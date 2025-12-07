@@ -40,7 +40,7 @@ export function KeyboardShortcuts({ open, onOpenChange }: KeyboardShortcutsDialo
   useHotkeys("mod+slash", () => {
       onOpenChange(true);
     },
-    { preventDefault: true },
+    { preventDefault: true, enableOnFormTags: true },
     [],
   );
 

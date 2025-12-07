@@ -72,7 +72,7 @@ export function AgentCreateForm() {
             <FormField field={fields.defaultModel} className="contents">
               <FormLabel className="sm:w-32">Default Model</FormLabel>
               <FormControl>
-                <ModelSelector />
+                <ModelSelector models={models} />
               </FormControl>
               <FormMessage className="sm:col-start-2" />
             </FormField>

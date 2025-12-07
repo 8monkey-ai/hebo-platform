@@ -1,17 +1,15 @@
-import { useSnapshot } from "valtio";
-
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Select } from "@hebo/shared-ui/components/Select";
 
-import { shellStore } from "~console/lib/shell";
+import type { Models } from "~console/lib/shell";
 
 import type { ComponentProps } from "react";
 
-function ModelSelector({
-  ...props
-}: Omit<ComponentProps<typeof Select>, "items">) {
-  const { models } = useSnapshot(shellStore);
+type ModelSelectorProps = Omit<ComponentProps<typeof Select>, "items"> & {
+  models: Models | undefined;
+};
 
+function ModelSelector({ models, ...props }: ModelSelectorProps) {
   return (
     <Select
       {...props}
@@ -23,7 +21,7 @@ function ModelSelector({
             {m.monthlyFreeTokens > 0 && (
               <Badge className="bg-green-600 text-white">Free Tier</Badge>
             )}
-            {m.modality[0] === "embedding" && (
+            {m.modality === "embedding" && (
               <Badge className="bg-blue-500 text-white">Embeddings</Badge>
             )}
           </>

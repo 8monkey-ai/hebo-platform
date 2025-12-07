@@ -35,7 +35,7 @@ export const SidebarNav = ({ activeAgent, activeBranch }: SidebarNavProps) => {
             <SidebarMenuButton 
               asChild 
               isActive={active}
-              tooltip={{children: (<span>{label}</span>)}}
+              tooltip={label}
               >
               <Link to={path} viewTransition>
                 <Icon aria-hidden="true" />

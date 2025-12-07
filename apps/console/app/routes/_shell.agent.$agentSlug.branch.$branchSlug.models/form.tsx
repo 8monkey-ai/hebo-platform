@@ -228,7 +228,7 @@ function ModelCard(props: {
                 <FormField field={modelFieldset.type} className="flex flex-col gap-2">
                   <FormLabel>Type</FormLabel>
                   <FormControl>
-                    <ModelSelector />
+                    <ModelSelector models={models} />
                   </FormControl>
                   <FormMessage />
                 </FormField>
@@ -269,7 +269,7 @@ function ModelCard(props: {
                       <ItemActions>
                         <FormControl>
                           {(() => {
-                            const availableProviders = providers.filter((p) => models?.[modelFieldset.type.value ?? ""]?.providers.includes(p.slug));
+                            const availableProviders = providers.filter((p) => models?.[modelFieldset.type.value ?? ""]?.providers?.includes(p.slug));
                             return (
                               <Select
                                 disabled={!routingEnabled}

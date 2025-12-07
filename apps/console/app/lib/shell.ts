@@ -7,7 +7,7 @@ export type Models = Record<
   {
     name: string;
     modality: string;
-    providers: string[];
+    providers: readonly string[];
     monthlyFreeTokens: number;
   }
 >;
