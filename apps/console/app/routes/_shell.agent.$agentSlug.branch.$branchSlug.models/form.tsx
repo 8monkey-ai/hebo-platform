@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm, getFormProps, type FieldMetadata, useInputControl } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 import { Brain, ChevronsUpDown, Edit } from "lucide-react";
+import { useSnapshot } from "valtio";
 
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
@@ -41,13 +42,14 @@ import {
 
 import { useFormErrorToast } from "~console/lib/errors";
 import { objectId } from "~console/lib/utils";
+import { shellStore } from "~console/state/shell";
+import { ModelSelector } from "~console/components/ui/ModelSelector";
 
 import {
   modelsConfigFormSchema,
   type ModelConfigFormValue,
   type ModelsConfigFormValues,
 } from "./schema";
-import { ModelSelector, SUPPORTED_MODELS } from "~console/components/ui/ModelSelector";
 
 
 type ModelsConfigProps = {
@@ -161,6 +163,8 @@ function ModelCard(props: {
     providers,
   } = props;
 
+  const { models } = useSnapshot(shellStore);
+
   const modelFieldset = model.getFieldset();
   const routingOnlyField = modelFieldset.routing.getFieldset().only.getFieldList()[0]!;
   const routingOnlyValue = useInputControl(routingOnlyField);
@@ -265,7 +269,7 @@ function ModelCard(props: {
                       <ItemActions>
                         <FormControl>
                           {(() => {
-                            const availableProviders = providers.filter((p) => SUPPORTED_MODELS[modelFieldset.type.value ?? ""]?.providers.includes(p.slug));
+                            const availableProviders = providers.filter((p) => models?.[modelFieldset.type.value ?? ""]?.providers.includes(p.slug));
                             return (
                               <Select
                                 disabled={!routingEnabled}

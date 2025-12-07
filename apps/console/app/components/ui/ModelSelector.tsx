@@ -1,37 +1,42 @@
-import supportedModels from "@hebo/shared-data/json/supported-models";
+import { useSnapshot } from "valtio";
+
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Select } from "@hebo/shared-ui/components/Select";
 
+import { shellStore } from "~console/state/shell";
+
 import type { ComponentProps } from "react";
 
-const SUPPORTED_MODELS = Object.fromEntries(
-  supportedModels.map(({ type, displayName, providers }) => [
-    type,
-    { displayName, providers: Object.keys(providers[0]) },
-  ]),
-);
+function ModelSelector({
+  ...props
+}: Omit<ComponentProps<typeof Select>, "items">) {
+  const { models } = useSnapshot(shellStore);
 
-function ModelSelector({ ...props }: ComponentProps<typeof Select>) {
   return (
     <Select
       {...props}
-      items={supportedModels.map((m) => ({
-        value: m.type,
+      items={Object.entries(models ?? {}).map(([id, m]) => ({
+        value: id,
         name: (
           <>
-            {m.displayName}{" "}
+            {m.name}{" "}
             {m.monthlyFreeTokens > 0 && (
               <Badge className="bg-green-600 text-white">Free Tier</Badge>
             )}
-            {m.modality === "embedding" && (
+            {m.modality[0] === "embedding" && (
               <Badge className="bg-blue-500 text-white">Embeddings</Badge>
             )}
           </>
         ),
       }))}
-      placeholder="Select the model"
+      disabled={Object.keys(models ?? {}).length === 0}
+      placeholder={
+        Object.keys(models ?? {}).length > 0
+          ? "Select the model"
+          : "Error: Couldn't load models"
+      }
     />
   );
 }
 
-export { SUPPORTED_MODELS, ModelSelector };
+export { ModelSelector };

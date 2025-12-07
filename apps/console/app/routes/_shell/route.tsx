@@ -17,10 +17,11 @@ import {
 } from "@hebo/shared-ui/components/Sidebar";
 
 import { authService } from "~console/lib/auth";
-import { api } from "~console/lib/service";
+import { api, gateway } from "~console/lib/service";
 import { dontRevalidateOnFormErrors } from "~console/lib/errors";
 import { getCookie, kbs } from "~console/lib/utils";
 import { authStore } from "~console/state/auth";
+import { shellStore } from "~console/state/shell";
 import { PageLoader } from "~console/components/ui/PageLoader";
 
 import { AgentSelect } from "./sidebar-agent";
@@ -41,7 +42,26 @@ async function authMiddleware() {
 export const clientMiddleware = [authMiddleware];
 
 export async function clientLoader() {
-  return { agents: (await api.agents.get()).data ?? [] };
+  const agents = await api.agents.get();
+
+  if (!shellStore.models) {
+    const models = await gateway.models.get({ query: { endpoints: true }});
+  
+    const supportedModels = Object.fromEntries(
+      (models.data?.data ?? []).map((m) => [
+        m.id,
+        {
+          name: m.name,
+          modality: m.architecture.output_modalities[0],
+          providers: m.endpoints?.map((e) => e.tag) ?? [],
+          monthlyFreeTokens: m.pricing?.monthly_free_tokens ?? 0,
+        }
+      ]));
+  
+    shellStore.models = supportedModels;
+  }
+
+  return { agents: agents?.data ?? [] };
 }
 
 export { dontRevalidateOnFormErrors as shouldRevalidate }

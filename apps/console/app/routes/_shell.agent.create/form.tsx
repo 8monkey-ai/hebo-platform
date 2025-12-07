@@ -1,4 +1,5 @@
 import { Form, useActionData, useNavigation } from "react-router";
+import { useSnapshot } from "valtio";
 import { z } from "zod";
 import { useForm, getFormProps } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
@@ -20,8 +21,9 @@ import {
 } from "@hebo/shared-ui/components/Form";
 import { Input } from "@hebo/shared-ui/components/Input";
 
-import { ModelSelector, SUPPORTED_MODELS } from "~console/components/ui/ModelSelector";
+import { ModelSelector } from "~console/components/ui/ModelSelector";
 import { useFormErrorToast } from "~console/lib/errors";
+import { shellStore } from "~console/state/shell";
 
 
 export const AgentCreateSchema = z.object({
@@ -31,13 +33,14 @@ export const AgentCreateSchema = z.object({
 export type AgentCreateFormValues = z.infer<typeof AgentCreateSchema>;
 
 export function AgentCreateForm() {
-  
+  const { models } = useSnapshot(shellStore);
+
   const lastResult = useActionData();
   const [form, fields] = useForm<AgentCreateFormValues>({
     lastResult,
     constraint: getZodConstraint(AgentCreateSchema),
     defaultValue: {
-      defaultModel: Object.keys(SUPPORTED_MODELS)[0],
+      defaultModel: Object.keys(models ?? {})[0],
     }
   });
   useFormErrorToast(form.allErrors);

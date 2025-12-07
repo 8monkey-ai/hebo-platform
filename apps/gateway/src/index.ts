@@ -14,7 +14,7 @@ import { models } from "./modules/models";
 const LOG_LEVEL = process.env.LOG_LEVEL ?? "info";
 const PORT = Number(process.env.PORT ?? 3002);
 
-export const createApp = () =>
+export const createGateway = () =>
   new Elysia()
     .use(logger({ level: LOG_LEVEL }))
     // Root route ("/") is unauthenticated and unprotected for health checks.
@@ -42,6 +42,8 @@ export const createApp = () =>
     );
 
 if (import.meta.main) {
-  const app = createApp().listen(PORT);
+  const app = createGateway().listen(PORT);
   console.log(`🐵 Hebo Gateway running at ${app.server!.url}`);
 }
+
+export type Gateway = ReturnType<typeof createGateway>;
