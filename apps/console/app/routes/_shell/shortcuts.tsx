@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
 import {
@@ -14,7 +13,7 @@ const SHORTCUT_GROUPS = [
     title: "Navigation",
     shortcuts: [
       { label: "Toggle sidebar", combo: "mod+S" },
-      { label: "Show shortcuts", combo: "mod+/" },
+      { label: "Keyboard shortcuts", combo: "mod+/" },
     ],
   },
   {
@@ -22,7 +21,7 @@ const SHORTCUT_GROUPS = [
     shortcuts: [
       { label: "Toggle playground", combo: "mod+P" },
       { label: "New chat", combo: "shift+mod+O" },
-      { label: "Focus chat input", combo: "mod+Esc" },
+      { label: "Focus chat input", combo: "shift+Esc" },
       { label: "Send message", combo: "Enter" },
       { label: "New line in message", combo: "shift+Enter" },
       { label: "Add attachment", combo: "mod+U" },
@@ -31,18 +30,22 @@ const SHORTCUT_GROUPS = [
 ] as const;
 
 
-export function KeyboardShortcuts() {
-  const [open, setOpen] = useState(false);
+type KeyboardShortcutsDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+};
+
+export function KeyboardShortcuts({ open, onOpenChange }: KeyboardShortcutsDialogProps) {
 
   useHotkeys("mod+slash", () => {
-      setOpen((prev) => !prev);
+      onOpenChange(true);
     },
     { preventDefault: true },
     [],
   );
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xs gap-6">
         <DialogHeader>
           <DialogTitle>Keyboard shortcuts</DialogTitle>

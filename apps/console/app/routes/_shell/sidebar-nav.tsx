@@ -1,27 +1,17 @@
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@hebo/shared-ui/components/Sidebar";
-import { BrainCog, Home, KeyRound } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router";
-import { useHotkeys } from "react-hotkeys-hook";
-import { kbs } from "~console/lib/utils";
+import { BrainCog, Home } from "lucide-react";
+import { Link, useLocation } from "react-router";
 
 const navItems = [
   {
     label: "Overview",
     icon: Home,
     postfix: "",
-    shortcut: undefined,
   },
   {
     label: "Models",
     icon: BrainCog,
     postfix: "/models",
-    shortcut: undefined,
-  },
-  {
-    label: "API Keys",
-    icon: KeyRound,
-    postfix: "/api-keys",
-    shortcut: undefined,
   },
 ] as const;
 
@@ -32,23 +22,11 @@ type SidebarNavProps = {
 
 export const SidebarNav = ({ activeAgent, activeBranch }: SidebarNavProps) => {
   const { pathname } = useLocation();
-  const navigate = useNavigate();
   const basePath = `/agent/${activeAgent.slug}/branch/${activeBranch.slug}`;
-
-  navItems.filter((i) => i.shortcut).forEach((item) => {
-    useHotkeys(
-      item.shortcut ?? "",
-      () => {
-        navigate(`${basePath}${item.postfix}`, { viewTransition: true });
-      },
-      { preventDefault: true },
-      [activeAgent.slug, activeBranch.slug, basePath, navigate],
-    );
-  });
 
   return (
     <SidebarMenu>
-      {navItems.map(({ label, icon: Icon, postfix, shortcut }) => {
+      {navItems.map(({ label, icon: Icon, postfix }) => {
         const path = `${basePath}${postfix}`;
         const active = pathname === path;
 
@@ -57,18 +35,7 @@ export const SidebarNav = ({ activeAgent, activeBranch }: SidebarNavProps) => {
             <SidebarMenuButton 
               asChild 
               isActive={active}
-              tooltip={{
-                children: (
-                  <span>
-                    {label}{" "}
-                    {shortcut && 
-                      <span className="text-muted-foreground">
-                        ({kbs(shortcut)})
-                      </span>
-                    }
-                  </span>
-                )
-              }}
+              tooltip={{children: (<span>{label}</span>)}}
               >
               <Link to={path} viewTransition>
                 <Icon aria-hidden="true" />

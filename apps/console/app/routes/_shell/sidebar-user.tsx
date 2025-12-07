@@ -1,4 +1,4 @@
-import { ChevronsUpDown, LogOut } from "lucide-react";
+import { BookOpen, ChevronsUpDown, ExternalLink, Keyboard, LogOut } from "lucide-react";
 import { Link } from "react-router";
 
 import {
@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@hebo/shared-ui/components/DropdownMenu";
 import {
@@ -20,6 +21,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@hebo/shared-ui/components/Sidebar";
+import { kbs } from "~console/lib/utils";
+import { KeyboardShortcuts } from "./shortcuts";
+import { useState } from "react";
 
 
 type User = {
@@ -30,6 +34,8 @@ type User = {
 }
 
 export function UserMenu({ user }: { user?: User}) {
+  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
   return (
     <SidebarMenu>
       <SidebarMenuItem className="group-data-[state=collapsed]:my-2 transition-[margin]">
@@ -72,6 +78,23 @@ export function UserMenu({ user }: { user?: User}) {
             <DropdownMenuGroup>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
+                <a
+                    href="https://docs.hebo.ai"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                  <BookOpen />
+                  Documentation
+                  <DropdownMenuShortcut><ExternalLink /></DropdownMenuShortcut>
+                </a>
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => setShortcutsOpen(true)}>
+                <Keyboard />
+                Shortcuts
+                <DropdownMenuShortcut>{kbs("mod+/")}</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
                 <Link to="/handler/sign-out" viewTransition>
                   <LogOut aria-hidden="true" />
                   Log out
@@ -80,6 +103,7 @@ export function UserMenu({ user }: { user?: User}) {
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
+        <KeyboardShortcuts open={shortcutsOpen} onOpenChange={setShortcutsOpen} />
       </SidebarMenuItem>
     </SidebarMenu>
   );

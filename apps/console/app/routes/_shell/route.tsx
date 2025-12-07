@@ -31,8 +31,6 @@ import { SidebarPlatform } from "./sidebar-platform";
 import { PlaygroundSidebar } from "./sidebar-playground";
 import { UserMenu } from "./sidebar-user";
 import { SidebarNav } from "./sidebar-nav";
-import { StaticContent } from "./sidebar-static";
-import { KeyboardShortcuts } from "./keyboard-shortcuts";
 
 import type { Route } from "./+types/route";
 
@@ -127,7 +125,6 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
                   <SidebarPlatform activeAgent={activeAgent} activeBranch={activeBranch} />
                 </>
               )}
-              <StaticContent />
               <SidebarSeparator className="mx-0" />
               <UserMenu user={user} />
           </SidebarFooter>
@@ -153,7 +150,6 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
             <Outlet />
           </div>
         </div>
-        <KeyboardShortcuts />
       </SidebarInset>
 
       <SidebarProvider

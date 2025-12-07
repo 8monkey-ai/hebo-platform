@@ -1,8 +1,13 @@
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@hebo/shared-ui/components/Sidebar";
-import { Cloud } from "lucide-react";
+import { Cloud, KeyRound } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
 const navItems = [
+  {
+    label: "API Keys",
+    icon: KeyRound,
+    postfix: "/api-keys",
+  },
   {
     label: "Providers",
     icon: Cloud,
