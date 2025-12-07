@@ -12,7 +12,6 @@ type ModelSelectorProps = Omit<ComponentProps<typeof Select>, "items"> & {
 function ModelSelector({ models, ...props }: ModelSelectorProps) {
   return (
     <Select
-      {...props}
       items={Object.entries(models ?? {}).map(([id, m]) => ({
         value: id,
         name: (
@@ -33,6 +32,7 @@ function ModelSelector({ models, ...props }: ModelSelectorProps) {
           ? "Select the model"
           : "Error: Couldn't load models"
       }
+      {...props}
     />
   );
 }
