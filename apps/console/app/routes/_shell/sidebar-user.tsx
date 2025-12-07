@@ -1,4 +1,4 @@
-import { ChevronsUpDown, LogOut, Settings } from "lucide-react";
+import { ChevronsUpDown, LogOut } from "lucide-react";
 import { Link } from "react-router";
 
 import {
@@ -50,7 +50,7 @@ export function UserMenu({ user }: { user?: User}) {
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="m-2 w-[var(--radix-dropdown-menu-trigger-width)] min-w-56 rounded-lg"
+            className="m-2 w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             side="bottom"
             align="end"
             sideOffset={4}

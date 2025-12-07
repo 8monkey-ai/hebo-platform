@@ -15,6 +15,7 @@ import {
   SidebarTrigger,
   SidebarGroup,
 } from "@hebo/shared-ui/components/Sidebar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@hebo/shared-ui/components/Tooltip";
 
 import { authService } from "~console/lib/auth";
 import { api, gateway } from "~console/lib/service";
@@ -90,7 +91,7 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
     <SidebarProvider
       defaultOpen={leftSidebarDefaultOpen}
       cookieName="left_sidebar_state"
-      shortcut="b"
+      shortcut="s"
       style={
         {
           "--sidebar-width": "12rem",
@@ -133,7 +134,14 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
       </Sidebar>
 
       <SidebarInset className="min-w-0">
-        <SidebarTrigger className="fixed m-2" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SidebarTrigger className="fixed m-2" />
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            Toggle Sidebar ({kbs("mod+S")})
+          </TooltipContent>
+        </Tooltip>
         <Toaster
           position="top-right"
           icons={{error: <XCircle className="size-4" aria-hidden="true" />}}

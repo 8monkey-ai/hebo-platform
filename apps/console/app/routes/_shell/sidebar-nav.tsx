@@ -9,19 +9,19 @@ const navItems = [
     label: "Overview",
     icon: Home,
     postfix: "",
-    shortcut: "mod+O",
+    shortcut: undefined,
   },
   {
     label: "Models",
     icon: BrainCog,
     postfix: "/models",
-    shortcut: "mod+M",
+    shortcut: undefined,
   },
   {
     label: "API Keys",
     icon: KeyRound,
     postfix: "/api-keys",
-    shortcut: "mod+K",
+    shortcut: undefined,
   },
 ] as const;
 
@@ -35,11 +35,11 @@ export const SidebarNav = ({ activeAgent, activeBranch }: SidebarNavProps) => {
   const navigate = useNavigate();
   const basePath = `/agent/${activeAgent.slug}/branch/${activeBranch.slug}`;
 
-  navItems.forEach(({ shortcut, postfix }) => {
+  navItems.filter((i) => i.shortcut).forEach((item) => {
     useHotkeys(
-      shortcut,
+      item.shortcut ?? "",
       () => {
-        navigate(`${basePath}${postfix}`, { viewTransition: true });
+        navigate(`${basePath}${item.postfix}`, { viewTransition: true });
       },
       { preventDefault: true },
       [activeAgent.slug, activeBranch.slug, basePath, navigate],
@@ -61,9 +61,11 @@ export const SidebarNav = ({ activeAgent, activeBranch }: SidebarNavProps) => {
                 children: (
                   <span>
                     {label}{" "}
-                    <span className="text-muted-foreground">
-                      ({kbs(shortcut)})
-                    </span>
+                    {shortcut && 
+                      <span className="text-muted-foreground">
+                        ({kbs(shortcut)})
+                      </span>
+                    }
                   </span>
                 )
               }}

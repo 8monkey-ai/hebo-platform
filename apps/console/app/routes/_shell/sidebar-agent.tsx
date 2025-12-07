@@ -19,7 +19,6 @@ import {
 } from "@hebo/shared-ui/components/Sidebar";
 
 import { AgentLogo } from "~console/components/ui/AgentLogo";
-import { kbs } from "~console/lib/utils";
 
 type Agent = {
   name: string,
@@ -36,11 +35,6 @@ export function AgentSelect({
 
   const [selectorOpen, setSelectorOpen] = useState(false);
 
-  const navigate = useNavigate();
-  useHotkeys("mod+shift+o", () =>
-    navigate("/agent/create", { viewTransition: true })
-  , { preventDefault: true }, [navigate]);
-
   return (
     <SidebarMenu>
       <SidebarMenuItem className="group-data-[state=collapsed]:my-2 transition-[margin]">
@@ -55,7 +49,7 @@ export function AgentSelect({
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-56 rounded-lg"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg"
             align="start"
             side="bottom"
             sideOffset={4}
@@ -113,9 +107,6 @@ export function AgentSelect({
                 <div className="text-muted-foreground font-medium">
                   Create Agent
                 </div>
-                <DropdownMenuShortcut>
-                  {kbs("mod+shift+O")}
-                </DropdownMenuShortcut>
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>

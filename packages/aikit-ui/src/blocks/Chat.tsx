@@ -9,7 +9,7 @@ import {
   Paperclip,
   TriangleAlert,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Conversation,
@@ -65,6 +65,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "../_shadcn/ui/item";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../_shadcn/ui/tooltip";
 import { OpenAIHttpChatTransport } from "../lib/openai-transport";
 import { cn } from "../lib/utils";
 
@@ -117,17 +118,52 @@ export function Chat({
     }
   }, [error]);
 
-  // Shortcut: Ctrl/Cmd+i to focus chat input field
+  // Shortcut: focus chat input field
+  const chatInputRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
     const handleGlobalKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "i") {
+      if (e.shiftKey && e.key === "Escape") {
         e.preventDefault();
-        (document.querySelector("#chat-input") as HTMLTextAreaElement)?.focus();
+        chatInputRef.current?.focus();
       }
     };
 
     document.addEventListener("keydown", handleGlobalKeyDown);
     return () => document.removeEventListener("keydown", handleGlobalKeyDown);
+  }, []);
+
+  // Shortcut: attachment button
+  const attachBtnRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "u") {
+        e.preventDefault();
+        attachBtnRef.current?.click();
+      }
+    };
+
+    document.addEventListener("keydown", handleGlobalKeyDown);
+    return () => document.removeEventListener("keydown", handleGlobalKeyDown);
+  }, []);
+
+  // Shortcut: clear chat
+  const clearBtnRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    function onKeyDown(e: KeyboardEvent) {
+      if (
+        e.shiftKey &&
+        (e.metaKey || e.ctrlKey) &&
+        e.key.toLowerCase() === "o"
+      ) {
+        e.preventDefault();
+        if (clearBtnRef.current?.disabled) return;
+        clearBtnRef.current?.click();
+        chatInputRef.current?.focus();
+      }
+    }
+
+    globalThis.addEventListener("keydown", onKeyDown);
+    return () => globalThis.removeEventListener("keydown", onKeyDown);
   }, []);
 
   const handleSubmit = async (message: PromptInputMessage) => {
@@ -154,17 +190,23 @@ export function Chat({
     <div className="relative flex h-full flex-col p-2 pt-12">
       {/* Header Controls */}
       <div className="absolute top-3 left-2">
-        <Button
-          disabled={!currentModelAlias}
-          variant="ghost"
-          size="icon"
-          className="hover:bg-sidebar-accent size-7"
-          onClick={() => setMessages([])}
-          aria-label="Clear conversation"
-          title="Clear conversation"
-        >
-          <Edit />
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              ref={clearBtnRef}
+              disabled={!currentModelAlias}
+              variant="ghost"
+              size="icon"
+              className="hover:bg-sidebar-accent size-7"
+              onClick={() => setMessages([])}
+              aria-label="Clear conversation"
+              title="Clear conversation"
+            >
+              <Edit />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Clear conversation (⇧ + ⌘/Ctrl + O)</TooltipContent>
+        </Tooltip>
       </div>
 
       {messages.length === 0 ? (
@@ -306,7 +348,7 @@ export function Chat({
           </PromptInputHeader>
           <PromptInputBody>
             <PromptInputTextarea
-              id="chat-input"
+              ref={chatInputRef}
               disabled={!currentModelAlias}
               onChange={(e) => setInput(e.target.value)}
               value={input}
@@ -325,7 +367,7 @@ export function Chat({
           <PromptInputFooter className="pb-2">
             <PromptInputTools className="h-6 w-full">
               {/* File upload */}
-              <PromptInputActionAddAttachment />
+              <PromptInputActionAddAttachment ref={attachBtnRef} />
 
               {/* Model selector */}
               {modelsConfig.length > 1 && (
@@ -369,11 +411,14 @@ export function Chat({
   );
 }
 
-export function PromptInputActionAddAttachment() {
+export function PromptInputActionAddAttachment(
+  props: React.ComponentProps<typeof PromptInputButton>,
+) {
   const attachments = usePromptInputAttachments();
 
   return (
     <PromptInputButton
+      {...props}
       className="-ml-1.5"
       onClick={() => {
         attachments.openFileDialog();
