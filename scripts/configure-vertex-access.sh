@@ -18,7 +18,7 @@ Required flags:
 
 Optional flags:
   --environment <production|preview>  Target environment (default: production).
-  --gateway-task-role-arn <arn>       ARN of the Hebo gateway ECS task role (required when --environment is production).
+  --gateway-task-role-name <name>     Gateway ECS task role name (required for production).
   --service-account-id <id>           Override the workload identity service account ID (default: hebo-vertex-sa).
   --workload-identity-pool-id <id>    Override the workload identity pool ID (default: hebo-vertex-aws-pool).
   --provider-id <id>                  Override the AWS provider ID within the workload identity pool (default: hebo-vertex-aws-provider).
@@ -29,7 +29,7 @@ Examples:
   ./configure-vertex-access.sh \
     --project-id hebo-production \
     --aws-account-id <aws-account-id> \
-    --gateway-task-role-arn arn:aws:iam::<aws-account-id>:role/HeboGatewayTaskRole
+    --gateway-task-role-name HeboGatewayTaskRole
 
   ./configure-vertex-access.sh \
     --environment preview \
@@ -46,7 +46,7 @@ main() {
   local location="global"
   local aws_account_id=""
   local environment="production"
-  local gateway_task_role_arn=""
+  local gateway_task_role_name=""
 
   while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -78,8 +78,8 @@ main() {
         aws_account_id="$2"
         shift 2
         ;;
-      --gateway-task-role-arn)
-        gateway_task_role_arn="$2"
+      --gateway-task-role-name)
+        gateway_task_role_name="$2"
         shift 2
         ;;
       --help|-h)
@@ -133,13 +133,13 @@ main() {
   local member=""
 
   if [[ "$environment" == "production" ]]; then
-    if [[ -z "$gateway_task_role_arn" ]]; then
-      echo "Error: --gateway-task-role-arn is required when --environment is production." >&2
+    if [[ -z "$gateway_task_role_name" ]]; then
+      echo "Error: --gateway-task-role-name is required when --environment is production." >&2
       usage
       exit 1
     fi
 
-    attribute_condition="assertion.arn.startsWith('${gateway_task_role_arn}')"
+    attribute_condition="assertion.arn.startsWith('arn:aws:sts::${aws_account_id}:assumed-role/${gateway_task_role_name}/')"
     service_account_display_name="Service account for Vertex"
     pool_display_name="Vertex AWS pool"
     pool_description="Pool for Vertex → AWS federation"
@@ -202,7 +202,7 @@ main() {
   echo "Binding workload identity user role to service account..."
   pool_full_name="$(gcloud iam workload-identity-pools describe "$workload_identity_pool_id" --project="$project_id" --location="$location" --format="value(name)")"
   if [[ "$environment" == "production" ]]; then
-    member="principalSet://iam.googleapis.com/${pool_full_name}/attribute.aws_role/${gateway_task_role_arn}"
+    member="principalSet://iam.googleapis.com/${pool_full_name}/attribute.aws_role/${gateway_task_role_name}"
   else
     member="principalSet://iam.googleapis.com/${pool_full_name}/attribute.account/${aws_account_id}"
   fi
