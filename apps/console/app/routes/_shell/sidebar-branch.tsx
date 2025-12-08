@@ -1,6 +1,5 @@
-import { Check, ChevronDown, GitBranch, Plus } from "lucide-react";
+import { Check, ChevronDown, GitBranch } from "lucide-react";
 import { useState } from "react";
-import { useHotkeys } from "react-hotkeys-hook";
 import { Link } from "react-router";
 
 import {
@@ -15,7 +14,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@hebo/shared-ui/components/Sidebar";
-import { kbs } from "~console/lib/utils";
 
 
 type Branch = {
@@ -39,34 +37,22 @@ export function BranchSelect({
   const branches = activeAgent.branches ?? [];
 
   const [selectorOpen, setSelectorOpen] = useState(false);
-  
-  useHotkeys(
-    "mod+J",
-    () => {
-      setSelectorOpen((prev) => !prev);
-    },
-    { preventDefault: true },
-    [],
-  );
 
   return (
     <SidebarMenu>
       <SidebarMenuItem className="group-data-[state=expanded]:mx-1.5 transition-[margin]">
         <DropdownMenu open={selectorOpen} onOpenChange={setSelectorOpen}>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton className="bg-background border-input border-1" aria-label="Select branch">
+            <SidebarMenuButton className="bg-background border-input border" aria-label="Select branch">
               <GitBranch aria-hidden="true" />
               <span className="truncate">
                   {activeBranch?.name ?? activeBranch?.slug ?? <span className="text-muted-foreground">Select …</span>}
               </span>
-              <span className="ml-auto text-muted-foreground">
-                  {kbs("mod+J")}
-              </span>
-              <ChevronDown aria-hidden="true" />
+              <ChevronDown className="ml-auto" aria-hidden="true" />
             </SidebarMenuButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-42 rounded-md"
+            className="w-(--radix-dropdown-menu-trigger-width) min-w-42 rounded-md"
             align="start"
             side="bottom"
             sideOffset={4}
@@ -99,7 +85,7 @@ export function BranchSelect({
                   to={`/agent/${activeAgent.slug}/branches`}
                   viewTransition
                 >
-                View all branches
+                Manage branches
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -1,9 +1,9 @@
 import { Form, useActionData, useNavigation } from "react-router";
+import { useSnapshot } from "valtio";
 import { z } from "zod";
 import { useForm, getFormProps } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
-import supportedModels from "@hebo/shared-data/json/supported-models";
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
   Card,
@@ -20,11 +20,10 @@ import {
   FormMessage,
 } from "@hebo/shared-ui/components/Form";
 import { Input } from "@hebo/shared-ui/components/Input";
-import {
-  Select
-} from "@hebo/shared-ui/components/Select";
 
+import { ModelSelector } from "~console/components/ui/ModelSelector";
 import { useFormErrorToast } from "~console/lib/errors";
+import { shellStore } from "~console/lib/shell";
 
 
 export const AgentCreateSchema = z.object({
@@ -34,13 +33,14 @@ export const AgentCreateSchema = z.object({
 export type AgentCreateFormValues = z.infer<typeof AgentCreateSchema>;
 
 export function AgentCreateForm() {
-  
+  const { models } = useSnapshot(shellStore);
+
   const lastResult = useActionData();
   const [form, fields] = useForm<AgentCreateFormValues>({
     lastResult,
     constraint: getZodConstraint(AgentCreateSchema),
     defaultValue: {
-      defaultModel: supportedModels[0].type,
+      defaultModel: Object.keys(models ?? {})[0],
     }
   });
   useFormErrorToast(form.allErrors);
@@ -54,8 +54,7 @@ export function AgentCreateForm() {
         <CardHeader>
           <CardTitle><h1>Create a new agent</h1></CardTitle>
           <CardDescription>
-            Each agent has its own model configuration and API keys. Learn more
-            about which model to choose based on Use Case.
+            Each agent has its own set of models. Model choice usually depends on use case and pricing. <a href="https://docs.hebo.ai">Learn more</a>
           </CardDescription>
         </CardHeader>
         
@@ -73,24 +72,7 @@ export function AgentCreateForm() {
             <FormField field={fields.defaultModel} className="contents">
               <FormLabel className="sm:w-32">Default Model</FormLabel>
               <FormControl>
-                <Select
-                  items={supportedModels.map((m) => ({
-                    value: m.type,
-                    name: (
-                        <>
-                          {m.displayName}{" "}
-                          <span className="text-xs">
-                            ({new Intl.NumberFormat("en", {
-                              notation: "compact",
-                              compactDisplay: "short",
-                              maximumFractionDigits: 1,
-                            }).format(m.rateLimit)}{" "}
-                            free tokens / month)
-                          </span>
-                        </>
-                      ),
-                  }))}
-                />
+                <ModelSelector models={models} />
               </FormControl>
               <FormMessage className="sm:col-start-2" />
             </FormField>

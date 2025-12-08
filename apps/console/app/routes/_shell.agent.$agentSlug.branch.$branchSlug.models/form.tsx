@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { useForm, getFormProps, type FieldMetadata, useInputControl } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 import { Brain, ChevronsUpDown, Edit } from "lucide-react";
+import { useSnapshot } from "valtio";
 
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
@@ -41,10 +42,11 @@ import {
 
 import { useFormErrorToast } from "~console/lib/errors";
 import { objectId } from "~console/lib/utils";
+import { shellStore } from "~console/lib/shell";
+import { ModelSelector } from "~console/components/ui/ModelSelector";
 
 import {
   modelsConfigFormSchema,
-  supportedModels,
   type ModelConfigFormValue,
   type ModelsConfigFormValues,
 } from "./schema";
@@ -161,6 +163,8 @@ function ModelCard(props: {
     providers,
   } = props;
 
+  const { models } = useSnapshot(shellStore);
+
   const modelFieldset = model.getFieldset();
   const routingOnlyField = modelFieldset.routing.getFieldset().only.getFieldList()[0]!;
   const routingOnlyValue = useInputControl(routingOnlyField);
@@ -170,9 +174,6 @@ function ModelCard(props: {
   const [routingEnabled, setRoutingEnabled] = useState(Boolean(routingOnlyField.value)); 
 
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const supportedProviders = Object.fromEntries(
-    supportedModels.map(m => [m.type, Object.keys(m.providers[0])])
-  );
 
   return (
     <Collapsible open={isExpanded} onOpenChange={onOpenChange}>
@@ -189,7 +190,7 @@ function ModelCard(props: {
 
             <Badge variant="outline">
               <Brain />
-              {supportedModels.find((m) => m.type === modelFieldset.type.value)?.displayName || "undefined"}
+              {modelFieldset.type.value ?? "undefined"}
             </Badge>
 
             <CollapsibleTrigger asChild>
@@ -227,13 +228,7 @@ function ModelCard(props: {
                 <FormField field={modelFieldset.type} className="flex flex-col gap-2">
                   <FormLabel>Type</FormLabel>
                   <FormControl>
-                    <Select
-                      items={supportedModels.map((item) => ({
-                        value: item.type,
-                        name: item.displayName,
-                      }))}
-                      placeholder="Select the model"
-                    />
+                    <ModelSelector models={models} />
                   </FormControl>
                   <FormMessage />
                 </FormField>
@@ -274,7 +269,7 @@ function ModelCard(props: {
                       <ItemActions>
                         <FormControl>
                           {(() => {
-                            const availableProviders = providers.filter((p) => supportedProviders[modelFieldset.type.value ?? ""]?.includes(p.slug));
+                            const availableProviders = providers.filter((p) => models?.[modelFieldset.type.value ?? ""]?.providers?.includes(p.slug));
                             return (
                               <Select
                                 disabled={!routingEnabled}

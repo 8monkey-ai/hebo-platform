@@ -1,19 +1,24 @@
 import { UserName } from "~console/components/ui/UserName";
 import { Logo } from "~console/components/ui/Logo";
 import { GenerateApiKey } from "./api-key";
+import { kbs } from "~console/lib/utils";
 
 <Logo className="hidden md:flex" />
 
 <p className="text-base font-semibold">Hi <UserName />!</p>
 
-Start using our playground or code your first agent.
+Start using our interactive playground ({kbs("mod+P")}) or code your first agent with our gateway.
 
 ## Step 1: Create your first API key
 
 <GenerateApiKey />
 Copy your key once generated; for security reasons, you won’t be able to see it again.
 
-## Step 2: Connect using your favorite framework
+## Step 2: Copy the alias for your default model
+
+The [Models](./main/models) page lists all your existing model aliases, lets you configure prompt defaults like reasoning effort and temperature, and helps you connect additional models to your agent.
+
+## Step 3: Connect using your favorite framework
 
 First, install the required package:
 
@@ -22,46 +27,70 @@ First, install the required package:
 npm install ai @ai-sdk/openai-compatible
 ```
 
+```bash OpenAI SDK
+npm install openai
+```
+
 ```bash Langchain
 pip install -U langchain-openai
 ```
 </CodeGroup>
 
-Then, create the following code:
+Then, use them in your code:
 
 <CodeGroup>
 ```ts Vercel AI SDK
-import { generateText } from 'ai';
-import { createOpenAICompatible } from '@ai-sdk/openai-compatible';
+import { generateText } from "ai";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
 const hebo = createOpenAICompatible({
-    name: 'hebo',
-    apiKey: 'sk_pf***',  // Replace with your real hebo api key
-    baseURL: 'https://gateway.hebo.ai/v1',
+  name: "hebo",
+  baseURL: "https://gateway.hebo.ai/v1",
+  apiKey: "<HEBO_API_KEY>",  // Replace with your generated key
 });
 
 const { text } = await generateText({
-    model: hebo('my-agent/main/default'),  // Replace with your real agent slug
-    prompt: 'Tell me a joke about AI.'
+  model: hebo("<HEBO_MODEL_ALIAS>"), // For example "my-first-agent/main/default"
+  prompt: "Tell me a joke about monkeys."
 });
 
 console.log(text);
+```
+
+```ts OpenAI SDK
+import OpenAI from "openai";
+
+const hebo = new OpenAI({
+  baseURL: "https://gateway.hebo.ai/v1",
+  apiKey: "<HEBO_API_KEY>", // Replace with your generated key
+});
+
+const completion = await hebo.chat.completions.create({
+  model: '<HEBO_MODEL_ALIAS>', // For example "my-first-agent/main/default"
+  messages: [{
+    role: 'user',
+    content: 'Tell me a joke about monkeys.',
+  }],
+});
+
+console.log(completion.choices[0].message);
 ```
 
 ```python Langchain
 from langchain_openai import ChatOpenAI
 
 hebo = ChatOpenAI(
-    model="my-agent/main/default",  # Replace with your real agent slug
-    api_key="sk_pf***",  # Replace with your real hebo api key
-    base_url="https://gateway.hebo.ai/v1",
+  base_url="https://gateway.hebo.ai/v1",
+  api_key="<HEBO_API_KEY>", # Replace with your generated key
+  model="<HEBO_MODEL_ALIAS>", # For example "my-first-agent/main/default"
 )
 
-response = hebo.invoke("Tell me a joke about AI.")
+response = hebo.invoke("Tell me a joke about monkeys.")
+
 print(response.content)
 ```
 </CodeGroup>
 
-## Step 3: Use your evaluations & observability tools as usual
+## Next: Use your observability tools & evals as usual
 
-Continue to read our full documentation to [learn more](https://docs.hebo.ai/hebo_eval)
+Continue to read our full documentation to [learn more](https://docs.hebo.ai/)

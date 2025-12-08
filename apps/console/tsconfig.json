@@ -5,7 +5,9 @@
     "paths": {
       "~console/*": ["./app/*"],
       "~api": ["../api/src/index.ts"],
-      "~api/*": ["../api/src/*"]
+      "~api/*": ["../api/src/*"],
+      "~gateway": ["../gateway/src/index.ts"],
+      "~gateway/*": ["../gateway/src/*"]
     },
     "rootDirs": [".", "./.react-router/types"],
     "types": ["vite/client", "mdx"],

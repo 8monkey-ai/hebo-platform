@@ -1,7 +1,7 @@
 import { Collection } from "@msw/data";
 import { z } from "zod";
 
-import { authStore } from "~console/state/auth";
+import { shellStore } from "~console/lib/shell";
 
 import { DEFAULT_EXPIRATION_MS, type AuthService } from "./types";
 
@@ -17,8 +17,8 @@ const apiKeys = new Collection({
 
 export const authService = {
   async ensureSignedIn() {
-    if (authStore.user) return;
-    authStore.user = {
+    if (shellStore.user) return;
+    shellStore.user = {
       name: "Dummy User",
       email: "dummy@user.com",
       initials: "DU",

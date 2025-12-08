@@ -15,12 +15,14 @@ import {
   SidebarTrigger,
   SidebarGroup,
 } from "@hebo/shared-ui/components/Sidebar";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@hebo/shared-ui/components/Tooltip";
 
 import { authService } from "~console/lib/auth";
-import { api } from "~console/lib/service";
+import { api, gateway } from "~console/lib/service";
 import { dontRevalidateOnFormErrors } from "~console/lib/errors";
 import { getCookie, kbs } from "~console/lib/utils";
-import { authStore } from "~console/state/auth";
+import { shellStore } from "~console/lib/shell";
+import { PageLoader } from "~console/components/ui/PageLoader";
 
 import { AgentSelect } from "./sidebar-agent";
 import { BranchSelect } from "./sidebar-branch";
@@ -28,7 +30,6 @@ import { SidebarPlatform } from "./sidebar-platform";
 import { PlaygroundSidebar } from "./sidebar-playground";
 import { UserMenu } from "./sidebar-user";
 import { SidebarNav } from "./sidebar-nav";
-import { StaticContent } from "./sidebar-static";
 
 import type { Route } from "./+types/route";
 
@@ -40,14 +41,33 @@ async function authMiddleware() {
 export const clientMiddleware = [authMiddleware];
 
 export async function clientLoader() {
-  return { agents: (await api.agents.get()).data ?? [] };
+  const agents = await api.agents.get();
+
+  if (!shellStore.models) {
+    const models = await gateway.models.get({ query: { endpoints: true }});
+  
+    const supportedModels = Object.fromEntries(
+      (models.data?.data ?? []).map((m) => [
+        m.id,
+        {
+          name: m.name,
+          modality: m.architecture.output_modalities[0],
+          providers: m.endpoints?.map((e) => e.tag) ?? [],
+          monthlyFreeTokens: m.pricing?.monthly_free_tokens ?? 0,
+        }
+      ]));
+  
+    shellStore.models = supportedModels;
+  }
+
+  return { agents: agents?.data ?? [] };
 }
 
 export { dontRevalidateOnFormErrors as shouldRevalidate }
 
 
 export default function ShellLayout({ loaderData: { agents } }: Route.ComponentProps) { 
-  const { user } = useSnapshot(authStore);
+  const { user } = useSnapshot(shellStore);
 
   const { 
     agent: activeAgent, 
@@ -69,7 +89,7 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
     <SidebarProvider
       defaultOpen={leftSidebarDefaultOpen}
       cookieName="left_sidebar_state"
-      shortcut="b"
+      shortcut="s"
       style={
         {
           "--sidebar-width": "12rem",
@@ -104,7 +124,6 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
                   <SidebarPlatform activeAgent={activeAgent} activeBranch={activeBranch} />
                 </>
               )}
-              <StaticContent />
               <SidebarSeparator className="mx-0" />
               <UserMenu user={user} />
           </SidebarFooter>
@@ -112,13 +131,21 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
       </Sidebar>
 
       <SidebarInset className="min-w-0">
-        <SidebarTrigger className="fixed m-2" />
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SidebarTrigger className="fixed m-2" />
+          </TooltipTrigger>
+          <TooltipContent side="right">
+            Toggle Sidebar ({kbs("mod+S")})
+          </TooltipContent>
+        </Tooltip>
         <Toaster
           position="top-right"
           icons={{error: <XCircle className="size-4" aria-hidden="true" />}}
         />
         <div ref={mainRef} tabIndex={-1} className="min-w-0 flex flex-1 flex-col focus:outline-none gap-4 px-4 sm:px-10 py-10">
           <div className="mx-auto max-w-4xl min-w-0 w-full">
+            <PageLoader />
             <Outlet />
           </div>
         </div>

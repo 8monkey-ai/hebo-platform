@@ -56,7 +56,7 @@ export default function ModelsConfigRoute({ loaderData }: Route.ComponentProps) 
         <div>
           <h1>Model Configuration</h1>
           <p className="text-muted-foreground text-sm">
-            Configure access for the agent to different models. Use our managed providers or connect your existing inference endpoints.
+            Configure access for your agent to different models. Use our managed providers or connect your existing inference endpoints. For latest pricing visit our <a href="https://docs.hebo.ai">Models</a> documentation.
           </p>
         </div>
 

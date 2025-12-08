@@ -2,58 +2,68 @@
   {
     "type": "openai/gpt-oss-120b",
     "displayName": "OpenAI GPT OSS 120B",
-    "rateLimit": 400000000,
+    "owner": "openai",
+    "created": 1764888221,
     "providers": [
       {
         "bedrock": "openai.gpt-oss-120b-1:0",
         "groq": "openai/gpt-oss-120b"
       }
     ],
-    "modality": "chat"
+    "modality": "chat",
+    "monthlyFreeTokens": 100000000
   },
   {
     "type": "openai/gpt-oss-20b",
     "displayName": "OpenAI GPT OSS 20B",
-    "rateLimit": 400000000,
+    "owner": "openai",
+    "created": 1764888221,
     "providers": [
       {
         "bedrock": "openai.gpt-oss-20b-1:0",
         "groq": "openai/gpt-oss-20b"
       }
     ],
-    "modality": "chat"
+    "modality": "chat",
+    "monthlyFreeTokens": 400000000
   },
   {
     "type": "google/gemini-2.5-flash-preview-09-2025",
     "displayName": "Gemini 2.5 Flash Preview (Sep 2025)",
-    "rateLimit": 400000000,
+    "owner": "google",
+    "created": 1764888221,
     "providers": [
       {
         "vertex": "gemini-2.5-flash-preview-09-2025"
       }
     ],
-    "modality": "chat"
+    "modality": "chat",
+    "monthlyFreeTokens": 0
   },
   {
     "type": "google/gemini-2.5-flash-lite-preview-09-2025",
     "displayName": "Gemini 2.5 Flash Lite Preview (Sep 2025)",
-    "rateLimit": 400000000,
+    "owner": "google",
+    "created": 1764888221,
     "providers": [
       {
         "vertex": "gemini-2.5-flash-lite-preview-09-2025"
       }
     ],
-    "modality": "chat"
+    "modality": "chat",
+    "monthlyFreeTokens": 0
   },
   {
     "type": "cohere/embed-v4.0",
     "displayName": "Cohere Embed v4.0",
-    "rateLimit": 400000000,
+    "owner": "cohere",
+    "created": 1764888221,
     "providers": [
       {
         "cohere": "embed-v4.0"
       }
     ],
-    "modality": "embedding"
+    "modality": "embedding",
+    "monthlyFreeTokens": 0
   }
 ]

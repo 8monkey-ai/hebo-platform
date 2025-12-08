@@ -1,9 +1,9 @@
 import { useSnapshot } from "valtio";
 
-import { authStore } from "~console/state/auth";
+import { shellStore } from "~console/lib/shell";
 
 export function UserName() {
-  const { user } = useSnapshot(authStore);
+  const { user } = useSnapshot(shellStore);
 
   return <span>{user?.name}</span>;
 }
