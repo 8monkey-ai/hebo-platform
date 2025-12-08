@@ -23,13 +23,11 @@ COPY --from=pruner /repo/out/full/ ./
 RUN bun run build
 
 ########################  runner stage  ########################
-FROM oven/bun:1-slim AS runner
+FROM gcr.io/distroless/base
 WORKDIR /app
 
-RUN groupadd -g 65532 nonroot \
-  && useradd -u 65532 -g nonroot -m nonroot
-
 COPY --from=builder /repo/apps/mcp/dist/ ./dist/
+COPY --from=builder /repo/apps/mcp/src/ui/public ./src/ui/public
 
 EXPOSE 3003
 USER nonroot:nonroot
