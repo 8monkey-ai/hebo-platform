@@ -32,7 +32,7 @@ const createApp = () =>
     })
     .group("/aikit", (app) =>
       app
-        .get("/", () => "🐵 Hebo Aikit says hello!")
+        .get("/", () => "🐵 Hebo Aikit MCP server says hello!")
         .post("/", async ({ request, body }) =>
           createMcpHandler(mcpServer)(request, body),
         ),
