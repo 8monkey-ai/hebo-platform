@@ -1,0 +1,36 @@
+# syntax=docker/dockerfile:1
+
+FROM oven/bun:1 AS base
+RUN bun install --global turbo@2
+
+########################  pruner stage  ########################
+FROM base AS pruner
+WORKDIR /repo
+
+COPY . .
+
+# FUTURE: move to the SST/Pulumi script
+RUN turbo prune @hebo/mcp --docker
+
+########################  installer + builder stage  ########################
+FROM base AS builder
+WORKDIR /repo
+
+COPY --from=pruner /repo/out/json/ ./
+RUN bun install --frozen-lockfile --production --ignore-scripts
+
+COPY --from=pruner /repo/out/full/ ./
+RUN bun run build
+
+########################  runner stage  ########################
+FROM oven/bun:1-slim AS runner
+WORKDIR /app
+
+RUN groupadd -g 65532 nonroot \
+  && useradd -u 65532 -g nonroot -m nonroot
+
+COPY --from=builder /repo/apps/mcp/dist/ ./dist/
+
+EXPOSE 3003
+USER nonroot:nonroot
+CMD ["/app/dist/server"]

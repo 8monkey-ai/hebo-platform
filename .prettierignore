@@ -2,3 +2,4 @@
 apps/console/public/mockServiceWorker.js
 **/migrations/**
 **/generated/**
+*.toml
