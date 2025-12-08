@@ -123,11 +123,11 @@ main() {
     aws_cli_opts+=("--profile" "$aws_profile")
   fi
 
-  local trust_policy_file
-  local inline_policy_file
+  local trust_policy_file=""
+  local inline_policy_file=""
   trust_policy_file="$(mktemp)"
   inline_policy_file="$(mktemp)"
-  trap 'rm -f "$trust_policy_file" "$inline_policy_file"' EXIT
+  trap 'rm -f "${trust_policy_file:-}" "${inline_policy_file:-}"' EXIT
 
   cat >"$trust_policy_file" <<EOF
 {
@@ -182,7 +182,13 @@ EOF
     --policy-document "file://$inline_policy_file"
 
   echo "Provisioning complete. IAM role ${role_name} is ready for ${usage_label} use."
+
+  cat <<EOF
+
+Bedrock role ARN: $(aws "${aws_cli_opts[@]}" iam get-role --role-name "$role_name" --query 'Role.Arn' --output text)
+Region:           ${aws_region:-"(not set; AWS default will be used)"}
+
+EOF
 }
 
 main "$@"
-

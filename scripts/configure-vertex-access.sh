@@ -218,6 +218,15 @@ main() {
     --role="roles/aiplatform.user" >/dev/null
 
   echo "Provisioning complete. Service account ${service_account_email} is configured for ${completion_label} Vertex use."
+
+  cat <<EOF
+
+Service account: ${service_account_email}
+Audience:        //iam.googleapis.com/${pool_full_name}/providers/${provider_id}
+Project ID:      ${project_id}
+Location:        global
+
+EOF
 }
 
 main "$@"
