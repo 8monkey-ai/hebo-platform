@@ -33,12 +33,12 @@ export const createGateway = () =>
     )
     .use(authService)
     .use(errorHandler)
-    .group(
-      "/v1",
-      {
-        isSignedIn: true,
-      },
-      (app) => app.use(completions).use(embeddings).use(models),
+    .group("/v1", (app) =>
+      app
+        .guard({ isSignedIn: true }, (app) =>
+          app.use(completions).use(embeddings),
+        )
+        .use(models),
     );
 
 if (import.meta.main) {
