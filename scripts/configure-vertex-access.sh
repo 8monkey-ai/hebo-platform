@@ -224,7 +224,7 @@ main() {
 Service account: ${service_account_email}
 Audience:        //iam.googleapis.com/${pool_full_name}/providers/${provider_id}
 Project ID:      ${project_id}
-Location:        global
+Location:        ${location}
 
 EOF
 }
