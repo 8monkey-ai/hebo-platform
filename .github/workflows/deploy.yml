@@ -45,7 +45,6 @@ jobs:
           bun run sst secret set BedrockRoleArn ${{ secrets.BEDROCK_ROLE_ARN }} --stage production
           bun run sst secret set BedrockRegion ${{ secrets.BEDROCK_REGION }} --stage production
           bun run sst secret set CohereApiKey ${{ secrets.COHERE_API_KEY }} --stage production
-          bun run sst secret set GroqApiKey ${{ secrets.GROQ_API_KEY }} --stage production
           bun run sst secret set VertexServiceAccountEmail ${{ secrets.GOOGLE_VERTEX_SERVICE_ACCOUNT_EMAIL }} --stage production
           bun run sst secret set VertexAwsProviderAudience ${{ secrets.GOOGLE_VERTEX_AWS_PROVIDER_AUDIENCE }} --stage production
           bun run sst secret set VertexProject ${{ secrets.GOOGLE_VERTEX_PROJECT }} --stage production
