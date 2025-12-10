@@ -24,16 +24,9 @@ import {
 import { kbs } from "~console/lib/utils";
 import { KeyboardShortcuts } from "./shortcuts";
 import { useState } from "react";
+import type { User } from "~console/lib/auth/types";
 
-
-type User = {
-  name: string,
-  email: string,
-  initials?: string,
-  avatar?: string
-}
-
-export function UserMenu({ user }: { user?: User}) {
+export function UserMenu({ user }: { user?: User }) {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   return (

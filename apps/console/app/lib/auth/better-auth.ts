@@ -42,11 +42,21 @@ export const setOtpEmail = (email: string | undefined) => {
   lastEmail = email?.trim() || undefined;
 };
 
+const getInitials = (name?: string, email?: string) => {
+  const source = name?.trim() || email?.trim();
+  if (!source) return;
+
+  const [first = "", second = ""] = source.split(/\s+/).filter(Boolean);
+  if (first && second) return `${first[0]}${second[0]}`.toUpperCase();
+  return source.slice(0, 2).toUpperCase();
+};
+
 const mapUser = (data: Partial<User> & { email?: string; name?: string }) => {
   const user: User = {
     email: data.email ?? "",
     name: data.name ?? data.email ?? "",
     avatar: (data as { image?: string }).image ?? data.avatar,
+    initials: data.initials ?? getInitials(data.name, data.email),
   };
   return user;
 };
