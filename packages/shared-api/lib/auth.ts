@@ -46,21 +46,15 @@ export const auth = betterAuth({
   // TODO: this should be exposed only to api, gateway does not need to know this.
   socialProviders: {
     google: {
-      clientId: await getSecret("GoogleClientId").then((id) => {
-        return id;
-      }),
+      clientId: await getSecret("GoogleClientId"),
       clientSecret: await getSecret("GoogleClientSecret"),
     },
     github: {
-      clientId: await getSecret("GithubClientId").then((id) => {
-        return id;
-      }),
+      clientId: await getSecret("GithubClientId"),
       clientSecret: await getSecret("GithubClientSecret"),
     },
     microsoft: {
-      clientId: await getSecret("MicrosoftClientId").then((id) => {
-        return id;
-      }),
+      clientId: await getSecret("MicrosoftClientId"),
       clientSecret: await getSecret("MicrosoftClientSecret"),
     },
   },
