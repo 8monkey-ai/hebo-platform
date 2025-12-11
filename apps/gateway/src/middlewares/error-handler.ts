@@ -12,7 +12,7 @@ const upstreamRes = (e: unknown) =>
     : undefined;
 
 export const errorHandler = new Elysia({ name: "error-handler" })
-  .onError(async ({ code, error }) => {
+  .onError(async ({ code, error, body }) => {
     if (error instanceof HttpError)
       return status(
         error.status,
@@ -23,7 +23,8 @@ export const errorHandler = new Elysia({ name: "error-handler" })
         ),
       );
 
-    if (error instanceof UnsupportedFunctionalityError)
+    if (error instanceof UnsupportedFunctionalityError) {
+      const model = (body as any)?.model; // Safely extract model
       return status(
         400,
         toOpenAiCompatibleError(
@@ -32,6 +33,7 @@ export const errorHandler = new Elysia({ name: "error-handler" })
           "unsupported_functionality",
         ),
       );
+    }
 
     // Elysia validation errors
     if (code === "VALIDATION")
