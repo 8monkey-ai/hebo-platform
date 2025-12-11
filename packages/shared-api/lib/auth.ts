@@ -22,7 +22,6 @@ const trustedOrigins = (
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const logSocial = process.env.NODE_ENV !== "production";
 const useSecureCookies = process.env.NODE_ENV === "production";
 // Set to the eTLD+1 (e.g., ".hebo.ai") so auth cookies flow to api/gateway.
 const cookieDomain = process.env.AUTH_COOKIE_DOMAIN?.trim() || undefined;
@@ -48,21 +47,18 @@ export const auth = betterAuth({
   socialProviders: {
     google: {
       clientId: await getSecret("GoogleClientId").then((id) => {
-        if (logSocial) console.info("[BetterAuth][Google][clientId]", id);
         return id;
       }),
       clientSecret: await getSecret("GoogleClientSecret"),
     },
     github: {
       clientId: await getSecret("GithubClientId").then((id) => {
-        if (logSocial) console.info("[BetterAuth][GitHub][clientId]", id);
         return id;
       }),
       clientSecret: await getSecret("GithubClientSecret"),
     },
     microsoft: {
       clientId: await getSecret("MicrosoftClientId").then((id) => {
-        if (logSocial) console.info("[BetterAuth][Microsoft][clientId]", id);
         return id;
       }),
       clientSecret: await getSecret("MicrosoftClientSecret"),
