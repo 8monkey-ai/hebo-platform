@@ -27,7 +27,7 @@ export const errorHandler = new Elysia({ name: "error-handler" })
       return status(
         400,
         toOpenAiCompatibleError(
-          error.message,
+          `The model "${model}" does not support attachments`,
           "invalid_request_error",
           "unsupported_functionality",
         ),

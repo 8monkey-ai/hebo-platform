@@ -250,7 +250,7 @@ export function toOpenAICompatibleStream(
         if (error instanceof UnsupportedFunctionalityError) {
           enqueue(
             toOpenAiCompatibleError(
-              `The model "${model}" does not support this message: ${error.message}`,
+              `The model "${model}" does not support attachments`,
               "invalid_request_error",
               "unsupported_functionality",
             ),
