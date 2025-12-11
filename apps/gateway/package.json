@@ -30,7 +30,7 @@
     "@hebo/shared-api": "workspace:*",
     "@hebo/shared-data": "workspace:*",
     "ai": "^5.0.19",
-    "elysia": "^1.4.9",
+    "elysia": "^1.4.18",
     "sst": "^3.17.13",
     "zod": "^4.1.12"
   },

@@ -2,12 +2,9 @@ import { logger } from "@bogeychan/elysia-logger";
 import { staticPlugin } from "@elysiajs/static";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import Elysia from "elysia";
-import { createElement } from "react";
-import { renderToString } from "react-dom/server";
 
 import { countLetterTool } from "./aikit/count-letter.js";
 import { createMcpHandler } from "./aikit/mcp-transport.js";
-import { Home } from "./ui/root";
 
 const LOG_LEVEL = process.env.LOG_LEVEL ?? "info";
 const PORT = Number(process.env.PORT ?? 3003);
@@ -19,17 +16,10 @@ mcpServer.registerTool(
   countLetterTool.handler,
 );
 
-const createApp = () =>
+const createApp = async () =>
   new Elysia()
     .use(logger({ level: LOG_LEVEL }))
-    .use(staticPlugin({ assets: "src/ui/public" }))
-    .use(staticPlugin({ assets: "dist", prefix: "/static" }))
-    .get("/", () => {
-      const html = renderToString(createElement(Home));
-      return new Response(html, {
-        headers: { "Content-Type": "text/html" },
-      });
-    })
+    .use(await staticPlugin({ prefix: "/", assets: "src/ui/" }))
     .group("/aikit", (app) =>
       app
         .get("/", () => "🐵 Hebo Aikit MCP server says hello!")
@@ -39,8 +29,7 @@ const createApp = () =>
     );
 
 if (import.meta.main) {
-  const app = createApp().listen(PORT);
+  // eslint-disable-next-line unicorn/no-await-expression-member
+  const app = (await createApp()).listen(PORT);
   console.log(`🐵 Hebo MCP running at ${app.server!.url}`);
 }
-
-export type McpApp = ReturnType<typeof createApp>;
