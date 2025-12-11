@@ -66,6 +66,7 @@ export class OpenAIHttpChatTransport<
           : undefined;
 
         return {
+          credentials: "include",
           body: {
             ...body,
             messages: openaiMessages,
