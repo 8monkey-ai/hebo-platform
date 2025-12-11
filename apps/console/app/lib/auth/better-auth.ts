@@ -45,7 +45,7 @@ export const authService: AuthService = {
     const { data = [] } = await authClient.apiKey.list();
     return data!.map((key) => ({
       ...key,
-      value: `******${key.start}`,
+      value: `${key.start}******`,
     })) as ApiKey[];
   },
 
