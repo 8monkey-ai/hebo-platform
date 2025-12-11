@@ -1,4 +1,4 @@
-export const isAuthEnabled = !!import.meta.env.VITE_IS_AUTH_ENABLED;
+export const isAuthEnabled = Boolean(import.meta.env.VITE_AUTH_ENABLED);
 
 // isDevLocal is true only in pure local dev: no Turbo/CI context and no explicit service URLs
 export const isDevLocal =

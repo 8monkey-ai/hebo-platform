@@ -3,9 +3,7 @@ import { Elysia } from "elysia";
 import { authServiceBetterAuth } from "./better-auth";
 import { AuthError } from "../../errors";
 
-const isAuthEnabled = Boolean(
-  process.env.AUTH_ENABLED ?? process.env.VITE_IS_AUTH_ENABLED,
-);
+const isAuthEnabled = Boolean(process.env.AUTH_ENABLED);
 
 const createAuthService = async () => {
   if (!isAuthEnabled) {
