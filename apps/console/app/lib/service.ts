@@ -1,7 +1,6 @@
 import { treaty } from "@elysiajs/eden";
 import ky, { HTTPError } from "ky";
 
-import { authService } from "~console/lib/auth";
 import { isDevLocal } from "~console/lib/env";
 
 import type { Api } from "~api";
@@ -19,12 +18,6 @@ export const kyFetch = ky.extend({
   credentials: "include",
   throwHttpErrors: false,
   hooks: {
-    beforeRequest: [
-      (request) => {
-        const token = authService.getAccessToken?.();
-        if (token) request.headers.set("authorization", `Bearer ${token}`);
-      },
-    ],
     afterResponse: [
       async (_req, _opts, res) => {
         // Successful response, all good

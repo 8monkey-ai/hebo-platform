@@ -23,10 +23,21 @@ const trustedOrigins = (
   .filter(Boolean);
 
 const logSocial = process.env.NODE_ENV !== "production";
+const useSecureCookies = process.env.NODE_ENV === "production";
+// Set to the eTLD+1 (e.g., ".hebo.ai") so auth cookies flow to api/gateway.
+const cookieDomain = process.env.AUTH_COOKIE_DOMAIN?.trim() || undefined;
 
 export const auth = betterAuth({
   baseURL: authBaseUrl,
   basePath: "/auth",
+  advanced: {
+    useSecureCookies,
+    crossSubDomainCookies: {
+      enabled: Boolean(cookieDomain),
+      // Use apex (e.g., "hebo.ai") to cover api/gateway/app.
+      domain: cookieDomain,
+    },
+  },
   database: prismaAdapter(prisma, {
     provider: "postgresql",
     usePlural: true,

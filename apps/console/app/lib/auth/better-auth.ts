@@ -77,11 +77,6 @@ export const authService: AuthService = {
     shellStore.user = mapUser(user);
   },
 
-  getAccessToken(): string | undefined {
-    // Better Auth is cookie-based in the console; add bearer once available.
-    return undefined;
-  },
-
   async generateApiKey(description, expiresIn?: number) {
     const create = apiKeyApi?.create;
     if (!create) throw new Error("API key client not available");

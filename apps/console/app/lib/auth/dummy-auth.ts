@@ -28,10 +28,6 @@ export const authService = {
     };
   },
 
-  getAccessToken() {
-    return "dummy-access-token";
-  },
-
   async generateApiKey(
     description,
     expiresInSeconds = DEFAULT_EXPIRATION_SECONDS,
