@@ -118,18 +118,23 @@ Local (Bun) examples:
 
 ```bash
 # set / get / delete
-bun run secret set StackSecretServerKey <value>
-bun run secret get StackSecretServerKey
-bun run secret delete StackSecretServerKey
+bun run secret set GithubClientId <value>
+bun run secret get GithubClientId
+bun run secret delete GithubClientId
 ```
 
 Remote (SST) examples:
 
 ```bash
 # set / remove (choose your <stage>)
-bun run sst secret set StackSecretServerKey <value> --stage <stage>
-bun run sst secret remove StackSecretServerKey --stage <stage>
+bun run sst secret set GithubClientId <value> --stage <stage>
+bun run sst secret remove GithubClientId --stage <stage>
 ```
+
+Auth middleware toggle:
+
+- Backend (`apps/api`, `apps/gateway`): set `AUTH_ENABLED=true` to enable Better Auth middleware; omit/false uses the localhost dummy.
+- Console frontend: set `VITE_IS_AUTH_ENABLED=true` to enable Better Auth in the UI; omit/false uses the dummy client.
 
 ## Run modes
 

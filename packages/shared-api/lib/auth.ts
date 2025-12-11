@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { emailOTP } from "better-auth/plugins";
+import { apiKey, emailOTP } from "better-auth/plugins";
 
 import { prisma } from "@hebo/database/client";
 
@@ -69,6 +69,7 @@ export const auth = betterAuth({
     },
   },
   plugins: [
+    apiKey(),
     emailOTP({
       async sendVerificationOTP({ email, otp }) {
         await sendVerificationOtpEmail({ email, otp });

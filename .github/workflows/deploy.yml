@@ -39,9 +39,6 @@ jobs:
 
       - name: Deploy to Production
         run: |
-          bun run sst secret set StackProjectId ${{ secrets.STACK_PROJECT_ID }} --stage production
-          bun run sst secret set StackPublishableClientKey ${{ secrets.STACK_PUBLISHABLE_CLIENT_KEY }} --stage production
-          bun run sst secret set StackSecretServerKey ${{ secrets.STACK_SECRET_SERVER_KEY }} --stage production
           bun run sst secret set GithubClientId ${{ secrets.GITHUB_CLIENT_ID }} --stage production
           bun run sst secret set GithubClientSecret ${{ secrets.GITHUB_CLIENT_SECRET }} --stage production
           bun run sst secret set GoogleClientId ${{ secrets.GOOGLE_CLIENT_ID }} --stage production

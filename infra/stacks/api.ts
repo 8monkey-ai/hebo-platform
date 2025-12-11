@@ -18,6 +18,7 @@ const heboApi = new sst.aws.Service("HeboApi", {
   },
   environment: {
     IS_REMOTE: $dev ? "false" : "true",
+    AUTH_ENABLED: "true",
     LOG_LEVEL: isProd ? "info" : "debug",
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: apiPort,
