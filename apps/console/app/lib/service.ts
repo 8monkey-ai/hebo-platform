@@ -6,7 +6,7 @@ import { isDevLocal } from "~console/lib/env";
 import type { Api } from "~api";
 import type { Gateway } from "~gateway";
 
-const apiUrl = isDevLocal
+export const apiUrl = isDevLocal
   ? "http://localhost:5173/api"
   : import.meta.env.VITE_API_URL || "http://localhost:3001";
 

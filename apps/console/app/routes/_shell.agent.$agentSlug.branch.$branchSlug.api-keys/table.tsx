@@ -98,7 +98,7 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2 font-mono text-sm">
-                      <span className="truncate">{key.key ?? key.start ?? "—"}</span>
+                      <span className="truncate">{key.value}</span>
                     </div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">

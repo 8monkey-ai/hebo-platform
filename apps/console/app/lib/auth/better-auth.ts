@@ -1,122 +1,52 @@
 import { createAuthClient } from "better-auth/client";
 import { apiKeyClient, emailOTPClient } from "better-auth/client/plugins";
 
-import { isDevLocal } from "~console/lib/env";
+import { apiUrl } from "~console/lib/service";
 import { shellStore } from "~console/lib/shell";
 
-import type { ApiKey, AuthService, User } from "./types";
+import {
+  DEFAULT_EXPIRATION_SECONDS,
+  type ApiKey,
+  type AuthService,
+  type User,
+} from "./types";
 
-// TODO: make sure pure FE experience (no auth involved) still works
-const authHost =
-  import.meta.env.VITE_AUTH_BASE_URL ??
-  import.meta.env.VITE_API_URL ??
-  (isDevLocal ? "http://localhost:3001" : undefined) ??
-  "http://localhost:3001";
-
-const baseURL = `${authHost.replace(/\/?$/, "")}/auth`;
-
-const appOrigin =
-  (globalThis.window !== undefined && globalThis.location.origin) ||
-  import.meta.env.VITE_APP_BASE_URL ||
-  "http://localhost:5173";
-const appRedirectURL = `${appOrigin.replace(/\/?$/, "")}/`;
+const baseURL = new URL("auth", apiUrl).toString();
+const appRedirectURL = `${globalThis.location.origin}/`;
 
 const authClient = createAuthClient({
   baseURL,
   plugins: [emailOTPClient(), apiKeyClient()],
 });
 
-const {
-  emailOtp: emailOtpApi,
-  apiKey: apiKeyApi,
-  signIn: signInApi,
-} = authClient;
-
-const getInitials = (name?: string, email?: string) => {
-  const source = name?.trim() || email?.trim();
-  if (!source) return;
-
-  const [first = "", second = ""] = source.split(/\s+/).filter(Boolean);
-  if (first && second) return `${first[0]}${second[0]}`.toUpperCase();
-  return source.slice(0, 2).toUpperCase();
-};
-
-const mapUser = (data: Partial<User> & { email?: string; name?: string }) => {
-  const user: User = {
-    email: data.email ?? "",
-    name: data.name ?? data.email ?? "",
-    avatar: (data as { image?: string }).image ?? data.avatar,
-    initials: data.initials ?? getInitials(data.name, data.email),
-  };
-  return user;
-};
-
-const unwrapData = <T>(value: unknown): T => {
-  if (value && typeof value === "object" && "data" in value) {
-    return (value as { data: T }).data;
-  }
-  return value as T;
-};
-
 export const authService: AuthService = {
   async ensureSignedIn() {
     const session = await authClient.getSession();
-    const user = session?.data?.user;
+    const user = session.data?.user as User | undefined;
 
     if (!user) {
-      if (globalThis.window !== undefined)
-        globalThis.location.replace("/signin");
+      globalThis.location.replace("/signin");
       return;
     }
 
-    shellStore.user = mapUser(user);
+    shellStore.user = user;
   },
 
-  async generateApiKey(description, expiresIn?: number) {
-    const create = apiKeyApi?.create;
-    if (!create) throw new Error("API key client not available");
-
-    const payload = {
-      name: description,
-      ...(typeof expiresIn === "number" ? { expiresIn } : {}),
-    };
-
-    try {
-      const result = await create(payload);
-      return unwrapData<ApiKey>(result);
-    } catch (error) {
-      throw new Error(
-        error instanceof Error ? error.message : "Unable to create API key",
-      );
-    }
+  async generateApiKey(name, expiresIn = DEFAULT_EXPIRATION_SECONDS) {
+    const { data } = await authClient.apiKey.create({ name, expiresIn });
+    return data as ApiKey;
   },
 
   async revokeApiKey(apiKeyId) {
-    const remove = apiKeyApi?.delete;
-    if (!remove) throw new Error("API key client not available");
-
-    try {
-      await remove({ keyId: apiKeyId });
-    } catch (error) {
-      throw new Error(
-        error instanceof Error ? error.message : "Unable to revoke API key",
-      );
-    }
+    await authClient.apiKey.delete({ keyId: apiKeyId });
   },
 
   async listApiKeys() {
-    const list = apiKeyApi?.list;
-    if (!list) throw new Error("API key client not available");
-
-    try {
-      const result = await list();
-      const unwrapped = unwrapData<unknown>(result);
-      return Array.isArray(unwrapped) ? (unwrapped as ApiKey[]) : [];
-    } catch (error) {
-      throw new Error(
-        error instanceof Error ? error.message : "Unable to load API keys",
-      );
-    }
+    const { data = [] } = await authClient.apiKey.list();
+    return data!.map((key) => ({
+      ...key,
+      value: `******${key.start}`,
+    })) as ApiKey[];
   },
 
   async signInWithOAuth(provider: string) {
@@ -127,15 +57,11 @@ export const authService: AuthService = {
   },
 
   async sendMagicLinkEmail(email: string) {
-    if (!emailOtpApi?.sendVerificationOtp) {
-      throw new Error("Email OTP client not available");
-    }
-    await emailOtpApi.sendVerificationOtp({
+    await authClient.emailOtp.sendVerificationOtp({
       email,
       type: "sign-in",
     });
 
-    // OTP-only flow; return a truthy value to move UI forward.
     return "otp-sent";
   },
 
@@ -145,20 +71,13 @@ export const authService: AuthService = {
     if (!token) throw new Error("Missing code");
     if (!emailValue) throw new Error("Missing email");
 
-    const signInEmailOtp = signInApi?.emailOtp;
-
-    if (!signInEmailOtp) throw new Error("Email OTP client not available");
-
-    const session = await signInEmailOtp({
+    await authClient.signIn.emailOtp({
       email: emailValue,
       otp: token,
+      // FUTURE: enable this when this github issue will be solved: https://github.com/better-auth/better-auth/issues/5596
+      // callbackURL: appRedirectURL,
     });
-    const user = session?.data?.user;
-    if (user) {
-      shellStore.user = mapUser(user);
-      if (globalThis.window !== undefined)
-        globalThis.location.replace(appRedirectURL);
-    }
+    globalThis.location.replace(appRedirectURL);
   },
 };
 

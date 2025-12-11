@@ -24,7 +24,7 @@ export const authService = {
       name: "Dummy User",
       email: "dummy@user.com",
       initials: "DU",
-      avatar: "",
+      image: "",
     };
   },
 
