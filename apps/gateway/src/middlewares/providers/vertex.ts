@@ -12,9 +12,10 @@ export class VertexProviderAdapter
 {
   private config?: VertexProviderConfig;
 
-  // Static map of modelType to Vertex-specific modelId
+  // modelType to modelId
   private static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
-    "google/gemini-2.5-flash-preview-09-2025": "gemini-2.5-flash-preview-09-2025",
+    "google/gemini-2.5-flash-preview-09-2025":
+      "gemini-2.5-flash-preview-09-2025",
     "google/gemini-2.5-flash-lite-preview-09-2025":
       "gemini-2.5-flash-lite-preview-09-2025",
   };
@@ -37,12 +38,13 @@ export class VertexProviderAdapter
     if (config) {
       this.config = config;
     } else {
-      const [serviceAccountEmail, audience, location, project] = await Promise.all([
-        getSecret("VertexServiceAccountEmail"),
-        getSecret("VertexAwsProviderAudience"),
-        getSecret("VertexLocation"),
-        getSecret("VertexProject"),
-      ]);
+      const [serviceAccountEmail, audience, location, project] =
+        await Promise.all([
+          getSecret("VertexServiceAccountEmail"),
+          getSecret("VertexAwsProviderAudience"),
+          getSecret("VertexLocation"),
+          getSecret("VertexProject"),
+        ]);
       this.config = { serviceAccountEmail, audience, location, project };
     }
     return this;

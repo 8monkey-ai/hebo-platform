@@ -20,7 +20,7 @@ export class BedrockProviderAdapter
   private config?: BedrockProviderConfig;
   private credentials?: BedrockCredentials;
 
-  // Static map of modelType to Bedrock-specific modelId
+  // modelType to modelId
   private static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
     "openai/gpt-oss-120b": "openai.gpt-oss-120b-1:0",
     "openai/gpt-oss-20b": "openai.gpt-oss-20b-1:0",

@@ -11,7 +11,7 @@ export class CohereProviderAdapter
 {
   private config?: ApiKeyProviderConfig;
 
-  // Static map of modelType to Cohere-specific modelId
+  // modelType to modelId
   private static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
     "cohere/embed-v4.0": "embed-v4.0",
   };
@@ -47,4 +47,3 @@ export class CohereProviderAdapter
     return modelId;
   }
 }
-

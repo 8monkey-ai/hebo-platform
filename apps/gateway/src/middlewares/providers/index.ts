@@ -18,7 +18,6 @@ export class ProviderAdapterFactory {
   constructor(private readonly dbClient: ReturnType<typeof createDbClient>) {}
 
   async createDefault(modelType: string): Promise<ProviderAdapter> {
-    // List all concrete ProviderAdapter classes
     const ALL_PROVIDER_CLASSES = [
       BedrockProviderAdapter,
       CohereProviderAdapter,
@@ -27,7 +26,6 @@ export class ProviderAdapterFactory {
     ];
 
     for (const ProviderClass of ALL_PROVIDER_CLASSES) {
-      // Create a temporary instance to check if it supports the modelType
       const tempInstance = new ProviderClass(modelType);
 
       if (tempInstance.supportsModel(modelType)) {

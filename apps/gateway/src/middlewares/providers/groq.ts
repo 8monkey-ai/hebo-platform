@@ -11,7 +11,7 @@ export class GroqProviderAdapter
 {
   private config?: ApiKeyProviderConfig;
 
-  // Static map of modelType to Groq-specific modelId
+  // modelType to modelId
   private static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
     "openai/gpt-oss-120b": "openai/gpt-oss-120b",
     "openai/gpt-oss-20b": "openai/gpt-oss-20b",
@@ -48,4 +48,3 @@ export class GroqProviderAdapter
     return modelId;
   }
 }
-
