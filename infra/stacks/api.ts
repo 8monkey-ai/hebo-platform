@@ -20,8 +20,8 @@ const heboApi = new sst.aws.Service("HeboApi", {
     IS_REMOTE: $dev ? "false" : "true",
     AUTH_BASE_URL: `https://${apiDomain}`,
     AUTH_TRUSTED_ORIGINS: isProd
-      ? "console.hebo.ai"
-      : `console.${$app.stage}.hebo.ai`,
+      ? "https://console.hebo.ai"
+      : `https://console.${$app.stage}.hebo.ai`,
     LOG_LEVEL: isProd ? "info" : "debug",
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: apiPort,
