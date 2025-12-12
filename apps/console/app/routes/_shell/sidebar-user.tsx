@@ -20,32 +20,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@hebo/shared-ui/components/Sidebar";
-import { useNavigate } from "react-router";
-import { authService } from "~console/lib/auth";
+import { Link } from "react-router";
 import { kbs } from "~console/lib/utils";
 import { KeyboardShortcuts } from "./shortcuts";
 import { useState } from "react";
 import type { User } from "~console/lib/auth/types";
 
 export function UserMenu({ user }: { user?: User }) {
-  const navigate = useNavigate();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
-  const [isSigningOut, setIsSigningOut] = useState(false);
-
-  const handleSignOut = async (event: Event) => {
-    event.preventDefault();
-    if (isSigningOut) return;
-
-    setIsSigningOut(true);
-    try {
-      await authService.signOut();
-      navigate("/signin", { replace: true, viewTransition: true });
-    } catch (error) {
-      console.error("Sign out failed", error);
-    } finally {
-      setIsSigningOut(false);
-    }
-  };
 
   return (
     <SidebarMenu>
@@ -105,12 +87,11 @@ export function UserMenu({ user }: { user?: User }) {
                 <DropdownMenuShortcut>{kbs("mod+/")}</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                disabled={isSigningOut}
-                onSelect={handleSignOut}
-              >
-                <LogOut aria-hidden="true" />
-                {isSigningOut ? "Logging out..." : "Log out"}
+              <DropdownMenuItem asChild>
+                <Link to="/signout" viewTransition>
+                  <LogOut aria-hidden="true" />
+                  Log out
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
