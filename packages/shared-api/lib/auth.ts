@@ -34,6 +34,7 @@ export const auth = betterAuth({
   }),
   socialProviders: {
     google: {
+      prompt: "select_account",
       clientId: await getSecret("GoogleClientId", isAuthEnabled),
       clientSecret: await getSecret("GoogleClientSecret", isAuthEnabled),
     },
@@ -47,7 +48,13 @@ export const auth = betterAuth({
     },
   },
   plugins: [
-    apiKey(),
+    apiKey({
+      startingCharactersConfig: {
+        shouldStore: true,
+        charactersLength: 8,
+      },
+      defaultPrefix: "sk_",
+    }),
     emailOTP({
       async sendVerificationOTP({ email, otp }) {
         await sendVerificationOtpEmail({ email, otp });
@@ -55,4 +62,5 @@ export const auth = betterAuth({
     }),
   ],
   trustedOrigins,
+  secret: await getSecret("AuthSecret", isAuthEnabled),
 });
