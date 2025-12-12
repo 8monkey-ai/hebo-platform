@@ -7,7 +7,6 @@ import index from "src/ui/index.html";
 import { countLetterTool } from "./aikit/count-letter.js";
 import { createMcpHandler } from "./aikit/mcp-transport.js";
 
-
 const LOG_LEVEL = process.env.LOG_LEVEL ?? "info";
 const PORT = Number(process.env.PORT ?? 3003);
 
@@ -18,7 +17,7 @@ mcpServer.registerTool(
   countLetterTool.handler,
 );
 
-const createApp = async () =>
+const createApp = () =>
   new Elysia()
     .use(logger({ level: LOG_LEVEL }))
     .get("/", index)
@@ -31,7 +30,6 @@ const createApp = async () =>
     );
 
 if (import.meta.main) {
-  // eslint-disable-next-line unicorn/no-await-expression-member
-  const app = (await createApp()).listen(PORT);
+  const app = createApp().listen(PORT);
   console.log(`🐵 Hebo MCP running at ${app.server!.url}`);
 }

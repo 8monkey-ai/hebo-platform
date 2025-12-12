@@ -9,19 +9,19 @@ export function Counter() {
       <div className="flex gap-2">
         <button
           onClick={() => setCount((c) => c - 1)}
-          className="rounded-md bg-zinc-600 px-4 py-2 transition-colors"
+          className="rounded-md bg-zinc-700 px-4 py-2 transition-colors hover:bg-zinc-600"
         >
           Decrement
         </button>
         <button
           onClick={() => setCount((c) => c + 1)}
-          className="rounded-md bg-zinc-600 px-4 py-2 transition-colors"
+          className="rounded-md bg-zinc-700 px-4 py-2 transition-colors hover:bg-zinc-600"
         >
           Increment
         </button>
         <button
           onClick={() => setCount(0)}
-          className="rounded-md bg-zinc-600 px-4 py-2 transition-colors"
+          className="rounded-md bg-zinc-700 px-4 py-2 transition-colors hover:bg-zinc-600"
         >
           Reset
         </button>
