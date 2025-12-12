@@ -8,6 +8,8 @@ import type { AuthService } from "./types";
 
 const authService: AuthService = isAuthEnabled
   ? betterAuthService
-  : (console.warn("⚠️ No auth configured, using dummy"), dummyAuthService);
+  : dummyAuthService;
+if (!isAuthEnabled)
+  console.warn("⚠️ No auth configured, using dummy auth service");
 
 export { authService };
