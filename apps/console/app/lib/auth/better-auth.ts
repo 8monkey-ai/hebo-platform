@@ -11,11 +11,10 @@ import {
   type User,
 } from "./types";
 
-const baseURL = new URL("auth", apiUrl).toString();
 const appRedirectURL = `${globalThis.location.origin}/`;
 
 const authClient = createAuthClient({
-  baseURL,
+  baseURL: new URL("auth", apiUrl).toString(),
   plugins: [emailOTPClient(), apiKeyClient()],
 });
 
@@ -78,7 +77,12 @@ export const authService: AuthService = {
       // FUTURE: enable this when this github issue will be solved: https://github.com/better-auth/better-auth/issues/5596
       // callbackURL: appRedirectURL,
     });
-    globalThis.location.replace(appRedirectURL);
+    globalThis.location.href = appRedirectURL;
+  },
+
+  async signOut() {
+    await authClient.signOut();
+    shellStore.user = undefined;
   },
 };
 

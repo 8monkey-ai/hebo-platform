@@ -1,5 +1,4 @@
 import { BookOpen, ChevronsUpDown, ExternalLink, Keyboard, LogOut } from "lucide-react";
-import { Link } from "react-router";
 
 import {
   Avatar,
@@ -21,13 +20,32 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@hebo/shared-ui/components/Sidebar";
+import { useNavigate } from "react-router";
+import { authService } from "~console/lib/auth";
 import { kbs } from "~console/lib/utils";
 import { KeyboardShortcuts } from "./shortcuts";
 import { useState } from "react";
 import type { User } from "~console/lib/auth/types";
 
 export function UserMenu({ user }: { user?: User }) {
+  const navigate = useNavigate();
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async (event: Event) => {
+    event.preventDefault();
+    if (isSigningOut) return;
+
+    setIsSigningOut(true);
+    try {
+      await authService.signOut();
+      navigate("/signin", { replace: true, viewTransition: true });
+    } catch (error) {
+      console.error("Sign out failed", error);
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   return (
     <SidebarMenu>
@@ -72,9 +90,9 @@ export function UserMenu({ user }: { user?: User }) {
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <a
-                    href="https://docs.hebo.ai"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                  href="https://docs.hebo.ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
                   <BookOpen />
                   Documentation
@@ -87,11 +105,12 @@ export function UserMenu({ user }: { user?: User }) {
                 <DropdownMenuShortcut>{kbs("mod+/")}</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/handler/sign-out" viewTransition>
-                  <LogOut aria-hidden="true" />
-                  Log out
-                </Link>
+              <DropdownMenuItem
+                disabled={isSigningOut}
+                onSelect={handleSignOut}
+              >
+                <LogOut aria-hidden="true" />
+                {isSigningOut ? "Logging out..." : "Log out"}
               </DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>

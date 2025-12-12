@@ -6,6 +6,7 @@ export interface AuthService {
   signInWithOAuth(provider: string): Promise<void>;
   sendMagicLinkEmail(email: string): Promise<string>;
   signInWithMagicLink(code: string, email: string): Promise<void>;
+  signOut(): Promise<void>;
 }
 
 export const DEFAULT_EXPIRATION_SECONDS = 7 * 24 * 60 * 60; // 7 days

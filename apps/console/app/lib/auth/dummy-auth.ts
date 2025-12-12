@@ -55,4 +55,8 @@ export const authService = {
   async signInWithMagicLink() {
     throw new Error("Magic Link not implemented");
   },
+
+  async signOut() {
+    shellStore.user = undefined;
+  },
 } satisfies AuthService;
