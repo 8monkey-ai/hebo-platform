@@ -99,7 +99,6 @@ export function MagicLinkSignIn() {
           } catch (error) {
             error instanceof Error && setError(error.message);
           } finally {
-            setOtp("");
             setLoading(false);
           }
         }}>
