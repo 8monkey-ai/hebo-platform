@@ -19,10 +19,8 @@ export type User = {
 
 export type ApiKey = {
   id: string;
-  name?: string;
-  key?: string;
-  value?: string;
-  createdAt: string | Date;
-  expiresAt?: string | Date | null;
-  description?: string;
+  name: string;
+  key: string;
+  createdAt: Date;
+  expiresAt: Date;
 };

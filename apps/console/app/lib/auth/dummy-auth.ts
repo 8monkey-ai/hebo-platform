@@ -10,10 +10,8 @@ const apiKeys = new Collection({
     id: z.string().default(crypto.randomUUID()),
     name: z.string(),
     key: z.string(),
-    start: z.string().nullable(),
-    description: z.string().optional(),
     createdAt: z.date(),
-    expiresAt: z.date().nullable(),
+    expiresAt: z.date(),
   }),
 });
 
@@ -28,22 +26,14 @@ export const authService = {
     };
   },
 
-  async generateApiKey(
-    description,
-    expiresInSeconds = DEFAULT_EXPIRATION_SECONDS,
-  ) {
+  async generateApiKey(name, expiresInSeconds = DEFAULT_EXPIRATION_SECONDS) {
     const now = new Date();
-    const key = crypto.randomUUID();
-    const newKey = await apiKeys.create({
-      name: description,
-      description,
-      key,
-      start: key.slice(0, 6),
+    return await apiKeys.create({
+      name,
+      key: crypto.randomUUID(),
       createdAt: now,
       expiresAt: new Date(now.getTime() + expiresInSeconds),
     });
-
-    return newKey;
   },
 
   async revokeApiKey(apiKeyId: string) {

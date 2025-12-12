@@ -43,10 +43,11 @@ export const authService: AuthService = {
 
   async listApiKeys() {
     const { data = [] } = await authClient.apiKey.list();
-    return data!.map((key) => ({
+    const keys = data!.map((key) => ({
       ...key,
-      value: `${key.start}******`,
+      key: `${key.start}******`,
     })) as ApiKey[];
+    return keys.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   },
 
   async signInWithOAuth(provider: string) {

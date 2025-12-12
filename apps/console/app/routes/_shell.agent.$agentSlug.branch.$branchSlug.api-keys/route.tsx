@@ -34,7 +34,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
       let apiKey;
       try {
         apiKey = await authService.generateApiKey(
-          submission.value.description,
+          submission.value.name,
           API_KEY_EXPIRATION_OPTIONS.find((option) => option.value === submission.value.expiresIn)!.durationSeconds
         );
       } catch (error) {
