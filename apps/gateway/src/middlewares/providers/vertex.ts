@@ -12,25 +12,40 @@ export class VertexProviderAdapter
 {
   private config?: VertexProviderConfig;
 
-  constructor(modelName: string) {
-    super("vertex", modelName);
+  // Static map of modelType to Vertex-specific modelId
+  private static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
+    "google/gemini-2.5-flash-preview-09-2025": "gemini-2.5-flash-preview-09-2025",
+    "google/gemini-2.5-flash-lite-preview-09-2025":
+      "gemini-2.5-flash-lite-preview-09-2025",
+  };
+
+  constructor(modelType: string) {
+    super("vertex", modelType);
   }
 
   protected getProviderName(): string {
     return "google";
   }
 
+  supportsModel(modelType: string): boolean {
+    return modelType in VertexProviderAdapter.SUPPORTED_MODELS_MAP;
+  }
+
+  transformConfigs(_modelConfig: Record<string, any>): Record<string, any> {
+    // Vertex currently doesn't require specific transformation for standard options
+    return {};
+  }
+
   async initialize(config?: VertexProviderConfig): Promise<this> {
     if (config) {
       this.config = config;
     } else {
-      const [serviceAccountEmail, audience, location, project] =
-        await Promise.all([
-          getSecret("VertexServiceAccountEmail"),
-          getSecret("VertexAwsProviderAudience"),
-          getSecret("VertexLocation"),
-          getSecret("VertexProject"),
-        ]);
+      const [serviceAccountEmail, audience, location, project] = await Promise.all([
+        getSecret("VertexServiceAccountEmail"),
+        getSecret("VertexAwsProviderAudience"),
+        getSecret("VertexLocation"),
+        getSecret("VertexProject"),
+      ]);
       this.config = { serviceAccountEmail, audience, location, project };
     }
     return this;
@@ -50,7 +65,11 @@ export class VertexProviderAdapter
     });
   }
 
-  async resolveModelId() {
-    return this.getProviderModelId();
+  async resolveModelId(): Promise<string> {
+    const modelId = VertexProviderAdapter.SUPPORTED_MODELS_MAP[this.modelType];
+    if (!modelId) {
+      throw new Error(`Model ${this.modelType} not supported by Vertex.`);
+    }
+    return modelId;
   }
 }

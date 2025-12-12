@@ -6,9 +6,6 @@ import {
 
 import type { BedrockProviderConfig } from "@hebo/database/src/types/providers";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
-import { getReasoningConfig } from "@hebo/shared-data/models/index";
-
-import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible-api-schemas";
 
 import { assumeRole } from "./adapters/aws";
 import { ProviderAdapterBase, type ProviderAdapter } from "./provider";
@@ -23,12 +20,22 @@ export class BedrockProviderAdapter
   private config?: BedrockProviderConfig;
   private credentials?: BedrockCredentials;
 
-  constructor(modelName: string) {
-    super("bedrock", modelName);
+  // Static map of modelType to Bedrock-specific modelId
+  private static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
+    "openai/gpt-oss-120b": "openai.gpt-oss-120b-1:0",
+    "openai/gpt-oss-20b": "openai.gpt-oss-20b-1:0",
+  };
+
+  constructor(modelType: string) {
+    super("bedrock", modelType);
   }
 
   protected getProviderName(): string {
     return "bedrock";
+  }
+
+  supportsModel(modelType: string): boolean {
+    return modelType in BedrockProviderAdapter.SUPPORTED_MODELS_MAP;
   }
 
   private static toSnakeCase(str: string): string {
@@ -47,15 +54,11 @@ export class BedrockProviderAdapter
     return newObj;
   }
 
-  getProviderOptions(reasoning?: OpenAICompatibleReasoning): any {
-    if (!reasoning) return;
-
-    const config = getReasoningConfig(this.modelName, reasoning);
-
-    if (!config || Object.keys(config).length === 0) return;
+  transformConfigs(modelConfig: Record<string, any>): Record<string, any> {
+    if (Object.keys(modelConfig).length === 0) return {};
 
     const snakeCaseConfig =
-      BedrockProviderAdapter.convertObjectKeysToSnakeCase(config);
+      BedrockProviderAdapter.convertObjectKeysToSnakeCase(modelConfig);
 
     return {
       bedrock: {
@@ -94,8 +97,14 @@ export class BedrockProviderAdapter
     });
   }
 
-  async resolveModelId() {
-    const modelId = this.getProviderModelId();
+  async resolveModelId(): Promise<string> {
+    const modelId = BedrockProviderAdapter.SUPPORTED_MODELS_MAP[this.modelType];
+    if (!modelId) {
+      throw new Error(`Model ${this.modelType} not supported by Bedrock.`);
+    }
+
+    // The remaining logic for ListInferenceProfilesCommand to verify ARN
+    // can stay as it confirms the resolved modelId exists in AWS.
     const { region } = this.config!;
     const client = new BedrockClient({
       region,

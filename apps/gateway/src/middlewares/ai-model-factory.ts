@@ -2,10 +2,10 @@ import { Elysia } from "elysia";
 
 import { BadRequestError } from "@hebo/shared-api/errors";
 import { dbClient } from "@hebo/shared-api/middlewares/db-client";
-import supportedModels from "@hebo/shared-data/json/supported-models";
 
 import { ModelConfigService } from "./model-config";
 import { ProviderAdapterFactory } from "./providers";
+import { ModelAdapterFactory } from "./models/factory";
 
 import type { ProviderAdapter } from "./providers/provider";
 import type { EmbeddingModel, LanguageModel } from "ai";
@@ -28,18 +28,11 @@ export const aiModelFactory = new Elysia({
     const createAIModel = async <M extends Modality>(
       modelAliasPath: string,
       modality: M,
-    ): Promise<{ model: AiModelFor<M>; provider: ProviderAdapter }> => {
+    ): Promise<AiModelFor<M>> => {
       const modelType = await modelConfigService.getModelType(modelAliasPath);
+      const modelAdapter = ModelAdapterFactory.getAdapter(modelType);
 
-      const modelModality = supportedModels.find(
-        (model) => model.type === modelType,
-      )?.modality;
-      if (!modelModality) {
-        throw new BadRequestError(
-          `Model ${modelAliasPath} (${modelType}) is not supported.`,
-        );
-      }
-      if (modelModality !== modality)
+      if (modelAdapter.getModality() !== modality)
         throw new BadRequestError(
           `Model ${modelAliasPath} (${modelType}) is not a ${modality} model.`,
         );
@@ -49,6 +42,7 @@ export const aiModelFactory = new Elysia({
       const providerAdapter = await (customProviderSlug
         ? providerAdapterFactory.createCustom(modelType, customProviderSlug)
         : providerAdapterFactory.createDefault(modelType));
+
       const provider = await providerAdapter.getProvider();
       const modelId = await providerAdapter.resolveModelId();
 
@@ -57,7 +51,7 @@ export const aiModelFactory = new Elysia({
           ? (provider.languageModel(modelId) as AiModelFor<M>)
           : (provider.textEmbeddingModel(modelId) as AiModelFor<M>);
 
-      return { model, provider: providerAdapter };
+      return model;
     };
 
     return {

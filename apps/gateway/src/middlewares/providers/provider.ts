@@ -2,10 +2,6 @@ import type {
   ProviderConfig,
   ProviderSlug,
 } from "@hebo/database/src/types/providers";
-import supportedModels from "@hebo/shared-data/json/supported-models";
-import { getReasoningConfig } from "@hebo/shared-data/models/index";
-
-import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible-api-schemas";
 
 import type { Provider } from "ai";
 
@@ -13,37 +9,22 @@ export interface ProviderAdapter {
   initialize(config?: ProviderConfig): Promise<this>;
   getProvider(): Promise<Provider>;
   resolveModelId(): Promise<string>;
-  getProviderOptions(reasoning?: OpenAICompatibleReasoning): any;
+  supportsModel(modelType: string): boolean;
+  transformConfigs(modelConfig: Record<string, any>): Record<string, any>;
+  getProviderSlug(): ProviderSlug;
 }
 
 export abstract class ProviderAdapterBase {
   protected constructor(
-    private readonly providerSlug: ProviderSlug,
-    private readonly modelName: string,
+    protected readonly providerSlug: ProviderSlug,
+    protected readonly modelType: string,
   ) {}
 
-  protected getProviderName(): string {
+  public getProviderSlug(): ProviderSlug {
     return this.providerSlug;
   }
+  
+  abstract supportsModel(modelType: string): boolean;
 
-  getProviderModelId(): string {
-    const entry = supportedModels
-      .find((model) => model.type === this.modelName)
-      ?.providers.find((provider) => this.providerSlug in provider) as
-      | Record<ProviderSlug, string>
-      | undefined;
-    if (!entry) {
-      throw new Error(
-        `Missing provider ${this.providerSlug} for model ${this.modelName}`,
-      );
-    }
-    return entry[this.providerSlug];
-  }
-
-  getProviderOptions(reasoning?: OpenAICompatibleReasoning): any {
-    if (!reasoning) return;
-    const config = getReasoningConfig(this.modelName, reasoning);
-    if (!config) return;
-    return { [this.getProviderName()]: config };
-  }
+  abstract transformConfigs(modelConfig: Record<string, any>): Record<string, any>;
 }

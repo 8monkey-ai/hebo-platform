@@ -6,7 +6,6 @@ import type {
   ProviderConfig,
   ProviderSlug,
 } from "@hebo/database/src/types/providers";
-import supportedModels from "@hebo/shared-data/json/supported-models";
 
 import { BedrockProviderAdapter } from "./bedrock";
 import { CohereProviderAdapter } from "./cohere";
@@ -19,25 +18,26 @@ export class ProviderAdapterFactory {
   constructor(private readonly dbClient: ReturnType<typeof createDbClient>) {}
 
   async createDefault(modelType: string): Promise<ProviderAdapter> {
-    const providerSlugs = [
-      ...new Set(
-        supportedModels
-          .find((model) => model.type === modelType)
-          ?.providers.flatMap(
-            (mapping) => Object.keys(mapping) as ProviderSlug[],
-          ),
-      ),
+    // List all concrete ProviderAdapter classes
+    const ALL_PROVIDER_CLASSES = [
+      BedrockProviderAdapter,
+      CohereProviderAdapter,
+      GroqProviderAdapter,
+      VertexProviderAdapter,
     ];
 
-    for (const providerSlug of providerSlugs) {
-      try {
+    for (const ProviderClass of ALL_PROVIDER_CLASSES) {
+      // Create a temporary instance to check if it supports the modelType
+      const tempInstance = new ProviderClass(modelType);
+
+      if (tempInstance.supportsModel(modelType)) {
+        const providerSlug = tempInstance.getProviderSlug();
         return await this.createAdapter(providerSlug, modelType);
-      } catch {
-        continue;
       }
     }
+
     throw new Error(
-      `Unable to create provider adapter: no providers available`,
+      `Unable to create provider adapter: no providers available for model type ${modelType}`,
     );
   }
 

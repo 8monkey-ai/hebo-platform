@@ -11,8 +11,26 @@ export class CohereProviderAdapter
 {
   private config?: ApiKeyProviderConfig;
 
-  constructor(modelName: string) {
-    super("cohere", modelName);
+  // Static map of modelType to Cohere-specific modelId
+  private static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
+    "cohere/embed-v4.0": "embed-v4.0",
+  };
+
+  constructor(modelType: string) {
+    super("cohere", modelType);
+  }
+
+  protected getProviderName(): string {
+    return "cohere";
+  }
+
+  supportsModel(modelType: string): boolean {
+    return modelType in CohereProviderAdapter.SUPPORTED_MODELS_MAP;
+  }
+
+  transformConfigs(_modelConfig: Record<string, any>): Record<string, any> {
+    // Cohere currently doesn't require specific transformation for standard options
+    return {};
   }
 
   async initialize(config?: ApiKeyProviderConfig): Promise<this> {
@@ -30,7 +48,12 @@ export class CohereProviderAdapter
     return createCohere({ ...cfg });
   }
 
-  async resolveModelId() {
-    return this.getProviderModelId();
+  async resolveModelId(): Promise<string> {
+    const modelId = CohereProviderAdapter.SUPPORTED_MODELS_MAP[this.modelType];
+    if (!modelId) {
+      throw new Error(`Model ${this.modelType} not supported by Cohere.`);
+    }
+    return modelId;
   }
 }
+
