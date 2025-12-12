@@ -39,24 +39,24 @@ jobs:
 
       - name: Deploy to Production
         run: |
-          bun run sst secret set AuthSecret ${{ secrets.AUTH_SECRET }} --stage production
-          bun run sst secret set GithubClientId ${{ secrets.GITHUB_CLIENT_ID }} --stage production
-          bun run sst secret set GithubClientSecret ${{ secrets.GITHUB_CLIENT_SECRET }} --stage production
-          bun run sst secret set GoogleClientId ${{ secrets.GOOGLE_CLIENT_ID }} --stage production
-          bun run sst secret set GoogleClientSecret ${{ secrets.GOOGLE_CLIENT_SECRET }} --stage production
-          bun run sst secret set MicrosoftClientId ${{ secrets.MICROSOFT_CLIENT_ID }} --stage production
-          bun run sst secret set MicrosoftClientSecret ${{ secrets.MICROSOFT_CLIENT_SECRET }} --stage production
-          bun run sst secret set SmtpHost ${{ secrets.SMTP_HOST }} --stage production
-          bun run sst secret set SmtpPort ${{ secrets.SMTP_PORT }} --stage production
-          bun run sst secret set SmtpUser ${{ secrets.SMTP_USER }} --stage production
-          bun run sst secret set SmtpPass ${{ secrets.SMTP_PASS }} --stage production
-          bun run sst secret set SmtpFrom ${{ secrets.SMTP_FROM }} --stage production
-          bun run sst secret set BedrockRoleArn ${{ secrets.BEDROCK_ROLE_ARN }} --stage production
-          bun run sst secret set BedrockRegion ${{ secrets.BEDROCK_REGION }} --stage production
-          bun run sst secret set CohereApiKey ${{ secrets.COHERE_API_KEY }} --stage production
-          bun run sst secret set VertexServiceAccountEmail ${{ secrets.GOOGLE_VERTEX_SERVICE_ACCOUNT_EMAIL }} --stage production
-          bun run sst secret set VertexAwsProviderAudience ${{ secrets.GOOGLE_VERTEX_AWS_PROVIDER_AUDIENCE }} --stage production
-          bun run sst secret set VertexProject ${{ secrets.GOOGLE_VERTEX_PROJECT }} --stage production
-          bun run sst secret set VertexLocation ${{ secrets.GOOGLE_VERTEX_LOCATION }} --stage production
+          printf '%s' "${{ secrets.AUTH_SECRET }}" | bun run sst secret set AuthSecret --stage production
+          printf '%s' "${{ secrets.GITHUB_CLIENT_ID }}" | bun run sst secret set GithubClientId --stage production
+          printf '%s' "${{ secrets.GITHUB_CLIENT_SECRET }}" | bun run sst secret set GithubClientSecret --stage production
+          printf '%s' "${{ secrets.GOOGLE_CLIENT_ID }}" | bun run sst secret set GoogleClientId --stage production
+          printf '%s' "${{ secrets.GOOGLE_CLIENT_SECRET }}" | bun run sst secret set GoogleClientSecret --stage production
+          printf '%s' "${{ secrets.MICROSOFT_CLIENT_ID }}" | bun run sst secret set MicrosoftClientId --stage production
+          printf '%s' "${{ secrets.MICROSOFT_CLIENT_SECRET }}" | bun run sst secret set MicrosoftClientSecret --stage production
+          printf '%s' "${{ secrets.SMTP_HOST }}" | bun run sst secret set SmtpHost --stage production
+          printf '%s' "${{ secrets.SMTP_PORT }}" | bun run sst secret set SmtpPort --stage production
+          printf '%s' "${{ secrets.SMTP_USER }}" | bun run sst secret set SmtpUser --stage production
+          printf '%s' "${{ secrets.SMTP_PASS }}" | bun run sst secret set SmtpPass --stage production
+          printf '%s' "${{ secrets.SMTP_FROM }}" | bun run sst secret set SmtpFrom --stage production
+          printf '%s' "${{ secrets.BEDROCK_ROLE_ARN }}" | bun run sst secret set BedrockRoleArn --stage production
+          printf '%s' "${{ secrets.BEDROCK_REGION }}" | bun run sst secret set BedrockRegion --stage production
+          printf '%s' "${{ secrets.COHERE_API_KEY }}" | bun run sst secret set CohereApiKey --stage production
+          printf '%s' "${{ secrets.GOOGLE_VERTEX_SERVICE_ACCOUNT_EMAIL }}" | bun run sst secret set VertexServiceAccountEmail --stage production
+          printf '%s' "${{ secrets.GOOGLE_VERTEX_AWS_PROVIDER_AUDIENCE }}" | bun run sst secret set VertexAwsProviderAudience --stage production
+          printf '%s' "${{ secrets.GOOGLE_VERTEX_PROJECT }}" | bun run sst secret set VertexProject --stage production
+          printf '%s' "${{ secrets.GOOGLE_VERTEX_LOCATION }}" | bun run sst secret set VertexLocation --stage production
 
           bun run sst deploy --stage production
