@@ -38,6 +38,7 @@ export function MagicLinkSignIn() {
       return;
     }
     verifyOnce.current = true;
+    setError(undefined);
     setLoading(true);
     void authService
       .signInWithMagicLink(otp, email)
