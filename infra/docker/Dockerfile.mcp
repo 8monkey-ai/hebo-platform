@@ -29,5 +29,4 @@ WORKDIR /app
 COPY --from=builder /repo/apps/mcp/dist/ ./
 
 EXPOSE 3003
-USER nonroot:nonroot
 CMD ["bun", "index.js"]
