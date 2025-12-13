@@ -1,6 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "types": ["bun-types", "nodemailer"]
+    "types": ["bun-types"]
   }
 }

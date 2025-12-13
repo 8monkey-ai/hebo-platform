@@ -1,14 +1,14 @@
-import nodemailer from "nodemailer";
+import { createMessage } from "@upyo/core";
+import { SmtpTransport } from "@upyo/smtp";
 
 import { getSecret } from "../../utils/secrets";
 import { isAuthEnabled, trustedOrigins } from "../env";
 
 const smtpPort = Number(await getSecret("SmtpPort", isAuthEnabled));
 const smtpFrom = await getSecret("SmtpFrom", isAuthEnabled);
-
 const logoUrl = "https://hebo.ai/_next/image?url=%2Fhebo.png&w=48&q=75";
 
-const mailer = nodemailer.createTransport({
+const transport = new SmtpTransport({
   host: await getSecret("SmtpHost", isAuthEnabled),
   port: smtpPort,
   secure: smtpPort === 465,
@@ -77,11 +77,20 @@ export async function sendVerificationOtpEmail({
     </table>
   `;
 
-  await mailer.sendMail({
-    from: smtpFrom,
+  const message = createMessage({
+    from: `Hebo Cloud <${smtpFrom}>`,
     to: email,
     subject: "Sign in to Hebo Cloud",
-    text: `Sign in to Hebo Cloud\n\nHi! This is your one-time password for signing in:\n\n${otp}\n\nOr you can click this link to sign in:\n${magicLinkUrl}\n\nIf you were not expecting this email, you can safely ignore it.`,
-    html,
+    content: {
+      text: `Sign in to Hebo Cloud\n\nHi! This is your one-time password for signing in:\n\n${otp}\n\nOr you can click this link to sign in:\n${magicLinkUrl}\n\nIf you were not expecting this email, you can safely ignore it.`,
+      html,
+    },
   });
+
+  const receipt = await transport.send(message);
+  if (!receipt.successful) {
+    throw new Error(
+      `Failed to send verification email: ${receipt.errorMessages.join(", ")}`,
+    );
+  }
 }
