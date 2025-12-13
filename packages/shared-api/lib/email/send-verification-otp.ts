@@ -2,19 +2,22 @@ import { createMessage } from "@upyo/core";
 import { SmtpTransport } from "@upyo/smtp";
 
 import { getSecret } from "../../utils/secrets";
-import { isAuthEnabled, trustedOrigins } from "../env";
+import { isRemote, trustedOrigins } from "../env";
 
-const smtpPort = Number(await getSecret("SmtpPort", isAuthEnabled));
-const smtpFrom = await getSecret("SmtpFrom", isAuthEnabled);
+const smtpHost = await getSecret("SmtpHost", false);
+const smtpPort = Number(await getSecret("SmtpPort", false));
+const smtpUser = await getSecret("SmtpUser", false);
+const smtpPass = await getSecret("SmtpPass", false);
+const smtpFrom = await getSecret("SmtpFrom", false);
 const logoUrl = "https://hebo.ai/_next/image?url=%2Fhebo.png&w=48&q=75";
 
 const transport = new SmtpTransport({
-  host: await getSecret("SmtpHost", isAuthEnabled),
+  host: smtpHost,
   port: smtpPort,
   secure: smtpPort === 465,
   auth: {
-    user: await getSecret("SmtpUser", isAuthEnabled),
-    pass: await getSecret("SmtpPass", isAuthEnabled),
+    user: smtpUser,
+    pass: smtpPass,
   },
 });
 
@@ -28,6 +31,14 @@ export async function sendVerificationOtpEmail({
   const magicLinkUrl = new URL("/signin/magic-link", trustedOrigins[0]);
   magicLinkUrl.searchParams.set("email", email);
   magicLinkUrl.searchParams.set("otp", otp);
+
+  // In local dev, we may not have SMTP credentials, so we just log the OTP.
+  if (!isRemote) {
+    console.info(">>> OTP:", otp);
+    if (!smtpHost || !smtpPort || !smtpUser || !smtpPass || !smtpFrom) {
+      return;
+    }
+  }
 
   const html = `
     <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(180deg,#fefce8 0%,#f8fafc 45%,#eef2ff 100%);padding:32px 0;color:#0f172a;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -86,7 +97,6 @@ export async function sendVerificationOtpEmail({
       html,
     },
   });
-
   const receipt = await transport.send(message);
   if (!receipt.successful) {
     throw new Error(

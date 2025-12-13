@@ -6,9 +6,8 @@ import { prisma } from "@hebo/database/client";
 
 import { getSecret } from "../utils/secrets";
 import { sendVerificationOtpEmail } from "./email/send-verification-otp";
-import { authBaseUrl, isAuthEnabled, trustedOrigins } from "./env";
+import { authBaseUrl, isRemote, trustedOrigins } from "./env";
 
-const isRemote = process.env.IS_REMOTE === "true";
 // Set to the eTLD+1 (e.g., "hebo.ai") so auth cookies flow to api/gateway.
 const cookieDomain = isRemote ? "hebo.ai" : undefined;
 
@@ -31,16 +30,16 @@ export const auth = betterAuth({
   socialProviders: {
     google: {
       prompt: "select_account",
-      clientId: await getSecret("GoogleClientId", isAuthEnabled),
-      clientSecret: await getSecret("GoogleClientSecret", isAuthEnabled),
+      clientId: await getSecret("GoogleClientId", false),
+      clientSecret: await getSecret("GoogleClientSecret", false),
     },
     github: {
-      clientId: await getSecret("GithubClientId", isAuthEnabled),
-      clientSecret: await getSecret("GithubClientSecret", isAuthEnabled),
+      clientId: await getSecret("GithubClientId", false),
+      clientSecret: await getSecret("GithubClientSecret", false),
     },
     microsoft: {
-      clientId: await getSecret("MicrosoftClientId", isAuthEnabled),
-      clientSecret: await getSecret("MicrosoftClientSecret", isAuthEnabled),
+      clientId: await getSecret("MicrosoftClientId", false),
+      clientSecret: await getSecret("MicrosoftClientSecret", false),
     },
   },
   plugins: [
@@ -58,5 +57,5 @@ export const auth = betterAuth({
     }),
   ],
   trustedOrigins,
-  secret: await getSecret("AuthSecret", isAuthEnabled),
+  secret: await getSecret("AuthSecret", false),
 });
