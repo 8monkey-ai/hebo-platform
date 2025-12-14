@@ -1,7 +1,7 @@
 import { treaty } from "@elysiajs/eden";
 import ky, { HTTPError } from "ky";
 
-import { isAuthEnabled, isDevLocal } from "~console/lib/env";
+import { isDevLocal } from "~console/lib/env";
 
 import type { Api } from "~api";
 import type { Gateway } from "~gateway";
@@ -10,9 +10,7 @@ export const apiUrl = isDevLocal
   ? "http://localhost:5173/api"
   : import.meta.env.VITE_API_URL || "http://localhost:3001";
 
-export const authUrl = isAuthEnabled
-  ? import.meta.env.VITE_AUTH_URL || "http://localhost:3000"
-  : undefined;
+export const authUrl = import.meta.env.VITE_AUTH_URL || "http://localhost:3000";
 
 export const gatewayUrl = isDevLocal
   ? "http://localhost:5173/gateway"
