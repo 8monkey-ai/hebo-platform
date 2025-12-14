@@ -18,6 +18,7 @@ import x from "./assets/x.svg";
 import { CodeBlock, CodeGroup } from "./components/code";
 import { CopyButton } from "./components/copy-button";
 import { Field, FieldContent, FieldLabel } from "./components/field";
+import { FontSwitcher } from "./components/font-switcher";
 import { RadioGroup, RadioGroupItem } from "./components/radio-group";
 import {
   Select,
@@ -91,6 +92,7 @@ export function Page() {
               hebo.ai
             </a>
           </div>
+          <FontSwitcher />
           <div className="flex flex-row items-center gap-6">
             <a
               href="https://x.com/heboai"
