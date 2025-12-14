@@ -3,24 +3,69 @@ import {
   CalendarClock,
   ExternalLinkIcon,
   Tally5,
-  Wrench,
 } from "lucide-react";
 
 import { Badge } from "./components/badge";
 import { Button } from "./components/button";
+import { CodeBlock, CodeGroup } from "./components/code";
 import { CopyButton } from "./components/copy-button";
-import { FontSwitcher } from "./components/font-switcher";
+import { Field, FieldContent, FieldLabel } from "./components/field";
 import { Discord, Github, Reddit, X } from "./components/icons";
+import { RadioGroup, RadioGroupItem } from "./components/radio-group";
 import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "./components/select";
+import { TabsContent, TabsList, TabsTrigger } from "./components/tabs";
 
 import "./global.css";
 import logo from "./logo.png";
+
+const CODE_SNIPPET = `import { experimental_createMCPClient as createMCPClient } from '@ai-sdk/mcp';
+
+const mcpClient = await createMCPClient({
+  transport: {
+    type: 'http',
+    url: 'https://mcp.hebo.ai/aikit/',
+  },
+}); 
+
+const { counting_letters } = await loadMcpTools();
+
+const result = await streamText({
+  model: "openai/gpt-oss-20b",
+  tools: { counting_letters },
+  prompt: "How many r's in Strawberry?",
+  onFinish: async () => {
+    await mcpClient.close();
+  },
+});`;
+
+const SCHEMA = `{
+  "name": "count_letters",
+  "description": "Counts occurrences of specific letters in a given word",
+  "inputSchema": {
+      "type": "object",
+      "properties": {
+          "word": {
+              "description": "The word to analyze",
+              "type": "string"
+          },
+          "letters": {
+              "description": "The letters to count (e.g., 'aeiou' for vowels)",
+              "type": "string"
+          }
+      },
+      "required": [
+          "word",
+          "letters"
+      ]
+  }
+}`;
 
 export function Page() {
   return (
@@ -42,7 +87,6 @@ export function Page() {
               hebo.ai
             </a>
           </div>
-          <FontSwitcher />
           <div className="flex flex-row items-center gap-6">
             <a
               href="https://x.com/heboai"
@@ -88,12 +132,12 @@ export function Page() {
         >
           <img src={logo} alt="MCP Hero" className="mx-auto size-42" />
           <h1 className="relative mx-auto w-fit text-4xl font-semibold">
-            Ready-to-use MCP Servers
+            Ready-to-use <span className="text-nowrap">MCP Servers</span>
             <Badge className="absolute rotate-10 bg-lime-600 text-base text-white sm:-top-3 sm:-right-8 sm:p-2.5">
               FREE
             </Badge>
           </h1>
-          <p className="max-w-3xl text-sm sm:text-base">
+          <p className="max-w-2xl text-sm sm:text-base">
             When Agents Struggle, MCP Solves It — Counting, Dates, Units, and
             More. Experiment freely. Deploy reliably. We host for you.
           </p>
@@ -110,19 +154,19 @@ export function Page() {
             Discover available toolkits
           </h2>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="bg-secondary flex flex-col justify-center gap-2 rounded-md p-4 text-sm hover:bg-slate-100">
+            <div className="bg-secondary flex flex-col gap-2 rounded-md p-4 text-sm hover:bg-slate-100">
               <a href="#code-samples" className="contents">
                 <div className="flex flex-row items-center gap-1 font-semibold">
                   <Tally5 />
                   Counting
                   <Button variant="outline" size="sm" className="ml-auto">
-                    Usage
+                    Connect
                   </Button>
                 </div>
                 <div>How many r’s are there in “Strawberry”?</div>
               </a>
             </div>
-            <div className="bg-secondary flex flex-col justify-center gap-2 rounded-md p-4 text-sm hover:bg-slate-100">
+            <div className="bg-secondary flex flex-col gap-2 rounded-md p-4 text-sm hover:bg-slate-100">
               <div className="flex flex-row items-center gap-1 font-semibold">
                 <CalendarClock />
                 Date Time
@@ -136,20 +180,20 @@ export function Page() {
               </div>
               <div>Convert dates and times into specific time zones</div>
             </div>
-            <div className="bg-secondary flex flex-col justify-center gap-2 rounded-md p-4 text-sm hover:bg-slate-100">
+            <div className="bg-secondary flex flex-col gap-2 rounded-md p-4 text-sm hover:bg-slate-100">
               <a
                 href="#reddit"
                 className="contents"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <div className="mx-auto flex flex-row items-center gap-4">
+                <div className="m-auto flex w-full flex-row items-center justify-between gap-4">
                   <Reddit size={48} />
                   <div>
                     <div className="font-semibold">What do you need?</div>
                     <div>Request new toolkits</div>
                   </div>
-                  <ExternalLinkIcon />
+                  <ExternalLinkIcon className="m-2 ml-auto" />
                 </div>
               </a>
             </div>
@@ -163,7 +207,7 @@ export function Page() {
 
         <div
           id="code-samples"
-          className="bg-secondary grid w-full grid-cols-[38fr_62fr] gap-8 rounded-md p-4"
+          className="bg-secondary flex w-full flex-col gap-4 rounded-md p-4 sm:grid sm:grid-cols-[38fr_62fr] sm:gap-8"
         >
           <div className="flex min-w-0 flex-col gap-4">
             <h2 className="text-xl font-semibold ">
@@ -171,27 +215,54 @@ export function Page() {
             </h2>
             <Select defaultValue="Counting">
               <SelectTrigger className="bg-background w-full">
-                <Wrench /> <SelectValue />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Counting">Counting</SelectItem>
+                <SelectSeparator />
+                <SelectItem disabled={true}>More coming soon …</SelectItem>
               </SelectContent>
             </Select>
-            <div className="flex flex-col gap-2 rounded-md border p-2 text-sm">
-              <div className="font-semibold">Count Letters</div>
-              <div className="truncate">
-                Counts occurrences of specific letters in a given word
-              </div>
-            </div>
+            <RadioGroup defaultValue="count_letters">
+              <FieldLabel htmlFor="count_letters">
+                <Field orientation="horizontal">
+                  <FieldContent>
+                    <div className="font-semibold">Count Letters</div>
+                    <div className="">
+                      Counts occurrences of specific letters in a given word
+                    </div>
+                  </FieldContent>
+                  <RadioGroupItem value="count_letters" id="count_letters" />
+                </Field>
+              </FieldLabel>
+              <FieldLabel className="border-dashed">
+                <Field>
+                  <div className="text-muted-foreground">
+                    More coming soon …
+                  </div>
+                </Field>
+              </FieldLabel>
+            </RadioGroup>
           </div>
-          <div className="bg-background flex h-64 w-full items-center justify-center rounded-md">
-            <div className="text-muted-foreground">Code Sample</div>
+          <div className="flex h-84 min-w-0">
+            <CodeGroup defaultValue="vercel">
+              <TabsList>
+                <TabsTrigger value="vercel">Vercel AI SDK</TabsTrigger>
+                <TabsTrigger value="schema">Schema</TabsTrigger>
+              </TabsList>
+              <TabsContent value="vercel">
+                <CodeBlock>{CODE_SNIPPET}</CodeBlock>
+              </TabsContent>
+              <TabsContent value="schema">
+                <CodeBlock>{SCHEMA}</CodeBlock>
+              </TabsContent>
+            </CodeGroup>
           </div>
         </div>
       </main>
 
-      <footer className="flex flex-wrap justify-center gap-1 text-xs sm:text-sm">
-        <div className="flex gap-1 whitespace-nowrap">
+      <footer className="flex flex-wrap justify-center gap-2 text-xs sm:text-sm">
+        <div className="flex items-center gap-1 whitespace-nowrap">
           <img
             src="https://hebo.ai/icon.png"
             alt="Hebo Logo"
@@ -200,7 +271,7 @@ export function Page() {
           <span className="font-semibold"> hebo.ai</span>
           <span>is designed, built and backed by</span>
         </div>
-        <div className="flex gap-1 whitespace-nowrap">
+        <div className="flex items-center gap-1 whitespace-nowrap">
           <img
             src="https://8monkey.ai/icon.png"
             alt="8monkey Logo"

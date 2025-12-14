@@ -22,10 +22,10 @@ export function CopyButton({
   const [hasCopied, setHasCopied] = React.useState(false);
 
   React.useEffect(() => {
-    setTimeout(() => {
-      setHasCopied(false);
-    }, 2000);
-  }, []);
+    if (!hasCopied) return;
+    const timeout = setTimeout(() => setHasCopied(false), 2000);
+    return () => clearTimeout(timeout);
+  }, [hasCopied]);
 
   return (
     <Tooltip>
@@ -33,8 +33,8 @@ export function CopyButton({
         data-slot="copy-button"
         data-copied={hasCopied}
         className={cn(
-          "size-4.5 [&_svg:not([class*='size-'])]:size-4.5",
-          "bg-code z-10 hover:opacity-100 focus-visible:opacity-100",
+          "[&_svg:not([class*='size-'])]:size-4.5",
+          "opacity-70 hover:opacity-100",
           className,
         )}
         onClick={() => {
@@ -43,7 +43,7 @@ export function CopyButton({
         }}
       >
         <span className="sr-only">Copy</span>
-        {hasCopied ? <Check /> : <Copy />}
+        {hasCopied ? <Check className="text-green-800" /> : <Copy />}
       </TooltipTrigger>
       <TooltipContent>{hasCopied ? "Copied" : tooltip}</TooltipContent>
     </Tooltip>

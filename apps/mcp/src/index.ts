@@ -2,7 +2,7 @@ import { logger } from "@bogeychan/elysia-logger";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import Elysia from "elysia";
 
-import hello from "src/aikit/hello.txt";
+import hello from "src/aikit/hello.md" with { type: "text" };
 import index from "src/ui/index.html";
 
 import { countLetterTool } from "./aikit/count-letter.js";
