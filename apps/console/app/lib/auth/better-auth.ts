@@ -32,7 +32,8 @@ export const authService: AuthService = {
   },
 
   async generateApiKey(name, expiresIn = DEFAULT_EXPIRATION_SECONDS) {
-    const { data } = await authClient.apiKey.create({ name, expiresIn });
+    const { data, error } = await authClient.apiKey.create({ name, expiresIn });
+    if (error) throw new Error(error.message);
     return data as ApiKey;
   },
 
