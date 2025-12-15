@@ -75,8 +75,8 @@ export default function MCP() {
         </figure>
 
         <div id="message" className="flex flex-col gap-4">
-          <div className="text-4xl font-light">Hebo Evals</div>
-          <div className="max-w-md text-5xl font-medium">
+          <div className="text-3xl font-light sm:text-4xl">Hebo Evals</div>
+          <div className="max-w-md text-4xl font-medium sm:text-5xl">
             Evaluate{" "}
             <span className="underline decoration-dotted">Prompts</span> /{" "}
             <span className="underline decoration-dotted">LLMs</span> /{" "}
