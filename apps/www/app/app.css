@@ -126,7 +126,9 @@
   }
 
   body {
-    background: var(--color-background-gradient);
+    background:
+      var(--color-background-gradient) 0 0 / 100% 100vh no-repeat,
+      #fefce8;
     @apply font-sans text-foreground;
   }
 

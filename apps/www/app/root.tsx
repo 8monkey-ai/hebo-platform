@@ -27,6 +27,17 @@ export const links: Route.LinksFunction = () => [
   },
 ];
 
+export function meta() {
+  return [
+    { title: "Hebo AI - The fastest way to build conversational agents" },
+    {
+      name: "description",
+      content:
+        "Hebo is the fastest way to build and scale high-quality conversational agents. ✔️ All SOTA LLMs ✔️ RAG, Tools & Memory ✔️ Evaluations & Observability",
+    },
+  ];
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
@@ -73,14 +84,15 @@ export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   }
 
   return (
-    <main className="container mx-auto p-4 pt-16">
-      <h1>{message}</h1>
+    <div className="container mx-auto p-4 py-16 text-center">
+      <div className="text-6xl">🙉</div>
+      <h1 className="text-8xl">{message}</h1>
       <p>{details}</p>
       {stack && (
         <pre className="w-full overflow-x-auto p-4">
           <code>{stack}</code>
         </pre>
       )}
-    </main>
+    </div>
   );
 }
