@@ -115,7 +115,8 @@ export default function MCP() {
         </h2>
         <p>
           We explored existing evaluation solutions — and while powerful, most
-          felt <strong>built for developers first</strong>.
+          felt <strong>built for developers first</strong>. But who ultimately
+          owns the outcomes? The business does.
         </p>
 
         <p>
