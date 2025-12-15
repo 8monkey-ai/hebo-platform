@@ -19,11 +19,31 @@ export default function Home() {
           to develop AI agents rapidly and scale them with confidence.
         </p>
         <div className="mx-auto flex gap-4">
-          <Button className="text-medium h-10 bg-indigo-900 px-5 text-white hover:bg-indigo-800">
-            <a href="https://console.hebo.ai/">Get Started</a>
+          <Button
+            render={
+              // eslint-disable-next-line jsx-a11y/anchor-has-content
+              <a
+                href="https://console.hebo.ai/"
+                target="_blank"
+                rel="noreferrer"
+              />
+            }
+            className="text-medium h-10 bg-indigo-900 px-5 text-white hover:bg-indigo-800"
+          >
+            Get Started
           </Button>
-          <Button className="h-10 rounded-xl border-2 border-solid border-indigo-800 bg-stone-100 px-5 text-base font-semibold text-stone-900 hover:bg-stone-200">
-            <a href="https://docs.hebo.ai/">Docs</a>
+          <Button
+            render={
+              // eslint-disable-next-line jsx-a11y/anchor-has-content
+              <a
+                href="https://docs.hebo.ai/"
+                target="_blank"
+                rel="noreferrer"
+              />
+            }
+            className="h-10 rounded-xl border-2 border-solid border-indigo-800 bg-stone-100 px-5 text-base font-semibold text-stone-900 hover:bg-stone-200"
+          >
+            Docs
           </Button>
         </div>
       </div>
@@ -48,7 +68,7 @@ export default function Home() {
           </li>
           <li>
             ✔️ A toolchain for Evaluations &amp; Observability enables tech and
-            business teams iterate quickly on agent capabilities.
+            business teams to iterate quickly on agent capabilities.
           </li>
         </ul>
 

@@ -87,10 +87,14 @@ export default function MCP() {
         </ul>
         <div className="flex gap-4">
           <Button className="text-medium h-10 bg-indigo-900 px-5 text-white hover:bg-indigo-800">
-            <a href="https://docs.hebo.ai/">Get Started</a>
+            <a href="https://docs.hebo.ai/" target="_blank" rel="noreferrer">
+              Get Started
+            </a>
           </Button>
           <Button className="h-10 rounded-xl border-2 border-solid border-indigo-800 bg-stone-100 px-5 text-base font-semibold text-stone-900 hover:bg-stone-200">
-            <a href="https://docs.hebo.ai/">Docs</a>
+            <a href="https://docs.hebo.ai/" target="_blank" rel="noreferrer">
+              Docs
+            </a>
           </Button>
         </div>
         <pre className="text-medium flex items-center gap-2">

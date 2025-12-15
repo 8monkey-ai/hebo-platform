@@ -5,6 +5,7 @@ import {
   Tally5,
 } from "lucide-react";
 
+import { Button } from "~www/components/button";
 import { CodeBlock, CodeGroup } from "~www/components/code";
 import { CopyButton } from "~www/components/copy-button";
 import { Field, FieldLabel, FieldContent } from "~www/components/field";
@@ -40,7 +41,7 @@ const mcpClient = await createMCPClient({
   },
 }); 
 
-const { counting_letters } = await loadMcpTools();
+const { counting_letters } = await mcpClient.tools();
 
 const result = await streamText({
   model: "openai/gpt-oss-20b",
@@ -92,7 +93,7 @@ export default function MCP() {
           More. Experiment freely. Deploy reliably. We host for you.
         </p>
         <p className="mx-auto flex flex-row items-center gap-2 font-semibold text-indigo-800">
-          <a href="aikit/" target="_blank" rel="noopener noreferrer">
+          <a href="https://mcp.hebo.ai/" target="_blank" rel="noreferrer">
             https://mcp.hebo.ai/aikit/
           </a>
           <CopyButton value="https://mcp.hebo.ai/aikit/" />
@@ -109,12 +110,12 @@ export default function MCP() {
               <div className="flex flex-row items-center gap-1 font-semibold">
                 <Tally5 />
                 Counting
-                <a
-                  href="#code-samples"
-                  className="ml-auto rounded-md border border-indigo-800 px-3 py-1 text-sm font-semibold text-indigo-800 hover:bg-indigo-100"
+                <Button
+                  variant="outline"
+                  className="ml-auto border-indigo-800 px-3 text-indigo-800"
                 >
                   Connect
-                </a>
+                </Button>
               </div>
               <div>How many r’s are there in “Strawberry”?</div>
             </a>
@@ -130,6 +131,7 @@ export default function MCP() {
             <div>Convert dates and times into specific time zones</div>
           </div>
           <div className="bg-secondary flex flex-col gap-2 rounded-md p-4 text-sm hover:bg-slate-100">
+            {/* FUTURE: create reddit thread */}
             <a href="#reddit" className="contents">
               <div className="m-auto flex w-full flex-row items-center justify-between gap-4">
                 <Reddit size={48} />

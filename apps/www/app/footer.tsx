@@ -1,4 +1,5 @@
 import { Brain, Gauge, SquareFunction } from "lucide-react";
+import { Link } from "react-router";
 
 export default function Footer() {
   return (
@@ -21,16 +22,16 @@ export default function Footer() {
                 <a
                   href="https://console.hebo.ai"
                   target="_blank"
-                  rel="noopener noreferrer"
                   className="bg-primary hover:bg-primary/70 rounded-xl px-4 py-1 font-medium"
+                  rel="noreferrer"
                 >
                   Try Hebo Cloud
                 </a>
                 <a
                   href="https://console.hebo.ai"
                   target="_blank"
-                  rel="noopener noreferrer"
                   className="font-semibold hover:underline"
+                  rel="noreferrer"
                 >
                   Start for free →
                 </a>
@@ -43,7 +44,7 @@ export default function Footer() {
                 className="contents"
                 href="https://console.hebo.ai"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noreferrer"
               >
                 <Brain className="size-10" />
                 <div>
@@ -55,12 +56,7 @@ export default function Footer() {
               </a>
             </div>
             <div className="flex gap-2 rounded-xl bg-white/70 p-4 hover:bg-white sm:flex-col">
-              <a
-                className="contents"
-                href="/mcp"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <Link className="contents" to="/mcp">
                 <SquareFunction className="size-10" />
                 <div>
                   <div className="text-sm font-semibold">MCP</div>
@@ -68,15 +64,10 @@ export default function Footer() {
                     Ready-to-use MCP Servers
                   </div>
                 </div>
-              </a>
+              </Link>
             </div>
             <div className="flex gap-2 rounded-xl bg-white/70 p-4 hover:bg-white sm:flex-col">
-              <a
-                className="contents"
-                href="/evals"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <Link className="contents" to="/evals">
                 <Gauge className="size-10" />
                 <div>
                   <div className="text-sm font-semibold">Evals</div>
@@ -84,7 +75,7 @@ export default function Footer() {
                     Write evals in Markdown
                   </div>
                 </div>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
