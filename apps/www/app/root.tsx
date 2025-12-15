@@ -29,7 +29,7 @@ export const links: Route.LinksFunction = () => [
 
 export function meta() {
   return [
-    { title: "Hebo AI - The fastest way to build conversational agents" },
+    { title: "Hebo AI - Build agents that actually work" },
     {
       name: "description",
       content:

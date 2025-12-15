@@ -1,4 +1,5 @@
 import { Button } from "~www/components/button";
+import { Github } from "~www/components/icons";
 
 export default function Home() {
   return (
@@ -11,9 +12,8 @@ export default function Home() {
         <h1 className="relative mx-auto w-fit text-4xl font-semibold">
           Build agents that actually work
         </h1>
-        <p className="max-w-2xl text-sm sm:text-base">
+        <p className="mx-auto max-w-156 text-sm sm:text-base">
           A low-code platform that brings development & business teams together.
-          <br />
           Rapidly develop & iterate on AI agents - then scale with confidence.
         </p>
         <div className="mx-auto flex gap-4">
@@ -43,6 +43,17 @@ export default function Home() {
           >
             Docs
           </Button>
+        </div>
+        <div className="mx-auto flex flex-row gap-2 text-sm">
+          <Github size={18} />
+          <a
+            href="https://github.com/8monkey-ai/hebo/"
+            target="_blank"
+            rel="noreferrer"
+            className="hover:underline"
+          >
+            https://github.com/8monkey-ai/hebo/
+          </a>
         </div>
       </div>
 
