@@ -1,6 +1,5 @@
 import { Loader2Icon } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router";
 
 import { Button } from "@hebo/shared-ui/components/Button";
 import { Label } from "@hebo/shared-ui/components/Label";
@@ -10,7 +9,6 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@hebo/shared-ui/component
 import { authService } from "~console/lib/auth";
 
 export function MagicLinkSignIn() {
-  const navigate = useNavigate();
   const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [linkSent, setLinkSent] = useState(false);
@@ -61,7 +59,6 @@ export function MagicLinkSignIn() {
           setLoading(true);
           try {
             await authService.signInWithMagicLink(otp, email);
-            navigate("/", { replace: true });
           } catch (error) {
             error instanceof Error && setError(error.message);
           } finally {

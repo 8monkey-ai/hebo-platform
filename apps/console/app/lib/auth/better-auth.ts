@@ -11,7 +11,8 @@ import {
   type User,
 } from "./types";
 
-const appRedirectURL = `${globalThis.location.origin}/`;
+const appRedirectPath = "/";
+const appRedirectURL = `${globalThis.location.origin}${appRedirectPath}`;
 
 const authClient = createAuthClient({
   baseURL: new URL("/v1/api", authUrl).toString(),
@@ -78,6 +79,10 @@ export const authService: AuthService = {
       email: emailValue,
       otp: token,
     });
+
+    // FUTURE: Replace this manual redirect once Better Auth supports callbackURL/redirect for email OTP sign-in.
+    // Tracking: https://github.com/better-auth/better-auth/issues/5596
+    globalThis.location.replace(appRedirectPath);
   },
 
   async signOut() {
