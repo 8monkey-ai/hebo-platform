@@ -5,7 +5,7 @@ import {
 } from "./gemini";
 import { GptOss120bAdapter, GptOss20bAdapter } from "./gpt";
 
-import type { ModelAdapter } from "./models";
+import type { ModelAdapter } from "./model";
 
 export class ModelAdapterFactory {
   private static readonly MODEL_ADAPTER_MAP: Record<

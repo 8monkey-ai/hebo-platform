@@ -1,6 +1,4 @@
-import {
-  ModelAdapterBase,
-} from "./models";
+import { ModelAdapterBase } from "./model";
 
 export class CohereEmbedV4Adapter extends ModelAdapterBase {
   getModelType(): string {
