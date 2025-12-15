@@ -5,7 +5,7 @@ import { authUrl } from "~console/lib/service";
 import { shellStore } from "~console/lib/shell";
 
 import {
-  DEFAULT_EXPIRATION_SECONDS,
+  DEFAULT_EXPIRATION_MS,
   type ApiKey,
   type AuthService,
   type User,
@@ -31,7 +31,9 @@ export const authService: AuthService = {
     shellStore.user = user;
   },
 
-  async generateApiKey(name, expiresIn = DEFAULT_EXPIRATION_SECONDS) {
+  async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
+    // Better Auth expects seconds.
+    const expiresIn = Math.max(1, Math.floor(expiresInMs / 1000));
     const { data, error } = await authClient.apiKey.create({ name, expiresIn });
     if (error) throw new Error(error.message);
     return data as ApiKey;

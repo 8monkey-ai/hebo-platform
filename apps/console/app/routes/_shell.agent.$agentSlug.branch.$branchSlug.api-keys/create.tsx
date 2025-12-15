@@ -25,14 +25,14 @@ import { useFormErrorToast } from "~console/lib/errors";
 import { Info } from "lucide-react";
 
 
-const DAY_IN_SECONDS = 24 * 60 * 60;
+const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 export const API_KEY_EXPIRATION_OPTIONS = [
-  { label: "1 day", value: "1d", durationSeconds: 1 * DAY_IN_SECONDS },
-  { label: "7 days", value: "7d", durationSeconds: 7 * DAY_IN_SECONDS },
-  { label: "30 days", value: "30d", durationSeconds: 30 * DAY_IN_SECONDS },
-  { label: "90 days", value: "90d", durationSeconds: 90 * DAY_IN_SECONDS },
-  { label: "1 year", value: "365d", durationSeconds: 365 * DAY_IN_SECONDS },
+  { label: "1 day", value: "1d", durationMs: 1 * DAY_IN_MS },
+  { label: "7 days", value: "7d", durationMs: 7 * DAY_IN_MS },
+  { label: "30 days", value: "30d", durationMs: 30 * DAY_IN_MS },
+  { label: "90 days", value: "90d", durationMs: 90 * DAY_IN_MS },
+  { label: "1 year", value: "365d", durationMs: 365 * DAY_IN_MS },
 ] as const;
 
 export const ApiKeyCreateSchema = z.object({

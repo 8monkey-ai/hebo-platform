@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { shellStore } from "~console/lib/shell";
 
-import { DEFAULT_EXPIRATION_SECONDS, type AuthService } from "./types";
+import { DEFAULT_EXPIRATION_MS, type AuthService } from "./types";
 
 const apiKeys = new Collection({
   schema: z.object({
@@ -26,13 +26,13 @@ export const authService = {
     };
   },
 
-  async generateApiKey(name, expiresInSeconds = DEFAULT_EXPIRATION_SECONDS) {
+  async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
     const now = new Date();
     return await apiKeys.create({
       name,
       key: crypto.randomUUID(),
       createdAt: now,
-      expiresAt: new Date(now.getTime() + expiresInSeconds * 1000),
+      expiresAt: new Date(now.getTime() + expiresInMs),
     });
   },
 
