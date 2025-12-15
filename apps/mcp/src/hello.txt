@@ -1,0 +1,22 @@
+🐵 Hebo MCP server says hello!
+
+
+Discover available tools
+========================
+
+~~~
+curl -X POST "https://mcp.hebo.ai/aikit/" \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/list",
+    "params": {},
+    "id": 1
+  }'
+~~~
+
+Learn more at: https://hebo.ai/mcp
+
+
+(hebo.ai is designed, built and backed by Infinite Monkey AI)
