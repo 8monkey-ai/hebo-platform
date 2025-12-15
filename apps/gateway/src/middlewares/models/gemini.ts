@@ -1,16 +1,19 @@
-import { ModelAdapterBase, type OpenAICompatibleOptions } from "./model";
+import type {
+  OpenAICompatibleOptions,
+  OpenAICompatibleReasoning,
+} from "~gateway/utils/openai-compatible-api-schemas";
 
-import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible-api-schemas";
+import { ModelAdapterBase } from "./model";
 
 export abstract class GeminiModelAdapter extends ModelAdapterBase {
   getModality(): "chat" | "embedding" {
     return "chat";
   }
 
-  transformConfigs(options: OpenAICompatibleOptions): Record<string, any> {
-    const config: Record<string, any> = {};
+  transformConfigs(options?: OpenAICompatibleOptions): Record<string, unknown> {
+    const config: Record<string, unknown> = {};
 
-    if (options.reasoning) {
+    if (options?.reasoning) {
       const thinkingConfig = this.transformReasoning(options.reasoning);
       if (thinkingConfig) {
         config.thinkingConfig = thinkingConfig;
@@ -74,7 +77,7 @@ export class Gemini25FlashPreviewAdapter extends GeminiModelAdapter {
   }
 
   getCreatedAt(): number {
-    return 1764888221;
+    return 1_764_888_221;
   }
 
   getMonthlyFreeTokens(): number {
@@ -96,7 +99,7 @@ export class Gemini25FlashLitePreviewAdapter extends GeminiModelAdapter {
   }
 
   getCreatedAt(): number {
-    return 1764888221;
+    return 1_764_888_221;
   }
 
   getMonthlyFreeTokens(): number {

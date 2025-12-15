@@ -45,8 +45,8 @@ export class BedrockProviderAdapter
     return newObj;
   }
 
-  transformConfigs(modelConfig: Record<string, any>): Record<string, any> {
-    if (Object.keys(modelConfig).length === 0) return {};
+  transformConfigs(modelConfig?: Record<string, any>): Record<string, any> {
+    if (!modelConfig || Object.keys(modelConfig).length === 0) return {};
 
     const snakeCaseConfig =
       BedrockProviderAdapter.convertObjectKeysToSnakeCase(modelConfig);

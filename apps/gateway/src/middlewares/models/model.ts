@@ -1,4 +1,4 @@
-import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible-api-schemas";
+import type { OpenAICompatibleOptions } from "~gateway/utils/openai-compatible-api-schemas";
 
 export interface ModelAdapter {
   getModelType(): string;
@@ -7,7 +7,7 @@ export interface ModelAdapter {
   getMonthlyFreeTokens(): number;
   getOwner(): string;
   getCreatedAt(): number;
-  transformConfigs(options: OpenAICompatibleOptions): Record<string, any>;
+  transformConfigs(options?: OpenAICompatibleOptions): Record<string, unknown>;
 }
 
 export abstract class ModelAdapterBase implements ModelAdapter {
@@ -24,11 +24,6 @@ export abstract class ModelAdapterBase implements ModelAdapter {
   abstract getCreatedAt(): number;
 
   abstract transformConfigs(
-    options: OpenAICompatibleOptions,
-  ): Record<string, any>;
+    options?: OpenAICompatibleOptions,
+  ): Record<string, unknown>;
 }
-
-export type OpenAICompatibleOptions = {
-  reasoning?: OpenAICompatibleReasoning;
-  [key: string]: any;
-};

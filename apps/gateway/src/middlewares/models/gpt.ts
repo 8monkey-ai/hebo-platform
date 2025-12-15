@@ -1,16 +1,19 @@
-import { ModelAdapterBase, type OpenAICompatibleOptions } from "./model";
+import type {
+  OpenAICompatibleOptions,
+  OpenAICompatibleReasoning,
+} from "~gateway/utils/openai-compatible-api-schemas";
 
-import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible-api-schemas";
+import { ModelAdapterBase } from "./model";
 
 export abstract class GptModelAdapter extends ModelAdapterBase {
   getModality(): "chat" | "embedding" {
     return "chat";
   }
 
-  transformConfigs(options: OpenAICompatibleOptions): Record<string, any> {
-    const config: Record<string, any> = {};
+  transformConfigs(options?: OpenAICompatibleOptions): Record<string, unknown> {
+    const config: Record<string, unknown> = {};
 
-    if (options.reasoning) {
+    if (options?.reasoning) {
       const reasoningConfig = this.transformReasoning(options.reasoning);
       if (reasoningConfig) {
         Object.assign(config, reasoningConfig);
@@ -58,7 +61,7 @@ export class GptOss120bAdapter extends GptModelAdapter {
   }
 
   getCreatedAt(): number {
-    return 1764888221;
+    return 1_764_888_221;
   }
 
   getMonthlyFreeTokens(): number {
@@ -80,7 +83,7 @@ export class GptOss20bAdapter extends GptModelAdapter {
   }
 
   getCreatedAt(): number {
-    return 1764888221;
+    return 1_764_888_221;
   }
 
   getMonthlyFreeTokens(): number {

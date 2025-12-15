@@ -18,10 +18,14 @@ export class CohereEmbedV4Adapter extends ModelAdapterBase {
   }
 
   getCreatedAt(): number {
-    return 1764888221;
+    return 1_764_888_221;
   }
 
   getMonthlyFreeTokens(): number {
     return 0;
+  }
+
+  transformConfigs(): Record<string, unknown> {
+    return {};
   }
 }

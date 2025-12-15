@@ -23,9 +23,9 @@ export class VertexProviderAdapter
     super("vertex", modelType);
   }
 
-  transformConfigs(modelConfig: Record<string, any>): Record<string, any> {
+  transformConfigs(modelConfig?: Record<string, any>): Record<string, any> {
     return {
-      google: modelConfig,
+      google: modelConfig || {},
     };
   }
 
