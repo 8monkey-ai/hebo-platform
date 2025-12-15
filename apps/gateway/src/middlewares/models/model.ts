@@ -4,7 +4,9 @@ export interface ModelAdapter {
   getModelType(): string;
   getModality(): "chat" | "embedding";
   getDisplayName(): string;
-  getRateLimit(): number;
+  getMonthlyFreeTokens(): number;
+  getOwner(): string;
+  getCreatedAt(): number;
   transformConfigs(options: OpenAICompatibleOptions): Record<string, any>;
 }
 
@@ -15,9 +17,11 @@ export abstract class ModelAdapterBase implements ModelAdapter {
 
   abstract getDisplayName(): string;
 
-  getRateLimit(): number {
-    return 400_000_000;
-  }
+  abstract getMonthlyFreeTokens(): number;
+
+  abstract getOwner(): string;
+
+  abstract getCreatedAt(): number;
 
   abstract transformConfigs(
     options: OpenAICompatibleOptions,

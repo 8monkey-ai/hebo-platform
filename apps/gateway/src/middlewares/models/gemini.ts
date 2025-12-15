@@ -60,7 +60,7 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
   }
 }
 
-export class GeminiFlashPreviewAdapter extends GeminiModelAdapter {
+export class Gemini25FlashPreviewAdapter extends GeminiModelAdapter {
   getModelType(): string {
     return "google/gemini-2.5-flash-preview-09-2025";
   }
@@ -68,14 +68,38 @@ export class GeminiFlashPreviewAdapter extends GeminiModelAdapter {
   getDisplayName(): string {
     return "Gemini 2.5 Flash Preview (Sep 2025)";
   }
+
+  getOwner(): string {
+    return "google";
+  }
+
+  getCreatedAt(): number {
+    return 1764888221;
+  }
+
+  getMonthlyFreeTokens(): number {
+    return 0;
+  }
 }
 
-export class GeminiFlashLiteAdapter extends GeminiModelAdapter {
+export class Gemini25FlashLitePreviewAdapter extends GeminiModelAdapter {
   getModelType(): string {
     return "google/gemini-2.5-flash-lite-preview-09-2025";
   }
 
   getDisplayName(): string {
     return "Gemini 2.5 Flash Lite Preview (Sep 2025)";
+  }
+
+  getOwner(): string {
+    return "google";
+  }
+
+  getCreatedAt(): number {
+    return 1764888221;
+  }
+
+  getMonthlyFreeTokens(): number {
+    return 0;
   }
 }

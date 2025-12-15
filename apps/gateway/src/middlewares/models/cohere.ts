@@ -12,4 +12,16 @@ export class CohereEmbedV4Adapter extends ModelAdapterBase {
   getDisplayName(): string {
     return "Cohere Embed v4.0";
   }
+
+  getOwner(): string {
+    return "cohere";
+  }
+
+  getCreatedAt(): number {
+    return 1764888221;
+  }
+
+  getMonthlyFreeTokens(): number {
+    return 0;
+  }
 }

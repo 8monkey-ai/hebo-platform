@@ -52,6 +52,18 @@ export class GptOss120bAdapter extends GptModelAdapter {
   getDisplayName(): string {
     return "OpenAI GPT OSS 120B";
   }
+
+  getOwner(): string {
+    return "openai";
+  }
+
+  getCreatedAt(): number {
+    return 1764888221;
+  }
+
+  getMonthlyFreeTokens(): number {
+    return 100_000_000;
+  }
 }
 
 export class GptOss20bAdapter extends GptModelAdapter {
@@ -61,5 +73,17 @@ export class GptOss20bAdapter extends GptModelAdapter {
 
   getDisplayName(): string {
     return "OpenAI GPT OSS 20B";
+  }
+
+  getOwner(): string {
+    return "openai";
+  }
+
+  getCreatedAt(): number {
+    return 1764888221;
+  }
+
+  getMonthlyFreeTokens(): number {
+    return 400_000_000;
   }
 }
