@@ -19,7 +19,7 @@ export default function Footer() {
               </p>
               <div className="flex flex-wrap items-center gap-3">
                 <a
-                  href="https://cloud.hebo.ai"
+                  href="https://console.hebo.ai"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-primary hover:bg-primary/70 rounded-xl px-4 py-1 font-medium"
@@ -27,7 +27,7 @@ export default function Footer() {
                   Try Hebo Cloud
                 </a>
                 <a
-                  href="https://cloud.hebo.ai"
+                  href="https://console.hebo.ai"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="font-semibold hover:underline"

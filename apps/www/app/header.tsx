@@ -42,7 +42,7 @@ export default function Header() {
             <Github size={18} />
           </a>
           <a
-            href="https://cloud.hebo.ai"
+            href="https://console.hebo.ai"
             target="_blank"
             rel="noopener noreferrer"
             className="rounded-2xl border-2 border-indigo-800 px-4 py-1 text-sm font-medium hover:bg-indigo-50"
