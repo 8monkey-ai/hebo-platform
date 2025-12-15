@@ -3,7 +3,7 @@ import { Brain, Gauge, SquareFunction } from "lucide-react";
 export default function Footer() {
   return (
     <footer className="flex flex-col gap-10">
-      <section className="border-border rounded-xl border bg-slate-100 p-6 ">
+      <section className="border-border mx-auto max-w-5xl rounded-xl border bg-slate-100 p-6 ">
         <div className="relative grid gap-8 sm:grid-cols-[1.5fr_1fr] sm:items-center">
           <div className="flex items-center gap-4">
             <img
