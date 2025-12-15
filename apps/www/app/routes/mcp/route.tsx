@@ -203,12 +203,13 @@ export default function MCP() {
       </div>
 
       <section className="mx-auto max-w-3xl space-y-2 text-base leading-relaxed font-normal">
-        <h2 className="text-xl font-semibold">Why we built mcp.hebo.ai</h2>
-        <p>We didn’t set out to build a platform.</p>
+        <h2 className="text-xl font-semibold">
+          Why we are building mcp.hebo.ai
+        </h2>
         <p>
           We were experimenting with agents and needed{" "}
-          <strong>something quick to test whether MCP actually works</strong>
-          —not in theory, but end-to-end, against a real server. Most MCP
+          <strong>something quick to test whether MCP actually works</strong>{" "}
+          —not only in theory, but end-to-end, against a real server. Most MCP
           servers we found lived on GitHub, which was great for learning, but
           meant <strong>self-hosting, wiring, and maintenance</strong> just to
           run an experiment.
@@ -220,7 +221,7 @@ export default function MCP() {
           problems, they <strong>need tools</strong>.
         </p>
         <p>
-          The MCP SDK didn’t make this easier. While it has{" "}
+          The official MCP SDK didn’t make this easier. While it has{" "}
           <strong>plenty of examples</strong>, they’re{" "}
           <strong>very low-level</strong> and often{" "}
           <strong>overly complicated</strong>, making it hard to see how
@@ -232,21 +233,43 @@ export default function MCP() {
             tools are just simple functions with a human readable description of
             their functionality
           </strong>
-          , which agents can use to decide when to call them.
+          , which agents can use to decide when to call them. And MCP is just a
+          way to access them remotely.
         </p>
         <p>
           So <strong>mcp.hebo.ai</strong> became our shortcut: a{" "}
           <strong>live MCP server</strong>, <strong>real tools</strong>, and a
           place to <strong>prove MCP works by actually using it</strong>. What
-          started as a test harness stuck around—because once the tools exist,
+          started as a test harness stuck around, because once the tools exist,
           you don’t want to rebuild them every time.
         </p>
         <p>
           We’ll <strong>keep adding tools over time</strong>, focusing on the
-          kinds of capabilities agents consistently struggle with.
+          kinds of capabilities agents consistently struggle with. Join us on
+          our journey via X (
+          <a
+            href="https://x.com/heboai"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Hebo on X"
+            className="text-nowrap underline underline-offset-2"
+          >
+            @heboai
+          </a>
+          ) or reach out to us on{" "}
+          <a
+            href="https://discord.com/invite/cCJtXZRU5p"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Join the Hebo Discord"
+            className="underline underline-offset-2"
+          >
+            Discord
+          </a>
+          .
         </p>
         <p>
-          <strong>mcp.hebo.ai</strong> exists so experimenting with MCP doesn’t
+          <strong>Hebo MCP</strong> exists so experimenting with MCP doesn’t
           start with <strong>infrastructure</strong>—and agents don’t have to
           pretend they can do everything.
         </p>

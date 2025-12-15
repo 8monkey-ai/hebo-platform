@@ -39,44 +39,44 @@ export default function Footer() {
             </div>
           </div>
           <div className="grid w-full gap-3 sm:grid-cols-3">
-            <div className="flex gap-2 rounded-xl bg-white/70 p-4 hover:bg-white sm:flex-col">
-              <a
-                className="contents"
-                href="https://console.hebo.ai"
-                target="_blank"
-                rel="noreferrer"
-              >
+            <a
+              className="contents"
+              href="https://console.hebo.ai"
+              target="_blank"
+              rel="noreferrer"
+            >
+              <div className="flex gap-2 rounded-xl bg-white/70 p-4 hover:bg-white sm:flex-col">
                 <Brain className="size-10" />
                 <div>
-                  <div className="text-sm font-semibold">Gateway</div>
+                  <div className="text-sm font-semibold">Gateway &gt;</div>
                   <div className="text-muted-foreground text-xs">
                     Instant access to SOTA models
                   </div>
                 </div>
-              </a>
-            </div>
-            <div className="flex gap-2 rounded-xl bg-white/70 p-4 hover:bg-white sm:flex-col">
-              <Link className="contents" to="/mcp">
+              </div>
+            </a>
+            <Link className="contents" to="/mcp">
+              <div className="flex gap-2 rounded-xl bg-white/70 p-4 hover:bg-white sm:flex-col">
                 <SquareFunction className="size-10" />
                 <div>
-                  <div className="text-sm font-semibold">MCP</div>
+                  <div className="text-sm font-semibold">MCP &gt;</div>
                   <div className="text-muted-foreground text-xs">
-                    Ready-to-use MCP Servers
+                    Ready-to-use tools via our hosted MCP
                   </div>
                 </div>
-              </Link>
-            </div>
-            <div className="flex gap-2 rounded-xl bg-white/70 p-4 hover:bg-white sm:flex-col">
-              <Link className="contents" to="/evals">
+              </div>
+            </Link>
+            <Link className="contents" to="/evals">
+              <div className="flex gap-2 rounded-xl bg-white/70 p-4 hover:bg-white sm:flex-col">
                 <Gauge className="size-10" />
                 <div>
-                  <div className="text-sm font-semibold">Evals</div>
+                  <div className="text-sm font-semibold">Evals &gt;</div>
                   <div className="text-muted-foreground text-xs">
-                    Write evals in Markdown
+                    Human-first evals, written in Markdown
                   </div>
                 </div>
-              </Link>
-            </div>
+              </div>
+            </Link>
           </div>
         </div>
       </section>

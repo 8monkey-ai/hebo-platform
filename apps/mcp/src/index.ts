@@ -18,7 +18,7 @@ mcpServer.registerTool(
 const createApp = () =>
   new Elysia()
     .use(logger({ level: LOG_LEVEL }))
-    .get("/", () => Bun.file("src/hello.txt").text())
+    .get("/", () => Bun.file("./hello.txt").text())
     .group("/aikit", (app) =>
       app.post("/", async ({ request, body }) =>
         createMcpHandler(mcpServer)(request, body),
