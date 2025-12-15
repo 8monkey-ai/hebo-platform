@@ -19,16 +19,16 @@ const MODEL_ADAPTER_MAP = {
 
 export type SupportedModelType = keyof typeof MODEL_ADAPTER_MAP;
 
-export class ModelAdapterFactory {
-  static getAdapter(modelType: SupportedModelType): ModelAdapter {
+export const ModelAdapterFactory = {
+  getAdapter(modelType: SupportedModelType): ModelAdapter {
     const factoryMethod = MODEL_ADAPTER_MAP[modelType];
     if (!factoryMethod) {
       throw new Error(`No model adapter found for model type: ${modelType}`);
     }
     return factoryMethod();
-  }
+  },
 
-  static getAllModels() {
+  getAllModels() {
     return Object.values(MODEL_ADAPTER_MAP).map((factory) => {
       const adapter = factory();
       return {
@@ -42,5 +42,5 @@ export class ModelAdapterFactory {
         },
       };
     });
-  }
-}
+  },
+};
