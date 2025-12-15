@@ -40,6 +40,7 @@ export default function Footer() {
           <div className="grid w-full gap-3 sm:grid-cols-3">
             <div className="flex gap-2 rounded-xl bg-white/70 p-4 hover:bg-white sm:flex-col">
               <a
+                className="contents"
                 href="https://console.hebo.ai"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -54,7 +55,12 @@ export default function Footer() {
               </a>
             </div>
             <div className="flex gap-2 rounded-xl bg-white/70 p-4 hover:bg-white sm:flex-col">
-              <a href="/mcp" target="_blank" rel="noopener noreferrer">
+              <a
+                className="contents"
+                href="/mcp"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <SquareFunction className="size-10" />
                 <div>
                   <div className="text-sm font-semibold">MCP</div>
@@ -65,7 +71,12 @@ export default function Footer() {
               </a>
             </div>
             <div className="flex gap-2 rounded-xl bg-white/70 p-4 hover:bg-white sm:flex-col">
-              <a href="/evals" target="_blank" rel="noopener noreferrer">
+              <a
+                className="contents"
+                href="/evals"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Gauge className="size-10" />
                 <div>
                   <div className="text-sm font-semibold">Evals</div>

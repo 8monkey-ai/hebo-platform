@@ -16,7 +16,7 @@ export default function MCP() {
   return (
     <div
       id="hero"
-      className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8 bg-[url('/hebo-evals.png')] bg-size-[auto_145px] bg-position-[right_calc(100%+50px)] bg-no-repeat sm:flex-row sm:bg-size-[auto_280px] sm:bg-bottom-right"
+      className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8 bg-[url('/hebo-evals.png')] bg-size-[auto_145px] bg-position-[right_calc(100%+50px)] bg-no-repeat sm:my-10 sm:flex-row sm:bg-size-[auto_280px] sm:bg-bottom-right"
     >
       <figure
         id="conversation.md"
