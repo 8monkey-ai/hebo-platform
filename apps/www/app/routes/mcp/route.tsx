@@ -81,7 +81,7 @@ export default function MCP() {
         id="hero"
         className="mx-auto flex max-w-4xl flex-col gap-4 text-center"
       >
-        <img src="./hebo-mcp.png" alt="MCP Hero" className="mx-auto size-42" />
+        <img src="/hebo-mcp.png" alt="MCP Hero" className="mx-auto size-42" />
         <h1 className="relative mx-auto w-fit text-4xl font-semibold">
           Ready-to-use <span className="text-nowrap">MCP Servers</span>
           <span className="absolute rotate-10 rounded-md bg-lime-600 px-2 py-0.5 text-base text-white sm:-top-4 sm:-right-8">
