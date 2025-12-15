@@ -46,7 +46,6 @@ function modelToModelsResponse(
       endpoints: ProviderAdapterFactory.ALL_PROVIDER_CLASSES.filter(
         (ProviderClass) => ProviderClass.supportsModel(m.id),
       ).map((ProviderClass) => {
-        // We need to instantiate to get the slug, but it's lightweight
         const instance = new ProviderClass(m.id);
         return { tag: instance.getProviderSlug() };
       }),
