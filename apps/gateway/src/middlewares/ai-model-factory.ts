@@ -5,7 +5,7 @@ import { BadRequestError } from "@hebo/shared-api/errors";
 import { dbClient } from "@hebo/shared-api/middlewares/db-client";
 
 import { ModelConfigService } from "./model-config";
-import { ModelAdapterFactory } from "./models/factory";
+import { ModelAdapterFactory } from "./models";
 import { ProviderAdapterFactory } from "./providers";
 
 import type { LanguageModelMiddleware , EmbeddingModel, LanguageModel } from "ai";

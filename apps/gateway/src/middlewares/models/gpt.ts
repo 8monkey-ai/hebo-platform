@@ -1,4 +1,4 @@
-import { ModelAdapterBase, type OpenAICompatibleOptions } from "../model-adapter";
+import { ModelAdapterBase, type OpenAICompatibleOptions } from "./models";
 
 import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible-api-schemas";
 

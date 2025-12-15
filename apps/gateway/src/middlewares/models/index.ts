@@ -1,11 +1,11 @@
-import { CohereEmbedV4Adapter } from "./adapters/cohere";
+import { CohereEmbedV4Adapter } from "./cohere";
 import {
   GeminiFlashPreviewAdapter,
   GeminiFlashLiteAdapter,
-} from "./adapters/gemini";
-import { GptOss120bAdapter, GptOss20bAdapter } from "./adapters/gpt";
+} from "./gemini";
+import { GptOss120bAdapter, GptOss20bAdapter } from "./gpt";
 
-import type { ModelAdapter } from "./model-adapter";
+import type { ModelAdapter } from "./models";
 
 export class ModelAdapterFactory {
   private static readonly MODEL_ADAPTER_MAP: Record<
