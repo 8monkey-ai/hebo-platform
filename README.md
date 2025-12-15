@@ -14,7 +14,6 @@ This is the monorepo for Hebo, containing all our applications and shared packag
 │   └── mcp/                        # MCP Server (ElysiaJS with SSR)
 │
 ├── packages/                       # Shared libraries and utilities
-│   ├── aikit-respond-io/           # Respond.io AI Kit integration
 │   ├── aikit-ui/                   # Chat UI components (Shadcn + custom)
 │   ├── database/                   # Database schema, migrations (Prisma)
 │   ├── shared-api/                 # API utilities (auth, CORS)
