@@ -10,9 +10,6 @@ export default function Home() {
         <img src="/hebo.png" alt="MCP Hero" className="mx-auto size-42" />
         <h1 className="relative mx-auto w-fit text-4xl font-semibold">
           Scale agents with confidence
-          <span className="absolute rotate-10 rounded-md bg-lime-600 px-2 py-0.5 text-base text-white sm:-top-4 sm:-right-8">
-            FREE
-          </span>
         </h1>
         <p className="max-w-2xl text-sm sm:text-base">
           A low-code platform that connects developers & business stakeholders
