@@ -2,7 +2,7 @@ import { Elysia, status, t } from "elysia";
 
 import { createSlug } from "@hebo/database/src/utils/create-slug";
 import { dbClient } from "@hebo/shared-api/middlewares/db-client";
-import { type Models } from "@hebo/shared-api/types/model-config";
+import { Models } from "@hebo/shared-api/types/model-config";
 
 import {
   branches,

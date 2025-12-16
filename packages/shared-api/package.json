@@ -27,6 +27,7 @@
   "dependencies": {
     "@elysiajs/bearer": "^1.4.1",
     "@hebo/database": "workspace:*",
+    "@sinclair/typebox": "^0.34.41",
     "jose": "^6.0.12",
     "sst": "^3.17.13"
   }
