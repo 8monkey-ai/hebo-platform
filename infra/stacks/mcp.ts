@@ -1,5 +1,5 @@
 import heboCluster from "./cluster";
-import { isProd } from "./env";
+import { allSecrets, isProd } from "./env";
 
 const mcpDomain = isProd ? "mcp.hebo.ai" : `mcp.${$app.stage}.hebo.ai`;
 const mcpPort = "3003";
@@ -9,6 +9,7 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
   architecture: "arm64",
   cpu: "0.25 vCPU",
   memory: "0.5 GB",
+  link: [...allSecrets],
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.mcp",

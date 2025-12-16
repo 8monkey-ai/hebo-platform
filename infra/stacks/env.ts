@@ -21,6 +21,24 @@ export const vertexAwsProviderAudience = new sst.Secret(
 export const vertexProject = new sst.Secret("VertexProject", "undefined");
 export const vertexLocation = new sst.Secret("VertexLocation", "undefined");
 
+export const grafanaCloudOtlpEndpoint = new sst.Secret(
+  "GrafanaCloudOtlpEndpoint",
+  "undefined",
+);
+export const grafanaCloudOtlpHeaders = new sst.Secret(
+  "GrafanaCloudOtlpHeaders",
+  "undefined",
+);
+// Back-compat (optional): if you prefer to store instanceId + apiKey instead of full headers.
+export const grafanaCloudInstanceId = new sst.Secret(
+  "GrafanaCloudInstanceId",
+  "undefined",
+);
+export const grafanaCloudApiKey = new sst.Secret(
+  "GrafanaCloudApiKey",
+  "undefined",
+);
+
 export const allSecrets = [
   stackSecretServerKey,
   stackPublishableClientKey,
@@ -33,5 +51,9 @@ export const allSecrets = [
   vertexAwsProviderAudience,
   vertexProject,
   vertexLocation,
+  grafanaCloudOtlpEndpoint,
+  grafanaCloudOtlpHeaders,
+  grafanaCloudInstanceId,
+  grafanaCloudApiKey,
 ];
 export const isProd = $app.stage === "production";
