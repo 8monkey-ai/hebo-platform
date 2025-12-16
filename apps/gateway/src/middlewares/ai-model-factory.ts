@@ -8,7 +8,11 @@ import { ModelConfigService } from "./model-config";
 import { ModelAdapterFactory } from "./models";
 import { ProviderAdapterFactory } from "./providers";
 
-import type { LanguageModelMiddleware , EmbeddingModel, LanguageModel } from "ai";
+import type {
+  LanguageModelMiddleware,
+  EmbeddingModel,
+  LanguageModel,
+} from "ai";
 
 type Modality = "chat" | "embedding";
 
@@ -60,7 +64,6 @@ export const aiModelFactory = new Elysia({
             return {
               ...params,
               providerOptions: {
-                ...params.providerOptions,
                 ...transformed,
               },
             };
@@ -75,7 +78,6 @@ export const aiModelFactory = new Elysia({
             return {
               ...params,
               providerOptions: {
-                ...params.providerOptions,
                 ...transformed,
               },
             };
