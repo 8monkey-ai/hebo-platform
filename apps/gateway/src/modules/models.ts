@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 
-import { ModelAdapterFactory } from "../middlewares/models";
+import { getSupportedModels, type SupportedModel } from "../middlewares/models";
 import { ProviderAdapterFactory } from "../middlewares/providers";
 
 const model = t.Object({
@@ -26,10 +26,7 @@ const model = t.Object({
 
 const modelsInclude = t.Optional(t.Object({ endpoints: t.Boolean() }));
 
-function modelToModelsResponse(
-  m: ReturnType<typeof ModelAdapterFactory.getAllModels>[0],
-  withEndpoints = false,
-) {
+function modelToModelsResponse(m: SupportedModel, withEndpoints = false) {
   const responseModel = {
     object: "model" as const,
     id: m.id,
@@ -63,7 +60,7 @@ export const models = new Elysia({
   .get(
     "/",
     ({ query }) => {
-      const supportedModels = ModelAdapterFactory.getAllModels();
+      const supportedModels = getSupportedModels();
       return {
         object: "list" as const,
         data: supportedModels.map((m) =>
@@ -84,7 +81,7 @@ export const models = new Elysia({
     "/:author/:slug/endpoints",
     ({ params }) => {
       const id = `${params.author}/${params.slug}`;
-      const supportedModels = ModelAdapterFactory.getAllModels();
+      const supportedModels = getSupportedModels();
       const m = supportedModels.find((model) => model.id === id);
       if (!m) return new Response("Model not found", { status: 404 });
 

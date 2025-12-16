@@ -7,6 +7,7 @@
   "exports": {
     "./middlewares/*": "./middlewares/*.ts",
     "./schemas/*": "./schemas/*.ts",
+    "./types/*": "./types/*.ts",
     "./utils/*": "./utils/*.ts",
     "./errors": "./errors.ts"
   },

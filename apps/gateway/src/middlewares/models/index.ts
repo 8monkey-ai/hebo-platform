@@ -1,3 +1,5 @@
+import { t, type Static } from "elysia";
+
 import { CohereEmbedV4Adapter } from "./cohere";
 import {
   Gemini25FlashPreviewAdapter,
@@ -6,6 +8,19 @@ import {
 import { GptOss120bAdapter, GptOss20bAdapter } from "./gpt";
 
 import type { ModelAdapter } from "./model";
+
+export const supportedModel = t.Object({
+  id: t.String(),
+  name: t.String(),
+  created: t.Number(),
+  owned_by: t.String(),
+  modality: t.Union([t.Literal("chat"), t.Literal("embedding")]),
+  pricing: t.Object({
+    monthly_free_tokens: t.Number(),
+  }),
+});
+
+export type SupportedModel = Static<typeof supportedModel>;
 
 const MODEL_ADAPTER_MAP = {
   "google/gemini-2.5-flash-preview-09-2025": () =>
@@ -27,20 +42,20 @@ export const ModelAdapterFactory = {
     }
     return factoryMethod();
   },
-
-  getAllModels() {
-    return Object.values(MODEL_ADAPTER_MAP).map((factory) => {
-      const adapter = factory();
-      return {
-        id: adapter.getModelType(),
-        name: adapter.getDisplayName(),
-        created: adapter.getCreatedAt(),
-        owned_by: adapter.getOwner(),
-        modality: adapter.getModality(),
-        pricing: {
-          monthly_free_tokens: adapter.getMonthlyFreeTokens(),
-        },
-      };
-    });
-  },
 };
+
+export function getSupportedModels(): SupportedModel[] {
+  return Object.values(MODEL_ADAPTER_MAP).map((factory) => {
+    const adapter = factory();
+    return {
+      id: adapter.getModelType(),
+      name: adapter.getDisplayName(),
+      created: adapter.getCreatedAt(),
+      owned_by: adapter.getOwner(),
+      modality: adapter.getModality(),
+      pricing: {
+        monthly_free_tokens: adapter.getMonthlyFreeTokens(),
+      },
+    };
+  });
+}

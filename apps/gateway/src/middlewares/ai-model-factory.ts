@@ -63,9 +63,7 @@ export const aiModelFactory = new Elysia({
             );
             return {
               ...params,
-              providerOptions: {
-                ...transformed,
-              },
+              providerOptions: transformed,
             };
           },
         };
@@ -77,9 +75,7 @@ export const aiModelFactory = new Elysia({
             );
             return {
               ...params,
-              providerOptions: {
-                ...transformed,
-              },
+              providerOptions: transformed,
             };
           },
         };
