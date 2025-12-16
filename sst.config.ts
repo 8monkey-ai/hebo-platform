@@ -13,7 +13,10 @@ export default $config({
     };
   },
   async run() {
-    await import("./infra/stacks/console");
+    await import("./infra/stacks/db");
+    await import("./infra/stacks/api");
+    await import("./infra/stacks/gateway");
     await import("./infra/stacks/mcp");
+    await import("./infra/stacks/console");
   },
 });
