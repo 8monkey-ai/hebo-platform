@@ -106,3 +106,25 @@ export class Gemini25FlashLitePreviewAdapter extends GeminiModelAdapter {
     return 0;
   }
 }
+
+export class Gemini3ProPreviewAdapter extends GeminiModelAdapter {
+  getModelType(): string {
+    return "google/gemini-3-pro-preview";
+  }
+
+  getDisplayName(): string {
+    return "Gemini 3 Pro Preview";
+  }
+
+  getOwner(): string {
+    return "google";
+  }
+
+  getCreatedAt(): number {
+    return 1_765_855_208;
+  }
+
+  getMonthlyFreeTokens(): number {
+    return 0;
+  }
+}

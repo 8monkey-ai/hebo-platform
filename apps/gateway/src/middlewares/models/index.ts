@@ -4,6 +4,7 @@ import { CohereEmbedV4Adapter } from "./cohere";
 import {
   Gemini25FlashPreviewAdapter,
   Gemini25FlashLitePreviewAdapter,
+  Gemini3ProPreviewAdapter,
 } from "./gemini";
 import { GptOss120bAdapter, GptOss20bAdapter } from "./gpt";
 
@@ -27,6 +28,7 @@ const MODEL_ADAPTER_MAP = {
     new Gemini25FlashPreviewAdapter(),
   "google/gemini-2.5-flash-lite-preview-09-2025": () =>
     new Gemini25FlashLitePreviewAdapter(),
+  "google/gemini-3-pro-preview": () => new Gemini3ProPreviewAdapter(),
   "openai/gpt-oss-120b": () => new GptOss120bAdapter(),
   "openai/gpt-oss-20b": () => new GptOss20bAdapter(),
   "cohere/embed-v4.0": () => new CohereEmbedV4Adapter(),
