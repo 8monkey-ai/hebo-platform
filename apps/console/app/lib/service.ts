@@ -16,6 +16,7 @@ export const gatewayUrl = isDevLocal
   : import.meta.env.VITE_GATEWAY_URL || "http://localhost:3002";
 
 export const kyFetch = ky.extend({
+  timeout: 60_000, // 60 seconds
   throwHttpErrors: false,
   hooks: {
     beforeRequest: [
