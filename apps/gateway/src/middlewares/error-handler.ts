@@ -1,3 +1,4 @@
+import { UnsupportedFunctionalityError } from "ai";
 import { Elysia, status } from "elysia";
 
 import { identifyPrismaError } from "@hebo/database/src/errors";
@@ -11,7 +12,7 @@ const upstreamRes = (e: unknown) =>
     : undefined;
 
 export const errorHandler = new Elysia({ name: "error-handler" })
-  .onError(async ({ code, error }) => {
+  .onError(async ({ code, error, body }) => {
     if (error instanceof HttpError)
       return status(
         error.status,
@@ -21,6 +22,18 @@ export const errorHandler = new Elysia({ name: "error-handler" })
           error.code,
         ),
       );
+
+    if (error instanceof UnsupportedFunctionalityError) {
+      const model = (body as any)?.model;
+      return status(
+        400,
+        toOpenAiCompatibleError(
+          `The model "${model}" does not support attachments`,
+          "invalid_request_error",
+          "unsupported_functionality",
+        ),
+      );
+    }
 
     // Elysia validation errors
     if (code === "VALIDATION")

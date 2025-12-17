@@ -1,6 +1,7 @@
 import {
   jsonSchema,
   tool,
+  UnsupportedFunctionalityError,
   type FinishReason,
   type GenerateTextResult,
   type ModelMessage,
@@ -246,6 +247,19 @@ export function toOpenAICompatibleStream(
       };
 
       const enqueueError = (error: unknown) => {
+        if (error instanceof UnsupportedFunctionalityError) {
+          enqueue(
+            toOpenAiCompatibleError(
+              `The model "${model}" does not support attachments`,
+              "invalid_request_error",
+              "unsupported_functionality",
+            ),
+          );
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+          return;
+        }
+
         const msg =
           error instanceof Error
             ? error.message
