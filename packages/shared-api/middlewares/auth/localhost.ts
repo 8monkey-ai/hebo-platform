@@ -17,7 +17,7 @@ export const authServiceLocalhost = new Elysia({
       '⚠️ [auth] Localhost mode: userId="dummy"; non-local requests will be 401',
     );
   })
-  .resolve(async ({ request, server }) => {
+  .resolve(async function resolveLocalhostAuth({ request, server }) {
     const clientIp = ((ip) =>
       typeof ip === "string" ? ip : (ip?.address ?? ""))(
       server?.requestIP(request),

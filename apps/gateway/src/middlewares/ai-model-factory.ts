@@ -20,7 +20,7 @@ export const aiModelFactory = new Elysia({
   name: "ai-model-factory",
 })
   .use(dbClient)
-  .resolve(({ dbClient }) => {
+  .resolve(function resolveAiModelFactory({ dbClient }) {
     const modelConfigService = new ModelConfigService(dbClient);
     const providerAdapterFactory = new ProviderAdapterFactory(dbClient);
 
