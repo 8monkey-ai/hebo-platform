@@ -58,7 +58,7 @@ export const aiModelFactory = new Elysia({
       if (modality === "chat") {
         const modelSpecificMiddleware: LanguageModelMiddleware = {
           transformParams: ({ params }: { params: any }) => {
-            const transformed = modelAdapter.transformConfigs(
+            const transformed = modelAdapter.transformOptions(
               params.providerOptions ?? {},
             );
             return {
@@ -70,7 +70,7 @@ export const aiModelFactory = new Elysia({
 
         const providerSpecificMiddleware: LanguageModelMiddleware = {
           transformParams: ({ params }: { params: any }) => {
-            const transformed = providerAdapter.transformConfigs(
+            const transformed = providerAdapter.transformOptions(
               params.providerOptions ?? {},
             );
             return {

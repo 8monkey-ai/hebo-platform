@@ -39,7 +39,11 @@ export const completions = new Elysia({
       const toolSet = toToolSet(tools);
       const modelMessages = toModelMessages(messages);
       const coreToolChoice = toToolChoice(toolChoice);
-      const providerOptions = (reasoning ? { reasoning } : {}) as any;
+
+      const providerOptions: Record<string, any> = {};
+      if (reasoning) {
+        providerOptions["openai-compatible"] = { reasoning };
+      }
 
       if (stream) {
         const result = streamText({

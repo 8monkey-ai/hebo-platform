@@ -3,13 +3,14 @@ import type {
   ProviderSlug,
 } from "@hebo/database/src/types/providers";
 
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
 import type { Provider } from "ai";
 
 export interface ProviderAdapter {
   initialize(config?: ProviderConfig): Promise<this>;
   getProvider(): Promise<Provider>;
   resolveModelId(): Promise<string>;
-  transformConfigs(modelConfig?: Record<string, any>): Record<string, any>;
+  transformOptions(options?: ProviderOptions): ProviderOptions;
   getProviderSlug(): ProviderSlug;
 }
 
@@ -45,9 +46,12 @@ export abstract class ProviderAdapterBase {
     return modelId;
   }
 
-  transformConfigs(modelConfig?: Record<string, any>): Record<string, any> {
+  transformOptions(options?: ProviderOptions): ProviderOptions {
+    const { "openai-compatible": openAiOptions, ...rest } = options || {};
+    const mergedOptions = { ...rest, ...(openAiOptions as object) };
+
     return {
-      [this.providerSlug]: modelConfig || {},
+      [this.providerSlug]: mergedOptions,
     };
   }
 }

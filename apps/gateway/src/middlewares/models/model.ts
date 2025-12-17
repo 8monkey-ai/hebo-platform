@@ -1,4 +1,4 @@
-import type { OpenAICompatibleOptions } from "~gateway/utils/openai-compatible-api-schemas";
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export interface ModelAdapter {
   getModelType(): string;
@@ -7,7 +7,7 @@ export interface ModelAdapter {
   getMonthlyFreeTokens(): number;
   getOwner(): string;
   getCreatedAt(): number;
-  transformConfigs(options?: OpenAICompatibleOptions): Record<string, unknown>;
+  transformOptions(options?: ProviderOptions): ProviderOptions;
 }
 
 export abstract class ModelAdapterBase implements ModelAdapter {
@@ -23,7 +23,5 @@ export abstract class ModelAdapterBase implements ModelAdapter {
 
   abstract getCreatedAt(): number;
 
-  abstract transformConfigs(
-    options?: OpenAICompatibleOptions,
-  ): Record<string, unknown>;
+  abstract transformOptions(options?: ProviderOptions): ProviderOptions;
 }

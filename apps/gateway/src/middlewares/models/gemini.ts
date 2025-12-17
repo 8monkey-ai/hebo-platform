@@ -5,22 +5,29 @@ import type {
 
 import { ModelAdapterBase } from "./model";
 
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
+
 export abstract class GeminiModelAdapter extends ModelAdapterBase {
   getModality(): "chat" | "embedding" {
     return "chat";
   }
 
-  transformConfigs(options?: OpenAICompatibleOptions): Record<string, unknown> {
-    const config: Record<string, unknown> = {};
+  transformOptions(options?: ProviderOptions): ProviderOptions {
+    const config: Record<string, any> = {};
+    const openAiOptions = options as OpenAICompatibleOptions;
 
-    if (options?.reasoning) {
-      const thinkingConfig = this.transformReasoning(options.reasoning);
+    if (openAiOptions?.["openai-compatible"]?.reasoning) {
+      const thinkingConfig = this.transformReasoning(
+        openAiOptions["openai-compatible"].reasoning,
+      );
       if (thinkingConfig) {
         config.thinkingConfig = thinkingConfig;
       }
     }
 
-    return config;
+    return {
+      "openai-compatible": config,
+    };
   }
 
   private transformReasoning(

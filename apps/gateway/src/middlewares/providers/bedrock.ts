@@ -10,6 +10,8 @@ import { getSecret } from "@hebo/shared-api/utils/secrets";
 import { assumeRole } from "./adapters/aws";
 import { ProviderAdapterBase, type ProviderAdapter } from "./provider";
 
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
+
 type BedrockCredentials =
   ReturnType<typeof assumeRole> extends Promise<infer T> ? T : never;
 
@@ -45,11 +47,14 @@ export class BedrockProviderAdapter
     return newObj;
   }
 
-  transformConfigs(modelConfig?: Record<string, any>): Record<string, any> {
-    if (!modelConfig || Object.keys(modelConfig).length === 0) return {};
+  transformOptions(options?: ProviderOptions): ProviderOptions {
+    const { "openai-compatible": openAiOptions, ...rest } = options || {};
+    const mergedOptions = { ...rest, ...(openAiOptions as object) };
+
+    if (Object.keys(mergedOptions).length === 0) return {};
 
     const snakeCaseConfig =
-      BedrockProviderAdapter.convertObjectKeysToSnakeCase(modelConfig);
+      BedrockProviderAdapter.convertObjectKeysToSnakeCase(mergedOptions);
 
     return {
       bedrock: {

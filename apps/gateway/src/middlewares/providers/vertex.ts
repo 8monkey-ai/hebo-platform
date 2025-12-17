@@ -1,10 +1,13 @@
 import { createVertex } from "@ai-sdk/google-vertex";
 
+
 import type { VertexProviderConfig } from "@hebo/database/src/types/providers";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import { injectMetadataCredentials, buildWifOptions } from "./adapters/aws";
 import { ProviderAdapterBase, type ProviderAdapter } from "./provider";
+
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export class VertexProviderAdapter
   extends ProviderAdapterBase
@@ -24,9 +27,12 @@ export class VertexProviderAdapter
     super("vertex", modelType);
   }
 
-  transformConfigs(modelConfig?: Record<string, any>): Record<string, any> {
+  transformOptions(options?: ProviderOptions): ProviderOptions {
+    const { "openai-compatible": openAiOptions, ...rest } = options || {};
+    const mergedOptions = { ...rest, ...(openAiOptions as object) };
+
     return {
-      google: modelConfig || {},
+      google: mergedOptions,
     };
   }
 

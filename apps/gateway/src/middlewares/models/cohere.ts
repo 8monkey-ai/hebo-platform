@@ -1,5 +1,7 @@
 import { ModelAdapterBase } from "./model";
 
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
+
 export class CohereEmbedV4Adapter extends ModelAdapterBase {
   getModelType(): string {
     return "cohere/embed-v4.0";
@@ -25,7 +27,10 @@ export class CohereEmbedV4Adapter extends ModelAdapterBase {
     return 0;
   }
 
-  transformConfigs(): Record<string, unknown> {
-    return {};
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  transformOptions(_options?: ProviderOptions): ProviderOptions {
+    return {
+      "openai-compatible": {},
+    };
   }
 }
