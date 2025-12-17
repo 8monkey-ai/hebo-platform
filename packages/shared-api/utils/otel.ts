@@ -7,6 +7,11 @@ export const getGrafanaCloudOtelpConfig = async () => {
     getSecret("GrafanaCloudOtlpApiToken", false),
   ]);
 
+  if (!endpoint || !instanceId || !apiToken) {
+    console.warn("⚠️ OpenTelemetry not configured. Skipping...");
+    return;
+  }
+
   return {
     url: new URL("/otlp/v1/traces", endpoint).toString(),
     headers: {
