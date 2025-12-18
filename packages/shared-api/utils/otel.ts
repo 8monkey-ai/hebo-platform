@@ -5,7 +5,6 @@ import { getSecret } from "./secrets";
 
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
 
-
 const getGrafanaCloudOtlpConfig = async () => {
   const [endpoint, instanceId, apiToken] = await Promise.all([
     getSecret("GrafanaCloudOtlpEndpoint", false),
@@ -29,11 +28,11 @@ const getGrafanaCloudOtlpConfig = async () => {
   };
 };
 
-const otelConfig = await getGrafanaCloudOtlpConfig();
+const grafanaOps = await getGrafanaCloudOtlpConfig();
 
 export const getOtelConfig = (
   serviceName: string,
 ): ElysiaOpenTelemetryOptions => ({
   serviceName,
-  spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter(otelConfig))],
+  spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter(grafanaOps))],
 });
