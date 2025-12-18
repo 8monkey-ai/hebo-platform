@@ -48,7 +48,7 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
       const thinkingConfig: Record<string, any> = {};
 
       thinkingConfig.includeThoughts =
-        params.enabled !== false && params.excluded !== true;
+        params.enabled !== false && params.exclude !== true;
 
       const specificConfig = this.getThinkingConfig(params);
       Object.assign(thinkingConfig, specificConfig);
