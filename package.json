@@ -1,29 +1,6 @@
 {
   "name": "hebo",
   "version": "0.0.5",
-  "private": true,
-  "packageManager": "bun@1.3.4",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "turbo run build",
-    "clean": "git clean -fdx -e '.env*'",
-    "db:migrate": "bun run -F @hebo/database db migrate dev",
-    "db:reset": "bun run -F @hebo/database db migrate reset --force",
-    "dev": "turbo run dev --parallel",
-    "dev:infra:up": "docker compose up -d",
-    "dev:infra:down": "docker compose down",
-    "format": "prettier --write .",
-    "format:staged": "prettier --write",
-    "lint": "turbo run lint",
-    "lint:deps": "check-dependency-version-consistency .",
-    "lint:staged": "eslint --cache --fix",
-    "postinstall": "lefthook install && bun run -F @hebo/database db generate",
-    "secret": "bun run scripts/secrets.ts",
-    "test": "turbo run test"
-  },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
     "bun-types": "^1.3.4",
@@ -54,5 +31,28 @@
   },
   "engines": {
     "bun": "^1.3.4"
-  }
+  },
+  "packageManager": "bun@1.3.4",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "clean": "git clean -fdx -e '.env*'",
+    "db:migrate": "bun run -F @hebo/database db migrate dev",
+    "db:reset": "bun run -F @hebo/database db migrate reset --force",
+    "dev": "turbo run dev --parallel",
+    "dev:infra:up": "docker compose up -d",
+    "dev:infra:down": "docker compose down",
+    "format": "prettier --write .",
+    "format:staged": "prettier --write",
+    "lint": "turbo run lint",
+    "lint:deps": "check-dependency-version-consistency .",
+    "lint:staged": "eslint --cache --fix",
+    "postinstall": "lefthook install && bun run -F @hebo/database db generate",
+    "secret": "bun run scripts/secrets.ts",
+    "test": "turbo run test"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }

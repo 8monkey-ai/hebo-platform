@@ -33,8 +33,6 @@ export const completions = new Elysia({
         temperature = 1,
         stream = false,
       } = body;
-      console.log(messages[1].tool_calls);
-
       const chatModel = await aiModelFactory.create(modelAliasPath, "chat");
 
       const toolSet = toToolSet(tools);

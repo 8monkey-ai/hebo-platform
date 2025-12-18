@@ -243,9 +243,9 @@
       "dependencies": {
         "@elysiajs/bearer": "^1.4.1",
         "@hebo/database": "workspace:*",
-        "@sinclair/typebox": "^0.34.41",
         "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
         "@opentelemetry/sdk-trace-node": "^2.2.0",
+        "@sinclair/typebox": "^0.34.41",
         "jose": "^6.0.12",
         "sst": "^3.17.13",
       },

@@ -86,20 +86,7 @@ export const aiModelFactory = new Elysia({
 
         model = wrapLanguageModel({
           model: model as any,
-          middleware: [
-            modelSpecificMiddleware,
-            providerSpecificMiddleware,
-            {
-              transformParams: ({ params }: { params: any }) => {
-                console.log(
-                  "Prompt:",
-                  params.prompt[1].content[0].providerOptions,
-                );
-                console.log("Provider Options:", params.providerOptions);
-                return params;
-              },
-            },
-          ],
+          middleware: [modelSpecificMiddleware, providerSpecificMiddleware],
         }) as AiModelFor<M>;
       }
 

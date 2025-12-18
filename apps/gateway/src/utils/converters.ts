@@ -188,14 +188,24 @@ export const toOpenAICompatibleMessage = (
   };
 
   if (result.toolCalls && result.toolCalls.length > 0) {
-    message.tool_calls = result.toolCalls.map((toolCall: any) => ({
-      id: toolCall.toolCallId,
-      type: "function" as const,
-      function: {
-        name: toolCall.toolName,
-        arguments: JSON.stringify(toolCall.input),
-      },
-    }));
+    message.tool_calls = result.toolCalls.map((toolCall: any) => {
+      const metadata = {};
+      if (toolCall.providerMetadata) {
+        for (const options of Object.values(toolCall.providerMetadata)) {
+          Object.assign(metadata, options);
+        }
+      }
+
+      return {
+        id: toolCall.toolCallId,
+        type: "function" as const,
+        function: {
+          name: toolCall.toolName,
+          arguments: JSON.stringify(toolCall.input),
+        },
+        ...metadata,
+      };
+    });
   } else {
     message.content = result.text;
   }
