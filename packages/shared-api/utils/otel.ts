@@ -1,6 +1,12 @@
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
+
 import { getSecret } from "./secrets";
 
-export const getGrafanaCloudOtelpConfig = async () => {
+import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
+
+
+const getGrafanaCloudOtlpConfig = async () => {
   const [endpoint, instanceId, apiToken] = await Promise.all([
     getSecret("GrafanaCloudOtlpEndpoint", false),
     getSecret("GrafanaCloudOtlpInstanceId", false),
@@ -22,3 +28,12 @@ export const getGrafanaCloudOtelpConfig = async () => {
     },
   };
 };
+
+const otelConfig = await getGrafanaCloudOtlpConfig();
+
+export const getOtelConfig = (
+  serviceName: string,
+): ElysiaOpenTelemetryOptions => ({
+  serviceName,
+  spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter(otelConfig))],
+});

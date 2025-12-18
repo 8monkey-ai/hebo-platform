@@ -14,11 +14,8 @@
   },
   "dependencies": {
     "@bogeychan/elysia-logger": "^0.1.10",
-    "@elysiajs/opentelemetry": "^1.4.9",
     "@hebo/shared-api": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.24.2",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
-    "@opentelemetry/sdk-trace-node": "^2.2.0",
     "elysia": "^1.4.9",
     "pino": "^9.8.0",
     "zod": "^4.1.13"

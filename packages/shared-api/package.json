@@ -27,6 +27,7 @@
     "@elysiajs/bearer": "^1.4.1",
     "@hebo/database": "workspace:*",
     "@hebo/shared-data": "workspace:*",
+    "@elysiajs/opentelemetry": "^1.4.9",
     "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
     "@opentelemetry/sdk-trace-node": "^2.2.0",
     "jose": "^6.0.12",
