@@ -185,7 +185,7 @@ describe("Model Adapter transformOptions", () => {
         "openai-compatible": {
           reasoning: {
             enabled: true,
-            exclude: true,
+            excluded: true,
           },
         },
       },
@@ -198,7 +198,6 @@ describe("Model Adapter transformOptions", () => {
         },
       },
     },
-
     // --- Gemini 3 Pro Scenarios ---
     {
       name: "Gemini 3 Pro: low effort -> LOW",
