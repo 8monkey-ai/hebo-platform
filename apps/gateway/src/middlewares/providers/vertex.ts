@@ -31,10 +31,12 @@ export class VertexProviderAdapter
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
     const { "openai-compatible": openAiOptions, ...rest } = options || {};
-    const mergedOptions = { ...rest, ...(openAiOptions as object) };
+
+    if (!openAiOptions) return rest;
 
     return {
-      google: mergedOptions,
+      ...rest,
+      google: openAiOptions,
     };
   }
 

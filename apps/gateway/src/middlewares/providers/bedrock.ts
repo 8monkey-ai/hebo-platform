@@ -51,14 +51,15 @@ export class BedrockProviderAdapter
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
     const { "openai-compatible": openAiOptions, ...rest } = options || {};
-    const mergedOptions = { ...rest, ...(openAiOptions as object) };
 
-    if (Object.keys(mergedOptions).length === 0) return {};
+    if (!openAiOptions) return rest;
 
-    const snakeCaseConfig =
-      BedrockProviderAdapter.convertObjectKeysToSnakeCase(mergedOptions);
+    const snakeCaseConfig = BedrockProviderAdapter.convertObjectKeysToSnakeCase(
+      openAiOptions as Record<string, any>,
+    );
 
     return {
+      ...rest,
       bedrock: {
         additionalModelRequestFields: snakeCaseConfig,
       },

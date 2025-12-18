@@ -27,9 +27,7 @@ describe("Provider Adapter transformOptions", () => {
       name: "Groq: no options provided",
       provider: groqProvider,
       input: undefined,
-      expected: {
-        groq: {},
-      },
+      expected: {},
     },
     {
       name: "Groq: passes through transformed reasoningEffort",
@@ -42,6 +40,26 @@ describe("Provider Adapter transformOptions", () => {
       expected: {
         groq: {
           reasoningEffort: "medium",
+        },
+      },
+    },
+    {
+      name: "Groq: preserves other provider options",
+      provider: groqProvider,
+      input: {
+        "other-provider": {
+          key: "value",
+        },
+        "openai-compatible": {
+          reasoningEffort: "high",
+        },
+      } as any,
+      expected: {
+        "other-provider": {
+          key: "value",
+        },
+        groq: {
+          reasoningEffort: "high",
         },
       },
     },
@@ -79,9 +97,7 @@ describe("Provider Adapter transformOptions", () => {
       name: "Vertex: no options provided",
       provider: vertexProvider,
       input: undefined,
-      expected: {
-        google: {},
-      },
+      expected: {},
     },
     {
       name: "Vertex: passes through transformed thinkingConfig",

@@ -47,10 +47,12 @@ export abstract class ProviderAdapterBase implements ProviderAdapter {
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
     const { "openai-compatible": openAiOptions, ...rest } = options || {};
-    const mergedOptions = { ...rest, ...(openAiOptions as object) };
+
+    if (!openAiOptions) return rest;
 
     return {
-      [this.providerSlug]: mergedOptions,
+      ...rest,
+      [this.providerSlug]: openAiOptions,
     };
   }
 
