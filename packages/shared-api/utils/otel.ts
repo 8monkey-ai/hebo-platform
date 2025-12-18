@@ -34,7 +34,7 @@ export const getOtelConfig = (
   serviceName: string,
 ): ElysiaOpenTelemetryOptions => ({
   serviceName,
-  spanProcessors: [
-    new BatchSpanProcessor(new OTLPTraceExporter(grafanaConfig)),
-  ],
+  spanProcessors: grafanaConfig
+    ? [new BatchSpanProcessor(new OTLPTraceExporter(grafanaConfig))]
+    : undefined,
 });
