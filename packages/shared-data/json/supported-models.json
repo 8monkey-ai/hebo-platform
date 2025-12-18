@@ -41,6 +41,19 @@
     "monthlyFreeTokens": 0
   },
   {
+    "type": "google/gemini-3-flash-preview",
+    "displayName": "Gemini 3 Flash Preview",
+    "owner": "google",
+    "created": 1766023009,
+    "providers": [
+      {
+        "vertex": "gemini-3-flash-preview"
+      }
+    ],
+    "modality": "chat",
+    "monthlyFreeTokens": 0
+  },
+  {
     "type": "google/gemini-2.5-flash-preview-09-2025",
     "displayName": "Gemini 2.5 Flash Preview (Sep 2025)",
     "owner": "google",
