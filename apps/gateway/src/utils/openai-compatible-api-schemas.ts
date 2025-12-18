@@ -105,7 +105,14 @@ export const OpenAICompatibleReasoning = t.Object({
   enabled: t.Boolean(),
   max_tokens: t.Optional(t.Number()),
   effort: t.Optional(
-    t.Union([t.Literal("low"), t.Literal("medium"), t.Literal("high")]),
+    t.Union([
+      t.Literal("none"),
+      t.Literal("minimal"),
+      t.Literal("low"),
+      t.Literal("medium"),
+      t.Literal("high"),
+      t.Literal("xhigh"),
+    ]),
   ),
   exclude: t.Optional(t.Boolean()),
 });

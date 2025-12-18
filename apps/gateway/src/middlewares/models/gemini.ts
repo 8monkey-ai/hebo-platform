@@ -37,9 +37,10 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
     params: OpenAICompatibleReasoning,
   ): Record<string, any> | undefined {
     const isReasoningActive =
-      params.enabled === true ||
-      (params.enabled === undefined &&
-        (params.max_tokens !== undefined || params.effort !== undefined));
+      (params.enabled === true ||
+        (params.enabled === undefined &&
+          (params.max_tokens !== undefined || params.effort !== undefined))) &&
+      params.effort !== "none";
 
     if (isReasoningActive) {
       const thinkingConfig: Record<string, any> = {};
@@ -63,12 +64,17 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
 
     if (params.max_tokens === undefined) {
       switch (params.effort) {
+        case "minimal":
         case "low": {
           thinkingConfig.thinkingBudget = 1024;
           break;
         }
         case "high": {
           thinkingConfig.thinkingBudget = 24_576;
+          break;
+        }
+        case "xhigh": {
+          thinkingConfig.thinkingBudget = 32_768; // assuming
           break;
         }
         default: {
@@ -107,6 +113,7 @@ export class Gemini3ProPreviewAdapter extends GeminiModelAdapter {
     const thinkingConfig: Record<string, any> = {};
 
     switch (params.effort) {
+      case "minimal":
       case "low": {
         thinkingConfig.thinkingLevel = "low";
         break;
@@ -115,7 +122,8 @@ export class Gemini3ProPreviewAdapter extends GeminiModelAdapter {
         thinkingConfig.thinkingLevel = "high";
         break;
       }
-      case "high": {
+      case "high":
+      case "xhigh": {
         thinkingConfig.thinkingLevel = "high";
         break;
       }
@@ -140,6 +148,10 @@ export class Gemini3FlashPreviewAdapter extends GeminiModelAdapter {
     const thinkingConfig: Record<string, any> = {};
 
     switch (params.effort) {
+      case "minimal": {
+        thinkingConfig.thinkingLevel = "minimal";
+        break;
+      }
       case "low": {
         thinkingConfig.thinkingLevel = "low";
         break;
@@ -148,7 +160,8 @@ export class Gemini3FlashPreviewAdapter extends GeminiModelAdapter {
         thinkingConfig.thinkingLevel = "medium";
         break;
       }
-      case "high": {
+      case "high":
+      case "xhigh": {
         thinkingConfig.thinkingLevel = "high";
         break;
       }
