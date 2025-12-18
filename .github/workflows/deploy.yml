@@ -49,5 +49,7 @@ jobs:
           bun run sst secret set VertexAwsProviderAudience ${{ secrets.GOOGLE_VERTEX_AWS_PROVIDER_AUDIENCE }} --stage production
           bun run sst secret set VertexProject ${{ secrets.GOOGLE_VERTEX_PROJECT }} --stage production
           bun run sst secret set VertexLocation ${{ secrets.GOOGLE_VERTEX_LOCATION }} --stage production
-
+          bun run sst secret set GrafanaCloudOtlpEndpoint ${{ secrets.GRAFANA_CLOUD_OTLP_ENDPOINT }} --stage production
+          bun run sst secret set GrafanaCloudOtlpInstanceId ${{ secrets.GRAFANA_CLOUD_OTLP_INSTANCE_ID }} --stage production
+          bun run sst secret set GrafanaCloudOtlpApiToken ${{ secrets.GRAFANA_CLOUD_OTLP_API_TOKEN }} --stage production
           bun run sst deploy --stage production
