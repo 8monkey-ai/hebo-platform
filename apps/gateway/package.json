@@ -14,7 +14,8 @@
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "prestart": "bun run build",
-    "start": "./dist/server"
+    "start": "./dist/server",
+    "test": "bun test"
   },
   "dependencies": {
     "@ai-sdk/amazon-bedrock": "^3.0.54",
