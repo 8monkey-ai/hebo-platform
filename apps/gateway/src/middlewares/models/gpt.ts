@@ -11,15 +11,16 @@ export abstract class GptModelAdapter extends ModelAdapterBase {
   readonly modality = "chat";
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { "openai-compatible": _, ...rest } = options || {};
-    const config: Record<string, any> = {};
-    const openAiOptions = options as OpenAICompatibleOptions;
+    const { "openai-compatible": openAiOptions, ...rest } = options || {};
 
-    if (openAiOptions?.["openai-compatible"]?.reasoning) {
-      const reasoningConfig = this.transformReasoning(
-        openAiOptions["openai-compatible"].reasoning,
-      );
+    if (!openAiOptions) return rest;
+
+    const config: Record<string, any> = {};
+    const reasoning = (openAiOptions as any)
+      ?.reasoning as OpenAICompatibleReasoning;
+
+    if (reasoning) {
+      const reasoningConfig = this.transformReasoning(reasoning);
       if (reasoningConfig) {
         Object.assign(config, reasoningConfig);
       }

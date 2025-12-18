@@ -15,15 +15,16 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
   };
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { "openai-compatible": _, ...rest } = options || {};
-    const config: Record<string, any> = {};
-    const openAiOptions = options as OpenAICompatibleOptions;
+    const { "openai-compatible": openAiOptions, ...rest } = options || {};
 
-    if (openAiOptions?.["openai-compatible"]?.reasoning) {
-      const thinkingConfig = this.transformReasoning(
-        openAiOptions["openai-compatible"].reasoning,
-      );
+    if (!openAiOptions) return rest;
+
+    const config: Record<string, any> = {};
+    const reasoning = (openAiOptions as any)
+      ?.reasoning as OpenAICompatibleReasoning;
+
+    if (reasoning) {
+      const thinkingConfig = this.transformReasoning(reasoning);
       if (thinkingConfig) {
         config.thinkingConfig = thinkingConfig;
       }
