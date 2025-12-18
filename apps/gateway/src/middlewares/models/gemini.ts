@@ -32,7 +32,7 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
     };
   }
 
-  private transformReasoning(
+  protected transformReasoning(
     params: OpenAICompatibleReasoning,
   ): Record<string, any> | undefined {
     const isReasoningActive =
@@ -46,29 +46,40 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
       thinkingConfig.includeThoughts =
         params.enabled !== false && params.exclude !== true;
 
-      if (params.max_tokens === undefined) {
-        switch (params.effort) {
-          case "low": {
-            thinkingConfig.thinkingBudget = 1024;
-            break;
-          }
-          case "high": {
-            thinkingConfig.thinkingBudget = 24_576;
-            break;
-          }
-          default: {
-            thinkingConfig.thinkingBudget = 8192;
-            break;
-          }
-        }
-      } else {
-        thinkingConfig.thinkingBudget = params.max_tokens;
-      }
+      const specificConfig = this.getThinkingConfig(params);
+      Object.assign(thinkingConfig, specificConfig);
 
       return thinkingConfig;
     }
 
     return undefined;
+  }
+
+  protected getThinkingConfig(
+    params: OpenAICompatibleReasoning,
+  ): Record<string, any> {
+    const thinkingConfig: Record<string, any> = {};
+
+    if (params.max_tokens === undefined) {
+      switch (params.effort) {
+        case "low": {
+          thinkingConfig.thinkingBudget = 1024;
+          break;
+        }
+        case "high": {
+          thinkingConfig.thinkingBudget = 24_576;
+          break;
+        }
+        default: {
+          thinkingConfig.thinkingBudget = 8192;
+          break;
+        }
+      }
+    } else {
+      thinkingConfig.thinkingBudget = params.max_tokens;
+    }
+
+    return thinkingConfig;
   }
 }
 
@@ -88,10 +99,64 @@ export class Gemini3ProPreviewAdapter extends GeminiModelAdapter {
   readonly id = "google/gemini-3-pro-preview";
   readonly name = "Gemini 3 Pro Preview";
   readonly created = 1_765_855_208;
+
+  protected getThinkingConfig(
+    params: OpenAICompatibleReasoning,
+  ): Record<string, any> {
+    const thinkingConfig: Record<string, any> = {};
+
+    switch (params.effort) {
+      case "low": {
+        thinkingConfig.thinkingLevel = "LOW";
+        break;
+      }
+      case "medium": {
+        thinkingConfig.thinkingLevel = "HIGH";
+        break;
+      }
+      case "high": {
+        thinkingConfig.thinkingLevel = "HIGH";
+        break;
+      }
+      default: {
+        thinkingConfig.thinkingLevel = "HIGH";
+        break;
+      }
+    }
+
+    return thinkingConfig;
+  }
 }
 
 export class Gemini3FlashPreviewAdapter extends GeminiModelAdapter {
   readonly id = "google/gemini-3-flash-preview";
   readonly name = "Gemini 3 Flash Preview";
   readonly created = 1_766_023_009;
+
+  protected getThinkingConfig(
+    params: OpenAICompatibleReasoning,
+  ): Record<string, any> {
+    const thinkingConfig: Record<string, any> = {};
+
+    switch (params.effort) {
+      case "low": {
+        thinkingConfig.thinkingLevel = "LOW";
+        break;
+      }
+      case "medium": {
+        thinkingConfig.thinkingLevel = "MEDIUM";
+        break;
+      }
+      case "high": {
+        thinkingConfig.thinkingLevel = "HIGH";
+        break;
+      }
+      default: {
+        thinkingConfig.thinkingLevel = "MEDIUM";
+        break;
+      }
+    }
+
+    return thinkingConfig;
+  }
 }

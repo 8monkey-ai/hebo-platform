@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
-import { Gemini25FlashPreviewAdapter } from "~gateway/middlewares/models/gemini";
+import {
+  Gemini25FlashPreviewAdapter,
+  Gemini3FlashPreviewAdapter,
+  Gemini3ProPreviewAdapter,
+} from "~gateway/middlewares/models/gemini";
 import { GptOss120bAdapter } from "~gateway/middlewares/models/gpt";
 import type { ModelAdapter } from "~gateway/middlewares/models/model";
 
@@ -17,6 +21,8 @@ describe("Model Adapter transformOptions", () => {
 
   const gptAdapter = new GptOss120bAdapter();
   const geminiAdapter = new Gemini25FlashPreviewAdapter();
+  const gemini3ProAdapter = new Gemini3ProPreviewAdapter();
+  const gemini3FlashAdapter = new Gemini3FlashPreviewAdapter();
 
   const testCases: TestCase[] = [
     // --- GPT Scenarios ---
@@ -188,6 +194,124 @@ describe("Model Adapter transformOptions", () => {
           thinkingConfig: {
             includeThoughts: false,
             thinkingBudget: 8192,
+          },
+        },
+      },
+    },
+
+    // --- Gemini 3 Pro Scenarios ---
+    {
+      name: "Gemini 3 Pro: low effort -> LOW",
+      model: gemini3ProAdapter,
+      input: {
+        "openai-compatible": {
+          reasoning: {
+            effort: "low",
+          },
+        },
+      },
+      expected: {
+        "openai-compatible": {
+          thinkingConfig: {
+            includeThoughts: true,
+            thinkingLevel: "LOW",
+          },
+        },
+      },
+    },
+    {
+      name: "Gemini 3 Pro: medium effort -> HIGH",
+      model: gemini3ProAdapter,
+      input: {
+        "openai-compatible": {
+          reasoning: {
+            effort: "medium",
+          },
+        },
+      },
+      expected: {
+        "openai-compatible": {
+          thinkingConfig: {
+            includeThoughts: true,
+            thinkingLevel: "HIGH",
+          },
+        },
+      },
+    },
+
+    // --- Gemini 3 Flash Scenarios ---
+    {
+      name: "Gemini 3 Flash: low effort -> LOW",
+      model: gemini3FlashAdapter,
+      input: {
+        "openai-compatible": {
+          reasoning: {
+            effort: "low",
+          },
+        },
+      },
+      expected: {
+        "openai-compatible": {
+          thinkingConfig: {
+            includeThoughts: true,
+            thinkingLevel: "LOW",
+          },
+        },
+      },
+    },
+    {
+      name: "Gemini 3 Flash: medium effort -> MEDIUM",
+      model: gemini3FlashAdapter,
+      input: {
+        "openai-compatible": {
+          reasoning: {
+            effort: "medium",
+          },
+        },
+      },
+      expected: {
+        "openai-compatible": {
+          thinkingConfig: {
+            includeThoughts: true,
+            thinkingLevel: "MEDIUM",
+          },
+        },
+      },
+    },
+    {
+      name: "Gemini 3 Flash: high effort -> HIGH",
+      model: gemini3FlashAdapter,
+      input: {
+        "openai-compatible": {
+          reasoning: {
+            effort: "high",
+          },
+        },
+      },
+      expected: {
+        "openai-compatible": {
+          thinkingConfig: {
+            includeThoughts: true,
+            thinkingLevel: "HIGH",
+          },
+        },
+      },
+    },
+    {
+      name: "Gemini 3 Flash: default effort -> MEDIUM",
+      model: gemini3FlashAdapter,
+      input: {
+        "openai-compatible": {
+          reasoning: {
+            enabled: true,
+          },
+        },
+      },
+      expected: {
+        "openai-compatible": {
+          thinkingConfig: {
+            includeThoughts: true,
+            thinkingLevel: "MEDIUM",
           },
         },
       },
