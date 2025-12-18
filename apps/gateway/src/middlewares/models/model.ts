@@ -17,6 +17,7 @@ export type SupportedModel = Static<typeof supportedModel>;
 
 export interface ModelAdapter extends SupportedModel {
   transformOptions(options?: ProviderOptions): ProviderOptions;
+  transformPrompt(prompt: any): any;
 }
 
 export abstract class ModelAdapterBase implements ModelAdapter {
@@ -30,4 +31,8 @@ export abstract class ModelAdapterBase implements ModelAdapter {
   };
 
   abstract transformOptions(options?: ProviderOptions): ProviderOptions;
+
+  transformPrompt(prompt: any): any {
+    return prompt;
+  }
 }

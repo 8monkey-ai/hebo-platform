@@ -105,17 +105,30 @@ export function toModelMessages(messages: OpenAICompatibleMessage[]) {
         if (message.tool_calls) {
           modelMessages.push({
             role: "assistant",
-            content: message.tool_calls.map((toolCall) => ({
-              type: "tool-call",
-              toolCallId: toolCall.id,
-              toolName: toolCall.function.name,
-              input: JSON.parse(toolCall.function.arguments),
-              providerOptions: {
-                google: {
-                  thoughtSignature: "context_engineering_is_the_way_to_go",
-                },
-              },
-            })),
+            content: message.tool_calls.map((toolCall) => {
+              const {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                type,
+                id,
+                function: toolFunction,
+                ...metadata
+              } = toolCall;
+
+              const content: any = {
+                type: "tool-call",
+                toolCallId: id,
+                toolName: toolFunction.name,
+                input: JSON.parse(toolFunction.arguments),
+              };
+
+              if (Object.keys(metadata).length > 0) {
+                content.providerOptions = {
+                  openaiCompatible: metadata,
+                };
+              }
+
+              return content;
+            }),
           });
         } else {
           modelMessages.push(message as ModelMessage);

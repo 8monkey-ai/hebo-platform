@@ -12,7 +12,7 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
   };
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    const { "openai-compatible": openAiOptions, ...rest } = options || {};
+    const { openaiCompatible: openAiOptions, ...rest } = options || {};
 
     if (!openAiOptions) return rest;
 
@@ -29,7 +29,7 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
 
     return {
       ...rest,
-      "openai-compatible": config,
+      openaiCompatible: config,
     };
   }
 
@@ -90,6 +90,48 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
   }
 }
 
+export abstract class Gemini3ModelAdapter extends GeminiModelAdapter {
+  transformPrompt(prompt: any): any {
+    return prompt.map((message: any) => {
+      if (message.role === "assistant" && Array.isArray(message.content)) {
+        let hasInjected = false;
+        return {
+          ...message,
+          content: message.content.map((part: any) => {
+            if (part.type === "tool-call") {
+              if (hasInjected) {
+                return part;
+              }
+
+              const existingSignature = (part as any).providerOptions
+                ?.openaiCompatible?.thoughtSignature;
+
+              if (existingSignature) {
+                hasInjected = true;
+                return part;
+              }
+
+              hasInjected = true;
+              return {
+                ...part,
+                providerOptions: {
+                  ...(part as any).providerOptions,
+                  google: {
+                    ...(part as any).providerOptions?.google,
+                    thoughtSignature: "context_engineering_is_the_way_to_go",
+                  },
+                },
+              };
+            }
+            return part;
+          }),
+        };
+      }
+      return message;
+    });
+  }
+}
+
 export class Gemini25FlashPreviewAdapter extends GeminiModelAdapter {
   readonly id = "google/gemini-2.5-flash-preview-09-2025";
   readonly name = "Gemini 2.5 Flash Preview (Sep 2025)";
@@ -102,7 +144,7 @@ export class Gemini25FlashLitePreviewAdapter extends GeminiModelAdapter {
   readonly created = 1_764_888_221;
 }
 
-export class Gemini3ProPreviewAdapter extends GeminiModelAdapter {
+export class Gemini3ProPreviewAdapter extends Gemini3ModelAdapter {
   readonly id = "google/gemini-3-pro-preview";
   readonly name = "Gemini 3 Pro Preview";
   readonly created = 1_765_855_208;
@@ -137,7 +179,7 @@ export class Gemini3ProPreviewAdapter extends GeminiModelAdapter {
   }
 }
 
-export class Gemini3FlashPreviewAdapter extends GeminiModelAdapter {
+export class Gemini3FlashPreviewAdapter extends Gemini3ModelAdapter {
   readonly id = "google/gemini-3-flash-preview";
   readonly name = "Gemini 3 Flash Preview";
   readonly created = 1_766_023_009;

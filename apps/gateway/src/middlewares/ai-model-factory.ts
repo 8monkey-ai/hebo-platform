@@ -56,12 +56,18 @@ export const aiModelFactory = new Elysia({
       if (modality === "chat") {
         const modelSpecificMiddleware: LanguageModelMiddleware = {
           transformParams: ({ params }: { params: any }) => {
-            const transformed = modelAdapter.transformOptions(
+            const transformedOptions = modelAdapter.transformOptions(
               params.providerOptions ?? {},
             );
+
+            const transformedPrompt = modelAdapter.transformPrompt(
+              params.prompt,
+            );
+
             return {
               ...params,
-              providerOptions: transformed,
+              providerOptions: transformedOptions,
+              prompt: transformedPrompt,
             };
           },
         };
@@ -80,7 +86,20 @@ export const aiModelFactory = new Elysia({
 
         model = wrapLanguageModel({
           model: model as any,
-          middleware: [modelSpecificMiddleware, providerSpecificMiddleware],
+          middleware: [
+            modelSpecificMiddleware,
+            providerSpecificMiddleware,
+            {
+              transformParams: ({ params }: { params: any }) => {
+                console.log(
+                  "Prompt:",
+                  params.prompt[1].content[0].providerOptions,
+                );
+                console.log("Provider Options:", params.providerOptions);
+                return params;
+              },
+            },
+          ],
         }) as AiModelFor<M>;
       }
 

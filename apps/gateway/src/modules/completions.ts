@@ -33,6 +33,7 @@ export const completions = new Elysia({
         temperature = 1,
         stream = false,
       } = body;
+      console.log(messages[1].tool_calls);
 
       const chatModel = await aiModelFactory.create(modelAliasPath, "chat");
 
@@ -42,7 +43,7 @@ export const completions = new Elysia({
 
       const providerOptions: Record<string, any> = {};
       if (reasoning) {
-        providerOptions["openai-compatible"] = { reasoning };
+        providerOptions.openaiCompatible = { reasoning };
       }
 
       if (stream) {

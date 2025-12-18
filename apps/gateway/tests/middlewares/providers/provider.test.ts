@@ -33,7 +33,7 @@ describe("Provider Adapter transformOptions", () => {
       name: "Groq: passes through transformed reasoningEffort",
       provider: groqProvider,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoningEffort: "medium",
         },
       } as any,
@@ -50,7 +50,7 @@ describe("Provider Adapter transformOptions", () => {
         "other-provider": {
           key: "value",
         },
-        "openai-compatible": {
+        openaiCompatible: {
           reasoningEffort: "high",
         },
       } as any,
@@ -75,7 +75,7 @@ describe("Provider Adapter transformOptions", () => {
       name: "Bedrock: converts transformed openai-compatible options to snake_case",
       provider: bedrockProvider,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           maxTokens: 512,
           stopSequences: ["\nUser:", "stop"],
           customBedrockOption: "value",
@@ -103,7 +103,7 @@ describe("Provider Adapter transformOptions", () => {
       name: "Vertex: passes through transformed thinkingConfig",
       provider: vertexProvider,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingBudget: 8192,
@@ -123,7 +123,7 @@ describe("Provider Adapter transformOptions", () => {
       name: "Vertex: passes through generic safetySettings from openai-compatible",
       provider: vertexProvider,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           safetySettings: [
             {
               category: "HARM_CATEGORY_HATE_SPEECH",

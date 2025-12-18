@@ -13,13 +13,13 @@ export class CohereEmbedV4Adapter extends ModelAdapterBase {
   };
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    const { "openai-compatible": openAiOptions, ...rest } = options || {};
+    const { openaiCompatible: openAiOptions, ...rest } = options || {};
     if (!openAiOptions) {
       return rest;
     }
     return {
       ...rest,
-      "openai-compatible": {},
+      openaiCompatible: {},
     };
   }
 }

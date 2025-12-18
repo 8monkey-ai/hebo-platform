@@ -31,6 +31,7 @@ export const OpenAICompatibleMessageToolCall = t.Object({
     arguments: t.String(),
     name: t.String(),
   }),
+  thought_signature: t.Optional(t.String()),
 });
 
 export const OpenAICompatibleSystemMessage = t.Object({
@@ -52,13 +53,16 @@ export const OpenAICompatibleUserMessage = t.Object({
   ]),
 });
 
-export const OpenAICompatibleAssistantMessage = t.Object({
-  role: t.Literal("assistant"),
-  content: t.Union([t.String(), t.Null()]),
-  tool_calls: t.Optional(t.Array(OpenAICompatibleMessageToolCall)),
-  reasoning: t.Optional(t.String()),
-  reasoning_content: t.Optional(t.String()),
-});
+export const OpenAICompatibleAssistantMessage = t.Object(
+  {
+    role: t.Literal("assistant"),
+    content: t.Union([t.String(), t.Null()]),
+    tool_calls: t.Optional(t.Array(OpenAICompatibleMessageToolCall)),
+    reasoning: t.Optional(t.String()),
+    reasoning_content: t.Optional(t.String()),
+  },
+  { additionalProperties: true },
+);
 
 export const OpenAICompatibleToolMessage = t.Object({
   role: t.Literal("tool"),
@@ -154,7 +158,7 @@ export type OpenAICompatibleConfig = Static<typeof OpenAICompatibleConfig>;
 
 export const OpenAICompatibleOptions = t.Object(
   {
-    "openai-compatible": t.Optional(OpenAICompatibleConfig),
+    openaiCompatible: t.Optional(OpenAICompatibleConfig),
   },
   { additionalProperties: true },
 );

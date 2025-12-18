@@ -42,26 +42,26 @@ describe("Model Adapter transformOptions", () => {
       name: "GPT: basic options (no reasoning)",
       model: gptAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           otherParam: 123,
         },
       },
       expected: {
-        "openai-compatible": {},
+        openaiCompatible: {},
       },
     },
     {
       name: "GPT: reasoning enabled with effort",
       model: gptAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "high",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoningEffort: "high",
         },
       },
@@ -70,14 +70,14 @@ describe("Model Adapter transformOptions", () => {
       name: "GPT: reasoning enabled (boolean) defaults to medium",
       model: gptAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             enabled: true,
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoningEffort: "medium",
         },
       },
@@ -86,7 +86,7 @@ describe("Model Adapter transformOptions", () => {
       name: "GPT: throws on max_tokens in reasoning",
       model: gptAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             enabled: true,
             max_tokens: 1000,
@@ -108,14 +108,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini: reasoning enabled (boolean) defaults to 8192 budget",
       model: geminiAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             enabled: true,
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingBudget: 8192,
@@ -127,14 +127,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini: reasoning with low effort",
       model: geminiAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "low",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingBudget: 1024,
@@ -146,14 +146,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini: reasoning with high effort",
       model: geminiAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "high",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingBudget: 24_576,
@@ -165,14 +165,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini: reasoning with minimal effort",
       model: geminiAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "minimal",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingBudget: 1024,
@@ -184,14 +184,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini: reasoning with xhigh effort",
       model: geminiAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "xhigh",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingBudget: 32_768,
@@ -203,28 +203,28 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini: reasoning disabled with none effort",
       model: geminiAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "none",
           },
         },
       },
       expected: {
-        "openai-compatible": {},
+        openaiCompatible: {},
       },
     },
     {
       name: "Gemini: reasoning with specific max_tokens",
       model: geminiAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             max_tokens: 5000,
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingBudget: 5000,
@@ -236,7 +236,7 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini: exclude thoughts",
       model: geminiAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             enabled: true,
             exclude: true,
@@ -244,7 +244,7 @@ describe("Model Adapter transformOptions", () => {
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: false,
             thinkingBudget: 8192,
@@ -258,14 +258,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini 3 Pro: low effort -> LOW",
       model: gemini3ProAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "low",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "low",
@@ -277,14 +277,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini 3 Pro: medium effort -> HIGH",
       model: gemini3ProAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "medium",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "high",
@@ -296,14 +296,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini 3 Pro: minimal effort -> LOW",
       model: gemini3ProAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "minimal",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "low",
@@ -315,14 +315,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini 3 Pro: xhigh effort -> HIGH",
       model: gemini3ProAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "xhigh",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "high",
@@ -336,14 +336,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini 3 Flash: low effort -> LOW",
       model: gemini3FlashAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "low",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "low",
@@ -355,14 +355,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini 3 Flash: medium effort -> MEDIUM",
       model: gemini3FlashAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "medium",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "medium",
@@ -374,14 +374,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini 3 Flash: high effort -> HIGH",
       model: gemini3FlashAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "high",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "high",
@@ -393,14 +393,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini 3 Flash: minimal effort -> MINIMAL",
       model: gemini3FlashAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "minimal",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "minimal",
@@ -412,14 +412,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini 3 Flash: xhigh effort -> HIGH",
       model: gemini3FlashAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             effort: "xhigh",
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "high",
@@ -431,14 +431,14 @@ describe("Model Adapter transformOptions", () => {
       name: "Gemini 3 Flash: default effort -> MEDIUM",
       model: gemini3FlashAdapter,
       input: {
-        "openai-compatible": {
+        openaiCompatible: {
           reasoning: {
             enabled: true,
           },
         },
       },
       expected: {
-        "openai-compatible": {
+        openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "medium",
@@ -456,6 +456,170 @@ describe("Model Adapter transformOptions", () => {
         const result = model.transformOptions(input);
         expect(result).toEqual(expected);
       }
+    });
+  }
+});
+
+describe("Model Adapter transformPrompt", () => {
+  type PromptTestCase = {
+    name: string;
+    model: ModelAdapter;
+    inputPrompt: any;
+    expectedPrompt: any;
+  };
+
+  const gemini3ProAdapter = new Gemini3ProPreviewAdapter();
+
+  const promptTestCases: PromptTestCase[] = [
+    {
+      name: "injects google thoughtSignature when missing",
+      model: gemini3ProAdapter,
+      inputPrompt: [
+        {
+          role: "assistant",
+          content: [
+            {
+              type: "tool-call",
+              toolCallId: "call_123",
+              toolName: "get_weather",
+              args: { location: "San Francisco" },
+            },
+          ],
+        },
+      ],
+      expectedPrompt: [
+        {
+          role: "assistant",
+          content: [
+            {
+              type: "tool-call",
+              toolCallId: "call_123",
+              toolName: "get_weather",
+              args: { location: "San Francisco" },
+              providerOptions: {
+                google: {
+                  thoughtSignature: "context_engineering_is_the_way_to_go",
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "does NOT inject when openaiCompatible.thoughtSignature is present",
+      model: gemini3ProAdapter,
+      inputPrompt: [
+        {
+          role: "assistant",
+          content: [
+            {
+              type: "tool-call",
+              toolCallId: "call_456",
+              toolName: "get_time",
+              args: { timezone: "UTC" },
+              providerOptions: {
+                openaiCompatible: {
+                  thoughtSignature: "existing_signature",
+                },
+              },
+            },
+          ],
+        },
+      ],
+      expectedPrompt: [
+        {
+          role: "assistant",
+          content: [
+            {
+              type: "tool-call",
+              toolCallId: "call_456",
+              toolName: "get_time",
+              args: { timezone: "UTC" },
+              providerOptions: {
+                openaiCompatible: {
+                  thoughtSignature: "existing_signature",
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: "injects thoughtSignature for the first tool call of each message",
+      model: gemini3ProAdapter,
+      inputPrompt: [
+        {
+          role: "assistant",
+          content: [
+            {
+              type: "tool-call",
+              toolCallId: "call_1",
+              toolName: "t1",
+            },
+            {
+              type: "tool-call",
+              toolCallId: "call_2",
+              toolName: "t2",
+            },
+          ],
+        },
+        {
+          role: "assistant",
+          content: [
+            {
+              type: "tool-call",
+              toolCallId: "call_3",
+              toolName: "t3",
+            },
+          ],
+        },
+      ],
+      expectedPrompt: [
+        {
+          role: "assistant",
+          content: [
+            {
+              type: "tool-call",
+              toolCallId: "call_1",
+              toolName: "t1",
+              providerOptions: {
+                google: {
+                  thoughtSignature: "context_engineering_is_the_way_to_go",
+                },
+              },
+            },
+            {
+              type: "tool-call",
+              toolCallId: "call_2",
+              toolName: "t2",
+            },
+          ],
+        },
+        {
+          role: "assistant",
+          content: [
+            {
+              type: "tool-call",
+              toolCallId: "call_3",
+              toolName: "t3",
+              providerOptions: {
+                google: {
+                  thoughtSignature: "context_engineering_is_the_way_to_go",
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  for (const { name, model, inputPrompt, expectedPrompt } of promptTestCases) {
+    test(name, () => {
+      const result = model.transformPrompt(inputPrompt);
+      expect(result).toEqual(expectedPrompt);
     });
   }
 });

@@ -8,7 +8,7 @@ export abstract class GptModelAdapter extends ModelAdapterBase {
   readonly modality = "chat";
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    const { "openai-compatible": openAiOptions, ...rest } = options || {};
+    const { openaiCompatible: openAiOptions, ...rest } = options || {};
 
     if (!openAiOptions) return rest;
 
@@ -25,7 +25,7 @@ export abstract class GptModelAdapter extends ModelAdapterBase {
 
     return {
       ...rest,
-      "openai-compatible": config,
+      openaiCompatible: config,
     };
   }
 
