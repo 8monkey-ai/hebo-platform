@@ -10,7 +10,7 @@
     "format": "prisma format"
   },
   "devDependencies": {
-    "bun-types": "^1.3.1",
+    "bun-types": "^1.3.4",
     "prisma": "^6.17.0",
     "prismabox": "^1.1.25"
   },

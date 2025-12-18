@@ -6,7 +6,9 @@ import { createDbClient } from "@hebo/database/client";
 export const dbClient = new Elysia({
   name: "db-client",
 })
-  .resolve((ctx) => ({
-    dbClient: createDbClient((ctx as unknown as { userId: string }).userId),
-  }))
+  .resolve(function resolveDbClient(ctx) {
+    return {
+      dbClient: createDbClient((ctx as unknown as { userId: string }).userId),
+    };
+  })
   .as("scoped");

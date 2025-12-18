@@ -1,6 +1,9 @@
 import { logger } from "@bogeychan/elysia-logger";
+import { opentelemetry } from "@elysiajs/opentelemetry";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import Elysia from "elysia";
+
+import { getOtelConfig } from "@hebo/shared-api/utils/otel";
 
 import { countLetterTool } from "./aikit/count-letter.js";
 import { createMcpHandler } from "./aikit/mcp-transport.js";
@@ -16,8 +19,9 @@ mcpServer.registerTool(
   countLetterTool.handler,
 );
 
-const createApp = () =>
+const createMcp = () =>
   new Elysia()
+    .use(opentelemetry(getOtelConfig("hebo-mcp")))
     .use(logger({ level: LOG_LEVEL }))
     .get("/", () => hello)
     .group("/aikit", (app) =>
@@ -27,8 +31,8 @@ const createApp = () =>
     );
 
 if (import.meta.main) {
-  const app = createApp().listen(PORT);
-  console.log(`🐵 Hebo MCP running at ${app.server!.url}`);
+  const mcp = createMcp().listen(PORT);
+  console.log(`🐵 Hebo MCP running at ${mcp.server!.url}`);
 }
 
-export type McpApp = ReturnType<typeof createApp>;
+export type Mcp = ReturnType<typeof createMcp>;
