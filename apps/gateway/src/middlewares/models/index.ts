@@ -3,6 +3,7 @@ import {
   Gemini25FlashPreviewAdapter,
   Gemini25FlashLitePreviewAdapter,
   Gemini3ProPreviewAdapter,
+  Gemini3FlashPreviewAdapter,
 } from "./gemini";
 import { GptOss120bAdapter, GptOss20bAdapter } from "./gpt";
 import { type ModelAdapter, type SupportedModel } from "./model";
@@ -11,6 +12,7 @@ const ALL_MODEL_ADAPTER_CLASSES = [
   Gemini25FlashPreviewAdapter,
   Gemini25FlashLitePreviewAdapter,
   Gemini3ProPreviewAdapter,
+  Gemini3FlashPreviewAdapter,
   GptOss120bAdapter,
   GptOss20bAdapter,
   CohereEmbedV4Adapter,

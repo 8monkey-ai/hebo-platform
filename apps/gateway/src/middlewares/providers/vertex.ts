@@ -22,6 +22,7 @@ export class VertexProviderAdapter
     "google/gemini-2.5-flash-lite-preview-09-2025":
       "gemini-2.5-flash-lite-preview-09-2025",
     "google/gemini-3-pro-preview": "gemini-3-pro-preview",
+    "google/gemini-3-flash-preview": "gemini-3-flash-preview",
   };
 
   constructor(modelType: string) {

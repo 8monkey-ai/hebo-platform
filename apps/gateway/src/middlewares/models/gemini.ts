@@ -9,6 +9,10 @@ import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export abstract class GeminiModelAdapter extends ModelAdapterBase {
   readonly modality = "chat";
+  readonly owned_by = "google";
+  readonly pricing = {
+    monthly_free_tokens: 0,
+  };
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
     const config: Record<string, any> = {};
@@ -71,29 +75,23 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
 export class Gemini25FlashPreviewAdapter extends GeminiModelAdapter {
   readonly id = "google/gemini-2.5-flash-preview-09-2025";
   readonly name = "Gemini 2.5 Flash Preview (Sep 2025)";
-  readonly owned_by = "google";
   readonly created = 1_764_888_221;
-  readonly pricing = {
-    monthly_free_tokens: 0,
-  };
 }
 
 export class Gemini25FlashLitePreviewAdapter extends GeminiModelAdapter {
   readonly id = "google/gemini-2.5-flash-lite-preview-09-2025";
   readonly name = "Gemini 2.5 Flash Lite Preview (Sep 2025)";
-  readonly owned_by = "google";
   readonly created = 1_764_888_221;
-  readonly pricing = {
-    monthly_free_tokens: 0,
-  };
 }
 
 export class Gemini3ProPreviewAdapter extends GeminiModelAdapter {
   readonly id = "google/gemini-3-pro-preview";
   readonly name = "Gemini 3 Pro Preview";
-  readonly owned_by = "google";
   readonly created = 1_765_855_208;
-  readonly pricing = {
-    monthly_free_tokens: 0,
-  };
+}
+
+export class Gemini3FlashPreviewAdapter extends GeminiModelAdapter {
+  readonly id = "google/gemini-3-flash-preview";
+  readonly name = "Gemini 3 Flash Preview";
+  readonly created = 1_766_023_009;
 }
