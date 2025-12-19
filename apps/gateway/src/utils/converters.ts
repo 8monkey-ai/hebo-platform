@@ -73,87 +73,88 @@ function parseToolOutput(content: string) {
 
 export function toModelMessages(messages: OpenAICompatibleMessage[]) {
   const modelMessages: ModelMessage[] = [];
-
-  const toolById = new Map<string, OpenAICompatibleToolMessage>();
-  for (const m of messages) {
-    if (m.role === "tool") toolById.set(m.tool_call_id, m);
-  }
+  const toolById = indexToolMessages(messages);
 
   for (const message of messages) {
-    switch (message.role) {
-      case "system": {
-        modelMessages.push(message as ModelMessage);
-        break;
-      }
+    if (message.role === "tool") continue;
 
-      case "user": {
-        if (Array.isArray(message.content)) {
-          modelMessages.push({
-            role: "user",
-            content: convertToModelContent(message.content),
-          });
-        } else {
-          modelMessages.push(message as ModelMessage);
-        }
-        break;
-      }
-
-      case "assistant": {
-        if (message.tool_calls && message.tool_calls.length > 0) {
-          modelMessages.push({
-            role: "assistant",
-            content: message.tool_calls.map((toolCall) => {
-              // Let the downstream sdk break if the json is malformed
-              let input;
-              try {
-                input = JSON.parse(toolCall.function.arguments);
-              } catch {
-                input = toolCall.function.arguments;
-              }
-
-              return {
-                type: "tool-call",
-                toolCallId: toolCall.id,
-                toolName: toolCall.function.name,
-                input,
-              };
-            }),
-          });
-
-          const toolResultParts: ToolResultPart[] = message.tool_calls.flatMap(
-            (tc) => {
-              const toolMsg = toolById.get(tc.id);
-              if (!toolMsg) return [];
-
-              return [
-                {
-                  type: "tool-result",
-                  toolCallId: tc.id,
-                  toolName: tc.function.name,
-                  output: parseToolOutput(toolMsg.content as string),
-                },
-              ];
-            },
-          );
-
-          modelMessages.push({
-            role: "tool",
-            content: toolResultParts,
-          });
-          break;
-        }
-
-        modelMessages.push(message as ModelMessage);
-        break;
-      }
-
-      case "tool": {
-        break;
-      }
+    if (message.role === "system") {
+      modelMessages.push(message as ModelMessage);
+      continue;
     }
+
+    if (message.role === "user") {
+      modelMessages.push(toUserModelMessage(message));
+      continue;
+    }
+
+    const { assistant, tool } = toAssistantModelMessages(message, toolById);
+    modelMessages.push(assistant);
+    if (tool) modelMessages.push(tool);
   }
 
   return modelMessages;
+}
+
+function indexToolMessages(messages: OpenAICompatibleMessage[]) {
+  const map = new Map<string, OpenAICompatibleToolMessage>();
+  for (const m of messages) {
+    if (m.role === "tool") map.set(m.tool_call_id, m);
+  }
+  return map;
+}
+
+function toUserModelMessage(
+  message: Extract<OpenAICompatibleMessage, { role: "user" }>,
+): ModelMessage {
+  if (Array.isArray(message.content)) {
+    return { role: "user", content: convertToModelContent(message.content) };
+  }
+  return message as ModelMessage;
+}
+
+function toAssistantModelMessages(
+  message: Extract<OpenAICompatibleMessage, { role: "assistant" }>,
+  toolById: Map<string, OpenAICompatibleToolMessage>,
+): { assistant: ModelMessage; tool?: ModelMessage } {
+  const toolCalls = message.tool_calls ?? [];
+  if (toolCalls.length === 0) return { assistant: message as ModelMessage };
+
+  const assistant: ModelMessage = {
+    role: "assistant",
+    content: toolCalls.map((tc) => ({
+      type: "tool-call",
+      toolCallId: tc.id,
+      toolName: tc.function.name,
+      input: parseToolInput(tc.function.arguments),
+    })),
+  };
+
+  const toolResultParts: ToolResultPart[] = [];
+  for (const tc of toolCalls) {
+    const toolMsg = toolById.get(tc.id);
+    if (!toolMsg) continue;
+
+    toolResultParts.push({
+      type: "tool-result",
+      toolCallId: tc.id,
+      toolName: tc.function.name,
+      output: parseToolOutput(toolMsg.content as string),
+    });
+  }
+
+  const tool = toolResultParts.length > 0
+    ? ({ role: "tool", content: toolResultParts } as ModelMessage)
+    : undefined;
+  return { assistant, tool };
+}
+
+function parseToolInput(raw: string) {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return raw;
+  }
 }
 
 export const toOpenAICompatibleFinishReason = (
