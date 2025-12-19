@@ -194,7 +194,7 @@ describe("Model Adapter transformOptions", () => {
         openaiCompatible: {
           thinkingConfig: {
             includeThoughts: true,
-            thinkingBudget: 32_768,
+            thinkingBudget: 24_576,
           },
         },
       },
