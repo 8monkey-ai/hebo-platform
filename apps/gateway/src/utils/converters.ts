@@ -1,22 +1,24 @@
-import {
-  jsonSchema,
-  tool,
-  type FinishReason,
-  type GenerateTextResult,
-  type ModelMessage,
-  type StreamTextResult,
-  type ToolChoice,
+import { jsonSchema, tool } from "ai";
+
+import type {
+  OpenAICompatibleAssistantMessage,
+  OpenAICompatibleContentPart,
+  OpenAICompatibleFinishReason,
+  OpenAICompatibleMessage,
+  OpenAICompatibleTool,
+  OpenAICompatibleToolChoice,
+  OpenAICompatibleToolCallDelta,
+  OpenAICompatibleToolMessage,
+} from "./openai-compatible-api-schemas";
+import type {
+  FinishReason,
+  GenerateTextResult,
+  ModelMessage,
+  StreamTextResult,
+  ToolChoice,
+  ToolResultPart,
 } from "ai";
 
-import {
-  type OpenAICompatibleAssistantMessage,
-  type OpenAICompatibleContentPart,
-  type OpenAICompatibleFinishReason,
-  type OpenAICompatibleMessage,
-  type OpenAICompatibleTool,
-  type OpenAICompatibleToolChoice,
-  type OpenAICompatibleToolCallDelta,
-} from "./openai-compatible-api-schemas";
 
 function convertToModelContent(content: OpenAICompatibleContentPart[]) {
   return content.map((part) => {
@@ -62,17 +64,6 @@ function convertToModelContent(content: OpenAICompatibleContentPart[]) {
   });
 }
 
-function findToolCall(messages: OpenAICompatibleMessage[], toolCallId: string) {
-  for (const message of messages) {
-    if (message.role === "assistant" && message.tool_calls) {
-      const toolCall = message.tool_calls.find((tc) => tc.id === toolCallId);
-      if (toolCall) {
-        return toolCall;
-      }
-    }
-  }
-}
-
 function parseToolOutput(content: string) {
   try {
     return { type: "json" as const, value: JSON.parse(content) };
@@ -84,12 +75,18 @@ function parseToolOutput(content: string) {
 export function toModelMessages(messages: OpenAICompatibleMessage[]) {
   const modelMessages: ModelMessage[] = [];
 
+  const toolById = new Map<string, OpenAICompatibleToolMessage>();
+  for (const m of messages) {
+    if (m.role === "tool") toolById.set(m.tool_call_id, m);
+  }
+
   for (const message of messages) {
     switch (message.role) {
       case "system": {
         modelMessages.push(message as ModelMessage);
         break;
       }
+
       case "user": {
         if (Array.isArray(message.content)) {
           modelMessages.push({
@@ -101,44 +98,49 @@ export function toModelMessages(messages: OpenAICompatibleMessage[]) {
         }
         break;
       }
+
       case "assistant": {
-        if (message.tool_calls) {
+        if (message.tool_calls && message.tool_calls.length > 0) {
           modelMessages.push({
             role: "assistant",
-            content: message.tool_calls.map((toolCall) => ({
-              type: "tool-call",
-              toolCallId: toolCall.id,
-              toolName: toolCall.function.name,
-              input: JSON.parse(toolCall.function.arguments),
-            })),
+            content: message.tool_calls.map((toolCall) => {
+              return {
+                type: "tool-call",
+                toolCallId: toolCall.id,
+                toolName: toolCall.function.name,
+                input: JSON.parse(toolCall.function.arguments),
+              };
+            }),
           });
-        } else {
-          modelMessages.push(message as ModelMessage);
+
+          const toolResultParts: ToolResultPart[] = message.tool_calls.flatMap(
+            (tc) => {
+              const toolMsg = toolById.get(tc.id);
+              if (!toolMsg) return [];
+
+              return [
+                {
+                  type: "tool-result",
+                  toolCallId: tc.id,
+                  toolName: tc.function.name,
+                  output: parseToolOutput(toolMsg.content as string),
+                },
+              ];
+            },
+          );
+
+          modelMessages.push({
+            role: "tool",
+            content: toolResultParts,
+          });
+          break;
         }
+
+        modelMessages.push(message as ModelMessage);
         break;
       }
+
       case "tool": {
-        const toolCall = findToolCall(messages, message.tool_call_id);
-
-        if (!toolCall) {
-          throw new Error(
-            `Tool call with id '${
-              message.tool_call_id
-            }' not found in assistant messages.`,
-          );
-        }
-
-        modelMessages.push({
-          role: "tool",
-          content: [
-            {
-              type: "tool-result",
-              toolCallId: message.tool_call_id,
-              toolName: toolCall.function.name,
-              output: parseToolOutput(message.content as string),
-            },
-          ],
-        });
         break;
       }
     }
@@ -170,7 +172,7 @@ export const toOpenAICompatibleMessage = (
   };
 
   if (result.toolCalls && result.toolCalls.length > 0) {
-    message.tool_calls = result.toolCalls.map((toolCall: any) => ({
+    message.tool_calls = result.toolCalls.map((toolCall) => ({
       id: toolCall.toolCallId,
       type: "function" as const,
       function: {
@@ -198,7 +200,7 @@ export const toToolSet = (tools: OpenAICompatibleTool[] | undefined) => {
   for (const t of tools) {
     toolSet[t.function.name] = tool({
       description: t.function.description,
-      inputSchema: jsonSchema(t.function.parameters as any),
+      inputSchema: jsonSchema(t.function.parameters),
     });
   }
   return toolSet;
