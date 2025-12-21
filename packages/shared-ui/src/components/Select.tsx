@@ -22,7 +22,9 @@ function Select({
   placeholder,
   defaultValue,
 }: SelectProps) {
-  const selectRef = useRef<React.ComponentRef<typeof SelectTrigger>>(null);
+  const selectRef = useRef<React.ComponentRef<typeof SelectTrigger> | null>(
+    null,
+  );
   const control = useControl({
     defaultValue,
     onFocus() {
@@ -31,39 +33,40 @@ function Select({
   });
 
   return (
-    <>
-      <input name={name} ref={control.register} type="hidden" />
-      <ShadcnSelect
-        // Conform's docs show using control.value directly; this is safe.
-        // eslint-disable-next-line react-hooks/refs
-        value={control.value}
-        onValueChange={(value) => {
-          control.change(value);
-        }}
-        onOpenChange={(open) => {
-          if (!open) {
-            control.blur();
-          }
-        }}
-        disabled={disabled}
+    <ShadcnSelect
+      name={name}
+      inputRef={(input) => control.register(input)}
+      value={control.value}
+      onValueChange={(value) => {
+        control.change(value ?? "");
+      }}
+      onOpenChange={(open) => {
+        if (!open) {
+          control.blur();
+        }
+      }}
+      disabled={disabled}
+    >
+      <SelectTrigger
+        className="bg-background w-full min-w-0 truncate"
+        ref={selectRef}
       >
-        <SelectTrigger
-          className="bg-background w-full min-w-0 truncate"
-          ref={selectRef}
-        >
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {items.map((item) => {
-            return (
-              <SelectItem key={item.value} value={item.value}>
-                {item.name}
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </ShadcnSelect>
-    </>
+        <SelectValue>
+          {control.value ?? (
+            <span className="text-muted-foreground">{placeholder}</span>
+          )}
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {items.map((item) => {
+          return (
+            <SelectItem key={item.value} value={item.value}>
+              {item.name}
+            </SelectItem>
+          );
+        })}
+      </SelectContent>
+    </ShadcnSelect>
   );
 }
 

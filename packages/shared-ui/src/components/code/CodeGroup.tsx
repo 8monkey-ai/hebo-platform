@@ -1,6 +1,6 @@
 "use client";
 
-import * as Tabs from "@radix-ui/react-tabs";
+import { Tabs } from "@base-ui/react";
 import { clsx } from "clsx";
 import * as React from "react";
 
@@ -71,7 +71,7 @@ export const CodeGroup = React.forwardRef(function CodeGroup(
         </div>
       </Tabs.List>
       {childArr.map((child, tabIndex: number) => (
-        <Tabs.Content
+        <Tabs.Panel
           key={tabIndex.toString()}
           value={tabIndex.toString()}
           tabIndex={-1}
@@ -85,7 +85,7 @@ export const CodeGroup = React.forwardRef(function CodeGroup(
               ).props.children
             }
           </pre>
-        </Tabs.Content>
+        </Tabs.Panel>
       ))}
     </Tabs.Root>
   );
@@ -98,11 +98,11 @@ interface TabItemProps {
 
 function TabItem({ children, value }: TabItemProps) {
   return (
-    <Tabs.Trigger
-      className="flex flex-none items-center border-b-2 text-sm data-[state=active]:border-slate-500"
+    <Tabs.Tab
+      className="flex flex-none items-center border-b-2 text-sm data-selected:border-slate-500"
       value={value}
     >
       <span className="z-10">{children}</span>
-    </Tabs.Trigger>
+    </Tabs.Tab>
   );
 }

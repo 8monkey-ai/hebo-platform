@@ -9,9 +9,7 @@ type ExtendedButtonProps = React.ComponentProps<typeof ShadCNButton> & {
 };
 
 export function Button({
-  variant = "default",
   className,
-  asChild,
   children,
   isLoading = false,
   disabled = false,
@@ -32,24 +30,16 @@ export function Button({
 
   return (
     <ShadCNButton
-      asChild={asChild}
-      variant={variant}
       className={cn("px-3", className)}
       aria-busy={isLoading}
       disabled={isLoading || disabled}
       {...props}
     >
-      {asChild ? (
-        children
-      ) : (
-        <>
-          {isLoading && showSpinner && (
-            <Loader2Icon className="h-4 w-4 animate-spin" aria-hidden="true" />
-          )}
-          {/* FUTURE: Gerundify title, e.g. "Create" -> "Creating...." */}
-          {children}
-        </>
+      {isLoading && showSpinner && (
+        <Loader2Icon className="h-4 w-4 animate-spin" aria-hidden="true" />
       )}
+      {/* FUTURE: Gerundify title, e.g. "Create" -> "Creating...." */}
+      {children}
     </ShadCNButton>
   );
 }
