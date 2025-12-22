@@ -1,5 +1,5 @@
 import { CopyButton } from "./code/CopyButton";
-import { Input as ShadCNInput } from "../_shadcn/ui/input";
+import { Input as ShadCnInput } from "../_shadcn/ui/input";
 import { cn } from "../lib/utils";
 
 import type { LucideIcon } from "lucide-react";
@@ -27,7 +27,7 @@ export function Input({
           focusable="false"
         />
       )}
-      <ShadCNInput
+      <ShadCnInput
         value={value}
         tabIndex={tabIndex}
         className={cn(

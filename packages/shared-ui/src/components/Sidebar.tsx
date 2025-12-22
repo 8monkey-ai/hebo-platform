@@ -4,7 +4,7 @@ import React from "react";
 import { Button } from "./Button";
 import {
   useSidebar,
-  Sidebar as ShadCNSidebar,
+  Sidebar as ShadCnSidebar,
   SidebarContext,
   SidebarContextProps,
 } from "../_shadcn/ui/sidebar";
@@ -156,7 +156,7 @@ function Sidebar({
   const { open } = useSidebar();
 
   return (
-    <ShadCNSidebar
+    <ShadCnSidebar
       side={side}
       variant={variant}
       collapsible={collapsible}
@@ -165,7 +165,7 @@ function Sidebar({
       {...props}
     >
       {children}
-    </ShadCNSidebar>
+    </ShadCnSidebar>
   );
 }
 

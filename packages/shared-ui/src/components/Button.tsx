@@ -1,10 +1,10 @@
 import { Loader2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { Button as ShadCNButton } from "../_shadcn/ui/button";
+import { Button as ShadCnButton } from "../_shadcn/ui/button";
 import { cn } from "../lib/utils";
 
-type ExtendedButtonProps = React.ComponentProps<typeof ShadCNButton> & {
+type ExtendedButtonProps = React.ComponentProps<typeof ShadCnButton> & {
   isLoading?: boolean;
 };
 
@@ -29,7 +29,7 @@ export function Button({
   }, [isLoading]);
 
   return (
-    <ShadCNButton
+    <ShadCnButton
       className={cn("px-3", className)}
       aria-busy={isLoading}
       disabled={isLoading || disabled}
@@ -40,6 +40,6 @@ export function Button({
       )}
       {/* FUTURE: Gerundify title, e.g. "Create" -> "Creating...." */}
       {children}
-    </ShadCNButton>
+    </ShadCnButton>
   );
 }

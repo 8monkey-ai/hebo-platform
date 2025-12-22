@@ -3,7 +3,7 @@ import { useRef } from "react";
 
 import {
   SelectTrigger,
-  Select as ShadcnSelect,
+  Select as ShadCnSelect,
   SelectValue,
   SelectContent,
   SelectItem,
@@ -33,7 +33,7 @@ function Select({
   });
 
   return (
-    <ShadcnSelect
+    <ShadCnSelect
       name={name}
       inputRef={(input) => control.register(input)}
       value={control.value}
@@ -52,7 +52,7 @@ function Select({
         ref={selectRef}
       >
         <SelectValue>
-          {control.value ?? (
+          {items.find((item) => item.value === control.value)?.name ?? (
             <span className="text-muted-foreground">{placeholder}</span>
           )}
         </SelectValue>
@@ -66,7 +66,7 @@ function Select({
           );
         })}
       </SelectContent>
-    </ShadcnSelect>
+    </ShadCnSelect>
   );
 }
 
