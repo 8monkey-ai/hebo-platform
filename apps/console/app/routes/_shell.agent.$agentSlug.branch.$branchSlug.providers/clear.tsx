@@ -59,7 +59,7 @@ export function ClearCredentialsDialog({open, onOpenChange, provider}: ClearCred
             <DialogTitle>Clear {provider?.name} Credentials</DialogTitle>
             <DialogDescription>Are you sure you want to clear the credentials? </DialogDescription>
           </DialogHeader>
-          <Alert variant="destructive" className="bg-muted/50">
+          <Alert variant="destructive">
             <AlertDescription>
               All gateway requests to {provider?.name} will immediately go back to using the default Hebo built-in provider.
             </AlertDescription>

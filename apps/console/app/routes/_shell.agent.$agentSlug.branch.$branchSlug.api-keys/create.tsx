@@ -1,3 +1,4 @@
+import { Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
@@ -5,6 +6,7 @@ import { z } from "zod";
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
+import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
 import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import {
@@ -19,10 +21,10 @@ import {
 } from "@hebo/shared-ui/components/Dialog";
 import { FormControl, FormField, FormLabel, FormMessage } from "@hebo/shared-ui/components/Form";
 import { Input } from "@hebo/shared-ui/components/Input";
+import { Label } from "@hebo/shared-ui/components/Label";
 import { Select } from "@hebo/shared-ui/components/Select";
 
 import { useFormErrorToast } from "~console/lib/errors";
-import { Info } from "lucide-react";
 
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -173,15 +175,19 @@ function ApiKeyRevealDialog({ apiKey, open, onOpenChange }: ApiKeyRevealDialogPr
           </div>
         </div>
 
-        <label className="flex items-center gap-3 rounded-md border border-border p-3 text-sm bg-muted/50">
-          <input
-            type="checkbox"
-            className="size-4 accent-foreground"
-            checked={acknowledged}
-            onChange={(event) => setAcknowledged(event.target.checked)}
-          />
-          <span>I understand that I will not be able to view this key again.</span>
-        </label>
+        <Alert>
+          <AlertTitle>
+            <Label>
+              <input
+                type="checkbox"
+                className="size-4 accent-foreground"
+                checked={acknowledged}
+                onChange={(event) => setAcknowledged(event.target.checked)}
+              />
+              <span>I understand that I will not be able to view this key again.</span>
+            </Label>
+          </AlertTitle>
+        </Alert>
 
         <DialogFooter>
           <DialogClose render={

@@ -75,7 +75,7 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
                 </DialogHeader>
 
                 <div className="flex flex-col gap-4">
-                  <Alert variant="destructive" className="bg-muted/50">
+                  <Alert variant="destructive">
                     <AlertTitle>
                       <strong>Warning:</strong> This action is not reversible.
                       Be certain.
