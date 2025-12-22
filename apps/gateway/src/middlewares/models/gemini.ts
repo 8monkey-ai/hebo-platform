@@ -105,22 +105,27 @@ export abstract class Gemini3ModelAdapter extends GeminiModelAdapter {
                 return part;
               }
 
-              const existingSignature = (part as any).providerOptions
-                ?.openaiCompatible?.thoughtSignature;
-
-              if (existingSignature) {
-                hasInjected = true;
-                return part;
-              }
+              const currentProviderOptions =
+                (part as any).providerOptions || {};
+              const existingSignature =
+                currentProviderOptions?.openaiCompatible?.thoughtSignature;
+              const thoughtSignatureToInject =
+                existingSignature || "context_engineering_is_the_way_to_go";
 
               hasInjected = true;
+
+              const mutableProviderOptions = { ...currentProviderOptions };
+              delete mutableProviderOptions.openaiCompatible;
+              const { google: existingGoogleOptions, ...restProviderOptions } =
+                mutableProviderOptions;
+
               return {
                 ...part,
                 providerOptions: {
-                  ...(part as any).providerOptions,
+                  ...restProviderOptions,
                   google: {
-                    ...(part as any).providerOptions?.google,
-                    thoughtSignature: "context_engineering_is_the_way_to_go",
+                    ...existingGoogleOptions,
+                    thoughtSignature: thoughtSignatureToInject,
                   },
                 },
               };
