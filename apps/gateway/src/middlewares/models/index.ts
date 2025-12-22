@@ -1,5 +1,6 @@
 import { BadRequestError } from "@hebo/shared-api/errors";
 
+import { ClaudeOpus45Adapter } from "./claude";
 import { CohereEmbedV4Adapter } from "./cohere";
 import {
   Gemini25FlashPreviewAdapter,
@@ -17,6 +18,7 @@ const ALL_MODEL_ADAPTER_CLASSES = [
   Gemini3FlashPreviewAdapter,
   GptOss120bAdapter,
   GptOss20bAdapter,
+  ClaudeOpus45Adapter,
   CohereEmbedV4Adapter,
 ];
 
