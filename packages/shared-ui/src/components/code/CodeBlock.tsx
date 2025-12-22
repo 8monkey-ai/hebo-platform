@@ -3,7 +3,7 @@
 import { clsx } from "clsx";
 import * as React from "react";
 
-import { CopyToClipboardButton } from "./CopyToClipboardButton";
+import { CopyButton } from "./CopyButton";
 import { getNodeText } from "./utils/getNodeText";
 
 export const styles = {
@@ -35,16 +35,10 @@ export const CodeBlock = React.forwardRef(function CodeBlock(
     >
       {title ? (
         <CodeTitleBar title={title}>
-          <CopyToClipboardButton
-            className="relative p-2"
-            textToCopy={textToCopy}
-          />
+          <CopyButton className="relative p-2" value={textToCopy} />
         </CodeTitleBar>
       ) : (
-        <CopyToClipboardButton
-          className="absolute top-0 right-0 p-2"
-          textToCopy={textToCopy}
-        />
+        <CopyButton className="absolute top-0 right-0 p-2" value={textToCopy} />
       )}
       <pre className={styles.code}>{children}</pre>
     </div>

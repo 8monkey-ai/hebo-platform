@@ -5,7 +5,7 @@ import { clsx } from "clsx";
 import * as React from "react";
 
 import { styles, type CodeBlockProps } from "./CodeBlock";
-import { CopyToClipboardButton } from "./CopyToClipboardButton";
+import { CopyButton } from "./CopyButton";
 import { getNodeText } from "./utils/getNodeText";
 
 export type CodeGroupPropsBase = {
@@ -62,8 +62,8 @@ export const CodeGroup = React.forwardRef(function CodeGroup(
           </TabItem>
         ))}
         <div className={clsx("flex flex-auto justify-end")}>
-          <CopyToClipboardButton
-            textToCopy={getNodeText(
+          <CopyButton
+            value={getNodeText(
               childArr[Number.parseInt(activeTab)]?.props?.children,
             )}
             className={clsx("relative p-2")}

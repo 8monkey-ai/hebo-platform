@@ -3,7 +3,7 @@ import { MoreVertical, Trash } from "lucide-react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
-import { CopyToClipboardButton } from "@hebo/shared-ui/components/code/CopyToClipboardButton";
+import { CopyButton } from "@hebo/shared-ui/components/code/CopyButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -66,7 +66,7 @@ export default function BranchesTable({ agent }: BranchesTableProps) {
                         {branch.slug}
                       </span>
                     </Badge>
-                    <CopyToClipboardButton textToCopy={copyValue} />
+                    <CopyButton value={copyValue} />
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-muted-foreground">
                     {`${branch.updated_by ?? "Dummy User"} (${formatDateTime(branch.updated_at ?? new Date(0))})`}

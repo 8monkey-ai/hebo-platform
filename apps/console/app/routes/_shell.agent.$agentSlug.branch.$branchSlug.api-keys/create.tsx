@@ -6,7 +6,7 @@ import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Button } from "@hebo/shared-ui/components/Button";
-import { CopyToClipboardButton } from "@hebo/shared-ui/components/code/CopyToClipboardButton";
+import { CopyButton } from "@hebo/shared-ui/components/code/CopyButton";
 import {
   Dialog,
   DialogClose,
@@ -169,7 +169,7 @@ function ApiKeyRevealDialog({ apiKey, open, onOpenChange }: ApiKeyRevealDialogPr
           </span>
           <div className="flex items-center gap-2">
             <Input readOnly value={apiKey} className="font-mono" />
-            <CopyToClipboardButton textToCopy={apiKey} />
+            <CopyButton value={apiKey} />
           </div>
         </div>
 

@@ -21,7 +21,7 @@ import {
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Select } from "@hebo/shared-ui/components/Select";
 import { Separator } from "@hebo/shared-ui/components/Separator";
-import { CopyToClipboardButton } from "@hebo/shared-ui/components/code/CopyToClipboardButton";
+import { CopyButton } from "@hebo/shared-ui/components/code/CopyButton";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@hebo/shared-ui/components/Item";
 import {
@@ -183,7 +183,7 @@ function ModelCard(props: {
             <span className="text-xs uppercase text-muted-foreground">Alias path</span>
             <div className="inline-flex gap-2 items-center">
               <span className="text-sm font-medium text-ellipsis-start">{aliasPath}</span>
-              <CopyToClipboardButton textToCopy={aliasPath} />
+              <CopyButton value={aliasPath} />
             </div>
           </div>
 

@@ -1,4 +1,4 @@
-import { CopyToClipboardButton } from "./code/CopyToClipboardButton";
+import { CopyButton } from "./code/CopyButton";
 import { Input as ShadCNInput } from "../_shadcn/ui/input";
 import { cn } from "../lib/utils";
 
@@ -39,11 +39,11 @@ export function Input({
         {...props}
       />
       {copy && (
-        <CopyToClipboardButton
+        <CopyButton
           disabled={!value}
           aria-disabled={!value}
           tabIndex={tabIndex}
-          textToCopy={value?.toString() ?? ""}
+          value={value?.toString() ?? ""}
           className="absolute top-1/2 right-2 -translate-y-1/2"
         />
       )}
