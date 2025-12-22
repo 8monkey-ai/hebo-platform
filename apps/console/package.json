@@ -33,7 +33,7 @@
     "is-network-error": "^1.1.0",
     "isbot": "^5",
     "ky": "^1.9.1",
-    "lucide-react": "^0.539.0",
+    "lucide-react": "^0.562.0",
     "motion": "^12.23.24",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
