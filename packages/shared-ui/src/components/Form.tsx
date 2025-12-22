@@ -1,5 +1,6 @@
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { type FieldMetadata } from "@conform-to/react";
-import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
 
 import { Label } from "../_shadcn/ui/label";
@@ -78,20 +79,39 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   );
 }
 
-function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
+function FormControl({
+  render,
+  children,
+  ...props
+}: useRender.ComponentProps<"input"> &
+  Omit<React.ComponentProps<"input">, "children"> & {
+    children?: React.ReactNode;
+  }) {
   const { descriptionId, errorId, id, initialValue, name, valid } = useField();
 
-  return (
-    <Slot
-      data-slot="form-control"
-      id={id}
-      {...({ name: name } as Record<string, unknown>)}
-      defaultValue={initialValue}
-      aria-describedby={valid ? `${descriptionId}` : `${errorId}`}
-      aria-invalid={!valid}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: "input",
+    props: mergeProps<"input">(
+      {
+        id,
+        name,
+        defaultValue: initialValue,
+        "aria-describedby": valid ? `${descriptionId}` : `${errorId}`,
+        "aria-invalid": !valid,
+      },
+      props,
+    ),
+    render:
+      render ??
+      (children
+        ? (renderProps) =>
+            React.isValidElement(children) ? (
+              React.cloneElement(children, renderProps)
+            ) : (
+              <>{children}</>
+            )
+        : undefined),
+  });
 }
 
 export { FormControl, FormField, FormLabel, FormDescription, FormMessage };
