@@ -1,5 +1,4 @@
 import { type FieldMetadata } from "@conform-to/react";
-import * as LabelPrimitive from "@radix-ui/react-label";
 import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
 
@@ -34,10 +33,7 @@ function FormField({
   );
 }
 
-function FormLabel({
-  className,
-  ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+function FormLabel({ className, ...props }: React.ComponentProps<"label">) {
   const { id, valid } = useField();
 
   return (
