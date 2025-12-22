@@ -203,7 +203,7 @@
   }
 
   .mdx h2 {
-    @apply text-xl font-medium p-0 pt-2;
+    @apply text-xl font-medium p-0 pt-4;
   }
 
   .mdx p,

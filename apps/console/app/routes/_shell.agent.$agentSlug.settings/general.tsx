@@ -8,7 +8,7 @@ export function GeneralSettings({ agent }: { agent: { slug: string, name: string
       <div>
         <AgentLogo size={96} />
       </div>
-      <div className="w-full grid grid-cols-[max-content_1fr] gap-x-3 gap-y-2 items-center">
+      <div className="w-full grid grid-cols-[max-content_1fr] gap-x-3 gap-y-2 items-center text-sm">
         <label htmlFor="name">Name</label>
         <Input id="name" readOnly defaultValue={agent.name} />
         <label htmlFor="slug">Slug</label>

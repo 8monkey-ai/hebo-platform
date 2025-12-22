@@ -79,7 +79,7 @@ export function UserMenu({ user }: { user?: User}) {
               <DropdownMenuSeparator />
               <DropdownMenuItem render={
                 <a
-                    href="https://docs.hebo.ai"
+                    href="https://hebo.ai/docs"
                     target="_blank"
                     rel="noopener noreferrer"
                 >
@@ -88,7 +88,7 @@ export function UserMenu({ user }: { user?: User}) {
                   <DropdownMenuShortcut><ExternalLink /></DropdownMenuShortcut>
                 </a>
               } />
-              <DropdownMenuItem onSelect={() => setShortcutsOpen(true)}>
+              <DropdownMenuItem onClick={() => setShortcutsOpen(true)}>
                 <Keyboard />
                 Shortcuts
                 <DropdownMenuShortcut>{kbs("mod+/")}</DropdownMenuShortcut>

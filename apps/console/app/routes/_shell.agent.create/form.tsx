@@ -49,7 +49,7 @@ export function AgentCreateForm() {
 
   return (
     <Form method="post" {...getFormProps(form)} className="contents">
-      <Card className="sm:max-w-lg min-w-0 w-full border-none bg-transparent shadow-none">
+      <Card className="sm:max-w-lg min-w-0 w-full ring-0 shadow-none bg-transparent">
 
         <CardHeader>
           <CardTitle><h1>Create a new agent</h1></CardTitle>
