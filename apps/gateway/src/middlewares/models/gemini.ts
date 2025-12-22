@@ -1,6 +1,9 @@
+import { BadRequestError } from "@hebo/shared-api/errors";
+
 import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible-api-schemas";
 
 import { ModelAdapterBase } from "./model";
+
 
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
@@ -147,6 +150,11 @@ export class Gemini3ProPreviewAdapter extends Gemini3ModelAdapter {
   protected getThinkingConfig(
     params: OpenAICompatibleReasoning,
   ): Record<string, any> {
+    if (params.max_tokens !== undefined) {
+      throw new BadRequestError(
+        "max_tokens is not supported for reasoning in Gemini 3 models. Please use 'effort' instead.",
+      );
+    }
     const thinkingConfig: Record<string, any> = {};
 
     switch (params.effort) {
@@ -179,6 +187,11 @@ export class Gemini3FlashPreviewAdapter extends Gemini3ModelAdapter {
   protected getThinkingConfig(
     params: OpenAICompatibleReasoning,
   ): Record<string, any> {
+    if (params.max_tokens !== undefined) {
+      throw new BadRequestError(
+        "max_tokens is not supported for reasoning in Gemini 3 models. Please use 'effort' instead.",
+      );
+    }
     const thinkingConfig: Record<string, any> = {};
 
     switch (params.effort) {

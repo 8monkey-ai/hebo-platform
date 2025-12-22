@@ -138,25 +138,6 @@ describe("Gemini Adapter transformOptions", () => {
       },
     },
     {
-      name: "Gemini 3 Pro: reasoning with specific max_tokens",
-      model: gemini3ProAdapter,
-      input: {
-        openaiCompatible: {
-          reasoning: {
-            max_tokens: 5000,
-          },
-        },
-      },
-      expected: {
-        openaiCompatible: {
-          thinkingConfig: {
-            includeThoughts: true,
-            thinkingLevel: "high",
-          },
-        },
-      },
-    },
-    {
       name: "Gemini 3 Pro: exclude thoughts",
       model: gemini3ProAdapter,
       input: {
@@ -369,6 +350,32 @@ describe("Gemini Adapter transformOptions", () => {
           },
         },
       },
+    },
+    {
+      name: "Gemini 3 Pro: throws error if max_tokens is provided in reasoning",
+      model: gemini3ProAdapter,
+      input: {
+        openaiCompatible: {
+          reasoning: {
+            max_tokens: 100,
+          },
+        },
+      },
+      shouldThrow: true,
+      expected: {},
+    },
+    {
+      name: "Gemini 3 Flash: throws error if max_tokens is provided in reasoning",
+      model: gemini3FlashAdapter,
+      input: {
+        openaiCompatible: {
+          reasoning: {
+            max_tokens: 100,
+          },
+        },
+      },
+      shouldThrow: true,
+      expected: {},
     },
   ];
 
