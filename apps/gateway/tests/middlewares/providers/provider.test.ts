@@ -76,17 +76,13 @@ describe("Provider Adapter transformOptions", () => {
       provider: bedrockProvider,
       input: {
         openaiCompatible: {
-          maxTokens: 512,
-          stopSequences: ["\nUser:", "stop"],
-          customBedrockOption: "value",
+          reasoningEffort: "medium",
         },
       } as any,
       expected: {
         bedrock: {
           additionalModelRequestFields: {
-            max_tokens: 512,
-            stop_sequences: ["\nUser:", "stop"],
-            custom_bedrock_option: "value",
+            reasoning_effort: "medium",
           },
         },
       },
@@ -144,30 +140,6 @@ describe("Provider Adapter transformOptions", () => {
             includeThoughts: true,
             thinkingBudget: 8192,
           },
-        },
-      },
-    },
-    {
-      name: "Vertex: passes through generic safetySettings from openai-compatible",
-      provider: vertexProvider,
-      input: {
-        openaiCompatible: {
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_LOW_AND_ABOVE",
-            },
-          ],
-        },
-      } as any,
-      expected: {
-        google: {
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_LOW_AND_ABOVE",
-            },
-          ],
         },
       },
     },

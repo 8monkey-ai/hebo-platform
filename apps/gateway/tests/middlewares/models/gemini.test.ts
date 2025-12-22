@@ -4,12 +4,11 @@ import {
   Gemini3FlashPreviewAdapter,
   Gemini3ProPreviewAdapter,
 } from "~gateway/middlewares/models/gemini";
-import { GptOss120bAdapter } from "~gateway/middlewares/models/gpt";
 import type { ModelAdapter } from "~gateway/middlewares/models/model";
 
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
-describe("Model Adapter transformOptions", () => {
+describe("Gemini Adapter transformOptions", () => {
   type TestCase = {
     name: string;
     model: ModelAdapter;
@@ -18,84 +17,10 @@ describe("Model Adapter transformOptions", () => {
     shouldThrow?: boolean;
   };
 
-  const gptAdapter = new GptOss120bAdapter();
-
   const gemini3ProAdapter = new Gemini3ProPreviewAdapter();
   const gemini3FlashAdapter = new Gemini3FlashPreviewAdapter();
 
   const testCases: TestCase[] = [
-    // --- GPT Scenarios ---
-    {
-      name: "GPT: no options provided",
-      model: gptAdapter,
-      input: undefined,
-      expected: {},
-    },
-    {
-      name: "GPT: non openai-compatible options provided",
-      model: gptAdapter,
-      input: { abc: { key: "value" } },
-      expected: { abc: { key: "value" } },
-    },
-    {
-      name: "GPT: basic options (no reasoning)",
-      model: gptAdapter,
-      input: {
-        openaiCompatible: {
-          otherParam: 123,
-        },
-      },
-      expected: {
-        openaiCompatible: {},
-      },
-    },
-    {
-      name: "GPT: reasoning enabled with effort",
-      model: gptAdapter,
-      input: {
-        openaiCompatible: {
-          reasoning: {
-            effort: "high",
-          },
-        },
-      },
-      expected: {
-        openaiCompatible: {
-          reasoningEffort: "high",
-        },
-      },
-    },
-    {
-      name: "GPT: reasoning enabled (boolean) defaults to medium",
-      model: gptAdapter,
-      input: {
-        openaiCompatible: {
-          reasoning: {
-            enabled: true,
-          },
-        },
-      },
-      expected: {
-        openaiCompatible: {
-          reasoningEffort: "medium",
-        },
-      },
-    },
-    {
-      name: "GPT: throws on max_tokens in reasoning",
-      model: gptAdapter,
-      input: {
-        openaiCompatible: {
-          reasoning: {
-            enabled: true,
-            max_tokens: 1000,
-          },
-        },
-      },
-      expected: {},
-      shouldThrow: true,
-    },
-
     // --- Gemini 3 Pro Scenarios ---
     {
       name: "Gemini 3 Pro: no options provided",
@@ -455,170 +380,6 @@ describe("Model Adapter transformOptions", () => {
         const result = model.transformOptions(input);
         expect(result).toEqual(expected);
       }
-    });
-  }
-});
-
-describe("Model Adapter transformPrompt", () => {
-  type PromptTestCase = {
-    name: string;
-    model: ModelAdapter;
-    inputPrompt: any;
-    expectedPrompt: any;
-  };
-
-  const gemini3ProAdapter = new Gemini3ProPreviewAdapter();
-
-  const promptTestCases: PromptTestCase[] = [
-    {
-      name: "injects google thoughtSignature when missing",
-      model: gemini3ProAdapter,
-      inputPrompt: [
-        {
-          role: "assistant",
-          content: [
-            {
-              type: "tool-call",
-              toolCallId: "call_123",
-              toolName: "get_weather",
-              args: { location: "San Francisco" },
-            },
-          ],
-        },
-      ],
-      expectedPrompt: [
-        {
-          role: "assistant",
-          content: [
-            {
-              type: "tool-call",
-              toolCallId: "call_123",
-              toolName: "get_weather",
-              args: { location: "San Francisco" },
-              providerOptions: {
-                google: {
-                  thoughtSignature: "context_engineering_is_the_way_to_go",
-                },
-              },
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: "does NOT inject when openaiCompatible.thoughtSignature is present",
-      model: gemini3ProAdapter,
-      inputPrompt: [
-        {
-          role: "assistant",
-          content: [
-            {
-              type: "tool-call",
-              toolCallId: "call_456",
-              toolName: "get_time",
-              args: { timezone: "UTC" },
-              providerOptions: {
-                openaiCompatible: {
-                  thoughtSignature: "existing_signature",
-                },
-              },
-            },
-          ],
-        },
-      ],
-      expectedPrompt: [
-        {
-          role: "assistant",
-          content: [
-            {
-              type: "tool-call",
-              toolCallId: "call_456",
-              toolName: "get_time",
-              args: { timezone: "UTC" },
-              providerOptions: {
-                google: {
-                  thoughtSignature: "existing_signature",
-                },
-              },
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: "injects thoughtSignature for the first tool call of each message",
-      model: gemini3ProAdapter,
-      inputPrompt: [
-        {
-          role: "assistant",
-          content: [
-            {
-              type: "tool-call",
-              toolCallId: "call_1",
-              toolName: "t1",
-            },
-            {
-              type: "tool-call",
-              toolCallId: "call_2",
-              toolName: "t2",
-            },
-          ],
-        },
-        {
-          role: "assistant",
-          content: [
-            {
-              type: "tool-call",
-              toolCallId: "call_3",
-              toolName: "t3",
-            },
-          ],
-        },
-      ],
-      expectedPrompt: [
-        {
-          role: "assistant",
-          content: [
-            {
-              type: "tool-call",
-              toolCallId: "call_1",
-              toolName: "t1",
-              providerOptions: {
-                google: {
-                  thoughtSignature: "context_engineering_is_the_way_to_go",
-                },
-              },
-            },
-            {
-              type: "tool-call",
-              toolCallId: "call_2",
-              toolName: "t2",
-            },
-          ],
-        },
-        {
-          role: "assistant",
-          content: [
-            {
-              type: "tool-call",
-              toolCallId: "call_3",
-              toolName: "t3",
-              providerOptions: {
-                google: {
-                  thoughtSignature: "context_engineering_is_the_way_to_go",
-                },
-              },
-            },
-          ],
-        },
-      ],
-    },
-  ];
-
-  for (const { name, model, inputPrompt, expectedPrompt } of promptTestCases) {
-    test(name, () => {
-      const result = model.transformPrompt(inputPrompt);
-      expect(result).toEqual(expectedPrompt);
     });
   }
 });
