@@ -58,21 +58,24 @@ export class BedrockProviderAdapter
   }
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    const { openaiCompatible: openAiCompatibleOptions, ...rest } =
-      options || {};
+    const { modelConfig, ...rest } = options || {};
 
-    if (!openAiCompatibleOptions) return rest;
+    let modifiedOptions: ProviderOptions = { ...rest };
 
-    const snakeCaseConfig = BedrockProviderAdapter.convertObjectKeysToSnakeCase(
-      openAiCompatibleOptions as Record<string, any>,
-    );
+    if (modelConfig) {
+      const snakeCaseConfig =
+        BedrockProviderAdapter.convertObjectKeysToSnakeCase(
+          modelConfig as Record<string, any>,
+        );
+      modifiedOptions = {
+        ...modifiedOptions,
+        bedrock: {
+          additionalModelRequestFields: snakeCaseConfig,
+        },
+      };
+    }
 
-    return {
-      ...rest,
-      bedrock: {
-        additionalModelRequestFields: snakeCaseConfig,
-      },
-    };
+    return modifiedOptions;
   }
 
   private async getCredentials() {

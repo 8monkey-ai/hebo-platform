@@ -47,15 +47,18 @@ export abstract class ProviderAdapterBase implements ProviderAdapter {
   }
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    const { openaiCompatible: openAiCompatibleOptions, ...rest } =
-      options || {};
+    const { modelConfig, ...rest } = options || {};
 
-    if (!openAiCompatibleOptions) return rest;
+    let modifiedOptions: ProviderOptions = { ...rest };
 
-    return {
-      ...rest,
-      [this.providerSlug]: openAiCompatibleOptions,
-    };
+    if (modelConfig) {
+      modifiedOptions = {
+        ...modifiedOptions,
+        [this.providerSlug]: modelConfig,
+      };
+    }
+
+    return modifiedOptions;
   }
 
   abstract initialize(config?: ProviderConfig): Promise<this>;

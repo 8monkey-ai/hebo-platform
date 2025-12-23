@@ -31,7 +31,9 @@ describe("Claude Adapter transformOptions", () => {
         },
       },
       expected: {
-        openaiCompatible: {},
+        openaiCompatible: {
+          otherParam: 123,
+        },
       },
     },
     {
@@ -46,6 +48,11 @@ describe("Claude Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            enabled: true,
+          },
+        },
+        modelConfig: {
           thinking: {
             type: "enabled",
             budgetTokens: 32_000, // 50% of 64000
@@ -65,6 +72,11 @@ describe("Claude Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "minimal",
+          },
+        },
+        modelConfig: {
           thinking: {
             type: "enabled",
             budgetTokens: 6400, // 10% of 64000
@@ -84,6 +96,11 @@ describe("Claude Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "low",
+          },
+        },
+        modelConfig: {
           thinking: {
             type: "enabled",
             budgetTokens: 12_800, // 20% of 64000
@@ -103,6 +120,11 @@ describe("Claude Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "medium",
+          },
+        },
+        modelConfig: {
           thinking: {
             type: "enabled",
             budgetTokens: 32_000, // 50% of 64000
@@ -122,6 +144,11 @@ describe("Claude Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "high",
+          },
+        },
+        modelConfig: {
           thinking: {
             type: "enabled",
             budgetTokens: 51_200, // 80% of 64000
@@ -141,6 +168,11 @@ describe("Claude Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "xhigh",
+          },
+        },
+        modelConfig: {
           thinking: {
             type: "enabled",
             budgetTokens: 60_800, // 95% of 64000
@@ -160,6 +192,11 @@ describe("Claude Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            max_tokens: 15_000,
+          },
+        },
+        modelConfig: {
           thinking: {
             type: "enabled",
             budgetTokens: 15_000,
@@ -178,7 +215,11 @@ describe("Claude Adapter transformOptions", () => {
         },
       },
       expected: {
-        openaiCompatible: {},
+        openaiCompatible: {
+          reasoning: {
+            effort: "none",
+          },
+        },
       },
     },
     {
@@ -193,6 +234,11 @@ describe("Claude Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            max_tokens: 500, // Explicitly low
+          },
+        },
+        modelConfig: {
           thinking: {
             type: "enabled",
             budgetTokens: 1024,

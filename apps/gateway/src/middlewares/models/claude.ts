@@ -17,26 +17,25 @@ export class ClaudeOpus45Adapter extends ModelAdapterBase {
   };
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    const { openaiCompatible: openAiCompatibleOptions, ...rest } =
-      options || {};
+    const modelConfig: Record<string, any> = {};
 
-    if (!openAiCompatibleOptions) return rest;
+    if (options?.openaiCompatible) {
+      const reasoning = (options.openaiCompatible as any)
+        ?.reasoning as OpenAICompatibleReasoning;
 
-    const config: Record<string, any> = {};
-    const reasoning = (openAiCompatibleOptions as any)
-      ?.reasoning as OpenAICompatibleReasoning;
-
-    if (reasoning) {
-      const thinkingConfig = this.transformReasoning(reasoning);
-      if (thinkingConfig) {
-        config.thinking = thinkingConfig;
+      if (reasoning) {
+        const thinkingConfig = this.transformReasoning(reasoning);
+        if (thinkingConfig) {
+          modelConfig.thinking = thinkingConfig;
+        }
       }
     }
 
-    return {
-      ...rest,
-      openaiCompatible: config,
-    };
+    if (Object.keys(modelConfig).length > 0) {
+      return { ...options, modelConfig };
+    }
+
+    return options || {};
   }
 
   protected transformReasoning(

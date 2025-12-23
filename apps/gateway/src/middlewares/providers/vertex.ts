@@ -17,10 +17,6 @@ export class VertexProviderAdapter
   static readonly providerSlug = "vertex";
 
   static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
-    "google/gemini-2.5-flash-preview-09-2025":
-      "gemini-2.5-flash-preview-09-2025",
-    "google/gemini-2.5-flash-lite-preview-09-2025":
-      "gemini-2.5-flash-lite-preview-09-2025",
     "google/gemini-3-pro-preview": "gemini-3-pro-preview",
     "google/gemini-3-flash-preview": "gemini-3-flash-preview",
   };
@@ -30,15 +26,18 @@ export class VertexProviderAdapter
   }
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    const { openaiCompatible: openAiCompatibleOptions, ...rest } =
-      options || {};
+    const { modelConfig, ...rest } = options || {};
 
-    if (!openAiCompatibleOptions) return rest;
+    let modifiedOptions: ProviderOptions = { ...rest };
 
-    return {
-      ...rest,
-      google: openAiCompatibleOptions,
-    };
+    if (modelConfig) {
+      modifiedOptions = {
+        ...modifiedOptions,
+        google: modelConfig,
+      };
+    }
+
+    return modifiedOptions;
   }
 
   async initialize(config?: VertexProviderConfig): Promise<this> {

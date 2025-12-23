@@ -4,7 +4,6 @@ import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible
 
 import { ModelAdapterBase } from "./model";
 
-
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export abstract class GeminiModelAdapter extends ModelAdapterBase {
@@ -15,26 +14,25 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
   };
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    const { openaiCompatible: openAiCompatibleOptions, ...rest } =
-      options || {};
+    const modelConfig: Record<string, any> = {};
 
-    if (!openAiCompatibleOptions) return rest;
+    if (options?.openaiCompatible) {
+      const reasoning = (options.openaiCompatible as any)
+        ?.reasoning as OpenAICompatibleReasoning;
 
-    const config: Record<string, any> = {};
-    const reasoning = (openAiCompatibleOptions as any)
-      ?.reasoning as OpenAICompatibleReasoning;
-
-    if (reasoning) {
-      const thinkingConfig = this.transformReasoning(reasoning);
-      if (thinkingConfig) {
-        config.thinkingConfig = thinkingConfig;
+      if (reasoning) {
+        const thinkingConfig = this.transformReasoning(reasoning);
+        if (thinkingConfig) {
+          modelConfig.thinkingConfig = thinkingConfig;
+        }
       }
     }
 
-    return {
-      ...rest,
-      openaiCompatible: config,
-    };
+    if (Object.keys(modelConfig).length > 0) {
+      return { ...options, modelConfig };
+    }
+
+    return options || {};
   }
 
   protected transformReasoning(

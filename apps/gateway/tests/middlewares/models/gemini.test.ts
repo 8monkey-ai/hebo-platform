@@ -40,6 +40,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            enabled: true,
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "high",
@@ -59,6 +64,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "low",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "low",
@@ -78,6 +88,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "high",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "high",
@@ -97,6 +112,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "minimal",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "low",
@@ -116,6 +136,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "xhigh",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "high",
@@ -134,7 +159,11 @@ describe("Gemini Adapter transformOptions", () => {
         },
       },
       expected: {
-        openaiCompatible: {},
+        openaiCompatible: {
+          reasoning: {
+            effort: "none",
+          },
+        },
       },
     },
     {
@@ -150,6 +179,12 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            enabled: true,
+            exclude: true,
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: false,
             thinkingLevel: "high",
@@ -171,6 +206,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "low",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "low",
@@ -190,6 +230,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "medium",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "high",
@@ -209,6 +254,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "minimal",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "low",
@@ -228,6 +278,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "xhigh",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "high",
@@ -249,6 +304,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "low",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "low",
@@ -268,6 +328,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "medium",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "medium",
@@ -287,6 +352,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "high",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "high",
@@ -306,6 +376,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "minimal",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "minimal",
@@ -325,6 +400,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "xhigh",
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "high",
@@ -344,6 +424,11 @@ describe("Gemini Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            enabled: true,
+          },
+        },
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingLevel: "medium",
@@ -362,7 +447,13 @@ describe("Gemini Adapter transformOptions", () => {
         },
       },
       shouldThrow: true,
-      expected: {},
+      expected: {
+        openaiCompatible: {
+          reasoning: {
+            max_tokens: 100,
+          },
+        },
+      },
     },
     {
       name: "Gemini 3 Flash: throws error if max_tokens is provided in reasoning",
@@ -375,7 +466,13 @@ describe("Gemini Adapter transformOptions", () => {
         },
       },
       shouldThrow: true,
-      expected: {},
+      expected: {
+        openaiCompatible: {
+          reasoning: {
+            max_tokens: 100,
+          },
+        },
+      },
     },
   ];
 

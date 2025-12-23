@@ -31,15 +31,7 @@ export abstract class ModelAdapterBase implements ModelAdapter {
   };
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    const { openaiCompatible: openAiCompatibleOptions, ...rest } =
-      options || {};
-    if (!openAiCompatibleOptions) {
-      return rest;
-    }
-    return {
-      ...rest,
-      openaiCompatible: {},
-    };
+    return options || {};
   }
 
   transformPrompt(prompt: any): any {

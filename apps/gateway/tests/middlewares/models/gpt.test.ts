@@ -39,7 +39,9 @@ describe("GPT Adapter transformOptions", () => {
         },
       },
       expected: {
-        openaiCompatible: {},
+        openaiCompatible: {
+          otherParam: 123,
+        },
       },
     },
     {
@@ -54,6 +56,11 @@ describe("GPT Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            effort: "high",
+          },
+        },
+        modelConfig: {
           reasoningEffort: "high",
         },
       },
@@ -70,6 +77,11 @@ describe("GPT Adapter transformOptions", () => {
       },
       expected: {
         openaiCompatible: {
+          reasoning: {
+            enabled: true,
+          },
+        },
+        modelConfig: {
           reasoningEffort: "medium",
         },
       },
@@ -85,7 +97,14 @@ describe("GPT Adapter transformOptions", () => {
           },
         },
       },
-      expected: {},
+      expected: {
+        openaiCompatible: {
+          reasoning: {
+            enabled: true,
+            max_tokens: 1000,
+          },
+        },
+      },
       shouldThrow: true,
     },
   ];

@@ -33,7 +33,7 @@ describe("Provider Adapter transformOptions", () => {
       name: "Groq: passes through transformed reasoningEffort",
       provider: groqProvider,
       input: {
-        openaiCompatible: {
+        modelConfig: {
           reasoningEffort: "medium",
         },
       } as any,
@@ -50,7 +50,7 @@ describe("Provider Adapter transformOptions", () => {
         "other-provider": {
           key: "value",
         },
-        openaiCompatible: {
+        modelConfig: {
           reasoningEffort: "high",
         },
       } as any,
@@ -75,7 +75,7 @@ describe("Provider Adapter transformOptions", () => {
       name: "Bedrock: converts transformed openai-compatible options to snake_case",
       provider: bedrockProvider,
       input: {
-        openaiCompatible: {
+        modelConfig: {
           reasoningEffort: "medium",
         },
       } as any,
@@ -91,7 +91,7 @@ describe("Provider Adapter transformOptions", () => {
       name: "Bedrock: converts deeply nested transformed openai-compatible options to snake_case",
       provider: bedrockProvider,
       input: {
-        openaiCompatible: {
+        modelConfig: {
           optionOne: "value1",
           nestedOption: {
             nestedOptionOne: "value2",
@@ -127,7 +127,7 @@ describe("Provider Adapter transformOptions", () => {
       name: "Vertex: passes through transformed thinkingConfig",
       provider: vertexProvider,
       input: {
-        openaiCompatible: {
+        modelConfig: {
           thinkingConfig: {
             includeThoughts: true,
             thinkingBudget: 8192,
