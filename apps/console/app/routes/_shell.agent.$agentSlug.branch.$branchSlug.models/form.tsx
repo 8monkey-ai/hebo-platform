@@ -264,7 +264,7 @@ function ModelCard(props: {
                               availableProviders
                                 .map((provider) => ({
                                   value: provider.slug,
-                                  name: provider.name,
+                                  label: provider.name,
                                 }))
                               }
                             placeholder={

@@ -100,7 +100,7 @@ export function CreateApiKeyDialog() {
                   <Select
                     items={API_KEY_EXPIRATION_OPTIONS.map((option) => ({
                       value: option.value,
-                      name: option.label,
+                      label: option.label,
                     }))}
                   />
                 </FormControl>

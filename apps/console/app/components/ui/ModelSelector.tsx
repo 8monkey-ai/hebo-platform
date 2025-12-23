@@ -14,7 +14,7 @@ function ModelSelector({ models, ...props }: ModelSelectorProps) {
     <Select
       items={Object.entries(models ?? {}).map(([id, m]) => ({
         value: id,
-        name: (
+        label: (
           <>
             {m.name}{" "}
             {m.monthlyFreeTokens > 0 && (

@@ -93,7 +93,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
                   items={
                     branches.map(branch => ({
                       value: branch.slug,
-                      name: (
+                      label: (
                         <>
                           <GitBranch aria-hidden="true" />
                           {branch.name}
