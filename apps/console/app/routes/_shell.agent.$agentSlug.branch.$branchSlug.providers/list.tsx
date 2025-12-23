@@ -1,7 +1,6 @@
 import { Eraser, HelpCircle, MoreVertical } from "lucide-react";
 import { useState } from "react";
 
-import { Avatar } from "@hebo/shared-ui/components/Avatar";
 import { Button } from "@hebo/shared-ui/components/Button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@hebo/shared-ui/components/DropdownMenu";
 import {
@@ -44,12 +43,10 @@ export function ProvidersList({ providers }: { providers: Provider[] }) {
                 return (
                     <Item key={provider.slug} variant="outline" className="bg-background">
                         <ItemMedia>
-                            <Avatar>
-                                {(() => {
-                                    const Icon = ProviderIcons[provider.slug as keyof typeof ProviderIcons] ?? HelpCircle;
-                                    return <Icon size={32} />;
-                                })()}
-                            </Avatar>
+                            {(() => {
+                                const Icon = ProviderIcons[provider.slug as keyof typeof ProviderIcons] ?? HelpCircle;
+                                return <Icon size={32} />;
+                            })()}
                         </ItemMedia>
                         <ItemContent>
                             <ItemTitle>{provider.name}</ItemTitle>

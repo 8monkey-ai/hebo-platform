@@ -200,8 +200,6 @@ export function Chat({
                 size="icon"
                 className="hover:bg-sidebar-accent size-7"
                 onClick={() => setMessages([])}
-                aria-label="Clear conversation"
-                title="Clear conversation"
               >
                 <Edit />
               </Button>
