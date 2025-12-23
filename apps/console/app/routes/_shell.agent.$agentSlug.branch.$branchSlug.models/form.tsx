@@ -67,15 +67,12 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
     lastResult: fetcher.data,
     constraint: getZodConstraint(modelsConfigFormSchema),
     defaultValue: { 
-      models: models?.map((model) => ({
-        ...model,
-        routing: model.routing?.only?.length
-          ? { only: [model.routing.only[0]] }
-          : { only: [""] },
-      }))
+      models
     }
   });
   useFormErrorToast(form.allErrors);
+
+  console.log(form.dirty);
 
   // Close the active card on successful submit
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
@@ -166,12 +163,12 @@ function ModelCard(props: {
   const { models } = useSnapshot(shellStore);
 
   const modelFieldset = model.getFieldset();
-  const routingOnlyField = modelFieldset.routing.getFieldset().only.getFieldList()[0]!;
+  const routingOnlyField = modelFieldset.routing?.getFieldset().only?.getFieldList()[0];
   const routingOnlyValue = useInputControl(routingOnlyField);
 
   const aliasPath = [agentSlug, branchSlug, modelFieldset.alias.value || "alias"].join("/");
 
-  const [routingEnabled, setRoutingEnabled] = useState(Boolean(routingOnlyField.value)); 
+  //const [routingEnabled, setRoutingEnabled] = useState(Boolean(routingOnlyField.value)); 
 
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
@@ -243,7 +240,7 @@ function ModelCard(props: {
                   } />
                 </div>
                 <CollapsibleContent keepMounted inert={!advancedOpen} className="overflow-hidden h-(--collapsible-panel-height)">
-                  <FormField field={routingOnlyField}>
+                  {/* <FormField field={routingOnlyField}>
                     <Item variant="outline" size="sm">
                       <ItemMedia className="pt-1">
                         <input
@@ -292,7 +289,7 @@ function ModelCard(props: {
                         <FormMessage />
                       </ItemActions>
                     </Item>
-                  </FormField>
+                  </FormField> */}
                 </CollapsibleContent>
               </Collapsible>
             </CardContent>

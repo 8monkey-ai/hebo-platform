@@ -16,6 +16,7 @@ import { Bedrock, Cohere, Groq, Vertex } from "~console/components/ui/Icons";
 import { ConfigureProviderDialog } from "./configure";
 import { ClearCredentialsDialog } from "./clear";
 import { formatDateTime } from "~console/lib/utils";
+import { Avatar } from "@hebo/shared-ui/components/Avatar";
 
 const ProviderIcons = {
   bedrock: Bedrock,
@@ -43,10 +44,12 @@ export function ProvidersList({ providers }: { providers: Provider[] }) {
                 return (
                     <Item key={provider.slug} variant="outline" className="bg-background">
                         <ItemMedia>
-                            {(() => {
-                                const Icon = ProviderIcons[provider.slug as keyof typeof ProviderIcons] ?? HelpCircle;
-                                return <Icon size={32} />;
-                            })()}
+                            <Avatar className="overflow-hidden" >
+                                {(() => {
+                                    const Icon = ProviderIcons[provider.slug as keyof typeof ProviderIcons] ?? HelpCircle;
+                                    return <Icon size={32} />;
+                                })()}
+                            </Avatar>
                         </ItemMedia>
                         <ItemContent>
                             <ItemTitle>{provider.name}</ItemTitle>
