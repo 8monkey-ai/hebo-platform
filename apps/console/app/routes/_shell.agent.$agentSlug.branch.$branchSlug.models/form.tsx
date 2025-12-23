@@ -1,6 +1,6 @@
 import { useFetcher } from "react-router";
 import { useEffect, useRef, useState } from "react";
-import { useForm, getFormProps, type FieldMetadata, useInputControl } from "@conform-to/react";
+import { useForm, getFormProps, type FieldMetadata } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 import { Brain, ChevronsUpDown, Edit } from "lucide-react";
 import { useSnapshot } from "valtio";
@@ -39,6 +39,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@hebo/shared-ui/components/Collapsible";
+import { Label } from "@hebo/shared-ui/components/Label";
 
 import { useFormErrorToast } from "~console/lib/errors";
 import { objectId } from "~console/lib/utils";
@@ -67,12 +68,7 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
     lastResult: fetcher.data,
     constraint: getZodConstraint(modelsConfigFormSchema),
     defaultValue: { 
-      models: models?.map((model) => ({
-        ...model,
-        routing: model.routing?.only?.length
-          ? { only: [model.routing.only[0]] }
-          : { only: [""] },
-      }))
+      models
     }
   });
   useFormErrorToast(form.allErrors);
@@ -126,7 +122,6 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
           onClick={() => {
             form.insert({
               name: fields.models.name,
-              defaultValue: { routing: { only: [""] } },
             });
             setExpandedCardId(modelItems.length);
           }}
@@ -166,14 +161,11 @@ function ModelCard(props: {
   const { models } = useSnapshot(shellStore);
 
   const modelFieldset = model.getFieldset();
-  const routingOnlyField = modelFieldset.routing.getFieldset().only.getFieldList()[0]!;
-  const routingOnlyValue = useInputControl(routingOnlyField);
-
   const aliasPath = [agentSlug, branchSlug, modelFieldset.alias.value || "alias"].join("/");
 
-  const [routingEnabled, setRoutingEnabled] = useState(Boolean(routingOnlyField.value)); 
-
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const routingOnlyField = modelFieldset.routing.getFieldset().only;
+  const [routingEnabled, setRoutingEnabled] = useState(Boolean(routingOnlyField.value));
 
   return (
     <Collapsible open={isExpanded} onOpenChange={onOpenChange}>
@@ -243,56 +235,48 @@ function ModelCard(props: {
                   } />
                 </div>
                 <CollapsibleContent keepMounted inert={!advancedOpen} className="overflow-hidden h-(--collapsible-panel-height)">
-                  <FormField field={routingOnlyField}>
-                    <Item variant="outline" size="sm">
-                      <ItemMedia className="pt-1">
-                        <input
-                          id={`byo-${aliasPath}`}
-                          type="checkbox"
-                          checked={routingEnabled}
-                          onChange={(event) => {
-                            const enabled = event.target.checked;
-                            if (!enabled) routingOnlyValue.change("")
-                            setRoutingEnabled(enabled);
-                          }}
-                          className="h-4 w-4 accent-primary"
-                          aria-label="Enable bring your own provider routing"
-                        />
-                      </ItemMedia>
-                      <ItemContent>
-                        <ItemTitle>
-                          <FormLabel htmlFor={`byo-${aliasPath}`} className="mb-0">Bring Your Own Provider</FormLabel>
-                        </ItemTitle>
-                        <ItemDescription className="line-clamp-1">Setup your credentials first in providers settings</ItemDescription>
-                      </ItemContent>
-                      <ItemActions>
-                        <FormControl>
-                          {(() => {
-                            const availableProviders = providers.filter((p) => models?.[modelFieldset.type.value ?? ""]?.providers?.includes(p.slug));
-                            return (
-                              <Select
-                                disabled={!routingEnabled}
-                                defaultValue={routingEnabled ? routingOnlyField.value ?? "" : ""}
-                                items={
-                                  availableProviders
-                                    .map((provider) => ({
-                                      value: provider.slug,
-                                      name: provider.name,
-                                    }))
-                                  }
-                                placeholder={
-                                  availableProviders.length
-                                    ? "Select provider"
-                                    : "No supported providers configured"
-                                }
-                              />
-                            )
-                          })()}
-                        </FormControl>
-                        <FormMessage />
-                      </ItemActions>
-                    </Item>
-                  </FormField>
+                  <Item variant="outline" size="sm">
+                    <ItemMedia className="pt-1">
+                      <input
+                        id={`byo-${aliasPath}`}
+                        type="checkbox"
+                        checked={routingEnabled}
+                        onChange={(e) => setRoutingEnabled(e.target.checked)}
+                        className="h-4 w-4 accent-primary"
+                        aria-label="Enable bring your own provider routing"
+                      />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>
+                        <Label htmlFor={`byo-${aliasPath}`} className="mb-0">Bring Your Own Provider</Label>
+                      </ItemTitle>
+                      <ItemDescription className="line-clamp-1">Setup your credentials first in providers settings</ItemDescription>
+                    </ItemContent>
+                    <ItemActions>
+                      {(() => {
+                        const availableProviders = providers.filter((p) => models?.[modelFieldset.type.value ?? ""]?.providers?.includes(p.slug));
+                        return (
+                          <Select
+                            disabled={!routingEnabled}
+                            name={`${model.name}.routing.only[0]`}
+                            defaultValue={routingOnlyField.getFieldList()[0]?.value ?? ""}
+                            items={
+                              availableProviders
+                                .map((provider) => ({
+                                  value: provider.slug,
+                                  name: provider.name,
+                                }))
+                              }
+                            placeholder={
+                              availableProviders.length
+                                ? "Select provider"
+                                : "No supported providers configured"
+                            }
+                          />
+                        )
+                      })()}
+                    </ItemActions>
+                  </Item>
                 </CollapsibleContent>
               </Collapsible>
             </CardContent>
