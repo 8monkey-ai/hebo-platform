@@ -97,18 +97,16 @@ export function CodeGroupMdx({ children }: CodeGroupMdxProps) {
       <TabsList>
         {blocks.map((block, index) => (
           <TabsTrigger key={index} value={String(index)}>
-            {(block.props.children as React.ReactElement<CodeBlockProps>)?.props
-              ?.title ?? `Code ${index + 1}`}
+            {(block.props?.children as React.ReactElement<CodeBlockProps>)
+              ?.props?.title ?? `Code ${index + 1}`}
           </TabsTrigger>
         ))}
       </TabsList>
       {blocks.map((block, index) => (
         <TabsContent key={index} value={String(index)}>
           <CodeBlock>
-            {
-              (block.props.children as React.ReactElement<CodeBlockProps>).props
-                .children
-            }
+            {(block.props?.children as React.ReactElement<CodeBlockProps>)
+              ?.props?.children ?? "no children"}
           </CodeBlock>
         </TabsContent>
       ))}

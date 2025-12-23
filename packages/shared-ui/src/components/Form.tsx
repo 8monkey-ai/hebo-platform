@@ -108,7 +108,7 @@ function FormControl({
             React.isValidElement(children) ? (
               React.cloneElement(children, renderProps)
             ) : (
-              <>{children}</>
+              <>children needs to be a valid React element</>
             )
         : undefined),
   });

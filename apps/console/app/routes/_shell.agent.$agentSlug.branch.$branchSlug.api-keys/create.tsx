@@ -174,8 +174,9 @@ function ApiKeyRevealDialog({ apiKey, open, onOpenChange }: ApiKeyRevealDialogPr
 
         <Alert>
           <AlertTitle>
-            <Label>
+            <Label htmlFor="acknowledge">
               <input
+                id="acknowledge"
                 type="checkbox"
                 className="size-4 accent-foreground"
                 checked={acknowledged}

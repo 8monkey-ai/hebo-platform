@@ -33,7 +33,7 @@ export default function SignIn() {
         <div className="space-y-5 px-19 py-30 text-xl">
           <div className="flex items-center gap-2 text-3xl font-semibold">
             Hebo is{}
-            <Badge className="text-foreground bg-lime-400 text-3xl font-semibold">
+            <Badge className="text-foreground bg-lime-400 text-3xl h-10 font-semibold">
               FREE
             </Badge>
           </div>
@@ -41,16 +41,13 @@ export default function SignIn() {
             <div className="font-semibold">Deploy agents to production:</div>
             <ul className="space-y-2">
               <li>
-                ✔️ Choose from a set of free open-source models (Deepseek, Qwen,
-                ...)
+                ✔️ Choose from a set of free open-source models
               </li>
               <li>
-                ✔️ Use commercial models (Claude, Gemini, ChatGPT) within
-                fair-usage
+                ✔️ Use commercial models within fair-usage
               </li>
               <li>
-                ✔️ Link your custom inference endpoints to leverage existing
-                credits
+                ✔️ Link your custom inference endpoints to use existing credits
               </li>
             </ul>
           </div>
