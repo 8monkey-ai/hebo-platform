@@ -103,33 +103,27 @@ export function toModelMessages(messages: OpenAICompatibleMessage[]) {
       }
       case "assistant": {
         if (message.tool_calls) {
-          modelMessages.push({
+          const toolCallMessage = {
             role: "assistant",
             content: message.tool_calls.map((toolCall) => {
-              const {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                type,
-                id,
-                function: toolFunction,
-                ...metadata
-              } = toolCall;
-
               const content: any = {
                 type: "tool-call",
-                toolCallId: id,
-                toolName: toolFunction.name,
-                input: JSON.parse(toolFunction.arguments),
+                toolCallId: toolCall.id,
+                toolName: toolCall.function.name,
+                input: JSON.parse(toolCall.function.arguments),
+                providerOptions: toolCall.extra_content && {
+                  openaiCompatible: toolCall.extra_content,
+                },
               };
-
-              if (Object.keys(metadata).length > 0) {
-                content.providerOptions = {
-                  openaiCompatible: metadata,
-                };
-              }
 
               return content;
             }),
-          });
+            providerOptions: message.extra_content && {
+              openaiCompatible: message.extra_content,
+            },
+          };
+
+          modelMessages.push(toolCallMessage as ModelMessage);
         } else {
           modelMessages.push(message as ModelMessage);
         }
@@ -203,8 +197,10 @@ export const toOpenAICompatibleMessage = (
     message.content = result.text;
   }
 
-  if (result.reasoningText) {
-    message.reasoning_content = result.reasoningText;
+  const reasoning = result.reasoning && result.reasoning[0];
+  if (reasoning) {
+    message.reasoning_content = reasoning.text;
+    message.extra_content = reasoning.providerMetadata;
   }
 
   return message;
@@ -324,6 +320,7 @@ export function toOpenAICompatibleStream(
           case "reasoning-delta": {
             const delta = {
               reasoning_content: part.text,
+              extra_content: part.providerMetadata,
             };
             enqueue({
               id: streamId,

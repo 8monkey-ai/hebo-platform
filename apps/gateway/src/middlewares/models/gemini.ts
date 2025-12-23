@@ -109,7 +109,7 @@ export abstract class Gemini3ModelAdapter extends GeminiModelAdapter {
               const currentProviderOptions =
                 (part as any).providerOptions || {};
               const existingSignature =
-                currentProviderOptions?.openaiCompatible?.thoughtSignature;
+                currentProviderOptions?.openaiCompatible?.thought_signature;
               const thoughtSignatureToInject =
                 existingSignature || "context_engineering_is_the_way_to_go";
 

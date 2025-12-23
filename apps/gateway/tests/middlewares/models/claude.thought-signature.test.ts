@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 
-import { Gemini3ProPreviewAdapter } from "~gateway/middlewares/models/gemini";
+import { ClaudeOpus45Adapter } from "~gateway/middlewares/models/claude";
 import type { ModelAdapter } from "~gateway/middlewares/models/model";
 
-describe("Gemini Adapter transformPrompt", () => {
+describe("Claude Adapter transformPrompt", () => {
   type PromptTestCase = {
     name: string;
     model: ModelAdapter;
@@ -11,47 +11,12 @@ describe("Gemini Adapter transformPrompt", () => {
     expectedPrompt: any;
   };
 
-  const gemini3ProAdapter = new Gemini3ProPreviewAdapter();
+  const claudeOpus45Adapter = new ClaudeOpus45Adapter();
 
   const promptTestCases: PromptTestCase[] = [
     {
-      name: "injects google thoughtSignature when missing",
-      model: gemini3ProAdapter,
-      inputPrompt: [
-        {
-          role: "assistant",
-          content: [
-            {
-              type: "tool-call",
-              toolCallId: "call_123",
-              toolName: "get_weather",
-              args: { location: "San Francisco" },
-            },
-          ],
-        },
-      ],
-      expectedPrompt: [
-        {
-          role: "assistant",
-          content: [
-            {
-              type: "tool-call",
-              toolCallId: "call_123",
-              toolName: "get_weather",
-              args: { location: "San Francisco" },
-              providerOptions: {
-                google: {
-                  thoughtSignature: "context_engineering_is_the_way_to_go",
-                },
-              },
-            },
-          ],
-        },
-      ],
-    },
-    {
-      name: "does NOT inject when openaiCompatible.thoughtSignature is present",
-      model: gemini3ProAdapter,
+      name: "does NOT inject when reasoning_content or thought_signature is missing",
+      model: claudeOpus45Adapter,
       inputPrompt: [
         {
           role: "assistant",
@@ -60,10 +25,13 @@ describe("Gemini Adapter transformPrompt", () => {
               type: "tool-call",
               toolCallId: "call_456",
               toolName: "get_time",
-              args: { timezone: "UTC" },
+              args: {
+                timezone: "UTC",
+              },
               providerOptions: {
                 openaiCompatible: {
-                  thought_signature: "existing_signature",
+                  reasoning_content: "Thought: I need to call the time tool.\n",
+                  // thought_signature is missing
                 },
               },
             },
@@ -78,10 +46,12 @@ describe("Gemini Adapter transformPrompt", () => {
               type: "tool-call",
               toolCallId: "call_456",
               toolName: "get_time",
-              args: { timezone: "UTC" },
+              args: {
+                timezone: "UTC",
+              },
               providerOptions: {
-                google: {
-                  thoughtSignature: "existing_signature",
+                openaiCompatible: {
+                  reasoning_content: "Thought: I need to call the time tool.\n",
                 },
               },
             },
@@ -90,16 +60,26 @@ describe("Gemini Adapter transformPrompt", () => {
       ],
     },
     {
-      name: "injects thoughtSignature for the first tool call of each message",
-      model: gemini3ProAdapter,
+      name: "injects reasoning before the first tool call of each message",
+      model: claudeOpus45Adapter,
       inputPrompt: [
         {
           role: "assistant",
           content: [
             {
+              type: "text",
+              text: "Here is some introductory text.",
+            },
+            {
               type: "tool-call",
               toolCallId: "call_1",
               toolName: "t1",
+              providerOptions: {
+                openaiCompatible: {
+                  reasoning_content: "Thought: Calling t1.\n",
+                  thought_signature: "sig1",
+                },
+              },
             },
             {
               type: "tool-call",
@@ -115,6 +95,12 @@ describe("Gemini Adapter transformPrompt", () => {
               type: "tool-call",
               toolCallId: "call_3",
               toolName: "t3",
+              providerOptions: {
+                openaiCompatible: {
+                  reasoning_content: "Thought: Calling t3.\n",
+                  thought_signature: "sig3",
+                },
+              },
             },
           ],
         },
@@ -124,12 +110,26 @@ describe("Gemini Adapter transformPrompt", () => {
           role: "assistant",
           content: [
             {
+              type: "text",
+              text: "Here is some introductory text.",
+            },
+            {
+              type: "reasoning",
+              text: "Thought: Calling t1.\n",
+              providerOptions: {
+                bedrock: {
+                  signature: "sig1",
+                },
+              },
+            },
+            {
               type: "tool-call",
               toolCallId: "call_1",
               toolName: "t1",
               providerOptions: {
-                google: {
-                  thoughtSignature: "context_engineering_is_the_way_to_go",
+                openaiCompatible: {
+                  reasoning_content: "Thought: Calling t1.\n",
+                  thought_signature: "sig1",
                 },
               },
             },
@@ -144,12 +144,22 @@ describe("Gemini Adapter transformPrompt", () => {
           role: "assistant",
           content: [
             {
+              type: "reasoning",
+              text: "Thought: Calling t3.\n",
+              providerOptions: {
+                bedrock: {
+                  signature: "sig3",
+                },
+              },
+            },
+            {
               type: "tool-call",
               toolCallId: "call_3",
               toolName: "t3",
               providerOptions: {
-                google: {
-                  thoughtSignature: "context_engineering_is_the_way_to_go",
+                openaiCompatible: {
+                  reasoning_content: "Thought: Calling t3.\n",
+                  thought_signature: "sig3",
                 },
               },
             },

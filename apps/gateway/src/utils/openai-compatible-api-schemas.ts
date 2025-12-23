@@ -24,17 +24,15 @@ export const OpenAICompatibleContentPartFile = t.Object({
   }),
 });
 
-export const OpenAICompatibleMessageToolCall = t.Object(
-  {
-    type: t.Literal("function"),
-    id: t.String(),
-    function: t.Object({
-      arguments: t.String(),
-      name: t.String(),
-    }),
-  },
-  { additionalProperties: true },
-);
+export const OpenAICompatibleMessageToolCall = t.Object({
+  type: t.Literal("function"),
+  id: t.String(),
+  function: t.Object({
+    arguments: t.String(),
+    name: t.String(),
+  }),
+  extra_content: t.Optional(t.Object({}, { additionalProperties: true })),
+});
 
 export const OpenAICompatibleSystemMessage = t.Object({
   role: t.Literal("system"),
@@ -61,6 +59,7 @@ export const OpenAICompatibleAssistantMessage = t.Object({
   tool_calls: t.Optional(t.Array(OpenAICompatibleMessageToolCall)),
   reasoning: t.Optional(t.String()),
   reasoning_content: t.Optional(t.String()),
+  extra_content: t.Optional(t.Object({}, { additionalProperties: true })),
 });
 
 export const OpenAICompatibleToolMessage = t.Object({

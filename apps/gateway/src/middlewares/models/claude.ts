@@ -6,15 +6,63 @@ import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 const MAX_CLAUDE_TOKENS = 64_000;
 
-export class ClaudeOpus45Adapter extends ModelAdapterBase {
-  readonly id = "anthropic/claude-opus-4-5-v1";
-  readonly name = "Anthropic Claude Opus 4.5";
+export abstract class ClaudeModelAdapter extends ModelAdapterBase {
   readonly owned_by = "anthropic";
-  readonly created = 1_766_369_841;
   readonly modality = "chat";
   readonly pricing = {
     monthly_free_tokens: 0,
   };
+
+  transformPrompt(prompt: any): any {
+    return prompt.map((message: any) => {
+      if (message.role === "assistant" && Array.isArray(message.content)) {
+        const newContent: any[] = [];
+        const firstToolCallPartIndex = message.content.findIndex(
+          (part: any) => part.type === "tool-call",
+        );
+        const firstToolCallPart =
+          firstToolCallPartIndex === -1
+            ? undefined
+            : message.content[firstToolCallPartIndex];
+
+        const openaiCompatible =
+          firstToolCallPart?.providerOptions?.openaiCompatible;
+        const reasoningContentToInject = openaiCompatible?.reasoning_content;
+        const thoughtSignatureToInject = openaiCompatible?.thought_signature;
+
+        for (const [index, part] of message.content.entries()) {
+          if (
+            index === firstToolCallPartIndex &&
+            reasoningContentToInject &&
+            thoughtSignatureToInject
+          ) {
+            newContent.push({
+              type: "reasoning",
+              text: reasoningContentToInject,
+              providerOptions: {
+                bedrock: {
+                  signature: thoughtSignatureToInject,
+                },
+              },
+            });
+          }
+          newContent.push(part);
+        }
+
+        return {
+          ...message,
+          content: newContent,
+        };
+      }
+      return message;
+    });
+  }
+}
+
+export class ClaudeOpus45Adapter extends ClaudeModelAdapter {
+  readonly id = "anthropic/claude-opus-4-5-v1";
+  readonly name = "Anthropic Claude Opus 4.5";
+  readonly created = 1_766_369_841;
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
     const modelConfig: Record<string, any> = {};
