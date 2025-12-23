@@ -1,3 +1,4 @@
+import { record } from "@elysiajs/opentelemetry";
 import { Elysia } from "elysia";
 
 import { BadRequestError } from "@hebo/shared-api/errors";
@@ -28,7 +29,9 @@ export const aiModelFactory = new Elysia({
       modelAliasPath: string,
       modality: M,
     ): Promise<AiModelFor<M>> => {
-      const modelType = await modelConfigService.getModelType(modelAliasPath);
+      const modelType = await record("getModelType", () =>
+        modelConfigService.getModelType(modelAliasPath),
+      );
 
       const modelModality = supportedModels.find(
         (model) => model.type === modelType,
@@ -43,13 +46,18 @@ export const aiModelFactory = new Elysia({
           `Model ${modelAliasPath} (${modelType}) is not a ${modality} model.`,
         );
 
-      const customProviderSlug =
-        await modelConfigService.getCustomProviderSlug(modelAliasPath);
-      const providerAdapter = await (customProviderSlug
-        ? providerAdapterFactory.createCustom(modelType, customProviderSlug)
-        : providerAdapterFactory.createDefault(modelType));
-      const provider = await providerAdapter.getProvider();
-      const modelId = await providerAdapter.resolveModelId();
+      const customProviderSlug = await record("getCustomProviderSlug", () =>
+        modelConfigService.getCustomProviderSlug(modelAliasPath),
+      );
+      const providerAdapter = await record("createProviderAdapter", () =>
+        customProviderSlug
+          ? providerAdapterFactory.createCustom(modelType, customProviderSlug)
+          : providerAdapterFactory.createDefault(modelType),
+      );
+      const [provider, modelId] = await Promise.all([
+        record("getProvider", () => providerAdapter.getProvider()),
+        record("resolveModelId", () => providerAdapter.resolveModelId()),
+      ]);
 
       return modality === "chat"
         ? (provider.languageModel(modelId) as AiModelFor<M>)
