@@ -79,14 +79,7 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   );
 }
 
-function FormControl({
-  render,
-  children,
-  ...props
-}: useRender.ComponentProps<"input"> &
-  Omit<React.ComponentProps<"input">, "children"> & {
-    children?: React.ReactNode;
-  }) {
+function FormControl({ render, ...props }: useRender.ComponentProps<"input">) {
   const { descriptionId, errorId, id, initialValue, name, valid } = useField();
 
   return useRender({
@@ -101,16 +94,7 @@ function FormControl({
       },
       props,
     ),
-    render:
-      render ??
-      (children
-        ? (renderProps) =>
-            React.isValidElement(children) ? (
-              React.cloneElement(children, renderProps)
-            ) : (
-              <>children needs to be a valid React element</>
-            )
-        : undefined),
+    render,
   });
 }
 

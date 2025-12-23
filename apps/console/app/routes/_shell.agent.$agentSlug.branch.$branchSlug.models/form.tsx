@@ -210,17 +210,17 @@ function ModelCard(props: {
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 <FormField field={modelFieldset.alias} className="flex flex-col gap-2">
                   <FormLabel>Alias</FormLabel>
-                  <FormControl>
+                  <FormControl render={
                     <Input placeholder="Set alias name" autoComplete="off" />
-                  </FormControl>
+                    } /> 
                   <FormMessage />
                 </FormField>
 
                 <FormField field={modelFieldset.type} className="flex flex-col gap-2">
                   <FormLabel>Type</FormLabel>
-                  <FormControl>
+                  <FormControl render={
                     <ModelSelector models={models} />
-                  </FormControl>
+                    } />
                   <FormMessage />
                 </FormField>
               </div>

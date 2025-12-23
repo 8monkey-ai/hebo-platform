@@ -102,9 +102,9 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
 
           <div className="flex flex-col gap-4">
             <FormField field={fields.slug} className="hidden">
-              <FormControl>
+              <FormControl render={
                 <input type="hidden" value={provider?.slug} />
-              </FormControl>
+                } />
             </FormField>
 
             {(activeKeys as (keyof typeof configFieldset)[]).map((key) => {
@@ -112,9 +112,9 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
               return (
                 <FormField key={key} field={field}>
                   <FormLabel>{labelize(key)}</FormLabel>
-                  <FormControl>
+                  <FormControl render={
                     <Input placeholder={`Set ${labelize(key).toLowerCase()}`} autoComplete="off" />
-                  </FormControl>
+                    } />
                   <FormMessage />
                 </FormField>
               )

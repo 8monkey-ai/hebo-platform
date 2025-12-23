@@ -89,21 +89,21 @@ export function CreateApiKeyDialog() {
             <div className="flex flex-col gap-4">
               <FormField field={fields.description}>
                 <FormLabel>Description</FormLabel>
-                <FormControl>
+                <FormControl render={
                   <Input placeholder="API key description" autoComplete="off" />
-                </FormControl>
+                  } />
                 <FormMessage />
               </FormField>
               <FormField field={fields.expiresIn}>
                 <FormLabel>Expires in</FormLabel>
-                <FormControl>
+                <FormControl render={
                   <Select
                     items={API_KEY_EXPIRATION_OPTIONS.map((option) => ({
                       value: option.value,
                       label: option.label,
                     }))}
                   />
-                </FormControl>
+                  } />
                 <FormMessage />
               </FormField>
             </div>

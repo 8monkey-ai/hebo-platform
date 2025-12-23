@@ -70,9 +70,9 @@ export default function DeleteBranchDialog({ open, onOpenChange, branchSlug }: D
                   <strong>{branchSlug}</strong> in the box below:
                 </div>
               </FormLabel>
-              <FormControl>
+              <FormControl render={
                 <Input autoComplete="off" />
-              </FormControl>
+              } />
               <FormMessage />
             </FormField>
           </div>

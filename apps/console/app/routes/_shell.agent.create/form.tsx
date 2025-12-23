@@ -61,17 +61,17 @@ export function AgentCreateForm() {
         <CardContent className="sm:grid sm:grid-cols-[auto_1fr] sm:gap-y-2">
           <FormField field={fields.agentName} className="contents">
             <FormLabel className="sm:w-32">Agent Name</FormLabel>
-            <FormControl>
+            <FormControl render={
               <Input placeholder="Set an agent name" autoComplete="off" />
-            </FormControl>
+              } />
             <FormMessage className="sm:col-start-2" />
           </FormField>
 
           <FormField field={fields.defaultModel} className="contents">
             <FormLabel className="sm:w-32">Default Model</FormLabel>
-            <FormControl>
+            <FormControl render={
               <ModelSelector models={models} />
-            </FormControl>
+              } />
             <FormMessage className="sm:col-start-2" />
           </FormField>
         </CardContent>
