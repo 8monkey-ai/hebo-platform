@@ -6,13 +6,6 @@ import { getZodConstraint } from "@conform-to/zod/v4";
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
-  Card,
-  CardAction,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@hebo/shared-ui/components/Card";
-import {
   Dialog,
   DialogFooter,
   DialogClose,
@@ -29,6 +22,7 @@ import {
   FormMessage,
 } from "@hebo/shared-ui/components/Form";
 import { Input } from "@hebo/shared-ui/components/Input";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@hebo/shared-ui/components/Item";
 
 import { useFormErrorToast } from "~console/lib/errors";
 
@@ -57,27 +51,30 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
     <div className="flex flex-col gap-2">
       <h2>Danger Zone</h2>
 
-      <Card className="border-destructive border-dashed">
-        <CardHeader>
-          <CardTitle>Delete Agent</CardTitle>
-          <CardDescription>
+      <Item variant="outline" className="bg-background border-destructive border-dashed">
+        <ItemContent>
+          <ItemTitle>Delete Agent</ItemTitle>
+          <ItemDescription>
             Once you delete an agent, there is no going back. Be certain.
-          </CardDescription>
-          <CardAction className="self-center">
+          </ItemDescription>
+        </ItemContent>
+        <ItemActions className="self-center">
 
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button variant="destructive">Delete agent</Button>
-              </DialogTrigger>
+          <Dialog>
+            <DialogTrigger render={
+              <Button variant="destructive">Delete agent</Button>
+            } />
 
-              <DialogContent className="sm:max-w-md bg-sidebar">
-                <Form method="post" {...getFormProps(form)} className="contents">
-                  <DialogHeader>
-                    <DialogTitle>Delete Agent</DialogTitle>
-                    <DialogDescription>
-                      This will delete your agent irreversibly.
-                    </DialogDescription>
-                  </DialogHeader>
+            <DialogContent>
+              <Form method="post" {...getFormProps(form)} className="contents">
+                <DialogHeader>
+                  <DialogTitle>Delete Agent</DialogTitle>
+                  <DialogDescription>
+                    This will delete your agent irreversibly.
+                  </DialogDescription>
+                </DialogHeader>
+
+                <div className="flex flex-col gap-4">
                   <Alert variant="destructive">
                     <AlertTitle>
                       <strong>Warning:</strong> This action is not reversible.
@@ -93,27 +90,27 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
                         the box below:
                       </div>
                     </FormLabel>
-                    <FormControl>
+                    <FormControl render={
                       <Input autoComplete="off" />
-                    </FormControl>
+                      } />
                     <FormMessage />
                   </FormField>
+                </div>
 
-                  <DialogFooter>
-                    <DialogClose asChild>
-                      <Button variant="outline" type="button">Cancel</Button>
-                    </DialogClose>
-                    <Button isLoading={navigation.state !== "idle" && navigation.formData != null} type="submit">
-                      Delete
-                    </Button>
-                  </DialogFooter>
-                </Form>
-              </DialogContent>
-            </Dialog>
+                <DialogFooter>
+                  <DialogClose render={
+                    <Button variant="outline" type="button">Cancel</Button>
+                  } />
+                  <Button isLoading={navigation.state !== "idle" && navigation.formData != null} type="submit">
+                    Delete
+                  </Button>
+                </DialogFooter>
+              </Form>
+            </DialogContent>
+          </Dialog>
 
-          </CardAction>
-        </CardHeader>
-      </Card>
+        </ItemActions>
+      </Item>
     </div>
   );
 }

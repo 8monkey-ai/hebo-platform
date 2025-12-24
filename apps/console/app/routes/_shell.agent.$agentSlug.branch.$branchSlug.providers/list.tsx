@@ -1,7 +1,6 @@
 import { Eraser, HelpCircle, MoreVertical } from "lucide-react";
 import { useState } from "react";
 
-import { Avatar } from "@hebo/shared-ui/components/Avatar";
 import { Button } from "@hebo/shared-ui/components/Button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@hebo/shared-ui/components/DropdownMenu";
 import {
@@ -17,6 +16,7 @@ import { Bedrock, Cohere, Groq, Vertex } from "~console/components/ui/Icons";
 import { ConfigureProviderDialog } from "./configure";
 import { ClearCredentialsDialog } from "./clear";
 import { formatDateTime } from "~console/lib/utils";
+import { Avatar } from "@hebo/shared-ui/components/Avatar";
 
 const ProviderIcons = {
   bedrock: Bedrock,
@@ -39,12 +39,12 @@ export function ProvidersList({ providers }: { providers: Provider[] }) {
     const [selectedProvider, setSelectedProvider] = useState<Provider | undefined>(undefined);
 
     return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
             {providers.map((provider) => {
                 return (
                     <Item key={provider.slug} variant="outline" className="bg-background">
                         <ItemMedia>
-                            <Avatar>
+                            <Avatar className="overflow-hidden" >
                                 {(() => {
                                     const Icon = ProviderIcons[provider.slug as keyof typeof ProviderIcons] ?? HelpCircle;
                                     return <Icon size={32} />;
@@ -59,7 +59,7 @@ export function ProvidersList({ providers }: { providers: Provider[] }) {
                                 <>
                                     Last updated {formatDateTime(provider.updated_at ?? new Date(0))}
                                     <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
+                                        <DropdownMenuTrigger render={
                                             <Button
                                             variant="ghost"
                                             size="icon"
@@ -67,16 +67,16 @@ export function ProvidersList({ providers }: { providers: Provider[] }) {
                                             >
                                                 <MoreVertical className="size-4" aria-hidden="true" />
                                             </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
+                                        } />
+                                        <DropdownMenuContent className="min-w-44" align="end">
                                             <DropdownMenuItem
-                                                className="text-destructive hover:!text-destructive"
-                                                onSelect={() => {
+                                                className="text-destructive"
+                                                onClick={() => {
                                                     setSelectedProvider(provider);
                                                     setClearOpen(true);
                                                 }}
                                                 >
-                                                <Eraser className="text-destructive" />
+                                                <Eraser />
                                                 Clear Credentials
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>

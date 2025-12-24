@@ -14,14 +14,14 @@ function ModelSelector({ models, ...props }: ModelSelectorProps) {
     <Select
       items={Object.entries(models ?? {}).map(([id, m]) => ({
         value: id,
-        name: (
+        label: (
           <>
             {m.name}{" "}
             {m.monthlyFreeTokens > 0 && (
-              <Badge className="bg-green-600 text-white">Free Tier</Badge>
+              <Badge className="bg-green-600 text-white!">Free Tier</Badge>
             )}
             {m.modality === "embedding" && (
-              <Badge className="bg-blue-500 text-white">Embeddings</Badge>
+              <Badge className="bg-blue-500 text-white!">Embeddings</Badge>
             )}
           </>
         ),

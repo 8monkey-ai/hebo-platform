@@ -65,7 +65,7 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
                   <TableCell>{key.description || "—"}</TableCell>
                   <TableCell className="align-middle">
                     <Tooltip>
-                      <TooltipTrigger asChild>
+                      <TooltipTrigger render={
                         <Badge
                           variant="outline"
                           className={isExpired ? "border-destructive text-destructive"
@@ -75,7 +75,7 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
                         >
                           {isExpired? "Expired" : isExpiringSoon? "Expires Soon": "Active"}
                         </Badge>
-                      </TooltipTrigger>
+                      } />
                       <TooltipContent>
                         {isExpired ? "Expired " : "Expires "}
                         {formatDateTime(key.expiresAt)}
@@ -92,7 +92,7 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                      <DropdownMenuTrigger render={
                         <Button
                           variant="ghost"
                           size="icon"
@@ -100,11 +100,11 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
                         >
                           <MoreVertical className="size-4" aria-hidden="true" />
                         </Button>
-                      </DropdownMenuTrigger>
+                      } />
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           className="text-destructive"
-                          onSelect={() => {
+                          onClick={() => {
                             setSelectedKey(key);
                             setRevokeOpen(true);
                           }}

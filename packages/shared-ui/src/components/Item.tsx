@@ -9,4 +9,4 @@ export {
   ItemDescription,
   ItemHeader,
   ItemFooter,
-} from "../_shadcn/ui/item";
+} from "#/_shadcn/ui/item";

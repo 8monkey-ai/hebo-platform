@@ -1,1 +1,1 @@
-export { Separator } from "../_shadcn/ui/separator";
+export { Separator } from "#/_shadcn/ui/separator";

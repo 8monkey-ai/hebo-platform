@@ -33,15 +33,14 @@ export const SidebarNav = ({ activeAgent, activeBranch }: SidebarNavProps) => {
         return (
           <SidebarMenuItem key={label} className="group-data-[state=expanded]:mx-0.5 transition-[margin]">
             <SidebarMenuButton 
-              asChild 
               isActive={active}
               tooltip={label}
-              >
-              <Link to={path} viewTransition>
-                <Icon aria-hidden="true" />
-                {label}
-              </Link>
-            </SidebarMenuButton>
+              render={
+                <Link to={path} viewTransition >
+                  <Icon aria-hidden="true" />
+                  <span>{label}</span>
+                </Link>
+              } />
           </SidebarMenuItem>
         );
       })}

@@ -1,1 +1,1 @@
-export { Label } from "../_shadcn/ui/label";
+export { Label } from "#/_shadcn/ui/label";
