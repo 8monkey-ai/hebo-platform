@@ -105,6 +105,7 @@ export function Chat({
       new OpenAIHttpChatTransport({
         api: currentModel?.endpoint.baseUrl + "/chat/completions",
         fetch: currentModel?.endpoint.fetch || fetch,
+        credentials: "include",
       }),
     [currentModel?.endpoint.baseUrl],
   );

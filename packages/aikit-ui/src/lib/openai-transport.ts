@@ -48,14 +48,19 @@ type ToolCall = {
   arguments: string;
 };
 
-type OpenAIHttpChatTransportOptions = HttpChatTransportInitOptions<UIMessage>;
+type OpenAIHttpChatTransportOptions =
+  HttpChatTransportInitOptions<UIMessage> & {
+    credentials?: RequestCredentials;
+  };
 
 export class OpenAIHttpChatTransport<
   UI_MESSAGE extends UIMessage = UIMessage,
 > extends HttpChatTransport<UI_MESSAGE> {
   constructor(options: OpenAIHttpChatTransportOptions) {
+    const { credentials, ...restOptions } = options;
+
     super({
-      ...options,
+      ...restOptions,
       prepareSendMessagesRequest: async ({ messages, body }) => {
         const openaiMessages = await Promise.all(
           messages.map((m) => toOpenAIMessage(m as UIMessage)),
@@ -66,7 +71,7 @@ export class OpenAIHttpChatTransport<
           : undefined;
 
         return {
-          credentials: "include",
+          ...(credentials ? { credentials } : {}),
           body: {
             ...body,
             messages: openaiMessages,
