@@ -88,9 +88,9 @@ export function toModelMessages(messages: OpenAICompatibleMessage[]) {
       continue;
     }
 
-    const { assistant, tool } = toAssistantModelMessages(message, toolById);
-    modelMessages.push(assistant);
-    if (tool) modelMessages.push(tool);
+    modelMessages.push(toAssistantModelMessage(message));
+    const toolResult = toToolResultMessage(message, toolById);
+    if (toolResult) modelMessages.push(toolResult);
   }
 
   return modelMessages;
@@ -113,14 +113,13 @@ function toUserModelMessage(
   return message as ModelMessage;
 }
 
-function toAssistantModelMessages(
+function toAssistantModelMessage(
   message: Extract<OpenAICompatibleMessage, { role: "assistant" }>,
-  toolById: Map<string, OpenAICompatibleToolMessage>,
-): { assistant: ModelMessage; tool?: ModelMessage } {
+): ModelMessage {
   const toolCalls = message.tool_calls ?? [];
-  if (toolCalls.length === 0) return { assistant: message as ModelMessage };
+  if (toolCalls.length === 0) return message as ModelMessage;
 
-  const assistant: ModelMessage = {
+  return {
     role: "assistant",
     content: toolCalls.map((tc) => ({
       type: "tool-call",
@@ -129,6 +128,14 @@ function toAssistantModelMessages(
       input: parseToolInput(tc.function.arguments),
     })),
   };
+}
+
+function toToolResultMessage(
+  message: Extract<OpenAICompatibleMessage, { role: "assistant" }>,
+  toolById: Map<string, OpenAICompatibleToolMessage>,
+): ModelMessage | undefined {
+  const toolCalls = message.tool_calls ?? [];
+  if (toolCalls.length === 0) return undefined;
 
   const toolResultParts: ToolResultPart[] = [];
   for (const tc of toolCalls) {
@@ -143,10 +150,9 @@ function toAssistantModelMessages(
     });
   }
 
-  const tool = toolResultParts.length > 0
+  return toolResultParts.length > 0
     ? ({ role: "tool", content: toolResultParts } as ModelMessage)
     : undefined;
-  return { assistant, tool };
 }
 
 function parseToolInput(raw: string) {
