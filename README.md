@@ -135,7 +135,7 @@ bun run sst secret remove GithubClientId --stage <stage>
 
 Auth middleware toggle:
 
-- Backend (`apps/api`, `apps/gateway`): set `AUTH_BASE_URL` to enable Better Auth middleware; omit uses the localhost dummy.
+- Backend (`apps/api`, `apps/gateway`): set `AUTH_URL` to enable Better Auth middleware; omit uses the localhost dummy.
 - Console frontend: set `VITE_AUTH_URL` to enable Better Auth in the UI; omit/false uses the dummy client.
 
 ## Run modes

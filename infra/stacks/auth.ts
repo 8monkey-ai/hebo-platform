@@ -4,7 +4,7 @@ import { authSecrets, otelExporterSecrets, isProd } from "./env";
 import heboVpc from "./network";
 
 const authDomain = isProd ? "auth.hebo.ai" : `auth.${$app.stage}.hebo.ai`;
-export const authBaseUrl = `https://${authDomain}`;
+export const authUrl = `https://${authDomain}`;
 const authPort = "3000";
 
 const heboAuth = new sst.aws.Service("HeboAuth", {
@@ -20,7 +20,7 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
   },
   environment: {
     IS_REMOTE: $dev ? "false" : "true",
-    AUTH_BASE_URL: authBaseUrl,
+    AUTH_URL: authUrl,
     AUTH_TRUSTED_ORIGINS: isProd
       ? "https://console.hebo.ai"
       : `https://console.${$app.stage}.hebo.ai`,
