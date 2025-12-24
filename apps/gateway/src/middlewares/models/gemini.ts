@@ -93,52 +93,7 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
   }
 }
 
-export abstract class Gemini3ModelAdapter extends GeminiModelAdapter {
-  transformPrompt(prompt: any): any {
-    return prompt.map((message: any) => {
-      if (message.role === "assistant" && Array.isArray(message.content)) {
-        let hasInjected = false;
-        return {
-          ...message,
-          content: message.content.map((part: any) => {
-            if (part.type === "tool-call") {
-              if (hasInjected) {
-                return part;
-              }
-
-              const currentProviderOptions =
-                (part as any).providerOptions || {};
-              const existingSignature =
-                currentProviderOptions?.openaiCompatible?.thought_signature;
-              const thoughtSignatureToInject =
-                existingSignature || "context_engineering_is_the_way_to_go";
-
-              hasInjected = true;
-
-              const mutableProviderOptions = { ...currentProviderOptions };
-              delete mutableProviderOptions.openaiCompatible;
-              const { google: existingGoogleOptions, ...restProviderOptions } =
-                mutableProviderOptions;
-
-              return {
-                ...part,
-                providerOptions: {
-                  ...restProviderOptions,
-                  google: {
-                    ...existingGoogleOptions,
-                    thoughtSignature: thoughtSignatureToInject,
-                  },
-                },
-              };
-            }
-            return part;
-          }),
-        };
-      }
-      return message;
-    });
-  }
-}
+export abstract class Gemini3ModelAdapter extends GeminiModelAdapter {}
 
 export class Gemini3ProPreviewAdapter extends Gemini3ModelAdapter {
   readonly id = "google/gemini-3-pro-preview";

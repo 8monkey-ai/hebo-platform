@@ -31,7 +31,6 @@ export const OpenAICompatibleMessageToolCall = t.Object({
     arguments: t.String(),
     name: t.String(),
   }),
-  extra_content: t.Optional(t.Object({}, { additionalProperties: true })),
 });
 
 export const OpenAICompatibleSystemMessage = t.Object({
@@ -59,7 +58,6 @@ export const OpenAICompatibleAssistantMessage = t.Object({
   tool_calls: t.Optional(t.Array(OpenAICompatibleMessageToolCall)),
   reasoning: t.Optional(t.String()),
   reasoning_content: t.Optional(t.String()),
-  extra_content: t.Optional(t.Object({}, { additionalProperties: true })),
 });
 
 export const OpenAICompatibleToolMessage = t.Object({
