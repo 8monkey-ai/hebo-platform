@@ -1,5 +1,6 @@
 import { ModelAdapterBase } from "./model";
 
+
 export class ClaudeOpus45Adapter extends ModelAdapterBase {
   readonly id = "anthropic/claude-opus-4-5-v1";
   readonly name = "Anthropic Claude Opus 4.5";

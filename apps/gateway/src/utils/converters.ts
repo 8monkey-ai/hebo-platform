@@ -126,7 +126,13 @@ function toAssistantModelMessage(
       toolCallId: tc.id,
       toolName: tc.function.name,
       input: parseToolInput(tc.function.arguments),
+      providerOptions: tc.extra_content && {
+        openaiCompatible: tc.extra_content,
+      },
     })),
+    providerOptions: message.extra_content && {
+      openaiCompatible: message.extra_content,
+    },
   };
 }
 
@@ -193,6 +199,7 @@ export const toOpenAICompatibleMessage = (
         name: toolCall.toolName,
         arguments: JSON.stringify(toolCall.input),
       },
+      extra_content: toolCall.providerMetadata,
     }));
   } else {
     message.content = result.text;
@@ -332,13 +339,14 @@ export function toOpenAICompatibleStream(
           }
 
           case "tool-call": {
-            const { toolCallId, toolName, input } = part;
+            const { toolCallId, toolName, input, providerMetadata } = part;
 
             const toolCall: OpenAICompatibleToolCallDelta = {
               id: toolCallId,
               index: toolCallIndexCounter++,
               type: "function",
               function: { name: toolName, arguments: JSON.stringify(input) },
+              extra_content: providerMetadata,
             };
 
             enqueue({
