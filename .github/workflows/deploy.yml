@@ -58,5 +58,7 @@ jobs:
           printf '%s' "${{ secrets.GOOGLE_VERTEX_AWS_PROVIDER_AUDIENCE }}" | bun run sst secret set VertexAwsProviderAudience --stage production
           printf '%s' "${{ secrets.GOOGLE_VERTEX_PROJECT }}" | bun run sst secret set VertexProject --stage production
           printf '%s' "${{ secrets.GOOGLE_VERTEX_LOCATION }}" | bun run sst secret set VertexLocation --stage production
-
+          printf '%s' "${{ secrets.GRAFANA_CLOUD_OTLP_ENDPOINT }}" | bun run sst secret set GrafanaCloudOtlpEndpoint --stage production
+          printf '%s' "${{ secrets.GRAFANA_CLOUD_OTLP_INSTANCE_ID }}" | bun run sst secret set GrafanaCloudOtlpInstanceId --stage production
+          printf '%s' "${{ secrets.GRAFANA_CLOUD_OTLP_API_TOKEN }}" | bun run sst secret set GrafanaCloudOtlpApiToken --stage production
           bun run sst deploy --stage production

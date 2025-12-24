@@ -93,7 +93,6 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
       style={
         {
           "--sidebar-width": "12rem",
-          "--sidebar-width-mobile": "12rem",
           "--sidebar-width-icon": "4rem",
         } as React.CSSProperties
       }
@@ -130,11 +129,11 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
         </div>
       </Sidebar>
 
-      <SidebarInset className="min-w-0">
+      <SidebarInset className="min-w-0 bg-transparent">
         <Tooltip>
-          <TooltipTrigger asChild>
+          <TooltipTrigger render={
             <SidebarTrigger className="fixed m-2" />
-          </TooltipTrigger>
+          } />
           <TooltipContent side="right">
             Toggle Sidebar ({kbs("mod+S")})
           </TooltipContent>
@@ -159,13 +158,12 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
         style={
           {
             "--sidebar-width": "24rem",
-            "--sidebar-width-mobile": "24rem", 
             "--sidebar-width-icon": "0rem",
           } as React.CSSProperties
         }
       >
         <SidebarTrigger 
-          className="fixed top-3 right-2 w-fit" 
+          className="fixed top-3 right-3 w-fit px-2" 
           icon={<div className="flex items-center space-x-1.5">
               <SquareChevronRight size={16} />
               <span>Playground</span>

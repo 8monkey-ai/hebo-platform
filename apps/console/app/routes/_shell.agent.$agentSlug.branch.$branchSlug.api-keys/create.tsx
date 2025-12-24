@@ -1,3 +1,4 @@
+import { Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
@@ -5,8 +6,9 @@ import { z } from "zod";
 import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
+import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
-import { CopyToClipboardButton } from "@hebo/shared-ui/components/code/CopyToClipboardButton";
+import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import {
   Dialog,
   DialogClose,
@@ -19,10 +21,10 @@ import {
 } from "@hebo/shared-ui/components/Dialog";
 import { FormControl, FormField, FormLabel, FormMessage } from "@hebo/shared-ui/components/Form";
 import { Input } from "@hebo/shared-ui/components/Input";
+import { Label } from "@hebo/shared-ui/components/Label";
 import { Select } from "@hebo/shared-ui/components/Select";
 
 import { useFormErrorToast } from "~console/lib/errors";
-import { Info } from "lucide-react";
 
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -72,45 +74,45 @@ export function CreateApiKeyDialog() {
     <>
       <Dialog open={createOpen} onOpenChange={createSetOpen}>
         <div>
-          <DialogTrigger asChild>
+          <DialogTrigger render={
             <Button variant="outline" type="button">+ Create API Key</Button>
-          </DialogTrigger>
+          } />
         </div>
         <DialogContent>
           <fetcher.Form method="post" {...getFormProps(form)} className="contents">
             <DialogHeader>
               <DialogTitle>Create API key</DialogTitle>
               <DialogDescription>
-                Provide a name and expiration window for this key.
+                Provide a name and expiration window.
               </DialogDescription>
             </DialogHeader>
             <div className="flex flex-col gap-4">
               <FormField field={fields.name}>
                 <FormLabel>Name</FormLabel>
-                <FormControl>
+                <FormControl render={
                   <Input placeholder="API key name" autoComplete="off" />
-                </FormControl>
+                  } />
                 <FormMessage />
               </FormField>
               <FormField field={fields.expiresIn}>
                 <FormLabel>Expires in</FormLabel>
-                <FormControl>
+                <FormControl render={
                   <Select
                     items={API_KEY_EXPIRATION_OPTIONS.map((option) => ({
                       value: option.value,
-                      name: option.label,
+                      label: option.label,
                     }))}
                   />
-                </FormControl>
+                  } />
                 <FormMessage />
               </FormField>
             </div>
             <DialogFooter>
-              <DialogClose asChild>
+              <DialogClose render={
                 <Button type="button" variant="ghost">
                   Cancel
                 </Button>
-              </DialogClose>
+              } />
               <Button
                 type="submit"
                 name="intent"
@@ -149,17 +151,14 @@ function ApiKeyRevealDialog({ apiKey, open, onOpenChange }: ApiKeyRevealDialogPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Info className="size-4" aria-hidden="true" />
             API Key
           </DialogTitle>
           <DialogDescription>
-            Here is your API key.{" "}
-            <span className="font-semibold">
-              Copy it to a safe place—you will not be able to view it again.
-            </span>
+            Copy your key to a safe place, you won't be able to view it again.
           </DialogDescription>
         </DialogHeader>
 
@@ -169,29 +168,34 @@ function ApiKeyRevealDialog({ apiKey, open, onOpenChange }: ApiKeyRevealDialogPr
           </span>
           <div className="flex items-center gap-2">
             <Input readOnly value={apiKey} className="font-mono" />
-            <CopyToClipboardButton textToCopy={apiKey} />
+            <CopyButton value={apiKey} />
           </div>
         </div>
 
-        <label className="flex items-center gap-3 rounded-md border border-border p-3 text-sm">
-          <input
-            type="checkbox"
-            className="size-4 accent-foreground"
-            checked={acknowledged}
-            onChange={(event) => setAcknowledged(event.target.checked)}
-          />
-          <span>I understand that I will not be able to view this key again.</span>
-        </label>
+        <Alert>
+          <AlertTitle>
+            <Label htmlFor="acknowledge">
+              <input
+                id="acknowledge"
+                type="checkbox"
+                className="size-4 accent-foreground"
+                checked={acknowledged}
+                onChange={(event) => setAcknowledged(event.target.checked)}
+              />
+              <span>I understand that I won't be able to view this key again</span>
+            </Label>
+          </AlertTitle>
+        </Alert>
 
         <DialogFooter>
-          <DialogClose asChild>
+          <DialogClose render={
             <Button
               type="button"
               disabled={!acknowledged}
             >
               Close
             </Button>
-          </DialogClose>
+          } />
         </DialogFooter>
       </DialogContent>
     </Dialog>

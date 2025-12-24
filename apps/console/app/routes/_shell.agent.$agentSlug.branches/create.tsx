@@ -60,41 +60,40 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <div>
-        <DialogTrigger asChild>
+        <DialogTrigger render={
           <Button
             type="button"
             variant="outline"
           >
             + Create Branch
           </Button>
-        </DialogTrigger>
+        } />
       </div>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <fetcher.Form method="post" {...getFormProps(form)} className="contents">
           <DialogHeader>
-            <DialogTitle>Create Banch</DialogTitle>
+            <DialogTitle>Create Branch</DialogTitle>
             <DialogDescription>
-              Set a name and choose a source from which to branch out.
+              Set a name and choose a source branch.
             </DialogDescription>
           </DialogHeader>
-          <div>
+          <div className="flex flex-col gap-4">
             <FormField field={fields.branchName}>
               <FormLabel>Branch name</FormLabel>
-              <FormControl>
+              <FormControl render={
                 <Input autoComplete="off" placeholder="Set a branch name" />
-              </FormControl>
+              } />
               <FormMessage />
             </FormField>
-          </div>
-          <div>
+
             <FormField field={fields.sourceBranchSlug}>
               <FormLabel>Source</FormLabel>
-              <FormControl>
+              <FormControl render={
                 <Select
                   items={
                     branches.map(branch => ({
                       value: branch.slug,
-                      name: (
+                      label: (
                         <>
                           <GitBranch aria-hidden="true" />
                           {branch.name}
@@ -103,16 +102,16 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
                     }))
                   }
                 />
-              </FormControl>
+                } />
               <FormMessage />
             </FormField>
           </div>
           <DialogFooter>
-            <DialogClose asChild>
+            <DialogClose render={
               <Button type="button" variant="ghost">
                 Cancel
               </Button>
-            </DialogClose>
+            } />
             <Button
               type="submit"
               name="intent"

@@ -1,13 +1,13 @@
 import { logger } from "@bogeychan/elysia-logger";
-import { staticPlugin } from "@elysiajs/static";
+import { opentelemetry } from "@elysiajs/opentelemetry";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import Elysia from "elysia";
-import { createElement } from "react";
-import { renderToString } from "react-dom/server";
+
+import { getOtelConfig } from "@hebo/shared-api/utils/otel";
 
 import { countLetterTool } from "./aikit/count-letter.js";
 import { createMcpHandler } from "./aikit/mcp-transport.js";
-import { Home } from "./ui/root";
+import hello from "./hello.txt";
 
 const LOG_LEVEL = process.env.LOG_LEVEL ?? "info";
 const PORT = Number(process.env.PORT ?? 3003);
@@ -19,28 +19,20 @@ mcpServer.registerTool(
   countLetterTool.handler,
 );
 
-const createApp = () =>
+const createMcp = () =>
   new Elysia()
+    .use(opentelemetry(getOtelConfig("hebo-mcp")))
     .use(logger({ level: LOG_LEVEL }))
-    .use(staticPlugin({ assets: "src/ui/public" }))
-    .use(staticPlugin({ assets: "dist", prefix: "/static" }))
-    .get("/", () => {
-      const html = renderToString(createElement(Home));
-      return new Response(html, {
-        headers: { "Content-Type": "text/html" },
-      });
-    })
+    .get("/", () => hello)
     .group("/aikit", (app) =>
-      app
-        .get("/", () => "🐵 Hebo Aikit MCP server says hello!")
-        .post("/", async ({ request, body }) =>
-          createMcpHandler(mcpServer)(request, body),
-        ),
+      app.post("/", async ({ request, body }) =>
+        createMcpHandler(mcpServer)(request, body),
+      ),
     );
 
 if (import.meta.main) {
-  const app = createApp().listen(PORT);
-  console.log(`🐵 Hebo MCP running at ${app.server!.url}`);
+  const mcp = createMcp().listen(PORT);
+  console.log(`🐵 Hebo MCP running at ${mcp.server!.url}`);
 }
 
-export type McpApp = ReturnType<typeof createApp>;
+export type Mcp = ReturnType<typeof createMcp>;

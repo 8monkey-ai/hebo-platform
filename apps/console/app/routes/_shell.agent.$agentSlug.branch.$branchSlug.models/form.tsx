@@ -1,6 +1,6 @@
 import { useFetcher } from "react-router";
 import { useEffect, useRef, useState } from "react";
-import { useForm, getFormProps, type FieldMetadata, useInputControl } from "@conform-to/react";
+import { useForm, getFormProps, type FieldMetadata } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 import { Brain, ChevronsUpDown, Edit } from "lucide-react";
 import { useSnapshot } from "valtio";
@@ -21,7 +21,7 @@ import {
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Select } from "@hebo/shared-ui/components/Select";
 import { Separator } from "@hebo/shared-ui/components/Separator";
-import { CopyToClipboardButton } from "@hebo/shared-ui/components/code/CopyToClipboardButton";
+import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemMedia, ItemTitle } from "@hebo/shared-ui/components/Item";
 import {
@@ -39,6 +39,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@hebo/shared-ui/components/Collapsible";
+import { Label } from "@hebo/shared-ui/components/Label";
 
 import { useFormErrorToast } from "~console/lib/errors";
 import { objectId } from "~console/lib/utils";
@@ -67,12 +68,7 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
     lastResult: fetcher.data,
     constraint: getZodConstraint(modelsConfigFormSchema),
     defaultValue: { 
-      models: models?.map((model) => ({
-        ...model,
-        routing: model.routing?.only?.length
-          ? { only: [model.routing.only[0]] }
-          : { only: [""] },
-      }))
+      models
     }
   });
   useFormErrorToast(form.allErrors);
@@ -126,7 +122,6 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
           onClick={() => {
             form.insert({
               name: fields.models.name,
-              defaultValue: { routing: { only: [""] } },
             });
             setExpandedCardId(modelItems.length);
           }}
@@ -166,141 +161,129 @@ function ModelCard(props: {
   const { models } = useSnapshot(shellStore);
 
   const modelFieldset = model.getFieldset();
-  const routingOnlyField = modelFieldset.routing.getFieldset().only.getFieldList()[0]!;
-  const routingOnlyValue = useInputControl(routingOnlyField);
-
   const aliasPath = [agentSlug, branchSlug, modelFieldset.alias.value || "alias"].join("/");
 
-  const [routingEnabled, setRoutingEnabled] = useState(Boolean(routingOnlyField.value)); 
-
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const routingOnlyField = modelFieldset.routing.getFieldset().only;
+  const [routingEnabled, setRoutingEnabled] = useState(Boolean(routingOnlyField.value));
 
   return (
     <Collapsible open={isExpanded} onOpenChange={onOpenChange}>
-      <Card className="gap-0">
-        <CardHeader>
-          <div className="grid gap-4 min-w-0 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
-            <div className="flex min-w-0 flex-col gap-2">
-              <span className="text-xs uppercase text-muted-foreground">Alias path</span>
-              <div className="inline-flex gap-2 items-center">
-                <span className="text-sm font-medium text-ellipsis-start">{aliasPath}</span>
-                <CopyToClipboardButton textToCopy={aliasPath} />
-              </div>
+      <Card size="sm">
+        <CardHeader className="grid gap-4 min-w-0 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
+          <div className="flex min-w-0 flex-col gap-2">
+            <span className="text-xs uppercase text-muted-foreground">Alias path</span>
+            <div className="inline-flex gap-2 items-center">
+              <span className="text-sm font-medium text-ellipsis-start">{aliasPath}</span>
+              <CopyButton value={aliasPath} />
             </div>
-
-            <Badge variant="outline">
-              <Brain />
-              {modelFieldset.type.value ?? "undefined"}
-            </Badge>
-
-            <CollapsibleTrigger asChild>
-              <Button type="button" variant="outline" disabled={isExpanded}>
-                <Edit />
-                Edit
-              </Button>
-            </CollapsibleTrigger>
           </div>
+
+          <Badge variant="outline">
+            <Brain />
+            {modelFieldset.type.value ?? "undefined"}
+          </Badge>
+
+          <CollapsibleTrigger render={
+            <Button type="button" variant="outline" disabled={isExpanded}>
+              <Edit />
+              Edit
+            </Button>
+          } />
         </CardHeader>
 
         <CollapsibleContent 
-          forceMount
+          keepMounted
           inert={!isExpanded}
           className="
             overflow-hidden
-            data-[state=closed]:animate-[collapsible-up_300ms_ease-in]
-            data-[state=closed]:h-0
+            h-(--collapsible-panel-height)
+            [&[data-starting-style],&[data-ending-style]]:h-0
+            transition-all duration-150 ease-out
             "
           >
-            <Separator className="mt-4" />
+            <Separator />
 
-            <CardContent className="flex flex-col gap-4 my-4">
+            <CardContent className="flex flex-col gap-4 my-3">
 
               {/* FUTURE: follow layout pattern of new shadcn fields components */}
               <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 <FormField field={modelFieldset.alias} className="flex flex-col gap-2">
                   <FormLabel>Alias</FormLabel>
-                  <FormControl>
+                  <FormControl render={
                     <Input placeholder="Set alias name" autoComplete="off" />
-                  </FormControl>
+                    } /> 
                   <FormMessage />
                 </FormField>
 
                 <FormField field={modelFieldset.type} className="flex flex-col gap-2">
                   <FormLabel>Type</FormLabel>
-                  <FormControl>
+                  <FormControl render={
                     <ModelSelector models={models} />
-                  </FormControl>
+                    } />
                   <FormMessage />
                 </FormField>
               </div>
 
               <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-                <div className="flex items-center gap-1 mb-2">
+                <div className="flex items-center gap-1">
                   <h4 className="text-sm font-medium">Advanced options</h4>
-                  <CollapsibleTrigger asChild>
+                  <CollapsibleTrigger render={
                     <Button variant="ghost" size="icon" className="size-6" type="button">
                       <ChevronsUpDown />
                     </Button>
-                  </CollapsibleTrigger>
+                  } />
                 </div>
-                <CollapsibleContent forceMount inert={!advancedOpen}  className="overflow-hidden data-[state=closed]:h-0">
-                  <FormField field={routingOnlyField}>
-                    <Item variant="outline" size="sm">
-                      <ItemMedia className="pt-1">
-                        <input
-                          id={`byo-${aliasPath}`}
-                          type="checkbox"
-                          checked={routingEnabled}
-                          onChange={(event) => {
-                            const enabled = event.target.checked;
-                            if (!enabled) routingOnlyValue.change("")
-                            setRoutingEnabled(enabled);
-                          }}
-                          className="h-4 w-4 accent-primary"
-                          aria-label="Enable bring your own provider routing"
-                        />
-                      </ItemMedia>
-                      <ItemContent>
-                        <ItemTitle>
-                          <FormLabel htmlFor={`byo-${aliasPath}`} className="mb-0">Bring Your Own Provider</FormLabel>
-                        </ItemTitle>
-                        <ItemDescription className="line-clamp-1">Setup your credentials first in providers settings</ItemDescription>
-                      </ItemContent>
-                      <ItemActions>
-                        <FormControl>
-                          {(() => {
-                            const availableProviders = providers.filter((p) => models?.[modelFieldset.type.value ?? ""]?.providers?.includes(p.slug));
-                            return (
-                              <Select
-                                disabled={!routingEnabled}
-                                defaultValue={routingEnabled ? routingOnlyField.value ?? "" : ""}
-                                items={
-                                  availableProviders
-                                    .map((provider) => ({
-                                      value: provider.slug,
-                                      name: provider.name,
-                                    }))
-                                  }
-                                placeholder={
-                                  availableProviders.length
-                                    ? "Select provider"
-                                    : "No supported providers configured"
-                                }
-                              />
-                            )
-                          })()}
-                        </FormControl>
-                        <FormMessage />
-                      </ItemActions>
-                    </Item>
-                  </FormField>
+                <CollapsibleContent keepMounted inert={!advancedOpen} className="overflow-hidden h-(--collapsible-panel-height)">
+                  <Item variant="outline" size="sm">
+                    <ItemMedia className="pt-1">
+                      <input
+                        id={`byo-${aliasPath}`}
+                        type="checkbox"
+                        checked={routingEnabled}
+                        onChange={(e) => setRoutingEnabled(e.target.checked)}
+                        className="h-4 w-4 accent-primary"
+                        aria-label="Enable bring your own provider routing"
+                      />
+                    </ItemMedia>
+                    <ItemContent>
+                      <ItemTitle>
+                        <Label htmlFor={`byo-${aliasPath}`} className="mb-0">Bring Your Own Provider</Label>
+                      </ItemTitle>
+                      <ItemDescription className="line-clamp-1">Setup your credentials first in providers settings</ItemDescription>
+                    </ItemContent>
+                    <ItemActions>
+                      {(() => {
+                        const availableProviders = providers.filter((p) => models?.[modelFieldset.type.value ?? ""]?.providers?.includes(p.slug));
+                        return (
+                          <Select
+                            disabled={!routingEnabled}
+                            name={`${model.name}.routing.only[0]`}
+                            defaultValue={routingOnlyField.getFieldList()[0]?.value ?? ""}
+                            items={
+                              availableProviders
+                                .map((provider) => ({
+                                  value: provider.slug,
+                                  label: provider.name,
+                                }))
+                              }
+                            placeholder={
+                              availableProviders.length
+                                ? "Select provider"
+                                : "No supported providers configured"
+                            }
+                          />
+                        )
+                      })()}
+                    </ItemActions>
+                  </Item>
                 </CollapsibleContent>
               </Collapsible>
             </CardContent>
 
-            <CardFooter className="pb-1">
+            <CardFooter>
               <Dialog>
-                <DialogTrigger asChild>
+                <DialogTrigger render={
                   <Button
                     type="button"
                     variant="destructive"
@@ -308,7 +291,7 @@ function ModelCard(props: {
                   >
                     Remove
                   </Button>
-                </DialogTrigger>
+                } />
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Remove model</DialogTitle>
@@ -317,11 +300,11 @@ function ModelCard(props: {
                     </DialogDescription>
                   </DialogHeader>
                   <DialogFooter>
-                    <DialogClose asChild>
+                    <DialogClose render={
                       <Button type="button" variant="outline">
                         Cancel
                       </Button>
-                    </DialogClose>
+                    } />
 
                     <Button
                       type="button"

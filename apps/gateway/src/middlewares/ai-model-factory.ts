@@ -1,13 +1,19 @@
+import { wrapLanguageModel } from "ai";
 import { Elysia } from "elysia";
 
 import { BadRequestError } from "@hebo/shared-api/errors";
-import { dbClient } from "@hebo/shared-api/middlewares/db-client";
-import supportedModels from "@hebo/shared-data/json/supported-models";
+
+import { dbClient } from "~api/middleware/db-client";
 
 import { ModelConfigService } from "./model-config";
+import { ModelAdapterFactory } from "./models";
 import { ProviderAdapterFactory } from "./providers";
 
-import type { EmbeddingModel, LanguageModel } from "ai";
+import type {
+  LanguageModelMiddleware,
+  EmbeddingModel,
+  LanguageModel,
+} from "ai";
 
 type Modality = "chat" | "embedding";
 
@@ -20,7 +26,7 @@ export const aiModelFactory = new Elysia({
   name: "ai-model-factory",
 })
   .use(dbClient)
-  .resolve(({ dbClient }) => {
+  .resolve(function resolveAiModelFactory({ dbClient }) {
     const modelConfigService = new ModelConfigService(dbClient);
     const providerAdapterFactory = new ProviderAdapterFactory(dbClient);
 
@@ -29,18 +35,10 @@ export const aiModelFactory = new Elysia({
       modality: M,
     ): Promise<AiModelFor<M>> => {
       const modelType = await modelConfigService.getModelType(modelAliasPath);
-
-      const modelModality = supportedModels.find(
-        (model) => model.type === modelType,
-      )?.modality;
-      if (!modelModality) {
+      const modelAdapter = ModelAdapterFactory.getAdapter(modelType);
+      if (modelAdapter.modality !== modality)
         throw new BadRequestError(
-          `Model ${modelAliasPath} (${modelType}) is not supported.`,
-        );
-      }
-      if (modelModality !== modality)
-        throw new BadRequestError(
-          `Model ${modelAliasPath} (${modelType}) is not a ${modality} model.`,
+          `Model ${modelType} is not a ${modality} model. It is a ${modelAdapter.modality} model.`,
         );
 
       const customProviderSlug =
@@ -48,12 +46,53 @@ export const aiModelFactory = new Elysia({
       const providerAdapter = await (customProviderSlug
         ? providerAdapterFactory.createCustom(modelType, customProviderSlug)
         : providerAdapterFactory.createDefault(modelType));
+
       const provider = await providerAdapter.getProvider();
       const modelId = await providerAdapter.resolveModelId();
 
-      return modality === "chat"
-        ? (provider.languageModel(modelId) as AiModelFor<M>)
-        : (provider.textEmbeddingModel(modelId) as AiModelFor<M>);
+      let model =
+        modality === "chat"
+          ? (provider.languageModel(modelId) as AiModelFor<M>)
+          : (provider.textEmbeddingModel(modelId) as AiModelFor<M>);
+
+      if (modality === "chat") {
+        const modelSpecificMiddleware: LanguageModelMiddleware = {
+          transformParams: ({ params }: { params: any }) => {
+            const transformedOptions = modelAdapter.transformOptions(
+              params.providerOptions ?? {},
+            );
+
+            const transformedPrompt = modelAdapter.transformPrompt(
+              params.prompt,
+            );
+
+            return {
+              ...params,
+              providerOptions: transformedOptions,
+              prompt: transformedPrompt,
+            };
+          },
+        };
+
+        const providerSpecificMiddleware: LanguageModelMiddleware = {
+          transformParams: ({ params }: { params: any }) => {
+            const transformed = providerAdapter.transformOptions(
+              params.providerOptions ?? {},
+            );
+            return {
+              ...params,
+              providerOptions: transformed,
+            };
+          },
+        };
+
+        model = wrapLanguageModel({
+          model: model as any,
+          middleware: [modelSpecificMiddleware, providerSpecificMiddleware],
+        }) as AiModelFor<M>;
+      }
+
+      return model;
     };
 
     return {

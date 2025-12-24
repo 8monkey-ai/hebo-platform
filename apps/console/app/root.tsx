@@ -18,10 +18,8 @@ export const links: Route.LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href:
-      "https://fonts.googleapis.com/css2?" +
-      "family=Inter:wght@100..900&" +
-      "display=swap",
+    // eslint-disable-next-line no-secrets/no-secrets
+    href: "https://fonts.googleapis.com/css2?family=Recursive:wght,MONO@400..600,0..1&display=block",
   },
   { rel: "icon", href: "/hebo-icon.png" },
 ];

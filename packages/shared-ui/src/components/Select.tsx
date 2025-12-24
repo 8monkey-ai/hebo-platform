@@ -1,69 +1,38 @@
-import { useControl } from "@conform-to/react/future";
-import { useRef } from "react";
-
 import {
   SelectTrigger,
-  Select as ShadcnSelect,
+  Select as ShadCnSelect,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "../_shadcn/ui/select";
+} from "#/_shadcn/ui/select";
 
-interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
-  items: Array<{ name: React.ReactNode; value: string }>;
+type SelectProps = React.ComponentProps<typeof ShadCnSelect> & {
+  items: Array<{ value: any; label: React.ReactNode }>;
   placeholder?: string;
-  defaultValue?: string;
-}
+};
 
-function Select({
-  name,
-  disabled,
-  items,
-  placeholder,
-  defaultValue,
-}: SelectProps) {
-  const selectRef = useRef<React.ComponentRef<typeof SelectTrigger>>(null);
-  const control = useControl({
-    defaultValue,
-    onFocus() {
-      selectRef.current?.focus();
-    },
-  });
-
+function Select({ items, placeholder, ...props }: SelectProps) {
   return (
-    <>
-      <input name={name} ref={control.register} type="hidden" />
-      <ShadcnSelect
-        // Conform's docs show using control.value directly; this is safe.
-        // eslint-disable-next-line react-hooks/refs
-        value={control.value}
-        onValueChange={(value) => {
-          control.change(value);
-        }}
-        onOpenChange={(open) => {
-          if (!open) {
-            control.blur();
+    <ShadCnSelect {...props}>
+      <SelectTrigger className="bg-background w-full min-w-0 truncate">
+        <SelectValue>
+          {(value) =>
+            items.find((item) => item.value === value)?.label ?? (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )
           }
-        }}
-        disabled={disabled}
-      >
-        <SelectTrigger
-          className="bg-background w-full min-w-0 truncate"
-          ref={selectRef}
-        >
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {items.map((item) => {
-            return (
-              <SelectItem key={item.value} value={item.value}>
-                {item.name}
-              </SelectItem>
-            );
-          })}
-        </SelectContent>
-      </ShadcnSelect>
-    </>
+        </SelectValue>
+      </SelectTrigger>
+      <SelectContent>
+        {items.map((item) => {
+          return (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          );
+        })}
+      </SelectContent>
+    </ShadCnSelect>
   );
 }
 

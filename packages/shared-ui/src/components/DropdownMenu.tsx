@@ -14,4 +14,4 @@ export {
   DropdownMenuSub,
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
-} from "../_shadcn/ui/dropdown-menu";
+} from "#/_shadcn/ui/dropdown-menu";

@@ -1,5 +1,6 @@
+import { Skeleton as ShadCnSkeleton } from "#/_shadcn/ui/skeleton";
+
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "./Table";
-import { Skeleton as ShadCNSkeleton } from "../_shadcn/ui/skeleton";
 
 interface SkeletonProps extends React.ComponentProps<"div"> {
   count?: number;
@@ -9,7 +10,7 @@ export function Skeleton({ count = 1, className, ...props }: SkeletonProps) {
   return (
     <>
       {Array.from({ length: count }).map((_, i) => (
-        <ShadCNSkeleton key={i} className={className} {...props} />
+        <ShadCnSkeleton key={i} className={className} {...props} />
       ))}
     </>
   );

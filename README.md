@@ -36,7 +36,7 @@ This is the monorepo for Hebo, containing all our applications and shared packag
 
 ## Prerequisites
 
-- Bun >= 1.3.1
+- Bun >= 1.3.4
 - Docker >= 28
 - AWS CLI (only required for deployment)
 

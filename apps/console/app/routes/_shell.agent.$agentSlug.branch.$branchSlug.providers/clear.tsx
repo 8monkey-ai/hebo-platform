@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@hebo/shared-ui/components/Dialog";
-import { FormControl, FormField, FormMessage } from "@hebo/shared-ui/components/Form";
+import { FormControl, FormField } from "@hebo/shared-ui/components/Form";
 
 import { useFormErrorToast } from "~console/lib/errors";
 
@@ -53,7 +53,7 @@ export function ClearCredentialsDialog({open, onOpenChange, provider}: ClearCred
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-sidebar">
+      <DialogContent>
         <fetcher.Form method="post" {...getFormProps(form)} className="contents">
           <DialogHeader>
             <DialogTitle>Clear {provider?.name} Credentials</DialogTitle>
@@ -66,9 +66,9 @@ export function ClearCredentialsDialog({open, onOpenChange, provider}: ClearCred
           </Alert>
 
           <FormField field={fields.providerSlug} className="hidden">
-            <FormControl>
+            <FormControl render={
               <input type="hidden" />
-            </FormControl>
+              } />
           </FormField>
 
           <DialogFooter>

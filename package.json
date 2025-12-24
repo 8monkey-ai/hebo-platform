@@ -1,39 +1,9 @@
 {
   "name": "hebo",
-  "version": "0.0.3",
-  "private": true,
-  "packageManager": "bun@1.3.1",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
-  "scripts": {
-    "build": "turbo run build",
-    "clean": "git clean -fdx -e '.env*'",
-    "db:api:generate": "bun run -F @hebo/api db generate",
-    "db:api:migrate": "bun run -F @hebo/api db migrate dev",
-    "db:api:reset": "bun run -F @hebo/api db migrate reset --force",
-    "db:auth:generate": "bun run -F @hebo/auth db generate",
-    "db:auth:migrate": "bun run -F @hebo/auth db migrate dev",
-    "db:auth:reset": "bun run -F @hebo/auth db migrate reset --force",
-    "db:generate": "bun run db:api:generate && bun run db:auth:generate",
-    "db:migrate": "bun run db:api:migrate && bun run db:auth:migrate",
-    "db:reset": "bun run db:api:reset && bun run db:auth:reset",
-    "dev": "turbo run dev --parallel",
-    "dev:infra:up": "docker compose up -d",
-    "dev:infra:down": "docker compose down",
-    "format": "prettier --write .",
-    "format:staged": "prettier --write",
-    "lint": "turbo run lint",
-    "lint:deps": "check-dependency-version-consistency .",
-    "lint:staged": "eslint --cache --fix",
-    "postinstall": "lefthook install && bun run db:generate",
-    "secret": "bun run scripts/secrets.ts",
-    "test": "turbo run test"
-  },
+  "version": "0.0.5",
   "devDependencies": {
     "@eslint/js": "^9.33.0",
-    "bun-types": "^1.3.1",
+    "bun-types": "^1.3.4",
     "check-dependency-version-consistency": "^5.0.1",
     "eslint": "^9.33.0",
     "eslint-config-flat-gitignore": "^2.1.0",
@@ -60,6 +30,40 @@
     "typescript-eslint": "^8.43.0"
   },
   "engines": {
-    "bun": "^1.3.1"
+    "bun": "^1.3.4"
+  },
+  "packageManager": "bun@1.3.4",
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "clean": "git clean -fdx -e '.env*'",
+    "db:api:generate": "bun run -F @hebo/api db generate",
+    "db:api:migrate": "bun run -F @hebo/api db migrate dev",
+    "db:api:reset": "bun run -F @hebo/api db migrate reset --force",
+    "db:auth:generate": "bun run -F @hebo/auth db generate",
+    "db:auth:migrate": "bun run -F @hebo/auth db migrate dev",
+    "db:auth:reset": "bun run -F @hebo/auth db migrate reset --force",
+    "db:generate": "bun run db:api:generate && bun run db:auth:generate",
+    "db:migrate": "bun run db:api:migrate && bun run db:auth:migrate",
+    "db:reset": "bun run db:api:reset && bun run db:auth:reset",
+    "dev": "turbo run dev --parallel",
+    "dev:infra:up": "docker compose up -d",
+    "dev:infra:down": "docker compose down",
+    "format": "prettier --write .",
+    "format:staged": "prettier --write",
+    "lint": "turbo run lint",
+    "lint:deps": "check-dependency-version-consistency .",
+    "lint:staged": "eslint --cache --fix",
+    "postinstall": "lefthook install && bun run db:generate",
+    "secret": "bun run scripts/secrets.ts",
+    "test": "turbo run test"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "dependencies": {
+    "@ai-sdk/provider-utils": "^4.0.1",
+    "hebo": "."
   }
 }

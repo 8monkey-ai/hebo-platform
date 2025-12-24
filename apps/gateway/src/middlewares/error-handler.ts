@@ -12,7 +12,7 @@ const upstreamRes = (e: unknown) =>
     : undefined;
 
 export const errorHandler = new Elysia({ name: "error-handler" })
-  .onError(async ({ code, error }) => {
+  .onError(async function handleGatewayError({ code, error }) {
     if (error instanceof HttpError)
       return status(
         error.status,

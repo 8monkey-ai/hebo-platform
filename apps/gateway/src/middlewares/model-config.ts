@@ -1,13 +1,13 @@
 import type { Models, ProviderSlug } from "~api/modules/providers/types";
-
-import type { createDbClient } from "../../../api/prisma/client";
+import type { createDbClient } from "~api/prisma/client";
+type ModelConfig = (typeof Models)[number];
 
 export class ModelConfigService {
-  private model?: Models[number];
+  private model?: ModelConfig;
 
   constructor(private readonly dbClient: ReturnType<typeof createDbClient>) {}
 
-  async getModelType(modelAliasPath: string) {
+  async getModelType(modelAliasPath: string): Promise<string> {
     const model = await this.getModel(modelAliasPath);
     return model.type;
   }

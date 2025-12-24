@@ -1,35 +1,56 @@
-import supportedModels from "@hebo/shared-data/json/supported-models";
+import { BadRequestError } from "@hebo/shared-api/errors";
 
 import type {
   ProviderConfig,
   ProviderSlug,
 } from "~api/modules/providers/types";
 
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
 import type { Provider } from "ai";
 
 export interface ProviderAdapter {
+  readonly providerSlug: ProviderSlug;
   initialize(config?: ProviderConfig): Promise<this>;
   getProvider(): Promise<Provider>;
   resolveModelId(): Promise<string>;
+  transformOptions(options?: ProviderOptions): ProviderOptions;
 }
 
-export abstract class ProviderAdapterBase {
-  protected constructor(
-    private readonly providerSlug: ProviderSlug,
-    private readonly modelName: string,
-  ) {}
+export abstract class ProviderAdapterBase implements ProviderAdapter {
+  static readonly providerSlug: ProviderSlug;
 
-  getProviderModelId(): string {
-    const entry = supportedModels
-      .find((model) => model.type === this.modelName)
-      ?.providers.find((provider) => this.providerSlug in provider) as
-      | Record<ProviderSlug, string>
-      | undefined;
-    if (!entry) {
-      throw new Error(
-        `Missing provider ${this.providerSlug} for model ${this.modelName}`,
+  protected constructor(protected readonly modelType: string) {}
+
+  get providerSlug(): ProviderSlug {
+    return (this.constructor as typeof ProviderAdapterBase).providerSlug;
+  }
+
+  static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {};
+
+  static getModelId(modelType: string): string | undefined {
+    return this.SUPPORTED_MODELS_MAP[modelType];
+  }
+
+  static supportsModel(modelType: string): boolean {
+    return !!this.getModelId(modelType);
+  }
+
+  async resolveModelId(): Promise<string> {
+    const modelId = (this.constructor as typeof ProviderAdapterBase).getModelId(
+      this.modelType,
+    );
+    if (!modelId) {
+      throw new BadRequestError(
+        `Model ${this.modelType} not supported by ${this.providerSlug}.`,
       );
     }
-    return entry[this.providerSlug];
+    return modelId;
   }
+
+  transformOptions(options?: ProviderOptions): ProviderOptions {
+    return options || {};
+  }
+
+  abstract initialize(config?: ProviderConfig): Promise<this>;
+  abstract getProvider(): Promise<Provider>;
 }

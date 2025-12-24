@@ -27,6 +27,19 @@ export const vertexAwsProviderAudience = new sst.Secret(
 export const vertexProject = new sst.Secret("VertexProject", "undefined");
 export const vertexLocation = new sst.Secret("VertexLocation", "undefined");
 
+export const grafanaCloudOtlpEndpoint = new sst.Secret(
+  "GrafanaCloudOtlpEndpoint",
+  "undefined",
+);
+export const grafanaCloudOtlpInstanceId = new sst.Secret(
+  "GrafanaCloudOtlpInstanceId",
+  "undefined",
+);
+export const grafanaCloudOtlpApiToken = new sst.Secret(
+  "GrafanaCloudOtlpApiToken",
+  "undefined",
+);
+
 export const allSecrets = [
   authSecret,
   githubClientId,
@@ -48,5 +61,8 @@ export const allSecrets = [
   vertexAwsProviderAudience,
   vertexProject,
   vertexLocation,
+  grafanaCloudOtlpEndpoint,
+  grafanaCloudOtlpInstanceId,
+  grafanaCloudOtlpApiToken,
 ];
 export const isProd = $app.stage === "production";

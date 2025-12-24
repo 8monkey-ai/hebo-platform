@@ -33,14 +33,14 @@ export const SidebarPlatform = ({ activeAgent, activeBranch }: SidebarPlatformPr
         return (
           <SidebarMenuItem key={label} className="group-data-[state=expanded]:mx-0.5 transition-[margin]">
             <SidebarMenuButton 
-              asChild 
               isActive={active}
-              tooltip={label}>
+              tooltip={label}
+              render={
               <Link to={path} viewTransition>
                 <Icon aria-hidden="true" />
-                {label}
+                <span>{label}</span>
               </Link>
-            </SidebarMenuButton>
+            } />
           </SidebarMenuItem>
         );
       })}

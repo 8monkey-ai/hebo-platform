@@ -18,6 +18,7 @@ export const gatewayUrl = isDevLocal
 
 export const kyFetch = ky.extend({
   credentials: "include",
+  timeout: 60_000, // 60 seconds
   throwHttpErrors: false,
   hooks: {
     afterResponse: [

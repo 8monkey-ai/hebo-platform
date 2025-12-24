@@ -11,8 +11,6 @@ import {
 } from "~api/generated/prismabox/agents";
 import { dbClient } from "~api/middleware/db-client";
 
-import { SupportedModelType } from "./providers/types";
-
 export const agents = t.Composite([agentsPlain, t.Partial(agentsRelations)], {
   additionalProperties: false,
 });
@@ -60,7 +58,7 @@ export const agentsModule = new Elysia({
     {
       body: t.Object({
         ...agentsInputCreate.properties,
-        defaultModel: SupportedModelType,
+        defaultModel: t.String(),
       }),
       response: { 201: agents, 409: t.String() },
     },

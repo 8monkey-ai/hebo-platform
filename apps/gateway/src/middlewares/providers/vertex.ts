@@ -13,8 +13,15 @@ export class VertexProviderAdapter
 {
   private config?: VertexProviderConfig;
 
-  constructor(modelName: string) {
-    super("vertex", modelName);
+  static readonly providerSlug = "vertex";
+
+  static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
+    "google/gemini-3-pro-preview": "gemini-3-pro-preview",
+    "google/gemini-3-flash-preview": "gemini-3-flash-preview",
+  };
+
+  constructor(modelType: string) {
+    super(modelType);
   }
 
   async initialize(config?: VertexProviderConfig): Promise<this> {
@@ -45,9 +52,5 @@ export class VertexProviderAdapter
       location,
       project,
     });
-  }
-
-  async resolveModelId() {
-    return this.getProviderModelId();
   }
 }
