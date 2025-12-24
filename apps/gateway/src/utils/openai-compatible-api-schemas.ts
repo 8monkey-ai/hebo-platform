@@ -138,6 +138,9 @@ export type OpenAICompatibleTool = Static<typeof OpenAICompatibleTool>;
 export type OpenAICompatibleToolChoice = Static<
   typeof OpenAICompatibleToolChoice
 >;
+export type OpenAICompatibleToolMessage = Static<
+  typeof OpenAICompatibleToolMessage
+>;
 
 export type OpenAICompatibleToolCallDelta = {
   id: string;
