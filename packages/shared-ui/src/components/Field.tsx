@@ -3,7 +3,13 @@ import { useRender } from "@base-ui/react/use-render";
 import { type FieldMetadata } from "@conform-to/react";
 import * as React from "react";
 
-import { Label } from "#/_shadcn/ui/label";
+import {
+  Field as ShadCnField,
+  FieldLabel as ShadCnFieldLabel,
+  FieldDescription as ShadCnFieldDescription,
+  FieldError as ShadCnFieldError,
+  FieldGroup as ShadCnFieldGroup,
+} from "#/_shadcn/ui/field";
 import { cn } from "#/lib/utils";
 
 const FieldCtx = React.createContext<FieldMetadata<string> | undefined>(
@@ -20,63 +26,47 @@ const useField = () => {
 
 function Field({
   field,
-  children,
   className,
-}: {
+  ...props
+}: React.ComponentProps<typeof ShadCnField> & {
   field: FieldMetadata<string>;
-  children: React.ReactNode;
-  className?: string;
 }) {
   return (
     <FieldCtx.Provider value={field}>
-      <div className={cn(className)}>{children}</div>
+      <ShadCnField className={cn("gap-2", className)} {...props} />
     </FieldCtx.Provider>
   );
 }
 
-function FieldLabel({ className, ...props }: React.ComponentProps<"label">) {
+function FieldLabel({
+  ...props
+}: React.ComponentProps<typeof ShadCnFieldLabel>) {
   const { id, valid } = useField();
 
-  return (
-    <Label
-      data-slot="form-label"
-      data-error={!valid}
-      className={cn("data-[error=true]:text-destructive py-1.5", className)}
-      htmlFor={id}
-      {...props}
-    />
-  );
+  return <ShadCnFieldLabel data-error={!valid} htmlFor={id} {...props} />;
 }
 
-function FieldDescription({ className, ...props }: React.ComponentProps<"p">) {
+function FieldDescription({
+  ...props
+}: React.ComponentProps<typeof ShadCnFieldDescription>) {
   const { descriptionId } = useField();
 
-  return (
-    <p
-      data-slot="form-description"
-      id={descriptionId}
-      className={cn("text-muted-foreground text-sm", className)}
-      {...props}
-    />
-  );
+  return <ShadCnFieldDescription id={descriptionId} {...props} />;
 }
 
-function FieldError({ className, ...props }: React.ComponentProps<"p">) {
+function FieldError() {
   const { errorId, errors } = useField();
 
-  if (!errors?.length) return <></>;
+  const errorsDict = errors?.map((message) => ({ message }));
 
-  return (
-    <p
-      data-slot="form-message"
-      id={errorId}
-      role="alert"
-      className={cn("text-destructive text-sm whitespace-pre-line", className)}
-      {...props}
-    >
-      {errors.join("\n")}
-    </p>
-  );
+  return <ShadCnFieldError id={errorId} errors={errorsDict} />;
+}
+
+function FieldGroup({
+  className,
+  ...props
+}: React.ComponentProps<typeof ShadCnFieldGroup>) {
+  return <ShadCnFieldGroup className={cn("gap-4", className)} {...props} />;
 }
 
 function FieldControl({ render, ...props }: useRender.ComponentProps<"input">) {
@@ -98,4 +88,19 @@ function FieldControl({ render, ...props }: useRender.ComponentProps<"input">) {
   });
 }
 
-export { Field, FieldControl, FieldDescription, FieldError, FieldLabel };
+export {
+  Field,
+  FieldControl,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+  FieldGroup,
+};
+
+export {
+  FieldLegend,
+  FieldSeparator,
+  FieldSet,
+  FieldContent,
+  FieldTitle,
+} from "#/_shadcn/ui/field";

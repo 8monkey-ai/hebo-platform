@@ -18,6 +18,7 @@ import {
   Field,
   FieldLabel,
   FieldError,
+  FieldGroup,
 } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 
@@ -58,22 +59,24 @@ export function AgentCreateForm() {
           </CardDescription>
         </CardHeader>
         
-        <CardContent className="sm:grid sm:grid-cols-[auto_1fr] sm:gap-y-2">
-          <Field field={fields.agentName} className="contents">
-            <FieldLabel className="sm:w-32">Agent Name</FieldLabel>
-            <FieldControl render={
-              <Input placeholder="Set an agent name" autoComplete="off" />
-              } />
-            <FieldError className="sm:col-start-2" />
-          </Field>
+        <CardContent>
+          <FieldGroup>
+            <Field field={fields.agentName} orientation="responsive">
+              <FieldLabel>Agent Name</FieldLabel>
+              <FieldControl render={
+                <Input placeholder="Set an agent name" autoComplete="off" className="w-xs" />
+                } />
+              <FieldError />
+            </Field>
 
-          <Field field={fields.defaultModel} className="contents">
-            <FieldLabel className="sm:w-32">Default Model</FieldLabel>
-            <FieldControl render={
-              <ModelSelector models={models} />
-              } />
-            <FieldError className="sm:col-start-2" />
-          </Field>
+            <Field field={fields.defaultModel} orientation="responsive">
+              <FieldLabel>Default Model</FieldLabel>
+              <FieldControl render={
+                <ModelSelector models={models} className="w-xs" />
+                } />
+              <FieldError />
+            </Field>
+          </FieldGroup>
         </CardContent>
 
         <CardFooter className="flex justify-end">
@@ -86,6 +89,6 @@ export function AgentCreateForm() {
         </CardFooter>
 
       </Card>
-    </Field>
+    </Form>
   );
 }

@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@hebo/shared-ui/components/Dialog";
-import { FieldControl, Field, FieldLabel, FieldError } from "@hebo/shared-ui/components/Field";
+import { FieldControl, Field, FieldLabel, FieldError, FieldGroup } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 
 import { useFormErrorToast } from "~console/lib/errors";
@@ -100,7 +100,7 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
             <DialogDescription>Learn how to retrieve the credentials in our documentation.</DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-col gap-4">
+          <FieldGroup>
             <Field field={fields.slug} className="hidden">
               <FieldControl render={
                 <input type="hidden" value={provider?.slug} />
@@ -119,7 +119,7 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
                 </Field>
               )
             })}
-          </div>
+          </FieldGroup>
 
           <div className="text-sm">
             The configured provider will only handle requests after you enable it for a specific model. 

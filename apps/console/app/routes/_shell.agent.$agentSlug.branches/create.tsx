@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@hebo/shared-ui/components/Dialog";
-import { FieldControl, Field, FieldLabel, FieldError } from "@hebo/shared-ui/components/Field";
+import { FieldControl, Field, FieldLabel, FieldError, FieldGroup } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Select } from "@hebo/shared-ui/components/Select";
 
@@ -77,7 +77,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
               Set a name and choose a source branch.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col gap-4">
+          <FieldGroup>
             <Field field={fields.branchName}>
               <FieldLabel>Branch name</FieldLabel>
               <FieldControl render={
@@ -105,7 +105,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
                 } />
               <FieldError />
             </Field>
-          </div>
+          </FieldGroup>
           <DialogFooter>
             <DialogClose render={
               <Button type="button" variant="ghost">

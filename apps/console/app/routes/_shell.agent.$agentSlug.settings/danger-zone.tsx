@@ -105,7 +105,7 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
                     Delete
                   </Button>
                 </DialogFooter>
-              </Field>
+              </Form>
             </DialogContent>
           </Dialog>
 
