@@ -6,21 +6,12 @@ import type { Route } from "./+types/root";
 
 import "./init";
 
+import "@fontsource/recursive/index.css";
+
 import "./styles/tailwind.css";
 import "./styles/global.css";
 
 export const links: Route.LinksFunction = () => [
-  { rel: "preconnect", href: "https://fonts.googleapis.com" },
-  {
-    rel: "preconnect",
-    href: "https://fonts.gstatic.com",
-    crossOrigin: "anonymous",
-  },
-  {
-    rel: "stylesheet",
-    // eslint-disable-next-line no-secrets/no-secrets
-    href: "https://fonts.googleapis.com/css2?family=Recursive:wght,MONO@400..600,0..1&display=block",
-  },
   { rel: "icon", href: "/hebo-icon.png" },
 ];
 

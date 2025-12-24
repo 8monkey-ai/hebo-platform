@@ -20,6 +20,7 @@
     "@conform-to/react": "^1.13.3",
     "@conform-to/zod": "^1.13.3",
     "@elysiajs/eden": "^1.4.3",
+    "@fontsource/recursive": "^5.2.8",
     "@hebo/aikit-ui": "workspace:*",
     "@hebo/shared-ui": "workspace:*",
     "@hookform/resolvers": "^5.2.1",
