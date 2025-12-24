@@ -8,7 +8,6 @@ import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
-import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import {
   Dialog,
   DialogClose,
@@ -129,7 +128,7 @@ export function CreateApiKeyDialog() {
       <ApiKeyRevealDialog
         open={revealOpen}
         onOpenChange={setRevealOpen}
-        apiKey={fetcher.data?.apiKey.value || ""}
+        apiKey={fetcher.data?.apiKey?.value || ""}
       />
     </>
   );
@@ -166,10 +165,7 @@ function ApiKeyRevealDialog({ apiKey, open, onOpenChange }: ApiKeyRevealDialogPr
           <span className="text-sm font-medium text-muted-foreground">
             Secret API Key
           </span>
-          <div className="flex items-center gap-2">
-            <Input readOnly value={apiKey} className="font-mono" />
-            <CopyButton value={apiKey} />
-          </div>
+          <Input readOnly copy value={apiKey} className="font-mono" />
         </div>
 
         <Alert>
