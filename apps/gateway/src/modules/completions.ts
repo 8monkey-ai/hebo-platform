@@ -28,7 +28,7 @@ export const completions = new Elysia({
         model: modelAliasPath,
         messages,
         tools,
-        toolChoice,
+        tool_choice,
         reasoning,
         temperature = 1,
         stream = false,
@@ -37,7 +37,7 @@ export const completions = new Elysia({
 
       const toolSet = toToolSet(tools);
       const modelMessages = toModelMessages(messages);
-      const coreToolChoice = toToolChoice(toolChoice);
+      const coreToolChoice = toToolChoice(tool_choice);
 
       const providerOptions: Record<string, any> = {};
       if (reasoning) {
@@ -83,7 +83,7 @@ export const completions = new Elysia({
         temperature: t.Optional(t.Number({ minimum: 0, maximum: 2 })),
         stream: t.Optional(t.Boolean()),
         tools: t.Optional(t.Array(OpenAICompatibleTool)),
-        toolChoice: t.Optional(OpenAICompatibleToolChoice),
+        tool_choice: t.Optional(OpenAICompatibleToolChoice),
         reasoning: t.Optional(OpenAICompatibleReasoning),
       }),
     },

@@ -199,6 +199,7 @@ export const toOpenAICompatibleMessage = (
         name: toolCall.toolName,
         arguments: JSON.stringify(toolCall.input),
       },
+      extra_content: toolCall.providerMetadata,
     }));
   } else {
     message.content = result.text;
