@@ -3,7 +3,7 @@ import { MoreVertical, Trash } from "lucide-react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
-import { CopyToClipboardButton } from "@hebo/shared-ui/components/code/CopyToClipboardButton";
+import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -61,13 +61,13 @@ export default function BranchesTable({ agent }: BranchesTableProps) {
               return (
                 <TableRow key={branch.slug}>
                   <TableCell className="align-middle">
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       <Badge variant="outline">
                         <span className="text-ellipsis-start">
                           {branch.slug}
                         </span>
                       </Badge>
-                      <CopyToClipboardButton textToCopy={copyValue} />
+                      <CopyButton value={copyValue} />
                     </div>
                   </TableCell>
                   <TableCell className="hidden sm:table-cell text-muted-foreground">
@@ -75,15 +75,15 @@ export default function BranchesTable({ agent }: BranchesTableProps) {
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
+                      <DropdownMenuTrigger render={
                         <Button variant="ghost" size="icon" aria-label="Branch actions">
                           <MoreVertical className="size-4" aria-hidden="true" />
                         </Button>
-                      </DropdownMenuTrigger>
+                      } />
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           className="text-destructive"
-                          onSelect={() => {
+                          onClick={() => {
                             setSelectedBranchSlug(branch.slug);
                             setDeleteOpen(true);
                           }}

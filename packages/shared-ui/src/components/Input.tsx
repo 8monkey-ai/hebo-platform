@@ -1,6 +1,7 @@
-import { CopyToClipboardButton } from "./code/CopyToClipboardButton";
-import { Input as ShadCNInput } from "../_shadcn/ui/input";
-import { cn } from "../lib/utils";
+import { Input as ShadCnInput } from "#/_shadcn/ui/input";
+import { cn } from "#/lib/utils";
+
+import { CopyButton } from "./CopyButton";
 
 import type { LucideIcon } from "lucide-react";
 
@@ -27,7 +28,7 @@ export function Input({
           focusable="false"
         />
       )}
-      <ShadCNInput
+      <ShadCnInput
         value={value}
         tabIndex={tabIndex}
         className={cn(
@@ -39,11 +40,11 @@ export function Input({
         {...props}
       />
       {copy && (
-        <CopyToClipboardButton
+        <CopyButton
           disabled={!value}
           aria-disabled={!value}
           tabIndex={tabIndex}
-          textToCopy={value?.toString() ?? ""}
+          value={value?.toString() ?? ""}
           className="absolute top-1/2 right-2 -translate-y-1/2"
         />
       )}

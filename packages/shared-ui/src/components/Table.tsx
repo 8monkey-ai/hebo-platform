@@ -2,8 +2,8 @@ import {
   Table as ShadCnTable,
   TableBody as ShadCnTableBody,
   TableHeader as ShadCnTableHeader,
-} from "../_shadcn/ui/table";
-import { cn } from "../lib/utils";
+} from "#/_shadcn/ui/table";
+import { cn } from "#/lib/utils";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
@@ -19,7 +19,7 @@ function Table({ className, ...props }: React.ComponentProps<"table">) {
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
   return (
-    <ShadCnTableHeader className={cn("bg-secondary", className)} {...props} />
+    <ShadCnTableHeader className={cn("bg-accent", className)} {...props} />
   );
 }
 
@@ -37,4 +37,4 @@ export {
   TableRow,
   TableCell,
   TableCaption,
-} from "../_shadcn/ui/table";
+} from "#/_shadcn/ui/table";

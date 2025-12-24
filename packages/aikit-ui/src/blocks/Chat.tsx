@@ -15,13 +15,13 @@ import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from "../_ai-elements/conversation";
-import { Loader } from "../_ai-elements/loader";
+} from "#/_ai-elements/conversation";
+import { Loader } from "#/_ai-elements/loader";
 import {
   Message,
   MessageContent,
   MessageResponse,
-} from "../_ai-elements/message";
+} from "#/_ai-elements/message";
 import {
   PromptInput,
   PromptInputBody,
@@ -41,22 +41,22 @@ import {
   PromptInputButton,
   PromptInputProvider,
   usePromptInputAttachments,
-} from "../_ai-elements/prompt-input";
+} from "#/_ai-elements/prompt-input";
 import {
   Reasoning,
   ReasoningContent,
   ReasoningTrigger,
-} from "../_ai-elements/reasoning";
-import { Alert, AlertDescription, AlertTitle } from "../_shadcn/ui/alert";
-import { Avatar, AvatarFallback } from "../_shadcn/ui/avatar";
-import { Button } from "../_shadcn/ui/button";
+} from "#/_ai-elements/reasoning";
+import { Alert, AlertDescription, AlertTitle } from "#/_shadcn/ui/alert";
+import { Avatar, AvatarFallback } from "#/_shadcn/ui/avatar";
+import { Button } from "#/_shadcn/ui/button";
 import {
   Empty,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "../_shadcn/ui/empty";
+} from "#/_shadcn/ui/empty";
 import {
   Item,
   ItemActions,
@@ -64,10 +64,10 @@ import {
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from "../_shadcn/ui/item";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../_shadcn/ui/tooltip";
-import { OpenAIHttpChatTransport } from "../lib/openai-transport";
-import { cn } from "../lib/utils";
+} from "#/_shadcn/ui/item";
+import { Tooltip, TooltipContent, TooltipTrigger } from "#/_shadcn/ui/tooltip";
+import { OpenAIHttpChatTransport } from "#/lib/openai-transport";
+import { cn } from "#/lib/utils";
 
 // Types based on models.schema.json
 export type ModelsConfig = Array<{
@@ -191,20 +191,20 @@ export function Chat({
       {/* Header Controls */}
       <div className="absolute top-3 left-2">
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button
-              ref={clearBtnRef}
-              disabled={!currentModelAlias}
-              variant="ghost"
-              size="icon"
-              className="hover:bg-sidebar-accent size-7"
-              onClick={() => setMessages([])}
-              aria-label="Clear conversation"
-              title="Clear conversation"
-            >
-              <Edit />
-            </Button>
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={
+              <Button
+                ref={clearBtnRef}
+                disabled={!currentModelAlias}
+                variant="ghost"
+                size="icon"
+                className="hover:bg-sidebar-accent size-7"
+                onClick={() => setMessages([])}
+              >
+                <Edit />
+              </Button>
+            }
+          />
           <TooltipContent>Clear conversation (⇧ + ⌘/Ctrl + O)</TooltipContent>
         </Tooltip>
       </div>
@@ -226,7 +226,7 @@ export function Chat({
         // Conversation area
         <Conversation className="h-full">
           <ConversationContent
-            className="gap-6 px-0"
+            className="gap-5 px-2"
             aria-label="Chat conversation"
             tabIndex={-1}
           >
@@ -242,7 +242,6 @@ export function Chat({
                           tabIndex={-1}
                           role="article"
                           aria-label={`Message from ${message.role}`}
-                          className="px-2"
                         >
                           <MessageContent>
                             <MessageResponse>{part.text}</MessageResponse>
@@ -255,7 +254,7 @@ export function Chat({
                         mode === "full" && (
                           <Reasoning
                             key={`${message.id}-${i}`}
-                            className="w-full px-2"
+                            className="w-full"
                             isStreaming={
                               status === "streaming" &&
                               i === message.parts.length - 1 &&
@@ -278,7 +277,7 @@ export function Chat({
                       return IMAGE_TYPES.includes(part.mediaType) ? (
                         <img
                           key={`${message.id}-${i}`}
-                          className="m-2 ml-auto h-auto w-24 rounded-lg"
+                          className="ml-auto h-auto w-24 rounded-lg"
                           src={part.url}
                           alt={part.filename}
                         />
@@ -287,10 +286,13 @@ export function Chat({
                         <Item
                           key={`${message.id}-${i}`}
                           variant="outline"
-                          asChild
-                          className="bg-card m-2 ml-auto w-3xs py-2"
+                          className="bg-card ml-auto w-3xs py-2"
                         >
-                          <a href={part.url} download={part.filename}>
+                          <a
+                            href={part.url}
+                            download={part.filename}
+                            className="contents"
+                          >
                             <ItemMedia className="translate-y-0! self-center!">
                               <FileUp size={24} className="text-foreground" />
                             </ItemMedia>
@@ -317,7 +319,7 @@ export function Chat({
             ))}
             {status === "submitted" && <Loader />}
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive" className="overflow-x-auto">
                 <TriangleAlert />
                 <AlertTitle>Something went wrong 🙉</AlertTitle>
                 <AlertDescription>

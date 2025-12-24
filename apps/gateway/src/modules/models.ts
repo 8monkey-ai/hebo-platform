@@ -1,6 +1,8 @@
 import { Elysia, t } from "elysia";
 
-import supportedModels from "@hebo/shared-data/json/supported-models";
+import { getSupportedModels } from "../middlewares/models";
+import { type SupportedModel } from "../middlewares/models/model";
+import { ProviderAdapterFactory } from "../middlewares/providers";
 
 const model = t.Object({
   id: t.String(),
@@ -25,24 +27,25 @@ const model = t.Object({
 
 const modelsInclude = t.Optional(t.Object({ endpoints: t.Boolean() }));
 
-function modelToModelsResponse(
-  m: (typeof supportedModels)[0],
-  withEndpoints = false,
-) {
+function modelToModelsResponse(m: SupportedModel, withEndpoints = false) {
   const responseModel = {
     object: "model" as const,
-    id: m.type,
-    name: m.displayName,
+    id: m.id,
+    name: m.name,
     created: m.created,
-    owned_by: m.owner,
+    owned_by: m.owned_by,
     architecture: {
       output_modalities: [m.modality],
     },
     pricing: {
-      monthly_free_tokens: m.monthlyFreeTokens || 0,
+      monthly_free_tokens: m.pricing.monthly_free_tokens,
     },
     ...(withEndpoints && {
-      endpoints: Object.keys(m.providers[0]).map((tag) => ({ tag })),
+      endpoints: ProviderAdapterFactory.ALL_PROVIDER_ADAPTER_CLASSES.filter(
+        (ProviderAdapterClass) => ProviderAdapterClass.supportsModel(m.id),
+      ).map((ProviderAdapterClass) => {
+        return { tag: ProviderAdapterClass.providerSlug };
+      }),
     }),
   };
 
@@ -59,7 +62,7 @@ export const models = new Elysia({
     ({ query }) => {
       return {
         object: "list" as const,
-        data: supportedModels.map((m) =>
+        data: getSupportedModels().map((m) =>
           modelToModelsResponse(m, query.endpoints),
         ),
       };
@@ -77,7 +80,7 @@ export const models = new Elysia({
     "/:author/:slug/endpoints",
     ({ params }) => {
       const id = `${params.author}/${params.slug}`;
-      const m = supportedModels.find((model) => model.type === id);
+      const m = getSupportedModels().find((model) => model.id === id);
       if (!m) return new Response("Model not found", { status: 404 });
 
       return {

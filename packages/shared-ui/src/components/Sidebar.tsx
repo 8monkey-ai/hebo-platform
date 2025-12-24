@@ -1,15 +1,16 @@
-import { TooltipProvider } from "@radix-ui/react-tooltip";
 import { PanelLeftIcon } from "lucide-react";
 import React from "react";
 
-import { Button } from "./Button";
 import {
   useSidebar,
-  Sidebar as ShadCNSidebar,
+  Sidebar as ShadCnSidebar,
   SidebarContext,
-} from "../_shadcn/ui/sidebar";
-import { useIsMobile } from "../hooks/use-mobile";
-import { cn } from "../lib/utils";
+  SidebarContextProps,
+} from "#/_shadcn/ui/sidebar";
+import { useIsMobile } from "#/hooks/use-mobile";
+import { cn } from "#/lib/utils";
+
+import { Button } from "./Button";
 
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_WIDTH = "16rem";
@@ -47,11 +48,14 @@ function SidebarProvider({
       } else {
         _setOpen(openState);
       }
+
+      // This sets the cookie to keep the sidebar state.
       document.cookie = `${cookieName}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
     },
     [setOpenProp, open, cookieName],
   );
 
+  // Helper to toggle the sidebar.
   const toggleSidebar = React.useCallback(() => {
     return isMobile ? setOpenMobile((open) => !open) : setOpen((open) => !open);
   }, [isMobile, setOpen, setOpenMobile]);
@@ -69,9 +73,13 @@ function SidebarProvider({
     return () => globalThis.removeEventListener("keydown", handleKeyDown);
   }, [shortcut, toggleSidebar]);
 
-  const contextValue = React.useMemo(
+  // We add a state so that we can do data-state="expanded" or "collapsed".
+  // This makes it easier to style the sidebar with Tailwind classes.
+  const state = open ? "expanded" : "collapsed";
+
+  const contextValue = React.useMemo<SidebarContextProps>(
     () => ({
-      state: open ? ("expanded" as const) : ("collapsed" as const),
+      state,
       open,
       setOpen,
       isMobile,
@@ -79,30 +87,28 @@ function SidebarProvider({
       setOpenMobile,
       toggleSidebar,
     }),
-    [open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
+    [state, open, setOpen, isMobile, openMobile, setOpenMobile, toggleSidebar],
   );
 
   return (
     <SidebarContext.Provider value={contextValue}>
-      <TooltipProvider delayDuration={0}>
-        <div
-          data-slot="sidebar-wrapper"
-          style={
-            {
-              "--sidebar-width": SIDEBAR_WIDTH,
-              "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
-              ...style,
-            } as React.CSSProperties
-          }
-          className={cn(
-            "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
-            className,
-          )}
-          {...props}
-        >
-          {children}
-        </div>
-      </TooltipProvider>
+      <div
+        data-slot="sidebar-wrapper"
+        style={
+          {
+            "--sidebar-width": SIDEBAR_WIDTH,
+            "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+            ...style,
+          } as React.CSSProperties
+        }
+        className={cn(
+          "group/sidebar-wrapper has-data-[variant=inset]:bg-sidebar flex min-h-svh w-full",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </div>
     </SidebarContext.Provider>
   );
 }
@@ -117,14 +123,6 @@ function SidebarTrigger({
 }) {
   const { toggleSidebar } = useSidebar();
 
-  const handleClick = React.useCallback(
-    (event: React.MouseEvent<HTMLButtonElement>) => {
-      onClick?.(event);
-      toggleSidebar();
-    },
-    [onClick, toggleSidebar],
-  );
-
   return (
     <Button
       data-sidebar="trigger"
@@ -132,7 +130,10 @@ function SidebarTrigger({
       variant="ghost"
       size="icon"
       className={cn("size-7 z-20 hover:bg-sidebar-accent", className)}
-      onClick={handleClick}
+      onClick={(event) => {
+        onClick?.(event);
+        toggleSidebar();
+      }}
       {...props}
     >
       {icon}
@@ -156,7 +157,7 @@ function Sidebar({
   const { open } = useSidebar();
 
   return (
-    <ShadCNSidebar
+    <ShadCnSidebar
       side={side}
       variant={variant}
       collapsible={collapsible}
@@ -165,7 +166,7 @@ function Sidebar({
       {...props}
     >
       {children}
-    </ShadCNSidebar>
+    </ShadCnSidebar>
   );
 }
 
@@ -194,4 +195,4 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarContext,
-} from "../_shadcn/ui/sidebar";
+} from "#/_shadcn/ui/sidebar";

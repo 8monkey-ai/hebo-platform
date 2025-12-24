@@ -10,6 +10,7 @@ import { getSecret } from "@hebo/shared-api/utils/secrets";
 import { assumeRole } from "./adapters/aws";
 import { ProviderAdapterBase, type ProviderAdapter } from "./provider";
 
+
 type BedrockCredentials =
   ReturnType<typeof assumeRole> extends Promise<infer T> ? T : never;
 
@@ -20,9 +21,17 @@ export class BedrockProviderAdapter
   private config?: BedrockProviderConfig;
   private credentials?: BedrockCredentials;
 
-  constructor(modelName: string) {
-    super("bedrock", modelName);
+  static readonly providerSlug = "bedrock";
+
+  constructor(modelType: string) {
+    super(modelType);
   }
+
+  static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
+    "openai/gpt-oss-120b": "openai.gpt-oss-120b-1:0",
+    "openai/gpt-oss-20b": "openai.gpt-oss-20b-1:0",
+    "anthropic/claude-opus-4-5-v1": "anthropic.claude-opus-4-5-20251101-v1:0",
+  };
 
   private async getCredentials() {
     if (!this.credentials) {
@@ -54,8 +63,9 @@ export class BedrockProviderAdapter
     });
   }
 
-  async resolveModelId() {
-    const modelId = this.getProviderModelId();
+  async resolveModelId(): Promise<string> {
+    const modelId = await super.resolveModelId();
+
     const { region } = this.config!;
     const client = new BedrockClient({
       region,

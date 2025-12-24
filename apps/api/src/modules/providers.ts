@@ -7,7 +7,7 @@ import {
   supportedProviders,
 } from "@hebo/database/src/types/providers";
 import { dbClient } from "@hebo/shared-api/middlewares/db-client";
-import { type Models } from "@hebo/shared-data/types/models";
+import { Models } from "@hebo/shared-api/types/model-config";
 
 export const providersModule = new Elysia({
   prefix: "/providers",

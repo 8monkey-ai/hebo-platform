@@ -16,7 +16,7 @@
   --popover-foreground: oklch(12.9% 0.042 264.695);
   --primary: oklch(0.852 0.199 91.936);
   --primary-foreground: oklch(20.5% 0 0);
-  --secondary: oklch(93.2% 0.032 255.585);
+  --secondary: oklch(88.2% 0.059 254.128);
   --secondary-foreground: oklch(0.21 0.006 285.885);
   --muted: oklch(96.8% 0.007 247.896);
   --muted-foreground: oklch(55.4% 0.046 257.417);
@@ -203,7 +203,7 @@
   }
 
   .mdx h2 {
-    @apply text-xl font-medium p-0 pt-2;
+    @apply text-xl font-medium p-0 pt-4;
   }
 
   .mdx p,

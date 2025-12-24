@@ -13,26 +13,27 @@ export default function SignIn() {
   return (
     <div className="relative min-h-dvh">
       {/* Marketing Message */}
-      <aside className="fixed min-h-dvh w-128 -translate-x-full bg-blue-100 bg-[url(/login-bg.png)] bg-bottom-left bg-no-repeat transition-transform duration-300 ease-in-out lg:translate-x-0">
+      <aside className="fixed min-h-dvh w-lg -translate-x-full bg-accent bg-[url(/login-bg.png)] bg-bottom-left bg-no-repeat transition-transform duration-300 ease-in-out lg:translate-x-0">
         <Button
-          asChild
-          variant="ghost"
-          className="absolute top-5 left-6 bg-blue-200 hover:bg-blue-300"
-        >
+          variant="secondary"
+          className="absolute top-5 left-6"
+          nativeButton={false}
+          render={
           <a
             href="https://docs.hebo.ai"
             target="_blank"
             rel="noopener noreferrer"
           >
             <BookOpen />
-            Docs
+            <span>Docs</span>
           </a>
-        </Button>
+          }
+          />
 
         <div className="space-y-5 px-19 py-30 text-xl">
           <div className="flex items-center gap-2 text-3xl font-semibold">
             Hebo is{}
-            <Badge className="text-foreground bg-lime-400 text-3xl font-semibold">
+            <Badge className="text-foreground bg-lime-400 text-3xl h-10 font-semibold">
               FREE
             </Badge>
           </div>
@@ -40,16 +41,13 @@ export default function SignIn() {
             <div className="font-semibold">Deploy agents to production:</div>
             <ul className="space-y-2">
               <li>
-                ✔️ Choose from a set of free open-source models (Deepseek, Qwen,
-                ...)
+                ✔️ Choose from a set of free open-source models
               </li>
               <li>
-                ✔️ Use commercial models (Claude, Gemini, ChatGPT) within
-                fair-usage
+                ✔️ Use commercial models within fair-usage
               </li>
               <li>
-                ✔️ Link your custom inference endpoints to leverage existing
-                credits
+                ✔️ Link your custom inference endpoints to use existing credits
               </li>
             </ul>
           </div>
@@ -70,9 +68,9 @@ export default function SignIn() {
           <div className="w-full space-y-4">
             <OAuthSignIn />
             <div className="flex items-center gap-4">
-              <div className="h-[1px] flex-1 bg-gray-300" />
+              <div className="h-px flex-1 bg-gray-300" />
               <span className="text-sm whitespace-nowrap">or</span>
-              <div className="h-[1px] flex-1 bg-gray-300" />
+              <div className="h-px flex-1 bg-gray-300" />
             </div>
             <MagicLinkSignIn />
           </div>

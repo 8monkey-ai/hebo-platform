@@ -6,7 +6,7 @@ import type {
   ProviderConfig,
   ProviderSlug,
 } from "@hebo/database/src/types/providers";
-import supportedModels from "@hebo/shared-data/json/supported-models";
+import { BadRequestError } from "@hebo/shared-api/errors";
 
 import { BedrockProviderAdapter } from "./bedrock";
 import { CohereProviderAdapter } from "./cohere";
@@ -16,28 +16,28 @@ import { VertexProviderAdapter } from "./vertex";
 import type { ProviderAdapter } from "./provider";
 
 export class ProviderAdapterFactory {
+  static readonly ALL_PROVIDER_ADAPTER_CLASSES = [
+    // FUTURE: error-prone for provider fallback feature. Fallback provider depends on the order of this list when the same model is supported by multiple providers.
+    BedrockProviderAdapter,
+    CohereProviderAdapter,
+    GroqProviderAdapter,
+    VertexProviderAdapter,
+  ];
+
   constructor(private readonly dbClient: ReturnType<typeof createDbClient>) {}
 
   async createDefault(modelType: string): Promise<ProviderAdapter> {
-    const providerSlugs = [
-      ...new Set(
-        supportedModels
-          .find((model) => model.type === modelType)
-          ?.providers.flatMap(
-            (mapping) => Object.keys(mapping) as ProviderSlug[],
-          ),
-      ),
-    ];
-
-    for (const providerSlug of providerSlugs) {
-      try {
-        return await this.createAdapter(providerSlug, modelType);
-      } catch {
-        continue;
+    for (const ProviderAdapterClass of ProviderAdapterFactory.ALL_PROVIDER_ADAPTER_CLASSES) {
+      if (ProviderAdapterClass.supportsModel(modelType)) {
+        return await this.createAdapter(
+          ProviderAdapterClass.providerSlug,
+          modelType,
+        );
       }
     }
-    throw new Error(
-      `Unable to create provider adapter: no providers available`,
+
+    throw new BadRequestError(
+      `Unable to create provider adapter: no providers available for model type ${modelType}`,
     );
   }
 
@@ -81,7 +81,7 @@ export class ProviderAdapterFactory {
         );
       }
       default: {
-        throw new Error(`Unsupported provider: ${providerSlug}`);
+        throw new BadRequestError(`Unsupported provider: ${providerSlug}`);
       }
     }
   }

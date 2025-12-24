@@ -3,4 +3,4 @@ export {
   InputOTPGroup,
   InputOTPSlot,
   InputOTPSeparator,
-} from "../_shadcn/ui/input-otp";
+} from "#/_shadcn/ui/input-otp";

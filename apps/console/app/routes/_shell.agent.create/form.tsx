@@ -49,7 +49,7 @@ export function AgentCreateForm() {
 
   return (
     <Form method="post" {...getFormProps(form)} className="contents">
-      <Card className="sm:max-w-lg min-w-0 w-full border-none bg-transparent shadow-none">
+      <Card className="sm:max-w-lg min-w-0 w-full ring-0 shadow-none bg-transparent">
 
         <CardHeader>
           <CardTitle><h1>Create a new agent</h1></CardTitle>
@@ -58,26 +58,22 @@ export function AgentCreateForm() {
           </CardDescription>
         </CardHeader>
         
-        <CardContent>
-          <div className="sm:grid sm:grid-cols-[auto_1fr] sm:gap-y-2">
+        <CardContent className="sm:grid sm:grid-cols-[auto_1fr] sm:gap-y-2">
+          <FormField field={fields.agentName} className="contents">
+            <FormLabel className="sm:w-32">Agent Name</FormLabel>
+            <FormControl render={
+              <Input placeholder="Set an agent name" autoComplete="off" />
+              } />
+            <FormMessage className="sm:col-start-2" />
+          </FormField>
 
-            <FormField field={fields.agentName} className="contents">
-              <FormLabel className="sm:w-32">Agent Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Set an agent name" autoComplete="off" />
-              </FormControl>
-              <FormMessage className="sm:col-start-2" />
-            </FormField>
-
-            <FormField field={fields.defaultModel} className="contents">
-              <FormLabel className="sm:w-32">Default Model</FormLabel>
-              <FormControl>
-                <ModelSelector models={models} />
-              </FormControl>
-              <FormMessage className="sm:col-start-2" />
-            </FormField>
-          </div>
-
+          <FormField field={fields.defaultModel} className="contents">
+            <FormLabel className="sm:w-32">Default Model</FormLabel>
+            <FormControl render={
+              <ModelSelector models={models} />
+              } />
+            <FormMessage className="sm:col-start-2" />
+          </FormField>
         </CardContent>
 
         <CardFooter className="flex justify-end">

@@ -3,4 +3,4 @@ export {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "../_shadcn/ui/tooltip";
+} from "#/_shadcn/ui/tooltip";

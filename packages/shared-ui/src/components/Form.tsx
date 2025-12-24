@@ -1,10 +1,10 @@
+import { mergeProps } from "@base-ui/react/merge-props";
+import { useRender } from "@base-ui/react/use-render";
 import { type FieldMetadata } from "@conform-to/react";
-import * as LabelPrimitive from "@radix-ui/react-label";
-import { Slot } from "@radix-ui/react-slot";
 import * as React from "react";
 
-import { Label } from "../_shadcn/ui/label";
-import { cn } from "../lib/utils";
+import { Label } from "#/_shadcn/ui/label";
+import { cn } from "#/lib/utils";
 
 const FieldCtx = React.createContext<FieldMetadata<string> | undefined>(
   undefined,
@@ -34,10 +34,7 @@ function FormField({
   );
 }
 
-function FormLabel({
-  className,
-  ...props
-}: React.ComponentProps<typeof LabelPrimitive.Root>) {
+function FormLabel({ className, ...props }: React.ComponentProps<"label">) {
   const { id, valid } = useField();
 
   return (
@@ -82,20 +79,23 @@ function FormMessage({ className, ...props }: React.ComponentProps<"p">) {
   );
 }
 
-function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
+function FormControl({ render, ...props }: useRender.ComponentProps<"input">) {
   const { descriptionId, errorId, id, initialValue, name, valid } = useField();
 
-  return (
-    <Slot
-      data-slot="form-control"
-      id={id}
-      {...({ name: name } as Record<string, unknown>)}
-      defaultValue={initialValue}
-      aria-describedby={valid ? `${descriptionId}` : `${errorId}`}
-      aria-invalid={!valid}
-      {...props}
-    />
-  );
+  return useRender({
+    defaultTagName: "input",
+    props: mergeProps<"input">(
+      {
+        id,
+        name,
+        defaultValue: initialValue,
+        "aria-describedby": valid ? `${descriptionId}` : `${errorId}`,
+        "aria-invalid": !valid,
+      },
+      props,
+    ),
+    render,
+  });
 }
 
 export { FormControl, FormField, FormLabel, FormDescription, FormMessage };

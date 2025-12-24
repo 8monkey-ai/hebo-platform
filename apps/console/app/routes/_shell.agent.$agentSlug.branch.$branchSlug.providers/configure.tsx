@@ -89,7 +89,7 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-lg">
         <fetcher.Form
           method="post"
           {...getFormProps(form)}
@@ -100,31 +100,33 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
             <DialogDescription>Learn how to retrieve the credentials in our documentation.</DialogDescription>
           </DialogHeader>
 
-          <FormField field={fields.slug} className="hidden">
-            <FormControl>
-              <input type="hidden" value={provider?.slug} />
-            </FormControl>
-          </FormField>
+          <div className="flex flex-col gap-4">
+            <FormField field={fields.slug} className="hidden">
+              <FormControl render={
+                <input type="hidden" value={provider?.slug} />
+                } />
+            </FormField>
 
-          {(activeKeys as (keyof typeof configFieldset)[]).map((key) => {
-            const field = configFieldset[key];
-            return (
-              <FormField key={key} field={field}>
-                <FormLabel>{labelize(key)}</FormLabel>
-                <FormControl>
-                  <Input placeholder={`Set ${labelize(key).toLowerCase()}`} autoComplete="off" />
-                </FormControl>
-                <FormMessage />
-              </FormField>
-            )
-          })}
-          
+            {(activeKeys as (keyof typeof configFieldset)[]).map((key) => {
+              const field = configFieldset[key];
+              return (
+                <FormField key={key} field={field}>
+                  <FormLabel>{labelize(key)}</FormLabel>
+                  <FormControl render={
+                    <Input placeholder={`Set ${labelize(key).toLowerCase()}`} autoComplete="off" />
+                    } />
+                  <FormMessage />
+                </FormField>
+              )
+            })}
+          </div>
+
           <div className="text-sm">
             The configured provider will only handle requests after you enable it for a specific model. 
           </div>
-          
+
           <DialogFooter>
-            <DialogClose asChild>
+            <DialogClose render={
               <Button 
                   type="button"
                   variant="ghost"
@@ -132,7 +134,7 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
                   >
                   Cancel
               </Button>
-            </DialogClose>
+            } />
             <Button
                 type="submit"
                 name="intent"

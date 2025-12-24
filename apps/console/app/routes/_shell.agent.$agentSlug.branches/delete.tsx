@@ -45,7 +45,7 @@ export default function DeleteBranchDialog({ open, onOpenChange, branchSlug }: D
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md bg-sidebar">
+      <DialogContent>
         <fetcher.Form method="post" {...getFormProps(form)} className="contents">
           <DialogHeader>
             <DialogTitle>Delete Branch</DialogTitle>
@@ -53,27 +53,29 @@ export default function DeleteBranchDialog({ open, onOpenChange, branchSlug }: D
               This will delete your branch irreversibly.
             </DialogDescription>
           </DialogHeader>
-          <Alert variant="destructive">
-            <AlertTitle>
-              <strong>Warning:</strong> This action is not reversible. Be certain.
-            </AlertTitle>
-          </Alert>
 
-          <input type="hidden" name="branchSlug" value={branchSlug} />
+          <div className="flex flex-col gap-4">
+            <Alert variant="destructive">
+              <AlertTitle>
+                <strong>Warning:</strong> This action is not reversible. Be certain.
+              </AlertTitle>
+            </Alert>
 
-          <FormField field={fields.slugConfirm}>
-            <FormLabel>
-              <div>
-                To confirm, type{" "}
-                <strong>{branchSlug}</strong> in the box below:
-              </div>
-            </FormLabel>
-            <FormControl>
-              <Input autoComplete="off" />
-            </FormControl>
-            <FormMessage />
-          </FormField>
+            <input type="hidden" name="branchSlug" value={branchSlug} />
 
+            <FormField field={fields.slugConfirm}>
+              <FormLabel>
+                <div>
+                  To confirm, type{" "}
+                  <strong>{branchSlug}</strong> in the box below:
+                </div>
+              </FormLabel>
+              <FormControl render={
+                <Input autoComplete="off" />
+              } />
+              <FormMessage />
+            </FormField>
+          </div>
           <DialogFooter>
             <Button
               type="button"
