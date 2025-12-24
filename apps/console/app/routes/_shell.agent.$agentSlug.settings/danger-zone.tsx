@@ -20,7 +20,7 @@ import {
   Field,
   FieldLabel,
   FieldError,
-} from "@hebo/shared-ui/components/Form";
+} from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@hebo/shared-ui/components/Item";
 
@@ -105,7 +105,7 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
                     Delete
                   </Button>
                 </DialogFooter>
-              </Form>
+              </Field>
             </DialogContent>
           </Dialog>
 

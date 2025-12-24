@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@hebo/shared-ui/components/Dialog";
-import { FieldControl, Field, FieldError } from "@hebo/shared-ui/components/Form";
+import { FieldControl, Field, FieldError } from "@hebo/shared-ui/components/Field";
 
 import { useFormErrorToast } from "~console/lib/errors";
 

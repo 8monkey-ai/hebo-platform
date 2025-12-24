@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@hebo/shared-ui/components/Dialog";
-import { FieldControl, Field, FieldLabel, FieldError } from "@hebo/shared-ui/components/Form";
+import { FieldControl, Field, FieldLabel, FieldError } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Select } from "@hebo/shared-ui/components/Select";
 
