@@ -10,7 +10,7 @@ const smtpPort = Number(await getSecret("SmtpPort", false));
 const smtpUser = await getSecret("SmtpUser", false);
 const smtpPass = await getSecret("SmtpPass", false);
 const smtpFrom = await getSecret("SmtpFrom", false);
-const logoUrl = "https://hebo.ai/_next/image?url=%2Fhebo.png&w=48&q=75";
+const logoUrl = "https://hebo.ai/icon.png";
 
 const transport = new SmtpTransport({
   host: smtpHost,
