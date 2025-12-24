@@ -1,22 +1,23 @@
-import {
-  jsonSchema,
-  tool,
-  type FinishReason,
-  type GenerateTextResult,
-  type ModelMessage,
-  type StreamTextResult,
-  type ToolChoice,
-} from "ai";
+import { jsonSchema, tool } from "ai";
 
-import {
-  type OpenAICompatibleAssistantMessage,
-  type OpenAICompatibleContentPart,
-  type OpenAICompatibleFinishReason,
-  type OpenAICompatibleMessage,
-  type OpenAICompatibleTool,
-  type OpenAICompatibleToolChoice,
-  type OpenAICompatibleToolCallDelta,
+import type {
+  OpenAICompatibleAssistantMessage,
+  OpenAICompatibleContentPart,
+  OpenAICompatibleFinishReason,
+  OpenAICompatibleMessage,
+  OpenAICompatibleTool,
+  OpenAICompatibleToolChoice,
+  OpenAICompatibleToolCallDelta,
+  OpenAICompatibleToolMessage,
 } from "./openai-compatible-api-schemas";
+import type {
+  FinishReason,
+  GenerateTextResult,
+  ModelMessage,
+  StreamTextResult,
+  ToolChoice,
+  ToolResultPart,
+} from "ai";
 
 function convertToModelContent(content: OpenAICompatibleContentPart[]) {
   return content.map((part) => {
@@ -62,17 +63,6 @@ function convertToModelContent(content: OpenAICompatibleContentPart[]) {
   });
 }
 
-function findToolCall(messages: OpenAICompatibleMessage[], toolCallId: string) {
-  for (const message of messages) {
-    if (message.role === "assistant" && message.tool_calls) {
-      const toolCall = message.tool_calls.find((tc) => tc.id === toolCallId);
-      if (toolCall) {
-        return toolCall;
-      }
-    }
-  }
-}
-
 function parseToolOutput(content: string) {
   try {
     return { type: "json" as const, value: JSON.parse(content) };
@@ -83,68 +73,94 @@ function parseToolOutput(content: string) {
 
 export function toModelMessages(messages: OpenAICompatibleMessage[]) {
   const modelMessages: ModelMessage[] = [];
+  const toolById = indexToolMessages(messages);
 
   for (const message of messages) {
-    switch (message.role) {
-      case "system": {
-        modelMessages.push(message as ModelMessage);
-        break;
-      }
-      case "user": {
-        if (Array.isArray(message.content)) {
-          modelMessages.push({
-            role: "user",
-            content: convertToModelContent(message.content),
-          });
-        } else {
-          modelMessages.push(message as ModelMessage);
-        }
-        break;
-      }
-      case "assistant": {
-        if (message.tool_calls) {
-          modelMessages.push({
-            role: "assistant",
-            content: message.tool_calls.map((toolCall) => ({
-              type: "tool-call",
-              toolCallId: toolCall.id,
-              toolName: toolCall.function.name,
-              input: JSON.parse(toolCall.function.arguments),
-            })),
-          });
-        } else {
-          modelMessages.push(message as ModelMessage);
-        }
-        break;
-      }
-      case "tool": {
-        const toolCall = findToolCall(messages, message.tool_call_id);
+    if (message.role === "tool") continue;
 
-        if (!toolCall) {
-          throw new Error(
-            `Tool call with id '${
-              message.tool_call_id
-            }' not found in assistant messages.`,
-          );
-        }
-
-        modelMessages.push({
-          role: "tool",
-          content: [
-            {
-              type: "tool-result",
-              toolCallId: message.tool_call_id,
-              toolName: toolCall.function.name,
-              output: parseToolOutput(message.content as string),
-            },
-          ],
-        });
-        break;
-      }
+    if (message.role === "system") {
+      modelMessages.push(message as ModelMessage);
+      continue;
     }
+
+    if (message.role === "user") {
+      modelMessages.push(toUserModelMessage(message));
+      continue;
+    }
+
+    modelMessages.push(toAssistantModelMessage(message));
+    const toolResult = toToolResultMessage(message, toolById);
+    if (toolResult) modelMessages.push(toolResult);
   }
 
   return modelMessages;
+}
+
+function indexToolMessages(messages: OpenAICompatibleMessage[]) {
+  const map = new Map<string, OpenAICompatibleToolMessage>();
+  for (const m of messages) {
+    if (m.role === "tool") map.set(m.tool_call_id, m);
+  }
+  return map;
+}
+
+function toUserModelMessage(
+  message: Extract<OpenAICompatibleMessage, { role: "user" }>,
+): ModelMessage {
+  if (Array.isArray(message.content)) {
+    return { role: "user", content: convertToModelContent(message.content) };
+  }
+  return message as ModelMessage;
+}
+
+function toAssistantModelMessage(
+  message: Extract<OpenAICompatibleMessage, { role: "assistant" }>,
+): ModelMessage {
+  const toolCalls = message.tool_calls ?? [];
+  if (toolCalls.length === 0) return message as ModelMessage;
+
+  return {
+    role: "assistant",
+    content: toolCalls.map((tc) => ({
+      type: "tool-call",
+      toolCallId: tc.id,
+      toolName: tc.function.name,
+      input: parseToolInput(tc.function.arguments),
+    })),
+  };
+}
+
+function toToolResultMessage(
+  message: Extract<OpenAICompatibleMessage, { role: "assistant" }>,
+  toolById: Map<string, OpenAICompatibleToolMessage>,
+): ModelMessage | undefined {
+  const toolCalls = message.tool_calls ?? [];
+  if (toolCalls.length === 0) return undefined;
+
+  const toolResultParts: ToolResultPart[] = [];
+  for (const tc of toolCalls) {
+    const toolMsg = toolById.get(tc.id);
+    if (!toolMsg) continue;
+
+    toolResultParts.push({
+      type: "tool-result",
+      toolCallId: tc.id,
+      toolName: tc.function.name,
+      output: parseToolOutput(toolMsg.content as string),
+    });
+  }
+
+  return toolResultParts.length > 0
+    ? ({ role: "tool", content: toolResultParts } as ModelMessage)
+    : undefined;
+}
+
+function parseToolInput(raw: string) {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return raw;
+  }
 }
 
 export const toOpenAICompatibleFinishReason = (
@@ -170,7 +186,7 @@ export const toOpenAICompatibleMessage = (
   };
 
   if (result.toolCalls && result.toolCalls.length > 0) {
-    message.tool_calls = result.toolCalls.map((toolCall: any) => ({
+    message.tool_calls = result.toolCalls.map((toolCall) => ({
       id: toolCall.toolCallId,
       type: "function" as const,
       function: {
@@ -198,7 +214,7 @@ export const toToolSet = (tools: OpenAICompatibleTool[] | undefined) => {
   for (const t of tools) {
     toolSet[t.function.name] = tool({
       description: t.function.description,
-      inputSchema: jsonSchema(t.function.parameters as any),
+      inputSchema: jsonSchema(t.function.parameters),
     });
   }
   return toolSet;
