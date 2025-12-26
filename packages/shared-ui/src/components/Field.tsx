@@ -1,6 +1,6 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
-import { useField } from "@conform-to/react";
+import { FormProvider, type FormMetadata, useField } from "@conform-to/react";
 import * as React from "react";
 
 import {
@@ -12,26 +12,52 @@ import {
 } from "#/_shadcn/ui/field";
 import { cn } from "#/lib/utils";
 
-const FieldNameCtx = React.createContext<string | undefined>(undefined);
+const FieldCtx = React.createContext<
+  ReturnType<typeof useField>[0] | undefined
+>(undefined);
+
 const useF = () => {
-  const fn = React.useContext(FieldNameCtx);
-  const f = useField(fn ?? "")[0];
-  if (fn) return f;
-  console.warn(
-    "Use <FieldLabel/FieldDescription/FieldMessage> inside <Field>.",
-  );
+  const field = React.useContext(FieldCtx);
+
+  if (!field) {
+    console.warn("Pass the `form` prop to <Field> to provide Conform context.");
+  }
+
+  return field;
 };
 
 function Field({
-  name = "dummy",
+  name,
+  context,
   orientation,
   className,
   ...props
 }: React.ComponentProps<typeof ShadCnField> & {
-  name: string;
+  name?: string;
+  context: FormMetadata<any, any>["context"];
 }) {
   return (
-    <FieldNameCtx.Provider value={name}>
+    <FormProvider context={context}>
+      <FieldWithContext
+        name={name}
+        orientation={orientation}
+        className={className}
+        {...props}
+      />
+    </FormProvider>
+  );
+}
+
+function FieldWithContext({
+  name,
+  orientation,
+  className,
+  ...props
+}: React.ComponentProps<typeof ShadCnField> & { name?: string }) {
+  const [field] = useField(name || "");
+
+  return (
+    <FieldCtx.Provider value={name ? field : undefined}>
       <ShadCnField
         className={cn(
           "gap-2 @md/field-group:[&>[data-slot=field-label]]:flex-initial @md/field-group:[&>[data-slot=field-label]]:min-w-32",
@@ -42,7 +68,7 @@ function Field({
         orientation={orientation}
         {...props}
       />
-    </FieldNameCtx.Provider>
+    </FieldCtx.Provider>
   );
 }
 
@@ -53,8 +79,8 @@ function FieldLabel({
 
   return (
     <ShadCnFieldLabel
-      data-error={!field?.valid}
-      htmlFor={field?.id}
+      data-error={field ? !field.valid : undefined}
+      htmlFor={field?.id ?? props.htmlFor}
       {...props}
     />
   );
@@ -65,7 +91,9 @@ function FieldDescription({
 }: React.ComponentProps<typeof ShadCnFieldDescription>) {
   const field = useF();
 
-  return <ShadCnFieldDescription id={field?.descriptionId} {...props} />;
+  return (
+    <ShadCnFieldDescription id={field?.descriptionId ?? props.id} {...props} />
+  );
 }
 
 function FieldError() {
@@ -85,20 +113,22 @@ function FieldGroup({
 function FieldControl({ render, ...props }: useRender.ComponentProps<"input">) {
   const field = useF();
 
+  const controlProps: React.ComponentProps<"input"> = {
+    id: field?.id,
+    name: field?.name,
+  };
+
+  if (field) {
+    controlProps.defaultValue = (field.initialValue as string) ?? "";
+    controlProps["aria-describedby"] = field.valid
+      ? field.descriptionId
+      : field.errorId;
+    controlProps["aria-invalid"] = !field.valid;
+  }
+
   return useRender({
     defaultTagName: "input",
-    props: mergeProps<"input">(
-      {
-        id: field?.id,
-        name: field?.name,
-        defaultValue: (field?.initialValue as string) ?? "",
-        "aria-describedby": field?.valid
-          ? `${field?.descriptionId}`
-          : `${field?.errorId}`,
-        "aria-invalid": !field?.valid,
-      },
-      props,
-    ),
+    props: mergeProps<"input">(controlProps, props),
     render,
   });
 }

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { FormProvider, getFormProps, useForm } from "@conform-to/react";
+import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Alert, AlertDescription } from "@hebo/shared-ui/components/Alert";
@@ -53,7 +53,6 @@ export function ClearCredentialsDialog({provider, ...props}: ClearCredentialsDia
     <Dialog {...props}>
       <DialogContent>
         <fetcher.Form method="post" {...getFormProps(form)} className="contents">
-          <FormProvider context={form.context}>
           <DialogHeader>
             <DialogTitle>Clear {provider?.name} Credentials</DialogTitle>
             <DialogDescription>Are you sure you want to clear the credentials? </DialogDescription>
@@ -64,7 +63,7 @@ export function ClearCredentialsDialog({provider, ...props}: ClearCredentialsDia
             </AlertDescription>
           </Alert>
 
-          <Field name={fields.providerSlug.name} className="hidden">
+          <Field context={form.context} name={fields.providerSlug.name} className="hidden">
             <FieldControl render={
               <input type="hidden" />
               } />
@@ -88,7 +87,6 @@ export function ClearCredentialsDialog({provider, ...props}: ClearCredentialsDia
               Clear
             </Button>
           </DialogFooter>
-        </FormProvider>
         </fetcher.Form>
       </DialogContent>
     </Dialog>

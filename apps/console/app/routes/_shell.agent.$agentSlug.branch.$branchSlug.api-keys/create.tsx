@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { FormProvider, getFormProps, useForm } from "@conform-to/react";
+import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
@@ -77,10 +77,9 @@ export function CreateApiKeyDialog() {
           <DialogTrigger render={
             <Button variant="outline" type="button">+ Create API Key</Button>
           } />
-        </div>
-        <DialogContent>
-          <fetcher.Form method="post" {...getFormProps(form)} className="contents">
-            <FormProvider context={form.context}>
+      </div>
+      <DialogContent>
+        <fetcher.Form method="post" {...getFormProps(form)} className="contents">
             <DialogHeader>
               <DialogTitle>Create API key</DialogTitle>
               <DialogDescription>
@@ -88,14 +87,14 @@ export function CreateApiKeyDialog() {
               </DialogDescription>
             </DialogHeader>
             <FieldGroup>
-              <Field name={fields.description.name}>
+              <Field context={form.context} name={fields.description.name}>
                 <FieldLabel>Description</FieldLabel>
                 <FieldControl render={
                   <Input placeholder="API key description" autoComplete="off" />
                   } />
                 <FieldError />
               </Field>
-              <Field name={fields.expiresIn.name}>
+              <Field context={form.context} name={fields.expiresIn.name}>
                 <FieldLabel>Expires in</FieldLabel>
                 <FieldControl render={
                   <Select
@@ -123,7 +122,6 @@ export function CreateApiKeyDialog() {
                 Create
               </Button>
             </DialogFooter>
-          </FormProvider>
           </fetcher.Form>
         </DialogContent>
       </Dialog>

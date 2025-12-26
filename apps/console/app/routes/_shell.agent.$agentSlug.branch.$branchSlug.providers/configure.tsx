@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { FormProvider, getFormProps, useForm } from "@conform-to/react";
+import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -93,14 +93,13 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
           {...getFormProps(form)}
           className="contents"
         >
-        <FormProvider context={form.context}>
           <DialogHeader>
             <DialogTitle>Configure {provider?.name} Credentials</DialogTitle>
             <DialogDescription>Learn how to retrieve the credentials in our documentation.</DialogDescription>
           </DialogHeader>
 
           <FieldGroup>
-            <Field name={fields.slug.name} className="hidden">
+            <Field context={form.context} name={fields.slug.name} className="hidden">
               <FieldControl render={
                 <input type="hidden" />
                 } />
@@ -109,7 +108,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
             {(activeKeys as (keyof typeof configFieldset)[]).map((key) => {
               const field = configFieldset[key];
               return (
-                <Field key={key} name={field.name}>
+                <Field key={key} context={form.context} name={field.name}>
                   <FieldLabel>{labelize(key)}</FieldLabel>
                   <FieldControl render={
                     <Input placeholder={`Set ${labelize(key).toLowerCase()}`} autoComplete="off" />
@@ -143,7 +142,6 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
                 Set
             </Button>
           </DialogFooter>
-        </FormProvider>
         </fetcher.Form>
       </DialogContent>
     </Dialog>

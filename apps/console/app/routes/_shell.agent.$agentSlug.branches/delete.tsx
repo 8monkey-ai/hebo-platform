@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { FormProvider, getFormProps, useForm } from "@conform-to/react";
+import { getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@hebo/shared-ui/components/Dialog";
@@ -47,7 +47,6 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
     <Dialog {...props}>
       <DialogContent>
         <fetcher.Form method="post" {...getFormProps(form)} className="contents">
-        <FormProvider context={form.context}>
           <DialogHeader>
             <DialogTitle>Delete Branch</DialogTitle>
             <DialogDescription>
@@ -62,13 +61,13 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
               </AlertTitle>
             </Alert>
 
-            <Field name={fields.branchSlug.name} className="hidden">
+            <Field context={form.context} name={fields.branchSlug.name} className="hidden">
               <FieldControl render={
                 <input type="hidden" name="branchSlug" />
                 } />
             </Field>
 
-            <Field name={fields.slugConfirm.name}>
+            <Field context={form.context} name={fields.slugConfirm.name}>
               <FieldLabel>
                 <div>
                   To confirm, type{" "}
@@ -99,7 +98,6 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
               Delete
             </Button>
           </DialogFooter>
-        </FormProvider>
         </fetcher.Form>
       </DialogContent>
     </Dialog>

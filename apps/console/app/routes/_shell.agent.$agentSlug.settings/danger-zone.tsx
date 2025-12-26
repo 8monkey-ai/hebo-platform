@@ -1,6 +1,6 @@
 import { Form, useActionData, useNavigation } from "react-router";
 import { z } from "zod";
-import { useForm, getFormProps, FormProvider } from "@conform-to/react";
+import { useForm, getFormProps } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
@@ -65,7 +65,6 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
 
             <DialogContent>
               <Form method="post" {...getFormProps(form)} className="contents">
-              <FormProvider context={form.context}>
                 <DialogHeader>
                   <DialogTitle>Delete Agent</DialogTitle>
                   <DialogDescription>
@@ -81,7 +80,7 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
                     </AlertTitle>
                   </Alert>
 
-                  <Field name={fields.slugConfirm.name}>
+                  <Field context={form.context} name={fields.slugConfirm.name}>
                     <FieldLabel>
                       <div>
                         To confirm, type{" "}
@@ -104,7 +103,6 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
                     Delete
                   </Button>
                 </DialogFooter>
-              </FormProvider>
               </Form>
             </DialogContent>
           </Dialog>

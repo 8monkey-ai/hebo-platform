@@ -1,7 +1,7 @@
 import { Form, useActionData, useNavigation } from "react-router";
 import { useSnapshot } from "valtio";
 import { z } from "zod";
-import { useForm, getFormProps, FormProvider } from "@conform-to/react";
+import { useForm, getFormProps } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -50,7 +50,6 @@ export function AgentCreateForm() {
 
   return (
     <Form method="post" {...getFormProps(form)} className="contents">
-    <FormProvider context={form.context}>
       <Card className="sm:max-w-lg min-w-0 w-full ring-0 shadow-none bg-transparent">
 
         <CardHeader>
@@ -62,7 +61,7 @@ export function AgentCreateForm() {
         
         <CardContent>
           <FieldGroup>
-            <Field name={fields.agentName.name} orientation="responsive">
+            <Field context={form.context} name={fields.agentName.name} orientation="responsive">
               <FieldLabel>Agent Name</FieldLabel>
               <FieldContent>
                 <FieldControl render={
@@ -72,7 +71,7 @@ export function AgentCreateForm() {
               </FieldContent>
             </Field>
 
-            <Field name={fields.defaultModel.name} orientation="responsive">
+            <Field context={form.context} name={fields.defaultModel.name} orientation="responsive">
               <FieldLabel>Default Model</FieldLabel>
               <FieldContent>
                 <FieldControl render={
@@ -94,7 +93,6 @@ export function AgentCreateForm() {
         </CardFooter>
 
       </Card>
-    </FormProvider>
     </Form>
   );
 }
