@@ -31,7 +31,7 @@ export abstract class ModelAdapterBase implements ModelAdapter {
   };
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    return options || {};
+    return options;
   }
 
   transformPrompt(prompt: any): any {

@@ -14,25 +14,16 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
   };
 
   transformOptions(options?: ProviderOptions): ProviderOptions {
-    const modelConfig: Record<string, any> = {};
+    const transformed: Record<string, any> = {};
 
-    if (options?.openaiCompatible) {
-      const reasoning = (options.openaiCompatible as any)
-        ?.reasoning as OpenAICompatibleReasoning;
-
-      if (reasoning) {
-        const thinkingConfig = this.transformReasoning(reasoning);
-        if (thinkingConfig) {
-          modelConfig.thinkingConfig = thinkingConfig;
-        }
+    if (options?.reasoning) {
+      const thinkingConfig = this.transformReasoning(options.reasoning);
+      if (thinkingConfig) {
+        transformed.thinkingConfig = thinkingConfig;
       }
     }
 
-    if (Object.keys(modelConfig).length > 0) {
-      return { ...options, modelConfig };
-    }
-
-    return options || {};
+    return Object.keys(transformed).length > 0 ? transformed : options;
   }
 
   protected transformReasoning(
