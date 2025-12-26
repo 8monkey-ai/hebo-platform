@@ -25,7 +25,7 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
       }
     }
 
-    return Object.keys(transformed).length > 0 ? transformed : options;
+    return transformed;
   }
 
   protected transformReasoning(

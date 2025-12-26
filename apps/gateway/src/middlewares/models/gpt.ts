@@ -21,7 +21,7 @@ export abstract class GptModelAdapter extends ModelAdapterBase {
       }
     }
 
-    return Object.keys(transformed).length > 0 ? transformed : options;
+    return transformed;
   }
 
   private transformReasoning(

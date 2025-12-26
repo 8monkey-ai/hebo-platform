@@ -21,72 +21,13 @@ describe("Gemini Adapter transformOptions", () => {
   const gemini3FlashAdapter = new Gemini3FlashPreviewAdapter();
 
   const testCases: TestCase[] = [
+    // --- Gemini 3 Pro Scenarios ---
     {
       name: "Gemini 3 Pro: reasoning enabled (boolean) defaults to 8192 budget",
       model: gemini3ProAdapter,
       input: {
         reasoning: {
           enabled: true,
-        },
-      },
-      expected: {
-        thinkingConfig: {
-          includeThoughts: true,
-          thinkingLevel: "high",
-        },
-      },
-    },
-    {
-      name: "Gemini 3 Pro: reasoning with low effort",
-      model: gemini3ProAdapter,
-      input: {
-        reasoning: {
-          effort: "low",
-        },
-      },
-      expected: {
-        thinkingConfig: {
-          includeThoughts: true,
-          thinkingLevel: "low",
-        },
-      },
-    },
-    {
-      name: "Gemini 3 Pro: reasoning with high effort",
-      model: gemini3ProAdapter,
-      input: {
-        reasoning: {
-          effort: "high",
-        },
-      },
-      expected: {
-        thinkingConfig: {
-          includeThoughts: true,
-          thinkingLevel: "high",
-        },
-      },
-    },
-    {
-      name: "Gemini 3 Pro: reasoning with minimal effort",
-      model: gemini3ProAdapter,
-      input: {
-        reasoning: {
-          effort: "minimal",
-        },
-      },
-      expected: {
-        thinkingConfig: {
-          includeThoughts: true,
-          thinkingLevel: "low",
-        },
-      },
-    },
-    {
-      name: "Gemini 3 Pro: reasoning with xhigh effort",
-      model: gemini3ProAdapter,
-      input: {
-        reasoning: {
-          effort: "xhigh",
         },
       },
       expected: {
@@ -104,11 +45,7 @@ describe("Gemini Adapter transformOptions", () => {
           effort: "none",
         },
       },
-      expected: {
-        reasoning: {
-          effort: "none",
-        },
-      },
+      expected: {},
     },
     {
       name: "Gemini 3 Pro: exclude thoughts",
@@ -126,8 +63,6 @@ describe("Gemini Adapter transformOptions", () => {
         },
       },
     },
-
-    // --- Gemini 3 Pro Scenarios ---
     {
       name: "Gemini 3 Pro: low effort -> LOW",
       model: gemini3ProAdapter,
@@ -170,6 +105,21 @@ describe("Gemini Adapter transformOptions", () => {
         thinkingConfig: {
           includeThoughts: true,
           thinkingLevel: "low",
+        },
+      },
+    },
+    {
+      name: "Gemini 3 Pro: high effort -> HIGH",
+      model: gemini3ProAdapter,
+      input: {
+        reasoning: {
+          effort: "high",
+        },
+      },
+      expected: {
+        thinkingConfig: {
+          includeThoughts: true,
+          thinkingLevel: "high",
         },
       },
     },

@@ -31,6 +31,8 @@ export abstract class ModelAdapterBase implements ModelAdapter {
   };
 
   transformOptions(options: ProviderOptions): ProviderOptions {
+    delete options.reasoning;
+
     return options;
   }
 
