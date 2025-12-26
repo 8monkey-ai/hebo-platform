@@ -18,7 +18,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs )
   let submission, result;
 
   switch (intent) {
-    case "create":
+    case "create": {
       submission = parseWithZod(formData, {
         schema: BranchCreateSchema
       });
@@ -40,20 +40,19 @@ export async function clientAction({ request, params }: Route.ClientActionArgs )
       if (result.error?.status === 409 || result.error?.status === 404) 
         return submission.reply({ fieldErrors: { branchName: [String(result.error.value)] }});
 
-      break;
+      return submission.reply({ resetForm: true });
+    }
 
-    case "delete": 
-      const branchSlug = formData.get("branchSlug") as string;
-
+    case "delete": {
       submission = parseWithZod(formData, {
-        schema: createBranchDeleteSchema(branchSlug)
+        schema: createBranchDeleteSchema(formData.get("branchSlug") as string)
       });
 
       if (submission!.status !== 'success')
         return submission!.reply();
 
       try {
-        result = await api.agents({ agentSlug: params.agentSlug }).branches({ branchSlug: submission.value.slugConfirm}).delete();
+        result = await api.agents({ agentSlug: params.agentSlug }).branches({ branchSlug: submission.value.branchSlug}).delete();
       } catch (error) {
         return submission.reply({ formErrors: [ parseError(error).message ] });
       }
@@ -61,10 +60,9 @@ export async function clientAction({ request, params }: Route.ClientActionArgs )
       if (result.error) 
         return submission.reply({ fieldErrors: { slugConfirm: [String(result.error.value)] }});
 
-      break;
+      return submission.reply();
+    }
   }
-  
-  return submission!.reply();
 }
 
 

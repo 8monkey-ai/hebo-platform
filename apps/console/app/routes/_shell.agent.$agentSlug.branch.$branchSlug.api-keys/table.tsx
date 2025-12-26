@@ -21,7 +21,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@hebo/shared-ui/components/Tooltip";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Undo2 } from "lucide-react";
 
 import type { ApiKey } from "~console/lib/auth/types";
 
@@ -30,8 +30,7 @@ import { formatDateTime } from "~console/lib/utils";
 
 
 export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
-  const [revokeOpen, setRevokeOpen] = useState(false);
-  const [selectedKey, setSelectedKey] = useState<ApiKey | undefined>(undefined);
+  const [revokeDialog, setRevokeDialog] = useState({open: false, apiKey: undefined as ApiKey | undefined});
 
   return (
     <div>
@@ -105,10 +104,10 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
                         <DropdownMenuItem
                           className="text-destructive"
                           onClick={() => {
-                            setSelectedKey(key);
-                            setRevokeOpen(true);
+                            setRevokeDialog({ open: true, apiKey: key });
                           }}
                         >
+                          <Undo2 />
                           Revoke
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -122,11 +121,9 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
       </Table>
 
       <RevokeApiKeyDialog
-        open={revokeOpen}
-        apiKey={selectedKey}
-        onOpenChange={(open) => {
-          setRevokeOpen(open);
-          if (!open) setSelectedKey(undefined);
+        {...revokeDialog}
+        onOpenChange={(open: boolean) => {
+          if (!open) setRevokeDialog({ open: false, apiKey: undefined})
         }}
       />
     </div>

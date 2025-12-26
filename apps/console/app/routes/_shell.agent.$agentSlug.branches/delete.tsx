@@ -1,8 +1,8 @@
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { FormProvider, getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@hebo/shared-ui/components/Dialog";
@@ -16,37 +16,38 @@ import { useFormErrorToast } from "~console/lib/errors";
 
 export function createBranchDeleteSchema(branchSlug: string) {
   return z.object({
-    slugConfirm: z.literal(branchSlug, "You must type your EXACT branch slug")
+    slugConfirm: z.literal(branchSlug, "You must type your EXACT branch slug"),
+    branchSlug: z.string()
   })
 }
 export type BranchDeleteFormValues = z.infer<ReturnType<typeof createBranchDeleteSchema>>;
 
 type DeleteBranchDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   branchSlug: string;
-};
+} & React.ComponentProps<typeof Dialog>;
 
-export default function DeleteBranchDialog({ open, onOpenChange, branchSlug }: DeleteBranchDialogProps) {
+export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranchDialogProps) {
   
   const fetcher = useFetcher();
   const [form, fields] = useForm<BranchDeleteFormValues>({
     id: branchSlug,
-    lastResult: fetcher.data,
+    lastResult: fetcher.state === "idle" && fetcher.data,
     constraint: getZodConstraint(createBranchDeleteSchema(branchSlug)),
+    defaultValue: { branchSlug }
   });
   useFormErrorToast(form.allErrors);
 
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
-      onOpenChange(false);
+      props.onOpenChange(false);
     }
   }, [fetcher.state, form.status]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog {...props}>
       <DialogContent>
         <fetcher.Form method="post" {...getFormProps(form)} className="contents">
+        <FormProvider context={form.context}>
           <DialogHeader>
             <DialogTitle>Delete Branch</DialogTitle>
             <DialogDescription>
@@ -61,9 +62,13 @@ export default function DeleteBranchDialog({ open, onOpenChange, branchSlug }: D
               </AlertTitle>
             </Alert>
 
-            <input type="hidden" name="branchSlug" value={branchSlug} />
+            <Field name={fields.branchSlug.name} className="hidden">
+              <FieldControl render={
+                <input type="hidden" name="branchSlug" />
+                } />
+            </Field>
 
-            <Field field={fields.slugConfirm}>
+            <Field name={fields.slugConfirm.name}>
               <FieldLabel>
                 <div>
                   To confirm, type{" "}
@@ -80,7 +85,7 @@ export default function DeleteBranchDialog({ open, onOpenChange, branchSlug }: D
             <Button
               type="button"
               variant="ghost"
-              onClick={() => onOpenChange(false)}
+              onClick={() => props.onOpenChange(false)}
             >
               Cancel
             </Button>
@@ -94,6 +99,7 @@ export default function DeleteBranchDialog({ open, onOpenChange, branchSlug }: D
               Delete
             </Button>
           </DialogFooter>
+        </FormProvider>
         </fetcher.Form>
       </DialogContent>
     </Dialog>

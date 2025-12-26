@@ -1,6 +1,6 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
-import { type FieldMetadata } from "@conform-to/react";
+import { useField } from "@conform-to/react";
 import * as React from "react";
 
 import {
@@ -12,28 +12,26 @@ import {
 } from "#/_shadcn/ui/field";
 import { cn } from "#/lib/utils";
 
-const FieldCtx = React.createContext<FieldMetadata<string> | undefined>(
-  undefined,
-);
-const useField = () => {
-  const f = React.useContext(FieldCtx);
-  if (!f)
-    console.warn(
-      "Use <FieldLabel/FieldControl/FieldDescription/FieldMessage> inside <Field>.",
-    );
-  return f;
+const FieldNameCtx = React.createContext<string | undefined>(undefined);
+const useF = () => {
+  const fn = React.useContext(FieldNameCtx);
+  const f = useField(fn ?? "")[0];
+  if (fn) return f;
+  console.warn(
+    "Use <FieldLabel/FieldDescription/FieldMessage> inside <Field>.",
+  );
 };
 
 function Field({
-  field,
+  name = "dummy",
   orientation,
   className,
   ...props
 }: React.ComponentProps<typeof ShadCnField> & {
-  field: FieldMetadata<string>;
+  name: string;
 }) {
   return (
-    <FieldCtx.Provider value={field}>
+    <FieldNameCtx.Provider value={name}>
       <ShadCnField
         className={cn(
           "gap-2 @md/field-group:[&>[data-slot=field-label]]:flex-initial @md/field-group:[&>[data-slot=field-label]]:min-w-32",
@@ -44,14 +42,14 @@ function Field({
         orientation={orientation}
         {...props}
       />
-    </FieldCtx.Provider>
+    </FieldNameCtx.Provider>
   );
 }
 
 function FieldLabel({
   ...props
 }: React.ComponentProps<typeof ShadCnFieldLabel>) {
-  const field = useField();
+  const field = useF();
 
   return (
     <ShadCnFieldLabel
@@ -65,13 +63,13 @@ function FieldLabel({
 function FieldDescription({
   ...props
 }: React.ComponentProps<typeof ShadCnFieldDescription>) {
-  const field = useField();
+  const field = useF();
 
   return <ShadCnFieldDescription id={field?.descriptionId} {...props} />;
 }
 
 function FieldError() {
-  const field = useField();
+  const field = useF();
   const errorsDict = field?.errors?.map((message) => ({ message }));
 
   return <ShadCnFieldError id={field?.errorId} errors={errorsDict} />;
@@ -85,7 +83,7 @@ function FieldGroup({
 }
 
 function FieldControl({ render, ...props }: useRender.ComponentProps<"input">) {
-  const field = useField();
+  const field = useF();
 
   return useRender({
     defaultTagName: "input",
@@ -93,7 +91,7 @@ function FieldControl({ render, ...props }: useRender.ComponentProps<"input">) {
       {
         id: field?.id,
         name: field?.name,
-        defaultValue: field?.initialValue,
+        defaultValue: (field?.initialValue as string) ?? "",
         "aria-describedby": field?.valid
           ? `${field?.descriptionId}`
           : `${field?.errorId}`,

@@ -1,6 +1,6 @@
 import { Form, useActionData, useNavigation } from "react-router";
 import { z } from "zod";
-import { useForm, getFormProps } from "@conform-to/react";
+import { useForm, getFormProps, FormProvider } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
@@ -36,16 +36,14 @@ export function createAgentDeleteSchema(agentSlug: string) {
 export type AgentDeleteFormValues = z.infer<ReturnType<typeof createAgentDeleteSchema>>;
 
 export function DangerSettings({ agent }: { agent: { slug: string }}) {
+  const navigation = useNavigation();
 
   const lastResult = useActionData();
   const [form, fields] = useForm<AgentDeleteFormValues>({
-    id: agent.slug,
-    lastResult,
+    lastResult: navigation.state === "idle" && lastResult,
     constraint: getZodConstraint(createAgentDeleteSchema(agent.slug)),
   });
   useFormErrorToast(form.allErrors);
-
-  const navigation = useNavigation();
 
   return (
     <div className="flex flex-col gap-2">
@@ -67,6 +65,7 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
 
             <DialogContent>
               <Form method="post" {...getFormProps(form)} className="contents">
+              <FormProvider context={form.context}>
                 <DialogHeader>
                   <DialogTitle>Delete Agent</DialogTitle>
                   <DialogDescription>
@@ -82,7 +81,7 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
                     </AlertTitle>
                   </Alert>
 
-                  <Field field={fields.slugConfirm}>
+                  <Field name={fields.slugConfirm.name}>
                     <FieldLabel>
                       <div>
                         To confirm, type{" "}
@@ -105,6 +104,7 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
                     Delete
                   </Button>
                 </DialogFooter>
+              </FormProvider>
               </Form>
             </DialogContent>
           </Dialog>

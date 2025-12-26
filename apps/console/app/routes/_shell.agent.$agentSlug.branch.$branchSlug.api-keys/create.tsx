@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { FormProvider, getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
@@ -24,6 +24,7 @@ import { Label } from "@hebo/shared-ui/components/Label";
 import { Select } from "@hebo/shared-ui/components/Select";
 
 import { useFormErrorToast } from "~console/lib/errors";
+import { Checkbox } from "@hebo/shared-ui/components/Checkbox";
 
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -50,7 +51,7 @@ export function CreateApiKeyDialog() {
   const fetcher = useFetcher();
 
   const [form, fields] = useForm<ApiKeyCreateFormValues>({
-    lastResult: fetcher.data?.submission,
+    lastResult: fetcher.state === "idle" && fetcher.data?.submission,
     constraint: getZodConstraint(ApiKeyCreateSchema),
     defaultValue: {
       expiresIn: "30d",
@@ -79,6 +80,7 @@ export function CreateApiKeyDialog() {
         </div>
         <DialogContent>
           <fetcher.Form method="post" {...getFormProps(form)} className="contents">
+            <FormProvider context={form.context}>
             <DialogHeader>
               <DialogTitle>Create API key</DialogTitle>
               <DialogDescription>
@@ -86,14 +88,14 @@ export function CreateApiKeyDialog() {
               </DialogDescription>
             </DialogHeader>
             <FieldGroup>
-              <Field field={fields.description}>
+              <Field name={fields.description.name}>
                 <FieldLabel>Description</FieldLabel>
                 <FieldControl render={
                   <Input placeholder="API key description" autoComplete="off" />
                   } />
                 <FieldError />
               </Field>
-              <Field field={fields.expiresIn}>
+              <Field name={fields.expiresIn.name}>
                 <FieldLabel>Expires in</FieldLabel>
                 <FieldControl render={
                   <Select
@@ -121,6 +123,7 @@ export function CreateApiKeyDialog() {
                 Create
               </Button>
             </DialogFooter>
+          </FormProvider>
           </fetcher.Form>
         </DialogContent>
       </Dialog>
@@ -137,19 +140,17 @@ export function CreateApiKeyDialog() {
 
 type ApiKeyRevealDialogProps = {
   apiKey: string;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-};
+} & React.ComponentProps<typeof Dialog>;
 
-function ApiKeyRevealDialog({ apiKey, open, onOpenChange }: ApiKeyRevealDialogProps) {
+function ApiKeyRevealDialog({ apiKey, ...props }: ApiKeyRevealDialogProps) {
   const [acknowledged, setAcknowledged] = useState(false);
 
   useEffect(() => {
-    if (open) setAcknowledged(false);
+    if (props.open) setAcknowledged(false);
   }, [open]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog {...props}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -171,12 +172,12 @@ function ApiKeyRevealDialog({ apiKey, open, onOpenChange }: ApiKeyRevealDialogPr
         <Alert>
           <AlertTitle>
             <Label htmlFor="acknowledge">
-              <input
+              <Checkbox
                 id="acknowledge"
                 type="checkbox"
                 className="size-4 accent-foreground"
-                checked={acknowledged}
-                onChange={(event) => setAcknowledged(event.target.checked)}
+                value={acknowledged}
+                onCheckedChange={setAcknowledged}
               />
               <span>I understand that I won't be able to view this key again</span>
             </Label>

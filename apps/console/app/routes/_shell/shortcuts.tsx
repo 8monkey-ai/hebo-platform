@@ -30,22 +30,17 @@ const SHORTCUT_GROUPS = [
 ] as const;
 
 
-type KeyboardShortcutsDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-};
-
-export function KeyboardShortcuts({ open, onOpenChange }: KeyboardShortcutsDialogProps) {
+export function KeyboardShortcuts({ props }: React.ComponentProps<typeof Dialog>) {
 
   useHotkeys("mod+slash", () => {
-      onOpenChange(true);
+      props.onOpenChange(true);
     },
     { preventDefault: true, enableOnFormTags: true },
     [],
   );
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog {...props}>
       <DialogContent className="sm:max-w-2xs gap-6">
         <DialogHeader>
           <DialogTitle>Keyboard shortcuts</DialogTitle>

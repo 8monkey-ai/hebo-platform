@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { FormProvider, getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Alert, AlertDescription } from "@hebo/shared-ui/components/Alert";
@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@hebo/shared-ui/components/Dialog";
-import { FieldControl, Field, FieldError } from "@hebo/shared-ui/components/Field";
+import { FieldControl, Field } from "@hebo/shared-ui/components/Field";
 
 import { useFormErrorToast } from "~console/lib/errors";
 
@@ -27,17 +27,15 @@ export const ApiKeyRevokeSchema = z.object({
 type ApiKeyRevokeFormValues = z.infer<typeof ApiKeyRevokeSchema>;
 
 type RevokeApiKeyDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   apiKey?: { id: string; description: string; value: string };
-};
+} & React.ComponentProps<typeof Dialog>;
 
-export function RevokeApiKeyDialog({open, onOpenChange, apiKey}: RevokeApiKeyDialogProps) {
+export function RevokeApiKeyDialog({apiKey, ...props}: RevokeApiKeyDialogProps) {
 
   const fetcher = useFetcher();
   const [form, fields] = useForm<ApiKeyRevokeFormValues>({
     id: apiKey?.id,
-    lastResult: fetcher.data?.submission,
+    lastResult: fetcher.state === "idle" && fetcher.data,
     constraint: getZodConstraint(ApiKeyRevokeSchema),
     defaultValue: {
       apiKeyId: apiKey?.id,
@@ -47,14 +45,15 @@ export function RevokeApiKeyDialog({open, onOpenChange, apiKey}: RevokeApiKeyDia
 
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
-      onOpenChange(false);
+      props.onOpenChange(false);
     }
   }, [fetcher.state, form.status]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog {...props}>
       <DialogContent>
         <fetcher.Form method="post" {...getFormProps(form)} className="contents">
+        <FormProvider context={form.context}>
           <DialogHeader>
             <DialogTitle>Revoke API key</DialogTitle>
             <DialogDescription>
@@ -67,7 +66,7 @@ export function RevokeApiKeyDialog({open, onOpenChange, apiKey}: RevokeApiKeyDia
             </AlertDescription>
           </Alert>
 
-          <Field field={fields.apiKeyId} className="hidden">
+          <Field name={fields.apiKeyId.name} className="hidden">
             <FieldControl render={
               <input type="hidden" />
               } />
@@ -77,7 +76,7 @@ export function RevokeApiKeyDialog({open, onOpenChange, apiKey}: RevokeApiKeyDia
             <Button
               type="button"
               variant="ghost"
-              onClick={() => onOpenChange(false)}
+              onClick={() => props.onOpenChange(false)}
             >
               Cancel
             </Button>
@@ -91,6 +90,7 @@ export function RevokeApiKeyDialog({open, onOpenChange, apiKey}: RevokeApiKeyDia
               Revoke
             </Button>
           </DialogFooter>
+        </FormProvider>
         </fetcher.Form>
       </DialogContent>
     </Dialog>

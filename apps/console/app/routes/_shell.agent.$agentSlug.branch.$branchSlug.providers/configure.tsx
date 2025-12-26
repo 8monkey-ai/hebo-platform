@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { FormProvider, getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -51,27 +51,25 @@ type ProviderConfigureFormValues = z.infer<typeof ProviderConfigureSchema>;
 
 
 type ConfigureProviderDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  provider?: { name: string; slug: string; };
-};
+  provider?: { name: string; slug: string; config: Record<string, unknown>; };
+} & React.ComponentProps<typeof Dialog>;
 
-export function ConfigureProviderDialog({ open, onOpenChange, provider }: ConfigureProviderDialogProps) {
+export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
   const fetcher = useFetcher();
 
   const [form, fields] = useForm<ProviderConfigureFormValues>({
     id: provider?.slug,
-    lastResult: fetcher.data?.submission,
+    lastResult: fetcher.state === "idle" && fetcher.data?.submission,
     constraint: getZodConstraint(ProviderConfigureSchema),
     defaultValue: { 
-      slug: provider?.slug,
+      ...provider
     }
   });
   useFormErrorToast(form.allErrors);
   
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
-      onOpenChange(false);
+      props.onOpenChange(false);
     }
   }, [fetcher.state, form.status]);
 
@@ -88,29 +86,30 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
   const activeKeys = provider ? providerFields[provider.slug] ?? [] : [];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog {...props}>
       <DialogContent className="sm:max-w-lg">
         <fetcher.Form
           method="post"
           {...getFormProps(form)}
           className="contents"
         >
+        <FormProvider context={form.context}>
           <DialogHeader>
             <DialogTitle>Configure {provider?.name} Credentials</DialogTitle>
             <DialogDescription>Learn how to retrieve the credentials in our documentation.</DialogDescription>
           </DialogHeader>
 
           <FieldGroup>
-            <Field field={fields.slug} className="hidden">
+            <Field name={fields.slug.name} className="hidden">
               <FieldControl render={
-                <input type="hidden" value={provider?.slug} />
+                <input type="hidden" />
                 } />
             </Field>
 
             {(activeKeys as (keyof typeof configFieldset)[]).map((key) => {
               const field = configFieldset[key];
               return (
-                <Field key={key} field={field}>
+                <Field key={key} name={field.name}>
                   <FieldLabel>{labelize(key)}</FieldLabel>
                   <FieldControl render={
                     <Input placeholder={`Set ${labelize(key).toLowerCase()}`} autoComplete="off" />
@@ -130,7 +129,7 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
               <Button 
                   type="button"
                   variant="ghost"
-                  onClick={() => onOpenChange(false)}
+                  onClick={() => props.onOpenChange(false)}
                   >
                   Cancel
               </Button>
@@ -144,6 +143,7 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
                 Set
             </Button>
           </DialogFooter>
+        </FormProvider>
         </fetcher.Form>
       </DialogContent>
     </Dialog>

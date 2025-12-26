@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { FormProvider, getFormProps, useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -42,7 +42,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
 
   const fetcher = useFetcher();
   const [form, fields] = useForm<BranchCreateFormValues>({
-    lastResult: fetcher.data,
+    lastResult: fetcher.state === "idle" && fetcher.data,
     constraint: getZodConstraint(BranchCreateSchema),
     defaultValue: {
       sourceBranchSlug: branches[0].slug,
@@ -71,6 +71,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
       </div>
       <DialogContent className="sm:max-w-lg">
         <fetcher.Form method="post" {...getFormProps(form)} className="contents">
+          <FormProvider context={form.context}>
           <DialogHeader>
             <DialogTitle>Create Branch</DialogTitle>
             <DialogDescription>
@@ -78,7 +79,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
             </DialogDescription>
           </DialogHeader>
           <FieldGroup>
-            <Field field={fields.branchName}>
+            <Field name={fields.branchName.name}>
               <FieldLabel>Branch name</FieldLabel>
               <FieldControl render={
                 <Input autoComplete="off" placeholder="Set a branch name" />
@@ -86,7 +87,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
               <FieldError />
             </Field>
 
-            <Field field={fields.sourceBranchSlug}>
+            <Field name={fields.sourceBranchSlug.name}>
               <FieldLabel>Source</FieldLabel>
               <FieldControl render={
                 <Select
@@ -121,6 +122,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
               Create
             </Button>
           </DialogFooter>
+        </FormProvider>
         </fetcher.Form>
       </DialogContent>
     </Dialog>

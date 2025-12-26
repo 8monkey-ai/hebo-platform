@@ -1,6 +1,6 @@
 import { useFetcher } from "react-router";
 import { useEffect, useRef, useState } from "react";
-import { useForm, getFormProps, type FieldMetadata } from "@conform-to/react";
+import { useForm, getFormProps, type FieldMetadata, FormProvider } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 import { Brain, ChevronsUpDown, Edit } from "lucide-react";
 import { useSnapshot } from "valtio";
@@ -44,7 +44,6 @@ import {
 } from "@hebo/shared-ui/components/Collapsible";
 
 import { useFormErrorToast } from "~console/lib/errors";
-import { objectId } from "~console/lib/utils";
 import { shellStore } from "~console/lib/shell";
 import { ModelSelector } from "~console/components/ui/ModelSelector";
 
@@ -53,8 +52,6 @@ import {
   type ModelConfigFormValue,
   type ModelsConfigFormValues,
 } from "./schema";
-import { Item } from "@hebo/shared-ui/components/Item";
-import { Label } from "@hebo/shared-ui/components/Label";
 
 
 type ModelsConfigProps = {
@@ -68,8 +65,7 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
   const fetcher = useFetcher();
 
   const [form, fields] = useForm<ModelsConfigFormValues>({
-    id: objectId(models),
-    lastResult: fetcher.data ,
+    lastResult: fetcher.state === "idle" && fetcher.data,
     constraint: getZodConstraint(modelsConfigFormSchema),
     defaultValue: { models }
   });
@@ -89,9 +85,10 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
 
   return (
     <fetcher.Form method="post" ref={formRef} {...getFormProps(form)} className="flex flex-col gap-4">
+    <FormProvider context={form.context}>
       {fields.models.getFieldList().map((model, index) => (
         <ModelCard
-          key={model.key}
+          key={model.name}
           model={model}
           agentSlug={agentSlug}
           branchSlug={branchSlug}
@@ -106,7 +103,7 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
             form.remove({ name: fields.models.name, index })
             // FUTURE: this is a quirk to work around a current Conform limitation. 
             // Remove once upgrade to future APIs in conform 1.9+
-            setTimeout(() => formRef.current?.requestSubmit(), 1000);
+            setTimeout(() => formRef.current?.requestSubmit(), 2000);
           }}
           onCancel={() => {
             form.dirty && form.reset({ name: fields.models.name  });
@@ -131,6 +128,7 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
           + Add Model
         </Button>
       </div>
+    </FormProvider>
     </fetcher.Form>
   );
 }
@@ -159,12 +157,13 @@ function ModelCard(props: {
     providers,
   } = props;
 
-  const { models } = useSnapshot(shellStore);
-
-  const aliasPath = [agentSlug, branchSlug, model.getFieldset().alias.value || "alias"].join("/");
+  const { models: supportedModels } = useSnapshot(shellStore);
+  const availableProviders = providers.filter((p) => supportedModels?.[model.getFieldset().type.value ?? ""]?.providers?.includes(p.slug));
 
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [routingEnabled, setRoutingEnabled] = useState(Boolean(model.getFieldset().routing.value));
+
+  const aliasPath = [agentSlug, branchSlug, model.getFieldset().alias.value || "alias"].join("/");
 
   return (
     <Collapsible open={isExpanded} onOpenChange={onOpenChange}>
@@ -195,130 +194,125 @@ function ModelCard(props: {
           keepMounted
           inert={!isExpanded}
           className="
-            overflow-hidden
             h-(--collapsible-panel-height)
             [&[data-starting-style],&[data-ending-style]]:h-0
             transition-all duration-150 ease-out
             "
           >
-            <Separator />
 
-            <CardContent className="flex flex-col gap-4 my-3">
-              <FieldGroup className="grid gap-4 grid-cols-1 md:grid-cols-2">
-                <Field field={model.getFieldset().alias}>
-                  <FieldLabel>Alias</FieldLabel>
-                  <FieldControl render={
-                    <Input placeholder="Set alias name" autoComplete="off" />
-                    } /> 
-                  <FieldError />
+          <Separator />
+
+          <CardContent className="flex flex-col gap-4 my-3">
+            <FieldGroup className="grid gap-4 grid-cols-1 md:grid-cols-2">
+              <Field name={model.getFieldset().alias.name}>
+                <FieldLabel>Alias</FieldLabel>
+                <FieldControl render={
+                  <Input placeholder="Set alias name" autoComplete="off" />
+                  } /> 
+                <FieldError />
+              </Field>
+
+              <Field name={model.getFieldset().type.name}>
+                <FieldLabel>Type</FieldLabel>
+                <FieldControl render={
+                  <ModelSelector models={supportedModels} />
+                  } />
+                <FieldError />
+              </Field>
+            </FieldGroup>
+
+            <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
+              <div className="flex items-center gap-1">
+                <h4 className="text-sm font-medium">Advanced options</h4>
+                <CollapsibleTrigger render={
+                  <Button variant="ghost" size="icon" className="size-6" type="button">
+                    <ChevronsUpDown />
+                  </Button>
+                } />
+              </div>
+              <CollapsibleContent keepMounted inert={!advancedOpen} className="overflow-hidden h-(--collapsible-panel-height) pt-2">
+                <Field orientation="horizontal" className="border border-border px-4 py-3.5">
+                  <Checkbox
+                    id={`byo-${aliasPath}`}
+                    checked={routingEnabled}
+                    onCheckedChange={setRoutingEnabled}
+                  />
+                  <FieldContent>
+                    <FieldLabel htmlFor={`byo-${aliasPath}`}>Bring Your Own Provider</FieldLabel>
+                    <FieldDescription>Setup your credentials first in providers settings</FieldDescription>
+                  </FieldContent>
+                  <Field
+                    name={`${model.getFieldset().routing.getFieldset().only.name}[0]`} 
+                    className="max-w-44">
+                    <FieldControl disabled={!routingEnabled} render={
+                      <Select
+                        items={
+                          availableProviders
+                            .map((provider) => ({
+                              value: provider.slug,
+                              label: provider.name,
+                            }))
+                          }
+                        placeholder={
+                          availableProviders.length
+                            ? "Select provider"
+                            : "No supported providers configured"
+                        }
+                        aria-label="Select Provider"
+                      />
+                      } />
+                  </Field>
                 </Field>
+              </CollapsibleContent>
+            </Collapsible>
+          </CardContent>
 
-                <Field field={model.getFieldset().type}>
-                  <FieldLabel>Type</FieldLabel>
-                  <FieldControl render={
-                    <ModelSelector models={models} />
-                    } />
-                  <FieldError />
-                </Field>
-              </FieldGroup>
-
-              <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
-                <div className="flex items-center gap-1">
-                  <h4 className="text-sm font-medium">Advanced options</h4>
-                  <CollapsibleTrigger render={
-                    <Button variant="ghost" size="icon" className="size-6" type="button">
-                      <ChevronsUpDown />
+          <CardFooter>
+            <Dialog>
+              <DialogTrigger render={
+                <Button
+                  type="button"
+                  variant="destructive"
+                  disabled={isSubmitting}
+                >
+                  Remove
+                </Button>
+              } />
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Remove model</DialogTitle>
+                  <DialogDescription>
+                    This action permanently removes the model and cannot be undone.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose render={
+                    <Button type="button" variant="outline">
+                      Cancel
                     </Button>
                   } />
-                </div>
-                <CollapsibleContent keepMounted inert={!advancedOpen} className="overflow-hidden h-(--collapsible-panel-height) pt-2">
-                  <Item variant="outline">
-                    <Field orientation="horizontal">
-                      <Checkbox
-                        id={`byo-${aliasPath}`}
-                        checked={routingEnabled}
-                        onCheckedChange={setRoutingEnabled}
-                      />
-                      <FieldContent>
-                        <Label htmlFor={`byo-${aliasPath}`} className="mb-0">Bring Your Own Provider</Label>
-                        <FieldDescription className="line-clamp-1">Setup your credentials first in providers settings</FieldDescription>
-                      </FieldContent>
-                      {(() => {
-                        const availableProviders = providers.filter((p) => models?.[model.getFieldset().type.value ?? ""]?.providers?.includes(p.slug));
-                        return (
-                          <FieldContent className="max-w-48">
-                            <Select
-                              name={`${model.getFieldset().routing.getFieldset().only.name}[0]`}
-                              defaultValue={model.getFieldset().routing.getFieldset().only.getFieldList()[0]?.value ?? ""}
-                              items={
-                                availableProviders
-                                  .map((provider) => ({
-                                    value: provider.slug,
-                                    label: provider.name,
-                                  }))
-                                }
-                              placeholder={
-                                availableProviders.length
-                                  ? "Select provider"
-                                  : "No supported providers configured"
-                              }
-                              disabled={!routingEnabled}
-                            />
-                          </FieldContent>
-                        )
-                      })()}
-                    </Field>
-                  </Item>
-                </CollapsibleContent>
-              </Collapsible>
-            </CardContent>
 
-            <CardFooter>
-              <Dialog>
-                <DialogTrigger render={
                   <Button
                     type="button"
                     variant="destructive"
-                    disabled={isSubmitting}
+                    onClick={onRemove}
+                    isLoading={isSubmitting}
                   >
                     Remove
                   </Button>
-                } />
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Remove model</DialogTitle>
-                    <DialogDescription>
-                      This action permanently removes the model and cannot be undone.
-                    </DialogDescription>
-                  </DialogHeader>
-                  <DialogFooter>
-                    <DialogClose render={
-                      <Button type="button" variant="outline">
-                        Cancel
-                      </Button>
-                    } />
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      onClick={onRemove}
-                      isLoading={isSubmitting}
-                    >
-                      Remove
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-
-              <div className="ml-auto flex gap-2">
-                <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={!model.dirty} isLoading={isSubmitting}>
-                  Save
-                </Button>
-              </div>
-            </CardFooter>
+            <div className="ml-auto flex gap-2">
+              <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={!model.dirty} isLoading={isSubmitting}>
+                Save
+              </Button>
+            </div>
+          </CardFooter>
         </CollapsibleContent>
       </Card>
     </Collapsible>

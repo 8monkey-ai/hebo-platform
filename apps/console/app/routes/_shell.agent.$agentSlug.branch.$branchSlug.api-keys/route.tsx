@@ -43,7 +43,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
         })};
       }
       
-      return { submission: submission.reply(), apiKey };
+      return { submission: submission.reply({ resetForm: true }), apiKey };
     }
 
     case "revoke": {

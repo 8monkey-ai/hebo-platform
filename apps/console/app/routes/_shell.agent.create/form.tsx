@@ -1,7 +1,7 @@
 import { Form, useActionData, useNavigation } from "react-router";
 import { useSnapshot } from "valtio";
 import { z } from "zod";
-import { useForm, getFormProps } from "@conform-to/react";
+import { useForm, getFormProps, FormProvider } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -36,10 +36,11 @@ export type AgentCreateFormValues = z.infer<typeof AgentCreateSchema>;
 
 export function AgentCreateForm() {
   const { models } = useSnapshot(shellStore);
+  const navigation = useNavigation();
 
   const lastResult = useActionData();
   const [form, fields] = useForm<AgentCreateFormValues>({
-    lastResult,
+    lastResult: navigation.state === "idle" && lastResult,
     constraint: getZodConstraint(AgentCreateSchema),
     defaultValue: {
       defaultModel: Object.keys(models ?? {})[0],
@@ -47,10 +48,9 @@ export function AgentCreateForm() {
   });
   useFormErrorToast(form.allErrors);
 
-  const navigation = useNavigation();
-
   return (
     <Form method="post" {...getFormProps(form)} className="contents">
+    <FormProvider context={form.context}>
       <Card className="sm:max-w-lg min-w-0 w-full ring-0 shadow-none bg-transparent">
 
         <CardHeader>
@@ -62,7 +62,7 @@ export function AgentCreateForm() {
         
         <CardContent>
           <FieldGroup>
-            <Field field={fields.agentName} orientation="responsive">
+            <Field name={fields.agentName.name} orientation="responsive">
               <FieldLabel>Agent Name</FieldLabel>
               <FieldContent>
                 <FieldControl render={
@@ -72,7 +72,7 @@ export function AgentCreateForm() {
               </FieldContent>
             </Field>
 
-            <Field field={fields.defaultModel} orientation="responsive">
+            <Field name={fields.defaultModel.name} orientation="responsive">
               <FieldLabel>Default Model</FieldLabel>
               <FieldContent>
                 <FieldControl render={
@@ -94,6 +94,7 @@ export function AgentCreateForm() {
         </CardFooter>
 
       </Card>
+    </FormProvider>
     </Form>
   );
 }
