@@ -68,11 +68,9 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
             </Field>
 
             <Field context={form.context} name={fields.slugConfirm.name}>
-              <FieldLabel>
-                <div>
-                  To confirm, type{" "}
-                  <strong>{branchSlug}</strong> in the box below:
-                </div>
+              <FieldLabel className="block">
+                To confirm, type{" "}
+                <strong>{branchSlug}</strong> in the box below:
               </FieldLabel>
               <FieldControl render={
                 <Input autoComplete="off" />

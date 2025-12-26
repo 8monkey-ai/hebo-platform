@@ -75,10 +75,9 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
 
   const providerFields = Object.fromEntries(
     ProviderConfigureSchema.options.flatMap((opt) => {
-      const slugEnum = opt.shape.slug as z.ZodEnum<any>;
-      const configSchema = opt.shape.config as z.ZodObject<any>;
-      const fields = Object.keys(configSchema.shape);
-      return slugEnum.options.map((value: string) => [value, fields]);
+      const slugEnum = opt.shape.slug;
+      const configKeys = Object.keys(opt.shape.config.shape);
+      return slugEnum.options.map((slug) => [slug, configKeys]);
     })
   );
     

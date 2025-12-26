@@ -145,7 +145,7 @@ function ApiKeyRevealDialog({ apiKey, ...props }: ApiKeyRevealDialogProps) {
 
   useEffect(() => {
     if (props.open) setAcknowledged(false);
-  }, [open]);
+  }, [props.open]);
 
   return (
     <Dialog {...props}>

@@ -98,7 +98,11 @@ function FieldDescription({
 
 function FieldError() {
   const field = useF();
-  const errorsDict = field?.errors?.map((message) => ({ message }));
+
+  const errors = field?.errors;
+  const errorsDict = Array.isArray(errors)
+    ? errors.map((message) => ({ message }))
+    : undefined;
 
   return <ShadCnFieldError id={field?.errorId} errors={errorsDict} />;
 }
