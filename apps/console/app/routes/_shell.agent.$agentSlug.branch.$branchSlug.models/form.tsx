@@ -1,6 +1,6 @@
 import { useFetcher } from "react-router";
 import { useEffect, useRef, useState } from "react";
-import { useForm, getFormProps, type FieldMetadata, type FormMetadata } from "@conform-to/react";
+import { useForm, type FieldMetadata } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 import { Brain, ChevronsUpDown, Edit } from "lucide-react";
 import { useSnapshot } from "valtio";
@@ -21,6 +21,7 @@ import {
   FieldGroup,
   FieldContent,
   FieldDescription,
+  FormControl,
 } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Select } from "@hebo/shared-ui/components/Select";
@@ -84,12 +85,16 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
   const formRef = useRef<HTMLFormElement>(null);
 
   return (
-    <fetcher.Form method="post" ref={formRef} {...getFormProps(form)} className="flex flex-col gap-4">
+    <FormControl
+      form={form}
+      as={fetcher.Form}
+      ref={formRef}
+      className="flex flex-col gap-4"
+    >
       {fields.models.getFieldList().map((model, index) => (
         <ModelCard
           key={model.name}
           model={model}
-          context={form.context}
           agentSlug={agentSlug}
           branchSlug={branchSlug}
           providers={providers}
@@ -128,14 +133,13 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
           + Add Model
         </Button>
       </div>
-    </fetcher.Form>
+    </FormControl>
   );
 }
 
 
 function ModelCard(props: {
   model: FieldMetadata<ModelConfigFormValue>;
-  context: FormMetadata<ModelsConfigFormValues>["context"];
   agentSlug: string;
   branchSlug: string;
   isExpanded: boolean;
@@ -147,7 +151,6 @@ function ModelCard(props: {
 }) {
   const {
     model,
-    context,
     agentSlug,
     branchSlug,
     isExpanded,
@@ -205,7 +208,7 @@ function ModelCard(props: {
 
           <CardContent className="flex flex-col gap-4 my-3">
             <FieldGroup className="grid gap-4 grid-cols-1 md:grid-cols-2">
-              <Field context={context} name={model.getFieldset().alias.name}>
+              <Field name={model.getFieldset().alias.name}>
                 <FieldLabel>Alias</FieldLabel>
                 <FieldControl render={
                   <Input placeholder="Set alias name" autoComplete="off" />
@@ -213,7 +216,7 @@ function ModelCard(props: {
                 <FieldError />
               </Field>
 
-              <Field context={context} name={model.getFieldset().type.name}>
+              <Field name={model.getFieldset().type.name}>
                 <FieldLabel>Type</FieldLabel>
                 <FieldControl render={
                   <ModelSelector models={supportedModels} />
@@ -232,7 +235,7 @@ function ModelCard(props: {
                 } />
               </div>
               <CollapsibleContent keepMounted inert={!advancedOpen} className="overflow-hidden h-(--collapsible-panel-height) pt-2">
-                <Field context={context} orientation="horizontal" className="border border-border px-4 py-3.5">
+                <Field orientation="horizontal" className="border border-border px-4 py-3.5">
                   <Checkbox
                     id={`byo-${aliasPath}`}
                     checked={routingEnabled}
@@ -243,7 +246,6 @@ function ModelCard(props: {
                     <FieldDescription>Setup your credentials first in providers settings</FieldDescription>
                   </FieldContent>
                   <Field
-                    context={context}
                     name={`${model.getFieldset().routing.getFieldset().only.name}[0]`} 
                     className="max-w-44">
                     <FieldControl disabled={!routingEnabled} render={

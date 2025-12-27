@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Alert, AlertDescription } from "@hebo/shared-ui/components/Alert";
@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@hebo/shared-ui/components/Dialog";
-import { FieldControl, Field } from "@hebo/shared-ui/components/Field";
+import { FieldControl, Field, FormControl } from "@hebo/shared-ui/components/Field";
 
 import { useFormErrorToast } from "~console/lib/errors";
 
@@ -52,7 +52,10 @@ export function ClearCredentialsDialog({provider, ...props}: ClearCredentialsDia
   return (
     <Dialog {...props}>
       <DialogContent>
-        <fetcher.Form method="post" {...getFormProps(form)} className="contents">
+        <FormControl
+          form={form}
+          as={fetcher.Form}
+        >
           <DialogHeader>
             <DialogTitle>Clear {provider?.name} Credentials</DialogTitle>
             <DialogDescription>Are you sure you want to clear the credentials? </DialogDescription>
@@ -63,7 +66,7 @@ export function ClearCredentialsDialog({provider, ...props}: ClearCredentialsDia
             </AlertDescription>
           </Alert>
 
-          <Field context={form.context} name={fields.providerSlug.name} className="hidden">
+          <Field name={fields.providerSlug.name} className="hidden">
             <FieldControl render={
               <input type="hidden" />
               } />
@@ -87,7 +90,7 @@ export function ClearCredentialsDialog({provider, ...props}: ClearCredentialsDia
               Clear
             </Button>
           </DialogFooter>
-        </fetcher.Form>
+        </FormControl>
       </DialogContent>
     </Dialog>
   );

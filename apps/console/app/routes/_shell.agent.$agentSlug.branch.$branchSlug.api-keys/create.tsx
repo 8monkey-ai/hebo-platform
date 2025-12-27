@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
+import { Checkbox } from "@hebo/shared-ui/components/Checkbox";
 import {
   Dialog,
   DialogClose,
@@ -18,13 +19,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@hebo/shared-ui/components/Dialog";
-import { FieldControl, Field, FieldLabel, FieldError, FieldGroup } from "@hebo/shared-ui/components/Field";
+import { FieldControl, Field, FieldLabel, FieldError, FieldGroup, FormControl } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Label } from "@hebo/shared-ui/components/Label";
 import { Select } from "@hebo/shared-ui/components/Select";
 
 import { useFormErrorToast } from "~console/lib/errors";
-import { Checkbox } from "@hebo/shared-ui/components/Checkbox";
 
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
@@ -79,7 +79,10 @@ export function CreateApiKeyDialog() {
           } />
       </div>
       <DialogContent>
-        <fetcher.Form method="post" {...getFormProps(form)} className="contents">
+        <FormControl
+          form={form}
+          as={fetcher.Form}
+        >
             <DialogHeader>
               <DialogTitle>Create API key</DialogTitle>
               <DialogDescription>
@@ -87,14 +90,14 @@ export function CreateApiKeyDialog() {
               </DialogDescription>
             </DialogHeader>
             <FieldGroup>
-              <Field context={form.context} name={fields.description.name}>
+              <Field name={fields.description.name}>
                 <FieldLabel>Description</FieldLabel>
                 <FieldControl render={
                   <Input placeholder="API key description" autoComplete="off" />
                   } />
                 <FieldError />
               </Field>
-              <Field context={form.context} name={fields.expiresIn.name}>
+              <Field name={fields.expiresIn.name}>
                 <FieldLabel>Expires in</FieldLabel>
                 <FieldControl render={
                   <Select
@@ -122,7 +125,7 @@ export function CreateApiKeyDialog() {
                 Create
               </Button>
             </DialogFooter>
-          </fetcher.Form>
+          </FormControl>
         </DialogContent>
       </Dialog>
 

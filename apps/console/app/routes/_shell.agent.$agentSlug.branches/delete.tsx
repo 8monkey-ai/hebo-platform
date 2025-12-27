@@ -2,13 +2,13 @@ import React, { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@hebo/shared-ui/components/Dialog";
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
-import { FieldControl, Field, FieldLabel, FieldError } from "@hebo/shared-ui/components/Field";
+import { FormControl, FieldControl, Field, FieldLabel, FieldError } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 
 import { useFormErrorToast } from "~console/lib/errors";
@@ -46,7 +46,10 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
   return (
     <Dialog {...props}>
       <DialogContent>
-        <fetcher.Form method="post" {...getFormProps(form)} className="contents">
+        <FormControl
+          form={form}
+          as={fetcher.Form}
+        >
           <DialogHeader>
             <DialogTitle>Delete Branch</DialogTitle>
             <DialogDescription>
@@ -61,13 +64,13 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
               </AlertTitle>
             </Alert>
 
-            <Field context={form.context} name={fields.branchSlug.name} className="hidden">
+            <Field name={fields.branchSlug.name} className="hidden">
               <FieldControl render={
                 <input type="hidden" name="branchSlug" />
                 } />
             </Field>
 
-            <Field context={form.context} name={fields.slugConfirm.name}>
+            <Field name={fields.slugConfirm.name}>
               <FieldLabel className="block">
                 To confirm, type{" "}
                 <strong>{branchSlug}</strong> in the box below:
@@ -96,7 +99,7 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
               Delete
             </Button>
           </DialogFooter>
-        </fetcher.Form>
+        </FormControl>
       </DialogContent>
     </Dialog>
   );

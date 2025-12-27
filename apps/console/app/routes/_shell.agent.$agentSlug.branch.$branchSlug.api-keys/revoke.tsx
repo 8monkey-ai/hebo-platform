@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Alert, AlertDescription } from "@hebo/shared-ui/components/Alert";
@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@hebo/shared-ui/components/Dialog";
-import { FieldControl, Field } from "@hebo/shared-ui/components/Field";
+import { FormControl, FieldControl, Field } from "@hebo/shared-ui/components/Field";
 
 import { useFormErrorToast } from "~console/lib/errors";
 
@@ -52,7 +52,10 @@ export function RevokeApiKeyDialog({apiKey, ...props}: RevokeApiKeyDialogProps) 
   return (
     <Dialog {...props}>
       <DialogContent>
-        <fetcher.Form method="post" {...getFormProps(form)} className="contents">
+        <FormControl
+          form={form}
+          as={fetcher.Form}
+        >
           <DialogHeader>
             <DialogTitle>Revoke API key</DialogTitle>
             <DialogDescription>
@@ -65,7 +68,7 @@ export function RevokeApiKeyDialog({apiKey, ...props}: RevokeApiKeyDialogProps) 
             </AlertDescription>
           </Alert>
 
-          <Field context={form.context} name={fields.apiKeyId.name} className="hidden">
+          <Field name={fields.apiKeyId.name} className="hidden">
             <FieldControl render={
               <input type="hidden" />
               } />
@@ -89,7 +92,7 @@ export function RevokeApiKeyDialog({apiKey, ...props}: RevokeApiKeyDialogProps) 
               Revoke
             </Button>
           </DialogFooter>
-        </fetcher.Form>
+        </FormControl>
       </DialogContent>
     </Dialog>
   );

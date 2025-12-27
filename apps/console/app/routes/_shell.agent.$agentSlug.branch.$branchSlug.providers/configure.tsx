@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@hebo/shared-ui/components/Dialog";
-import { FieldControl, Field, FieldLabel, FieldError, FieldGroup } from "@hebo/shared-ui/components/Field";
+import { FormControl, FieldControl, Field, FieldLabel, FieldError, FieldGroup } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 
 import { useFormErrorToast } from "~console/lib/errors";
@@ -87,10 +87,9 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
   return (
     <Dialog {...props}>
       <DialogContent className="sm:max-w-lg">
-        <fetcher.Form
-          method="post"
-          {...getFormProps(form)}
-          className="contents"
+        <FormControl
+          form={form}
+          as={fetcher.Form}
         >
           <DialogHeader>
             <DialogTitle>Configure {provider?.name} Credentials</DialogTitle>
@@ -98,7 +97,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
           </DialogHeader>
 
           <FieldGroup>
-            <Field context={form.context} name={fields.slug.name} className="hidden">
+            <Field name={fields.slug.name} className="hidden">
               <FieldControl render={
                 <input type="hidden" />
                 } />
@@ -107,7 +106,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
             {(activeKeys as (keyof typeof configFieldset)[]).map((key) => {
               const field = configFieldset[key];
               return (
-                <Field key={key} context={form.context} name={field.name}>
+                <Field key={key} name={field.name}>
                   <FieldLabel>{labelize(key)}</FieldLabel>
                   <FieldControl render={
                     <Input placeholder={`Set ${labelize(key).toLowerCase()}`} autoComplete="off" />
@@ -141,7 +140,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
                 Set
             </Button>
           </DialogFooter>
-        </fetcher.Form>
+        </FormControl>
       </DialogContent>
     </Dialog>
   );

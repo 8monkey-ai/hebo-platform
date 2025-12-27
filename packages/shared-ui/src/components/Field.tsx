@@ -1,6 +1,11 @@
 import { mergeProps } from "@base-ui/react/merge-props";
 import { useRender } from "@base-ui/react/use-render";
-import { FormProvider, type FormMetadata, useField } from "@conform-to/react";
+import {
+  FormMetadata,
+  FormProvider,
+  getFormProps,
+  useField,
+} from "@conform-to/react";
 import * as React from "react";
 
 import {
@@ -19,36 +24,15 @@ const FieldCtx = React.createContext<
 const useF = () => {
   const field = React.useContext(FieldCtx);
 
-  if (!field) {
-    console.warn("Pass the `form` prop to <Field> to provide Conform context.");
-  }
+  if (!field)
+    console.warn(
+      'Wrap your component into <Field name="..."> to provide Conform context.',
+    );
 
   return field;
 };
 
 function Field({
-  name,
-  context,
-  orientation,
-  className,
-  ...props
-}: React.ComponentProps<typeof ShadCnField> & {
-  name?: string;
-  context: FormMetadata<Record<string, unknown>, string[]>["context"];
-}) {
-  return (
-    <FormProvider context={context}>
-      <FieldWithContext
-        name={name}
-        orientation={orientation}
-        className={className}
-        {...props}
-      />
-    </FormProvider>
-  );
-}
-
-function FieldWithContext({
   name,
   orientation,
   className,
@@ -137,6 +121,31 @@ function FieldControl({ render, ...props }: useRender.ComponentProps<"input">) {
     render,
   });
 }
+
+type FormControlProps = {
+  form: FormMetadata<any, any>;
+  as: React.ElementType;
+} & React.ComponentPropsWithoutRef<"form">;
+
+export const FormControl = React.forwardRef<HTMLFormElement, FormControlProps>(
+  function FormControl({ form, as, children, ...props }, ref) {
+    const Comp = as;
+
+    return (
+      <FormProvider context={form.context}>
+        <Comp
+          ref={ref}
+          method="post"
+          className="contents"
+          {...getFormProps(form)}
+          {...props}
+        >
+          {children}
+        </Comp>
+      </FormProvider>
+    );
+  },
+);
 
 export {
   Field,
