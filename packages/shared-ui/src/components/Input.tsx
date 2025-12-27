@@ -23,7 +23,7 @@ export function Input({
       {Icon && (
         <Icon
           size={16}
-          className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
+          className="pointer-events-none absolute top-1/2 left-2.5 -translate-y-1/2"
           aria-hidden="true"
           focusable="false"
         />
@@ -33,7 +33,7 @@ export function Input({
         tabIndex={tabIndex}
         className={cn(
           "bg-background text-sm",
-          Icon && "pl-9",
+          Icon && "pl-8",
           copy && "pr-8 truncate",
           className,
         )}
@@ -45,7 +45,7 @@ export function Input({
           aria-disabled={!value}
           tabIndex={tabIndex}
           value={value?.toString() ?? ""}
-          className="absolute top-1/2 right-2 -translate-y-1/2"
+          className="absolute top-1/2 right-1 -translate-y-1/2"
         />
       )}
     </div>

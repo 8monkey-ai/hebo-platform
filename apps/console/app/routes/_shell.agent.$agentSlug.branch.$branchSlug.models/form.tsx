@@ -184,7 +184,7 @@ function ModelCard(props: {
         <CardHeader className="grid gap-4 min-w-0 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center focus:outline-none focus:ring-2 focus:ring-ring/40 focus:ring-offset-2 focus:ring-offset-background">
           <div className="flex min-w-0 flex-col gap-2">
             <span className="text-xs uppercase text-muted-foreground">Alias path</span>
-            <div className="inline-flex gap-2 items-center">
+            <div className="inline-flex gap-1 items-center">
               <span className="text-sm font-medium text-ellipsis-start">{aliasPath}</span>
               <CopyButton value={aliasPath} />
             </div>

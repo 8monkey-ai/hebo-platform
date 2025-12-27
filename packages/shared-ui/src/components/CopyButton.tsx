@@ -1,4 +1,3 @@
-import { mergeProps, useRender } from "@base-ui/react";
 import { Check, Copy } from "lucide-react";
 import * as React from "react";
 
@@ -26,13 +25,6 @@ export function CopyButton({
     return () => clearTimeout(timeout);
   }, [hasCopied]);
 
-  const render = (
-    <button type="button">
-      <span className="sr-only">Copy</span>
-      {hasCopied ? <Check className="text-green-800" /> : <Copy />}
-    </button>
-  );
-
   const copy = () => {
     try {
       navigator.clipboard.writeText(value);
@@ -42,34 +34,34 @@ export function CopyButton({
     }
   };
 
-  const comp = useRender({
-    defaultTagName: "button",
-    props: mergeProps<"button">(
-      {
-        className: cn(
-          "[&_svg:not([class*='size-'])]:size-4.5",
-          "opacity-70 hover:opacity-100 disabled:opacity-50!",
-          className,
-        ),
-        disabled,
-        onClick: copy,
-      },
-      props,
-    ),
-    render: disabled ? render : <TooltipTrigger render={render} />,
-    state: {
-      slot: "copy-button",
-      copied: hasCopied,
-    },
-  });
-
-  if (disabled) {
-    return comp;
-  }
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    props.onClick?.(event);
+    if (event.defaultPrevented) return;
+    copy();
+  };
 
   return (
-    <Tooltip>
-      {comp}
+    <Tooltip disabled={disabled}>
+      <TooltipTrigger
+        render={
+          <button
+            type="button"
+            className={cn(
+              "[&_svg:not([class*='size-'])]:size-4.5 p-1.5",
+              "opacity-70 hover:opacity-100 disabled:opacity-50!",
+              className,
+            )}
+            data-slot="copy-button"
+            data-copied={hasCopied ? "true" : undefined}
+            disabled={disabled}
+            onClick={handleClick}
+            {...props}
+          >
+            <span className="sr-only">Copy</span>
+            {hasCopied ? <Check className="text-green-800" /> : <Copy />}
+          </button>
+        }
+      />
       <TooltipContent>{hasCopied ? "Copied" : tooltip}</TooltipContent>
     </Tooltip>
   );

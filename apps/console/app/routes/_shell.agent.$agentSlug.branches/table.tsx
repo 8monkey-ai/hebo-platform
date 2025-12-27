@@ -60,7 +60,7 @@ export default function BranchesTable({ agent }: BranchesTableProps) {
               return (
                 <TableRow key={branch.slug}>
                   <TableCell className="align-middle">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <Badge variant="outline">
                         <span className="text-ellipsis-start">
                           {branch.slug}
