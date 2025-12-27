@@ -91,7 +91,7 @@ export function CreateApiKeyDialog() {
                 <FieldLabel>Description</FieldLabel>
                 <FieldControl render={
                   <Input placeholder="API key description" autoComplete="off" />
-                  } />
+                } />
                 <FieldError />
               </Field>
               <Field name={fields.expiresIn.name}>
@@ -103,7 +103,7 @@ export function CreateApiKeyDialog() {
                       label: option.label,
                     }))}
                   />
-                  } />
+                } />
                 <FieldError />
               </Field>
             </FieldGroup>

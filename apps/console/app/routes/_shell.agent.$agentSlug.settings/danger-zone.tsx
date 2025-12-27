@@ -89,7 +89,7 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
                     </FieldLabel>
                     <FieldControl render={
                       <Input autoComplete="off" />
-                      } />
+                    } />
                     <FieldError />
                   </Field>
                 </div>

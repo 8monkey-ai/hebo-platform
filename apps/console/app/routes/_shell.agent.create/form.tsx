@@ -67,7 +67,7 @@ export function AgentCreateForm() {
               <FieldContent>
                 <FieldControl render={
                   <Input placeholder="Set an agent name" autoComplete="off" />
-                  } />
+                } />
                 <FieldError />
               </FieldContent>
             </Field>
@@ -77,7 +77,7 @@ export function AgentCreateForm() {
               <FieldContent>
                 <FieldControl render={
                   <ModelSelector models={models} />
-                  } />
+                } />
                 <FieldError />
               </FieldContent>
             </Field>

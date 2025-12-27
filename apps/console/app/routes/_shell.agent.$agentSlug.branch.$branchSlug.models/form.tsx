@@ -212,7 +212,7 @@ function ModelCard(props: {
                 <FieldLabel>Alias</FieldLabel>
                 <FieldControl render={
                   <Input placeholder="Set alias name" autoComplete="off" />
-                  } /> 
+                } /> 
                 <FieldError />
               </Field>
 
@@ -220,7 +220,7 @@ function ModelCard(props: {
                 <FieldLabel>Type</FieldLabel>
                 <FieldControl render={
                   <ModelSelector models={supportedModels} />
-                  } />
+                } />
                 <FieldError />
               </Field>
             </FieldGroup>

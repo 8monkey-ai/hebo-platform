@@ -66,7 +66,7 @@ export function ClearCredentialsDialog({provider, ...props}: ClearCredentialsDia
           <Field name={fields.providerSlug.name} className="hidden">
             <FieldControl render={
               <input type="hidden" />
-              } />
+            } />
           </Field>
 
           <DialogFooter>

@@ -102,7 +102,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
                     }))
                   }
                 />
-                } />
+              } />
               <FieldError />
             </Field>
           </FieldGroup>

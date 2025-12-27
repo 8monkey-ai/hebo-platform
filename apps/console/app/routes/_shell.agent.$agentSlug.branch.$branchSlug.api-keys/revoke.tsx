@@ -68,7 +68,7 @@ export function RevokeApiKeyDialog({apiKey, ...props}: RevokeApiKeyDialogProps) 
           <Field name={fields.apiKeyId.name} className="hidden">
             <FieldControl render={
               <input type="hidden" />
-              } />
+            } />
           </Field>
 
           <DialogFooter>

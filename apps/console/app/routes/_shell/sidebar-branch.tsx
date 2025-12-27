@@ -50,7 +50,7 @@ export function BranchSelect({
               </span>
               <ChevronDown className="ml-auto" aria-hidden="true" />
             </SidebarMenuButton>
-          }/>
+          } />
           <DropdownMenuContent
             className="min-w-42"
             align="start"

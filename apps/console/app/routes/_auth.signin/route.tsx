@@ -19,16 +19,15 @@ export default function SignIn() {
           className="absolute top-5 left-6"
           nativeButton={false}
           render={
-          <a
-            href="https://docs.hebo.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <BookOpen />
-            <span>Docs</span>
-          </a>
-          }
-          />
+            <a
+              href="https://docs.hebo.ai"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <BookOpen />
+              <span>Docs</span>
+            </a>
+        } />
 
         <div className="space-y-5 px-19 py-30 text-xl">
           <div className="flex items-center gap-2 text-3xl font-semibold">
