@@ -52,10 +52,7 @@ export function RevokeApiKeyDialog({apiKey, ...props}: RevokeApiKeyDialogProps) 
   return (
     <Dialog {...props}>
       <DialogContent>
-        <FormControl
-          form={form}
-          as={fetcher.Form}
-        >
+        <FormControl form={form} as={fetcher.Form}>
           <DialogHeader>
             <DialogTitle>Revoke API key</DialogTitle>
             <DialogDescription>

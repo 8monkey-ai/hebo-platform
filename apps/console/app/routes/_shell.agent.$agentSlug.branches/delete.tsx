@@ -46,10 +46,7 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
   return (
     <Dialog {...props}>
       <DialogContent>
-        <FormControl
-          form={form}
-          as={fetcher.Form}
-        >
+        <FormControl form={form} as={fetcher.Form}>
           <DialogHeader>
             <DialogTitle>Delete Branch</DialogTitle>
             <DialogDescription>

@@ -52,10 +52,7 @@ export function ClearCredentialsDialog({provider, ...props}: ClearCredentialsDia
   return (
     <Dialog {...props}>
       <DialogContent>
-        <FormControl
-          form={form}
-          as={fetcher.Form}
-        >
+        <FormControl form={form} as={fetcher.Form}>
           <DialogHeader>
             <DialogTitle>Clear {provider?.name} Credentials</DialogTitle>
             <DialogDescription>Are you sure you want to clear the credentials? </DialogDescription>

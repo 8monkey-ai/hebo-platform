@@ -77,12 +77,9 @@ export function CreateApiKeyDialog() {
           <DialogTrigger render={
             <Button variant="outline" type="button">+ Create API Key</Button>
           } />
-      </div>
-      <DialogContent>
-        <FormControl
-          form={form}
-          as={fetcher.Form}
-        >
+        </div>
+        <DialogContent>
+          <FormControl form={form} as={fetcher.Form}>
             <DialogHeader>
               <DialogTitle>Create API key</DialogTitle>
               <DialogDescription>

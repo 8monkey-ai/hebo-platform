@@ -50,10 +50,7 @@ export function AgentCreateForm() {
   useFormErrorToast(form.allErrors);
 
   return (
-    <FormControl
-      form={form}
-      as={Form}
-    >
+    <FormControl form={form} as={Form}>
       <Card className="sm:max-w-lg min-w-0 w-full ring-0 shadow-none bg-transparent">
 
         <CardHeader>

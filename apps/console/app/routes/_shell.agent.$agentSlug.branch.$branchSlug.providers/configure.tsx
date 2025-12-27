@@ -87,10 +87,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
   return (
     <Dialog {...props}>
       <DialogContent className="sm:max-w-lg">
-        <FormControl
-          form={form}
-          as={fetcher.Form}
-        >
+        <FormControl form={form} as={fetcher.Form}>
           <DialogHeader>
             <DialogTitle>Configure {provider?.name} Credentials</DialogTitle>
             <DialogDescription>Learn how to retrieve the credentials in our documentation.</DialogDescription>

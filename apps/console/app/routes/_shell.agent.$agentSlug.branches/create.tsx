@@ -70,10 +70,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
         } />
       </div>
       <DialogContent className="sm:max-w-lg">
-        <FormControl
-          form={form}
-          as={fetcher.Form}
-        >
+        <FormControl form={form} as={fetcher.Form}>
           <DialogHeader>
             <DialogTitle>Create Branch</DialogTitle>
             <DialogDescription>

@@ -65,10 +65,7 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
             } />
 
             <DialogContent>
-              <FormControl
-                form={form}
-                as={Form}
-              >
+              <FormControl form={form} as={Form}>
                 <DialogHeader>
                   <DialogTitle>Delete Agent</DialogTitle>
                   <DialogDescription>
