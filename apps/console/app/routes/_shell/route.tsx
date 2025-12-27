@@ -3,7 +3,6 @@ import {
   Outlet,
   unstable_useRoute as useRoute,
   useLocation,
-  useNavigation,
 } from "react-router";
 import { useRef, useEffect } from "react";
 import { Toaster } from "sonner";
