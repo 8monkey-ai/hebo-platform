@@ -169,10 +169,17 @@ function ModelCard(props: {
 
   const aliasPath = [agentSlug, branchSlug, model.getFieldset().alias.value || "alias"].join("/");
 
+  const cardRef = useRef<HTMLDivElement>(null); 
+  useEffect(() => {
+    if (isExpanded) cardRef.current?.focus();
+  }, [isExpanded]);
+
   return (
-    <Collapsible open={isExpanded} onOpenChange={onOpenChange}>
+    <Collapsible 
+      open={isExpanded}
+      onOpenChange={onOpenChange}>
       <Card size="sm">
-        <CardHeader className="grid gap-4 min-w-0 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
+        <CardHeader className="grid gap-4 min-w-0 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center focus:outline-none focus:ring-2 focus:ring-ring/40 focus:ring-offset-2 focus:ring-offset-background">
           <div className="flex min-w-0 flex-col gap-2">
             <span className="text-xs uppercase text-muted-foreground">Alias path</span>
             <div className="inline-flex gap-2 items-center">
@@ -206,7 +213,7 @@ function ModelCard(props: {
 
           <Separator />
 
-          <CardContent className="flex flex-col gap-4 my-3">
+          <CardContent ref={cardRef} tabIndex={-1} className="flex flex-col gap-4 my-3">
             <FieldGroup className="grid gap-4 grid-cols-1 md:grid-cols-2">
               <Field name={model.getFieldset().alias.name}>
                 <FieldLabel>Alias</FieldLabel>
