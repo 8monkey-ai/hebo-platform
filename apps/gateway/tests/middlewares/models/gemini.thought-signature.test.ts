@@ -50,7 +50,7 @@ describe("Gemini Adapter transformPrompt", () => {
       ],
     },
     {
-      name: "does NOT inject when openaiCompatible.thoughtSignature is present",
+      name: "does NOT inject when thoughtSignature is present",
       model: gemini3ProAdapter,
       inputPrompt: [
         {
@@ -62,9 +62,7 @@ describe("Gemini Adapter transformPrompt", () => {
               toolName: "get_time",
               args: { timezone: "UTC" },
               providerOptions: {
-                openaiCompatible: {
-                  thought_signature: "existing_signature",
-                },
+                thought_signature: "existing_signature",
               },
             },
           ],

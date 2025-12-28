@@ -4,6 +4,7 @@ import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible
 
 import { ModelAdapterBase } from "./model";
 
+import type { LanguageModelV2Prompt } from "@ai-sdk/provider";
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export abstract class GeminiModelAdapter extends ModelAdapterBase {
@@ -87,39 +88,27 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
 }
 
 export abstract class Gemini3ModelAdapter extends GeminiModelAdapter {
-  transformPrompt(prompt: any): any {
-    return prompt.map((message: any) => {
+  transformPrompt(prompt: LanguageModelV2Prompt): LanguageModelV2Prompt {
+    return prompt.map((message) => {
       if (message.role === "assistant" && Array.isArray(message.content)) {
         let hasInjected = false;
         return {
           ...message,
-          content: message.content.map((part: any) => {
+          content: message.content.map((part) => {
             if (part.type === "tool-call") {
               if (hasInjected) {
                 return part;
               }
-
-              const currentProviderOptions =
-                (part as any).providerOptions || {};
-              const existingSignature =
-                currentProviderOptions?.openaiCompatible?.thought_signature;
-              const thoughtSignatureToInject =
-                existingSignature || "context_engineering_is_the_way_to_go";
-
+              const thoughtSignature =
+                part.providerOptions?.thought_signature ||
+                "context_engineering_is_the_way_to_go";
               hasInjected = true;
-
-              const mutableProviderOptions = { ...currentProviderOptions };
-              delete mutableProviderOptions.openaiCompatible;
-              const { google: existingGoogleOptions, ...restProviderOptions } =
-                mutableProviderOptions;
 
               return {
                 ...part,
                 providerOptions: {
-                  ...restProviderOptions,
                   google: {
-                    ...existingGoogleOptions,
-                    thoughtSignature: thoughtSignatureToInject,
+                    thoughtSignature,
                   },
                 },
               };

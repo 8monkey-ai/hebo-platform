@@ -22,6 +22,7 @@
     "@ai-sdk/cohere": "^2.0.19",
     "@ai-sdk/google-vertex": "^3.0.51",
     "@ai-sdk/groq": "^2.0.28",
+    "@ai-sdk/provider": "^3.0.0",
     "@ai-sdk/provider-utils": "^3.0.19",
     "@aws-sdk/client-bedrock": "^3.920.0",
     "@aws-sdk/client-sts": "^3.921.0",
