@@ -1,5 +1,6 @@
 import { t, type Static } from "elysia";
 
+import type { LanguageModelV3Prompt } from "@ai-sdk/provider";
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export const supportedModel = t.Object({
@@ -17,7 +18,7 @@ export type SupportedModel = Static<typeof supportedModel>;
 
 export interface ModelAdapter extends SupportedModel {
   transformOptions(options: ProviderOptions): ProviderOptions;
-  transformPrompt(prompt: any): any;
+  transformPrompt(prompt: LanguageModelV3Prompt): LanguageModelV3Prompt;
 }
 
 export abstract class ModelAdapterBase implements ModelAdapter {
@@ -36,7 +37,7 @@ export abstract class ModelAdapterBase implements ModelAdapter {
     return options;
   }
 
-  transformPrompt(prompt: any): any {
+  transformPrompt(prompt: LanguageModelV3Prompt): LanguageModelV3Prompt {
     return prompt;
   }
 }
