@@ -129,27 +129,29 @@ function FieldControl({ children, ...props }: FieldControlProps) {
 type FormControlProps = {
   form: FormMetadata<any, any>;
   as: React.ElementType;
-} & React.ComponentPropsWithoutRef<"form">;
+} & React.ComponentProps<"form">;
 
-export const FormControl = React.forwardRef<HTMLFormElement, FormControlProps>(
-  function FormControl({ form, as, children, ...props }, ref) {
-    const Comp = as;
+export function FormControl({
+  form,
+  as,
+  children,
+  ...props
+}: FormControlProps) {
+  const Comp = as;
 
-    return (
-      <FormProvider context={form.context}>
-        <Comp
-          ref={ref}
-          method="post"
-          className="contents"
-          {...getFormProps(form)}
-          {...props}
-        >
-          {children}
-        </Comp>
-      </FormProvider>
-    );
-  },
-);
+  return (
+    <FormProvider context={form.context}>
+      <Comp
+        method="post"
+        className="contents"
+        {...getFormProps(form)}
+        {...props}
+      >
+        {children}
+      </Comp>
+    </FormProvider>
+  );
+}
 
 export {
   Field,
