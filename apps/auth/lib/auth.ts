@@ -6,13 +6,13 @@ import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import { prisma } from "../prisma/client";
 import { sendVerificationOtpEmail } from "./email/send-verification-otp";
-import { authBaseUrl, isRemote, trustedOrigins } from "./env";
+import { isRemote, trustedOrigins } from "./env";
 
 // Set to the eTLD+1 (e.g., "hebo.ai") so auth cookies flow to api/gateway.
 const cookieDomain = isRemote ? "hebo.ai" : undefined;
 
 export const auth = betterAuth({
-  baseURL: authBaseUrl,
+  baseURL: process.env.AUTH_URL || `http://localhost:3000`,
   basePath: "/v1",
   advanced: {
     useSecureCookies: isRemote,
