@@ -99,7 +99,7 @@ export function AgentSelect({
               <DropdownMenuSeparator />
               <DropdownMenuItem className="gap-2 p-2" render={
                 <Link to="/agent/create" aria-label="Create agent" viewTransition>
-                  <Plus className="size-4" aria-hidden="true" />
+                  <Plus className="size-4 text-muted-foreground" aria-hidden="true" />
                   <span className="text-muted-foreground font-medium">
                     Create Agent
                   </span>

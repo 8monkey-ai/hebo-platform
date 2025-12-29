@@ -1,7 +1,7 @@
 import { Form, useActionData, useNavigation } from "react-router";
 import { useSnapshot } from "valtio";
 import { z } from "zod";
-import { useForm, getFormProps } from "@conform-to/react";
+import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -15,10 +15,13 @@ import {
 } from "@hebo/shared-ui/components/Card";
 import {
   FormControl,
-  FormField,
-  FormLabel,
-  FormMessage,
-} from "@hebo/shared-ui/components/Form";
+  FieldControl,
+  Field,
+  FieldLabel,
+  FieldError,
+  FieldGroup,
+  FieldContent,
+} from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 
 import { ModelSelector } from "~console/components/ui/ModelSelector";
@@ -34,10 +37,11 @@ export type AgentCreateFormValues = z.infer<typeof AgentCreateSchema>;
 
 export function AgentCreateForm() {
   const { models } = useSnapshot(shellStore);
+  const navigation = useNavigation();
 
   const lastResult = useActionData();
   const [form, fields] = useForm<AgentCreateFormValues>({
-    lastResult,
+    lastResult: navigation.state === "idle" ? lastResult : undefined,
     constraint: getZodConstraint(AgentCreateSchema),
     defaultValue: {
       defaultModel: Object.keys(models ?? {})[0],
@@ -45,10 +49,8 @@ export function AgentCreateForm() {
   });
   useFormErrorToast(form.allErrors);
 
-  const navigation = useNavigation();
-
   return (
-    <Form method="post" {...getFormProps(form)} className="contents">
+    <FormControl form={form} as={Form}>
       <Card className="sm:max-w-lg min-w-0 w-full ring-0 shadow-none bg-transparent">
 
         <CardHeader>
@@ -58,22 +60,28 @@ export function AgentCreateForm() {
           </CardDescription>
         </CardHeader>
         
-        <CardContent className="sm:grid sm:grid-cols-[auto_1fr] sm:gap-y-2">
-          <FormField field={fields.agentName} className="contents">
-            <FormLabel className="sm:w-32">Agent Name</FormLabel>
-            <FormControl render={
-              <Input placeholder="Set an agent name" autoComplete="off" />
-              } />
-            <FormMessage className="sm:col-start-2" />
-          </FormField>
+        <CardContent>
+          <FieldGroup>
+            <Field name={fields.agentName.name} orientation="responsive">
+              <FieldLabel>Agent Name</FieldLabel>
+              <FieldContent>
+                <FieldControl>
+                  <Input placeholder="Set an agent name" autoComplete="off" />
+                </FieldControl>
+                <FieldError />
+              </FieldContent>
+            </Field>
 
-          <FormField field={fields.defaultModel} className="contents">
-            <FormLabel className="sm:w-32">Default Model</FormLabel>
-            <FormControl render={
-              <ModelSelector models={models} />
-              } />
-            <FormMessage className="sm:col-start-2" />
-          </FormField>
+            <Field name={fields.defaultModel.name} orientation="responsive">
+              <FieldLabel>Default Model</FieldLabel>
+              <FieldContent>
+                <FieldControl>
+                  <ModelSelector models={models} />
+                </FieldControl>
+                <FieldError />
+              </FieldContent>
+            </Field>
+          </FieldGroup>
         </CardContent>
 
         <CardFooter className="flex justify-end">
@@ -86,6 +94,6 @@ export function AgentCreateForm() {
         </CardFooter>
 
       </Card>
-    </Form>
+    </FormControl>
   );
 }

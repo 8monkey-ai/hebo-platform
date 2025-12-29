@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@hebo/shared-ui/components/Dialog";
-import { FormControl, FormField, FormLabel, FormMessage } from "@hebo/shared-ui/components/Form";
+import { FormControl, FieldControl, Field, FieldLabel, FieldError, FieldGroup } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Select } from "@hebo/shared-ui/components/Select";
 
@@ -42,7 +42,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
 
   const fetcher = useFetcher();
   const [form, fields] = useForm<BranchCreateFormValues>({
-    lastResult: fetcher.data,
+    lastResult: fetcher.state === "idle" ? fetcher.data : undefined,
     constraint: getZodConstraint(BranchCreateSchema),
     defaultValue: {
       sourceBranchSlug: branches[0].slug,
@@ -70,25 +70,25 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
         } />
       </div>
       <DialogContent className="sm:max-w-lg">
-        <fetcher.Form method="post" {...getFormProps(form)} className="contents">
+        <FormControl form={form} as={fetcher.Form}>
           <DialogHeader>
             <DialogTitle>Create Branch</DialogTitle>
             <DialogDescription>
               Set a name and choose a source branch.
             </DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col gap-4">
-            <FormField field={fields.branchName}>
-              <FormLabel>Branch name</FormLabel>
-              <FormControl render={
+          <FieldGroup>
+            <Field name={fields.branchName.name}>
+              <FieldLabel>Branch name</FieldLabel>
+              <FieldControl>
                 <Input autoComplete="off" placeholder="Set a branch name" />
-              } />
-              <FormMessage />
-            </FormField>
+              </FieldControl>
+              <FieldError />
+            </Field>
 
-            <FormField field={fields.sourceBranchSlug}>
-              <FormLabel>Source</FormLabel>
-              <FormControl render={
+            <Field name={fields.sourceBranchSlug.name}>
+              <FieldLabel>Source</FieldLabel>
+              <FieldControl>
                 <Select
                   items={
                     branches.map(branch => ({
@@ -102,10 +102,10 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
                     }))
                   }
                 />
-                } />
-              <FormMessage />
-            </FormField>
-          </div>
+              </FieldControl>
+              <FieldError />
+            </Field>
+          </FieldGroup>
           <DialogFooter>
             <DialogClose render={
               <Button type="button" variant="ghost">
@@ -117,11 +117,11 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
               name="intent"
               value="create"
               isLoading={fetcher.state !== "idle"}
-            >
-              Create
-            </Button>
+              >
+                Create
+              </Button>
           </DialogFooter>
-        </fetcher.Form>
+        </FormControl>
       </DialogContent>
     </Dialog>
   );

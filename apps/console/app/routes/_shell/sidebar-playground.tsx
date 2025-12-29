@@ -22,5 +22,5 @@ export function PlaygroundSidebar({ activeAgent, activeBranch }: { activeAgent?:
     },
   }));
 
-  return <Chat name={activeAgent?.name} modelsConfig={modelsConfig} mode="full" />;
+  return <Chat key={`pg-${activeAgent?.name}/${activeBranch?.slug}`} name={activeAgent?.name} modelsConfig={modelsConfig} mode="full" />;
 }

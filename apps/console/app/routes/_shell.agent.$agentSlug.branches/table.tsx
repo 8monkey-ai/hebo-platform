@@ -35,8 +35,7 @@ type BranchesTableProps = {
 };
 
 export default function BranchesTable({ agent }: BranchesTableProps) {
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [selectedBranchSlug, setSelectedBranchSlug] = useState("");
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, branchSlug: ""});
 
   return (
     <div>
@@ -61,7 +60,7 @@ export default function BranchesTable({ agent }: BranchesTableProps) {
               return (
                 <TableRow key={branch.slug}>
                   <TableCell className="align-middle">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
                       <Badge variant="outline">
                         <span className="text-ellipsis-start">
                           {branch.slug}
@@ -84,8 +83,7 @@ export default function BranchesTable({ agent }: BranchesTableProps) {
                         <DropdownMenuItem
                           className="text-destructive"
                           onClick={() => {
-                            setSelectedBranchSlug(branch.slug);
-                            setDeleteOpen(true);
+                            setDeleteDialog({ open: true, branchSlug: branch.slug })
                           }}
                         >
                           <Trash aria-hidden="true" />
@@ -102,11 +100,9 @@ export default function BranchesTable({ agent }: BranchesTableProps) {
       </Table>
 
       <DeleteBranchDialog
-        open={deleteOpen}
-        branchSlug={selectedBranchSlug}
-        onOpenChange={(open) => {
-          setDeleteOpen(open);
-          if (!open) setSelectedBranchSlug("");
+        {...deleteDialog}
+        onOpenChange={(open: boolean) => {
+          if (!open) setDeleteDialog({ open: false, branchSlug: ""});
         }}
       />
     </div>

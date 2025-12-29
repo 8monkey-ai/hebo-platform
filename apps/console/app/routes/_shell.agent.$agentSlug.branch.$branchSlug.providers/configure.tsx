@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@hebo/shared-ui/components/Dialog";
-import { FormControl, FormField, FormLabel, FormMessage } from "@hebo/shared-ui/components/Form";
+import { FormControl, FieldControl, Field, FieldLabel, FieldError, FieldGroup } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 
 import { useFormErrorToast } from "~console/lib/errors";
@@ -51,36 +51,33 @@ type ProviderConfigureFormValues = z.infer<typeof ProviderConfigureSchema>;
 
 
 type ConfigureProviderDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  provider?: { name: string; slug: string; };
-};
+  provider?: { name: string; slug: string; config: Record<string, unknown>; };
+} & React.ComponentProps<typeof Dialog>;
 
-export function ConfigureProviderDialog({ open, onOpenChange, provider }: ConfigureProviderDialogProps) {
+export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
   const fetcher = useFetcher();
 
   const [form, fields] = useForm<ProviderConfigureFormValues>({
     id: provider?.slug,
-    lastResult: fetcher.data?.submission,
+    lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
     constraint: getZodConstraint(ProviderConfigureSchema),
     defaultValue: { 
-      slug: provider?.slug,
+      ...provider
     }
   });
   useFormErrorToast(form.allErrors);
   
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
-      onOpenChange(false);
+      props.onOpenChange(false);
     }
   }, [fetcher.state, form.status]);
 
   const providerFields = Object.fromEntries(
     ProviderConfigureSchema.options.flatMap((opt) => {
-      const slugEnum = opt.shape.slug as z.ZodEnum<any>;
-      const configSchema = opt.shape.config as z.ZodObject<any>;
-      const fields = Object.keys(configSchema.shape);
-      return slugEnum.options.map((value: string) => [value, fields]);
+      const slugEnum = opt.shape.slug;
+      const configKeys = Object.keys(opt.shape.config.shape);
+      return slugEnum.options.map((slug) => [slug, configKeys]);
     })
   );
     
@@ -88,38 +85,34 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
   const activeKeys = provider ? providerFields[provider.slug] ?? [] : [];
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog {...props}>
       <DialogContent className="sm:max-w-lg">
-        <fetcher.Form
-          method="post"
-          {...getFormProps(form)}
-          className="contents"
-        >
+        <FormControl form={form} as={fetcher.Form}>
           <DialogHeader>
             <DialogTitle>Configure {provider?.name} Credentials</DialogTitle>
             <DialogDescription>Learn how to retrieve the credentials in our documentation.</DialogDescription>
           </DialogHeader>
 
-          <div className="flex flex-col gap-4">
-            <FormField field={fields.slug} className="hidden">
-              <FormControl render={
-                <input type="hidden" value={provider?.slug} />
-                } />
-            </FormField>
+          <FieldGroup>
+            <Field name={fields.slug.name} className="hidden">
+              <FieldControl>
+                <input type="hidden" />
+              </FieldControl>
+            </Field>
 
             {(activeKeys as (keyof typeof configFieldset)[]).map((key) => {
               const field = configFieldset[key];
               return (
-                <FormField key={key} field={field}>
-                  <FormLabel>{labelize(key)}</FormLabel>
-                  <FormControl render={
+                <Field key={key} name={field.name}>
+                  <FieldLabel>{labelize(key)}</FieldLabel>
+                  <FieldControl>
                     <Input placeholder={`Set ${labelize(key).toLowerCase()}`} autoComplete="off" />
-                    } />
-                  <FormMessage />
-                </FormField>
+                  </FieldControl>
+                  <FieldError />
+                </Field>
               )
             })}
-          </div>
+          </FieldGroup>
 
           <div className="text-sm">
             The configured provider will only handle requests after you enable it for a specific model. 
@@ -128,11 +121,11 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
           <DialogFooter>
             <DialogClose render={
               <Button 
-                  type="button"
-                  variant="ghost"
-                  onClick={() => onOpenChange(false)}
-                  >
-                  Cancel
+                type="button"
+                variant="ghost"
+                onClick={() => props.onOpenChange(false)}
+                >
+                Cancel
               </Button>
             } />
             <Button
@@ -144,7 +137,7 @@ export function ConfigureProviderDialog({ open, onOpenChange, provider }: Config
                 Set
             </Button>
           </DialogFooter>
-        </fetcher.Form>
+        </FormControl>
       </DialogContent>
     </Dialog>
   );

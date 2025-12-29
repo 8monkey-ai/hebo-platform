@@ -1,5 +1,9 @@
 import { XCircle, SquareChevronRight } from "lucide-react";
-import { Outlet, unstable_useRoute as useRoute, useLocation } from "react-router";
+import {
+  Outlet,
+  unstable_useRoute as useRoute,
+  useLocation,
+} from "react-router";
 import { useRef, useEffect } from "react";
 import { Toaster } from "sonner";
 import { useSnapshot } from "valtio";
@@ -79,7 +83,7 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
   const mainRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     mainRef.current?.focus();
-  }, [location]);
+  }, [location.pathname]);
 
   // FUTURE replace with session storage
   const leftSidebarDefaultOpen = getCookie("left_sidebar_state") === "true";

@@ -42,7 +42,7 @@ export function CodeBlock({
       {...props}
     >
       {title ? (
-        <div className="bg-accent flex items-center justify-between gap-1 p-2">
+        <div className="bg-accent flex items-center justify-between gap-1 py-0.5 pr-1 pl-2">
           <span className="text-foreground text-sm font-medium">{title}</span>
           <CopyButton value={getNodeText(children)} className="" />
         </div>
@@ -61,9 +61,33 @@ export function CodeBlock({
 
 type CodeGroupProps = React.ComponentProps<typeof Tabs>;
 
+const EVT = "codegroup:tab:change";
+
 export function CodeGroup({ className, ...props }: CodeGroupProps) {
+  const id = React.useId();
+  const [value, setValue] = React.useState(props.defaultValue ?? "");
+
+  React.useEffect(() => {
+    const onChange = (e: Event) => {
+      const next = (e as CustomEvent<string>).detail;
+      const has = !!document.querySelector(
+        `#${CSS.escape(id)} [data-slot="tabs-trigger"][data-value="${CSS.escape(next)}"]`,
+      );
+      if (has) setValue(next);
+    };
+
+    globalThis.addEventListener(EVT, onChange);
+    return () => globalThis.removeEventListener(EVT, onChange);
+  }, []);
+
   return (
     <Tabs
+      id={id}
+      value={value}
+      onValueChange={(next) => {
+        setValue(next);
+        globalThis.dispatchEvent(new CustomEvent(EVT, { detail: next }));
+      }}
       className={cn(
         "relative flex h-full w-full min-h-0 min-w-0 gap-0",
         "bg-accent overflow-hidden rounded-lg",
@@ -72,7 +96,6 @@ export function CodeGroup({ className, ...props }: CodeGroupProps) {
         "**:data-[slot=tabs-content]:min-h-0",
         "**:data-[slot=tabs-content]:overflow-hidden",
         "**:data-[slot=code-block]:static",
-        "**:data-[slot=copy-button]:p-2.5",
         "**:data-[slot=copy-button]:bg-transparent",
         className,
       )}
@@ -92,22 +115,31 @@ export function CodeGroupMdx({ children }: CodeGroupMdxProps) {
     children,
   ) as React.ReactElement<CodeBlockProps>[];
 
+  const items = blocks.map((block, index) => {
+    const inner = block.props?.children as
+      | React.ReactElement<CodeBlockProps>
+      | undefined;
+    const title = inner?.props?.title ?? `Code ${index + 1}`;
+    return {
+      title,
+      value: String(title),
+      content: inner?.props?.children,
+    };
+  });
+
   return (
-    <CodeGroup defaultValue={"0"}>
+    <CodeGroup defaultValue={items[0]?.value}>
       <TabsList>
-        {blocks.map((block, index) => (
-          <TabsTrigger key={index} value={String(index)}>
-            {(block.props?.children as React.ReactElement<CodeBlockProps>)
-              ?.props?.title ?? `Code ${index + 1}`}
+        {items.map(({ title, value }) => (
+          <TabsTrigger key={value} value={value} data-value={value}>
+            {title}
           </TabsTrigger>
         ))}
       </TabsList>
-      {blocks.map((block, index) => (
-        <TabsContent key={index} value={String(index)}>
-          <CodeBlock>
-            {(block.props?.children as React.ReactElement<CodeBlockProps>)
-              ?.props?.children ?? "no children"}
-          </CodeBlock>
+
+      {items.map(({ value, content }) => (
+        <TabsContent key={value} value={value}>
+          <CodeBlock>{content}</CodeBlock>
         </TabsContent>
       ))}
     </CodeGroup>

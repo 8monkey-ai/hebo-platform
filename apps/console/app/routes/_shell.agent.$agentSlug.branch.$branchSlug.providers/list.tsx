@@ -1,4 +1,4 @@
-import { Eraser, HelpCircle, MoreVertical } from "lucide-react";
+import { Eraser, FileSliders, HelpCircle, MoreVertical } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -18,13 +18,13 @@ import { ClearCredentialsDialog } from "./clear";
 import { formatDateTime } from "~console/lib/utils";
 import { Avatar } from "@hebo/shared-ui/components/Avatar";
 
+
 const ProviderIcons = {
   bedrock: Bedrock,
   cohere: Cohere,
   vertex: Vertex,
   groq: Groq,
 } as const;
-
 
 type Provider = {
   slug: string;
@@ -34,9 +34,15 @@ type Provider = {
 };
 
 export function ProvidersList({ providers }: { providers: Provider[] }) {
-    const [configureOpen, setConfigureOpen] = useState(false);
-    const [clearOpen, setClearOpen] = useState(false);
-    const [selectedProvider, setSelectedProvider] = useState<Provider | undefined>(undefined);
+    const [configureDialog, setConfigureDialog] = useState({
+      open: false,
+      provider: undefined as Provider | undefined
+    });
+
+    const [clearDialog, setClearDialog] = useState({
+      open: false,
+      provider: undefined as Provider | undefined
+    });
 
     return (
         <div className="flex flex-col gap-2">
@@ -59,23 +65,21 @@ export function ProvidersList({ providers }: { providers: Provider[] }) {
                                 <>
                                     Last updated {formatDateTime(provider.updated_at ?? new Date(0))}
                                     <DropdownMenu>
-                                        <DropdownMenuTrigger render={
+                                        <DropdownMenuTrigger className="size-4" render={
                                             <Button
-                                            variant="ghost"
-                                            size="icon"
-                                            aria-label="Provider actions"
-                                            >
-                                                <MoreVertical className="size-4" aria-hidden="true" />
+                                                variant="ghost"
+                                                size="icon"
+                                                aria-label="Provider actions"
+                                                >
+                                                <MoreVertical aria-hidden="true" />
                                             </Button>
                                         } />
-                                        <DropdownMenuContent className="min-w-44" align="end">
-                                            <DropdownMenuItem
-                                                className="text-destructive"
-                                                onClick={() => {
-                                                    setSelectedProvider(provider);
-                                                    setClearOpen(true);
-                                                }}
-                                                >
+                                            <DropdownMenuContent className="min-w-44" align="end">
+                                            <DropdownMenuItem onClick={() => setConfigureDialog({ open: true, provider })}>
+                                                <FileSliders />
+                                                Configure
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem onClick={() => setClearDialog({ open: true, provider })} className="text-destructive">
                                                 <Eraser />
                                                 Clear Credentials
                                             </DropdownMenuItem>
@@ -86,10 +90,7 @@ export function ProvidersList({ providers }: { providers: Provider[] }) {
                                 <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => {
-                                        setSelectedProvider(provider);
-                                        setConfigureOpen(true);
-                                    }}
+                                    onClick={() => setConfigureDialog({ open: true, provider })}
                                     >
                                     Configure
                                 </Button>
@@ -100,18 +101,19 @@ export function ProvidersList({ providers }: { providers: Provider[] }) {
             })}
 
             <ConfigureProviderDialog
-                open={configureOpen}
-                provider={selectedProvider}
-                onOpenChange={(open) => {
-                    setConfigureOpen(open);
+                {...configureDialog}
+                onOpenChange={(open: boolean) => {
+                  if (!open) setConfigureDialog(prev => ({...prev, open}))
+                }}
+                onOpenChangeComplete={(open: boolean) => {
+                  if (!open) setConfigureDialog({ open: false, provider: undefined});
                 }}
                 />
 
             <ClearCredentialsDialog
-                open={clearOpen}
-                provider={selectedProvider}
-                onOpenChange={(open) => {
-                    setClearOpen(open);
+                {...clearDialog}
+                onOpenChange={(open: boolean) => {
+                  if (!open) setClearDialog({ open: false, provider: undefined});
                 }}
             />
         </div>
