@@ -1,7 +1,6 @@
 import heboCluster from "./cluster";
 import heboDatabase from "./db";
 import { authSecrets, otelExporterSecrets, isProd } from "./env";
-import heboVpc from "./network";
 
 const authDomain = isProd ? "auth.hebo.ai" : `auth.${$app.stage}.hebo.ai`;
 export const authUrl = `https://${authDomain}`;
@@ -41,29 +40,6 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
   },
   capacity: isProd ? undefined : "spot",
   wait: isProd,
-});
-
-const migrator = new sst.aws.Function("AuthDatabaseMigrator", {
-  handler: "apps/auth/prisma/lambda/migrator.handler",
-  vpc: heboVpc,
-  link: [heboDatabase],
-  copyFiles: [
-    { from: "apps/auth/prisma", to: "./prisma" },
-    { from: "apps/auth/prisma.config.ts", to: "./prisma.config.ts" },
-  ],
-
-  environment: {
-    NODE_EXTRA_CA_CERTS: "/var/runtime/ca-cert.pem",
-    // eslint-disable-next-line sonarjs/publicly-writable-directories -- Lambda /tmp is execution-isolated
-    NPM_CONFIG_CACHE: "/tmp/.npm",
-  },
-  timeout: "300 seconds",
-});
-
-// eslint-disable-next-line sonarjs/constructor-for-side-effects
-new aws.lambda.Invocation("AuthDatabaseMigratorInvocation", {
-  input: Date.now().toString(),
-  functionName: migrator.name,
 });
 
 export default heboAuth;

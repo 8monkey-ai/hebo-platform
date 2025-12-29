@@ -1,20 +1,10 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import { Resource } from "sst";
+
+import { getConnectionString } from "@hebo/shared-api/lib/db/connection";
 
 import { PrismaClient } from "~api/generated/prisma/client";
 import type { ProviderConfig } from "~api/modules/providers/types";
 import { redactProviderConfigValue } from "~api/utils/redact-provider";
-
-export const getConnectionString = () => {
-  try {
-    // @ts-expect-error: HeboDatabase may not be defined
-    const db = Resource.HeboDatabase;
-    return `postgresql://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}?sslmode=verify-full`;
-  } catch {
-    // FUTURE: keep in sync with dev:infra:up script once updated
-    return "postgresql://postgres:password@localhost:5432/local";
-  }
-};
 
 // eslint-disable-next-line unicorn/no-null
 const dbNull = null;
