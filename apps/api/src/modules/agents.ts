@@ -6,9 +6,9 @@ import {
   agentsInputUpdate,
   agentsPlain,
   agentsRelations,
-} from "~api/database/generated/prismabox/agents";
-import { createSlug } from "~api/database/utils/create-slug";
+} from "~api/generated/prismabox/agents";
 import { dbClient } from "~api/middleware/db-client";
+import { createSlug } from "~api/utils/create-slug";
 
 export const agents = t.Composite([agentsPlain, t.Partial(agentsRelations)], {
   additionalProperties: false,

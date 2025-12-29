@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 
-import { createDbClient } from "../../prisma/client";
+import { createDbClient } from "~api/lib/db/client";
 
 // Note: Must be used after authService to ensure userId is set
 export const dbClient = new Elysia({
@@ -13,4 +13,4 @@ export const dbClient = new Elysia({
   })
   .as("scoped");
 
-export { type createDbClient } from "../../prisma/client";
+export { type createDbClient } from "../lib/db/client";

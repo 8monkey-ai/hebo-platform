@@ -3,7 +3,7 @@
 
 generator client {
   provider   = "prisma-client"
-  output     = "./src/generated/prisma"
+  output     = "../src/generated/prisma"
   engineType = "client"
 }
 
@@ -17,7 +17,7 @@ generator prismabox {
   typeboxImportDependencyName = "elysia"
   typeboxImportVariableName   = "t"
   inputModel                  = true
-  output                      = "./src/generated/prismabox"
+  output                      = "../src/generated/prismabox"
   additionalProperties        = false
 }
 

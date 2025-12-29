@@ -1,7 +1,7 @@
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 
-import { getConnectionString } from "../client";
+import { getConnectionString } from "~api/lib/db/client";
 
 export const handler = async () => {
   await promisify(exec)(

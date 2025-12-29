@@ -4,9 +4,9 @@ import {
   branches,
   branchesInputCreate,
   branchesInputUpdate,
-} from "~api/database/generated/prismabox/branches";
-import { createSlug } from "~api/database/utils/create-slug";
+} from "~api/generated/prismabox/branches";
 import { dbClient } from "~api/middleware/db-client";
+import { createSlug } from "~api/utils/create-slug";
 
 import { Models } from "./providers/types";
 

@@ -1,10 +1,9 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Resource } from "sst";
 
+import { PrismaClient } from "~api/generated/prisma/client";
 import type { ProviderConfig } from "~api/modules/providers/types";
-
-import { PrismaClient } from "./src/generated/prisma/client";
-import { redactProviderConfigValue } from "./src/utils/redact-provider";
+import { redactProviderConfigValue } from "~api/utils/redact-provider";
 
 export const getConnectionString = () => {
   try {
@@ -48,15 +47,17 @@ export const createDbClient = (userId: string) => {
 
           if (model === "agents" && args.data.branches?.create) {
             const existing = args.data.branches.create;
-            args.data.branches.create = Array.isArray(existing) ? existing.map((item) => ({
-                ...item,
-                created_by: userId,
-                updated_by: userId,
-              })) : {
-                ...existing,
-                created_by: userId,
-                updated_by: userId,
-              };
+            args.data.branches.create = Array.isArray(existing)
+              ? existing.map((item) => ({
+                  ...item,
+                  created_by: userId,
+                  updated_by: userId,
+                }))
+              : {
+                  ...existing,
+                  created_by: userId,
+                  updated_by: userId,
+                };
           }
           return query(args);
         },

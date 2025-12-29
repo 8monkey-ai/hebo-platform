@@ -4,7 +4,6 @@
     "baseUrl": ".",
     "paths": {
       "~api/*": ["./src/*"],
-      "~api/database/*": ["./prisma/src/*"],
       "~auth": ["../auth/src/index.ts"],
       "~auth/*": ["../auth/src/*"]
     },
