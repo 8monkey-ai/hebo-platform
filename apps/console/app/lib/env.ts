@@ -6,5 +6,4 @@ export const isDevLocal =
   !import.meta.env.VITE_AUTH_URL;
 export const isDev = import.meta.env.MODE === "development" && !isDevLocal;
 
-export const isAuthEnabled =
-  !isDevLocal && Boolean(import.meta.env.VITE_AUTH_URL);
+export const isAuthEnabled = Boolean(import.meta.env.VITE_AUTH_URL);
