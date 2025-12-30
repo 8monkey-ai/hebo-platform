@@ -5,8 +5,8 @@ const SUPPORTED_MODELS = [
   "google/gemini-3-flash-preview",
   "openai/gpt-oss-120b",
   "openai/gpt-oss-20b",
-  "claude/opus-4-5",
-  "cohere/embed-v4",
+  "anthropic/claude-opus-4-5-v1",
+  "cohere/embed-v4.0",
 ];
 
 export const supportedProviders = {
