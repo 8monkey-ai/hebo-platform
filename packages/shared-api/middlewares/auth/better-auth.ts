@@ -1,53 +1,45 @@
 import { type Logger } from "@bogeychan/elysia-logger/types";
-import { bearer } from "@elysiajs/bearer";
+import { createAuthClient } from "better-auth/client";
 import { Elysia } from "elysia";
 
-// TODO: maybe move this to the auth package?
-import { auth } from "../../../../apps/auth/lib/auth";
 import { BadRequestError } from "../../errors";
+
+const AUTH_URL = process.env.AUTH_URL || "http://localhost:3000";
+
+const authClient = createAuthClient({
+  baseURL: new URL("/v1", AUTH_URL).toString(),
+});
 
 export const authServiceBetterAuth = new Elysia({
   name: "authenticate-user-better-auth",
 })
-  .use(bearer())
   .resolve(async (ctx) => {
-    const apiKey = ctx.bearer;
-    const cookies = ctx.request.headers.get("cookie");
     const log = (ctx as unknown as { log: Logger }).log;
 
-    if (apiKey && cookies) {
+    const authorization = ctx.request.headers.get("authorization");
+    const cookie = ctx.request.headers.get("cookie");
+
+    if (authorization && cookie) {
       throw new BadRequestError(
         "Provide exactly one credential: Bearer API Key or JWT Header",
       );
     }
 
-    if (apiKey) {
-      const { key, error } = await auth.api.verifyApiKey({
-        body: { key: apiKey },
-      });
+    const headers = new Headers();
+    if (authorization) headers.set("authorization", authorization);
+    if (cookie) headers.set("cookie", cookie);
 
-      if (key) {
-        return { userId: key.userId } as const;
-      }
+    const { data: session, error } = await authClient.getSession({
+      fetchOptions: {
+        headers,
+      },
+    });
 
-      log.info({ error }, "Better Auth API key validation failed");
+    if (error || !session) {
+      log.info({ error }, "Authentication failed or no credentials provided");
       return { userId: undefined } as const;
     }
 
-    if (cookies) {
-      const session = await auth.api.getSession({
-        headers: ctx.request.headers,
-      });
-
-      if (!session) {
-        log.info("JWT verification failed");
-        return { userId: undefined } as const;
-      }
-
-      return { userId: session.user.id } as const;
-    }
-
-    log.info("No credentials provided");
-    return { userId: undefined } as const;
+    return { userId: session.user.id } as const;
   })
   .as("scoped");

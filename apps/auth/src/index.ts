@@ -6,7 +6,7 @@ import Elysia from "elysia";
 import { corsConfig } from "@hebo/shared-api/middlewares/cors-config";
 import { getOtelConfig } from "@hebo/shared-api/utils/otel";
 
-import { auth } from "../lib/auth";
+import { auth } from "./lib/auth";
 
 const LOG_LEVEL = process.env.LOG_LEVEL ?? "info";
 const PORT = Number(process.env.PORT ?? 3000);

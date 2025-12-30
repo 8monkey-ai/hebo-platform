@@ -5,9 +5,7 @@
     "paths": {
       "~gateway/*": ["./src/*"],
       "~api": ["../api/src/index.ts"],
-      "~api/*": ["../api/src/*"],
-      "~auth": ["../auth/src/index.ts"],
-      "~auth/*": ["../auth/src/*"]
+      "~api/*": ["../api/src/*"]
     },
     "types": ["bun-types"],
     "verbatimModuleSyntax": true

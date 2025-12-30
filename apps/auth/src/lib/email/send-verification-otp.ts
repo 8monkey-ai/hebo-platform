@@ -79,7 +79,7 @@ export async function sendVerificationOtpEmail({
               <td style="padding-top:10px;">
                 <div style="border-top:1px solid #e2e8f0;margin:6px 0 10px;"></div>
                 <div style="font-size:12px;line-height:18px;color:#475569;text-align:center;">
-                  If you weren’t expecting this email, you can safely ignore it.
+                  If you weren't expecting this email, you can safely ignore it.
                 </div>
               </td>
             </tr>

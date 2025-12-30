@@ -3,9 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "~api/*": ["./src/*"],
-      "~auth": ["../auth/src/index.ts"],
-      "~auth/*": ["../auth/src/*"]
+      "~api/*": ["./src/*"]
     },
     "types": ["bun-types"],
     "verbatimModuleSyntax": true

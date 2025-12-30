@@ -28,14 +28,11 @@
     "is-localhost-ip": "^2.0.0"
   },
   "dependencies": {
-    "@elysiajs/bearer": "^1.4.1",
     "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
     "@opentelemetry/sdk-trace-node": "^2.2.0",
     "@sinclair/typebox": "^0.34.41",
     "@upyo/core": "^0.3.2",
     "@upyo/smtp": "^0.3.2",
-    "better-auth": "^1.4.5",
-    "jose": "^6.0.12",
     "sst": "^3.17.13"
   }
 }
