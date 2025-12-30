@@ -53,4 +53,8 @@ export class VertexProviderAdapter
       project,
     });
   }
+
+  getProviderOptionsName(): string {
+    return "google";
+  }
 }

@@ -46,11 +46,11 @@ export function BranchSelect({
             <SidebarMenuButton className="bg-background border-input border" aria-label="Select branch">
               <GitBranch aria-hidden="true" />
               <span className="truncate">
-                  {activeBranch?.name ?? activeBranch?.slug ?? <span className="text-muted-foreground">Select …</span>}
+                  {activeBranch?.name ?? <span className="text-muted-foreground">Select …</span>}
               </span>
               <ChevronDown className="ml-auto" aria-hidden="true" />
             </SidebarMenuButton>
-          }/>
+          } />
           <DropdownMenuContent
             className="min-w-42"
             align="start"

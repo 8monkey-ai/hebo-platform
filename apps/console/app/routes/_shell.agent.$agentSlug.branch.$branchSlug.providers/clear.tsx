@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
-import { getFormProps, useForm } from "@conform-to/react";
+import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Alert, AlertDescription } from "@hebo/shared-ui/components/Alert";
@@ -15,7 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@hebo/shared-ui/components/Dialog";
-import { FormControl, FormField } from "@hebo/shared-ui/components/Form";
+import { FieldControl, Field, FormControl } from "@hebo/shared-ui/components/Field";
 
 import { useFormErrorToast } from "~console/lib/errors";
 
@@ -27,17 +27,15 @@ export const CredentialsClearSchema = z.object({
 type CredentialsClearFormValues = z.infer<typeof CredentialsClearSchema>;
 
 type ClearCredentialsDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   provider?: { slug: string; name: string };
-};
+} & React.ComponentProps<typeof Dialog>;
 
-export function ClearCredentialsDialog({open, onOpenChange, provider}: ClearCredentialsDialogProps) {
+export function ClearCredentialsDialog({ provider, ...props }: ClearCredentialsDialogProps) {
 
   const fetcher = useFetcher();
   const [form, fields] = useForm<CredentialsClearFormValues>({
     id: provider?.slug,
-    lastResult: fetcher.data?.submission,
+    lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
     constraint: getZodConstraint(CredentialsClearSchema),
     defaultValue: {
       providerSlug: provider?.slug,
@@ -47,14 +45,14 @@ export function ClearCredentialsDialog({open, onOpenChange, provider}: ClearCred
 
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
-      onOpenChange(false);
+      props.onOpenChange(false);
     }
   }, [fetcher.state, form.status]);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog {...props}>
       <DialogContent>
-        <fetcher.Form method="post" {...getFormProps(form)} className="contents">
+        <FormControl form={form} as={fetcher.Form}>
           <DialogHeader>
             <DialogTitle>Clear {provider?.name} Credentials</DialogTitle>
             <DialogDescription>Are you sure you want to clear the credentials? </DialogDescription>
@@ -65,17 +63,17 @@ export function ClearCredentialsDialog({open, onOpenChange, provider}: ClearCred
             </AlertDescription>
           </Alert>
 
-          <FormField field={fields.providerSlug} className="hidden">
-            <FormControl render={
+          <Field name={fields.providerSlug.name} className="hidden">
+            <FieldControl>
               <input type="hidden" />
-              } />
-          </FormField>
+            </FieldControl>
+          </Field>
 
           <DialogFooter>
             <Button
               type="button"
               variant="ghost"
-              onClick={() => onOpenChange(false)}
+              onClick={() => props.onOpenChange(false)}
             >
               Cancel
             </Button>
@@ -89,7 +87,7 @@ export function ClearCredentialsDialog({open, onOpenChange, provider}: ClearCred
               Clear
             </Button>
           </DialogFooter>
-        </fetcher.Form>
+        </FormControl>
       </DialogContent>
     </Dialog>
   );

@@ -33,7 +33,8 @@ export async function clientLoader({ params }: Route.ClientLoaderArgs) {
 }
 
 export function shouldRevalidate(args: ShouldRevalidateFunctionArgs) {
-  if (args.currentParams.branchSlug !== args.nextParams.branchSlug) {
+  if (args.currentParams.agentSlug !== args.nextParams.agentSlug
+    || args.currentParams.branchSlug !== args.nextParams.branchSlug ) {
     return true;
   }
   return dontRevalidateOnFormErrors(args);

@@ -16,7 +16,7 @@ export const supportedModel = t.Object({
 export type SupportedModel = Static<typeof supportedModel>;
 
 export interface ModelAdapter extends SupportedModel {
-  transformOptions(options?: ProviderOptions): ProviderOptions;
+  transformOptions(options: ProviderOptions): ProviderOptions;
   transformPrompt(prompt: any): any;
 }
 
@@ -30,8 +30,10 @@ export abstract class ModelAdapterBase implements ModelAdapter {
     monthly_free_tokens: number;
   };
 
-  transformOptions(options?: ProviderOptions): ProviderOptions {
-    return options || {};
+  transformOptions(options: ProviderOptions): ProviderOptions {
+    delete options.reasoning;
+
+    return options;
   }
 
   transformPrompt(prompt: any): any {
