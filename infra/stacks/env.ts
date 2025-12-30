@@ -59,7 +59,7 @@ export const llmSecrets = [
   vertexLocation,
 ];
 
-export const otelExporterSecrets = [
+export const otelSecrets = [
   grafanaEndpoint,
   grafanaInstanceId,
   grafanaApiToken,
