@@ -1,5 +1,6 @@
 import { BadRequestError } from "@hebo/shared-api/errors";
 
+import type { createDbClient } from "~api/lib/db/client";
 import type {
   ApiKeyProviderConfig,
   BedrockProviderConfig,
@@ -14,7 +15,6 @@ import { GroqProviderAdapter } from "./groq";
 import { VertexProviderAdapter } from "./vertex";
 
 import type { ProviderAdapter } from "./provider";
-import type { createDbClient } from "../../../../api/prisma/client";
 
 export class ProviderAdapterFactory {
   static readonly ALL_PROVIDER_ADAPTER_CLASSES = [
