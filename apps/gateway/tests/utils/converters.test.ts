@@ -3,6 +3,8 @@ import { describe, expect, test } from "bun:test";
 import { toModelMessages } from "~gateway/utils/converters";
 import type { OpenAICompatibleMessage } from "~gateway/utils/openai-compatible-api-schemas";
 
+import type { ModelMessage } from "ai";
+
 describe("toModelMessages", () => {
   test("bundles parallel tool calls into a single tool message with multiple tool-result parts", () => {
     const messages: OpenAICompatibleMessage[] = [
@@ -227,5 +229,88 @@ describe("toModelMessages", () => {
       "call_tokyo",
       "call_paris",
     ]);
+  });
+
+  describe("merges extra_ properties into providerOptions", () => {
+    const testCases = [
+      {
+        name: "should merge extra_ properties for assistant message without tool calls",
+        inputMessages: [
+          {
+            role: "assistant",
+            content: "Hello",
+            extra_body: { reasoning_effort: "high" },
+            extra_overrides: { verbosity: "medium" },
+          },
+        ],
+        expectedOutput: [
+          {
+            role: "assistant",
+            content: "Hello",
+            providerOptions: { reasoning_effort: "high", verbosity: "medium" },
+          },
+        ],
+      },
+      {
+        name: "should merge multiple extra_ properties for assistant message with tool calls",
+        inputMessages: [
+          {
+            role: "assistant",
+            content: undefined,
+            tool_calls: [
+              {
+                id: "call_1",
+                type: "function",
+                function: {
+                  name: "test_tool",
+                  arguments: "{}",
+                },
+                extra_body: { reasoning_effort: "high" },
+                extra_content: { thought_signature: "TOOL_SIG_XYZ" },
+              },
+            ],
+            extra_body: { resoning_effort: "high" },
+          },
+        ],
+        expectedOutput: [
+          {
+            role: "assistant",
+            content: [
+              {
+                type: "tool-call",
+                toolCallId: "call_1",
+                toolName: "test_tool",
+                input: {},
+                providerOptions: {
+                  reasoning_effort: "high",
+                  thought_signature: "TOOL_SIG_XYZ",
+                },
+              },
+            ],
+            providerOptions: { resoning_effort: "high" },
+          },
+        ],
+      },
+      {
+        name: "should handle empty extra_ properties gracefully",
+        inputMessages: [
+          {
+            role: "assistant",
+            content: "No extras",
+          },
+        ],
+        expectedOutput: [
+          {
+            role: "assistant",
+            content: "No extras",
+          },
+        ],
+      },
+    ];
+
+    test.each(testCases)("$name", ({ inputMessages, expectedOutput }) => {
+      const out = toModelMessages(inputMessages as OpenAICompatibleMessage[]);
+      expect(out).toEqual(expectedOutput as ModelMessage[]);
+    });
   });
 });

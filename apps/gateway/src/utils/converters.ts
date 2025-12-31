@@ -116,8 +116,16 @@ function toUserModelMessage(
 function toAssistantModelMessage(
   message: Extract<OpenAICompatibleMessage, { role: "assistant" }>,
 ): ModelMessage {
+  const providerOptions = extractAndMergeExtraProperties(message);
   const toolCalls = message.tool_calls ?? [];
-  if (toolCalls.length === 0) return message as ModelMessage;
+
+  if (toolCalls.length === 0) {
+    return {
+      role: "assistant",
+      content: message.content ?? undefined,
+      ...(providerOptions ? { providerOptions } : {}),
+    } as ModelMessage;
+  }
 
   return {
     role: "assistant",
@@ -126,10 +134,19 @@ function toAssistantModelMessage(
       toolCallId: tc.id,
       toolName: tc.function.name,
       input: parseToolInput(tc.function.arguments),
-      providerOptions: tc.extra_content,
+      providerOptions: extractAndMergeExtraProperties(tc),
     })),
-    providerOptions: message.extra_content,
+    providerOptions,
   };
+}
+
+function extractAndMergeExtraProperties(source: Record<string, any>) {
+  const merged = Object.entries(source)
+    .filter(([k]) => k.startsWith("extra_"))
+    // eslint-disable-next-line unicorn/no-array-reduce
+    .reduce((acc, [, v]) => ({ ...acc, ...v }), {});
+
+  return Object.keys(merged).length > 0 ? merged : undefined;
 }
 
 function toToolResultMessage(
