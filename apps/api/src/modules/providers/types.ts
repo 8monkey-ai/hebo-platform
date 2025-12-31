@@ -1,14 +1,5 @@
 import { t, type Static } from "elysia";
 
-const SUPPORTED_MODELS = [
-  "google/gemini-3-pro-preview",
-  "google/gemini-3-flash-preview",
-  "openai/gpt-oss-120b",
-  "openai/gpt-oss-20b",
-  "anthropic/claude-opus-4-5-v1",
-  "cohere/embed-v4.0",
-];
-
 export const supportedProviders = {
   bedrock: { name: "Amazon Bedrock" },
   cohere: { name: "Cohere" },
@@ -49,15 +40,11 @@ export const Provider = t.Object({
   config: t.Optional(ProviderConfig),
 });
 
-export const SupportedModelType = t.Enum(
-  Object.fromEntries(SUPPORTED_MODELS.map((model) => [model, model])),
-  { error: "Invalid model type" },
-);
-
 export const Models = t.Array(
   t.Object({
     alias: t.String({ minLength: 1 }),
-    type: SupportedModelType,
+    // FUTURE: Add a validation for the model type
+    type: t.String({ minLength: 1 }),
     // Inspired from Vercel Provider Options: https://vercel.com/docs/ai-gateway/provider-options
     routing: t.Optional(t.Object({ only: t.Array(ProviderSlug) })),
   }),
