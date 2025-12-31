@@ -2,11 +2,17 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { apiKey, emailOTP } from "better-auth/plugins";
 
+import { createPrismaAdapter } from "@hebo/shared-api/lib/db/connection";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
-import { prisma } from "./lib/db/client";
+import { PrismaClient } from "~auth/generated/prisma/client";
+
 import { sendVerificationOtpEmail } from "./lib/email";
 import { isRemote } from "./lib/env";
+
+export const prisma = new PrismaClient({
+  adapter: createPrismaAdapter("auth"),
+});
 
 const baseURL = process.env.AUTH_URL || `http://localhost:3000`;
 
@@ -17,7 +23,6 @@ function getCookieDomain() {
     ? undefined
     : hostname.split(".").slice(-2).join(".");
 }
-
 const cookieDomain = getCookieDomain();
 
 export const auth = betterAuth({
