@@ -1,5 +1,5 @@
 import heboCluster from "./cluster";
-import heboDatabase from "./db";
+import heboDatabase, { createMigrator } from "./db";
 import { authSecrets, otelSecrets, isProd } from "./env";
 
 const authDomain = isProd ? "auth.hebo.ai" : `auth.${$app.stage}.hebo.ai`;
@@ -37,5 +37,7 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
   capacity: isProd ? undefined : "spot",
   wait: isProd,
 });
+
+createMigrator("auth");
 
 export default heboAuth;
