@@ -1,13 +1,11 @@
-import { defineConfig } from "prisma/config";
-
-import { getConnectionString } from "@hebo/shared-api/lib/db/connection";
-
-export default defineConfig({
+export default {
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
   },
   datasource: {
-    url: getConnectionString("auth"),
+    url:
+      process.env.DATABASE_URL ??
+      "postgresql://postgres:password@localhost:5432/local?schema=auth",
   },
-});
+};

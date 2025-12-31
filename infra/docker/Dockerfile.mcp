@@ -20,6 +20,8 @@ RUN bun install --lockfile-only
 RUN bun install --frozen-lockfile --ignore-scripts
 
 COPY --from=pruner /repo/out/full/ ./
+# turbo prune doesn't include root-level files, so copy tsconfig.base.json explicitly
+COPY --from=pruner /repo/tsconfig.base.json ./
 RUN bun run build
 
 ########################  runner stage  ########################
