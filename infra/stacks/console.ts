@@ -12,8 +12,8 @@ const heboConsole = new sst.aws.StaticSite("HeboConsole", {
   domain: isProd ? "console.hebo.ai" : `console.${$app.stage}.hebo.ai`,
   environment: {
     VITE_API_URL: heboApi.url,
-    VITE_GATEWAY_URL: heboGateway.url,
     VITE_AUTH_URL: heboAuth.url,
+    VITE_GATEWAY_URL: heboGateway.url,
   },
 });
 
