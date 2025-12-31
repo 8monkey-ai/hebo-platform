@@ -19,6 +19,7 @@ export function PlaygroundSidebar({ activeAgent, activeBranch }: { activeAgent?:
     endpoint: {
       baseUrl: new URL("v1", gatewayUrl).toString(),
       fetch: kyFetch,
+      credentials: "include" as const,
     },
   }));
 
