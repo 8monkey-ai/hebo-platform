@@ -1,8 +1,8 @@
 import { createPrismaAdapter } from "@hebo/shared-api/lib/db/connection";
 
 import { Prisma, PrismaClient } from "~api/generated/prisma/client";
+import { redactProviderConfigValue } from "~api/lib/redact-provider";
 import type { ProviderConfig } from "~api/modules/providers/types";
-import { redactProviderConfigValue } from "~api/utils/redact-provider";
 
 // eslint-disable-next-line unicorn/no-null
 const dbNull = null;
