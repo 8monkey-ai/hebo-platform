@@ -22,11 +22,12 @@
     "@elysiajs/cors": "^1.4.0",
     "@elysiajs/openapi": "^1.4.11",
     "@elysiajs/opentelemetry": "^1.4.9",
+    "@hebo/shared-api": "workspace:*",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
-    "@hebo/shared-api": "workspace:*",
     "crypto-random-string": "^5.0.0",
     "elysia": "^1.4.9",
+    "pg": "^8.16.3",
     "slugify": "^1.6.6"
   },
   "devDependencies": {
