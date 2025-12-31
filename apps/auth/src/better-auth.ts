@@ -6,7 +6,7 @@ import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import { prisma } from "./lib/db/client";
 import { sendVerificationOtpEmail } from "./lib/email";
-import { isRemote, consoleUrl } from "./lib/env";
+import { isRemote } from "./lib/env";
 
 const baseURL = process.env.AUTH_URL || `http://localhost:3000`;
 
@@ -70,11 +70,15 @@ export const auth = betterAuth({
         null,
     }),
     emailOTP({
-      async sendVerificationOTP({ email, otp }) {
-        await sendVerificationOtpEmail({ email, otp });
+      async sendVerificationOTP({ email, otp }, ctx) {
+        await sendVerificationOtpEmail({
+          email,
+          otp,
+          consoleUrl: ctx?.request?.headers.get("origin") ?? undefined,
+        });
       },
     }),
   ],
-  trustedOrigins: [consoleUrl],
+  trustedOrigins: cookieDomain ? [`https://*.${cookieDomain}`] : ["*"],
   secret: await getSecret("AuthSecret", false),
 });

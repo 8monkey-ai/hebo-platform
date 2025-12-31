@@ -3,7 +3,7 @@ import { SmtpTransport } from "@upyo/smtp";
 
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
-import { isRemote, consoleUrl } from "./env";
+import { isRemote } from "./env";
 
 const smtpHost = await getSecret("SmtpHost", false);
 const smtpPort = Number(await getSecret("SmtpPort", false));
@@ -25,14 +25,12 @@ const transport = new SmtpTransport({
 export async function sendVerificationOtpEmail({
   email,
   otp,
+  consoleUrl,
 }: {
   email: string;
   otp: string;
+  consoleUrl?: string;
 }) {
-  const magicLinkUrl = new URL("/signin/magic-link", consoleUrl);
-  magicLinkUrl.searchParams.set("email", email);
-  magicLinkUrl.searchParams.set("otp", otp);
-
   // Locally we allow devs to work with the service without SMTP credentials, so we just log the OTP.
   if (!isRemote) {
     console.info(">>> OTP:", otp);
@@ -40,6 +38,15 @@ export async function sendVerificationOtpEmail({
       return;
     }
   }
+
+  if (!consoleUrl) {
+    console.warn("Missing origin header, cannot send verification email");
+    return;
+  }
+
+  const magicLinkUrl = new URL("/signin/magic-link", consoleUrl);
+  magicLinkUrl.searchParams.set("email", email);
+  magicLinkUrl.searchParams.set("otp", otp);
 
   const html = `
     <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(180deg,#fefce8 0%,#f8fafc 45%,#eef2ff 100%);padding:32px 0;color:#0f172a;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">

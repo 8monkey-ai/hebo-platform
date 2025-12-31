@@ -3,7 +3,6 @@ import heboDatabase from "./db";
 import { authSecrets, otelSecrets, isProd } from "./env";
 
 const authDomain = isProd ? "auth.hebo.ai" : `auth.${$app.stage}.hebo.ai`;
-const authUrl = `https://${authDomain}`;
 const authPort = "3000";
 
 const heboAuth = new sst.aws.Service("HeboAuth", {
@@ -19,10 +18,7 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
   },
   environment: {
     IS_REMOTE: $dev ? "false" : "true",
-    AUTH_URL: authUrl,
-    CONSOLE_URL: isProd
-      ? "https://console.hebo.ai"
-      : `https://console.${$app.stage}.hebo.ai`,
+    AUTH_URL: `https://${authDomain}`,
     LOG_LEVEL: isProd ? "info" : "debug",
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: authPort,
