@@ -162,6 +162,7 @@
         "@elysiajs/cors": "^1.4.0",
         "@elysiajs/openapi": "^1.4.11",
         "@elysiajs/opentelemetry": "^1.4.9",
+        "@hebo/api": "workspace:*",
         "@hebo/shared-api": "workspace:*",
         "ai": "^5.0.19",
         "elysia": "^1.4.9",
