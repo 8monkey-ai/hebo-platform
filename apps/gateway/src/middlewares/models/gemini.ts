@@ -94,31 +94,23 @@ export abstract class Gemini3ModelAdapter extends GeminiModelAdapter {
         return {
           ...message,
           content: message.content.map((part) => {
-            if (part.type === "tool-call") {
-              if (hasInjected) {
-                return part;
-              }
+            if (
+              part.type === "tool-call" &&
+              !hasInjected &&
+              !part.providerOptions?.thoughtSignature
+            ) {
               this.logger?.warn(
                 {
                   modelId: this.id,
                   role: message.role,
-                  thoughtSignature: part.providerOptions?.thought_signature,
                 },
-                "Injected dummy thought signature. Model performance may degrade. Provide a valid signature for optimal results.",
+                "Injected dummy thoughtSignature. Model performance may degrade. Provide a valid thoughtSignature for optimal results.",
               );
-              const thoughtSignature =
-                part.providerOptions?.thought_signature ||
-                "context_engineering_is_the_way_to_go";
-              hasInjected = true;
-
-              return {
-                ...part,
-                providerOptions: {
-                  google: {
-                    thoughtSignature,
-                  },
-                },
+              part.providerOptions = {
+                ...part.providerOptions,
+                thoughtSignature: "context_engineering_is_the_way_to_go",
               };
+              hasInjected = true;
             }
             return part;
           }),

@@ -40,9 +40,7 @@ describe("Gemini Adapter transformPrompt", () => {
               toolName: "get_weather",
               args: { location: "San Francisco" },
               providerOptions: {
-                google: {
-                  thoughtSignature: "context_engineering_is_the_way_to_go",
-                },
+                thoughtSignature: "context_engineering_is_the_way_to_go",
               },
             },
           ],
@@ -62,7 +60,7 @@ describe("Gemini Adapter transformPrompt", () => {
               toolName: "get_time",
               args: { timezone: "UTC" },
               providerOptions: {
-                thought_signature: "existing_signature",
+                thoughtSignature: "existing_signature",
               },
             },
           ],
@@ -78,9 +76,7 @@ describe("Gemini Adapter transformPrompt", () => {
               toolName: "get_time",
               args: { timezone: "UTC" },
               providerOptions: {
-                google: {
-                  thoughtSignature: "existing_signature",
-                },
+                thoughtSignature: "existing_signature",
               },
             },
           ],
@@ -126,9 +122,7 @@ describe("Gemini Adapter transformPrompt", () => {
               toolCallId: "call_1",
               toolName: "t1",
               providerOptions: {
-                google: {
-                  thoughtSignature: "context_engineering_is_the_way_to_go",
-                },
+                thoughtSignature: "context_engineering_is_the_way_to_go",
               },
             },
             {
@@ -146,9 +140,7 @@ describe("Gemini Adapter transformPrompt", () => {
               toolCallId: "call_3",
               toolName: "t3",
               providerOptions: {
-                google: {
-                  thoughtSignature: "context_engineering_is_the_way_to_go",
-                },
+                thoughtSignature: "context_engineering_is_the_way_to_go",
               },
             },
           ],
