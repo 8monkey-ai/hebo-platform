@@ -14,10 +14,10 @@
   },
   "dependencies": {
     "@bogeychan/elysia-logger": "^0.1.10",
-    "@elysiajs/opentelemetry": "^1.4.9",
+    "@elysiajs/opentelemetry": "^1.4.10",
     "@hebo/shared-api": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.25.1",
-    "elysia": "^1.4.9",
+    "elysia": "^1.4.21",
     "pino": "^9.8.0",
     "zod": "^4.1.13"
   },
