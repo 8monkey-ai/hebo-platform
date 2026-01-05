@@ -4,7 +4,7 @@ import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible
 
 import { ModelAdapterBase } from "./model";
 
-import type { LanguageModelV3Prompt } from "@ai-sdk/provider";
+import type { LanguageModelV2Prompt } from "@ai-sdk/provider";
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export abstract class GeminiModelAdapter extends ModelAdapterBase {
@@ -88,7 +88,7 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
 }
 
 export abstract class Gemini3ModelAdapter extends GeminiModelAdapter {
-  transformPrompt(prompt: LanguageModelV3Prompt): LanguageModelV3Prompt {
+  transformPrompt(prompt: LanguageModelV2Prompt): LanguageModelV2Prompt {
     return prompt.map((message) => {
       if (message.role === "assistant" && Array.isArray(message.content)) {
         let hasInjected = false;
