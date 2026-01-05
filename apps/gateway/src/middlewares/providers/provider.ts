@@ -31,6 +31,9 @@ export abstract class ProviderAdapterBase implements ProviderAdapter {
     return (this.constructor as typeof ProviderAdapterBase).providerSlug;
   }
 
+  abstract initialize(config?: ProviderConfig): Promise<this>;
+  abstract getProvider(): Promise<Provider>;
+
   static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {};
 
   static getModelId(modelType: string): string | undefined {
