@@ -75,7 +75,6 @@ export const createDbClient = (organizationId: string, userId: string) => {
             data: {
               deleted_by: userId,
               deleted_at: new Date(),
-              organization_id: organizationId,
             },
           });
         },
