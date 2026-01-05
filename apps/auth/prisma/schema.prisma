@@ -13,30 +13,34 @@ datasource db {
 }
 
 model users {
-  id            String     @id @db.Text
+  id            String        @id @db.Text
   name          String
-  email         String     @unique
-  emailVerified Boolean    @default(false)
+  email         String        @unique
+  emailVerified Boolean       @default(false)
   image         String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   sessions      sessions[]
   accounts      accounts[]
   apikeys       apikeys[]
+  members       members[]
+  invitations   invitations[]
 
   @@schema("auth")
 }
 
 model sessions {
-  id        String   @id @db.Text
-  userId    String   @db.Text
-  token     String   @unique
-  expiresAt DateTime
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                   String   @id @db.Text
+  userId               String   @db.Text
+  token                String   @unique
+  expiresAt            DateTime
+  ipAddress            String?
+  userAgent            String?
+  activeOrganizationId String?  @db.Text
+  activeTeamId         String?  @db.Text
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  user                 users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@schema("auth")
@@ -99,5 +103,53 @@ model apikeys {
   user                users     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@schema("auth")
+}
+
+model organizations {
+  id          String        @id @db.Text
+  name        String
+  slug        String
+  logo        String?
+  metadata    Json?
+  createdAt   DateTime      @default(now())
+  members     members[]
+  invitations invitations[]
+
+  @@unique([slug])
+  @@schema("auth")
+}
+
+model members {
+  id             String        @id @db.Text
+  userId         String        @db.Text
+  organizationId String        @db.Text
+  role           String
+  createdAt      DateTime      @default(now())
+  user           users         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+  @@schema("auth")
+}
+
+model invitations {
+  id             String        @id @db.Text
+  email          String
+  inviterId      String        @db.Text
+  organizationId String        @db.Text
+  role           String
+  status         String
+  teamId         String?       @db.Text
+  createdAt      DateTime      @default(now())
+  expiresAt      DateTime
+  inviter        users         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  organization   organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([organizationId])
+  @@index([inviterId])
   @@schema("auth")
 }
