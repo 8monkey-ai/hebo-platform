@@ -2,6 +2,8 @@ import { jsonSchema, tool } from "ai";
 
 import type {
   OpenAICompatibleAssistantMessage,
+  OpenAICompatibleMessageToolCall,
+  OpenAICompatibleUserMessage,
   OpenAICompatibleContentPart,
   OpenAICompatibleFinishReason,
   OpenAICompatibleMessage,
@@ -105,7 +107,7 @@ function indexToolMessages(messages: OpenAICompatibleMessage[]) {
 }
 
 function toUserModelMessage(
-  message: Extract<OpenAICompatibleMessage, { role: "user" }>,
+  message: OpenAICompatibleUserMessage,
 ): ModelMessage {
   if (Array.isArray(message.content)) {
     return { role: "user", content: convertToModelContent(message.content) };
@@ -113,44 +115,53 @@ function toUserModelMessage(
   return message as ModelMessage;
 }
 
-function toAssistantModelMessage(
-  message: Extract<OpenAICompatibleMessage, { role: "assistant" }>,
-): ModelMessage {
-  const providerOptions = extractAndMergeExtraProperties(message);
-  const toolCalls = message.tool_calls ?? [];
+function extractProviderOptions(
+  nonOpenAICompatibleOptions: Record<string, any>,
+) {
+  const { extra_body, extra_content, ...otherOptions } =
+    nonOpenAICompatibleOptions;
+  const providerOptions = {
+    ...otherOptions,
+    ...extra_body,
+    ...extra_content,
+  };
 
-  if (toolCalls.length === 0) {
+  return providerOptions;
+}
+
+function toAssistantModelMessage(
+  message: OpenAICompatibleAssistantMessage,
+): ModelMessage {
+  const { tool_calls: toolCalls, role, content, ...rest } = message;
+  const providerOptions = extractProviderOptions(rest);
+
+  if (!toolCalls || toolCalls.length === 0) {
     return {
-      role: "assistant",
-      content: message.content ?? undefined,
-      ...(providerOptions ? { providerOptions } : {}),
+      role: role,
+      content: content,
+      providerOptions,
     } as ModelMessage;
   }
 
   return {
-    role: "assistant",
-    content: toolCalls.map((tc) => ({
-      type: "tool-call",
-      toolCallId: tc.id,
-      toolName: tc.function.name,
-      input: parseToolInput(tc.function.arguments),
-      providerOptions: extractAndMergeExtraProperties(tc),
-    })),
+    role: role,
+    content: toolCalls.map((tc: OpenAICompatibleMessageToolCall) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { type, id, function: fn, ...rest } = tc;
+      return {
+        type: "tool-call",
+        toolCallId: id,
+        toolName: fn.name,
+        input: parseToolInput(fn.arguments),
+        providerOptions: extractProviderOptions(rest),
+      };
+    }),
     providerOptions,
   };
 }
 
-function extractAndMergeExtraProperties(source: Record<string, any>) {
-  const merged = Object.entries(source)
-    .filter(([k]) => k.startsWith("extra_"))
-    // eslint-disable-next-line unicorn/no-array-reduce
-    .reduce((acc, [, v]) => ({ ...acc, ...v }), {});
-
-  return Object.keys(merged).length > 0 ? merged : undefined;
-}
-
 function toToolResultMessage(
-  message: Extract<OpenAICompatibleMessage, { role: "assistant" }>,
+  message: OpenAICompatibleAssistantMessage,
   toolById: Map<string, OpenAICompatibleToolMessage>,
 ): ModelMessage | undefined {
   const toolCalls = message.tool_calls ?? [];

@@ -34,10 +34,7 @@ export const OpenAICompatibleMessageToolCall = t.Object(
     }),
   },
   {
-    additionalProperties: false,
-    patternProperties: {
-      "^extra_": t.Optional(t.Object({}, { additionalProperties: true })),
-    },
+    additionalProperties: true,
   },
 );
 
@@ -69,10 +66,7 @@ export const OpenAICompatibleAssistantMessage = t.Object(
     reasoning_content: t.Optional(t.String()),
   },
   {
-    additionalProperties: false,
-    patternProperties: {
-      "^extra_": t.Optional(t.Object({}, { additionalProperties: true })),
-    },
+    additionalProperties: true,
   },
 );
 
@@ -134,6 +128,15 @@ export const OpenAICompatibleReasoning = t.Object({
 });
 
 export type OpenAICompatibleMessage = Static<typeof OpenAICompatibleMessage>;
+export type OpenAICompatibleSystemMessage = Static<
+  typeof OpenAICompatibleSystemMessage
+>;
+export type OpenAICompatibleUserMessage = Static<
+  typeof OpenAICompatibleUserMessage
+>;
+export type OpenAICompatibleMessageToolCall = Static<
+  typeof OpenAICompatibleMessageToolCall
+>;
 export type OpenAICompatibleContentPart =
   | Static<typeof OpenAICompatibleContentPartText>
   | Static<typeof OpenAICompatibleContentPartImage>
