@@ -26,31 +26,46 @@ function getCookieDomain() {
 }
 const cookieDomain = getCookieDomain();
 
+async function ensureUserHasOrganization(
+  userId: string,
+  userName: string | null,
+  email: string,
+) {
+  // Use serializable transaction to prevent race conditions
+  return prisma.$transaction(
+    async (tx) => {
+      const existing = await tx.members.findFirst({ where: { userId } });
+      if (existing) return existing;
+
+      const org = await tx.organizations.create({
+        data: {
+          id: crypto.randomUUID(),
+          name: `${userName || email.split("@")[0]}'s Workspace`,
+          slug: `${userId.slice(0, 8)}-workspace`,
+        },
+      });
+      return tx.members.create({
+        data: {
+          id: crypto.randomUUID(),
+          userId,
+          organizationId: org.id,
+          role: "owner",
+        },
+      });
+    },
+    { isolationLevel: "Serializable" },
+  );
+}
+
 const afterHook = createAuthMiddleware(async (ctx) => {
   const newSession = ctx.context.newSession;
   if (!newSession) return;
 
-  let membership = await prisma.members.findFirst({
-    where: { userId: newSession.user.id },
-  });
-
-  if (!membership) {
-    const org = await prisma.organizations.create({
-      data: {
-        id: crypto.randomUUID(),
-        name: `${newSession.user.name || newSession.user.email.split("@")[0]}'s Workspace`,
-        slug: `${newSession.user.id.slice(0, 8)}-workspace`,
-      },
-    });
-    membership = await prisma.members.create({
-      data: {
-        id: crypto.randomUUID(),
-        userId: newSession.user.id,
-        organizationId: org.id,
-        role: "owner",
-      },
-    });
-  }
+  const membership = await ensureUserHasOrganization(
+    newSession.user.id,
+    newSession.user.name,
+    newSession.user.email,
+  );
 
   await prisma.sessions.update({
     where: { id: newSession.session.id },
