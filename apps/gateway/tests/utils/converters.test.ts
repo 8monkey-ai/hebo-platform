@@ -235,15 +235,15 @@ describe("toModelMessages", () => {
     const testCases = [
       {
         name: "should merge extra_ properties for assistant message without tool calls",
-        inputMessages: [
+        input: [
           {
             role: "assistant",
             content: "Hello",
             extra_body: { reasoning_effort: "high" },
-            extra_overrides: { verbosity: "medium" },
+            extra_content: { verbosity: "medium" },
           },
         ],
-        expectedOutput: [
+        expected: [
           {
             role: "assistant",
             content: "Hello",
@@ -253,7 +253,7 @@ describe("toModelMessages", () => {
       },
       {
         name: "should merge multiple extra_ properties for assistant message with tool calls",
-        inputMessages: [
+        input: [
           {
             role: "assistant",
             content: undefined,
@@ -267,12 +267,13 @@ describe("toModelMessages", () => {
                 },
                 extra_body: { reasoning_effort: "high" },
                 extra_content: { thought_signature: "TOOL_SIG_XYZ" },
+                other_field: "foo",
               },
             ],
             extra_body: { resoning_effort: "high" },
           },
         ],
-        expectedOutput: [
+        expected: [
           {
             role: "assistant",
             content: [
@@ -284,6 +285,7 @@ describe("toModelMessages", () => {
                 providerOptions: {
                   reasoning_effort: "high",
                   thought_signature: "TOOL_SIG_XYZ",
+                  other_field: "foo",
                 },
               },
             ],
@@ -293,13 +295,13 @@ describe("toModelMessages", () => {
       },
       {
         name: "should handle empty extra_ properties gracefully",
-        inputMessages: [
+        input: [
           {
             role: "assistant",
             content: "No extras",
           },
         ],
-        expectedOutput: [
+        expected: [
           {
             role: "assistant",
             content: "No extras",
@@ -308,9 +310,9 @@ describe("toModelMessages", () => {
       },
     ];
 
-    test.each(testCases)("$name", ({ inputMessages, expectedOutput }) => {
-      const out = toModelMessages(inputMessages as OpenAICompatibleMessage[]);
-      expect(out).toEqual(expectedOutput as ModelMessage[]);
+    test.each(testCases)("$name", ({ input, expected }) => {
+      const out = toModelMessages(input as OpenAICompatibleMessage[]);
+      expect(out).toEqual(expected as ModelMessage[]);
     });
   });
 });

@@ -4,6 +4,7 @@ import type {
 } from "@hebo/database/src/types/providers";
 import { BadRequestError } from "@hebo/shared-api/errors";
 
+import type { LanguageModelV2Prompt } from "@ai-sdk/provider";
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
 import type { Provider } from "ai";
 
@@ -15,6 +16,7 @@ export interface ProviderAdapter {
   getProviderOptionsName(): string;
   resolveModelId(): Promise<string>;
   transformOptions(options: ProviderOptions): ProviderOptions;
+  transformPrompt(prompt: LanguageModelV2Prompt): LanguageModelV2Prompt;
 }
 
 export abstract class ProviderAdapterBase implements ProviderAdapter {
@@ -59,6 +61,27 @@ export abstract class ProviderAdapterBase implements ProviderAdapter {
     return options;
   }
 
-  abstract initialize(config?: ProviderConfig): Promise<this>;
-  abstract getProvider(): Promise<Provider>;
+  transformPrompt(prompt: LanguageModelV2Prompt): LanguageModelV2Prompt {
+    const providerOptionsName = this.getProviderOptionsName();
+
+    for (const message of prompt) {
+      if (message.providerOptions) {
+        message.providerOptions = {
+          [providerOptionsName]: message.providerOptions,
+        };
+      }
+
+      if (Array.isArray(message.content)) {
+        for (const contentPart of message.content) {
+          if (contentPart.providerOptions) {
+            contentPart.providerOptions = {
+              [providerOptionsName]: contentPart.providerOptions,
+            };
+          }
+        }
+      }
+    }
+
+    return prompt;
+  }
 }
