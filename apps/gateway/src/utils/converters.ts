@@ -118,6 +118,9 @@ function toUserModelMessage(
 function extractProviderOptions(
   nonOpenAICompatibleOptions: Record<string, any>,
 ) {
+  if (Object.keys(nonOpenAICompatibleOptions).length === 0) {
+    return;
+  }
   const { extra_body, extra_content, ...otherOptions } =
     nonOpenAICompatibleOptions;
   const providerOptions = {

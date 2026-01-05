@@ -84,6 +84,7 @@ export const aiModelFactory = new Elysia({
                       providerAdapter.transformOptions(params.providerOptions),
                   }
                 : undefined,
+              prompt: providerAdapter.transformPrompt(params.prompt),
             };
           },
         };
