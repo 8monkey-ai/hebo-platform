@@ -121,12 +121,13 @@ function extractProviderOptions(
   if (Object.keys(nonOpenAICompatibleOptions).length === 0) {
     return;
   }
-  const { extra_body, extra_content, ...otherOptions } =
+  const { extra_body, extra_content, extra_part, ...otherOptions } =
     nonOpenAICompatibleOptions;
   const providerOptions = {
     ...otherOptions,
     ...extra_body,
     ...extra_content,
+    ...extra_part,
   };
 
   return providerOptions;
