@@ -16,18 +16,18 @@
     "clean": "git clean -fdx -e '.env*' ."
   },
   "peerDependencies": {
-    "@bogeychan/elysia-logger": "^0.1.10",
-    "@elysiajs/opentelemetry": "^1.4.9",
+    "@bogeychan/elysia-logger": "catalog:",
+    "@elysiajs/opentelemetry": "catalog:",
     "@prisma/adapter-pg": "^7.1.0",
-    "elysia": "^1.4.9"
+    "elysia": "catalog:"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
-    "@bogeychan/elysia-logger": "^0.1.10",
-    "@elysiajs/opentelemetry": "^1.4.9",
+    "@bogeychan/elysia-logger": "catalog:",
+    "@elysiajs/opentelemetry": "catalog:",
     "@prisma/adapter-pg": "^7.1.0",
     "bun-types": "^1.3.4",
-    "elysia": "^1.4.9"
+    "elysia": "catalog:"
   },
   "dependencies": {
     "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",

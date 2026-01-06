@@ -36,13 +36,15 @@ export const createGateway = () =>
     )
     .use(authService)
     .use(errorHandler)
-    .group("/v1", (app) =>
-      app
-        .guard({ isSignedIn: true }, (app) =>
-          app.use(completions).use(embeddings),
-        )
-        .use(models),
-    );
+    .group(
+      "/v1",
+      {
+        isSignedIn: true,
+      },
+      (app) => app.use(completions).use(embeddings),
+    )
+    // Public routes (no authentication required)
+    .group("/v1", (app) => app.use(models));
 
 if (import.meta.main) {
   const app = createGateway().listen(PORT);
