@@ -40,7 +40,7 @@ async function ensureUserHasOrganization(
       const org = await tx.organizations.create({
         data: {
           id: Bun.randomUUIDv7(),
-          name: `${userName || email.split("@")[0]}'s Workspace`,
+          name: `${userName || email.split("@")[0]}'s Org`,
           slug: createOrgSlug(userName, email),
         },
       });
