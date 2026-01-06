@@ -38,7 +38,7 @@ async function ensureUserHasOrganization(
 
       const org = await tx.organizations.create({
         data: {
-          id: crypto.randomUUID(),
+          id: Bun.randomUUIDv7(),
           name: `${userName || email.split("@")[0]}'s Workspace`,
           // FUTURE: Handle unlikely slug collisions (8 hex chars = 4.3B combinations)
           slug: `${userId.slice(0, 8)}-workspace`,
@@ -46,7 +46,7 @@ async function ensureUserHasOrganization(
       });
       return tx.members.create({
         data: {
-          id: crypto.randomUUID(),
+          id: Bun.randomUUIDv7(),
           userId,
           organizationId: org.id,
           role: "owner",
@@ -92,6 +92,9 @@ export const auth = betterAuth({
     crossSubDomainCookies: {
       enabled: Boolean(cookieDomain),
       domain: cookieDomain,
+    },
+    database: {
+      generateId: () => Bun.randomUUIDv7(),
     },
   },
   database: prismaAdapter(prisma, {
