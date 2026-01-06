@@ -18,7 +18,7 @@
     "start": "./dist/server"
   },
   "dependencies": {
-    "@bogeychan/elysia-logger": "^0.1.10",
+    "@bogeychan/elysia-logger": "catalog:",
     "@elysiajs/cors": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",

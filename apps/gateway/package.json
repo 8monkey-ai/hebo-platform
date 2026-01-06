@@ -25,7 +25,7 @@
     "@ai-sdk/provider-utils": "^3.0.19",
     "@aws-sdk/client-bedrock": "^3.920.0",
     "@aws-sdk/client-sts": "^3.921.0",
-    "@bogeychan/elysia-logger": "^0.1.10",
+    "@bogeychan/elysia-logger": "catalog:",
     "@elysiajs/cors": "catalog:",
     "@elysiajs/openapi": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",

@@ -41,7 +41,7 @@
       "name": "@hebo/api",
       "version": "0.0.1",
       "dependencies": {
-        "@bogeychan/elysia-logger": "^0.1.10",
+        "@bogeychan/elysia-logger": "catalog:",
         "@elysiajs/cors": "catalog:",
         "@elysiajs/openapi": "catalog:",
         "@elysiajs/opentelemetry": "catalog:",
@@ -67,7 +67,7 @@
       "name": "@hebo/auth",
       "version": "0.0.1",
       "dependencies": {
-        "@bogeychan/elysia-logger": "^0.1.10",
+        "@bogeychan/elysia-logger": "catalog:",
         "@elysiajs/cors": "catalog:",
         "@elysiajs/opentelemetry": "catalog:",
         "@hebo/shared-api": "workspace:*",
@@ -158,7 +158,7 @@
         "@ai-sdk/provider-utils": "^3.0.19",
         "@aws-sdk/client-bedrock": "^3.920.0",
         "@aws-sdk/client-sts": "^3.921.0",
-        "@bogeychan/elysia-logger": "^0.1.10",
+        "@bogeychan/elysia-logger": "catalog:",
         "@elysiajs/cors": "catalog:",
         "@elysiajs/openapi": "catalog:",
         "@elysiajs/opentelemetry": "catalog:",
@@ -179,7 +179,7 @@
       "name": "@hebo/mcp",
       "version": "0.0.1",
       "dependencies": {
-        "@bogeychan/elysia-logger": "^0.1.10",
+        "@bogeychan/elysia-logger": "catalog:",
         "@elysiajs/opentelemetry": "catalog:",
         "@hebo/shared-api": "workspace:*",
         "@modelcontextprotocol/sdk": "^1.25.1",
@@ -242,7 +242,7 @@
         "sst": "^3.17.13",
       },
       "devDependencies": {
-        "@bogeychan/elysia-logger": "^0.1.10",
+        "@bogeychan/elysia-logger": "catalog:",
         "@elysiajs/opentelemetry": "catalog:",
         "@hebo/typescript-config": "workspace:*",
         "@prisma/adapter-pg": "^7.1.0",
@@ -250,7 +250,7 @@
         "elysia": "catalog:",
       },
       "peerDependencies": {
-        "@bogeychan/elysia-logger": "^0.1.10",
+        "@bogeychan/elysia-logger": "catalog:",
         "@elysiajs/opentelemetry": "catalog:",
         "@prisma/adapter-pg": "^7.1.0",
         "elysia": "catalog:",
@@ -289,6 +289,7 @@
     },
   },
   "catalog": {
+    "@bogeychan/elysia-logger": "^0.1.10",
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/openapi": "^1.4.13",
     "@elysiajs/opentelemetry": "^1.4.10",
