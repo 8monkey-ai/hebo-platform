@@ -20,6 +20,7 @@ CREATE TABLE "sessions" (
     "ipAddress" TEXT,
     "userAgent" TEXT,
     "activeOrganizationId" TEXT,
+    "activeTeamId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -122,6 +123,27 @@ CREATE TABLE "invitations" (
     CONSTRAINT "invitations_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "teams" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "organizationId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3),
+
+    CONSTRAINT "teams_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "teamMembers" (
+    "id" TEXT NOT NULL,
+    "teamId" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "teamMembers_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -161,6 +183,21 @@ CREATE INDEX "invitations_organizationId_idx" ON "invitations"("organizationId")
 -- CreateIndex
 CREATE INDEX "invitations_inviterId_idx" ON "invitations"("inviterId");
 
+-- CreateIndex
+CREATE INDEX "invitations_teamId_idx" ON "invitations"("teamId");
+
+-- CreateIndex
+CREATE INDEX "teams_organizationId_idx" ON "teams"("organizationId");
+
+-- CreateIndex
+CREATE INDEX "teamMembers_teamId_idx" ON "teamMembers"("teamId");
+
+-- CreateIndex
+CREATE INDEX "teamMembers_userId_idx" ON "teamMembers"("userId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "teamMembers_teamId_userId_key" ON "teamMembers"("teamId", "userId");
+
 -- AddForeignKey
 ALTER TABLE "sessions" ADD CONSTRAINT "sessions_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -181,3 +218,15 @@ ALTER TABLE "invitations" ADD CONSTRAINT "invitations_inviterId_fkey" FOREIGN KE
 
 -- AddForeignKey
 ALTER TABLE "invitations" ADD CONSTRAINT "invitations_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "invitations" ADD CONSTRAINT "invitations_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "teams"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "teams" ADD CONSTRAINT "teams_organizationId_fkey" FOREIGN KEY ("organizationId") REFERENCES "organizations"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "teamMembers" ADD CONSTRAINT "teamMembers_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "teams"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "teamMembers" ADD CONSTRAINT "teamMembers_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

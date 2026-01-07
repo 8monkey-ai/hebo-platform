@@ -142,7 +142,7 @@ export const auth = betterAuth({
         });
       },
     }),
-    organization(),
+    organization({ teams: { enabled: true } }),
   ],
   trustedOrigins: cookieDomain ? [`https://*.${cookieDomain}`] : ["*"],
   secret: await getSecret("AuthSecret", false),
