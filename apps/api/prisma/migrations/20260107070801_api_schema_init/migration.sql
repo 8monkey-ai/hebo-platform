@@ -10,6 +10,7 @@ CREATE TABLE "agents" (
     "deleted_by" TEXT,
     "deleted_at" TIMESTAMP(3),
     "organization_id" TEXT NOT NULL,
+    "team_id" TEXT NOT NULL,
 
     CONSTRAINT "agents_pkey" PRIMARY KEY ("id")
 );
@@ -28,6 +29,7 @@ CREATE TABLE "branches" (
     "deleted_by" TEXT,
     "deleted_at" TIMESTAMP(3),
     "organization_id" TEXT NOT NULL,
+    "team_id" TEXT NOT NULL,
 
     CONSTRAINT "branches_pkey" PRIMARY KEY ("id")
 );

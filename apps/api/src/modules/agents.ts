@@ -1,5 +1,6 @@
 import { Elysia, status, t } from "elysia";
 
+import { authClient } from "@hebo/shared-api/middlewares/auth/better-auth";
 import { createSlug } from "@hebo/shared-api/utils/create-slug";
 
 import {
@@ -10,6 +11,7 @@ import {
   agentsRelations,
 } from "~api/generated/prismabox/agents";
 import { dbClient } from "~api/middleware/db-client";
+import { getAuthHeaders } from "~api/utils/auth-headers";
 
 export const agents = t.Composite([agentsPlain, t.Partial(agentsRelations)], {
   additionalProperties: false,
@@ -36,17 +38,35 @@ export const agentsModule = new Elysia({
   )
   .post(
     "/",
-    async ({ body, dbClient }) => {
+    async (ctx) => {
+      const { body, dbClient, request } = ctx;
+      const organizationId = (ctx as unknown as { organizationId: string })
+        .organizationId;
+
+      const { data: team, error } = await authClient.organization.createTeam({
+        name: `${body.name}'s Team`,
+        organizationId,
+        fetchOptions: { headers: getAuthHeaders(request) },
+      });
+
+      if (error || !team) {
+        throw new Error(
+          `Failed to create team: ${error?.message ?? "Unknown error"}`,
+        );
+      }
+
       return status(
         201,
         await dbClient.agents.create({
           data: {
             name: body.name,
             slug: createSlug(body.name, 3),
+            team_id: team.id,
             branches: {
               create: {
                 name: "Main",
                 slug: "main",
+                team_id: team.id,
                 models: [{ alias: "default", type: body.defaultModel }],
               },
             },

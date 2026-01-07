@@ -11,14 +11,18 @@ export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("api"),
 });
 
-export const createDbClient = (organizationId: string, userId: string) => {
+export const createDbClient = (
+  organizationId: string,
+  teamIds: string[] | undefined,
+  userId: string,
+) => {
   if (!organizationId || !userId) {
     throw new Error("Organization ID and User ID are required");
   }
   return prisma.$extends({
     query: {
       $allModels: {
-        async $allOperations({ args, query, operation }) {
+        async $allOperations({ args, query, operation, model }) {
           if (operation !== "create") {
             const a = args as { where?: Record<string, unknown> };
             a.where = {
@@ -26,6 +30,13 @@ export const createDbClient = (organizationId: string, userId: string) => {
               deleted_at: dbNull,
               organization_id: organizationId,
             };
+
+            if (model === "agents" || model === "branches") {
+              a.where = {
+                ...a.where,
+                team_id: { in: teamIds },
+              };
+            }
           }
 
           return query(args);

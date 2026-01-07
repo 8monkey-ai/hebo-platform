@@ -32,7 +32,7 @@ export const branchesModule = new Elysia({
   .post(
     "/",
     async ({ body, dbClient, params }) => {
-      const { models } = await dbClient.branches.findFirstOrThrow({
+      const { models, team_id } = await dbClient.branches.findFirstOrThrow({
         where: { agent_slug: params.agentSlug, slug: body.sourceBranchSlug },
       });
       return status(
@@ -43,6 +43,7 @@ export const branchesModule = new Elysia({
             name: body.name,
             slug: createSlug(body.name),
             models,
+            team_id,
           } as any,
         }),
       );

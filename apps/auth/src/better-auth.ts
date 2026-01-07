@@ -78,6 +78,17 @@ const afterHook = createAuthMiddleware(async (ctx) => {
       data: { activeOrganizationId: membership.organizationId },
     });
   }
+
+  const teams = ctx.headers
+    ? await auth.api.listUserTeams({ headers: ctx.headers })
+    : [];
+
+  if (teams) {
+    await prisma.sessions.update({
+      where: { id: newSession.session.id },
+      data: { teamIds: teams.map((team) => team.id) },
+    });
+  }
 });
 
 export const auth = betterAuth({
@@ -86,6 +97,14 @@ export const auth = betterAuth({
   accountLinking: {
     enabled: true,
     trustedProviders: ["google", "github", "microsoft"],
+  },
+  session: {
+    additionalFields: {
+      teamIds: {
+        type: "string[]",
+        required: false,
+      },
+    },
   },
   advanced: {
     useSecureCookies: isRemote,
@@ -142,7 +161,27 @@ export const auth = betterAuth({
         });
       },
     }),
-    organization({ teams: { enabled: true } }),
+    organization({
+      teams: { enabled: true },
+      organizationHooks: {
+        afterCreateTeam: async ({ team, user }) => {
+          if (!user) return;
+
+          const sessions = await prisma.sessions.findMany({
+            where: { userId: user.id },
+          });
+
+          await Promise.all(
+            sessions.map((session) =>
+              prisma.sessions.update({
+                where: { id: session.id },
+                data: { teamIds: [...(session.teamIds ?? []), team.id] },
+              }),
+            ),
+          );
+        },
+      },
+    }),
   ],
   trustedOrigins: cookieDomain ? [`https://*.${cookieDomain}`] : ["*"],
   secret: await getSecret("AuthSecret", false),

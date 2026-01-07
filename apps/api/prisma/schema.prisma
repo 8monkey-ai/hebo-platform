@@ -44,6 +44,8 @@ model agents {
   deleted_at      DateTime?
   /// @prismabox.hide
   organization_id String
+  /// @prismabox.hide
+  team_id         String
 }
 
 model branches {
@@ -73,6 +75,8 @@ model branches {
   deleted_at      DateTime?
   /// @prismabox.hide
   organization_id String
+  /// @prismabox.hide
+  team_id         String
 
   @@unique([agent_slug, slug])
 }

@@ -1,15 +1,27 @@
 import { type Logger } from "@bogeychan/elysia-logger/types";
 import { createAuthClient } from "better-auth/client";
-import { organizationClient } from "better-auth/client/plugins";
+import {
+  inferAdditionalFields,
+  organizationClient,
+} from "better-auth/client/plugins";
 import { Elysia } from "elysia";
 
 import { BadRequestError } from "../../errors";
 
 const AUTH_URL = process.env.AUTH_URL || "http://localhost:3000";
 
-const authClient = createAuthClient({
+export const authClient = createAuthClient({
   baseURL: new URL("/v1", AUTH_URL).toString(),
-  plugins: [organizationClient()],
+  plugins: [
+    organizationClient({
+      teams: { enabled: true },
+    }),
+    inferAdditionalFields({
+      session: {
+        teamIds: { type: "string[]" },
+      },
+    }),
+  ],
 });
 
 export const authServiceBetterAuth = new Elysia({
@@ -39,10 +51,15 @@ export const authServiceBetterAuth = new Elysia({
 
     if (error || !session) {
       log.info({ error }, "Authentication failed or no credentials provided");
-      return { organizationId: undefined, userId: undefined } as const;
+      return {
+        organizationId: undefined,
+        teamIds: undefined,
+        userId: undefined,
+      } as const;
     }
     return {
       organizationId: session.session.activeOrganizationId,
+      teamIds: session.session.teamIds,
       userId: session.user.id,
     } as const;
   })
