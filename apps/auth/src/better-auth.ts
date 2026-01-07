@@ -9,7 +9,10 @@ import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import { PrismaClient } from "~auth/generated/prisma/client";
 
-import { sendVerificationOtpEmail } from "./lib/email";
+import {
+  sendOrganizationInvitationEmail,
+  sendVerificationOtpEmail,
+} from "./lib/email";
 import { isRemote } from "./lib/env";
 
 export const prisma = new PrismaClient({
@@ -160,6 +163,16 @@ export const auth = betterAuth({
     }),
     organization({
       teams: { enabled: true },
+      async sendInvitationEmail(data, ctx) {
+        await sendOrganizationInvitationEmail({
+          email: data.email,
+          invitationId: data.id,
+          organizationName: data.organization.name,
+          inviterName: data.inviter.user.name,
+          inviterEmail: data.inviter.user.email,
+          consoleUrl: ctx?.headers.get("origin") ?? undefined,
+        });
+      },
       organizationHooks: {
         afterCreateTeam: async ({ team, user }) => {
           if (!user) return;
