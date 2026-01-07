@@ -73,21 +73,17 @@ const afterHook = createAuthMiddleware(async (ctx) => {
     : // FUTURE: Define ordering of organizations
       await prisma.members.findFirst({ where: { userId: newSession.user.id } });
 
-  if (membership) {
-    await prisma.sessions.update({
-      where: { id: newSession.session.id },
-      data: { activeOrganizationId: membership.organizationId },
-    });
-  }
-
   const teams = ctx.headers
     ? await auth.api.listUserTeams({ headers: ctx.headers })
     : [];
 
-  if (teams) {
+  if (membership || teams.length > 0) {
     await prisma.sessions.update({
       where: { id: newSession.session.id },
-      data: { teamIds: teams.map((team) => team.id) },
+      data: {
+        ...(membership && { activeOrganizationId: membership.organizationId }),
+        ...(teams.length > 0 && { teamIds: teams.map((team) => team.id) }),
+      },
     });
   }
 });
