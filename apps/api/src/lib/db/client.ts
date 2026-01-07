@@ -32,6 +32,9 @@ export const createDbClient = (
             };
 
             if (model === "agents" || model === "branches") {
+              if (!teamIds) {
+                throw new Error("Team IDs are required");
+              }
               a.where = {
                 ...a.where,
                 team_id: { in: teamIds },
