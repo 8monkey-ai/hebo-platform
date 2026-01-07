@@ -70,7 +70,8 @@ const afterHook = createAuthMiddleware(async (ctx) => {
         newSession.user.name,
         newSession.user.email,
       )
-    : await prisma.members.findFirst({ where: { userId: newSession.user.id } });
+    : // FUTURE: Define ordering of organizations
+      await prisma.members.findFirst({ where: { userId: newSession.user.id } });
 
   if (membership) {
     await prisma.sessions.update({
