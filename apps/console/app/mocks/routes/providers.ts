@@ -4,9 +4,9 @@ import { db } from "~console/mocks/db";
 
 const SUPPORTED_PROVIDERS: Record<string, { name: string }> = {
   bedrock: { name: "Amazon Bedrock" },
-  voyage: { name: "Voyage AI" },
   vertex: { name: "Google Vertex AI" },
   groq: { name: "Groq" },
+  voyage: { name: "Voyage AI" },
 };
 
 export const providerHandlers = [
