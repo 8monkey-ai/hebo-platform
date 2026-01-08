@@ -33,7 +33,7 @@
     "ai": "^5.0.19",
     "elysia": "catalog:",
     "sst": "^3.17.13",
-    "voyage-ai-provider": "2",
+    "voyage-ai-provider": "^2.0.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
