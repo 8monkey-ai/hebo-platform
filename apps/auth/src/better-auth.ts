@@ -1,10 +1,8 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { createAuthMiddleware } from "better-auth/api";
 import { apiKey, emailOTP, organization } from "better-auth/plugins";
 
 import { createPrismaAdapter } from "@hebo/shared-api/lib/db/connection";
-import { slugFromName } from "@hebo/shared-api/utils/create-slug";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import { PrismaClient } from "~auth/generated/prisma/client";
@@ -14,6 +12,7 @@ import {
   sendVerificationOtpEmail,
 } from "./lib/email";
 import { isRemote } from "./lib/env";
+import { createOrganizationHook } from "./lib/organization";
 
 export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
@@ -29,62 +28,6 @@ function getCookieDomain() {
     : hostname.split(".").slice(-2).join(".");
 }
 const cookieDomain = getCookieDomain();
-
-async function ensureUserHasOrganization(
-  userId: string,
-  userName: string | null,
-  email: string,
-) {
-  return prisma.$transaction(
-    async (tx) => {
-      const existing = await tx.members.findFirst({ where: { userId } });
-      if (existing) return existing;
-
-      const org = await tx.organizations.create({
-        data: {
-          id: Bun.randomUUIDv7(),
-          name: `${userName || email.split("@")[0]}'s Org`,
-          slug: slugFromName(userName, email),
-        },
-      });
-      return tx.members.create({
-        data: {
-          id: Bun.randomUUIDv7(),
-          userId,
-          organizationId: org.id,
-          role: "owner",
-        },
-      });
-    },
-    { isolationLevel: "Serializable" },
-  );
-}
-
-const afterHook = createAuthMiddleware(async (ctx) => {
-  const newSession = ctx.context.newSession;
-  if (!newSession) return;
-
-  const isNewUserPath =
-    ctx.path.startsWith("/callback/") || ctx.path === "/sign-in/email-otp";
-
-  const membership = isNewUserPath
-    ? await ensureUserHasOrganization(
-        newSession.user.id,
-        newSession.user.name,
-        newSession.user.email,
-      )
-    : // FUTURE: Define ordering of organizations
-      await prisma.members.findFirst({ where: { userId: newSession.user.id } });
-
-  if (membership) {
-    await prisma.sessions.update({
-      where: { id: newSession.session.id },
-      data: {
-        activeOrganizationId: membership.organizationId,
-      },
-    });
-  }
-});
 
 export const auth = betterAuth({
   baseURL,
@@ -109,7 +52,7 @@ export const auth = betterAuth({
     transaction: true,
     debugLogs: process.env.LOG_LEVEL === "debug",
   }),
-  hooks: { after: afterHook },
+  hooks: { after: createOrganizationHook(prisma) },
   socialProviders: {
     google: {
       prompt: "select_account",
