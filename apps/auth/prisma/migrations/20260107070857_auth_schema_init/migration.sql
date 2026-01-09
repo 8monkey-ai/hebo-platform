@@ -127,6 +127,7 @@ CREATE TABLE "teams" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "organizationId" TEXT NOT NULL,
+    "agentSlug" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3),
 
@@ -184,6 +185,9 @@ CREATE INDEX "invitations_inviterId_idx" ON "invitations"("inviterId");
 
 -- CreateIndex
 CREATE INDEX "invitations_teamId_idx" ON "invitations"("teamId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "teams_agentSlug_key" ON "teams"("agentSlug");
 
 -- CreateIndex
 CREATE INDEX "teams_organizationId_idx" ON "teams"("organizationId");
