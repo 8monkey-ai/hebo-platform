@@ -106,17 +106,16 @@ export async function sendOrganizationInvitationEmail({
   inviterEmail: string;
   consoleUrl?: string;
 }) {
+  const acceptUrl = new URL("/accept-invitation", consoleUrl);
   if (!isRemote) {
     console.info(
-      ">>> Organization Invitation:",
-      `${consoleUrl || "http://localhost:5173"}/accept-invitation?id=${invitationId}`,
+      `>>> Organization Invitation: ${acceptUrl.toString()}?id=${invitationId}`,
     );
     if (!hasSmtpConfig()) return;
   }
   if (!consoleUrl)
     return console.warn("Missing origin header, cannot send invitation email");
 
-  const acceptUrl = new URL("/accept-invitation", consoleUrl);
   acceptUrl.searchParams.set("id", invitationId);
   const inviter = inviterName || inviterEmail;
   const subject = `You've been invited to ${organizationName}`;
