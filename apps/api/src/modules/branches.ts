@@ -1,6 +1,6 @@
 import { Elysia, status, t } from "elysia";
 
-import { createSlug } from "@hebo/shared-api/utils/create-slug";
+import { slugFromString } from "@hebo/shared-api/utils/create-slug";
 
 import {
   branches,
@@ -41,7 +41,7 @@ export const branchesModule = new Elysia({
           data: {
             agent_slug: params.agentSlug,
             name: body.name,
-            slug: createSlug(body.name),
+            slug: slugFromString(body.name),
             models,
           } as any,
         }),

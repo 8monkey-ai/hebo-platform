@@ -2,7 +2,7 @@ import { Elysia, status, t } from "elysia";
 
 import { authClient } from "@hebo/shared-api/middlewares/auth/better-auth";
 import { getAuthHeaders } from "@hebo/shared-api/utils/auth-headers";
-import { createSlug } from "@hebo/shared-api/utils/create-slug";
+import { slugFromString } from "@hebo/shared-api/utils/create-slug";
 
 import {
   agentsInclude,
@@ -43,7 +43,7 @@ export const agentsModule = new Elysia({
       const organizationId = (ctx as unknown as { organizationId: string })
         .organizationId;
 
-      const agentSlug = createSlug(body.name, 3);
+      const agentSlug = slugFromString(body.name, 3);
 
       const { data: team, error } = await authClient.organization.createTeam({
         name: `${body.name}'s Team`,

@@ -34,7 +34,7 @@
     "@opentelemetry/sdk-trace-node": "^2.2.0",
     "better-auth": "^1.4.5",
     "crypto-random-string": "^5.0.0",
-    "slugify": "^1.6.6",
+    "@sindresorhus/slugify": "^2.2.1",
     "sst": "^3.17.13"
   }
 }

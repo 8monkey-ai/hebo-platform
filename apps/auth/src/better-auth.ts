@@ -4,7 +4,7 @@ import { createAuthMiddleware } from "better-auth/api";
 import { apiKey, emailOTP, organization } from "better-auth/plugins";
 
 import { createPrismaAdapter } from "@hebo/shared-api/lib/db/connection";
-import { createOrgSlug } from "@hebo/shared-api/utils/create-slug";
+import { slugFromName } from "@hebo/shared-api/utils/create-slug";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import { PrismaClient } from "~auth/generated/prisma/client";
@@ -44,7 +44,7 @@ async function ensureUserHasOrganization(
         data: {
           id: Bun.randomUUIDv7(),
           name: `${userName || email.split("@")[0]}'s Org`,
-          slug: createOrgSlug(userName, email),
+          slug: slugFromName(userName, email),
         },
       });
       return tx.members.create({
