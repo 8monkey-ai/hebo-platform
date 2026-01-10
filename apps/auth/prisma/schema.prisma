@@ -158,7 +158,6 @@ model teams {
   invitations    invitations[]
 
   @@index([organizationId])
-  @@index([agentSlug])
 }
 
 model teamMembers {
