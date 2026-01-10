@@ -16,13 +16,13 @@ const SUPPORTED_MODELS = [
     monthlyFreeTokens: 100_000_000,
   },
   {
-    type: "cohere/embed-v4.0",
-    displayName: "Cohere Embed v4.0",
-    owner: "cohere",
-    created: 1_764_888_221,
+    type: "voyage/voyage-3.5",
+    displayName: "Voyage 3.5",
+    owner: "voyage",
+    created: 1_767_837_920,
     providers: [
       {
-        cohere: "embed-v4.0",
+        voyage: "voyage-3.5",
       },
     ],
     modality: "embedding",

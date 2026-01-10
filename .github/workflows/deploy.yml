@@ -53,7 +53,7 @@ jobs:
           printf '%s' "${{ secrets.SMTP_FROM }}" | bun run sst secret set SmtpFrom --stage production
           printf '%s' "${{ secrets.BEDROCK_ROLE_ARN }}" | bun run sst secret set BedrockRoleArn --stage production
           printf '%s' "${{ secrets.BEDROCK_REGION }}" | bun run sst secret set BedrockRegion --stage production
-          printf '%s' "${{ secrets.COHERE_API_KEY }}" | bun run sst secret set CohereApiKey --stage production
+          printf '%s' "${{ secrets.VOYAGE_API_KEY }}" | bun run sst secret set VoyageApiKey --stage production
           printf '%s' "${{ secrets.GOOGLE_VERTEX_SERVICE_ACCOUNT_EMAIL }}" | bun run sst secret set VertexServiceAccountEmail --stage production
           printf '%s' "${{ secrets.GOOGLE_VERTEX_AWS_PROVIDER_AUDIENCE }}" | bun run sst secret set VertexAwsProviderAudience --stage production
           printf '%s' "${{ secrets.GOOGLE_VERTEX_PROJECT }}" | bun run sst secret set VertexProject --stage production

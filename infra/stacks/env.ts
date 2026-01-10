@@ -17,7 +17,7 @@ export const smtpFrom = getSstSecret("SmtpFrom");
 // LLMs
 export const bedrockRoleArn = getSstSecret("BedrockRoleArn");
 export const bedrockRegion = getSstSecret("BedrockRegion");
-export const cohereApiKey = getSstSecret("CohereApiKey");
+export const voyageApiKey = getSstSecret("VoyageApiKey");
 export const groqApiKey = getSstSecret("GroqApiKey");
 export const vertexServiceAccountEmail = getSstSecret(
   "VertexServiceAccountEmail",
@@ -51,7 +51,7 @@ export const authSecrets = [
 export const llmSecrets = [
   bedrockRoleArn,
   bedrockRegion,
-  cohereApiKey,
+  voyageApiKey,
   groqApiKey,
   vertexServiceAccountEmail,
   vertexAwsProviderAudience,

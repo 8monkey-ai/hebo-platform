@@ -40,7 +40,7 @@ export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
     }),
   }),
   z.object({
-    slug: z.enum(["cohere", "groq"]),
+    slug: z.enum(["voyage", "groq"]),
     config: z.object({
       apiKey: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a valid API key"),
     }),

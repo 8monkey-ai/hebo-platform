@@ -11,7 +11,7 @@ import {
   ItemTitle
 } from "@hebo/shared-ui/components/Item";
 
-import { Bedrock, Cohere, Groq, Vertex } from "~console/components/ui/Icons";
+import { Bedrock, Voyage, Groq, Vertex } from "~console/components/ui/Icons";
 
 import { ConfigureProviderDialog } from "./configure";
 import { ClearCredentialsDialog } from "./clear";
@@ -21,7 +21,7 @@ import { Avatar } from "@hebo/shared-ui/components/Avatar";
 
 const ProviderIcons = {
   bedrock: Bedrock,
-  cohere: Cohere,
+  voyage: Voyage,
   vertex: Vertex,
   groq: Groq,
 } as const;

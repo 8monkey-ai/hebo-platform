@@ -1,4 +1,4 @@
-import { createCohere } from "@ai-sdk/cohere";
+import { createVoyage } from "voyage-ai-provider";
 
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
@@ -6,16 +6,16 @@ import type { ApiKeyProviderConfig } from "~api/modules/providers/types";
 
 import { ProviderAdapterBase, type ProviderAdapter } from "./provider";
 
-export class CohereProviderAdapter
+export class VoyageProviderAdapter
   extends ProviderAdapterBase
   implements ProviderAdapter
 {
   private config?: ApiKeyProviderConfig;
 
-  static readonly providerSlug = "cohere";
+  static readonly providerSlug = "voyage";
 
   static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
-    "cohere/embed-v4.0": "embed-v4.0",
+    "voyage/voyage-3.5": "voyage-3.5",
   };
 
   constructor(modelType: string) {
@@ -26,7 +26,7 @@ export class CohereProviderAdapter
     if (config) {
       this.config = config;
     } else {
-      const apiKey = await getSecret("CohereApiKey");
+      const apiKey = await getSecret("VoyageApiKey");
       this.config = { apiKey };
     }
     return this;
@@ -34,6 +34,6 @@ export class CohereProviderAdapter
 
   async getProvider() {
     const cfg = this.config!;
-    return createCohere({ ...cfg });
+    return createVoyage({ ...cfg });
   }
 }

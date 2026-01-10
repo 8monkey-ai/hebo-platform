@@ -114,7 +114,7 @@ Secret names:
 - LLMs
   - Bedrock: `BedrockRoleArn`, `BedrockRegion`
   - Vertex: `VertexServiceAccountEmail`, `VertexAwsProviderAudience`, `VertexProject`, `VertexLocation`
-  - Others: `CohereApiKey`, `GroqApiKey`
+  - Others: `VoyageApiKey`, `GroqApiKey`
 
 Note for local development: if SMTP secrets are not configured, the email OTP is logged to the console (look for `>>> OTP:`) so you can sign in without setting up an email provider.
 

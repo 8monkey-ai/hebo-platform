@@ -1,10 +1,10 @@
 import { BadRequestError } from "@hebo/shared-api/errors";
 
 import { ClaudeOpus45Adapter } from "./claude";
-import { CohereEmbedV4Adapter } from "./cohere";
 import { Gemini3ProPreviewAdapter, Gemini3FlashPreviewAdapter } from "./gemini";
 import { GptOss120bAdapter, GptOss20bAdapter } from "./gpt";
 import { type ModelAdapter, type SupportedModel } from "./model";
+import { Voyage35Adapter } from "./voyage";
 
 const ALL_MODEL_ADAPTER_CLASSES = [
   Gemini3ProPreviewAdapter,
@@ -12,7 +12,7 @@ const ALL_MODEL_ADAPTER_CLASSES = [
   GptOss120bAdapter,
   GptOss20bAdapter,
   ClaudeOpus45Adapter,
-  CohereEmbedV4Adapter,
+  Voyage35Adapter,
 ];
 
 const MODEL_ADAPTER_MAP: Record<string, () => ModelAdapter> = {};

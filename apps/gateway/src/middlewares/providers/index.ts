@@ -10,9 +10,9 @@ import type {
 } from "~api/modules/providers/types";
 
 import { BedrockProviderAdapter } from "./bedrock";
-import { CohereProviderAdapter } from "./cohere";
 import { GroqProviderAdapter } from "./groq";
 import { VertexProviderAdapter } from "./vertex";
+import { VoyageProviderAdapter } from "./voyage";
 
 import type { ProviderAdapter } from "./provider";
 
@@ -20,7 +20,7 @@ export class ProviderAdapterFactory {
   static readonly ALL_PROVIDER_ADAPTER_CLASSES = [
     // FUTURE: error-prone for provider fallback feature. Fallback provider depends on the order of this list when the same model is supported by multiple providers.
     BedrockProviderAdapter,
-    CohereProviderAdapter,
+    VoyageProviderAdapter,
     GroqProviderAdapter,
     VertexProviderAdapter,
   ];
@@ -66,8 +66,8 @@ export class ProviderAdapterFactory {
           config as BedrockProviderConfig | undefined,
         );
       }
-      case "cohere": {
-        return new CohereProviderAdapter(modelType).initialize(
+      case "voyage": {
+        return new VoyageProviderAdapter(modelType).initialize(
           config as ApiKeyProviderConfig | undefined,
         );
       }
