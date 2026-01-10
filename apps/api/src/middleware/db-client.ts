@@ -1,18 +1,17 @@
 import { Elysia } from "elysia";
 
+import { authService } from "@hebo/shared-api/middlewares/auth/auth-service";
+
 import { createDbClient } from "~api/lib/db/client";
 
 // Note: Must be used after authService to ensure userId and organizationId are set
 export const dbClient = new Elysia({
   name: "db-client",
 })
-  .resolve(function resolveDbClient(ctx) {
-    const { organizationId, userId } = ctx as unknown as {
-      organizationId: string;
-      userId: string;
-    };
+  .use(authService)
+  .resolve(function resolveDbClient({ organizationId, userId }) {
     return {
-      dbClient: createDbClient(organizationId, userId),
+      dbClient: createDbClient(organizationId!, userId!),
     };
   })
   .as("scoped");
