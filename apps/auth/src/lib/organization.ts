@@ -55,11 +55,13 @@ export function createOrganizationHook(prisma: PrismaClient) {
           where: { userId: newSession.user.id },
         });
 
-    if (membership) {
-      await prisma.sessions.update({
-        where: { id: newSession.session.id },
-        data: { activeOrganizationId: membership.organizationId },
-      });
+    if (!membership) {
+      throw new Error("No membership found");
     }
+
+    await prisma.sessions.update({
+      where: { id: newSession.session.id },
+      data: { activeOrganizationId: membership.organizationId },
+    });
   });
 }
