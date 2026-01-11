@@ -44,6 +44,7 @@ export const createOrganizationHook = (prisma: PrismaClient) => {
 
 export const createSessionHook = (prisma: PrismaClient) => {
   return async (session: { userId: string }) => {
+    // FUTURE: Define ordering of organizations
     const membership = await prisma.members.findFirst({
       where: { userId: session.userId },
     });
