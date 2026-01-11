@@ -13,12 +13,12 @@ export const createOrganizationHook = (prisma: PrismaClient) => {
       ctx.path.startsWith("/callback/") || ctx.path === "/sign-in/email-otp";
     if (!isNewUser) return;
 
-    const existing = await prisma.members.findFirst({
-      where: { userId: newSession.user.id },
-    });
-    if (existing) return;
-
     await prisma.$transaction(async (tx) => {
+      const existing = await tx.members.findFirst({
+        where: { userId: newSession.user.id },
+      });
+      if (existing) return;
+
       const org = await tx.organizations.create({
         data: {
           id: Bun.randomUUIDv7(),
