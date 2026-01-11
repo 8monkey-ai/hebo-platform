@@ -106,10 +106,7 @@ export async function sendOrganizationInvitationEmail({
   inviterEmail: string;
   consoleUrl?: string;
 }) {
-  const acceptUrl = new URL(
-    "/accept-invitation",
-    consoleUrl || "http://localhost:5173",
-  );
+  const acceptUrl = new URL("/accept-invitation", consoleUrl);
   if (!isRemote) {
     console.info(
       `>>> Organization Invitation: ${acceptUrl.toString()}?id=${invitationId}`,
