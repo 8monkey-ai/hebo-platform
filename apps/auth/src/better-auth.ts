@@ -12,7 +12,7 @@ import {
   sendVerificationOtpEmail,
 } from "./lib/email";
 import { isRemote } from "./lib/env";
-import { createOrganizationHook } from "./lib/organization";
+import { createOrganizationHook, createSessionHook } from "./lib/organization";
 
 export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
@@ -52,6 +52,7 @@ export const auth = betterAuth({
     transaction: true,
     debugLogs: process.env.LOG_LEVEL === "debug",
   }),
+  databaseHooks: { session: { create: { before: createSessionHook(prisma) } } },
   hooks: { after: createOrganizationHook(prisma) },
   socialProviders: {
     google: {
