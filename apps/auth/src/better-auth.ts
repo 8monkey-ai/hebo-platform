@@ -78,6 +78,11 @@ export const auth = betterAuth({
       defaultPrefix: "sk_",
       enableMetadata: true,
       enableSessionForAPIKeys: true,
+      rateLimit: {
+        enabled: true,
+        timeWindow: 60 * 1000,
+        maxRequests: 100,
+      },
       customAPIKeyGetter: (ctx) =>
         ctx.request?.headers.get("authorization")?.replace("Bearer ", "") ??
         // eslint-disable-next-line unicorn/no-null
