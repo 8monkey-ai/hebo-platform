@@ -9,37 +9,37 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["auth"]
 }
 
 model users {
-  id            String     @id @db.Text
+  id            String        @id @db.Text
   name          String
-  email         String     @unique
-  emailVerified Boolean    @default(false)
+  email         String        @unique
+  emailVerified Boolean       @default(false)
   image         String?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   sessions      sessions[]
   accounts      accounts[]
   apikeys       apikeys[]
-
-  @@schema("auth")
+  members       members[]
+  invitations   invitations[]
+  teamMembers   teamMembers[]
 }
 
 model sessions {
-  id        String   @id @db.Text
-  userId    String   @db.Text
-  token     String   @unique
-  expiresAt DateTime
-  ipAddress String?
-  userAgent String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                   String   @id @db.Text
+  userId               String   @db.Text
+  token                String   @unique
+  expiresAt            DateTime
+  ipAddress            String?
+  userAgent            String?
+  activeOrganizationId String?  @db.Text
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  user                 users    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@schema("auth")
 }
 
 model accounts {
@@ -60,7 +60,6 @@ model accounts {
 
   @@unique([providerId, accountId])
   @@index([userId])
-  @@schema("auth")
 }
 
 model verifications {
@@ -70,8 +69,6 @@ model verifications {
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-  @@schema("auth")
 }
 
 model apikeys {
@@ -99,5 +96,79 @@ model apikeys {
   user                users     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@schema("auth")
+}
+
+model organizations {
+  id          String        @id @db.Text
+  name        String
+  slug        String
+  logo        String?
+  metadata    Json?
+  createdAt   DateTime      @default(now())
+  members     members[]
+  invitations invitations[]
+  teams       teams[]
+
+  @@unique([slug])
+}
+
+model members {
+  id             String        @id @db.Text
+  userId         String        @db.Text
+  organizationId String        @db.Text
+  role           String
+  createdAt      DateTime      @default(now())
+  user           users         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model invitations {
+  id             String        @id @db.Text
+  email          String
+  inviterId      String        @db.Text
+  organizationId String        @db.Text
+  role           String
+  status         String
+  teamId         String?       @db.Text
+  createdAt      DateTime      @default(now())
+  expiresAt      DateTime
+  inviter        users         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+  organization   organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  team           teams?        @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  @@index([email])
+  @@index([organizationId])
+  @@index([inviterId])
+  @@index([teamId])
+}
+
+model teams {
+  id             String        @id @db.Text
+  name           String
+  organizationId String        @db.Text
+  agentSlug      String        @unique
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime?     @updatedAt
+  organization   organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  teamMembers    teamMembers[]
+  invitations    invitations[]
+
+  @@index([organizationId])
+}
+
+model teamMembers {
+  id        String   @id @db.Text
+  teamId    String   @db.Text
+  userId    String   @db.Text
+  createdAt DateTime @default(now())
+  team      teams    @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([teamId])
+  @@index([userId])
 }

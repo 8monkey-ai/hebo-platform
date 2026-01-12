@@ -16,8 +16,8 @@ export const createPrismaAdapter = (
   schema: string,
   max: number = 25,
 ): PrismaPg => {
-  return new PrismaPg({
-    connectionString: getConnectionString(schema),
-    max,
-  });
+  return new PrismaPg(
+    { connectionString: getConnectionString(schema), max },
+    { schema: schema.toLowerCase() },
+  );
 };

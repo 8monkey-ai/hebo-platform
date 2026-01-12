@@ -7,8 +7,8 @@ export const authService = new Elysia({ name: "auth-service" })
   .use(authServiceBetterAuth)
   .macro({
     isSignedIn: {
-      beforeHandle: function checkIsSignedIn({ userId }) {
-        if (!userId) throw new AuthError("Unauthorized");
+      beforeHandle: function checkIsSignedIn({ organizationId, userId }) {
+        if (!organizationId || !userId) throw new AuthError("Unauthorized");
       },
     },
   })

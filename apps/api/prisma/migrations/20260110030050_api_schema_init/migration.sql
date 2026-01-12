@@ -1,8 +1,5 @@
--- CreateSchema
-CREATE SCHEMA IF NOT EXISTS "api";
-
 -- CreateTable
-CREATE TABLE "api"."agents" (
+CREATE TABLE "agents" (
     "id" UUID NOT NULL,
     "slug" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -12,12 +9,14 @@ CREATE TABLE "api"."agents" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_by" TEXT,
     "deleted_at" TIMESTAMP(3),
+    "organization_id" TEXT NOT NULL,
+    "team_id" TEXT NOT NULL,
 
     CONSTRAINT "agents_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "api"."branches" (
+CREATE TABLE "branches" (
     "id" UUID NOT NULL,
     "slug" TEXT NOT NULL,
     "agent_slug" TEXT NOT NULL,
@@ -29,12 +28,13 @@ CREATE TABLE "api"."branches" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_by" TEXT,
     "deleted_at" TIMESTAMP(3),
+    "organization_id" TEXT NOT NULL,
 
     CONSTRAINT "branches_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "api"."provider_configs" (
+CREATE TABLE "provider_configs" (
     "id" UUID NOT NULL,
     "provider_slug" TEXT NOT NULL,
     "value" JSONB NOT NULL,
@@ -44,15 +44,16 @@ CREATE TABLE "api"."provider_configs" (
     "updated_at" TIMESTAMP(3) NOT NULL,
     "deleted_by" TEXT,
     "deleted_at" TIMESTAMP(3),
+    "organization_id" TEXT NOT NULL,
 
     CONSTRAINT "provider_configs_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "agents_slug_key" ON "api"."agents"("slug");
+CREATE UNIQUE INDEX "agents_slug_key" ON "agents"("slug");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "branches_agent_slug_slug_key" ON "api"."branches"("agent_slug", "slug");
+CREATE UNIQUE INDEX "branches_agent_slug_slug_key" ON "branches"("agent_slug", "slug");
 
 -- AddForeignKey
-ALTER TABLE "api"."branches" ADD CONSTRAINT "branches_agent_slug_fkey" FOREIGN KEY ("agent_slug") REFERENCES "api"."agents"("slug") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "branches" ADD CONSTRAINT "branches_agent_slug_fkey" FOREIGN KEY ("agent_slug") REFERENCES "agents"("slug") ON DELETE CASCADE ON UPDATE CASCADE;

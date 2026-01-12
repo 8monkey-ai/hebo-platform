@@ -9,7 +9,6 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  schemas  = ["api"]
 }
 
 generator prismabox {
@@ -32,19 +31,21 @@ model agents {
 
   // Common audit fields across entities
   /// @prismabox.input.hide
-  created_by String
+  created_by      String
   /// @prismabox.input.hide
-  created_at DateTime  @default(now())
+  created_at      DateTime  @default(now())
   /// @prismabox.input.hide
-  updated_by String
+  updated_by      String
   /// @prismabox.input.hide
-  updated_at DateTime  @updatedAt
+  updated_at      DateTime  @updatedAt
   /// @prismabox.hide
-  deleted_by String?
+  deleted_by      String?
   /// @prismabox.hide
-  deleted_at DateTime?
-
-  @@schema("api")
+  deleted_at      DateTime?
+  /// @prismabox.hide
+  organization_id String
+  /// @prismabox.hide
+  team_id         String
 }
 
 model branches {
@@ -61,20 +62,21 @@ model branches {
 
   // Common audit fields across entities
   /// @prismabox.input.hide
-  created_by String
+  created_by      String
   /// @prismabox.input.hide
-  created_at DateTime  @default(now())
+  created_at      DateTime  @default(now())
   /// @prismabox.input.hide
-  updated_by String
+  updated_by      String
   /// @prismabox.input.hide
-  updated_at DateTime  @updatedAt
+  updated_at      DateTime  @updatedAt
   /// @prismabox.hide
-  deleted_by String?
+  deleted_by      String?
   /// @prismabox.hide
-  deleted_at DateTime?
+  deleted_at      DateTime?
+  /// @prismabox.hide
+  organization_id String
 
   @@unique([agent_slug, slug])
-  @@schema("api")
 }
 
 model provider_configs {
@@ -85,17 +87,17 @@ model provider_configs {
 
   // Common audit fields across entities
   /// @prismabox.hide
-  created_by String
+  created_by      String
   /// @prismabox.hide
-  created_at DateTime  @default(now())
+  created_at      DateTime  @default(now())
   /// @prismabox.hide
-  updated_by String
+  updated_by      String
   /// @prismabox.hide
-  updated_at DateTime  @updatedAt
+  updated_at      DateTime  @updatedAt
   /// @prismabox.hide
-  deleted_by String?
+  deleted_by      String?
   /// @prismabox.hide
-  deleted_at DateTime?
-
-  @@schema("api")
+  deleted_at      DateTime?
+  /// @prismabox.hide
+  organization_id String
 }

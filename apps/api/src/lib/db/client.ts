@@ -11,9 +11,9 @@ export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("api"),
 });
 
-export const createDbClient = (userId: string) => {
-  if (!userId) {
-    throw new Error("User ID is required");
+export const createDbClient = (organizationId: string, userId: string) => {
+  if (!organizationId || !userId) {
+    throw new Error("Organization ID and User ID are required");
   }
   return prisma.$extends({
     query: {
@@ -21,7 +21,11 @@ export const createDbClient = (userId: string) => {
         async $allOperations({ args, query, operation }) {
           if (operation !== "create") {
             const a = args as { where?: Record<string, unknown> };
-            a.where = { ...a.where, created_by: userId, deleted_at: dbNull };
+            a.where = {
+              ...a.where,
+              deleted_at: dbNull,
+              organization_id: organizationId,
+            };
           }
 
           return query(args);
@@ -31,6 +35,7 @@ export const createDbClient = (userId: string) => {
             ...args.data,
             created_by: userId,
             updated_by: userId,
+            organization_id: organizationId,
           };
 
           if (model === "agents" && args.data.branches?.create) {
@@ -40,11 +45,13 @@ export const createDbClient = (userId: string) => {
                   ...item,
                   created_by: userId,
                   updated_by: userId,
+                  organization_id: organizationId,
                 }))
               : {
                   ...existing,
                   created_by: userId,
                   updated_by: userId,
+                  organization_id: organizationId,
                 };
           }
           return query(args);
@@ -65,7 +72,10 @@ export const createDbClient = (userId: string) => {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return (context as any).update({
             where,
-            data: { deleted_by: userId, deleted_at: new Date() },
+            data: {
+              deleted_by: userId,
+              deleted_at: new Date(),
+            },
           });
         },
       },
@@ -76,6 +86,7 @@ export const createDbClient = (userId: string) => {
               provider_slug: slug,
               created_by: userId,
               deleted_at: dbNull,
+              organization_id: organizationId,
             },
           });
         },
