@@ -80,8 +80,8 @@ export const auth = betterAuth({
       enableSessionForAPIKeys: true,
       rateLimit: {
         enabled: true,
-        timeWindow: 60 * 1000,
-        maxRequests: 100,
+        timeWindow: 1000 * 60 * 60, // Per hour
+        maxRequests: 3600, // 3600 requests per hour
       },
       customAPIKeyGetter: (ctx) =>
         ctx.request?.headers.get("authorization")?.replace("Bearer ", "") ??
