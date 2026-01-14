@@ -18,23 +18,24 @@
   "peerDependencies": {
     "@bogeychan/elysia-logger": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
-    "@prisma/adapter-pg": "^7.1.0",
+    "@prisma/adapter-pg": "catalog:",
+    "better-auth": "catalog:",
     "elysia": "catalog:"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
     "@bogeychan/elysia-logger": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
-    "@prisma/adapter-pg": "^7.1.0",
-    "bun-types": "^1.3.4",
-    "elysia": "catalog:"
+    "@prisma/adapter-pg": "catalog:",
+    "better-auth": "catalog:",
+    "bun-types": "catalog:",
+    "elysia": "catalog:",
+    "typescript": "catalog:"
   },
   "dependencies": {
     "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
     "@opentelemetry/sdk-trace-node": "^2.2.0",
-    "better-auth": "^1.4.5",
-    "crypto-random-string": "^5.0.0",
     "@sindresorhus/slugify": "^2.2.1",
-    "sst": "^3.17.13"
+    "crypto-random-string": "^5.0.0"
   }
 }
