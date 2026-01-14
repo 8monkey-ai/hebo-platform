@@ -33,9 +33,9 @@
     "typescript": "catalog:"
   },
   "dependencies": {
-    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
-    "@opentelemetry/sdk-trace-node": "^2.2.0",
-    "@sindresorhus/slugify": "^2.2.1",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.209.0",
+    "@opentelemetry/sdk-trace-node": "^2.3.0",
+    "@sindresorhus/slugify": "^3.0.0",
     "crypto-random-string": "^5.0.0"
   }
 }

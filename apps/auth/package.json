@@ -24,8 +24,8 @@
     "@hebo/shared-api": "workspace:*",
     "@prisma/adapter-pg": "catalog:",
     "@prisma/client": "catalog:",
-    "@upyo/core": "^0.3.2",
-    "@upyo/smtp": "^0.3.2",
+    "@upyo/core": "^0.4.0",
+    "@upyo/smtp": "^0.4.0",
     "better-auth": "catalog:",
     "elysia": "catalog:",
     "pg": "catalog:"

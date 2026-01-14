@@ -16,7 +16,7 @@
     "@bogeychan/elysia-logger": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.25.1",
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "better-auth": "catalog:",
     "elysia": "catalog:",
     "zod": "catalog:"
