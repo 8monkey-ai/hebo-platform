@@ -115,31 +115,19 @@ function toUserModelMessage(
   return message as ModelMessage;
 }
 
-function extractProviderOptions(
-  nonOpenAICompatibleOptions: Record<string, any>,
-) {
-  if (Object.keys(nonOpenAICompatibleOptions).length === 0) {
-    return;
-  }
-  const { extra_body, extra_content, extra_part, ...otherOptions } =
-    nonOpenAICompatibleOptions;
-  const providerOptions = {
-    ...otherOptions,
-    ...extra_body,
-    ...extra_content,
-    ...extra_part,
-  };
-
-  return providerOptions;
-}
-
 function toAssistantModelMessage(
   message: OpenAICompatibleAssistantMessage,
 ): ModelMessage {
-  const { tool_calls: toolCalls, role, content, ...rest } = message;
-  const providerOptions = extractProviderOptions(rest);
+  const { tool_calls, role, content, extra_content } = message;
+  const providerOptions = extra_content?.google?.thought_signature
+    ? {
+        google: {
+          thoughtSignature: extra_content.google.thought_signature,
+        },
+      }
+    : undefined;
 
-  if (!toolCalls || toolCalls.length === 0) {
+  if (!tool_calls || tool_calls.length === 0) {
     return {
       role: role,
       content: content,
@@ -149,15 +137,20 @@ function toAssistantModelMessage(
 
   return {
     role: role,
-    content: toolCalls.map((tc: OpenAICompatibleMessageToolCall) => {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { type, id, function: fn, ...rest } = tc;
+    content: tool_calls.map((tc: OpenAICompatibleMessageToolCall) => {
+      const { id, function: fn, extra_content } = tc;
       return {
         type: "tool-call",
         toolCallId: id,
         toolName: fn.name,
         input: parseToolInput(fn.arguments),
-        providerOptions: extractProviderOptions(rest),
+        providerOptions: extra_content?.google?.thought_signature
+          ? {
+              google: {
+                thoughtSignature: extra_content.google.thought_signature,
+              },
+            }
+          : undefined,
       };
     }),
     providerOptions,
@@ -374,7 +367,14 @@ export function toOpenAICompatibleStream(
               index: toolCallIndexCounter++,
               type: "function",
               function: { name: toolName, arguments: JSON.stringify(input) },
-              extra_content: providerMetadata,
+              extra_content: model.startsWith("google")
+                ? {
+                    google: {
+                      thought_signature:
+                        providerMetadata?.google?.thoughtSignature,
+                    },
+                  }
+                : providerMetadata,
             };
 
             enqueue({

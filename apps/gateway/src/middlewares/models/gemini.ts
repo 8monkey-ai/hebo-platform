@@ -4,7 +4,6 @@ import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible
 
 import { ModelAdapterBase } from "./model";
 
-import type { LanguageModelV2Prompt } from "@ai-sdk/provider";
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export abstract class GeminiModelAdapter extends ModelAdapterBase {
@@ -86,40 +85,7 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
   }
 }
 
-export abstract class Gemini3ModelAdapter extends GeminiModelAdapter {
-  transformPrompt(prompt: LanguageModelV2Prompt): LanguageModelV2Prompt {
-    return prompt.map((message) => {
-      if (message.role === "assistant" && Array.isArray(message.content)) {
-        let hasInjected = false;
-        return {
-          ...message,
-          content: message.content.map((part) => {
-            if (
-              part.type === "tool-call" &&
-              !hasInjected &&
-              !part.providerOptions?.thoughtSignature
-            ) {
-              this.logger?.warn(
-                {
-                  modelId: this.id,
-                  role: message.role,
-                },
-                "Injected dummy thoughtSignature. Model performance may degrade. Provide a valid thoughtSignature for optimal results.",
-              );
-              part.providerOptions = {
-                ...part.providerOptions,
-                thoughtSignature: "context_engineering_is_the_way_to_go",
-              };
-              hasInjected = true;
-            }
-            return part;
-          }),
-        };
-      }
-      return message;
-    });
-  }
-}
+export abstract class Gemini3ModelAdapter extends GeminiModelAdapter {}
 
 export class Gemini3ProPreviewAdapter extends Gemini3ModelAdapter {
   readonly id = "google/gemini-3-pro-preview";

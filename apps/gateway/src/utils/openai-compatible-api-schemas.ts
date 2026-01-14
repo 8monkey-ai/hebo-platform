@@ -24,19 +24,23 @@ export const OpenAICompatibleContentPartFile = t.Object({
   }),
 });
 
-export const OpenAICompatibleMessageToolCall = t.Object(
-  {
-    type: t.Literal("function"),
-    id: t.String(),
-    function: t.Object({
-      arguments: t.String(),
-      name: t.String(),
-    }),
-  },
-  {
-    additionalProperties: true,
-  },
-);
+export const GoogleExtraContent = t.Object({
+  thought_signature: t.Any(),
+});
+
+export const ExtraContent = t.Object({
+  google: t.Optional(GoogleExtraContent),
+});
+
+export const OpenAICompatibleMessageToolCall = t.Object({
+  type: t.Literal("function"),
+  id: t.String(),
+  function: t.Object({
+    arguments: t.String(),
+    name: t.String(),
+  }),
+  extra_content: t.Optional(ExtraContent),
+});
 
 export const OpenAICompatibleSystemMessage = t.Object({
   role: t.Literal("system"),
@@ -57,18 +61,14 @@ export const OpenAICompatibleUserMessage = t.Object({
   ]),
 });
 
-export const OpenAICompatibleAssistantMessage = t.Object(
-  {
-    role: t.Literal("assistant"),
-    content: t.Union([t.String(), t.Null()]),
-    tool_calls: t.Optional(t.Array(OpenAICompatibleMessageToolCall)),
-    reasoning: t.Optional(t.String()),
-    reasoning_content: t.Optional(t.String()),
-  },
-  {
-    additionalProperties: true,
-  },
-);
+export const OpenAICompatibleAssistantMessage = t.Object({
+  role: t.Literal("assistant"),
+  content: t.Union([t.String(), t.Null()]),
+  tool_calls: t.Optional(t.Array(OpenAICompatibleMessageToolCall)),
+  reasoning: t.Optional(t.String()),
+  reasoning_content: t.Optional(t.String()),
+  extra_content: t.Optional(ExtraContent),
+});
 
 export const OpenAICompatibleToolMessage = t.Object({
   role: t.Literal("tool"),
@@ -163,5 +163,5 @@ export type OpenAICompatibleToolCallDelta = {
   index: number;
   type: "function";
   function: { name: string; arguments: string };
-  [key: string]: any;
+  extra_content?: Static<typeof ExtraContent>;
 };

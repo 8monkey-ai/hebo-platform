@@ -58,27 +58,10 @@ export abstract class ProviderAdapterBase implements ProviderAdapter {
     return options;
   }
 
+  abstract initialize(config?: ProviderConfig): Promise<this>;
+  abstract getProvider(): Promise<Provider>;
+
   transformPrompt(prompt: LanguageModelV2Prompt): LanguageModelV2Prompt {
-    const providerOptionsName = this.getProviderOptionsName();
-
-    for (const message of prompt) {
-      if (message.providerOptions) {
-        message.providerOptions = {
-          [providerOptionsName]: message.providerOptions,
-        };
-      }
-
-      if (Array.isArray(message.content)) {
-        for (const contentPart of message.content) {
-          if (contentPart.providerOptions) {
-            contentPart.providerOptions = {
-              [providerOptionsName]: contentPart.providerOptions,
-            };
-          }
-        }
-      }
-    }
-
     return prompt;
   }
 }
