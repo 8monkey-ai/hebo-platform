@@ -29,7 +29,7 @@ export const createGateway = () =>
         documentation: {
           info: {
             title: "Hebo AI Gateway",
-            version: "0.0.1",
+            version: "0.1.0",
           },
         },
       }),
