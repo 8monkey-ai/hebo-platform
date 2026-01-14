@@ -11,7 +11,7 @@ import type { BedrockProviderConfig } from "~api/modules/providers/types";
 import { assumeRole } from "./adapters/aws";
 import { ProviderAdapterBase, type ProviderAdapter } from "./provider";
 
-import type { ProviderOptions } from "@ai-sdk/provider-utils";
+import type { SharedV2ProviderOptions } from "@ai-sdk/provider";
 
 type BedrockCredentials =
   ReturnType<typeof assumeRole> extends Promise<infer T> ? T : never;
@@ -40,9 +40,9 @@ export class BedrockProviderAdapter
   }
 
   private static convertObjectKeysToSnakeCase(
-    obj: ProviderOptions,
-  ): ProviderOptions {
-    const newObj: ProviderOptions = {};
+    obj: SharedV2ProviderOptions,
+  ): SharedV2ProviderOptions {
+    const newObj: SharedV2ProviderOptions = {};
     for (const key in obj) {
       if (Object.prototype.hasOwnProperty.call(obj, key)) {
         const originalValue = obj[key];
@@ -51,7 +51,7 @@ export class BedrockProviderAdapter
           originalValue !== null &&
           !Array.isArray(originalValue)
             ? BedrockProviderAdapter.convertObjectKeysToSnakeCase(
-                originalValue as ProviderOptions,
+                originalValue as SharedV2ProviderOptions,
               )
             : originalValue;
         newObj[BedrockProviderAdapter.toSnakeCase(key)] = convertedValue;
@@ -60,8 +60,8 @@ export class BedrockProviderAdapter
     return newObj;
   }
 
-  transformOptions(options: ProviderOptions): ProviderOptions {
-    const transformed: ProviderOptions = {};
+  transformOptions(options: SharedV2ProviderOptions): SharedV2ProviderOptions {
+    const transformed: SharedV2ProviderOptions = {};
 
     const snakeCaseConfig =
       BedrockProviderAdapter.convertObjectKeysToSnakeCase(options);

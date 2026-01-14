@@ -119,13 +119,7 @@ function toAssistantModelMessage(
   message: OpenAICompatibleAssistantMessage,
 ): ModelMessage {
   const { tool_calls, role, content, extra_content } = message;
-  const providerOptions = extra_content?.google?.thought_signature
-    ? {
-        google: {
-          thoughtSignature: extra_content.google.thought_signature,
-        },
-      }
-    : undefined;
+  const providerOptions = extra_content;
 
   if (!tool_calls || tool_calls.length === 0) {
     return {
@@ -144,13 +138,7 @@ function toAssistantModelMessage(
         toolCallId: id,
         toolName: fn.name,
         input: parseToolInput(fn.arguments),
-        providerOptions: extra_content?.google?.thought_signature
-          ? {
-              google: {
-                thoughtSignature: extra_content.google.thought_signature,
-              },
-            }
-          : undefined,
+        providerOptions: extra_content,
       };
     }),
     providerOptions,
@@ -203,17 +191,6 @@ export const toOpenAICompatibleFinishReason = (
   return finishReason.replaceAll("-", "_") as OpenAICompatibleFinishReason;
 };
 
-function formatExtraContent(providerMetadata: any) {
-  if (!providerMetadata) return;
-  if (providerMetadata?.google?.thoughtSignature) {
-    return {
-      google: {
-        thought_signature: providerMetadata.google.thoughtSignature,
-      },
-    };
-  }
-}
-
 export const toOpenAICompatibleMessage = (
   result: GenerateTextResult<any, any>,
 ): OpenAICompatibleAssistantMessage => {
@@ -223,7 +200,7 @@ export const toOpenAICompatibleMessage = (
     content: null,
   };
 
-  const extra_content = formatExtraContent(result.providerMetadata);
+  const extra_content = result.providerMetadata;
   if (extra_content) {
     message.extra_content = extra_content;
   }
@@ -236,7 +213,7 @@ export const toOpenAICompatibleMessage = (
         name: toolCall.toolName,
         arguments: JSON.stringify(toolCall.input),
       },
-      extra_content: formatExtraContent(toolCall.providerMetadata),
+      extra_content: toolCall.providerMetadata,
     }));
   } else {
     message.content = result.text;
@@ -383,7 +360,7 @@ export function toOpenAICompatibleStream(
               index: toolCallIndexCounter++,
               type: "function",
               function: { name: toolName, arguments: JSON.stringify(input) },
-              extra_content: formatExtraContent(providerMetadata),
+              extra_content: providerMetadata,
             };
 
             enqueue({
@@ -404,8 +381,9 @@ export function toOpenAICompatibleStream(
           }
 
           case "finish": {
-            const { finishReason, totalUsage, providerMetadata } = part;
-            const extra_content = formatExtraContent(providerMetadata);
+            const { finishReason, totalUsage } = part;
+            const providerMetadata = (part as any).providerMetadata;
+            const extra_content = providerMetadata;
             enqueue({
               id: streamId,
               object: "chat.completion.chunk",

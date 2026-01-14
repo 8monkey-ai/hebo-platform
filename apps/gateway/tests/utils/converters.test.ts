@@ -1,9 +1,12 @@
 import { describe, expect, test } from "bun:test";
 
-import { toModelMessages } from "~gateway/utils/converters";
+import {
+  toModelMessages,
+  toOpenAICompatibleMessage,
+} from "~gateway/utils/converters";
 import type { OpenAICompatibleMessage } from "~gateway/utils/openai-compatible-api-schemas";
 
-import type { ModelMessage } from "ai";
+import type { GenerateTextResult, ModelMessage } from "ai";
 
 describe("toModelMessages", () => {
   test("bundles parallel tool calls into a single tool message with multiple tool-result parts", () => {
@@ -246,7 +249,7 @@ describe("toModelMessages", () => {
           {
             role: "assistant",
             content: "Hello",
-            providerOptions: { google: { thoughtSignature: "SIG_XYZ" } },
+            providerOptions: { google: { thought_signature: "SIG_XYZ" } },
           },
         ],
       },
@@ -279,7 +282,7 @@ describe("toModelMessages", () => {
                 toolName: "test_tool",
                 input: {},
                 providerOptions: {
-                  google: { thoughtSignature: "SIG_XYZ" },
+                  google: { thought_signature: "SIG_XYZ" },
                 },
               },
             ],
@@ -307,5 +310,84 @@ describe("toModelMessages", () => {
       const out = toModelMessages(input as OpenAICompatibleMessage[]);
       expect(out).toEqual(expected as ModelMessage[]);
     });
+  });
+});
+
+describe("toOpenAICompatibleMessage", () => {
+  const testCases = [
+    {
+      name: "should convert providerMetadata to extra_content for message and tool calls",
+      input: {
+        text: "Response text",
+        finishReason: "stop",
+        usage: {
+          inputTokens: 10,
+          outputTokens: 20,
+        },
+        providerMetadata: {
+          google: { thought_signature: "thought_signature_msg" },
+        },
+        toolCalls: [
+          {
+            toolCallId: "call_1",
+            toolName: "test_tool_1",
+            input: {},
+            providerMetadata: {
+              google: { thought_signature: "thought_signature_tc_1" },
+            },
+          },
+        ],
+      },
+      expected: {
+        role: "assistant",
+        // eslint-disable-next-line unicorn/no-null
+        content: null,
+        extra_content: {
+          google: { thought_signature: "thought_signature_msg" },
+        },
+        tool_calls: [
+          {
+            id: "call_1",
+            type: "function",
+            function: {
+              name: "test_tool_1",
+              arguments: "{}",
+            },
+            extra_content: {
+              google: { thought_signature: "thought_signature_tc_1" },
+            },
+          },
+        ],
+      },
+    },
+    {
+      name: "should convert providerMetadata to extra_content for message without tool calls",
+      input: {
+        text: "Response text",
+        finishReason: "stop",
+        usage: {
+          inputTokens: 10,
+          outputTokens: 20,
+        },
+        providerMetadata: {
+          google: { thought_signature: "thought_signature_msg" },
+        },
+        toolCalls: [],
+      },
+      expected: {
+        role: "assistant",
+        content: "Response text",
+        extra_content: {
+          google: { thought_signature: "thought_signature_msg" },
+        },
+      },
+    },
+  ];
+
+  test.each(testCases)("$name", ({ input, expected }) => {
+    const out = toOpenAICompatibleMessage(
+      input as unknown as GenerateTextResult<any, any>,
+    );
+    expect(out).toEqual(expected as any);
   });
 });

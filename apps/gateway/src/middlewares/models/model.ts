@@ -1,7 +1,10 @@
 import { t, type Static } from "elysia";
 
-import type { LanguageModelV2Prompt } from "@ai-sdk/provider";
-import type { ProviderOptions } from "@ai-sdk/provider-utils";
+import type {
+  LanguageModelV2Prompt,
+  SharedV2ProviderMetadata,
+  SharedV2ProviderOptions,
+} from "@ai-sdk/provider";
 
 export const supportedModel = t.Object({
   id: t.String(),
@@ -17,8 +20,11 @@ export const supportedModel = t.Object({
 export type SupportedModel = Static<typeof supportedModel>;
 
 export interface ModelAdapter extends SupportedModel {
-  transformOptions(options: ProviderOptions): ProviderOptions;
+  transformOptions(options: SharedV2ProviderOptions): SharedV2ProviderOptions;
   transformPrompt(prompt: LanguageModelV2Prompt): LanguageModelV2Prompt;
+  transformProviderMetadata(
+    metadata: SharedV2ProviderMetadata | undefined,
+  ): SharedV2ProviderMetadata | undefined;
 }
 
 export abstract class ModelAdapterBase implements ModelAdapter {
@@ -31,13 +37,17 @@ export abstract class ModelAdapterBase implements ModelAdapter {
     monthly_free_tokens: number;
   };
 
-  transformOptions(options: ProviderOptions): ProviderOptions {
-    delete options.reasoning;
-
+  transformOptions(options: SharedV2ProviderOptions): SharedV2ProviderOptions {
     return options;
   }
 
   transformPrompt(prompt: LanguageModelV2Prompt): LanguageModelV2Prompt {
     return prompt;
+  }
+
+  transformProviderMetadata(
+    metadata: SharedV2ProviderMetadata | undefined,
+  ): SharedV2ProviderMetadata | undefined {
+    return metadata;
   }
 }

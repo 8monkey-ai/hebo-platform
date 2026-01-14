@@ -10,10 +10,12 @@ import { ModelAdapterFactory } from "./models";
 import { ProviderAdapterFactory } from "./providers";
 
 import type {
-  LanguageModelMiddleware,
-  EmbeddingModel,
-  LanguageModel,
-} from "ai";
+  LanguageModelV2,
+  LanguageModelV2Content,
+  LanguageModelV2Middleware,
+  LanguageModelV2StreamPart,
+} from "@ai-sdk/provider";
+import type { EmbeddingModel, LanguageModel } from "ai";
 
 type Modality = "chat" | "embedding";
 
@@ -56,8 +58,8 @@ export const aiModelFactory = new Elysia({
           : (provider.textEmbeddingModel(modelId) as AiModelFor<M>);
 
       if (modality === "chat") {
-        const modelSpecificMiddleware: LanguageModelMiddleware = {
-          transformParams: ({ params }: { params: any }) => {
+        const modelSpecificMiddleware: LanguageModelV2Middleware = {
+          transformParams: async ({ params }) => {
             return {
               ...params,
               providerOptions: params.providerOptions
@@ -66,10 +68,59 @@ export const aiModelFactory = new Elysia({
               prompt: modelAdapter.transformPrompt(params.prompt),
             };
           },
+          wrapGenerate: async ({ doGenerate }) => {
+            const result = await doGenerate();
+
+            const transformedProviderMetadata =
+              modelAdapter.transformProviderMetadata(result.providerMetadata);
+
+            const transformedContent = result.content?.map(
+              (part: LanguageModelV2Content) => ({
+                ...part,
+                providerMetadata:
+                  "providerMetadata" in part
+                    ? modelAdapter.transformProviderMetadata(
+                        part.providerMetadata,
+                      )
+                    : undefined,
+              }),
+            );
+            return {
+              ...result,
+              content: transformedContent,
+              providerMetadata: transformedProviderMetadata,
+            };
+          },
+          wrapStream: async ({ doStream }) => {
+            const { stream, ...rest } = await doStream();
+
+            const transformStream = new TransformStream<
+              LanguageModelV2StreamPart,
+              LanguageModelV2StreamPart
+            >({
+              transform(chunk, controller) {
+                if ("providerMetadata" in chunk && chunk.providerMetadata) {
+                  controller.enqueue({
+                    ...chunk,
+                    providerMetadata: modelAdapter.transformProviderMetadata(
+                      chunk.providerMetadata,
+                    ),
+                  });
+                } else {
+                  controller.enqueue(chunk);
+                }
+              },
+            });
+
+            return {
+              stream: stream.pipeThrough(transformStream),
+              ...rest,
+            };
+          },
         };
 
-        const providerSpecificMiddleware: LanguageModelMiddleware = {
-          transformParams: ({ params }: { params: any }) => {
+        const providerSpecificMiddleware: LanguageModelV2Middleware = {
+          transformParams: async ({ params }) => {
             return {
               ...params,
               providerOptions: params.providerOptions
@@ -84,7 +135,7 @@ export const aiModelFactory = new Elysia({
         };
 
         model = wrapLanguageModel({
-          model: model as any,
+          model: model as LanguageModelV2,
           middleware: [modelSpecificMiddleware, providerSpecificMiddleware],
         }) as AiModelFor<M>;
       }

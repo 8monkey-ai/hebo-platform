@@ -5,8 +5,10 @@ import type {
   ProviderSlug,
 } from "~api/modules/providers/types";
 
-import type { LanguageModelV2Prompt } from "@ai-sdk/provider";
-import type { ProviderOptions } from "@ai-sdk/provider-utils";
+import type {
+  LanguageModelV2Prompt,
+  SharedV2ProviderOptions,
+} from "@ai-sdk/provider";
 import type { Provider } from "ai";
 
 export interface ProviderAdapter {
@@ -15,7 +17,7 @@ export interface ProviderAdapter {
   getProvider(): Promise<Provider>;
   getProviderOptionsName(): string;
   resolveModelId(): Promise<string>;
-  transformOptions(options: ProviderOptions): ProviderOptions;
+  transformOptions(options: SharedV2ProviderOptions): SharedV2ProviderOptions;
   transformPrompt(prompt: LanguageModelV2Prompt): LanguageModelV2Prompt;
 }
 
@@ -54,7 +56,7 @@ export abstract class ProviderAdapterBase implements ProviderAdapter {
     return modelId;
   }
 
-  transformOptions(options: ProviderOptions): ProviderOptions {
+  transformOptions(options: SharedV2ProviderOptions): SharedV2ProviderOptions {
     return options;
   }
 

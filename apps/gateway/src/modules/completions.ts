@@ -17,7 +17,7 @@ import {
   OpenAICompatibleReasoningEffort,
 } from "~gateway/utils/openai-compatible-api-schemas";
 
-import type { ProviderOptions } from "@ai-sdk/provider-utils";
+import type { SharedV2ProviderOptions } from "@ai-sdk/provider";
 
 export const completions = new Elysia({
   name: "completions",
@@ -43,7 +43,7 @@ export const completions = new Elysia({
       const modelMessages = toModelMessages(messages);
       const coreToolChoice = toToolChoice(tool_choice);
 
-      const providerOptions: ProviderOptions = {};
+      const providerOptions: SharedV2ProviderOptions = {};
       if (reasoning) {
         providerOptions.reasoning = reasoning;
       } else if (reasoning_effort) {

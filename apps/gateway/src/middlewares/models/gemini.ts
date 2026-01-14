@@ -4,7 +4,18 @@ import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible
 
 import { ModelAdapterBase } from "./model";
 
-import type { ProviderOptions } from "@ai-sdk/provider-utils";
+import type {
+  LanguageModelV2Prompt,
+  SharedV2ProviderMetadata,
+  SharedV2ProviderOptions,
+  JSONValue,
+} from "@ai-sdk/provider";
+
+interface ThinkingConfig {
+  includeThoughts?: boolean;
+  thinkingBudget?: number;
+  thinkingLevel?: "minimal" | "low" | "medium" | "high" | "xhigh";
+}
 
 export abstract class GeminiModelAdapter extends ModelAdapterBase {
   readonly modality = "chat";
@@ -13,24 +24,69 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
     monthly_free_tokens: 0,
   };
 
-  transformOptions(options: ProviderOptions): ProviderOptions {
-    const transformed: ProviderOptions = {};
+  transformOptions(options: SharedV2ProviderOptions): SharedV2ProviderOptions {
+    const transformed: SharedV2ProviderOptions = {};
 
     if (options.reasoning) {
       const thinkingConfig = this.transformReasoning(
         options.reasoning as OpenAICompatibleReasoning,
       );
       if (thinkingConfig) {
-        transformed.thinkingConfig = thinkingConfig;
+        transformed.thinkingConfig = thinkingConfig as unknown as Record<
+          string,
+          JSONValue
+        >;
       }
     }
 
     return transformed;
   }
 
+  transformPrompt(prompt: LanguageModelV2Prompt): LanguageModelV2Prompt {
+    return prompt.map((message) => ({
+      ...message,
+      providerOptions: this.transformThinkingOptions(message.providerOptions),
+      content: Array.isArray(message.content)
+        ? message.content.map((part) => ({
+            ...part,
+            providerOptions: this.transformThinkingOptions(
+              part.providerOptions,
+            ),
+          }))
+        : message.content,
+    })) as LanguageModelV2Prompt;
+  }
+
+  private transformThinkingOptions(
+    options?: SharedV2ProviderOptions,
+  ): SharedV2ProviderOptions | undefined {
+    const opts = options as
+      | {
+          google?: {
+            thought_signature?: string;
+            thoughtSignature?: string;
+            [key: string]: unknown;
+          };
+          [key: string]: unknown;
+        }
+      | undefined;
+
+    if (opts?.google?.thought_signature) {
+      const { thought_signature, ...restGoogle } = opts.google;
+      return {
+        ...options,
+        google: {
+          ...restGoogle,
+          thoughtSignature: thought_signature,
+        },
+      };
+    }
+    return options;
+  }
+
   protected transformReasoning(
     params: OpenAICompatibleReasoning,
-  ): Record<string, any> | undefined {
+  ): ThinkingConfig | undefined {
     const isReasoningActive =
       (params.enabled === true ||
         (params.enabled === undefined &&
@@ -38,6 +94,11 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
       params.effort !== "none";
 
     if (isReasoningActive) {
+      const thinkingConfig: ThinkingConfig = {};
+
+      thinkingConfig.includeThoughts =
+        params.enabled !== false && params.exclude !== true;
+
       const specificConfig = this.getThinkingConfig(params);
 
       return Object.assign(
@@ -53,8 +114,8 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
 
   protected getThinkingConfig(
     params: OpenAICompatibleReasoning,
-  ): Record<string, any> {
-    const thinkingConfig: Record<string, any> = {};
+  ): ThinkingConfig {
+    const thinkingConfig: ThinkingConfig = {};
 
     if (params.max_tokens === undefined) {
       switch (params.effort) {
@@ -83,6 +144,24 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
 
     return thinkingConfig;
   }
+
+  transformProviderMetadata(
+    metadata: SharedV2ProviderMetadata | undefined,
+  ): SharedV2ProviderMetadata | undefined {
+    if (metadata?.google?.thoughtSignature) {
+      const newMetadataGoogle: SharedV2ProviderMetadata["google"] = {
+        ...metadata.google,
+        thought_signature: metadata.google.thoughtSignature,
+      };
+      delete newMetadataGoogle.thoughtSignature;
+
+      return {
+        ...metadata,
+        google: newMetadataGoogle,
+      };
+    }
+    return metadata;
+  }
 }
 
 export abstract class Gemini3ModelAdapter extends GeminiModelAdapter {}
@@ -94,13 +173,13 @@ export class Gemini3ProPreviewAdapter extends Gemini3ModelAdapter {
 
   protected getThinkingConfig(
     params: OpenAICompatibleReasoning,
-  ): Record<string, any> {
+  ): ThinkingConfig {
     if (params.max_tokens !== undefined) {
       throw new BadRequestError(
         "max_tokens is not supported for reasoning in Gemini 3 models. Please use 'effort' instead.",
       );
     }
-    const thinkingConfig: Record<string, any> = {};
+    const thinkingConfig: ThinkingConfig = {};
 
     switch (params.effort) {
       case "minimal":
@@ -131,13 +210,13 @@ export class Gemini3FlashPreviewAdapter extends Gemini3ModelAdapter {
 
   protected getThinkingConfig(
     params: OpenAICompatibleReasoning,
-  ): Record<string, any> {
+  ): ThinkingConfig {
     if (params.max_tokens !== undefined) {
       throw new BadRequestError(
         "max_tokens is not supported for reasoning in Gemini 3 models. Please use 'effort' instead.",
       );
     }
-    const thinkingConfig: Record<string, any> = {};
+    const thinkingConfig: ThinkingConfig = {};
 
     switch (params.effort) {
       case "minimal": {
