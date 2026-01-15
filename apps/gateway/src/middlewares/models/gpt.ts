@@ -58,7 +58,7 @@ export class GptOss120bAdapter extends GptModelAdapter {
   readonly owned_by = "openai";
   readonly created = 1_764_888_221;
   readonly pricing = {
-    monthly_free_tokens: 100_000_000,
+    monthly_free_tokens: 6_000_000_000,
   };
 }
 
@@ -68,6 +68,6 @@ export class GptOss20bAdapter extends GptModelAdapter {
   readonly owned_by = "openai";
   readonly created = 1_764_888_221;
   readonly pricing = {
-    monthly_free_tokens: 400_000_000,
+    monthly_free_tokens: 12_000_000_000,
   };
 }
