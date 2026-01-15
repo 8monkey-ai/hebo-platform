@@ -9,11 +9,12 @@ import { ModelConfigService } from "./model-config";
 import { ModelAdapterFactory } from "./models";
 import { ProviderAdapterFactory } from "./providers";
 
+import type { LanguageModelV2 } from "@ai-sdk/provider";
 import type {
-  LanguageModelV2,
-  LanguageModelV2Middleware,
-} from "@ai-sdk/provider";
-import type { EmbeddingModel, LanguageModel } from "ai";
+  LanguageModelMiddleware,
+  EmbeddingModel,
+  LanguageModel,
+} from "ai";
 
 type Modality = "chat" | "embedding";
 
@@ -56,7 +57,7 @@ export const aiModelFactory = new Elysia({
           : (provider.textEmbeddingModel(modelId) as AiModelFor<M>);
 
       if (modality === "chat") {
-        const modelSpecificMiddleware: LanguageModelV2Middleware = {
+        const modelSpecificMiddleware: LanguageModelMiddleware = {
           transformParams: async ({ params }) => {
             return {
               ...params,
@@ -68,7 +69,7 @@ export const aiModelFactory = new Elysia({
           },
         };
 
-        const providerSpecificMiddleware: LanguageModelV2Middleware = {
+        const providerSpecificMiddleware: LanguageModelMiddleware = {
           transformParams: async ({ params }) => {
             return {
               ...params,

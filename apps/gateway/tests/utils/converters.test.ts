@@ -250,9 +250,7 @@ describe("toModelMessages", () => {
             role: "assistant",
             content: "Hello",
             providerOptions: {
-              extra_content: {
-                google: { thought_signature: "SIG_XYZ" },
-              },
+              google: { thought_signature: "SIG_XYZ" },
             },
           },
         ],
@@ -286,9 +284,7 @@ describe("toModelMessages", () => {
                 toolName: "test_tool",
                 input: {},
                 providerOptions: {
-                  extra_content: {
-                    google: { thought_signature: "SIG_XYZ" },
-                  },
+                  google: { thought_signature: "SIG_XYZ" },
                 },
               },
             ],
@@ -326,9 +322,7 @@ describe("toOpenAICompatibleMessage", () => {
       input: {
         text: "Response text",
         providerMetadata: {
-          extra_content: {
-            google: { thought_signature: "thought_signature_msg" },
-          },
+          google: { thought_signature: "thought_signature_msg" },
         },
         toolCalls: [
           {
@@ -336,9 +330,7 @@ describe("toOpenAICompatibleMessage", () => {
             toolName: "test_tool_1",
             input: {},
             providerMetadata: {
-              extra_content: {
-                google: { thought_signature: "thought_signature_tc_1" },
-              },
+              google: { thought_signature: "thought_signature_tc_1" },
             },
           },
         ],
@@ -370,9 +362,7 @@ describe("toOpenAICompatibleMessage", () => {
       input: {
         text: "Response text",
         providerMetadata: {
-          extra_content: {
-            google: { thought_signature: "thought_signature_msg" },
-          },
+          google: { thought_signature: "thought_signature_msg" },
         },
         toolCalls: [],
       },

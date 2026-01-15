@@ -7,7 +7,7 @@ import {
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import type { BedrockProviderConfig } from "~api/modules/providers/types";
-import { toSnakeCase } from "~gateway/utils/converters";
+import { toSnakeCase } from "~gateway/utils/helpers";
 
 import { assumeRole } from "./adapters/aws";
 import { ProviderAdapterBase, type ProviderAdapter } from "./provider";

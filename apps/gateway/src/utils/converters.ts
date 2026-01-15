@@ -121,9 +121,7 @@ function toAssistantModelMessage(
 ): ModelMessage {
   const { tool_calls, role, content, extra_content } = message;
   const providerOptions = extra_content
-    ? ({
-        extra_content,
-      } as ProviderOptions)
+    ? (extra_content as ProviderOptions)
     : undefined;
 
   if (!tool_calls || tool_calls.length === 0) {
@@ -143,9 +141,9 @@ function toAssistantModelMessage(
         toolCallId: id,
         toolName: fn.name,
         input: parseToolInput(fn.arguments),
-        providerOptions: {
-          extra_content,
-        } as ProviderOptions,
+        providerOptions: extra_content
+          ? (extra_content as ProviderOptions)
+          : undefined,
       };
     }),
     providerOptions,
@@ -205,7 +203,7 @@ export const toOpenAICompatibleMessage = (
     role: "assistant",
     // eslint-disable-next-line unicorn/no-null
     content: null,
-    ...result.providerMetadata,
+    extra_content: result.providerMetadata,
   };
 
   if (result.toolCalls && result.toolCalls.length > 0) {
@@ -216,7 +214,7 @@ export const toOpenAICompatibleMessage = (
         name: toolCall.toolName,
         arguments: JSON.stringify(toolCall.input),
       },
-      ...toolCall.providerMetadata,
+      extra_content: toolCall.providerMetadata,
     }));
   } else {
     message.content = result.text;
@@ -363,7 +361,7 @@ export function toOpenAICompatibleStream(
               index: toolCallIndexCounter++,
               type: "function",
               function: { name: toolName, arguments: JSON.stringify(input) },
-              ...providerMetadata,
+              extra_content: providerMetadata,
             };
 
             enqueue({
@@ -394,7 +392,9 @@ export function toOpenAICompatibleStream(
               choices: [
                 {
                   index: 0,
-                  delta: providerMetadata ? { ...providerMetadata } : {},
+                  delta: providerMetadata
+                    ? { extra_content: providerMetadata }
+                    : {},
                   finish_reason: toOpenAICompatibleFinishReason(finishReason),
                 },
               ],
@@ -461,35 +461,4 @@ export function toOpenAICompatibleNonStreamResponse(
       },
     },
   };
-}
-
-export function toCamelCase(obj: any): any {
-  if (Array.isArray(obj)) {
-    return obj.map((v) => toCamelCase(v));
-  } else if (obj !== null && typeof obj === "object") {
-    const result: any = {};
-    for (const key of Object.keys(obj)) {
-      const camelKey = key.replaceAll(/_([a-z])/g, (g) => g[1].toUpperCase());
-      result[camelKey] = toCamelCase(obj[key]);
-    }
-    return result;
-  }
-  return obj;
-}
-
-export function toSnakeCase(obj: any): any {
-  if (Array.isArray(obj)) {
-    return obj.map((v) => toSnakeCase(v));
-  } else if (obj !== null && typeof obj === "object") {
-    const result: any = {};
-    for (const key of Object.keys(obj)) {
-      const snakeKey = key.replaceAll(
-        /[A-Z]/g,
-        (letter) => `_${letter.toLowerCase()}`,
-      );
-      result[snakeKey] = toSnakeCase(obj[key]);
-    }
-    return result;
-  }
-  return obj;
 }

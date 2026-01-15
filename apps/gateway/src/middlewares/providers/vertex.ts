@@ -3,7 +3,7 @@ import { createVertex } from "@ai-sdk/google-vertex";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import type { VertexProviderConfig } from "~api/modules/providers/types";
-import { toCamelCase, toSnakeCase } from "~gateway/utils/converters";
+import { toCamelCase, toSnakeCase } from "~gateway/utils/helpers";
 
 import { injectMetadataCredentials, buildWifOptions } from "./adapters/aws";
 import { ProviderAdapterBase, type ProviderAdapter } from "./provider";
@@ -94,9 +94,7 @@ export class VertexProviderAdapter
     metadata: SharedV2ProviderMetadata | undefined,
   ): SharedV2ProviderMetadata | undefined {
     if (!metadata) return metadata;
-    return {
-      extra_content: toSnakeCase(metadata),
-    } as unknown as SharedV2ProviderMetadata;
+    return toSnakeCase(metadata) as unknown as SharedV2ProviderMetadata;
   }
 
   private convertProviderOptions(
@@ -104,16 +102,7 @@ export class VertexProviderAdapter
   ): ProviderOptions | undefined {
     if (!options) return options;
 
-    if (options.extra_content) {
-      const { extra_content, ...rest } = options;
-      const camelCasedExtra = toCamelCase(extra_content);
-      return {
-        ...rest,
-        ...camelCasedExtra,
-      };
-    }
-
-    return options;
+    return toCamelCase(options) as ProviderOptions;
   }
 
   async initialize(config?: VertexProviderConfig): Promise<this> {

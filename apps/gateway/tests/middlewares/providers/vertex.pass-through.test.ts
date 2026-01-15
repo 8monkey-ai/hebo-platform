@@ -28,10 +28,8 @@ describe("Vertex Adapter - Pass-through transformations", () => {
             role: "assistant",
             content: [{ type: "text", text: "Hi there" }],
             providerOptions: {
-              extra_content: {
-                google: {
-                  thought_signature: "input_signature_123",
-                },
+              google: {
+                thought_signature: "input_signature_123",
               },
             },
           },
@@ -62,10 +60,8 @@ describe("Vertex Adapter - Pass-through transformations", () => {
                 type: "text",
                 text: "Thoughtful response",
                 providerOptions: {
-                  extra_content: {
-                    google: {
-                      thought_signature: "content_signature_456",
-                    },
+                  google: {
+                    thought_signature: "content_signature_456",
                   },
                 },
               },
@@ -153,13 +149,11 @@ describe("Vertex Adapter - Pass-through transformations", () => {
           },
         },
         expected: {
-          extra_content: {
-            google: {
-              thought_signature: "output_signature_789",
-              some_other_camel_field: "value",
-            },
-            some_other_top_level_field: "topValue",
+          google: {
+            thought_signature: "output_signature_789",
+            some_other_camel_field: "value",
           },
+          some_other_top_level_field: "topValue",
         },
       },
       {
@@ -174,11 +168,9 @@ describe("Vertex Adapter - Pass-through transformations", () => {
           },
         },
         expected: {
-          extra_content: {
-            google: {
-              nested_object: {
-                deeply_nested_key: "deepValue",
-              },
+          google: {
+            nested_object: {
+              deeply_nested_key: "deepValue",
             },
           },
         },
