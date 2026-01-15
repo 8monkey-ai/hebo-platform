@@ -7,11 +7,12 @@ import {
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import type { BedrockProviderConfig } from "~api/modules/providers/types";
+import { toSnakeCase } from "~gateway/utils/converters";
 
 import { assumeRole } from "./adapters/aws";
 import { ProviderAdapterBase, type ProviderAdapter } from "./provider";
 
-import type { SharedV2ProviderOptions } from "@ai-sdk/provider";
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 type BedrockCredentials =
   ReturnType<typeof assumeRole> extends Promise<infer T> ? T : never;
@@ -35,36 +36,10 @@ export class BedrockProviderAdapter
     "anthropic/claude-opus-4-5-v1": "anthropic.claude-opus-4-5-20251101-v1:0",
   };
 
-  private static toSnakeCase(str: string): string {
-    return str.replaceAll(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
-  }
+  transformOptions(options: ProviderOptions): ProviderOptions {
+    const transformed: ProviderOptions = {};
 
-  private static convertObjectKeysToSnakeCase(
-    obj: SharedV2ProviderOptions,
-  ): SharedV2ProviderOptions {
-    const newObj: SharedV2ProviderOptions = {};
-    for (const key in obj) {
-      if (Object.prototype.hasOwnProperty.call(obj, key)) {
-        const originalValue = obj[key];
-        const convertedValue =
-          typeof originalValue === "object" &&
-          originalValue !== null &&
-          !Array.isArray(originalValue)
-            ? BedrockProviderAdapter.convertObjectKeysToSnakeCase(
-                originalValue as SharedV2ProviderOptions,
-              )
-            : originalValue;
-        newObj[BedrockProviderAdapter.toSnakeCase(key)] = convertedValue;
-      }
-    }
-    return newObj;
-  }
-
-  transformOptions(options: SharedV2ProviderOptions): SharedV2ProviderOptions {
-    const transformed: SharedV2ProviderOptions = {};
-
-    const snakeCaseConfig =
-      BedrockProviderAdapter.convertObjectKeysToSnakeCase(options);
+    const snakeCaseConfig = toSnakeCase(options);
     if (Object.keys(snakeCaseConfig).length > 0) {
       transformed.additionalModelRequestFields = snakeCaseConfig;
     }

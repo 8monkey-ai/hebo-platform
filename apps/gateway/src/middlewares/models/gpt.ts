@@ -4,13 +4,13 @@ import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible
 
 import { ModelAdapterBase } from "./model";
 
-import type { SharedV2ProviderOptions } from "@ai-sdk/provider";
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export abstract class GptModelAdapter extends ModelAdapterBase {
   readonly modality = "chat";
 
-  transformOptions(options: SharedV2ProviderOptions): SharedV2ProviderOptions {
-    const transformed: SharedV2ProviderOptions = {};
+  transformOptions(options: ProviderOptions): ProviderOptions {
+    const transformed: ProviderOptions = {};
 
     if (options.reasoning) {
       const reasoningConfig = this.transformReasoning(

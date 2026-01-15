@@ -7,8 +7,9 @@ import type {
 
 import type {
   LanguageModelV2Prompt,
-  SharedV2ProviderOptions,
+  LanguageModelV2StreamPart,
 } from "@ai-sdk/provider";
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
 import type { Provider } from "ai";
 
 export interface ProviderAdapter {
@@ -17,8 +18,12 @@ export interface ProviderAdapter {
   getProvider(): Promise<Provider>;
   getProviderOptionsName(): string;
   resolveModelId(): Promise<string>;
-  transformOptions(options: SharedV2ProviderOptions): SharedV2ProviderOptions;
+  transformOptions(options: ProviderOptions): ProviderOptions;
   transformPrompt(prompt: LanguageModelV2Prompt): LanguageModelV2Prompt;
+  transformResult(result: any): any;
+  transformStream(
+    stream: ReadableStream<LanguageModelV2StreamPart>,
+  ): ReadableStream<LanguageModelV2StreamPart>;
 }
 
 export abstract class ProviderAdapterBase implements ProviderAdapter {
@@ -56,7 +61,7 @@ export abstract class ProviderAdapterBase implements ProviderAdapter {
     return modelId;
   }
 
-  transformOptions(options: SharedV2ProviderOptions): SharedV2ProviderOptions {
+  transformOptions(options: ProviderOptions): ProviderOptions {
     return options;
   }
 
@@ -65,5 +70,15 @@ export abstract class ProviderAdapterBase implements ProviderAdapter {
 
   transformPrompt(prompt: LanguageModelV2Prompt): LanguageModelV2Prompt {
     return prompt;
+  }
+
+  transformResult(result: any): any {
+    return result;
+  }
+
+  transformStream(
+    stream: ReadableStream<LanguageModelV2StreamPart>,
+  ): ReadableStream<LanguageModelV2StreamPart> {
+    return stream;
   }
 }

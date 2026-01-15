@@ -1,15 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
-import { GeminiModelAdapter } from "~gateway/middlewares/models/gemini";
+import { VertexProviderAdapter } from "~gateway/middlewares/providers/vertex";
 
 import type { LanguageModelV2Prompt } from "@ai-sdk/provider";
 
-describe("Gemini Adapter thoughtSignature transformations", () => {
-  const geminiAdapter = new (class extends GeminiModelAdapter {
-    readonly id = "test-gemini-id";
-    readonly name = "Test Gemini Model";
-    readonly created = 1_234_567_890;
-  })();
+describe("Vertex Adapter thoughtSignature transformations", () => {
+  const vertexAdapter = new VertexProviderAdapter(
+    "google/gemini-3-pro-preview",
+  );
 
   describe("transformPrompt (Input)", () => {
     type TestCase = {
@@ -20,7 +18,7 @@ describe("Gemini Adapter thoughtSignature transformations", () => {
 
     const testCases: TestCase[] = [
       {
-        name: "should convert thought_signature to thoughtSignature in message providerOptions",
+        name: "should convert extra_content (snake_case) with nested google to top-level camelCase in message providerOptions",
         input: [
           {
             role: "user",
@@ -30,8 +28,10 @@ describe("Gemini Adapter thoughtSignature transformations", () => {
             role: "assistant",
             content: [{ type: "text", text: "Hi there" }],
             providerOptions: {
-              google: {
-                thought_signature: "input_signature_123",
+              extra_content: {
+                google: {
+                  thought_signature: "input_signature_123",
+                },
               },
             },
           },
@@ -53,7 +53,7 @@ describe("Gemini Adapter thoughtSignature transformations", () => {
         ],
       },
       {
-        name: "should convert thought_signature to thoughtSignature in content part providerOptions",
+        name: "should convert extra_content (snake_case) with nested google to top-level camelCase in content part providerOptions",
         input: [
           {
             role: "assistant",
@@ -62,8 +62,10 @@ describe("Gemini Adapter thoughtSignature transformations", () => {
                 type: "text",
                 text: "Thoughtful response",
                 providerOptions: {
-                  google: {
-                    thought_signature: "content_signature_456",
+                  extra_content: {
+                    google: {
+                      thought_signature: "content_signature_456",
+                    },
                   },
                 },
               },
@@ -88,7 +90,7 @@ describe("Gemini Adapter thoughtSignature transformations", () => {
         ],
       },
       {
-        name: "should not modify prompt without google thought_signature",
+        name: "should not modify prompt without extra_content",
         input: [
           {
             role: "user",
@@ -126,56 +128,78 @@ describe("Gemini Adapter thoughtSignature transformations", () => {
     ];
 
     test.each(testCases)("$name", ({ input, expected }) => {
-      const transformedPrompt = geminiAdapter.transformPrompt(input);
+      const transformedPrompt = vertexAdapter.transformPrompt(input);
       expect(transformedPrompt).toEqual(expected);
     });
   });
 
-  describe("transformProviderMetadata (Output)", () => {
+  describe("transformResult (Output)", () => {
     type TestCase = {
       name: string;
-      input: Record<string, any> | undefined;
-      expected: Record<string, any> | undefined;
+      input: any; // Raw result from AI SDK
+      expectedMetadata: Record<string, any> | undefined; // The providerMetadata part of the final result
     };
 
     const testCases: TestCase[] = [
       {
-        name: "should convert thoughtSignature to thought_signature in output providerMetadata",
+        name: "should convert providerMetadata (camelCase) to snake_case and nest in extra_content",
         input: {
-          google: {
-            thoughtSignature: "output_signature_789",
+          providerMetadata: {
+            google: {
+              thoughtSignature: "output_signature_789",
+              someOtherCamelField: "value",
+            },
+            someOtherTopLevelField: "topValue",
           },
         },
-        expected: {
-          google: {
-            thought_signature: "output_signature_789",
+        expectedMetadata: {
+          extra_content: {
+            google: {
+              thought_signature: "output_signature_789",
+              some_other_camel_field: "value",
+            },
+            some_other_top_level_field: "topValue",
           },
         },
       },
       {
-        name: "should not modify providerMetadata without google thoughtSignature",
+        name: "should handle nested objects in providerMetadata",
         input: {
-          otherProvider: {
-            someField: "value",
+          providerMetadata: {
+            google: {
+              nestedObject: {
+                deeplyNestedKey: "deepValue",
+              },
+            },
           },
         },
-        expected: {
-          otherProvider: {
-            someField: "value",
+        expectedMetadata: {
+          extra_content: {
+            google: {
+              nested_object: {
+                deeply_nested_key: "deepValue",
+              },
+            },
           },
         },
       },
       {
-        name: "should not modify undefined providerMetadata",
-        input: undefined,
-        expected: undefined,
+        name: "should handle undefined providerMetadata",
+        input: {},
+        expectedMetadata: undefined,
+      },
+      {
+        name: "should handle null providerMetadata",
+        // eslint-disable-next-line unicorn/no-null
+        input: { providerMetadata: null },
+        // eslint-disable-next-line unicorn/no-null
+        expectedMetadata: null,
       },
     ];
 
-    test.each(testCases)("$name", ({ input, expected }) => {
-      const transformedMetadata =
-        geminiAdapter.transformProviderMetadata(input);
-      expect(transformedMetadata).toEqual(expected);
+    test.each(testCases)("$name", ({ input, expectedMetadata }) => {
+      const result = vertexAdapter.transformResult(input);
+      expect(result.providerMetadata).toEqual(expectedMetadata);
     });
   });
 });

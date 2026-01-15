@@ -12,6 +12,7 @@ import type {
   OpenAICompatibleToolCallDelta,
   OpenAICompatibleToolMessage,
 } from "./openai-compatible-api-schemas";
+import type { ProviderOptions } from "@ai-sdk/provider-utils";
 import type {
   FinishReason,
   GenerateTextResult,
@@ -119,7 +120,11 @@ function toAssistantModelMessage(
   message: OpenAICompatibleAssistantMessage,
 ): ModelMessage {
   const { tool_calls, role, content, extra_content } = message;
-  const providerOptions = extra_content;
+  const providerOptions = extra_content
+    ? ({
+        extra_content,
+      } as ProviderOptions)
+    : undefined;
 
   if (!tool_calls || tool_calls.length === 0) {
     return {
@@ -138,7 +143,9 @@ function toAssistantModelMessage(
         toolCallId: id,
         toolName: fn.name,
         input: parseToolInput(fn.arguments),
-        providerOptions: extra_content,
+        providerOptions: {
+          extra_content,
+        } as ProviderOptions,
       };
     }),
     providerOptions,
@@ -198,12 +205,8 @@ export const toOpenAICompatibleMessage = (
     role: "assistant",
     // eslint-disable-next-line unicorn/no-null
     content: null,
+    ...result.providerMetadata,
   };
-
-  const extra_content = result.providerMetadata;
-  if (extra_content) {
-    message.extra_content = extra_content;
-  }
 
   if (result.toolCalls && result.toolCalls.length > 0) {
     message.tool_calls = result.toolCalls.map((toolCall) => ({
@@ -213,7 +216,7 @@ export const toOpenAICompatibleMessage = (
         name: toolCall.toolName,
         arguments: JSON.stringify(toolCall.input),
       },
-      extra_content: toolCall.providerMetadata,
+      ...toolCall.providerMetadata,
     }));
   } else {
     message.content = result.text;
@@ -360,7 +363,7 @@ export function toOpenAICompatibleStream(
               index: toolCallIndexCounter++,
               type: "function",
               function: { name: toolName, arguments: JSON.stringify(input) },
-              extra_content: providerMetadata,
+              ...providerMetadata,
             };
 
             enqueue({
@@ -383,7 +386,6 @@ export function toOpenAICompatibleStream(
           case "finish": {
             const { finishReason, totalUsage } = part;
             const providerMetadata = (part as any).providerMetadata;
-            const extra_content = providerMetadata;
             enqueue({
               id: streamId,
               object: "chat.completion.chunk",
@@ -392,7 +394,7 @@ export function toOpenAICompatibleStream(
               choices: [
                 {
                   index: 0,
-                  delta: extra_content ? { extra_content } : {},
+                  delta: providerMetadata ? { ...providerMetadata } : {},
                   finish_reason: toOpenAICompatibleFinishReason(finishReason),
                 },
               ],
@@ -459,4 +461,35 @@ export function toOpenAICompatibleNonStreamResponse(
       },
     },
   };
+}
+
+export function toCamelCase(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map((v) => toCamelCase(v));
+  } else if (obj !== null && typeof obj === "object") {
+    const result: any = {};
+    for (const key of Object.keys(obj)) {
+      const camelKey = key.replaceAll(/_([a-z])/g, (g) => g[1].toUpperCase());
+      result[camelKey] = toCamelCase(obj[key]);
+    }
+    return result;
+  }
+  return obj;
+}
+
+export function toSnakeCase(obj: any): any {
+  if (Array.isArray(obj)) {
+    return obj.map((v) => toSnakeCase(v));
+  } else if (obj !== null && typeof obj === "object") {
+    const result: any = {};
+    for (const key of Object.keys(obj)) {
+      const snakeKey = key.replaceAll(
+        /[A-Z]/g,
+        (letter) => `_${letter.toLowerCase()}`,
+      );
+      result[snakeKey] = toSnakeCase(obj[key]);
+    }
+    return result;
+  }
+  return obj;
 }

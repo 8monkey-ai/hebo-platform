@@ -11,9 +11,7 @@ import { ProviderAdapterFactory } from "./providers";
 
 import type {
   LanguageModelV2,
-  LanguageModelV2Content,
   LanguageModelV2Middleware,
-  LanguageModelV2StreamPart,
 } from "@ai-sdk/provider";
 import type { EmbeddingModel, LanguageModel } from "ai";
 
@@ -68,55 +66,6 @@ export const aiModelFactory = new Elysia({
               prompt: modelAdapter.transformPrompt(params.prompt),
             };
           },
-          wrapGenerate: async ({ doGenerate }) => {
-            const result = await doGenerate();
-
-            const transformedProviderMetadata =
-              modelAdapter.transformProviderMetadata(result.providerMetadata);
-
-            const transformedContent = result.content?.map(
-              (part: LanguageModelV2Content) => ({
-                ...part,
-                providerMetadata:
-                  "providerMetadata" in part
-                    ? modelAdapter.transformProviderMetadata(
-                        part.providerMetadata,
-                      )
-                    : undefined,
-              }),
-            );
-            return {
-              ...result,
-              content: transformedContent,
-              providerMetadata: transformedProviderMetadata,
-            };
-          },
-          wrapStream: async ({ doStream }) => {
-            const { stream, ...rest } = await doStream();
-
-            const transformStream = new TransformStream<
-              LanguageModelV2StreamPart,
-              LanguageModelV2StreamPart
-            >({
-              transform(chunk, controller) {
-                if ("providerMetadata" in chunk && chunk.providerMetadata) {
-                  controller.enqueue({
-                    ...chunk,
-                    providerMetadata: modelAdapter.transformProviderMetadata(
-                      chunk.providerMetadata,
-                    ),
-                  });
-                } else {
-                  controller.enqueue(chunk);
-                }
-              },
-            });
-
-            return {
-              stream: stream.pipeThrough(transformStream),
-              ...rest,
-            };
-          },
         };
 
         const providerSpecificMiddleware: LanguageModelV2Middleware = {
@@ -130,6 +79,17 @@ export const aiModelFactory = new Elysia({
                   }
                 : undefined,
               prompt: providerAdapter.transformPrompt(params.prompt),
+            };
+          },
+          wrapGenerate: async ({ doGenerate }) => {
+            const result = await doGenerate();
+            return providerAdapter.transformResult(result);
+          },
+          wrapStream: async ({ doStream }) => {
+            const { stream, ...rest } = await doStream();
+            return {
+              stream: providerAdapter.transformStream(stream),
+              ...rest,
             };
           },
         };

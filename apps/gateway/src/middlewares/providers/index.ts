@@ -33,7 +33,6 @@ export class ProviderAdapterFactory {
         return await this.createAdapter(
           ProviderAdapterClass.providerSlug,
           modelType,
-          undefined,
         );
       }
     }
