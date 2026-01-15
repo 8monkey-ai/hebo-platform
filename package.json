@@ -47,7 +47,7 @@
     "lint": "turbo run lint --parallel",
     "lint:deps": "check-dependency-version-consistency .",
     "lint:staged": "eslint --cache --fix",
-    "preinstall": "lefthook install",
+    "postinstall": "lefthook install",
     "secret": "bun run scripts/secrets.ts",
     "test": "turbo run test"
   },
