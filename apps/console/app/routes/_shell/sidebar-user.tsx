@@ -69,11 +69,7 @@ export function UserMenu({ user }: { user?: User }) {
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem render={
-                <a
-                    href="https://hebo.ai/docs"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
+                <a href="https://hebo.ai/docs" target="_blank" rel="noopener">
                   <BookOpen />
                   <span>Documentation</span>
                   <DropdownMenuShortcut><ExternalLink /></DropdownMenuShortcut>

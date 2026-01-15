@@ -7,10 +7,10 @@ import { type ModelAdapter, type SupportedModel } from "./model";
 import { Voyage35Adapter } from "./voyage";
 
 const ALL_MODEL_ADAPTER_CLASSES = [
-  Gemini3ProPreviewAdapter,
-  Gemini3FlashPreviewAdapter,
-  GptOss120bAdapter,
   GptOss20bAdapter,
+  GptOss120bAdapter,
+  Gemini3FlashPreviewAdapter,
+  Gemini3ProPreviewAdapter,
   ClaudeOpus45Adapter,
   Voyage35Adapter,
 ];

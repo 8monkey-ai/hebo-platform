@@ -19,11 +19,7 @@ export default function SignIn() {
           className="absolute top-5 left-6"
           nativeButton={false}
           render={
-            <a
-              href="https://docs.hebo.ai"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href="https://hebo.ai/docs" target="_blank" rel="noopener">
               <BookOpen />
               <span>Docs</span>
             </a>
@@ -43,16 +39,14 @@ export default function SignIn() {
                 ✔️ Choose from a set of free open-source models
               </li>
               <li>
-                ✔️ Use commercial models within fair-usage
+                ✔️ Use commercial models within fair-usage policy
               </li>
               <li>
-                ✔️ Link your custom inference endpoints to use existing credits
+                ✔️ Bring your own key to use 3rd party credits
               </li>
             </ul>
           </div>
-          <span className="font-semibold">Save money</span> on commercial models
-          with our built-in cache and optimised routing to the cheapest cloud
-          provider.
+          <span className="font-semibold">Get in touch</span> with us on <a href="https://discord.com/invite/cCJtXZRU5p" target="_blank" rel="noopener noreferrer">Discord</a> to learn about our special programs, including student ambassadors.
         </div>
       </aside>
 

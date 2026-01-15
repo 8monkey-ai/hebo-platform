@@ -44,7 +44,10 @@ export function AgentCreateForm() {
     lastResult: navigation.state === "idle" ? lastResult : undefined,
     constraint: getZodConstraint(AgentCreateSchema),
     defaultValue: {
-      defaultModel: Object.keys(models ?? {})[0],
+      defaultModel: (function selectModelWithMostMonthlyFreeTokens() {
+        return Object.entries(models ?? {})
+          .sort(([, a], [, b]) => b.monthlyFreeTokens - a.monthlyFreeTokens)[0]?.[0];
+      })()
     }
   });
   useFormErrorToast(form.allErrors);
@@ -56,7 +59,7 @@ export function AgentCreateForm() {
         <CardHeader>
           <CardTitle><h1>Create a new agent</h1></CardTitle>
           <CardDescription>
-            Each agent has its own set of models. Model choice usually depends on use case and pricing. <a href="https://docs.hebo.ai">Learn more</a>
+            Each agent has its own set of models. Model choice usually depends on use case and pricing. <a href="https://hebo.ai/docs" target="_blank" rel="noopener">Learn more</a>
           </CardDescription>
         </CardHeader>
         
