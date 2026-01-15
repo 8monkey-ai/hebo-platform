@@ -4,7 +4,7 @@ import { VertexProviderAdapter } from "~gateway/middlewares/providers/vertex";
 
 import type { LanguageModelV2Prompt } from "@ai-sdk/provider";
 
-describe("Vertex Adapter thoughtSignature transformations", () => {
+describe("Vertex Adapter - Pass-through transformations", () => {
   const vertexAdapter = new VertexProviderAdapter(
     "google/gemini-3-pro-preview",
   );

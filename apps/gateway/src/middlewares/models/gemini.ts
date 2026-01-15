@@ -4,7 +4,6 @@ import type { OpenAICompatibleReasoning } from "~gateway/utils/openai-compatible
 
 import { ModelAdapterBase } from "./model";
 
-import type { SharedV2ProviderMetadata, JSONValue } from "@ai-sdk/provider";
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
 
 export abstract class GeminiModelAdapter extends ModelAdapterBase {
@@ -22,10 +21,7 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
         options.reasoning as OpenAICompatibleReasoning,
       );
       if (thinkingConfig) {
-        transformed.thinkingConfig = thinkingConfig as unknown as Record<
-          string,
-          JSONValue
-        >;
+        transformed.thinkingConfig = thinkingConfig;
       }
     }
 
@@ -91,24 +87,6 @@ export abstract class GeminiModelAdapter extends ModelAdapterBase {
     }
 
     return thinkingConfig;
-  }
-
-  private transformProviderMetadata(
-    metadata: SharedV2ProviderMetadata | undefined,
-  ): SharedV2ProviderMetadata | undefined {
-    if (metadata?.google?.thoughtSignature) {
-      const newMetadataGoogle: SharedV2ProviderMetadata["google"] = {
-        ...metadata.google,
-        thought_signature: metadata.google.thoughtSignature,
-      };
-      delete newMetadataGoogle.thoughtSignature;
-
-      return {
-        ...metadata,
-        google: newMetadataGoogle,
-      };
-    }
-    return metadata;
   }
 }
 

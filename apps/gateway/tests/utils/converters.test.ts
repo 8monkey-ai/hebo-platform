@@ -325,11 +325,6 @@ describe("toOpenAICompatibleMessage", () => {
       name: "should convert providerMetadata to extra_content for message and tool calls",
       input: {
         text: "Response text",
-        finishReason: "stop",
-        usage: {
-          inputTokens: 10,
-          outputTokens: 20,
-        },
         providerMetadata: {
           extra_content: {
             google: { thought_signature: "thought_signature_msg" },
@@ -374,11 +369,6 @@ describe("toOpenAICompatibleMessage", () => {
       name: "should convert providerMetadata to extra_content for message without tool calls",
       input: {
         text: "Response text",
-        finishReason: "stop",
-        usage: {
-          inputTokens: 10,
-          outputTokens: 20,
-        },
         providerMetadata: {
           extra_content: {
             google: { thought_signature: "thought_signature_msg" },
