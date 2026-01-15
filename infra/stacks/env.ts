@@ -1,4 +1,5 @@
-const getSstSecret = (name: string) => new sst.Secret(name, "undefined");
+const getSstSecret = (name: string, placeholder: string = "undefined") =>
+  new sst.Secret(name, placeholder);
 
 // Auth
 export const authSecret = getSstSecret("AuthSecret");
@@ -29,7 +30,10 @@ export const vertexProject = getSstSecret("VertexProject");
 export const vertexLocation = getSstSecret("VertexLocation");
 
 // OTEL Exporter
-export const grafanaEndpoint = getSstSecret("GrafanaEndpoint");
+export const grafanaEndpoint = getSstSecret(
+  "GrafanaEndpoint",
+  "http://localhost:3000",
+);
 export const grafanaInstanceId = getSstSecret("GrafanaInstanceId");
 export const grafanaApiToken = getSstSecret("GrafanaApiToken");
 
