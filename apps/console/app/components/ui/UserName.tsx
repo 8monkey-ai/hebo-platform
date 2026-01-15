@@ -5,5 +5,5 @@ import { shellStore } from "~console/lib/shell";
 export function UserName() {
   const { user } = useSnapshot(shellStore);
 
-  return <span>{user?.name}</span>;
+  return <span>{user?.name || user?.email}</span>;
 }

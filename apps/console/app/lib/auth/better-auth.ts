@@ -48,6 +48,13 @@ export const authService: AuthService = {
       return;
     }
 
+    const initialsSource = user?.name || user.email;
+    const initialsSeparator = user?.name ? " " : "@";
+    user.initials = initialsSource
+      .split(initialsSeparator)
+      .map((part) => part[0])
+      .join("");
+
     shellStore.user = user;
   },
 
@@ -113,5 +120,3 @@ export const authService: AuthService = {
     shellStore.user = undefined;
   },
 };
-
-export { authClient };
