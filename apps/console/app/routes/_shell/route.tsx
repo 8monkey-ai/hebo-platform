@@ -38,8 +38,8 @@ import { SidebarNav } from "./sidebar-nav";
 import type { Route } from "./+types/route";
 
 
-async function authMiddleware() {
-  await authService.ensureSignedIn();
+async function authMiddleware({ request }: { request: Request }) {
+  await authService.ensureSignedIn(request);
 }
 
 export const clientMiddleware = [authMiddleware];
