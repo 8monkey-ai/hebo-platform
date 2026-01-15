@@ -29,7 +29,6 @@
     "@elysiajs/openapi": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/api": "workspace:*",
-    "@hebo/auth": "workspace:*",
     "@hebo/shared-api": "workspace:*",
     "ai": "catalog:",
     "better-auth": "catalog:",
