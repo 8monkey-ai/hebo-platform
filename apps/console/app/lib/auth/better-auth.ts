@@ -71,7 +71,9 @@ export const authService: AuthService = {
       ...key,
       key: `${key.start}******`,
     })) as ApiKey[];
-    return keys.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return keys.toSorted(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
   },
 
   async signInWithOAuth(provider: string) {

@@ -29,7 +29,7 @@ const createApi = () =>
         documentation: {
           info: {
             title: "Hebo API",
-            version: "0.0.1",
+            version: "0.1.0",
           },
         },
       }),

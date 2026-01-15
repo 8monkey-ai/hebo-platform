@@ -15,7 +15,6 @@ This is the monorepo for Hebo, containing all our applications and shared packag
 │
 ├── packages/                       # Shared libraries and utilities
 │   ├── aikit-ui/                   # Chat UI components (Shadcn + custom)
-│   ├── database/                   # Database schema, migrations (Prisma)
 │   ├── shared-api/                 # API utilities (auth, CORS)
 │   ├── shared-data/                # Shared data models & schemas
 │   └── shared-ui/                  # UI components (Shadcn + custom)
@@ -36,7 +35,7 @@ This is the monorepo for Hebo, containing all our applications and shared packag
 
 ## Prerequisites
 
-- Bun >= 1.3.4
+- Bun >= 1.3.6
 - Docker >= 28
 - AWS CLI (only required for deployment)
 
@@ -111,6 +110,8 @@ Secret names:
   - Google: `GoogleClientId`, `GoogleClientSecret`
   - Microsoft: `MicrosoftClientId`, `MicrosoftClientSecret`
   - Email OTP and Magic Link: `SmtpHost`, `SmtpPort`, `SmtpUser`, `SmtpPass`, `SmtpFrom`
+  - BetterAuth: `AuthSecret` (https://www.better-auth.com/docs/reference/options#secret))
+
 - LLMs
   - Bedrock: `BedrockRoleArn`, `BedrockRegion`
   - Vertex: `VertexServiceAccountEmail`, `VertexAwsProviderAudience`, `VertexProject`, `VertexLocation`

@@ -24,20 +24,23 @@
     "tailwind-merge": "^3.4.0"
   },
   "peerDependencies": {
-    "@base-ui/react": "^1.0.0",
-    "@conform-to/react": "^1.13.3",
-    "lucide-react": "^0.562.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "@base-ui/react": "catalog:",
+    "@conform-to/react": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tailwindcss": "catalog:"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
-    "@base-ui/react": "^1.0.0",
-    "@conform-to/react": "^1.13.3",
-    "@types/react": "^19.1.1",
-    "@types/react-dom": "^19.1.1",
-    "lucide-react": "^0.562.0",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "@base-ui/react": "catalog:",
+    "@conform-to/react": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "lucide-react": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
   }
 }

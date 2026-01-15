@@ -4,7 +4,7 @@
   "private": true,
   "sideEffects": false,
   "engines": {
-    "bun": "^1.3.4"
+    "bun": "^1.3.6"
   },
   "type": "module",
   "scripts": {
@@ -18,27 +18,28 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@ai-sdk/amazon-bedrock": "^3.0.54",
-    "@ai-sdk/google-vertex": "^3.0.51",
-    "@ai-sdk/groq": "^2.0.28",
-    "@ai-sdk/provider-utils": "^3.0.19",
-    "@aws-sdk/client-bedrock": "^3.920.0",
-    "@aws-sdk/client-sts": "^3.921.0",
+    "@ai-sdk/amazon-bedrock": "^3.0.73",
+    "@ai-sdk/google-vertex": "^3.0.97",
+    "@ai-sdk/groq": "^2.0.34",
+    "@ai-sdk/provider-utils": "catalog:",
+    "@aws-sdk/client-bedrock": "^3.968.0",
+    "@aws-sdk/client-sts": "^3.968.0",
     "@bogeychan/elysia-logger": "catalog:",
     "@elysiajs/cors": "catalog:",
     "@elysiajs/openapi": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/api": "workspace:*",
     "@hebo/shared-api": "workspace:*",
-    "ai": "^5.0.19",
+    "ai": "catalog:",
+    "better-auth": "catalog:",
     "elysia": "catalog:",
-    "sst": "^3.17.13",
     "voyage-ai-provider": "^2.0.0",
-    "zod": "^4.1.12"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
-    "bun-types": "^1.3.4",
-    "pino-pretty": "^13.1.1"
+    "bun-types": "catalog:",
+    "pino-pretty": "catalog:",
+    "typescript": "catalog:"
   }
 }
