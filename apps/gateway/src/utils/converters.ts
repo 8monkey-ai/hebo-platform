@@ -126,13 +126,9 @@ function toAssistantModelMessage(
       toolCallId: tc.id,
       toolName: tc.function.name,
       input: parseToolInput(tc.function.arguments),
-      providerOptions: tc.extra_content && {
-        openaiCompatible: tc.extra_content,
-      },
+      providerOptions: tc.extra_content,
     })),
-    providerOptions: message.extra_content && {
-      openaiCompatible: message.extra_content,
-    },
+    providerOptions: message.extra_content,
   };
 }
 
