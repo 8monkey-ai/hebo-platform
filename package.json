@@ -44,7 +44,7 @@
     "dev:infra:down": "docker compose down",
     "format": "prettier --write .",
     "format:staged": "prettier --write",
-    "lint": "turbo run lint --parallel",
+    "lint": "turbo run lint",
     "lint:deps": "check-dependency-version-consistency .",
     "lint:staged": "eslint --cache --fix",
     "postinstall": "lefthook install",
