@@ -6,10 +6,10 @@
       "dependsOn": ["^build"],
       "env": ["NODE_ENV", "VITE_"],
       "outputs": [
+        "**/generated/**",
         "build/**",
         "dist/**",
-        "out/**",
-        "**/generated/**"
+        "out/**"
       ]
     },
     "predev": {
