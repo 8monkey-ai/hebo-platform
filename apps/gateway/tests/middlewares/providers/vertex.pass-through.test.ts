@@ -136,8 +136,8 @@ describe("Vertex Adapter - Pass-through transformations", () => {
   describe("transformResult (Output)", () => {
     type TestCase = {
       name: string;
-      input: any; // Raw result from AI SDK
-      expectedMetadata: Record<string, any> | undefined; // The providerMetadata part of the final result
+      input: any;
+      expected: Record<string, any> | undefined;
     };
 
     const testCases: TestCase[] = [
@@ -152,7 +152,7 @@ describe("Vertex Adapter - Pass-through transformations", () => {
             someOtherTopLevelField: "topValue",
           },
         },
-        expectedMetadata: {
+        expected: {
           extra_content: {
             google: {
               thought_signature: "output_signature_789",
@@ -173,7 +173,7 @@ describe("Vertex Adapter - Pass-through transformations", () => {
             },
           },
         },
-        expectedMetadata: {
+        expected: {
           extra_content: {
             google: {
               nested_object: {
@@ -186,20 +186,20 @@ describe("Vertex Adapter - Pass-through transformations", () => {
       {
         name: "should handle undefined providerMetadata",
         input: {},
-        expectedMetadata: undefined,
+        expected: undefined,
       },
       {
         name: "should handle null providerMetadata",
         // eslint-disable-next-line unicorn/no-null
         input: { providerMetadata: null },
         // eslint-disable-next-line unicorn/no-null
-        expectedMetadata: null,
+        expected: null,
       },
     ];
 
-    test.each(testCases)("$name", ({ input, expectedMetadata }) => {
+    test.each(testCases)("$name", ({ input, expected }) => {
       const result = vertexAdapter.transformResult(input);
-      expect(result.providerMetadata).toEqual(expectedMetadata);
+      expect(result.providerMetadata).toEqual(expected);
     });
   });
 });
