@@ -292,7 +292,7 @@ describe("toModelMessages", () => {
         ],
       },
       {
-        name: "should handle empty extra_ properties gracefully",
+        name: "should handle empty extra_content properties gracefully",
         input: [
           {
             role: "assistant",
@@ -320,10 +320,7 @@ describe("toOpenAICompatibleMessage", () => {
     {
       name: "should convert providerMetadata to extra_content for message and tool calls",
       input: {
-        text: "Response text",
-        providerMetadata: {
-          google: { thought_signature: "thought_signature_msg" },
-        },
+        content: [],
         toolCalls: [
           {
             toolCallId: "call_1",
@@ -339,9 +336,6 @@ describe("toOpenAICompatibleMessage", () => {
         role: "assistant",
         // eslint-disable-next-line unicorn/no-null
         content: null,
-        extra_content: {
-          google: { thought_signature: "thought_signature_msg" },
-        },
         tool_calls: [
           {
             id: "call_1",
@@ -360,10 +354,15 @@ describe("toOpenAICompatibleMessage", () => {
     {
       name: "should convert providerMetadata to extra_content for message without tool calls",
       input: {
-        text: "Response text",
-        providerMetadata: {
-          google: { thought_signature: "thought_signature_msg" },
-        },
+        content: [
+          {
+            type: "text",
+            text: "Response text",
+            providerMetadata: {
+              google: { thought_signature: "thought_signature_msg" },
+            },
+          },
+        ],
         toolCalls: [],
       },
       expected: {

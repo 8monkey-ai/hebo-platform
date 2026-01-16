@@ -203,7 +203,6 @@ export const toOpenAICompatibleMessage = (
     role: "assistant",
     // eslint-disable-next-line unicorn/no-null
     content: null,
-    extra_content: result.providerMetadata,
   };
 
   if (result.toolCalls && result.toolCalls.length > 0) {
@@ -216,8 +215,16 @@ export const toOpenAICompatibleMessage = (
       },
       extra_content: toolCall.providerMetadata,
     }));
-  } else {
-    message.content = result.text;
+  }
+
+  for (const part of result.content) {
+    if (part.type === "text") {
+      message.content = part.text;
+      if (part.providerMetadata) {
+        message.extra_content = part.providerMetadata;
+      }
+      break;
+    }
   }
 
   if (result.reasoningText) {
@@ -323,9 +330,11 @@ export function toOpenAICompatibleStream(
 
         switch (part.type) {
           case "text-delta": {
+            const providerMetadata = (part as any).providerMetadata;
             const delta = {
               role: "assistant",
               content: part.text,
+              ...(providerMetadata ? { extra_content: providerMetadata } : {}),
             };
             enqueue({
               id: streamId,
