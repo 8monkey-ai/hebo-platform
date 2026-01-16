@@ -74,5 +74,5 @@ export const normalizedStage = $app.stage
   .trim()
   .toLowerCase()
   .replaceAll(/[^a-z0-9]+/g, "-")
-  .replaceAll(/^-+/g, "")
-  .replaceAll(/-+$/g, "");
+  // eslint-disable-next-line sonarjs/anchor-precedence
+  .replaceAll(/^-+|-+$/g, "");
