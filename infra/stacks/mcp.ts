@@ -1,7 +1,7 @@
 import heboCluster from "./cluster";
-import { otelSecrets, isProd, formattedStage } from "./env";
+import { otelSecrets, isProd, normalizedStage } from "./env";
 
-const mcpDomain = isProd ? "mcp.hebo.ai" : `mcp.${formattedStage}.hebo.ai`;
+const mcpDomain = isProd ? "mcp.hebo.ai" : `mcp.${normalizedStage}.hebo.ai`;
 const mcpPort = "3003";
 
 const heboMcp = new sst.aws.Service("HeboMcp", {

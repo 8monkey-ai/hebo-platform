@@ -1,9 +1,9 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
-import { otelSecrets, isProd, formattedStage } from "./env";
+import { otelSecrets, isProd, normalizedStage } from "./env";
 
-const apiDomain = isProd ? "api.hebo.ai" : `api.${formattedStage}.hebo.ai`;
+const apiDomain = isProd ? "api.hebo.ai" : `api.${normalizedStage}.hebo.ai`;
 const apiPort = "3001";
 
 const heboApi = new sst.aws.Service("HeboApi", {

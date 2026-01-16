@@ -1,8 +1,8 @@
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
-import { authSecrets, otelSecrets, isProd, formattedStage } from "./env";
+import { authSecrets, otelSecrets, isProd, normalizedStage } from "./env";
 
-const authDomain = isProd ? "auth.hebo.ai" : `auth.${formattedStage}.hebo.ai`;
+const authDomain = isProd ? "auth.hebo.ai" : `auth.${normalizedStage}.hebo.ai`;
 const authPort = "3000";
 
 const heboAuth = new sst.aws.Service("HeboAuth", {

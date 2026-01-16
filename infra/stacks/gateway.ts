@@ -1,11 +1,11 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase from "./db";
-import { llmSecrets, otelSecrets, isProd, formattedStage } from "./env";
+import { llmSecrets, otelSecrets, isProd, normalizedStage } from "./env";
 
 const gatewayDomain = isProd
   ? "gateway.hebo.ai"
-  : `gateway.${formattedStage}.hebo.ai`;
+  : `gateway.${normalizedStage}.hebo.ai`;
 const gatewayPort = "3002";
 
 const heboGateway = new sst.aws.Service("HeboGateway", {

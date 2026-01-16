@@ -1,8 +1,8 @@
-import { isProd, formattedStage } from "./env";
+import { isProd, normalizedStage } from "./env";
 import heboVpc from "./network";
 
 const globalCluster = new aws.rds.GlobalCluster("HeboDbGlobal", {
-  globalClusterIdentifier: `${formattedStage}-hebo-db-global`,
+  globalClusterIdentifier: `${normalizedStage}-hebo-db-global`,
   engine: "aurora-postgresql",
   engineVersion: "17.6",
   storageEncrypted: true,
