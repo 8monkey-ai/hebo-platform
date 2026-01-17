@@ -10,6 +10,7 @@
     "./schemas/*": "./schemas/*.ts",
     "./types/*": "./types/*.ts",
     "./utils/*": "./utils/*.ts",
+    "./env": "./env.ts",
     "./errors": "./errors.ts"
   },
   "scripts": {

@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { apiKey, emailOTP, organization } from "better-auth/plugins";
 
+import { authUrl } from "@hebo/shared-api/env";
 import { createPrismaAdapter } from "@hebo/shared-api/lib/db/connection";
 import { getRootDomain } from "@hebo/shared-api/utils/root-domain";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
@@ -19,13 +20,11 @@ export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
 });
 
-const baseURL = process.env.AUTH_URL ?? "http://localhost:3000";
-
 // Set to the eTLD+1 (e.g., "example.com") so auth cookies flow to api/gateway.
-const cookieDomain = getRootDomain(baseURL);
+const cookieDomain = getRootDomain(authUrl);
 
 export const auth = betterAuth({
-  baseURL,
+  baseURL: authUrl,
   basePath: "/v1",
   accountLinking: {
     enabled: true,
