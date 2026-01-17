@@ -1,1 +1,1 @@
-export const isRemote = process.env.IS_REMOTE === "true";
+export const isProd = process.env.NODE_ENV === "production";
