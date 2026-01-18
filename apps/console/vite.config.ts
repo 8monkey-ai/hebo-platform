@@ -2,6 +2,7 @@ import mdx from "@mdx-js/rollup";
 import { reactRouter } from "@react-router/dev/vite";
 import rehypeShiki from "@shikijs/rehype";
 import tailwindcss from "@tailwindcss/vite";
+import preserveDirectives from "rollup-preserve-directives";
 import { defineConfig, loadEnv } from "vite";
 import babel from "vite-plugin-babel";
 import devtoolsJson from "vite-plugin-devtools-json";
@@ -13,6 +14,7 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       tsconfigPaths(),
+      preserveDirectives(),
       mdx({
         providerImportSource: "~console/mdx-components",
         rehypePlugins: [
