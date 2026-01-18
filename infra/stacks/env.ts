@@ -1,4 +1,7 @@
-const getSstSecret = (name: string) => new sst.Secret(name, "undefined");
+export const isProduction = $app.stage === "production";
+
+const getSstSecret = (name: string) =>
+  isProduction ? new sst.Secret(name) : new sst.Secret(name, "undefined");
 
 // Auth
 export const authSecret = getSstSecret("AuthSecret");
@@ -65,7 +68,6 @@ export const otelSecrets = [
   grafanaApiToken,
 ];
 
-export const isProd = $app.stage === "production";
 export const normalizedStage = $app.stage
   .trim()
   .toLowerCase()

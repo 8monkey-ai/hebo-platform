@@ -3,7 +3,7 @@ import { SmtpTransport } from "@upyo/smtp";
 
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
-import { isRemote } from "./env";
+const isProduction = process.env.NODE_ENV === "production";
 
 const smtpHost = await getSecret("SmtpHost", false);
 const smtpPort = Number(await getSecret("SmtpPort", false));
@@ -55,7 +55,7 @@ export async function sendVerificationOtpEmail({
   otp: string;
   consoleUrl?: string;
 }) {
-  if (!isRemote) {
+  if (!isProduction) {
     console.info(">>> OTP:", otp);
     if (!hasSmtpConfig()) return;
   }
@@ -107,7 +107,7 @@ export async function sendOrganizationInvitationEmail({
   consoleUrl?: string;
 }) {
   const acceptUrl = new URL("/accept-invitation", consoleUrl);
-  if (!isRemote) {
+  if (!isProduction) {
     console.info(
       `>>> Organization Invitation: ${acceptUrl.toString()}?id=${invitationId}`,
     );

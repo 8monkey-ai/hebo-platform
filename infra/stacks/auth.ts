@@ -1,15 +1,17 @@
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
-import { authSecrets, otelSecrets, isProd, normalizedStage } from "./env";
+import { authSecrets, otelSecrets, isProduction, normalizedStage } from "./env";
 
-const authDomain = isProd ? "auth.hebo.ai" : `auth.${normalizedStage}.hebo.ai`;
+const authDomain = isProduction
+  ? "auth.hebo.ai"
+  : `auth.${normalizedStage}.hebo.ai`;
 const authPort = "3000";
 
 const heboAuth = new sst.aws.Service("HeboAuth", {
   cluster: heboCluster,
   architecture: "arm64",
-  cpu: isProd ? "1 vCPU" : "0.25 vCPU",
-  memory: isProd ? "2 GB" : "0.5 GB",
+  cpu: isProduction ? "1 vCPU" : "0.25 vCPU",
+  memory: isProduction ? "2 GB" : "0.5 GB",
   link: [heboDatabase, ...authSecrets, ...otelSecrets],
   image: {
     context: ".",
@@ -17,9 +19,9 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
     tags: [authDomain],
   },
   environment: {
-    IS_REMOTE: $dev ? "false" : "true",
     AUTH_URL: `https://${authDomain}`,
-    LOG_LEVEL: isProd ? "info" : "debug",
+    LOG_LEVEL: isProduction ? "info" : "debug",
+    NODE_ENV: isProduction ? "production" : "development",
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: authPort,
   },
@@ -31,11 +33,11 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
     ],
   },
   scaling: {
-    min: isProd ? 2 : 1,
-    max: isProd ? 4 : 1,
+    min: isProduction ? 2 : 1,
+    max: isProduction ? 4 : 1,
   },
-  capacity: isProd ? undefined : "spot",
-  wait: isProd,
+  capacity: isProduction ? undefined : "spot",
+  wait: isProduction,
 });
 
 createMigrator("auth");

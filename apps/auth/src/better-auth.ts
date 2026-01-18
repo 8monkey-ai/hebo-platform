@@ -2,7 +2,9 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { apiKey, emailOTP, organization } from "better-auth/plugins";
 
+import { authUrl } from "@hebo/shared-api/env";
 import { createPrismaAdapter } from "@hebo/shared-api/lib/db/connection";
+import { getRootDomain } from "@hebo/shared-api/utils/domains";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import { PrismaClient } from "~auth/generated/prisma/client";
@@ -11,33 +13,23 @@ import {
   sendOrganizationInvitationEmail,
   sendVerificationOtpEmail,
 } from "./lib/email";
-import { isRemote } from "./lib/env";
 import { createOrganizationHook, createSessionHook } from "./lib/organization";
 
 export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
 });
 
-const baseURL = process.env.AUTH_URL || `http://localhost:3000`;
-
-// Set to the eTLD+1 (e.g., "hebo.ai") so auth cookies flow to api/gateway.
-function getCookieDomain() {
-  const { hostname } = new URL(baseURL);
-  return hostname === "localhost"
-    ? undefined
-    : hostname.split(".").slice(-2).join(".");
-}
-const cookieDomain = getCookieDomain();
+// Set to the eTLD+1 (e.g., "example.com") so auth cookies flow to api/gateway.
+const cookieDomain = getRootDomain(authUrl);
 
 export const auth = betterAuth({
-  baseURL,
+  baseURL: authUrl,
   basePath: "/v1",
   accountLinking: {
     enabled: true,
     trustedProviders: ["google", "github", "microsoft"],
   },
   advanced: {
-    useSecureCookies: isRemote,
     crossSubDomainCookies: {
       enabled: Boolean(cookieDomain),
       domain: cookieDomain,

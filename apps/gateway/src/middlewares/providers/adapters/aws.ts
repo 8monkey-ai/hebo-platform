@@ -13,7 +13,7 @@ type AwsContainerCredentialResponse = {
 // FUTURE: Let google auth library handle this once they will start supporting WIF for ECS tasks: https://github.com/googleapis/google-cloud-node-core/issues/523
 export async function injectMetadataCredentials() {
   const relativeUri = process.env.AWS_CONTAINER_CREDENTIALS_RELATIVE_URI;
-  if (process.env.IS_REMOTE && relativeUri) {
+  if (relativeUri) {
     const response = await fetch(`http://169.254.170.2${relativeUri}`);
     const credentials =
       (await response.json()) as AwsContainerCredentialResponse;

@@ -3,9 +3,8 @@ import { createAuthClient as createBetterAuthClient } from "better-auth/client";
 import { organizationClient } from "better-auth/client/plugins";
 import { Elysia } from "elysia";
 
+import { authUrl } from "../../env";
 import { BadRequestError } from "../../errors";
-
-const AUTH_URL = process.env.AUTH_URL || "http://localhost:3000";
 
 const createAuthClient = (request: Request) => {
   const headers = new Headers();
@@ -15,7 +14,7 @@ const createAuthClient = (request: Request) => {
   }
 
   return createBetterAuthClient({
-    baseURL: new URL("/v1", AUTH_URL).toString(),
+    baseURL: new URL("/v1", authUrl).toString(),
     plugins: [
       organizationClient({
         teams: { enabled: true },

@@ -1,4 +1,4 @@
-import { isProd, normalizedStage } from "./env";
+import { isProduction, normalizedStage } from "./env";
 import heboVpc from "./network";
 
 const globalCluster = new aws.rds.GlobalCluster("HeboDbGlobal", {
@@ -12,8 +12,8 @@ const heboDatabase = new sst.aws.Aurora("HeboDatabase", {
   engine: "postgres",
   version: "17.6",
   vpc: heboVpc,
-  replicas: isProd ? 1 : 0,
-  scaling: isProd
+  replicas: isProduction ? 1 : 0,
+  scaling: isProduction
     ? { min: "0.5 ACU" }
     : { min: "0 ACU", max: "4 ACU", pauseAfter: "20 minutes" },
   database: "hebo",
