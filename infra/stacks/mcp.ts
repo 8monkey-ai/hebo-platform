@@ -1,7 +1,9 @@
 import heboCluster from "./cluster";
-import { otelSecrets, isProd, normalizedStage } from "./env";
+import { otelSecrets, isProduction, normalizedStage } from "./env";
 
-const mcpDomain = isProd ? "mcp.hebo.ai" : `mcp.${normalizedStage}.hebo.ai`;
+const mcpDomain = isProduction
+  ? "mcp.hebo.ai"
+  : `mcp.${normalizedStage}.hebo.ai`;
 const mcpPort = "3003";
 
 const heboMcp = new sst.aws.Service("HeboMcp", {
@@ -16,8 +18,8 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
     tags: [mcpDomain],
   },
   environment: {
-    NODE_ENV: isProd ? "production" : "development",
-    LOG_LEVEL: isProd ? "info" : "debug",
+    NODE_ENV: isProduction ? "production" : "development",
+    LOG_LEVEL: isProduction ? "info" : "debug",
     PORT: mcpPort,
   },
   loadBalancer: {
@@ -32,7 +34,7 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
     max: 1,
   },
   capacity: "spot",
-  wait: isProd,
+  wait: isProduction,
 });
 
 export default heboMcp;

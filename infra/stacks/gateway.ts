@@ -1,9 +1,9 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase from "./db";
-import { llmSecrets, otelSecrets, isProd, normalizedStage } from "./env";
+import { llmSecrets, otelSecrets, isProduction, normalizedStage } from "./env";
 
-const gatewayDomain = isProd
+const gatewayDomain = isProduction
   ? "gateway.hebo.ai"
   : `gateway.${normalizedStage}.hebo.ai`;
 const gatewayPort = "3002";
@@ -11,8 +11,8 @@ const gatewayPort = "3002";
 const heboGateway = new sst.aws.Service("HeboGateway", {
   cluster: heboCluster,
   architecture: "arm64",
-  cpu: isProd ? "1 vCPU" : "0.25 vCPU",
-  memory: isProd ? "2 GB" : "0.5 GB",
+  cpu: isProduction ? "1 vCPU" : "0.25 vCPU",
+  memory: isProduction ? "2 GB" : "0.5 GB",
   permissions: [
     {
       actions: ["sts:AssumeRole"],
@@ -27,8 +27,8 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   },
   environment: {
     AUTH_URL: heboAuth.url,
-    LOG_LEVEL: isProd ? "info" : "debug",
-    NODE_ENV: isProd ? "production" : "development",
+    LOG_LEVEL: isProduction ? "info" : "debug",
+    NODE_ENV: isProduction ? "production" : "development",
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: gatewayPort,
   },
@@ -40,11 +40,11 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
     ],
   },
   scaling: {
-    min: isProd ? 2 : 1,
-    max: isProd ? 4 : 1,
+    min: isProduction ? 2 : 1,
+    max: isProduction ? 4 : 1,
   },
-  capacity: isProd ? undefined : "spot",
-  wait: isProd,
+  capacity: isProduction ? undefined : "spot",
+  wait: isProduction,
 });
 
 export default heboGateway;

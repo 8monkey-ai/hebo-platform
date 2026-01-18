@@ -1,7 +1,7 @@
-export const isProd = $app.stage === "production";
+export const isProduction = $app.stage === "production";
 
 const getSstSecret = (name: string) =>
-  isProd ? new sst.Secret(name) : new sst.Secret(name, "undefined");
+  isProduction ? new sst.Secret(name) : new sst.Secret(name, "undefined");
 
 // Auth
 export const authSecret = getSstSecret("AuthSecret");

@@ -1,6 +1,6 @@
 import heboApi from "./api";
 import heboAuth from "./auth";
-import { isProd, normalizedStage } from "./env";
+import { isProduction, normalizedStage } from "./env";
 import heboGateway from "./gateway";
 
 const heboConsole = new sst.aws.StaticSite("HeboConsole", {
@@ -9,7 +9,9 @@ const heboConsole = new sst.aws.StaticSite("HeboConsole", {
     command: "bun run build",
     output: "build/client",
   },
-  domain: isProd ? "console.hebo.ai" : `console.${normalizedStage}.hebo.ai`,
+  domain: isProduction
+    ? "console.hebo.ai"
+    : `console.${normalizedStage}.hebo.ai`,
   environment: {
     VITE_API_URL: heboApi.url,
     VITE_AUTH_URL: heboAuth.url,
