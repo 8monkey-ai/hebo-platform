@@ -13,7 +13,6 @@ import {
   sendOrganizationInvitationEmail,
   sendVerificationOtpEmail,
 } from "./lib/email";
-import { isProd } from "./lib/env";
 import { createOrganizationHook, createSessionHook } from "./lib/organization";
 
 export const prisma = new PrismaClient({
@@ -31,7 +30,6 @@ export const auth = betterAuth({
     trustedProviders: ["google", "github", "microsoft"],
   },
   advanced: {
-    useSecureCookies: isProd,
     crossSubDomainCookies: {
       enabled: Boolean(cookieDomain),
       domain: cookieDomain,

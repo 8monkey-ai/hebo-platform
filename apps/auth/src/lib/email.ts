@@ -3,7 +3,7 @@ import { SmtpTransport } from "@upyo/smtp";
 
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
-import { isProd } from "./env";
+const isProd = process.env.NODE_ENV === "production";
 
 const smtpHost = await getSecret("SmtpHost", false);
 const smtpPort = Number(await getSecret("SmtpPort", false));
