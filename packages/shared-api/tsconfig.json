@@ -1,6 +1,6 @@
 {
   "extends": "@hebo/typescript-config/base.json",
   "compilerOptions": {
-    "types": ["bun-types"]
+    "types": ["@types/bun"]
   }
 }

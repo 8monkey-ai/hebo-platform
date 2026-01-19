@@ -5,7 +5,7 @@
     "paths": {
       "~api/*": ["./src/*"]
     },
-    "types": ["bun-types"],
+    "types": ["@types/bun"],
     "verbatimModuleSyntax": true
   }
 }

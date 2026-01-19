@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "engines": {
-    "bun": "^1.3.6"
-  },
   "scripts": {
     "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target=bun --outfile dist/server",
     "clean": "git clean -fdx -e '.env*' .",
@@ -20,14 +17,12 @@
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.25.2",
-    "better-auth": "catalog:",
     "elysia": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
-    "bun-types": "catalog:",
-    "pino-pretty": "catalog:",
-    "typescript": "catalog:"
+    "@types/bun": "catalog:",
+    "pino-pretty": "catalog:"
   }
 }

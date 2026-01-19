@@ -3,9 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "sideEffects": false,
-  "engines": {
-    "bun": "^1.3.6"
-  },
   "type": "module",
   "scripts": {
     "prebuild": "bun run db generate",
@@ -24,20 +21,16 @@
     "@elysiajs/cors": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",
-    "@prisma/adapter-pg": "catalog:",
-    "@prisma/client": "catalog:",
     "@upyo/core": "^0.4.0",
     "@upyo/smtp": "^0.4.0",
+    "@prisma/client": "catalog:",
     "better-auth": "catalog:",
-    "elysia": "catalog:",
-    "pg": "catalog:"
+    "elysia": "catalog:"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
-    "@types/pg": "catalog:",
-    "bun-types": "catalog:",
+    "@types/bun": "catalog:",
     "pino-pretty": "catalog:",
-    "prisma": "catalog:",
-    "typescript": "catalog:"
+    "prisma": "catalog:"
   }
 }
