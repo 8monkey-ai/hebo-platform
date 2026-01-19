@@ -13,8 +13,6 @@ jobs:
   cleanup:
     name: Remove Preview Deployment
     runs-on: ubuntu-latest
-    env:
-      STAGE_NAME: "pr-${{ github.event.pull_request.number }}"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
