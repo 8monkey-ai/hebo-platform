@@ -211,7 +211,9 @@
       "dependencies": {
         "@opentelemetry/exporter-trace-otlp-http": "^0.210.0",
         "@opentelemetry/sdk-trace-node": "^2.4.0",
+        "@prisma/adapter-pg": "catalog:",
         "@sindresorhus/slugify": "^3.0.0",
+        "better-auth": "catalog:",
         "crypto-random-string": "^5.0.0",
       },
       "devDependencies": {
@@ -221,8 +223,6 @@
       "peerDependencies": {
         "@bogeychan/elysia-logger": "catalog:",
         "@elysiajs/opentelemetry": "catalog:",
-        "@prisma/adapter-pg": "catalog:",
-        "better-auth": "catalog:",
         "elysia": "catalog:",
         "sst": "catalog:",
       },
