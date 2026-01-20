@@ -62,7 +62,7 @@ bun run db:migrate
 # 3) Run all apps (API, Gateway, Console)
 bun run dev
 
-# Optional - console only (from repo root)
+# Optional - console only with service mocks
 bun run -F @hebo/console dev
 ```
 
@@ -140,7 +140,7 @@ bun run sst secret remove GithubClientId --stage <stage>
 
 | #   | Mode                         | Command                          | Database              | API availability                        |
 |-----|------------------------------|----------------------------------|-----------------------|-----------------------------------------|
-| 1   | **Frontend-only** (offline)  | `bun run -F @hebo/console dev`   | —                     | none – UI relies on MSW / MSW data      |
+| 1   | **Frontend-only** (offline)  | `bun run -F @hebo/console dev`   | —                     | none – UI relies on mock services      |
 | 2   | **Local full-stack**         | `bun run dev`                    | Dockerized PostgreSQL | URLs from env                           |
 | 3   | **Remote full-stack**        | `bun run sst deploy`             | Aurora PostgreSQL     | HTTPS URLs exported by SST              |
 

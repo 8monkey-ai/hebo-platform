@@ -11,164 +11,174 @@ datasource db {
   provider = "postgresql"
 }
 
-model users {
-  id            String        @id @db.Text
+model Users {
+  id            String        @id
   name          String
-  email         String        @unique
+  email         String
   emailVerified Boolean       @default(false)
   image         String?
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  sessions      sessions[]
-  accounts      accounts[]
-  apikeys       apikeys[]
-  members       members[]
-  invitations   invitations[]
-  teamMembers   teamMembers[]
+  sessions      Sessions[]
+  accounts      Accounts[]
+  apikeys       Apikeys[]
+  teammembers   TeamMembers[]
+  members       Members[]
+  invitations   Invitations[]
+
+  @@unique([email])
+  @@map("users")
 }
 
-model sessions {
-  id                   String   @id @db.Text
-  userId               String   @db.Text
-  token                String   @unique
+model Sessions {
+  id                   String   @id
   expiresAt            DateTime
-  ipAddress            String?
-  userAgent            String?
-  activeOrganizationId String?  @db.Text
+  token                String
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
-  user                 users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress            String?
+  userAgent            String?
+  userId               String
+  users                Users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  activeOrganizationId String?
+  activeTeamId         String?
 
+  @@unique([token])
   @@index([userId])
+  @@map("sessions")
 }
 
-model accounts {
-  id                    String    @id @db.Text
-  userId                String    @db.Text
+model Accounts {
+  id                    String    @id
   accountId             String
   providerId            String
+  userId                String
+  users                 Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
+  idToken               String?
   accessTokenExpiresAt  DateTime?
   refreshTokenExpiresAt DateTime?
   scope                 String?
-  idToken               String?
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
-  user                  users     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([providerId, accountId])
   @@index([userId])
+  @@map("accounts")
 }
 
-model verifications {
-  id         String   @id @db.Text
+model Verifications {
+  id         String   @id
   identifier String
   value      String
   expiresAt  DateTime
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verifications")
 }
 
-model apikeys {
-  id                  String    @id @db.Text
+model Apikeys {
+  id                  String    @id
   name                String?
   start               String?
   prefix              String?
   key                 String
-  userId              String    @db.Text
+  userId              String
+  users               Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
   refillInterval      Int?
   refillAmount        Int?
   lastRefillAt        DateTime?
-  enabled             Boolean   @default(true)
-  rateLimitEnabled    Boolean   @default(true)
-  rateLimitTimeWindow Int?
-  rateLimitMax        Int?
-  requestCount        Int       @default(0)
+  enabled             Boolean?  @default(true)
+  rateLimitEnabled    Boolean?  @default(true)
+  rateLimitTimeWindow Int?      @default(3600000)
+  rateLimitMax        Int?      @default(3600)
+  requestCount        Int?      @default(0)
   remaining           Int?
   lastRequest         DateTime?
   expiresAt           DateTime?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  createdAt           DateTime
+  updatedAt           DateTime
   permissions         String?
-  metadata            Json?
-  user                users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  metadata            String?
 
+  @@index([key])
   @@index([userId])
+  @@map("apikeys")
 }
 
-model organizations {
-  id          String        @id @db.Text
+model Organizations {
+  id          String        @id
   name        String
   slug        String
   logo        String?
-  metadata    Json?
-  createdAt   DateTime      @default(now())
-  members     members[]
-  invitations invitations[]
-  teams       teams[]
+  createdAt   DateTime
+  metadata    String?
+  teams       Teams[]
+  members     Members[]
+  invitations Invitations[]
 
   @@unique([slug])
+  @@map("organizations")
 }
 
-model members {
-  id             String        @id @db.Text
-  userId         String        @db.Text
-  organizationId String        @db.Text
-  role           String
-  createdAt      DateTime      @default(now())
-  user           users         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization   organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, organizationId])
-  @@index([userId])
-  @@index([organizationId])
-}
-
-model invitations {
-  id             String        @id @db.Text
-  email          String
-  inviterId      String        @db.Text
-  organizationId String        @db.Text
-  role           String
-  status         String
-  teamId         String?       @db.Text
-  createdAt      DateTime      @default(now())
-  expiresAt      DateTime
-  inviter        users         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
-  organization   organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  team           teams?        @relation(fields: [teamId], references: [id], onDelete: SetNull)
-
-  @@index([email])
-  @@index([organizationId])
-  @@index([inviterId])
-  @@index([teamId])
-}
-
-model teams {
-  id             String        @id @db.Text
+model Teams {
+  id             String        @id
   name           String
-  organizationId String        @db.Text
-  agentSlug      String        @unique
-  createdAt      DateTime      @default(now())
+  organizationId String
+  organizations  Organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime
   updatedAt      DateTime?     @updatedAt
-  organization   organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  teamMembers    teamMembers[]
-  invitations    invitations[]
+  agentSlug      String
+  teammembers    TeamMembers[]
 
   @@index([organizationId])
+  @@map("teams")
 }
 
-model teamMembers {
-  id        String   @id @db.Text
-  teamId    String   @db.Text
-  userId    String   @db.Text
-  createdAt DateTime @default(now())
-  team      teams    @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  user      users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+model TeamMembers {
+  id        String    @id
+  teamId    String
+  teams     Teams     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId    String
+  users     Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime?
 
-  @@unique([teamId, userId])
   @@index([teamId])
   @@index([userId])
+  @@map("teamMembers")
+}
+
+model Members {
+  id             String        @id
+  organizationId String
+  organizations  Organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  users          Users         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String        @default("member")
+  createdAt      DateTime
+
+  @@index([organizationId])
+  @@index([userId])
+  @@map("members")
+}
+
+model Invitations {
+  id             String        @id
+  organizationId String
+  organizations  Organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  teamId         String?
+  status         String        @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime      @default(now())
+  inviterId      String
+  users          Users         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitations")
 }

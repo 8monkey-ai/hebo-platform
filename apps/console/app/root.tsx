@@ -6,10 +6,7 @@ import type { Route } from "./+types/root";
 
 import "./init";
 
-import "@fontsource/recursive/400.css";
-import "@fontsource/recursive/500.css";
-import "@fontsource/recursive/600.css";
-
+import "./styles/fonts.css";
 import "./styles/tailwind.css";
 import "./styles/global.css";
 

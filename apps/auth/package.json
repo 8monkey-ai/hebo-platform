@@ -1,6 +1,6 @@
 {
   "name": "@hebo/auth",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "sideEffects": false,
   "type": "module",
@@ -8,6 +8,7 @@
     "prebuild": "bun run db generate",
     "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target=bun --outfile dist/server",
     "clean": "git clean -fdx -e '.env*' .",
+    "generate-schema": "bunx --bun @better-auth/cli generate --config src/better-auth.ts",
     "db": "prisma",
     "predev": "test -d src/generated || bun run db generate",
     "dev": "bun --hot src/index.ts | pino-pretty",

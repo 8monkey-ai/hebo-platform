@@ -17,7 +17,11 @@ export const createPrismaAdapter = (
   max: number = 25,
 ): PrismaPg => {
   return new PrismaPg(
-    { connectionString: getConnectionString(schema), max },
+    {
+      connectionString: getConnectionString(schema),
+      max,
+      idleTimeoutMillis: 60_000,
+    },
     { schema: schema.toLowerCase() },
   );
 };

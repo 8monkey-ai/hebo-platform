@@ -14,6 +14,7 @@ export default $config({
   },
   async run() {
     await import("./infra/stacks/db");
+    await import("./infra/stacks/auth");
     await import("./infra/stacks/api");
     await import("./infra/stacks/gateway");
     await import("./infra/stacks/mcp");

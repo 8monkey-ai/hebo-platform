@@ -24,6 +24,7 @@ export const createOrganizationHook = (prisma: PrismaClient) => {
           id: Bun.randomUUIDv7(),
           name: `${newSession.user.name || newSession.user.email}'s Org`,
           slug: slugFromName(newSession.user.name, newSession.user.email),
+          createdAt: new Date(),
         },
       });
       await tx.members.create({
@@ -32,6 +33,7 @@ export const createOrganizationHook = (prisma: PrismaClient) => {
           userId: newSession.user.id,
           organizationId: org.id,
           role: "owner",
+          createdAt: new Date(),
         },
       });
       await tx.sessions.update({

@@ -1,5 +1,5 @@
-import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { betterAuth } from "better-auth/minimal";
 import { apiKey, emailOTP, organization } from "better-auth/plugins";
 
 import { authUrl } from "@hebo/shared-api/env";
@@ -23,8 +23,6 @@ export const prisma = new PrismaClient({
 const cookieDomain = getRootDomain(authUrl);
 
 export const auth = betterAuth({
-  baseURL: authUrl,
-  basePath: "/v1",
   accountLinking: {
     enabled: true,
     trustedProviders: ["google", "github", "microsoft"],
@@ -38,6 +36,8 @@ export const auth = betterAuth({
       generateId: () => Bun.randomUUIDv7(),
     },
   },
+  basePath: "/v1",
+  baseURL: authUrl,
   database: prismaAdapter(prisma, {
     provider: "postgresql",
     usePlural: true,
@@ -45,22 +45,8 @@ export const auth = betterAuth({
     debugLogs: process.env.LOG_LEVEL === "debug",
   }),
   databaseHooks: { session: { create: { before: createSessionHook(prisma) } } },
+  experimental: { joins: true },
   hooks: { after: createOrganizationHook(prisma) },
-  socialProviders: {
-    google: {
-      prompt: "select_account",
-      clientId: await getSecret("GoogleClientId", false),
-      clientSecret: await getSecret("GoogleClientSecret", false),
-    },
-    github: {
-      clientId: await getSecret("GithubClientId", false),
-      clientSecret: await getSecret("GithubClientSecret", false),
-    },
-    microsoft: {
-      clientId: await getSecret("MicrosoftClientId", false),
-      clientSecret: await getSecret("MicrosoftClientSecret", false),
-    },
-  },
   plugins: [
     apiKey({
       startingCharactersConfig: {
@@ -114,6 +100,21 @@ export const auth = betterAuth({
       },
     }),
   ],
-  trustedOrigins: cookieDomain ? [`https://*.${cookieDomain}`] : ["*"],
   secret: await getSecret("AuthSecret", false),
+  socialProviders: {
+    google: {
+      prompt: "select_account",
+      clientId: await getSecret("GoogleClientId", false),
+      clientSecret: await getSecret("GoogleClientSecret", false),
+    },
+    github: {
+      clientId: await getSecret("GithubClientId", false),
+      clientSecret: await getSecret("GithubClientSecret", false),
+    },
+    microsoft: {
+      clientId: await getSecret("MicrosoftClientId", false),
+      clientSecret: await getSecret("MicrosoftClientSecret", false),
+    },
+  },
+  trustedOrigins: cookieDomain ? [`https://*.${cookieDomain}`] : ["*"],
 });
