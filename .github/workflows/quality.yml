@@ -8,6 +8,9 @@ on:
   # Required to allow reuse. Do not remove.
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   quality:
     name: Run Quality Checks
