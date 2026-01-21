@@ -13,9 +13,7 @@ describe("BedrockProviderAdapter transformOptions", () => {
     expected: ProviderOptions;
   };
 
-  const bedrockProvider = new BedrockProviderAdapter(
-    "anthropic.claude-3-sonnet-20240229-v1:0",
-  );
+  const bedrockProvider = new BedrockProviderAdapter("openai.gpt-oss-20b-1:0");
 
   const testCases: TestCase[] = [
     {

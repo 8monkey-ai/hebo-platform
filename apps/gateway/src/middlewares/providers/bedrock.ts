@@ -33,7 +33,6 @@ export class BedrockProviderAdapter
   static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
     "openai/gpt-oss-120b": "openai.gpt-oss-120b-1:0",
     "openai/gpt-oss-20b": "openai.gpt-oss-20b-1:0",
-    "anthropic/claude-opus-4-5-v1": "anthropic.claude-opus-4-5-20251101-v1:0",
   };
 
   transformOptions(options: ProviderOptions): ProviderOptions {

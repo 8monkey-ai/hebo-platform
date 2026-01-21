@@ -1,6 +1,5 @@
 import { BadRequestError } from "@hebo/shared-api/errors";
 
-import { ClaudeOpus45Adapter } from "./claude";
 import { Gemini3ProPreviewAdapter, Gemini3FlashPreviewAdapter } from "./gemini";
 import { GptOss120bAdapter, GptOss20bAdapter } from "./gpt";
 import { type ModelAdapter, type SupportedModel } from "./model";
@@ -11,7 +10,6 @@ const ALL_MODEL_ADAPTER_CLASSES = [
   GptOss120bAdapter,
   Gemini3FlashPreviewAdapter,
   Gemini3ProPreviewAdapter,
-  ClaudeOpus45Adapter,
   Voyage35Adapter,
 ];
 
