@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+/// <reference path="../../.sst/platform/config.d.ts" />
+
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
 import { authSecrets, otelSecrets, isProduction, normalizedStage } from "./env";
@@ -31,6 +34,13 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
       { listen: "80/http", redirect: "443/https" },
       { listen: "443/https", forward: `${authPort}/http` },
     ],
+  },
+  transform: {
+    listener: (args) => {
+      if (args.protocol === "HTTPS") {
+        args.sslPolicy = "ELBSecurityPolicy-TLS13-1-2-2021-06";
+      }
+    },
   },
   scaling: {
     min: isProduction ? 2 : 1,
