@@ -4,6 +4,7 @@ import {
   emailOTPClient,
   organizationClient,
 } from "better-auth/client/plugins";
+import { getSessionCookie } from "better-auth/cookies";
 
 import { authUrl } from "~console/lib/service";
 import { shellStore } from "~console/lib/shell";
@@ -15,7 +16,7 @@ import {
   type User,
 } from "./types";
 
-const appRedirectPath = "/";
+const appRedirectPath = "/?after-signin";
 const appRedirectURL = `${globalThis.location.origin}${appRedirectPath}`;
 
 const authClient = createAuthClient({
@@ -40,7 +41,9 @@ const authClient = createAuthClient({
 
 export const authService: AuthService = {
   async ensureSignedIn() {
-    if (!document.cookie.includes("better-auth.session_token=")) {
+    const headers = new Headers();
+    headers.set("cookie", document.cookie);
+    if (!getSessionCookie(headers)) {
       shellStore.user = undefined;
       globalThis.location.replace("/signin");
       return;
@@ -51,7 +54,12 @@ export const authService: AuthService = {
     }
 
     // Disable cookie cache only after fresh sign-in to ensure we get the latest session
-    const isComingFromSignIn = document.referrer.includes("/signin");
+    const url = new URL(globalThis.location.href);
+    const isComingFromSignIn = url.searchParams.has("after-signin");
+    if (isComingFromSignIn) {
+      url.searchParams.delete("after-signin");
+      globalThis.history.replaceState({}, "", url.pathname + url.search);
+    }
 
     const session = await authClient.getSession({
       query: { disableCookieCache: isComingFromSignIn },

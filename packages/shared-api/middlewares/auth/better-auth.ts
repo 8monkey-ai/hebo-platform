@@ -1,14 +1,17 @@
 import { type Logger } from "@bogeychan/elysia-logger/types";
 import { createAuthClient as createBetterAuthClient } from "better-auth/client";
 import { organizationClient } from "better-auth/client/plugins";
-import { getCookieCache } from "better-auth/cookies";
+import { getCookieCache, getCookies } from "better-auth/cookies";
 import { Elysia } from "elysia";
 
+import { betterAuthCookieOptions } from "./cookie-options";
 import { authUrl } from "../../env";
 import { BadRequestError } from "../../errors";
 import { getSecret } from "../../utils/secrets";
 
+
 const authSecret = await getSecret("AuthSecret", false);
+const cookieConfig = getCookies(betterAuthCookieOptions);
 
 const createAuthClient = (request: Request) => {
   const headers = new Headers();
@@ -56,23 +59,30 @@ export const authServiceBetterAuth = new Elysia({
 
     const authClient = createAuthClient(ctx.request);
 
+    let session, error;
+
     if (cookie) {
-      const cachedSession = await getCookieCache(ctx.request, {
+      session = await getCookieCache(ctx.request, {
         secret: authSecret,
       });
-      if (cachedSession) {
-        return {
-          organizationId: cachedSession.session.activeOrganizationId,
-          userId: cachedSession.user.id,
-          authClient,
-        } as const;
-      }
+    } else {
+      ({ data: session, error } = await authClient.getSession());
     }
-
-    const { data: session, error } = await authClient.getSession();
 
     if (error || !session) {
       log.info({ error }, "Authentication failed or no credentials provided");
+
+      // Clear the session cookie when unauthorized
+      const { sameSite, ...restAttributes } =
+        cookieConfig.sessionToken.attributes;
+      ctx.set.cookie ??= {};
+      ctx.set.cookie[cookieConfig.sessionToken.name] = {
+        value: "",
+        ...restAttributes,
+        sameSite: sameSite.toLowerCase() as "lax" | "strict" | "none",
+        maxAge: 0,
+      };
+
       return {
         organizationId: undefined,
         userId: undefined,
