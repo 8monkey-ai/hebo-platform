@@ -1,10 +1,14 @@
 import { type Logger } from "@bogeychan/elysia-logger/types";
 import { createAuthClient as createBetterAuthClient } from "better-auth/client";
 import { organizationClient } from "better-auth/client/plugins";
+import { getCookieCache } from "better-auth/cookies";
 import { Elysia } from "elysia";
 
 import { authUrl } from "../../env";
 import { BadRequestError } from "../../errors";
+import { getSecret } from "../../utils/secrets";
+
+const authSecret = await getSecret("AuthSecret", false);
 
 const createAuthClient = (request: Request) => {
   const headers = new Headers();
@@ -51,6 +55,19 @@ export const authServiceBetterAuth = new Elysia({
     }
 
     const authClient = createAuthClient(ctx.request);
+
+    if (cookie) {
+      const cachedSession = await getCookieCache(ctx.request, {
+        secret: authSecret,
+      });
+      if (cachedSession) {
+        return {
+          organizationId: cachedSession.session.activeOrganizationId,
+          userId: cachedSession.user.id,
+          authClient,
+        } as const;
+      }
+    }
 
     const { data: session, error } = await authClient.getSession();
 

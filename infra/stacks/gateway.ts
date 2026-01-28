@@ -4,7 +4,13 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase from "./db";
-import { llmSecrets, otelSecrets, isProduction, normalizedStage } from "./env";
+import {
+  authSecret,
+  isProduction,
+  llmSecrets,
+  normalizedStage,
+  otelSecrets,
+} from "./env";
 
 const gatewayDomain = isProduction
   ? "gateway.hebo.ai"
@@ -22,7 +28,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
       resources: ["*"],
     },
   ],
-  link: [heboDatabase, ...llmSecrets, ...otelSecrets],
+  link: [heboDatabase, authSecret, ...llmSecrets, ...otelSecrets],
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.gateway",
