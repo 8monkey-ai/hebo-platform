@@ -50,8 +50,11 @@ export const authService: AuthService = {
       return;
     }
 
+    // Disable cookie cache only after fresh sign-in to ensure we get the latest session
+    const isComingFromSignIn = document.referrer.includes("/signin");
+
     const session = await authClient.getSession({
-      query: { disableCookieCache: true },
+      query: { disableCookieCache: isComingFromSignIn },
     });
     const user = session.data?.user as User;
     const initialsSource = user?.name || user.email;
