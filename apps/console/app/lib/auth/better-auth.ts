@@ -38,15 +38,11 @@ const authClient = createAuthClient({
   ],
 });
 
-const redirectToSignIn = () => {
-  shellStore.user = undefined;
-  globalThis.location.replace("/signin");
-};
-
 export const authService: AuthService = {
   async ensureSignedIn() {
     if (!document.cookie.includes("better-auth.session_token=")) {
-      redirectToSignIn();
+      shellStore.user = undefined;
+      globalThis.location.replace("/signin");
       return;
     }
 
@@ -60,11 +56,7 @@ export const authService: AuthService = {
     const session = await authClient.getSession({
       query: { disableCookieCache: isComingFromSignIn },
     });
-    const user = session.data?.user as User | undefined;
-    if (!user) {
-      redirectToSignIn();
-      return;
-    }
+    const user = session.data?.user as User;
     const initialsSource = user?.name || user.email;
     const initialsSeparator = user?.name ? " " : "@";
     user.initials = initialsSource
