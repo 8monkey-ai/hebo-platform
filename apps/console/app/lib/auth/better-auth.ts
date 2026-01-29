@@ -9,15 +9,19 @@ import { getSessionCookie } from "better-auth/cookies";
 import { authUrl } from "~console/lib/service";
 import { shellStore } from "~console/lib/shell";
 
-import {
-  DEFAULT_EXPIRATION_MS,
-  type ApiKey,
-  type AuthService,
-  type User,
-} from "./types";
+import { DEFAULT_EXPIRATION_MS, type ApiKey, type AuthService } from "./types";
 
 const appRedirectPath = "/?after-signin";
 const appRedirectURL = `${globalThis.location.origin}${appRedirectPath}`;
+
+function getInitials(name: string | undefined, email: string) {
+  const source = name || email;
+  const separator = name ? " " : "@";
+  return source
+    .split(separator)
+    .map((part) => part[0])
+    .join("");
+}
 
 const authClient = createAuthClient({
   baseURL: new URL("/v1", authUrl).toString(),
@@ -59,15 +63,14 @@ export const authService: AuthService = {
     const session = await authClient.getSession({
       query: { disableCookieCache: isComingFromSignIn },
     });
-    const user = session.data?.user as User;
-    const initialsSource = user?.name || user.email;
-    const initialsSeparator = user?.name ? " " : "@";
-    user.initials = initialsSource
-      .split(initialsSeparator)
-      .map((part) => part[0])
-      .join("");
 
-    shellStore.user = user;
+    const sessionUser = session.data?.user;
+    shellStore.user = sessionUser && {
+      email: sessionUser.email,
+      name: sessionUser.name,
+      image: sessionUser.image ?? undefined,
+      initials: getInitials(sessionUser.name, sessionUser.email),
+    };
   },
 
   async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
