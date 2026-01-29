@@ -41,9 +41,7 @@ const createAuthClient = (request: Request) => {
   });
 };
 
-const authServiceBetterAuth = new Elysia({
-  name: "authenticate-user-better-auth",
-})
+export const authService = new Elysia({ name: "auth-service" })
   .resolve(async (ctx) => {
     const log = (ctx as unknown as { log: Logger }).log;
 
@@ -102,10 +100,6 @@ const authServiceBetterAuth = new Elysia({
       authClient,
     } as const;
   })
-  .as("scoped");
-
-export const authService = new Elysia({ name: "auth-service" })
-  .use(authServiceBetterAuth)
   .macro({
     isSignedIn: {
       beforeHandle: function checkIsSignedIn({ organizationId, userId }) {
