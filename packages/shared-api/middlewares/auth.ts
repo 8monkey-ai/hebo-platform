@@ -2,7 +2,7 @@ import { type Logger } from "@bogeychan/elysia-logger/types";
 import { createAuthClient as createBetterAuthClient } from "better-auth/client";
 import { organizationClient } from "better-auth/client/plugins";
 import { getCookieCache, getCookies } from "better-auth/cookies";
-import { Elysia } from "elysia";
+import { type Cookie, Elysia } from "elysia";
 
 import { authUrl } from "../env";
 import { AuthError, BadRequestError } from "../errors";
@@ -72,15 +72,12 @@ const authServiceBetterAuth = new Elysia({
       log.info({ error }, "Authentication failed or no credentials provided");
 
       // Clear the session cookie when unauthorized
-      const { sameSite, ...restAttributes } =
-        cookieConfig.sessionToken.attributes;
-      ctx.set.cookie ??= {};
-      ctx.set.cookie[cookieConfig.sessionToken.name] = {
+      const { attributes, name } = cookieConfig.sessionToken;
+      ctx.cookie[name] = {
         value: "",
-        ...restAttributes,
-        sameSite: sameSite.toLowerCase() as "lax" | "strict" | "none",
         maxAge: 0,
-      };
+        ...attributes,
+      } as Cookie<string>;
 
       return {
         organizationId: undefined,
