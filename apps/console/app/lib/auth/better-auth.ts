@@ -53,13 +53,9 @@ export const authService: AuthService = {
     }
 
     // Disable cookie cache only after fresh sign-in to ensure we get the latest session
-    const url = new URL(globalThis.location.href);
-    const isComingFromSignIn = url.searchParams.has("after-signin");
-    if (isComingFromSignIn) {
-      url.searchParams.delete("after-signin");
-      globalThis.history.replaceState({}, "", url.pathname + url.search);
-    }
-
+    const isComingFromSignIn = new URL(
+      globalThis.location.href,
+    ).searchParams.has("after-signin");
     const session = await authClient.getSession({
       query: { disableCookieCache: isComingFromSignIn },
     });
