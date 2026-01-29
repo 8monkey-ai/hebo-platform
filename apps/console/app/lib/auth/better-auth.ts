@@ -4,6 +4,7 @@ import {
   emailOTPClient,
   organizationClient,
 } from "better-auth/client/plugins";
+import { getSessionCookie } from "better-auth/cookies";
 
 import { authUrl } from "~console/lib/service";
 import { shellStore } from "~console/lib/shell";
@@ -15,7 +16,7 @@ import {
   type User,
 } from "./types";
 
-const appRedirectPath = "/";
+const appRedirectPath = "/?after-signin";
 const appRedirectURL = `${globalThis.location.origin}${appRedirectPath}`;
 
 const authClient = createAuthClient({
@@ -40,14 +41,25 @@ const authClient = createAuthClient({
 
 export const authService: AuthService = {
   async ensureSignedIn() {
-    const session = await authClient.getSession();
-    const user = session.data?.user as User | undefined;
-
-    if (!user) {
+    const headers = new Headers({ cookie: document.cookie });
+    if (!getSessionCookie(headers)) {
+      shellStore.user = undefined;
       globalThis.location.replace("/signin");
       return;
     }
 
+    if (shellStore.user) {
+      return;
+    }
+
+    // Disable cookie cache only after fresh sign-in to ensure we get the latest session
+    const isComingFromSignIn = new URL(
+      globalThis.location.href,
+    ).searchParams.has("after-signin");
+    const session = await authClient.getSession({
+      query: { disableCookieCache: isComingFromSignIn },
+    });
+    const user = session.data?.user as User;
     const initialsSource = user?.name || user.email;
     const initialsSeparator = user?.name ? " " : "@";
     user.initials = initialsSource

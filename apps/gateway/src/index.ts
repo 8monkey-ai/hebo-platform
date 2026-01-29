@@ -4,9 +4,9 @@ import { openapi } from "@elysiajs/openapi";
 import { opentelemetry } from "@elysiajs/opentelemetry";
 import Elysia from "elysia";
 
-import { authService } from "@hebo/shared-api/middlewares/auth/auth-service";
-import { corsConfig } from "@hebo/shared-api/utils/cors";
-import { getOtelConfig } from "@hebo/shared-api/utils/otel";
+import { corsConfig } from "@hebo/shared-api/lib/cors";
+import { getOtelConfig } from "@hebo/shared-api/lib/otel";
+import { authService } from "@hebo/shared-api/middlewares/auth";
 
 import { errorHandler } from "./middlewares/error-handler";
 import { completions } from "./modules/completions";

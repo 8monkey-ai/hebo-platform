@@ -1,6 +1,6 @@
 import { Elysia, status, t } from "elysia";
 
-import { authService } from "@hebo/shared-api/middlewares/auth/auth-service";
+import { authService } from "@hebo/shared-api/middlewares/auth";
 import { slugFromString } from "@hebo/shared-api/utils/create-slug";
 
 import {

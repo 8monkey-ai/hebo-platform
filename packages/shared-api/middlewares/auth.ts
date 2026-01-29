@@ -1,10 +1,16 @@
 import { type Logger } from "@bogeychan/elysia-logger/types";
 import { createAuthClient as createBetterAuthClient } from "better-auth/client";
 import { organizationClient } from "better-auth/client/plugins";
-import { Elysia } from "elysia";
+import { getCookieCache, getCookies } from "better-auth/cookies";
+import { type Cookie, Elysia } from "elysia";
 
-import { authUrl } from "../../env";
-import { BadRequestError } from "../../errors";
+import { authUrl } from "../env";
+import { AuthError, BadRequestError } from "../errors";
+import { betterAuthCookieOptions } from "../lib/cookie-options";
+import { getSecret } from "../utils/secrets";
+
+const authSecret = await getSecret("AuthSecret", false);
+const cookieConfig = getCookies(betterAuthCookieOptions);
 
 const createAuthClient = (request: Request) => {
   const headers = new Headers();
@@ -35,9 +41,7 @@ const createAuthClient = (request: Request) => {
   });
 };
 
-export const authServiceBetterAuth = new Elysia({
-  name: "authenticate-user-better-auth",
-})
+export const authService = new Elysia({ name: "auth-service" })
   .resolve(async (ctx) => {
     const log = (ctx as unknown as { log: Logger }).log;
 
@@ -52,10 +56,27 @@ export const authServiceBetterAuth = new Elysia({
 
     const authClient = createAuthClient(ctx.request);
 
-    const { data: session, error } = await authClient.getSession();
+    let session, error;
+
+    if (cookie) {
+      session = await getCookieCache(ctx.request, {
+        secret: authSecret,
+      });
+    } else {
+      ({ data: session, error } = await authClient.getSession());
+    }
 
     if (error || !session) {
       log.info({ error }, "Authentication failed or no credentials provided");
+
+      // Clear the session cookie when unauthorized
+      const { attributes, name } = cookieConfig.sessionToken;
+      ctx.cookie[name] = {
+        value: "",
+        maxAge: 0,
+        ...attributes,
+      } as Cookie<string>;
+
       return {
         organizationId: undefined,
         userId: undefined,
@@ -78,5 +99,12 @@ export const authServiceBetterAuth = new Elysia({
       userId: session.user.id,
       authClient,
     } as const;
+  })
+  .macro({
+    isSignedIn: {
+      beforeHandle: function checkIsSignedIn({ organizationId, userId }) {
+        if (!organizationId || !userId) throw new AuthError("Unauthorized");
+      },
+    },
   })
   .as("scoped");

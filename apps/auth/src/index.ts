@@ -3,8 +3,8 @@ import { cors } from "@elysiajs/cors";
 import { opentelemetry } from "@elysiajs/opentelemetry";
 import Elysia from "elysia";
 
-import { corsConfig } from "@hebo/shared-api/utils/cors";
-import { getOtelConfig } from "@hebo/shared-api/utils/otel";
+import { corsConfig } from "@hebo/shared-api/lib/cors";
+import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 
 import { auth } from "./better-auth";
 

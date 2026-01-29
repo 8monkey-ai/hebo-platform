@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 
-import { authService } from "@hebo/shared-api/middlewares/auth/auth-service";
+import { authService } from "@hebo/shared-api/middlewares/auth";
 
 import { createDbClient } from "~api/lib/db/client";
 

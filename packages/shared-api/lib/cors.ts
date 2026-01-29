@@ -1,5 +1,5 @@
 import { authUrl } from "../env";
-import { getRootDomain } from "./domains";
+import { getRootDomain } from "../utils/domains";
 
 const rootDomain = getRootDomain(authUrl)?.replaceAll(".", String.raw`\.`);
 
@@ -7,7 +7,7 @@ export const corsConfig = rootDomain
   ? {
       // Matches HTTPS origins for exact domain or subdomains
       origin: new RegExp(
-        `^https://(?:${rootDomain}|(?:[a-z0-9-]+\\.)+${rootDomain})$`,
+        String.raw`^https://(?:${rootDomain}|(?:[a-z0-9-]+\.)+${rootDomain})$`,
         "i",
       ),
       credentials: true,

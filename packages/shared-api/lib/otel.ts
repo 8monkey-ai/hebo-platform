@@ -1,7 +1,7 @@
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
 
-import { getSecret } from "./secrets";
+import { getSecret } from "../utils/secrets";
 
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
 
