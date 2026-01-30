@@ -86,7 +86,9 @@ export const authService: AuthService = {
   async listApiKeys() {
     const { data, error } = await authClient.apiKey.list();
     if (error) throw new Error(error.message);
-    const keys = data.map((key) => ({
+    // v1.5.0-beta.9 returns { apiKeys: [...] } for pagination support
+    const apiKeys = "apiKeys" in data ? data.apiKeys : data;
+    const keys = apiKeys.map((key) => ({
       ...key,
       key: `${key.start}******`,
     })) as ApiKey[];
