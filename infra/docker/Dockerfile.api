@@ -14,6 +14,7 @@ RUN turbo prune @hebo/api --docker
 ########################  installer + builder stage  ########################
 FROM oven/bun:1 AS builder
 ENV CI=1
+ENV NODE_ENV=production
 WORKDIR /repo
 
 COPY --from=pruner /repo/out/json/ ./

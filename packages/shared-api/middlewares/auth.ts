@@ -10,6 +10,8 @@ import { betterAuthCookieOptions } from "../lib/cookie-options";
 import { getSecret } from "../utils/secrets";
 
 const authSecret = await getSecret("AuthSecret", false);
+// FUTURE: remove this
+const isSecure = authUrl.startsWith("https://");
 const cookieConfig = getCookies(betterAuthCookieOptions);
 
 const createAuthClient = (request: Request) => {
@@ -61,6 +63,7 @@ export const authService = new Elysia({ name: "auth-service" })
     if (cookie) {
       session = await getCookieCache(ctx.request, {
         secret: authSecret,
+        isSecure,
       });
     } else {
       ({ data: session, error } = await authClient.getSession());
