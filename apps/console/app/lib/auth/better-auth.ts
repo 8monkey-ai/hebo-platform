@@ -48,7 +48,10 @@ export const authService: AuthService = {
       return;
     }
 
-    if (shellStore.user) {
+    const hasSessionDataCookie = getSessionCookie(headers, {
+      cookieName: "session_data",
+    });
+    if (shellStore.user && hasSessionDataCookie) {
       return;
     }
 
