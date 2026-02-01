@@ -24,7 +24,6 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
     },
   },
   environment: {
-    LOG_LEVEL: isProduction ? "info" : "debug",
     PORT: mcpPort,
   },
   loadBalancer: {

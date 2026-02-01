@@ -2,7 +2,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { betterAuth } from "better-auth/minimal";
 import { apiKey, emailOTP, organization } from "better-auth/plugins";
 
-import { authUrl } from "@hebo/shared-api/env";
+import { authUrl, logLevel } from "@hebo/shared-api/env";
 import {
   betterAuthCookieOptions,
   cookieDomain,
@@ -39,7 +39,7 @@ export const auth = betterAuth({
     provider: "postgresql",
     usePlural: true,
     transaction: true,
-    debugLogs: process.env.LOG_LEVEL === "debug",
+    debugLogs: logLevel === "debug",
   }),
   databaseHooks: {
     user: { create: { after: createOrganizationHook(prisma) } },

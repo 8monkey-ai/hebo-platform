@@ -1,9 +1,8 @@
 import { createMessage } from "@upyo/core";
 import { SmtpTransport } from "@upyo/smtp";
 
+import { isProduction } from "@hebo/shared-api/env";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
-
-const isProduction = process.env.NODE_ENV === "production";
 
 const smtpHost = await getSecret("SmtpHost", false);
 const smtpPort = Number(await getSecret("SmtpPort", false));

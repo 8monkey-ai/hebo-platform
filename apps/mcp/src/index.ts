@@ -4,12 +4,12 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import Elysia from "elysia";
 
+import { logLevel } from "@hebo/shared-api/env";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 
 import { countLetterTool } from "./aikit/count-letter.js";
 import hello from "./hello.txt";
 
-const LOG_LEVEL = process.env.LOG_LEVEL ?? "info";
 const PORT = Number(process.env.PORT ?? 3003);
 
 const mcp = new McpServer({ name: "hebo-mcp", version: "0.0.2" });
@@ -22,7 +22,7 @@ mcp.registerTool(
 const createMcp = () =>
   new Elysia()
     .use(opentelemetry(getOtelConfig("hebo-mcp")))
-    .use(logger({ level: LOG_LEVEL }))
+    .use(logger({ level: logLevel }))
     .get("/", () => hello)
     .group("/aikit", (app) =>
       app.mount("/", async (request) => {

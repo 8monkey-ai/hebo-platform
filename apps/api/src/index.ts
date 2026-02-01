@@ -4,6 +4,7 @@ import { openapi } from "@elysiajs/openapi";
 import { opentelemetry } from "@elysiajs/opentelemetry";
 import Elysia from "elysia";
 
+import { logLevel } from "@hebo/shared-api/env";
 import { corsConfig } from "@hebo/shared-api/lib/cors";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { authService } from "@hebo/shared-api/middlewares/auth";
@@ -13,13 +14,12 @@ import { agentsModule } from "./modules/agents";
 import { branchesModule } from "./modules/branches";
 import { providersModule } from "./modules/providers";
 
-const LOG_LEVEL = process.env.LOG_LEVEL ?? "info";
 const PORT = Number(process.env.PORT ?? 3001);
 
 const createApi = () =>
   new Elysia()
     .use(opentelemetry(getOtelConfig("hebo-api")))
-    .use(logger({ level: LOG_LEVEL }))
+    .use(logger({ level: logLevel }))
     // Root route ("/") is unauthenticated and unprotected for health checks.
     .get("/", () => "🐵 Hebo API says hello!")
     .use(cors(corsConfig))
