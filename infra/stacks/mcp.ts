@@ -19,9 +19,11 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.mcp",
     tags: [mcpDomain],
+    args: {
+      NODE_ENV: isProduction ? "production" : "development",
+    },
   },
   environment: {
-    NODE_ENV: isProduction ? "production" : "development",
     LOG_LEVEL: isProduction ? "info" : "debug",
     PORT: mcpPort,
   },

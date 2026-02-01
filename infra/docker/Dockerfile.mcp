@@ -14,14 +14,19 @@ RUN turbo prune @hebo/mcp --docker
 ########################  installer + builder stage  ########################
 FROM oven/bun:1 AS builder
 ENV CI=1
-ENV NODE_ENV=production
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 WORKDIR /repo
 
 COPY --from=pruner /repo/out/json/ ./
 RUN bun install --frozen-lockfile
 
 COPY --from=pruner /repo/out/full/ ./
-RUN bun run build
+RUN if [ "$NODE_ENV" = "production" ]; then \
+      bun build apps/mcp/src/index.ts --compile --minify-whitespace --minify-syntax --target=bun --outfile apps/mcp/dist/server --production; \
+    else \
+      bun build apps/mcp/src/index.ts --compile --minify-whitespace --minify-syntax --target=bun --outfile apps/mcp/dist/server; \
+    fi
 
 ########################  runner stage  ########################
 FROM gcr.io/distroless/base

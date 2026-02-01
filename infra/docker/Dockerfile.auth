@@ -14,7 +14,8 @@ RUN turbo prune @hebo/auth --docker
 ########################  installer + builder stage  ########################
 FROM oven/bun:1 AS builder
 ENV CI=1
-ENV NODE_ENV=production
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 WORKDIR /repo
 
 COPY --from=pruner /repo/out/json/ ./
@@ -22,7 +23,12 @@ RUN bun install --frozen-lockfile
 
 COPY --from=pruner /repo/out/full/ ./
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /rds-bundle.pem
-RUN bun run build
+RUN bun run -F @hebo/auth prebuild && \
+    if [ "$NODE_ENV" = "production" ]; then \
+      bun build apps/auth/src/index.ts --compile --minify-whitespace --minify-syntax --target=bun --outfile apps/auth/dist/server --production; \
+    else \
+      bun build apps/auth/src/index.ts --compile --minify-whitespace --minify-syntax --target=bun --outfile apps/auth/dist/server; \
+    fi
 
 ########################  runner stage  ########################
 FROM gcr.io/distroless/base

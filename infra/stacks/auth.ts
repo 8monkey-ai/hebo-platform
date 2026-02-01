@@ -20,11 +20,13 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.auth",
     tags: [authDomain],
+    args: {
+      NODE_ENV: isProduction ? "production" : "development",
+    },
   },
   environment: {
     AUTH_URL: `https://${authDomain}`,
     LOG_LEVEL: isProduction ? "info" : "debug",
-    NODE_ENV: isProduction ? "production" : "development",
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: authPort,
   },

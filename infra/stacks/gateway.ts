@@ -33,11 +33,13 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.gateway",
     tags: [gatewayDomain],
+    args: {
+      NODE_ENV: isProduction ? "production" : "development",
+    },
   },
   environment: {
     AUTH_URL: heboAuth.url,
     LOG_LEVEL: isProduction ? "info" : "debug",
-    NODE_ENV: isProduction ? "production" : "development",
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: gatewayPort,
   },

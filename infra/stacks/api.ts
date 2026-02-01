@@ -21,11 +21,13 @@ const heboApi = new sst.aws.Service("HeboApi", {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.api",
     tags: [apiDomain],
+    args: {
+      NODE_ENV: isProduction ? "production" : "development",
+    },
   },
   environment: {
     AUTH_URL: heboAuth.url,
     LOG_LEVEL: isProduction ? "info" : "debug",
-    NODE_ENV: isProduction ? "production" : "development",
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: apiPort,
   },
