@@ -23,12 +23,10 @@ RUN bun install --frozen-lockfile
 
 COPY --from=pruner /repo/out/full/ ./
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /rds-bundle.pem
-# TODO: simplify the following logic
-RUN bun run -F @hebo/api prebuild && \
-    if [ "$NODE_ENV" = "production" ]; then \
-      bun build apps/api/src/index.ts --compile --minify-whitespace --minify-syntax --target=bun --outfile apps/api/dist/server --production; \
+RUN if [ "$NODE_ENV" = "production" ]; then \
+      bun run build -- -- --production; \
     else \
-      bun build apps/api/src/index.ts --compile --minify-whitespace --minify-syntax --target=bun --outfile apps/api/dist/server; \
+      bun run build; \
     fi
 
 ########################  runner stage  ########################
