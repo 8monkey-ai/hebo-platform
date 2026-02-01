@@ -21,11 +21,7 @@ COPY --from=pruner /repo/out/json/ ./
 RUN bun install --frozen-lockfile
 
 COPY --from=pruner /repo/out/full/ ./
-RUN if [ "$NODE_ENV" = "production" ]; then \
-      bun run build -- -- --production; \
-    else \
-      bun run build; \
-    fi
+RUN [ "$NODE_ENV" = "production" ] && bun run build -- -- --production || bun run build
 
 ########################  runner stage  ########################
 FROM gcr.io/distroless/base
