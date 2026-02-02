@@ -1,5 +1,3 @@
-import { AssumeRoleCommand, STSClient } from "@aws-sdk/client-sts";
-
 type AwsContainerCredentialResponse = {
   AccessKeyId: string;
   SecretAccessKey: string;
@@ -48,22 +46,3 @@ export function buildWifOptions(audience: string, serviceAccountEmail: string) {
     service_account_impersonation_url: `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/${serviceAccountEmail}:generateAccessToken`,
   };
 }
-
-/*
- * Assumes a role and returns the credentials.
- * Used for Bedrock provider.
- */
-export const assumeRole = async (region: string, roleArn: string) => {
-  const resp = await new STSClient({ region }).send(
-    new AssumeRoleCommand({
-      RoleArn: roleArn,
-      RoleSessionName: "HeboBedrockSession",
-    }),
-  );
-  if (!resp.Credentials) throw new Error("Missing AWS credentials");
-  return {
-    accessKeyId: resp.Credentials.AccessKeyId!,
-    secretAccessKey: resp.Credentials.SecretAccessKey!,
-    sessionToken: resp.Credentials.SessionToken!,
-  };
-};

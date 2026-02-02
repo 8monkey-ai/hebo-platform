@@ -21,7 +21,7 @@
     "@ai-sdk/provider": "2.0.1",
     "@ai-sdk/provider-utils": "catalog:",
     "@aws-sdk/client-bedrock": "^3.968.0",
-    "@aws-sdk/client-sts": "^3.968.0",
+    "@aws-sdk/credential-providers": "^3.980.0",
     "@bogeychan/elysia-logger": "catalog:",
     "@elysiajs/cors": "catalog:",
     "@elysiajs/openapi": "catalog:",
@@ -30,6 +30,7 @@
     "@hebo/shared-api": "workspace:*",
     "ai": "catalog:",
     "elysia": "catalog:",
+    "quick-lru": "^7.3.0",
     "voyage-ai-provider": "^2.0.0",
     "zod": "catalog:"
   },

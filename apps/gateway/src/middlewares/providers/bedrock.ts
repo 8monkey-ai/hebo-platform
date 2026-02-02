@@ -3,26 +3,23 @@ import {
   BedrockClient,
   ListInferenceProfilesCommand,
 } from "@aws-sdk/client-bedrock";
+import { fromTemporaryCredentials } from "@aws-sdk/credential-providers";
 
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import type { BedrockProviderConfig } from "~api/modules/providers/types";
 import { toSnakeCase } from "~gateway/utils/helpers";
 
-import { assumeRole } from "./adapters/aws";
 import { ProviderAdapterBase, type ProviderAdapter } from "./provider";
 
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
-
-type BedrockCredentials =
-  ReturnType<typeof assumeRole> extends Promise<infer T> ? T : never;
 
 export class BedrockProviderAdapter
   extends ProviderAdapterBase
   implements ProviderAdapter
 {
-  private config?: BedrockProviderConfig;
-  private credentials?: BedrockCredentials;
+  private config!: BedrockProviderConfig;
+  private credentials!: ReturnType<typeof fromTemporaryCredentials>;
 
   static readonly providerSlug = "bedrock";
 
@@ -46,14 +43,6 @@ export class BedrockProviderAdapter
     return Object.keys(transformed).length > 0 ? transformed : options;
   }
 
-  private async getCredentials() {
-    if (!this.credentials) {
-      const cfg = this.config!;
-      this.credentials = await assumeRole(cfg.region, cfg.bedrockRoleArn);
-    }
-    return this.credentials;
-  }
-
   async initialize(config?: BedrockProviderConfig): Promise<this> {
     if (config) {
       this.config = config;
@@ -64,25 +53,29 @@ export class BedrockProviderAdapter
       ]);
       this.config = { bedrockRoleArn, region };
     }
+    this.credentials = fromTemporaryCredentials({
+      params: {
+        RoleArn: this.config.bedrockRoleArn,
+        RoleSessionName: "HeboBedrockSession",
+      },
+      clientConfig: { region: this.config.region },
+    });
     return this;
   }
 
   async getProvider() {
-    const credentials = await this.getCredentials();
-    const { region } = this.config!;
     return createAmazonBedrock({
-      ...credentials,
-      region,
+      region: this.config.region,
+      credentialProvider: this.credentials,
     });
   }
 
   async resolveModelId(): Promise<string> {
     const modelId = await super.resolveModelId();
 
-    const { region } = this.config!;
     const client = new BedrockClient({
-      region,
-      credentials: await this.getCredentials(),
+      region: this.config.region,
+      credentials: this.credentials,
     });
     let nextToken: string | undefined;
     do {

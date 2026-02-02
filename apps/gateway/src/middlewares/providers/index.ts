@@ -1,3 +1,5 @@
+import QuickLRU from "quick-lru";
+
 import { BadRequestError } from "@hebo/shared-api/errors";
 
 import type { createDbClient } from "~api/lib/db/client";
@@ -25,12 +27,16 @@ export class ProviderAdapterFactory {
     VertexProviderAdapter,
   ];
 
+  private static adapterCache = new QuickLRU<string, ProviderAdapter>({
+    maxSize: 100,
+  });
+
   constructor(private readonly dbClient: ReturnType<typeof createDbClient>) {}
 
   async createDefault(modelType: string): Promise<ProviderAdapter> {
     for (const ProviderAdapterClass of ProviderAdapterFactory.ALL_PROVIDER_ADAPTER_CLASSES) {
       if (ProviderAdapterClass.supportsModel(modelType)) {
-        return await this.createAdapter(
+        return await this.getOrCreateAdapter(
           ProviderAdapterClass.providerSlug,
           modelType,
         );
@@ -48,11 +54,27 @@ export class ProviderAdapterFactory {
   ): Promise<ProviderAdapter> {
     const { value: config } =
       await this.dbClient.provider_configs.getUnredacted(providerSlug);
-    return await this.createAdapter(
+    return await this.getOrCreateAdapter(
       providerSlug,
       modelType,
       config as ProviderConfig,
     );
+  }
+
+  private async getOrCreateAdapter(
+    providerSlug: ProviderSlug,
+    modelType: string,
+    config?: ProviderConfig,
+  ): Promise<ProviderAdapter> {
+    const configKey = config ? JSON.stringify(config) : "default";
+    const cacheKey = `${providerSlug}:${modelType}:${configKey}`;
+
+    let adapter = ProviderAdapterFactory.adapterCache.get(cacheKey);
+    if (!adapter) {
+      adapter = await this.createAdapter(providerSlug, modelType, config);
+      ProviderAdapterFactory.adapterCache.set(cacheKey, adapter);
+    }
+    return adapter;
   }
 
   private async createAdapter(

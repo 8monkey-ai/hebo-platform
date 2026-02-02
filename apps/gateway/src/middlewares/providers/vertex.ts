@@ -20,7 +20,7 @@ export class VertexProviderAdapter
   extends ProviderAdapterBase
   implements ProviderAdapter
 {
-  private config?: VertexProviderConfig;
+  private config!: VertexProviderConfig;
 
   static readonly providerSlug = "vertex";
 
@@ -122,8 +122,7 @@ export class VertexProviderAdapter
   }
 
   async getProvider() {
-    const cfg = this.config!;
-    const { serviceAccountEmail, audience, location, project } = cfg;
+    const { serviceAccountEmail, audience, location, project } = this.config;
     await injectMetadataCredentials();
     return createVertex({
       googleAuthOptions: {
