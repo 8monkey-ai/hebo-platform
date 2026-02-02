@@ -41,5 +41,12 @@ jobs:
         id: deploy
         run: |
           STAGE="pr-${{ github.event.pull_request.number }}"
+          printf '%s' "${{ secrets.AUTH_GITHUB_CLIENT_ID }}" | bun run sst secret set GithubClientId --stage $STAGE
+          printf '%s' "${{ secrets.AUTH_GITHUB_CLIENT_SECRET }}" | bun run sst secret set GithubClientSecret --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_HOST }}" | bun run sst secret set SmtpHost --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_PORT }}" | bun run sst secret set SmtpPort --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_USER }}" | bun run sst secret set SmtpUser --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_PASS }}" | bun run sst secret set SmtpPass --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_FROM }}" | bun run sst secret set SmtpFrom --stage $STAGE
           echo "Deploying to stage: $STAGE"
           bun run sst deploy --stage $STAGE
