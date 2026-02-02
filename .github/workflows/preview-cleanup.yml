@@ -4,10 +4,6 @@ on:
   pull_request:
     types: [closed]
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   cleanup:
     name: Remove Preview Deployment
@@ -20,13 +16,6 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
-
-      # Temporary: Pin Pulumi to v3.210.0 until SST releases version compatible with latest Pulumi
-      # See: https://github.com/anomalyco/sst/issues/6314
-      - name: Setup Pulumi (pin for SST)
-        uses: pulumi/actions@v6
-        with:
-          pulumi-version: 3.210.0
 
       - name: Install dependencies
         run: bun install --frozen-lockfile

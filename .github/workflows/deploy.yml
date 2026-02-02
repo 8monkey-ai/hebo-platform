@@ -5,10 +5,6 @@ on:
     tags:
       - "v*"
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
   quality:
     uses: ./.github/workflows/quality.yml
