@@ -22,7 +22,7 @@ export class BedrockProviderAdapter
 
   static readonly providerSlug = "bedrock";
 
-  private static credentialProviderCache = new Map<
+  private static credentialsCache = new Map<
     string,
     ReturnType<typeof fromTemporaryCredentials>
   >();
@@ -47,21 +47,21 @@ export class BedrockProviderAdapter
     return Object.keys(transformed).length > 0 ? transformed : options;
   }
 
-  private getCredentialProvider() {
+  private getCredentials() {
     const { region, bedrockRoleArn } = this.config!;
     const cacheKey = `${region}:${bedrockRoleArn}`;
-    let provider = BedrockProviderAdapter.credentialProviderCache.get(cacheKey);
-    if (!provider) {
-      provider = fromTemporaryCredentials({
+    let credentials = BedrockProviderAdapter.credentialsCache.get(cacheKey);
+    if (!credentials) {
+      credentials = fromTemporaryCredentials({
         params: {
           RoleArn: bedrockRoleArn,
           RoleSessionName: "HeboBedrockSession",
         },
         clientConfig: { region },
       });
-      BedrockProviderAdapter.credentialProviderCache.set(cacheKey, provider);
+      BedrockProviderAdapter.credentialsCache.set(cacheKey, credentials);
     }
-    return provider;
+    return credentials;
   }
 
   async initialize(config?: BedrockProviderConfig): Promise<this> {
@@ -81,7 +81,7 @@ export class BedrockProviderAdapter
     const { region } = this.config!;
     return createAmazonBedrock({
       region,
-      credentialProvider: this.getCredentialProvider(),
+      credentialProvider: this.getCredentials(),
     });
   }
 
@@ -91,7 +91,7 @@ export class BedrockProviderAdapter
     const { region } = this.config!;
     const client = new BedrockClient({
       region,
-      credentials: this.getCredentialProvider(),
+      credentials: this.getCredentials(),
     });
     let nextToken: string | undefined;
     do {
