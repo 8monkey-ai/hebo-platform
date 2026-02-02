@@ -3,28 +3,29 @@ import {
   BedrockClient,
   ListInferenceProfilesCommand,
 } from "@aws-sdk/client-bedrock";
+import { fromTemporaryCredentials } from "@aws-sdk/credential-providers";
 
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import type { BedrockProviderConfig } from "~api/modules/providers/types";
 import { toSnakeCase } from "~gateway/utils/helpers";
 
-import { assumeRole } from "./adapters/aws";
 import { ProviderAdapterBase, type ProviderAdapter } from "./provider";
 
 import type { ProviderOptions } from "@ai-sdk/provider-utils";
-
-type BedrockCredentials =
-  ReturnType<typeof assumeRole> extends Promise<infer T> ? T : never;
 
 export class BedrockProviderAdapter
   extends ProviderAdapterBase
   implements ProviderAdapter
 {
   private config?: BedrockProviderConfig;
-  private credentials?: BedrockCredentials;
 
   static readonly providerSlug = "bedrock";
+
+  private static credentialProviderCache = new Map<
+    string,
+    ReturnType<typeof fromTemporaryCredentials>
+  >();
 
   constructor(modelType: string) {
     super(modelType);
@@ -46,12 +47,21 @@ export class BedrockProviderAdapter
     return Object.keys(transformed).length > 0 ? transformed : options;
   }
 
-  private async getCredentials() {
-    if (!this.credentials) {
-      const cfg = this.config!;
-      this.credentials = await assumeRole(cfg.region, cfg.bedrockRoleArn);
+  private getCredentialProvider() {
+    const { region, bedrockRoleArn } = this.config!;
+    const cacheKey = `${region}:${bedrockRoleArn}`;
+    let provider = BedrockProviderAdapter.credentialProviderCache.get(cacheKey);
+    if (!provider) {
+      provider = fromTemporaryCredentials({
+        params: {
+          RoleArn: bedrockRoleArn,
+          RoleSessionName: "HeboBedrockSession",
+        },
+        clientConfig: { region },
+      });
+      BedrockProviderAdapter.credentialProviderCache.set(cacheKey, provider);
     }
-    return this.credentials;
+    return provider;
   }
 
   async initialize(config?: BedrockProviderConfig): Promise<this> {
@@ -68,11 +78,10 @@ export class BedrockProviderAdapter
   }
 
   async getProvider() {
-    const credentials = await this.getCredentials();
     const { region } = this.config!;
     return createAmazonBedrock({
-      ...credentials,
       region,
+      credentialProvider: this.getCredentialProvider(),
     });
   }
 
@@ -82,7 +91,7 @@ export class BedrockProviderAdapter
     const { region } = this.config!;
     const client = new BedrockClient({
       region,
-      credentials: await this.getCredentials(),
+      credentials: this.getCredentialProvider(),
     });
     let nextToken: string | undefined;
     do {
