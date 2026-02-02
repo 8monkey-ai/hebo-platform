@@ -62,9 +62,8 @@ export class ProviderAdapterFactory {
     modelType: string,
     config?: ProviderConfig,
   ): Promise<ProviderAdapter> {
-    const cacheKey = config
-      ? `${providerSlug}:${JSON.stringify(config)}`
-      : `${providerSlug}:default`;
+    const configKey = config ? JSON.stringify(config) : "default";
+    const cacheKey = `${providerSlug}:${modelType}:${configKey}`;
 
     let adapter = ProviderAdapterFactory.adapterCache.get(cacheKey);
     if (!adapter) {
