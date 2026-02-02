@@ -126,7 +126,6 @@ export class VertexProviderAdapter
     if (!this.provider) {
       const cfg = this.config!;
       const { serviceAccountEmail, audience, location, project } = cfg;
-
       await injectMetadataCredentials();
       this.provider = createVertex({
         googleAuthOptions: {
