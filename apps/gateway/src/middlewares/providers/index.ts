@@ -25,12 +25,14 @@ export class ProviderAdapterFactory {
     VertexProviderAdapter,
   ];
 
+  private static adapterCache = new Map<string, ProviderAdapter>();
+
   constructor(private readonly dbClient: ReturnType<typeof createDbClient>) {}
 
   async createDefault(modelType: string): Promise<ProviderAdapter> {
     for (const ProviderAdapterClass of ProviderAdapterFactory.ALL_PROVIDER_ADAPTER_CLASSES) {
       if (ProviderAdapterClass.supportsModel(modelType)) {
-        return await this.createAdapter(
+        return await this.getOrCreateAdapter(
           ProviderAdapterClass.providerSlug,
           modelType,
         );
@@ -48,11 +50,28 @@ export class ProviderAdapterFactory {
   ): Promise<ProviderAdapter> {
     const { value: config } =
       await this.dbClient.provider_configs.getUnredacted(providerSlug);
-    return await this.createAdapter(
+    return await this.getOrCreateAdapter(
       providerSlug,
       modelType,
       config as ProviderConfig,
     );
+  }
+
+  private async getOrCreateAdapter(
+    providerSlug: ProviderSlug,
+    modelType: string,
+    config?: ProviderConfig,
+  ): Promise<ProviderAdapter> {
+    const cacheKey = config
+      ? `${providerSlug}:${JSON.stringify(config)}`
+      : `${providerSlug}:default`;
+
+    let adapter = ProviderAdapterFactory.adapterCache.get(cacheKey);
+    if (!adapter) {
+      adapter = await this.createAdapter(providerSlug, modelType, config);
+      ProviderAdapterFactory.adapterCache.set(cacheKey, adapter);
+    }
+    return adapter;
   }
 
   private async createAdapter(

@@ -19,13 +19,9 @@ export class BedrockProviderAdapter
   implements ProviderAdapter
 {
   private config?: BedrockProviderConfig;
+  private credentials?: ReturnType<typeof fromTemporaryCredentials>;
 
   static readonly providerSlug = "bedrock";
-
-  private static credentialsCache = new Map<
-    string,
-    ReturnType<typeof fromTemporaryCredentials>
-  >();
 
   constructor(modelType: string) {
     super(modelType);
@@ -48,20 +44,16 @@ export class BedrockProviderAdapter
   }
 
   private getCredentials() {
-    const { region, bedrockRoleArn } = this.config!;
-    const cacheKey = `${region}:${bedrockRoleArn}`;
-    let credentials = BedrockProviderAdapter.credentialsCache.get(cacheKey);
-    if (!credentials) {
-      credentials = fromTemporaryCredentials({
+    if (!this.credentials) {
+      this.credentials = fromTemporaryCredentials({
         params: {
-          RoleArn: bedrockRoleArn,
+          RoleArn: this.config!.bedrockRoleArn,
           RoleSessionName: "HeboBedrockSession",
         },
-        clientConfig: { region },
+        clientConfig: { region: this.config!.region },
       });
-      BedrockProviderAdapter.credentialsCache.set(cacheKey, credentials);
     }
-    return credentials;
+    return this.credentials;
   }
 
   async initialize(config?: BedrockProviderConfig): Promise<this> {

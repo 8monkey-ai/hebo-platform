@@ -21,13 +21,9 @@ export class VertexProviderAdapter
   implements ProviderAdapter
 {
   private config?: VertexProviderConfig;
+  private provider?: ReturnType<typeof createVertex>;
 
   static readonly providerSlug = "vertex";
-
-  private static providerCache = new Map<
-    string,
-    ReturnType<typeof createVertex>
-  >();
 
   static readonly SUPPORTED_MODELS_MAP: Record<string, string> = {
     "google/gemini-3-pro-preview": "gemini-3-pro-preview",
@@ -127,14 +123,12 @@ export class VertexProviderAdapter
   }
 
   async getProvider() {
-    const cfg = this.config!;
-    const { serviceAccountEmail, audience, location, project } = cfg;
-    const cacheKey = `${project}:${location}:${serviceAccountEmail}`;
+    if (!this.provider) {
+      const cfg = this.config!;
+      const { serviceAccountEmail, audience, location, project } = cfg;
 
-    await injectMetadataCredentials();
-    let provider = VertexProviderAdapter.providerCache.get(cacheKey);
-    if (!provider) {
-      provider = createVertex({
+      await injectMetadataCredentials();
+      this.provider = createVertex({
         googleAuthOptions: {
           credentials: buildWifOptions(audience, serviceAccountEmail),
           scopes: ["https://www.googleapis.com/auth/cloud-platform"],
@@ -142,9 +136,8 @@ export class VertexProviderAdapter
         location,
         project,
       });
-      VertexProviderAdapter.providerCache.set(cacheKey, provider);
     }
-    return provider;
+    return this.provider;
   }
 
   getProviderOptionsName(): string {
