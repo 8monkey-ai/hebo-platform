@@ -20,8 +20,7 @@ export class VertexProviderAdapter
   extends ProviderAdapterBase
   implements ProviderAdapter
 {
-  private config?: VertexProviderConfig;
-  private provider?: ReturnType<typeof createVertex>;
+  private config!: VertexProviderConfig;
 
   static readonly providerSlug = "vertex";
 
@@ -123,20 +122,16 @@ export class VertexProviderAdapter
   }
 
   async getProvider() {
-    if (!this.provider) {
-      const cfg = this.config!;
-      const { serviceAccountEmail, audience, location, project } = cfg;
-      await injectMetadataCredentials();
-      this.provider = createVertex({
-        googleAuthOptions: {
-          credentials: buildWifOptions(audience, serviceAccountEmail),
-          scopes: ["https://www.googleapis.com/auth/cloud-platform"],
-        },
-        location,
-        project,
-      });
-    }
-    return this.provider;
+    const { serviceAccountEmail, audience, location, project } = this.config;
+    await injectMetadataCredentials();
+    return createVertex({
+      googleAuthOptions: {
+        credentials: buildWifOptions(audience, serviceAccountEmail),
+        scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+      },
+      location,
+      project,
+    });
   }
 
   getProviderOptionsName(): string {

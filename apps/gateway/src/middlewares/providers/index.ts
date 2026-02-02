@@ -1,3 +1,5 @@
+import QuickLRU from "quick-lru";
+
 import { BadRequestError } from "@hebo/shared-api/errors";
 
 import type { createDbClient } from "~api/lib/db/client";
@@ -25,7 +27,9 @@ export class ProviderAdapterFactory {
     VertexProviderAdapter,
   ];
 
-  private static adapterCache = new Map<string, ProviderAdapter>();
+  private static adapterCache = new QuickLRU<string, ProviderAdapter>({
+    maxSize: 100,
+  });
 
   constructor(private readonly dbClient: ReturnType<typeof createDbClient>) {}
 

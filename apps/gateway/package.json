@@ -30,6 +30,7 @@
     "@hebo/shared-api": "workspace:*",
     "ai": "catalog:",
     "elysia": "catalog:",
+    "quick-lru": "^7.3.0",
     "voyage-ai-provider": "^2.0.0",
     "zod": "catalog:"
   },
