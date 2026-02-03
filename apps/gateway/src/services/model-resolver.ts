@@ -132,11 +132,8 @@ export class ModelResolver {
     }
 
     // Fallback to groq for openai/* models when bedrock not configured
-    if (modelId.startsWith("openai/")) {
-      const hasBedrockConfig = await this.hasProviderConfig("bedrock");
-      if (!hasBedrockConfig) {
-        return defaultProviders.groq;
-      }
+    if (modelId.startsWith("openai/") && !defaultProviders.bedrock) {
+      return defaultProviders.groq;
     }
 
     return undefined;
@@ -166,15 +163,6 @@ export class ModelResolver {
       };
     }
     return this.modelConfig;
-  }
-
-  private async hasProviderConfig(slug: ProviderSlug): Promise<boolean> {
-    try {
-      await this.dbClient.provider_configs.getUnredacted(slug);
-      return true;
-    } catch {
-      return false;
-    }
   }
 
   private async getCustomProvider(
