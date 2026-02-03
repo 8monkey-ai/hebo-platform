@@ -7,6 +7,7 @@ on:
 jobs:
   cleanup:
     name: Remove Preview Deployment
+    if: contains(github.event.pull_request.labels.*.name, 'preview deploy')
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,5 +31,9 @@ jobs:
       - name: Remove preview environment
         run: |
           STAGE="pr-${{ github.event.pull_request.number }}"
+          if ! bun run sst list --stage $STAGE; then
+            echo "Stage $STAGE does not exist, skipping cleanup"
+            exit 0
+          fi
           echo "Removing preview environment: $STAGE"
           bun run sst remove --stage $STAGE
