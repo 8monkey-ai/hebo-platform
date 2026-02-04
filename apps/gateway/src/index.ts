@@ -29,13 +29,6 @@ import { errorHandler } from "./middlewares/error-handler";
 
 const PORT = Number(process.env.PORT ?? 3002);
 
-// Workaround for Elysia type issue with async handlers returning Response
-// See: https://github.com/elysiajs/elysia/issues/1721
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const asResponse = <T extends (...args: any[]) => Promise<Response>>(
-  handler: T,
-) => handler as unknown as (...args: Parameters<T>) => Response;
-
 export const createGateway = () =>
   new Elysia()
     .use(opentelemetry(getOtelConfig("hebo-gateway")))
@@ -56,9 +49,11 @@ export const createGateway = () =>
     )
     .use(errorHandler)
     // Public routes (no authentication required)
+     
     .get(
       "/v1/models",
-      asResponse(({ request }) => gw.routes["/models"].handler(request)),
+      (({ request }: { request: Request }) =>
+        gw.routes["/models"].handler(request)) as any,
       {
         response: {
           200: ModelListSchema,
@@ -69,7 +64,9 @@ export const createGateway = () =>
     )
     .get(
       "/v1/models/:modelId",
-      asResponse(({ request }) => gw.routes["/models"].handler(request)),
+       
+      (({ request }: { request: Request }) =>
+        gw.routes["/models"].handler(request)) as any,
       {
         response: {
           200: ModelSchema,
@@ -85,9 +82,9 @@ export const createGateway = () =>
         .use(dbClient)
         .post(
           "/chat/completions",
-          asResponse(({ request, dbClient }) =>
-            gw.handler(request, { dbClient }),
-          ),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- https://github.com/elysiajs/elysia/issues/1721
+          (({ request, dbClient }: any) =>
+            gw.handler(request, { dbClient })) as any,
           {
             parse: "none",
             body: ChatCompletionsBodySchema,
@@ -100,9 +97,9 @@ export const createGateway = () =>
         )
         .post(
           "/embeddings",
-          asResponse(({ request, dbClient }) =>
-            gw.handler(request, { dbClient }),
-          ),
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- https://github.com/elysiajs/elysia/issues/1721
+          (({ request, dbClient }: any) =>
+            gw.handler(request, { dbClient })) as any,
           {
             parse: "none",
             body: EmbeddingsBodySchema,
