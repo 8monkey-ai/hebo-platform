@@ -55,19 +55,13 @@ export const gw = gateway({
 
   hooks: {
     resolveModelId: async (ctx) =>
-      ctx.modelId &&
       new ModelResolver(
         (ctx.state as { dbClient: DbClient }).dbClient,
-      ).resolveModelId(ctx.modelId),
+      ).resolveModelId(ctx.modelId!),
 
     resolveProvider: async (ctx) =>
-      ctx.modelId &&
       new ModelResolver(
         (ctx.state as { dbClient: DbClient }).dbClient,
-      ).resolveProvider(
-        ctx.resolvedModelId ?? ctx.modelId,
-        ctx.modelId,
-        ctx.providers,
-      ),
+      ).resolveProvider(ctx.resolvedModelId!, ctx.modelId!, ctx.providers),
   },
 });
