@@ -24,7 +24,7 @@ export const createGateway = () =>
     .use(cors(corsConfig))
     .use(errorHandler)
     // Public routes (no authentication required)
-    .all("/v1/models/*", ({ request }) => gw.routes["/models"].handler(request))
+    .all("/v1/models*", ({ request }) => gw.routes["/models"].handler(request))
     .use(authService)
     .group(basePath, { isSignedIn: true }, (app) =>
       app
