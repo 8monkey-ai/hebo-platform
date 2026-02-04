@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { LRUCache } from "lru-cache";
 
 import type { createDbClient } from "~api/lib/db/client";
@@ -14,9 +16,13 @@ import type {
   ResolveProviderHookContext,
 } from "@hebo-ai/gateway";
 
+const configCache = new LRUCache<string, string>({
+  max: 100,
+  ttl: 5 * 60 * 1000, // 5 minutes
+});
+
 const providerCache = new LRUCache<string, ProviderV3>({
   max: 100,
-  ttl: 300_000, // 5 minutes
 });
 
 export async function resolveModelId(ctx: ResolveModelHookContext) {
@@ -58,18 +64,34 @@ export async function resolveProvider(ctx: ResolveProviderHookContext) {
   };
 
   if (customProviderSlug) {
-    const cacheKey = `${customProviderSlug}:${modelId}`;
-    const cachedProvider = providerCache.get(cacheKey);
+    const configCacheKey = `${customProviderSlug}:${modelId}`;
+    const cachedConfigHash = configCache.get(configCacheKey);
 
-    if (cachedProvider) {
-      return cachedProvider;
+    if (cachedConfigHash) {
+      const providerCacheKey = `${configCacheKey}:${cachedConfigHash}`;
+      const cachedProvider = providerCache.get(providerCacheKey);
+
+      if (cachedProvider) {
+        return cachedProvider;
+      }
     }
 
     const { value: config } =
       await dbClient.provider_configs.getUnredacted(customProviderSlug);
 
-    const provider = createProvider(customProviderSlug, config);
-    providerCache.set(cacheKey, provider!);
+    const configHash = createHash("sha256")
+      .update(JSON.stringify(config))
+      .digest("hex");
+
+    configCache.set(configCacheKey, configHash);
+
+    const providerCacheKey = `${configCacheKey}:${configHash}`;
+    let provider = providerCache.get(providerCacheKey);
+
+    if (!provider) {
+      provider = createProvider(customProviderSlug, config);
+      providerCache.set(providerCacheKey, provider!);
+    }
 
     return provider;
   }
