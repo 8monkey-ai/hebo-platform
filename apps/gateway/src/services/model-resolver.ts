@@ -16,7 +16,7 @@ import type {
 
 const providerCache = new LRUCache<string, ProviderV3>({
   max: 100,
-  ttl: 30_000, // 30 seconds
+  ttl: 300_000, // 5 minutes
 });
 
 export async function resolveModelId(ctx: ResolveModelHookContext) {
