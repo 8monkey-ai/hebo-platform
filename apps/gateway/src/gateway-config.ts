@@ -9,10 +9,8 @@ import {
   loadProviderSecrets,
 } from "./services/provider-factory";
 
-const basePath = "/v1";
+export const basePath = "/v1";
 const secrets = await loadProviderSecrets();
-
-export { basePath };
 
 const withFreeTokens = (freeTokens: number) => ({
   additionalProperties: { pricing: { monthly_free_tokens: freeTokens } },
