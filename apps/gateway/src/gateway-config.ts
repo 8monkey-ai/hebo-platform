@@ -15,7 +15,7 @@ const secrets = await loadProviderSecrets();
 
 export { basePath };
 
-const withPricing = (freeTokens: number) => ({
+const withFreeTokens = (freeTokens: number) => ({
   additionalProperties: { pricing: { monthly_free_tokens: freeTokens } },
 });
 
@@ -40,16 +40,16 @@ export const gw = gateway({
   models: defineModelCatalog(
     gptOss20b({
       providers: ["bedrock", "groq"],
-      ...withPricing(12_000_000_000),
+      ...withFreeTokens(12_000_000_000),
     }),
     gptOss120b({
       providers: ["bedrock", "groq"],
-      ...withPricing(6_000_000_000),
+      ...withFreeTokens(6_000_000_000),
     }),
     gemini["v3.x"].map((preset) =>
-      preset({ providers: ["vertex"], ...withPricing(0) }),
+      preset({ providers: ["vertex"], ...withFreeTokens(0) }),
     ),
-    voyage35({ providers: ["voyage"], ...withPricing(0) }),
+    voyage35({ providers: ["voyage"], ...withFreeTokens(0) }),
   ),
 
   hooks: {
