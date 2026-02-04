@@ -23,6 +23,8 @@ export const createGateway = () =>
     .get("/", () => "🐵 Hebo AI Gateway says hello!")
     .use(cors(corsConfig))
     .use(errorHandler)
+    // Public routes (no authentication required)
+    .all("/v1/models", ({ request }) => gw.routes["/models"].handler(request))
     .use(authService)
     .group(basePath, { isSignedIn: true }, (app) =>
       app
@@ -32,9 +34,7 @@ export const createGateway = () =>
           ({ request, dbClient }) => gw.handler(request, { dbClient }),
           { parse: "none" },
         ),
-    )
-    // Public routes (no authentication required)
-    .mount("/v1/models", gw.routes["/models"].handler);
+    );
 
 if (import.meta.main) {
   const app = createGateway().listen(PORT);
