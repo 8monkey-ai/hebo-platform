@@ -107,81 +107,63 @@ export function createProvider(
   }
 }
 
-export class ModelResolver {
-  private modelConfig?: { type: string; customProviderSlug?: ProviderSlug };
+export async function resolveModelId(
+  aliasPath: string,
+  dbClient: DbClient,
+  state: Record<string, unknown>,
+) {
+  const [agentSlug, branchSlug, modelAlias] = aliasPath.split("/");
+  const branch = await dbClient.branches.findFirstOrThrow({
+    where: { agent_slug: agentSlug, slug: branchSlug },
+    select: { models: true },
+  });
 
-  constructor(private readonly dbClient: DbClient) {}
+  const model = (branch.models as Models)?.find(
+    ({ alias }) => alias === modelAlias,
+  );
 
-  async resolveModelId(aliasPath: string): Promise<string> {
-    const config = await this.getModelConfig(aliasPath);
-    return config.type;
+  if (!model) {
+    throw new Error(`Missing model config for alias path ${aliasPath}`);
   }
 
-  async resolveProvider(
-    modelId: string,
-    aliasPath: string,
-    defaultProviders: ProviderRegistry,
-  ): Promise<ProviderV3 | undefined> {
-    // Refresh AWS credentials for Vertex WIF before using Google models
-    if (modelId.startsWith("google/")) {
-      await injectMetadataCredentials();
-    }
+  state.modelConfig = {
+    type: model.type,
+    customProviderSlug: model.routing?.only?.[0] as ProviderSlug | undefined,
+  };
 
-    const config = await this.getModelConfig(aliasPath);
+  return model.type;
+}
 
-    if (config.customProviderSlug) {
-      return this.getCustomProvider(config.customProviderSlug, modelId);
-    }
-
-    // Fallback to groq for openai/* models when bedrock not configured
-    if (modelId.startsWith("openai/") && !defaultProviders.bedrock) {
-      return defaultProviders.groq;
-    }
-
-    return undefined;
+export async function resolveProvider(
+  modelId: string,
+  defaultProviders: ProviderRegistry,
+  state: Record<string, unknown>,
+  dbClient: DbClient,
+) {
+  if (modelId.startsWith("google/")) {
+    await injectMetadataCredentials();
   }
 
-  private async getModelConfig(aliasPath: string) {
-    if (!this.modelConfig) {
-      const [agentSlug, branchSlug, modelAlias] = aliasPath.split("/");
-      const branch = await this.dbClient.branches.findFirstOrThrow({
-        where: { agent_slug: agentSlug, slug: branchSlug },
-        select: { models: true },
-      });
+  const { customProviderSlug } = state.modelConfig as {
+    customProviderSlug?: ProviderSlug;
+  };
 
-      const model = (branch.models as Models)?.find(
-        ({ alias }) => alias === modelAlias,
-      );
-
-      if (!model) {
-        throw new Error(`Missing model config for alias path ${aliasPath}`);
-      }
-
-      this.modelConfig = {
-        type: model.type,
-        customProviderSlug: model.routing?.only?.[0] as
-          | ProviderSlug
-          | undefined,
-      };
-    }
-    return this.modelConfig;
-  }
-
-  private async getCustomProvider(
-    slug: ProviderSlug,
-    modelId: string,
-  ): Promise<ProviderV3> {
+  if (customProviderSlug) {
     const { value: config } =
-      await this.dbClient.provider_configs.getUnredacted(slug);
+      await dbClient.provider_configs.getUnredacted(customProviderSlug);
 
-    const cacheKey = `${slug}:${modelId}:${JSON.stringify(config)}`;
+    const cacheKey = `${customProviderSlug}:${modelId}:${JSON.stringify(config)}`;
     let provider = providerCache.get(cacheKey);
 
     if (!provider) {
-      provider = createProvider(slug, config);
+      provider = createProvider(customProviderSlug, config);
       providerCache.set(cacheKey, provider);
     }
 
     return provider;
+  }
+
+  if (modelId.startsWith("openai/") && !defaultProviders.bedrock) {
+    return defaultProviders.groq;
   }
 }

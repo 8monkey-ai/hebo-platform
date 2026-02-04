@@ -6,7 +6,8 @@ import { voyage35 } from "@hebo-ai/gateway/models/voyage";
 import {
   createProvider,
   loadProviderSecrets,
-  ModelResolver,
+  resolveModelId,
+  resolveProvider,
 } from "./services/model-resolver";
 
 import type { DbClient } from "./services/model-resolver";
@@ -54,14 +55,19 @@ export const gw = gateway({
   ),
 
   hooks: {
-    resolveModelId: async (ctx) =>
-      new ModelResolver(
-        (ctx.state as { dbClient: DbClient }).dbClient,
-      ).resolveModelId(ctx.modelId!),
+    resolveModelId: async (ctx) => {
+      const { dbClient } = ctx.state as { dbClient: DbClient };
+      return resolveModelId(ctx.modelId, dbClient, ctx.state);
+    },
 
-    resolveProvider: async (ctx) =>
-      new ModelResolver(
-        (ctx.state as { dbClient: DbClient }).dbClient,
-      ).resolveProvider(ctx.resolvedModelId!, ctx.modelId!, ctx.providers),
+    resolveProvider: async (ctx) => {
+      const { dbClient } = ctx.state as { dbClient: DbClient };
+      return resolveProvider(
+        ctx.resolvedModelId,
+        ctx.providers,
+        ctx.state,
+        dbClient,
+      );
+    },
   },
 });
