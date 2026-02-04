@@ -58,7 +58,6 @@ export function createProvider(
   slug: ProviderSlug,
   config: unknown,
 ): ProviderV3 | undefined {
-  console.log("config", config);
   switch (slug) {
     case "bedrock": {
       const { bedrockRoleArn, region } = config as BedrockProviderConfig;
