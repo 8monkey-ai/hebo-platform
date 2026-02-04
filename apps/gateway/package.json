@@ -28,7 +28,7 @@
     "@hebo/api": "workspace:*",
     "@hebo/shared-api": "workspace:*",
     "elysia": "catalog:",
-    "quick-lru": "^7.3.0",
+    "lru-cache": "^11.2.5",
     "voyage-ai-provider": "^3.0.0"
   },
   "devDependencies": {
