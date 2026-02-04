@@ -12,6 +12,8 @@ import { createVoyage } from "voyage-ai-provider";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import type { createDbClient } from "~api/lib/db/client";
+
+export type DbClient = ReturnType<typeof createDbClient>;
 import type {
   ApiKeyProviderConfig,
   BedrockProviderConfig,
@@ -108,7 +110,7 @@ export function createProvider(
 export class ModelResolver {
   private modelConfig?: { type: string; customProviderSlug?: ProviderSlug };
 
-  constructor(private readonly dbClient: ReturnType<typeof createDbClient>) {}
+  constructor(private readonly dbClient: DbClient) {}
 
   async resolveModelId(aliasPath: string): Promise<string> {
     const config = await this.getModelConfig(aliasPath);

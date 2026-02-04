@@ -3,14 +3,13 @@ import { gemini } from "@hebo-ai/gateway/models/google";
 import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
 import { voyage35 } from "@hebo-ai/gateway/models/voyage";
 
-import type { createDbClient } from "~api/lib/db/client";
-
 import {
   createProvider,
   loadProviderSecrets,
   ModelResolver,
 } from "./services/model-resolver";
 
+import type { DbClient } from "./services/model-resolver";
 
 const basePath = "/v1";
 const secrets = await loadProviderSecrets();
@@ -20,11 +19,6 @@ export { basePath };
 const withPricing = (freeTokens: number) => ({
   additionalProperties: { pricing: { monthly_free_tokens: freeTokens } },
 });
-
-const getResolver = (ctx: { state: unknown }) =>
-  new ModelResolver(
-    (ctx.state as { dbClient: ReturnType<typeof createDbClient> }).dbClient,
-  );
 
 export const gw = gateway({
   basePath,
@@ -61,11 +55,16 @@ export const gw = gateway({
 
   hooks: {
     resolveModelId: async (ctx) =>
-      ctx.modelId && getResolver(ctx).resolveModelId(ctx.modelId),
+      ctx.modelId &&
+      new ModelResolver(
+        (ctx.state as { dbClient: DbClient }).dbClient,
+      ).resolveModelId(ctx.modelId),
 
     resolveProvider: async (ctx) =>
       ctx.modelId &&
-      getResolver(ctx).resolveProvider(
+      new ModelResolver(
+        (ctx.state as { dbClient: DbClient }).dbClient,
+      ).resolveProvider(
         ctx.resolvedModelId ?? ctx.modelId,
         ctx.modelId,
         ctx.providers,
