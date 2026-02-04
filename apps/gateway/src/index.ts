@@ -5,6 +5,7 @@ import { opentelemetry } from "@elysiajs/opentelemetry";
 import { OpenAIErrorSchema } from "@hebo-ai/gateway/endpoints";
 import {
   ChatCompletionsBodySchema,
+  ChatCompletionsChunkSchema,
   ChatCompletionsSchema,
 } from "@hebo-ai/gateway/endpoints/chat-completions";
 import {
@@ -88,7 +89,7 @@ export const createGateway = () =>
             parse: "none",
             body: ChatCompletionsBodySchema,
             response: {
-              200: ChatCompletionsSchema,
+              200: ChatCompletionsSchema.or(ChatCompletionsChunkSchema),
               400: OpenAIErrorSchema,
               500: OpenAIErrorSchema,
             },
