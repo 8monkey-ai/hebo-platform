@@ -10,8 +10,6 @@ import {
 } from "./services/model-resolver";
 import { createProvider } from "./services/provider-factory";
 
-import type { DbClient } from "./services/model-resolver";
-
 const basePath = "/v1";
 const secrets = await loadProviderSecrets();
 
@@ -55,19 +53,7 @@ export const gw = gateway({
   ),
 
   hooks: {
-    resolveModelId: async (ctx) => {
-      const { dbClient } = ctx.state as { dbClient: DbClient };
-      return resolveModelId(ctx.modelId, dbClient, ctx.state);
-    },
-
-    resolveProvider: async (ctx) => {
-      const { dbClient } = ctx.state as { dbClient: DbClient };
-      return resolveProvider(
-        ctx.resolvedModelId,
-        ctx.providers,
-        ctx.state,
-        dbClient,
-      );
-    },
+    resolveModelId,
+    resolveProvider,
   },
 });

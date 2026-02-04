@@ -11,7 +11,7 @@ import { injectMetadataCredentials } from "./aws-wif";
 import { createProvider } from "./provider-factory";
 
 import type { ProviderV3 } from "@ai-sdk/provider";
-import type { ProviderRegistry } from "@hebo-ai/gateway";
+import type { HookContext } from "@hebo-ai/gateway";
 
 const providerCache = new QuickLRU<string, ProviderV3>({ maxSize: 100 });
 
@@ -48,11 +48,14 @@ export async function loadProviderSecrets() {
   };
 }
 
-export async function resolveModelId(
-  aliasPath: string,
-  dbClient: DbClient,
-  state: Record<string, unknown>,
-) {
+export async function resolveModelId(ctx: HookContext) {
+  const { modelId: aliasPath, state } = ctx;
+  const { dbClient } = state as { dbClient: DbClient };
+
+  if (!aliasPath) {
+    throw new Error("Missing modelId in context");
+  }
+
   const [agentSlug, branchSlug, modelAlias] = aliasPath.split("/");
   const branch = await dbClient.branches.findFirstOrThrow({
     where: { agent_slug: agentSlug, slug: branchSlug },
@@ -75,12 +78,14 @@ export async function resolveModelId(
   return model.type;
 }
 
-export async function resolveProvider(
-  modelId: string,
-  defaultProviders: ProviderRegistry,
-  state: Record<string, unknown>,
-  dbClient: DbClient,
-) {
+export async function resolveProvider(ctx: HookContext) {
+  const { resolvedModelId: modelId, providers: defaultProviders, state } = ctx;
+  const { dbClient } = state as { dbClient: DbClient };
+
+  if (!modelId) {
+    return;
+  }
+
   if (modelId.startsWith("google/")) {
     await injectMetadataCredentials();
   }
