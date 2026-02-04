@@ -17,6 +17,7 @@ export async function resolveModelId(ctx: HookContext) {
   const { modelId: aliasPath, state } = ctx;
   const { dbClient } = state as { dbClient: DbClient };
 
+  // TODO: Remove this as soon the new Hebo AI Gateway version is released
   if (!aliasPath) {
     throw new Error("Missing modelId in context");
   }
@@ -47,6 +48,7 @@ export async function resolveProvider(ctx: HookContext) {
   const { resolvedModelId: modelId, providers: defaultProviders, state } = ctx;
   const { dbClient } = state as { dbClient: DbClient };
 
+  // TODO: Remove this as soon the new Hebo AI Gateway version is released
   if (!modelId) {
     return;
   }
