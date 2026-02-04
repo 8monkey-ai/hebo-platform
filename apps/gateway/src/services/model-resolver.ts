@@ -13,6 +13,7 @@ import type { HookContext } from "@hebo-ai/gateway";
 
 const providerCache = new QuickLRU<string, ProviderV3>({ maxSize: 100 });
 
+// TODO: Use narrower type once the new Hebo AI Gateway version is released
 export async function resolveModelId(ctx: HookContext) {
   const { modelId: aliasPath, state } = ctx;
   const { dbClient } = state as { dbClient: DbClient };
@@ -44,8 +45,9 @@ export async function resolveModelId(ctx: HookContext) {
   return model.type;
 }
 
+// TODO: Use narrower type once the new Hebo AI Gateway version is released
 export async function resolveProvider(ctx: HookContext) {
-  const { resolvedModelId: modelId, providers: defaultProviders, state } = ctx;
+  const { resolvedModelId: modelId, state } = ctx;
   const { dbClient } = state as { dbClient: DbClient };
 
   // TODO: Remove this as soon the new Hebo AI Gateway version is released
@@ -70,13 +72,9 @@ export async function resolveProvider(ctx: HookContext) {
 
     if (!provider) {
       provider = createProvider(customProviderSlug, config);
-      providerCache.set(cacheKey, provider);
+      providerCache.set(cacheKey, provider!);
     }
 
     return provider;
-  }
-
-  if (modelId.startsWith("openai/") && !defaultProviders.bedrock) {
-    return defaultProviders.groq;
   }
 }

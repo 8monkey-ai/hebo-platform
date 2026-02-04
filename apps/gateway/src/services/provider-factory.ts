@@ -57,7 +57,9 @@ export async function loadProviderSecrets() {
 export function createProvider(
   slug: ProviderSlug,
   config: unknown,
-): ProviderV3 {
+): ProviderV3 | undefined {
+  if (!config) return;
+
   switch (slug) {
     case "bedrock": {
       const { bedrockRoleArn, region } = config as BedrockProviderConfig;
