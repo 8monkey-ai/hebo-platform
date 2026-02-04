@@ -19,7 +19,6 @@
     "@ai-sdk/google-vertex": "^4.0.41",
     "@ai-sdk/groq": "^3.0.21",
     "@ai-sdk/provider": "3.0.7",
-    "@ai-sdk/provider-utils": "catalog:",
     "@aws-sdk/client-bedrock": "^3.968.0",
     "@aws-sdk/credential-providers": "^3.980.0",
     "@bogeychan/elysia-logger": "catalog:",
@@ -28,11 +27,9 @@
     "@hebo-ai/gateway": "^0.2.0",
     "@hebo/api": "workspace:*",
     "@hebo/shared-api": "workspace:*",
-    "ai": "catalog:",
     "elysia": "catalog:",
     "quick-lru": "^7.3.0",
-    "voyage-ai-provider": "^3.0.0",
-    "zod": "catalog:"
+    "voyage-ai-provider": "^3.0.0"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
