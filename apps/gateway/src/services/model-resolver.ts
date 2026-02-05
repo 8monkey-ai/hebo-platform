@@ -11,10 +11,14 @@ import { injectMetadataCredentials } from "./aws-wif";
 import { createProvider } from "./provider-factory";
 
 import type { ProviderV3 } from "@ai-sdk/provider";
-import type {
-  ResolveModelHookContext,
-  ResolveProviderHookContext,
+
+import {
+  CANONICAL_MODEL_IDS,
+  type ResolveModelHookContext,
+  type ResolveProviderHookContext,
 } from "@hebo-ai/gateway";
+
+const canonicalModelIds = new Set<string>(CANONICAL_MODEL_IDS);
 
 const configCache = new LRUCache<string, string>({
   max: 100,
@@ -27,6 +31,12 @@ const providerCache = new LRUCache<string, ProviderV3>({
 
 export async function resolveModelId(ctx: ResolveModelHookContext) {
   const { modelId: aliasPath, state } = ctx;
+
+  if (canonicalModelIds.has(aliasPath)) {
+    state.modelConfig = { type: aliasPath, customProviderSlug: undefined };
+    return aliasPath;
+  }
+
   const { dbClient } = state as { dbClient: DbClient };
 
   const [agentSlug, branchSlug, modelAlias] = aliasPath.split("/");
