@@ -13,9 +13,7 @@ const getBetterStackConfig = async () => {
   ]);
 
   if (!endpoint || !sourceToken) {
-    console.warn(
-      "BetterStack not configured: OpenTelemetry Trace Exporter will not be used",
-    );
+    console.warn("⚠️ OpenTelemetry Trace Exporter not configured. Skipping...");
     return;
   }
 
