@@ -1,0 +1,52 @@
+name: Deploy to Preview
+
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  quality:
+    name: Run Quality Checks
+    if: ${{ github.event.label.name == 'preview deploy' }}
+    uses: ./.github/workflows/quality.yml
+
+  deploy:
+    name: Deploy to Preview
+    needs: quality
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: .
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy to Preview
+        id: deploy
+        run: |
+          STAGE="pr-${{ github.event.pull_request.number }}"
+          printf '%s' "${{ secrets.AUTH_GITHUB_CLIENT_ID }}" | bun run sst secret set GithubClientId --stage $STAGE
+          printf '%s' "${{ secrets.AUTH_GITHUB_CLIENT_SECRET }}" | bun run sst secret set GithubClientSecret --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_HOST }}" | bun run sst secret set SmtpHost --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_PORT }}" | bun run sst secret set SmtpPort --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_USER }}" | bun run sst secret set SmtpUser --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_PASS }}" | bun run sst secret set SmtpPass --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_FROM }}" | bun run sst secret set SmtpFrom --stage $STAGE
+          echo "Deploying to stage: $STAGE"
+          bun run sst deploy --stage $STAGE

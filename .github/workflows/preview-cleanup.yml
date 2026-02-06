@@ -1,0 +1,39 @@
+name: Cleanup Preview
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup:
+    name: Remove Preview Deployment
+    if: contains(github.event.pull_request.labels.*.name, 'preview deploy')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Remove preview environment
+        run: |
+          STAGE="pr-${{ github.event.pull_request.number }}"
+          if ! bun run sst list --stage $STAGE; then
+            echo "Stage $STAGE does not exist, skipping cleanup"
+            exit 0
+          fi
+          echo "Removing preview environment: $STAGE"
+          bun run sst remove --stage $STAGE
