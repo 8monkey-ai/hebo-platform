@@ -1,23 +1,7 @@
 import { trace } from "@opentelemetry/api";
 
 import { logLevel } from "../env";
-import { getSecret } from "../utils/secrets";
-
-const getBetterStackConfig = async () => {
-  const [endpoint, sourceToken] = await Promise.all([
-    getSecret("BetterStackEndpoint", false),
-    getSecret("BetterStackSourceToken", false),
-  ]);
-
-  if (!endpoint || !sourceToken) return;
-
-  return {
-    url: new URL("/v1/logs", endpoint).toString(),
-    sourceToken,
-  };
-};
-
-const betterStackConfig = await getBetterStackConfig();
+import { betterStackConfig } from "./betterstack";
 
 // Manually inject trace context because @opentelemetry/instrumentation-pino
 // requires --experimental-loader for ESM which Bun doesn't support.
@@ -46,7 +30,7 @@ export const getLoggerOptions = (serviceName: string) => {
           logRecordProcessorOptions: {
             exporterOptions: {
               protobufExporterOptions: {
-                url: betterStackConfig.url,
+                url: new URL("/v1/logs", betterStackConfig.endpoint).toString(),
                 headers: {
                   Authorization: `Bearer ${betterStackConfig.sourceToken}`,
                 },
