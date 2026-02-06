@@ -1,4 +1,5 @@
 import { type Logger } from "@bogeychan/elysia-logger/types";
+import { context, propagation } from "@opentelemetry/api";
 import { createAuthClient as createBetterAuthClient } from "better-auth/client";
 import { organizationClient } from "better-auth/client/plugins";
 import { getCookieCache, getCookies } from "better-auth/cookies";
@@ -18,6 +19,11 @@ const createAuthClient = (request: Request) => {
     const value = request.headers.get(name);
     if (value) headers.set(name, value);
   }
+
+  // Inject OTEL trace context (traceparent, tracestate) for distributed tracing
+  propagation.inject(context.active(), headers, {
+    set: (carrier, key, value) => carrier.set(key, value),
+  });
 
   return createBetterAuthClient({
     baseURL: new URL("/v1", authUrl).toString(),
