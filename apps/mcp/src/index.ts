@@ -12,12 +12,15 @@ import hello from "./hello.txt";
 
 const PORT = Number(process.env.PORT ?? 3003);
 
-const mcp = new McpServer({ name: "hebo-mcp", version: "0.0.2" });
-mcp.registerTool(
-  countLetterTool.name,
-  countLetterTool.config,
-  countLetterTool.handler,
-);
+function createMcpServer() {
+  const mcp = new McpServer({ name: "hebo-mcp", version: "0.0.3" });
+  mcp.registerTool(
+    countLetterTool.name,
+    countLetterTool.config,
+    countLetterTool.handler,
+  );
+  return mcp;
+}
 
 const createMcp = () =>
   new Elysia()
@@ -26,6 +29,7 @@ const createMcp = () =>
     .get("/", () => hello)
     .group("/aikit", (app) =>
       app.mount("/", async (request) => {
+        const mcp = createMcpServer();
         const transport = new WebStandardStreamableHTTPServerTransport();
         await mcp.connect(transport);
         return transport.handleRequest(request);

@@ -1,6 +1,6 @@
 {
   "name": "@hebo/mcp",
-  "version": "0.1.0",
+  "version": "0.0.3",
   "private": true,
   "type": "module",
   "scripts": {
@@ -16,7 +16,7 @@
     "@bogeychan/elysia-logger": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.25.2",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "elysia": "catalog:",
     "zod": "catalog:"
   },
