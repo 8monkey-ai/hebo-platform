@@ -8,7 +8,7 @@ import { logLevel } from "@hebo/shared-api/env";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 
 import { countLetterTool } from "./aikit/count-letter";
-import { currentTimestampTool } from "./aikit/current-timestamp";
+import { worldTimeTool } from "./aikit/world-time";
 import hello from "./hello.txt";
 
 const PORT = Number(process.env.PORT ?? 3003);
@@ -21,9 +21,9 @@ function createMcpServer() {
     countLetterTool.handler,
   );
   mcp.registerTool(
-    currentTimestampTool.name,
-    currentTimestampTool.config,
-    currentTimestampTool.handler,
+    worldTimeTool.name,
+    worldTimeTool.config,
+    worldTimeTool.handler,
   );
   return mcp;
 }
