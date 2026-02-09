@@ -2,7 +2,6 @@ import { logger } from "@bogeychan/elysia-logger";
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 import { opentelemetry } from "@elysiajs/opentelemetry";
-import { OpenAIErrorSchema } from "@hebo-ai/gateway/endpoints";
 import {
   ChatCompletionsBodySchema,
   ChatCompletionsChunkSchema,
@@ -16,6 +15,7 @@ import {
   ModelListSchema,
   ModelSchema,
 } from "@hebo-ai/gateway/endpoints/models";
+import { OpenAIErrorSchema } from "@hebo-ai/gateway/errors/openai";
 import Elysia from "elysia";
 
 import { logLevel } from "@hebo/shared-api/env";
