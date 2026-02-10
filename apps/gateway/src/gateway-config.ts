@@ -1,7 +1,8 @@
-import { defineModelCatalog, gateway, type LogLevel } from "@hebo-ai/gateway";
+import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
 import { gemini } from "@hebo-ai/gateway/models/google";
 import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
 import { voyage35 } from "@hebo-ai/gateway/models/voyage";
+import pino from "pino";
 
 import { logLevel } from "@hebo/shared-api/env";
 
@@ -55,5 +56,5 @@ export const gw = gateway({
     resolveModelId,
     resolveProvider,
   },
-  logger: { level: logLevel as LogLevel },
+  logger: pino({ level: logLevel }),
 });
