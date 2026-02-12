@@ -1,6 +1,6 @@
 import { getSecret } from "../utils/secrets";
 
-const fetchBetterStackConfig = async () => {
+const getBetterStackConfig = async () => {
   const [endpoint, sourceToken] = await Promise.all([
     getSecret("BetterStackEndpoint"),
     getSecret("BetterStackSourceToken"),
@@ -13,4 +13,4 @@ const fetchBetterStackConfig = async () => {
   return { endpoint, sourceToken };
 };
 
-export const betterStackConfig = await fetchBetterStackConfig();
+export const betterStackConfig = await getBetterStackConfig();
