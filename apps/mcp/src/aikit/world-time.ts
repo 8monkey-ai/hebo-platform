@@ -15,13 +15,19 @@ export const worldTimeTool = {
   name: "world_time",
   config: {
     description:
-      "Get current time for one or more locations. Supports IANA timezones (e.g., 'America/New_York') or partial city names (e.g., 'tokyo' → 'Asia/Tokyo').",
+      "Get time for one or more locations. Supports IANA timezones (e.g., 'America/New_York') or partial city names (e.g., 'tokyo' → 'Asia/Tokyo'). Use 'at' to query a specific point in time.",
     inputSchema: {
       timezones: z
         .array(z.string())
         .min(1)
         .describe(
           "IANA timezones or partial city names (e.g., 'America/New_York', 'tokyo', 'london')",
+        ),
+      at: z
+        .union([z.literal("now"), z.string(), z.number()])
+        .optional()
+        .describe(
+          "Point in time to query. 'now' (default), ISO 8601 string (e.g., '2026-02-15T14:00:00Z'), or Unix timestamp in milliseconds.",
         ),
       options: z
         .object({
@@ -37,13 +43,27 @@ export const worldTimeTool = {
   },
   handler: async (input: {
     timezones: string[];
+    at?: "now" | string | number;
     options?: {
       locale?: string;
       timeStyle?: "short" | "medium" | "long" | "full";
       dateStyle?: "short" | "medium" | "long" | "full";
     };
   }) => {
-    const now = new Date();
+    const timestamp =
+      !input.at || input.at === "now" ? new Date() : new Date(input.at);
+
+    if (Number.isNaN(timestamp.getTime())) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify({ error: `Invalid 'at' value: ${input.at}` }),
+          },
+        ],
+      };
+    }
+
     const {
       locale = "en-US",
       timeStyle = "short",
@@ -56,12 +76,16 @@ export const worldTimeTool = {
       const iana = resolve(tz);
       if (!iana) return { input: tz, error: "Unknown timezone" };
 
-      const parts = fmt(iana, { timeZoneName: "short" }).formatToParts(now);
-      const local = new Date(now.toLocaleString("en-US", { timeZone: iana }));
+      const parts = fmt(iana, { timeZoneName: "short" }).formatToParts(
+        timestamp,
+      );
+      const local = new Date(
+        timestamp.toLocaleString("en-US", { timeZone: iana }),
+      );
       const offsetMin = Math.round(
         (local.getTime() -
           new Date(
-            now.toLocaleString("en-US", { timeZone: "UTC" }),
+            timestamp.toLocaleString("en-US", { timeZone: "UTC" }),
           ).getTime()) /
           60_000,
       );
@@ -70,13 +94,13 @@ export const worldTimeTool = {
       return {
         input: tz,
         iana,
-        iso: now.toISOString(),
-        unixMs: now.getTime(),
+        iso: timestamp.toISOString(),
+        unixMs: timestamp.getTime(),
         offsetMinutes: offsetMin,
         abbrev: parts.find((p) => p.type === "timeZoneName")?.value || "",
-        date: fmt(iana, { dateStyle }).format(now),
-        time: fmt(iana, { timeStyle }).format(now),
-        weekday: fmt(iana, { weekday: "long" }).format(now),
+        date: fmt(iana, { dateStyle }).format(timestamp),
+        time: fmt(iana, { timeStyle }).format(timestamp),
+        weekday: fmt(iana, { weekday: "long" }).format(timestamp),
         isWeekend: day === 0 || day === 6,
       };
     });
