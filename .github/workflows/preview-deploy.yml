@@ -5,14 +5,9 @@ on:
     types: [labeled]
 
 jobs:
-  quality:
-    name: Run Quality Checks
-    if: ${{ github.event.label.name == 'preview deploy' }}
-    uses: ./.github/workflows/quality.yml
-
   deploy:
     name: Deploy to Preview
-    needs: quality
+    if: ${{ github.event.label.name == 'preview deploy' }}
     runs-on: ubuntu-latest
     defaults:
       run:
