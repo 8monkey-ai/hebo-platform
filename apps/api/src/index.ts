@@ -21,7 +21,7 @@ const API_URL = process.env.API_URL ?? `http://localhost:${PORT}`;
 const createApi = () =>
   new Elysia()
     .use(opentelemetry(getOtelConfig("hebo-api")))
-    .use(logger(getLoggerOptions("hebo-api")))
+    .use(logger(getLoggerOptions()))
     // Root route ("/") is unauthenticated and unprotected for health checks.
     .get("/", () => "🐵 Hebo API says hello!")
     .use(cors(corsConfig))

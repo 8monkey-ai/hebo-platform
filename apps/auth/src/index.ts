@@ -14,7 +14,7 @@ const PORT = Number(process.env.PORT ?? 3000);
 const createAuth = () =>
   new Elysia()
     .use(opentelemetry(getOtelConfig("hebo-auth")))
-    .use(logger(getLoggerOptions("hebo-auth")))
+    .use(logger(getLoggerOptions()))
     .get("/", () => "🐵 Hebo Auth says hello!")
     .use(cors(corsConfig))
     .mount(auth.handler);

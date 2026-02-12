@@ -35,7 +35,7 @@ const GATEWAY_URL = process.env.GATEWAY_URL ?? `http://localhost:${PORT}`;
 export const createGateway = () =>
   new Elysia()
     .use(opentelemetry(getOtelConfig("hebo-gateway")))
-    .use(logger(getLoggerOptions("hebo-gateway")))
+    .use(logger(getLoggerOptions()))
     // Root route ("/") is unauthenticated and unprotected for health checks.
     .get("/", () => "🐵 Hebo AI Gateway says hello!")
     .use(cors(corsConfig))

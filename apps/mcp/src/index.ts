@@ -25,7 +25,7 @@ function createMcpServer() {
 const createMcp = () =>
   new Elysia()
     .use(opentelemetry(getOtelConfig("hebo-mcp")))
-    .use(logger(getLoggerOptions("hebo-mcp")))
+    .use(logger(getLoggerOptions()))
     .get("/", () => hello)
     .group("/aikit", (app) =>
       app.mount("/", async (request) => {
