@@ -18,6 +18,13 @@ const customProps = () => {
   };
 };
 
+if (betterStackConfig) {
+  process.env.OTEL_EXPORTER_OTLP_LOGS_PROTOCOL = "grpc";
+  process.env.OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = betterStackConfig.endpoint;
+  process.env.OTEL_EXPORTER_OTLP_LOGS_HEADERS = `Authorization=Bearer ${betterStackConfig.sourceToken}`;
+  process.env.OTEL_EXPORTER_OTLP_LOGS_COMPRESSION = "gzip";
+}
+
 export const getLoggerOptions = (serviceName: string) => {
   if (betterStackConfig) {
     return {
@@ -27,16 +34,6 @@ export const getLoggerOptions = (serviceName: string) => {
         target: "pino-opentelemetry-transport",
         options: {
           resourceAttributes: { "service.name": serviceName },
-          logRecordProcessorOptions: {
-            exporterOptions: {
-              protobufExporterOptions: {
-                url: new URL("/v1/logs", betterStackConfig.endpoint).toString(),
-                headers: {
-                  Authorization: `Bearer ${betterStackConfig.sourceToken}`,
-                },
-              },
-            },
-          },
         },
       },
     };

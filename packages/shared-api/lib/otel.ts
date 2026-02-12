@@ -1,4 +1,5 @@
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { Metadata } from "@grpc/grpc-js";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";
 import { CompressionAlgorithm } from "@opentelemetry/otlp-exporter-base";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
 import {
@@ -16,9 +17,12 @@ const getTraceExporterConfig = () => {
     return;
   }
 
+  const metadata = new Metadata();
+  metadata.set("Authorization", `Bearer ${betterStackConfig.sourceToken}`);
+
   return {
-    url: new URL("/v1/traces", betterStackConfig.endpoint).toString(),
-    headers: { Authorization: `Bearer ${betterStackConfig.sourceToken}` },
+    url: betterStackConfig.endpoint,
+    metadata,
     compression: CompressionAlgorithm.GZIP,
   };
 };

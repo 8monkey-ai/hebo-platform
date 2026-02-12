@@ -17,8 +17,9 @@
     "clean": "git clean -fdx -e '.env*' ."
   },
   "dependencies": {
+    "@grpc/grpc-js": "^1.13.3",
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.211.0",
+    "@opentelemetry/exporter-trace-otlp-grpc": "^0.211.0",
     "@opentelemetry/otlp-exporter-base": "^0.211.0",
     "@opentelemetry/sdk-trace-node": "^2.5.0",
     "@prisma/adapter-pg": "catalog:",
