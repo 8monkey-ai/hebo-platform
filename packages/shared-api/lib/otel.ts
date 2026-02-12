@@ -1,40 +1,43 @@
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-node";
+import { Metadata } from "@grpc/grpc-js";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";
+import { CompressionAlgorithm } from "@opentelemetry/otlp-exporter-base";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import {
+  PrismaInstrumentation,
+  registerInstrumentations,
+} from "@prisma/instrumentation";
 
-import { getSecret } from "../utils/secrets";
+import { betterStackConfig } from "./better-stack";
 
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
 
-const getGrafanaConfig = async () => {
-  const [endpoint, instanceId, apiToken] = await Promise.all([
-    getSecret("GrafanaEndpoint"),
-    getSecret("GrafanaInstanceId"),
-    getSecret("GrafanaApiToken"),
-  ]);
-
-  if (!endpoint || !instanceId || !apiToken) {
+const getTraceExporterConfig = () => {
+  if (!betterStackConfig) {
     console.warn("⚠️ OpenTelemetry Trace Exporter not configured. Skipping...");
     return;
   }
 
+  const metadata = new Metadata();
+  metadata.set("Authorization", `Bearer ${betterStackConfig.sourceToken}`);
+
   return {
-    url: new URL("/otlp/v1/traces", endpoint).toString(),
-    headers: {
-      Authorization: [
-        "Basic ",
-        Buffer.from([instanceId, apiToken].join(":")).toString("base64"),
-      ].join(""),
-    },
+    url: betterStackConfig.endpoint,
+    metadata,
+    compression: CompressionAlgorithm.GZIP,
   };
 };
 
-const grafanaConfig = await getGrafanaConfig();
+const traceExporterConfig = getTraceExporterConfig();
+
+registerInstrumentations({
+  instrumentations: [new PrismaInstrumentation()],
+});
 
 export const getOtelConfig = (
   serviceName: string,
 ): ElysiaOpenTelemetryOptions => ({
   serviceName,
-  spanProcessors: grafanaConfig
-    ? [new BatchSpanProcessor(new OTLPTraceExporter(grafanaConfig))]
+  spanProcessors: traceExporterConfig
+    ? [new BatchSpanProcessor(new OTLPTraceExporter(traceExporterConfig))]
     : undefined,
 });

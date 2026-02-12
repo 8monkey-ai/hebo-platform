@@ -2,6 +2,7 @@ import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
 import { gemini } from "@hebo-ai/gateway/models/google";
 import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
 import { voyage35 } from "@hebo-ai/gateway/models/voyage";
+import { trace } from "@opentelemetry/api";
 import pino from "pino";
 
 import { logLevel } from "@hebo/shared-api/env";
@@ -57,4 +58,8 @@ export const gw = gateway({
     resolveProvider,
   },
   logger: pino({ level: logLevel }),
+  telemetry: {
+    enabled: true,
+    tracer: trace.getTracer("hebo-ai-gateway"),
+  },
 });

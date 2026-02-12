@@ -33,10 +33,9 @@ export const vertexAwsProviderAudience = getSstSecret(
 export const vertexProject = getSstSecret("VertexProject");
 export const vertexLocation = getSstSecret("VertexLocation");
 
-// OTEL Exporter
-export const grafanaEndpoint = getSstSecret("GrafanaEndpoint");
-export const grafanaInstanceId = getSstSecret("GrafanaInstanceId");
-export const grafanaApiToken = getSstSecret("GrafanaApiToken");
+// Better Stack (OTEL Exporter)
+export const betterStackEndpoint = getSstSecret("BetterStackEndpoint");
+export const betterStackSourceToken = getSstSecret("BetterStackSourceToken");
 
 export const authSecrets = [
   authSecret,
@@ -64,11 +63,7 @@ export const llmSecrets = [
   vertexLocation,
 ];
 
-export const otelSecrets = [
-  grafanaEndpoint,
-  grafanaInstanceId,
-  grafanaApiToken,
-];
+export const otelSecrets = [betterStackEndpoint, betterStackSourceToken];
 
 export const normalizedStage = $app.stage
   .trim()

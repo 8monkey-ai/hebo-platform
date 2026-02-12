@@ -56,6 +56,7 @@
     "typescript-eslint": "^8.53.0"
   },
   "catalog": {
+    "@opentelemetry/api": "^1.9.0",
     "ai": "^6.0.68",
     "@ai-sdk/provider-utils": "^4.0.13",
     "@base-ui/utils": "^0.2.3",
@@ -69,6 +70,7 @@
     "@elysiajs/opentelemetry": "^1.4.10",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
+    "@prisma/instrumentation": "^7.2.0",
     "@types/bun": "^1.3.8",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
