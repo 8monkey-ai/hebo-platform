@@ -23,11 +23,9 @@ const heboDatabase = new sst.aws.Aurora("HeboDatabase", {
   transform: {
     cluster: (a) => {
       a.globalClusterIdentifier = globalCluster.id;
-      a.databaseInsightsMode = "advanced";
-    },
-    instance: (a) => {
       a.performanceInsightsEnabled = true;
       a.performanceInsightsRetentionPeriod = 465;
+      a.databaseInsightsMode = "advanced";
     },
   },
 });
