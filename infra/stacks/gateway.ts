@@ -51,6 +51,9 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
     ],
   },
   transform: {
+    loadBalancer: (args) => {
+      args.idleTimeout = 300; // 5 minutes
+    },
     listener: (args) => {
       if (args.protocol === "HTTPS") {
         args.sslPolicy = "ELBSecurityPolicy-TLS13-1-2-2021-06";
