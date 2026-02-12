@@ -1,5 +1,5 @@
 import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
-import { claudeOpus45 } from "@hebo-ai/gateway/models/anthropic";
+import { claudeOpus46 } from "@hebo-ai/gateway/models/anthropic";
 import { gemini } from "@hebo-ai/gateway/models/google";
 import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
 import { voyage35 } from "@hebo-ai/gateway/models/voyage";
@@ -51,7 +51,7 @@ export const gw = gateway({
     gemini["v3.x"].map((preset) =>
       preset({ providers: ["vertex"], ...withFreeTokens(0) }),
     ),
-    claudeOpus45({ providers: ["bedrock"], ...withFreeTokens(0) }),
+    claudeOpus46({ providers: ["bedrock"], ...withFreeTokens(0) }),
     voyage35({ providers: ["voyage"], ...withFreeTokens(0) }),
   ),
 
