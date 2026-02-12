@@ -31,9 +31,6 @@ export const worldTimeTool = {
             .describe("Locale for formatting (e.g., 'en-US')"),
           timeStyle: z.enum(["short", "medium", "long", "full"]).optional(),
           dateStyle: z.enum(["short", "medium", "long", "full"]).optional(),
-          businessHours: z
-            .object({ start: z.string(), end: z.string().optional() })
-            .optional(),
         })
         .optional(),
     },
@@ -44,7 +41,6 @@ export const worldTimeTool = {
       locale?: string;
       timeStyle?: "short" | "medium" | "long" | "full";
       dateStyle?: "short" | "medium" | "long" | "full";
-      businessHours?: { start: string; end?: string };
     };
   }) => {
     const now = new Date();
@@ -52,7 +48,6 @@ export const worldTimeTool = {
       locale = "en-US",
       timeStyle = "short",
       dateStyle = "medium",
-      businessHours,
     } = input.options || {};
     const fmt = (tz: string, opts: Intl.DateTimeFormatOptions) =>
       new Intl.DateTimeFormat(locale, { timeZone: tz, ...opts });
@@ -71,9 +66,6 @@ export const worldTimeTool = {
           60_000,
       );
       const day = local.getDay();
-      const mins = local.getHours() * 60 + local.getMinutes();
-      const [sh, sm] = (businessHours?.start || "09:00").split(":").map(Number);
-      const [eh, em] = (businessHours?.end || "17:00").split(":").map(Number);
 
       return {
         input: tz,
@@ -86,8 +78,6 @@ export const worldTimeTool = {
         time: fmt(iana, { timeStyle }).format(now),
         weekday: fmt(iana, { weekday: "long" }).format(now),
         isWeekend: day === 0 || day === 6,
-        isBusinessHours:
-          day > 0 && day < 6 && mins >= sh * 60 + sm && mins < eh * 60 + em,
       };
     });
 
