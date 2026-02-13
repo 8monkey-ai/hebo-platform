@@ -7,17 +7,23 @@ import Elysia from "elysia";
 import { getLoggerOptions } from "@hebo/shared-api/lib/logger";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 
-import { countLetterTool } from "./aikit/count-letter.js";
+import { countLetterTool } from "./aikit/count-letter";
+import { worldTimeTool } from "./aikit/world-time";
 import hello from "./hello.txt";
 
 const PORT = Number(process.env.PORT ?? 3003);
 
 function createMcpServer() {
-  const mcp = new McpServer({ name: "hebo-mcp", version: "0.0.3" });
+  const mcp = new McpServer({ name: "hebo-mcp", version: "0.2.0" });
   mcp.registerTool(
     countLetterTool.name,
     countLetterTool.config,
     countLetterTool.handler,
+  );
+  mcp.registerTool(
+    worldTimeTool.name,
+    worldTimeTool.config,
+    worldTimeTool.handler,
   );
   return mcp;
 }
