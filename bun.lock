@@ -141,7 +141,7 @@
         "@elysiajs/cors": "catalog:",
         "@elysiajs/openapi": "catalog:",
         "@elysiajs/opentelemetry": "catalog:",
-        "@hebo-ai/gateway": "^0.4.0-beta.2",
+        "@hebo-ai/gateway": "^0.4.0-beta.3",
         "@hebo/api": "workspace:*",
         "@hebo/shared-api": "workspace:*",
         "@opentelemetry/api": "catalog:",
@@ -583,7 +583,7 @@
 
     "@grpc/proto-loader": ["@grpc/proto-loader@0.8.0", "", { "dependencies": { "lodash.camelcase": "^4.3.0", "long": "^5.0.0", "protobufjs": "^7.5.3", "yargs": "^17.7.2" }, "bin": { "proto-loader-gen-types": "build/bin/proto-loader-gen-types.js" } }, "sha512-rc1hOQtjIWGxcxpb9aHAfLpIctjEnsDehj0DAiVfBlmT84uvR0uUtN2hEi/ecvWVjXUGf5qPF4qEgiLOx1YIMQ=="],
 
-    "@hebo-ai/gateway": ["@hebo-ai/gateway@0.4.0-beta.2", "", { "dependencies": { "@ai-sdk/provider": "^3.0.7", "@ai-sdk/provider-utils": "^4.0.13", "@opentelemetry/api": "^1.9.0", "ai": "^6.0.67", "serialize-error": "^13.0.1", "zod": "^4.3.6" }, "peerDependencies": { "@ai-sdk/amazon-bedrock": "^4.0.41", "@ai-sdk/anthropic": "^3.0.31", "@ai-sdk/cohere": "^3.0.16", "@ai-sdk/google-vertex": "^4.0.37", "@ai-sdk/groq": "^3.0.19", "@ai-sdk/openai": "^3.0.23", "typescript": "^5.9.3", "voyage-ai-provider": "^3.0.0" }, "optionalPeers": ["@ai-sdk/amazon-bedrock", "@ai-sdk/anthropic", "@ai-sdk/cohere", "@ai-sdk/google-vertex", "@ai-sdk/groq", "@ai-sdk/openai", "voyage-ai-provider"] }, "sha512-BCrxvbB+Ky8UfbBGTQmfISQEvPOZikUCWtt1KgaKQy3chu/6B+KIq2ArMhrMGm/YkG2njJAsPyU0ylKOCi2thA=="],
+    "@hebo-ai/gateway": ["@hebo-ai/gateway@0.4.0-beta.3", "", { "dependencies": { "@ai-sdk/provider": "^3.0.7", "@ai-sdk/provider-utils": "^4.0.13", "@opentelemetry/api": "^1.9.0", "ai": "^6.0.67", "serialize-error": "^13.0.1", "zod": "^4.3.6" }, "peerDependencies": { "@ai-sdk/amazon-bedrock": "^4.0.41", "@ai-sdk/anthropic": "^3.0.31", "@ai-sdk/cohere": "^3.0.16", "@ai-sdk/google-vertex": "^4.0.37", "@ai-sdk/groq": "^3.0.19", "@ai-sdk/openai": "^3.0.23", "typescript": "^5.9.3", "voyage-ai-provider": "^3.0.0" }, "optionalPeers": ["@ai-sdk/amazon-bedrock", "@ai-sdk/anthropic", "@ai-sdk/cohere", "@ai-sdk/google-vertex", "@ai-sdk/groq", "@ai-sdk/openai", "voyage-ai-provider"] }, "sha512-8RG1KeK4cgT11ZFZ/nsgBocq39jt4nLbwM/5Dxb0JpSxs+0UwjZeRNczp2IFP3mLIpxlepRVJNB4Oo2zpDgmBg=="],
 
     "@hebo/aikit-ui": ["@hebo/aikit-ui@workspace:packages/aikit-ui"],
 
