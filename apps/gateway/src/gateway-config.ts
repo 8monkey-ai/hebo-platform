@@ -63,5 +63,6 @@ export const gw = gateway({
   telemetry: {
     enabled: true,
     tracer: trace.getTracer("hebo-ai-gateway"),
+    attributes: "full",
   },
 });
