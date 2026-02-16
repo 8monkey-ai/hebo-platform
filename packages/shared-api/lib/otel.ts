@@ -33,7 +33,11 @@ const traceExporterConfig = getTraceExporterConfig();
 registerInstrumentations({
   instrumentations: [
     new PrismaInstrumentation({
-      ignoreSpanTypes: [/^(?!prisma:client:operation$).+/],
+      ignoreSpanTypes: [
+        "prisma:client:compile",
+        "prisma:client:serialize",
+        "prisma:client:db_query",
+      ],
     }),
   ],
 });
