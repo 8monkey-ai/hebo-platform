@@ -1,7 +1,11 @@
 import { Metadata } from "@grpc/grpc-js";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";
 import { CompressionAlgorithm } from "@opentelemetry/otlp-exporter-base";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import {
+  BatchSpanProcessor,
+  ConsoleSpanExporter,
+  SimpleSpanProcessor,
+} from "@opentelemetry/sdk-trace-base";
 import {
   PrismaInstrumentation,
   registerInstrumentations,
@@ -14,7 +18,9 @@ import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
 
 const getTraceExporterConfig = () => {
   if (!betterStackConfig) {
-    console.warn("⚠️ OpenTelemetry Trace Exporter not configured. Skipping...");
+    console.warn(
+      "⚠️ OpenTelemetry Trace Exporter not configured. Falling back to console exporter.",
+    );
     return;
   }
 
@@ -29,6 +35,9 @@ const getTraceExporterConfig = () => {
 };
 
 const traceExporterConfig = getTraceExporterConfig();
+const spanProcessor = traceExporterConfig
+  ? new BatchSpanProcessor(new OTLPTraceExporter(traceExporterConfig))
+  : new SimpleSpanProcessor(new ConsoleSpanExporter());
 
 registerInstrumentations({
   instrumentations: [
@@ -50,7 +59,5 @@ export const getOtelConfig = (
     if (request.method !== "GET") return true;
     return !isRootPathUrl(request.url);
   },
-  spanProcessors: traceExporterConfig
-    ? [new BatchSpanProcessor(new OTLPTraceExporter(traceExporterConfig))]
-    : undefined,
+  spanProcessors: [spanProcessor],
 });
