@@ -10,14 +10,13 @@
     "clean": "git clean -fdx -e '.env*' .",
     "db": "prisma",
     "predev": "test -d src/generated || bun run db generate",
-    "dev": "bun --hot src/index.ts | pino-pretty",
+    "dev": "bun --hot src/index.ts",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "prestart": "bun run build",
     "start": "./dist/server"
   },
   "dependencies": {
-    "@bogeychan/elysia-logger": "catalog:",
     "@elysiajs/cors": "catalog:",
     "@elysiajs/openapi": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
@@ -28,7 +27,6 @@
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
     "@types/bun": "catalog:",
-    "pino-pretty": "catalog:",
     "prisma": "catalog:",
     "prismabox": "^1.1.26"
   }

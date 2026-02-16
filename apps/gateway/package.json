@@ -7,7 +7,7 @@
   "scripts": {
     "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target=bun --outfile dist/server",
     "clean": "git clean -fdx -e '.env*' .",
-    "dev": "bun --hot src/index.ts | pino-pretty",
+    "dev": "bun --hot src/index.ts",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "prestart": "bun run build",
@@ -21,7 +21,6 @@
     "@ai-sdk/provider": "^3.0.8",
     "@aws-sdk/client-bedrock": "^3.985.0",
     "@aws-sdk/credential-providers": "^3.985.0",
-    "@bogeychan/elysia-logger": "catalog:",
     "@elysiajs/cors": "catalog:",
     "@elysiajs/openapi": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
@@ -31,12 +30,10 @@
     "@opentelemetry/api": "catalog:",
     "elysia": "catalog:",
     "lru-cache": "^11.2.5",
-    "pino": "^10.3.1",
     "voyage-ai-provider": "^3.0.0"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
-    "@types/bun": "catalog:",
-    "pino-pretty": "catalog:"
+    "@types/bun": "catalog:"
   }
 }

@@ -26,11 +26,9 @@
     "@prisma/instrumentation": "catalog:",
     "@sindresorhus/slugify": "^3.0.0",
     "better-auth": "catalog:",
-    "crypto-random-string": "^5.0.0",
-    "pino-opentelemetry-transport": "^2.0.0"
+    "crypto-random-string": "^5.0.0"
   },
   "peerDependencies": {
-    "@bogeychan/elysia-logger": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
     "elysia": "catalog:",
     "sst": "catalog:"

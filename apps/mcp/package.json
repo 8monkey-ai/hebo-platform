@@ -6,14 +6,13 @@
   "scripts": {
     "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target=bun --outfile dist/server",
     "clean": "git clean -fdx -e '.env*' .",
-    "dev": "bun --hot src/index.ts | pino-pretty",
+    "dev": "bun --hot src/index.ts",
     "lint": "eslint .",
     "type-check": "tsc --noEmit",
     "prestart": "bun run build",
     "start": "./dist/server"
   },
   "dependencies": {
-    "@bogeychan/elysia-logger": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",
     "@modelcontextprotocol/sdk": "^1.26.0",
@@ -22,7 +21,6 @@
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
-    "@types/bun": "catalog:",
-    "pino-pretty": "catalog:"
+    "@types/bun": "catalog:"
   }
 }

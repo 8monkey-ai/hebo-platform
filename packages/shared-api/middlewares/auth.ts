@@ -1,4 +1,3 @@
-import { type Logger } from "@bogeychan/elysia-logger/types";
 import { context, propagation } from "@opentelemetry/api";
 import { createAuthClient as createBetterAuthClient } from "better-auth/client";
 import { organizationClient } from "better-auth/client/plugins";
@@ -49,8 +48,6 @@ const createAuthClient = (request: Request) => {
 
 export const authService = new Elysia({ name: "auth-service" })
   .resolve(async function resolveAuthContext(ctx) {
-    const log = (ctx as unknown as { log: Logger }).log;
-
     const authorization = ctx.request.headers.get("authorization");
     const cookie = ctx.request.headers.get("cookie");
 
@@ -74,8 +71,6 @@ export const authService = new Elysia({ name: "auth-service" })
     }
 
     if (error || !session) {
-      log.info({ error }, "Authentication failed or no credentials provided");
-
       // Clear the session cookie when unauthorized
       const { attributes, name } = cookieConfig.sessionToken;
       ctx.cookie[name] = {
