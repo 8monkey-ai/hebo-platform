@@ -5,7 +5,7 @@ import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
 import { voyage35 } from "@hebo-ai/gateway/models/voyage";
 import { trace } from "@opentelemetry/api";
 
-import { createGatewayLogger } from "@hebo/shared-api/lib/logger";
+import { createLogger } from "@hebo/shared-api/lib/logger";
 
 import { resolveModelId, resolveProvider } from "./services/model-resolver";
 import {
@@ -15,7 +15,6 @@ import {
 
 export const basePath = "/v1";
 const secrets = await loadProviderSecrets();
-const logger = createGatewayLogger("hebo-gateway");
 
 const withFreeTokens = (freeTokens: number) => ({
   additionalProperties: { pricing: { monthly_free_tokens: freeTokens } },
@@ -23,7 +22,6 @@ const withFreeTokens = (freeTokens: number) => ({
 
 export const gw = gateway({
   basePath,
-  logger,
 
   providers: {
     groq: createProvider("groq", { apiKey: secrets.groqApiKey }),
@@ -60,6 +58,7 @@ export const gw = gateway({
     resolveModelId,
     resolveProvider,
   },
+  logger: createLogger("hebo-ai-gateway"),
   telemetry: {
     enabled: true,
     tracer: trace.getTracer("hebo-ai-gateway"),

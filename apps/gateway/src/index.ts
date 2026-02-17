@@ -18,6 +18,7 @@ import { OpenAIErrorSchema } from "@hebo-ai/gateway/errors/openai";
 import Elysia from "elysia";
 
 import { corsConfig } from "@hebo/shared-api/lib/cors";
+import { shutdownLoggers } from "@hebo/shared-api/lib/logger";
 import { getOpenapiConfig } from "@hebo/shared-api/lib/openapi";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { authService } from "@hebo/shared-api/middlewares/auth";
@@ -112,6 +113,18 @@ export const createGateway = () =>
 if (import.meta.main) {
   const app = createGateway().listen(PORT);
   console.log(`🐵 Hebo Gateway running at ${app.server!.url}`);
+
+  const shutdown = async () => {
+    await shutdownLoggers();
+    app.stop();
+  };
+
+  process.once("SIGINT", () => {
+    void shutdown();
+  });
+  process.once("SIGTERM", () => {
+    void shutdown();
+  });
 }
 
 export type Gateway = ReturnType<typeof createGateway>;
