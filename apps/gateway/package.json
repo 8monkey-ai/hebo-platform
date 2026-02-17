@@ -24,7 +24,7 @@
     "@elysiajs/cors": "catalog:",
     "@elysiajs/openapi": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
-    "@hebo-ai/gateway": "^0.4.0-beta.3",
+    "@hebo-ai/gateway": "^0.4.0-beta.4",
     "@hebo/api": "workspace:*",
     "@hebo/shared-api": "workspace:*",
     "@opentelemetry/api": "catalog:",
