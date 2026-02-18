@@ -166,7 +166,7 @@ const createLogHandler = (
 };
 
 export const createLogger = (serviceName: string) => {
-  if (configuredLogLevelWeight > levelWeightByLevel.error) {
+  if (configuredLogLevelWeight === levelWeightByLevel.silent) {
     return {
       trace: noop,
       debug: noop,
