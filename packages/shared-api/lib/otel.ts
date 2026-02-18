@@ -44,8 +44,14 @@ registerInstrumentations({
     new PrismaInstrumentation({
       ignoreSpanTypes: [
         "prisma:client:compile",
+        "prisma:client:connect",
         "prisma:client:serialize",
         "prisma:client:db_query",
+        "prisma:engine:query",
+        "prisma:engine:response_json_serialization",
+        "prisma:engine:serialize",
+        "prisma:engine:db_query",
+        "prisma:engine:connection",
       ],
     }),
   ],
