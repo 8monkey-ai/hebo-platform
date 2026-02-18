@@ -16,17 +16,19 @@ import { betterStackConfig } from "./better-stack";
 import type { Logger } from "@opentelemetry/api-logs";
 
 type LogLevel = "trace" | "debug" | "info" | "warn" | "error";
+type ConfigLogLevel = LogLevel | "silent";
 
-const levelWeightByLevel: Record<LogLevel, number> = {
+const levelWeightByLevel: Record<ConfigLogLevel, number> = {
   trace: 10,
   debug: 20,
   info: 30,
   warn: 40,
   error: 50,
+  silent: 60,
 };
 
 const getLogLevelWeight = (level: string): number =>
-  levelWeightByLevel[level as LogLevel] ?? levelWeightByLevel.info;
+  levelWeightByLevel[level as ConfigLogLevel] ?? levelWeightByLevel.info;
 
 const getSeverityNumber = (level: LogLevel): SeverityNumber => {
   switch (level) {
@@ -51,6 +53,7 @@ const getSeverityNumber = (level: LogLevel): SeverityNumber => {
 const configuredLogLevelWeight = getLogLevelWeight(logLevel);
 
 const loggerProviders = new Set<LoggerProvider>();
+const noop = () => {};
 
 const serializeError = (error: Error) => ({
   message: error.message,
@@ -165,6 +168,16 @@ const createLogHandler = (
 };
 
 export const createLogger = (serviceName: string) => {
+  if (configuredLogLevelWeight > levelWeightByLevel.error) {
+    return {
+      trace: noop,
+      debug: noop,
+      info: noop,
+      warn: noop,
+      error: noop,
+    };
+  }
+
   const otelLogger = createOtelLogger(serviceName || "unknown_service:bun");
   const log = createLogHandler(otelLogger);
 
