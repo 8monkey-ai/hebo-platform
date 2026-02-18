@@ -13,29 +13,37 @@ import {
 import { logLevel } from "../env";
 import { betterStackConfig } from "./better-stack";
 
-import type { LogAttributes, Logger } from "@opentelemetry/api-logs";
+import type { Logger } from "@opentelemetry/api-logs";
 
 type LogLevel = "trace" | "debug" | "info" | "warn" | "error";
 
-const getLogLevelWeight = (level: string): number => {
+const levelWeightByLevel: Record<LogLevel, number> = {
+  trace: 10,
+  debug: 20,
+  info: 30,
+  warn: 40,
+  error: 50,
+};
+
+const getLogLevelWeight = (level: string): number =>
+  levelWeightByLevel[level as LogLevel] ?? levelWeightByLevel.info;
+
+const getSeverityNumber = (level: LogLevel): SeverityNumber => {
   switch (level) {
     case "trace": {
-      return 10;
+      return SeverityNumber.TRACE;
     }
     case "debug": {
-      return 20;
+      return SeverityNumber.DEBUG;
     }
     case "info": {
-      return 30;
+      return SeverityNumber.INFO;
     }
     case "warn": {
-      return 40;
+      return SeverityNumber.WARN;
     }
     case "error": {
-      return 50;
-    }
-    default: {
-      return 30;
+      return SeverityNumber.ERROR;
     }
   }
 };
@@ -44,6 +52,42 @@ const configuredLogLevelWeight = getLogLevelWeight(logLevel);
 
 const loggerProviderByServiceName = new Map<string, LoggerProvider>();
 const loggerByServiceName = new Map<string, Logger>();
+
+const serializeError = (error: Error) => ({
+  message: error.message,
+  stack: error.stack,
+});
+
+const asBody = (value: unknown) =>
+  value as NonNullable<Parameters<Logger["emit"]>[0]["body"]>;
+
+const emitObjectLog = (
+  otelLogger: Logger,
+  severityNumber: SeverityNumber,
+  obj: Record<string, unknown>,
+  msg?: string,
+) => {
+  const err = obj.err;
+  if (err instanceof Error) {
+    const rest = { ...obj };
+    delete rest.err;
+    otelLogger.emit({
+      severityNumber,
+      body: asBody({
+        ...(msg ? { msg } : {}),
+        ...rest,
+        err: serializeError(err),
+      }),
+      attributes: { "error.type": err.name },
+    });
+    return;
+  }
+
+  otelLogger.emit({
+    severityNumber,
+    body: asBody(msg ? { msg, ...obj } : obj),
+  });
+};
 
 const getLogExporterConfig = () => {
   if (!betterStackConfig) {
@@ -89,58 +133,50 @@ const createLogMethod = (
   otelLogger: Logger,
   level: LogLevel,
 ): ((...args: unknown[]) => void) => {
-  let severityNumber: SeverityNumber;
-  switch (level) {
-    case "trace": {
-      severityNumber = SeverityNumber.TRACE;
-      break;
-    }
-    case "debug": {
-      severityNumber = SeverityNumber.DEBUG;
-      break;
-    }
-    case "info": {
-      severityNumber = SeverityNumber.INFO;
-      break;
-    }
-    case "warn": {
-      severityNumber = SeverityNumber.WARN;
-      break;
-    }
-    case "error": {
-      severityNumber = SeverityNumber.ERROR;
-      break;
-    }
-  }
+  const severityNumber = getSeverityNumber(level);
+  const levelWeight = getLogLevelWeight(level);
 
   return (...args: unknown[]) => {
-    if (getLogLevelWeight(level) < configuredLogLevelWeight) return;
+    if (levelWeight < configuredLogLevelWeight) return;
 
     const first = args[0];
     const second = args[1];
+    const msg =
+      typeof second === "string" && second.length > 0 ? second : undefined;
 
     if (typeof first === "string") {
       otelLogger.emit({
         severityNumber,
         body: first,
-        attributes:
-          second && typeof second === "object"
-            ? (second as LogAttributes)
-            : undefined,
       });
+      return;
+    }
+
+    if (first instanceof Error) {
+      otelLogger.emit({
+        severityNumber,
+        body: asBody({
+          ...(msg ? { msg } : {}),
+          ...serializeError(first),
+        }),
+        attributes: { "error.type": first.name },
+      });
+      return;
+    }
+
+    if (typeof first === "object" && first !== null) {
+      emitObjectLog(
+        otelLogger,
+        severityNumber,
+        first as Record<string, unknown>,
+        msg,
+      );
       return;
     }
 
     otelLogger.emit({
       severityNumber,
-      body:
-        typeof second === "string" && second.length > 0
-          ? second
-          : "service log",
-      attributes:
-        first && typeof first === "object"
-          ? (first as LogAttributes)
-          : undefined,
+      body: first === undefined ? "service log" : String(first),
     });
   };
 };
