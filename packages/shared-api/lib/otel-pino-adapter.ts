@@ -51,33 +51,6 @@ const NOOP_LOGGER = {
 const asBody = (value: unknown) =>
   value as NonNullable<Parameters<Logger["emit"]>[0]["body"]>;
 
-const buildObjectLog = (
-  severityNumber: SeverityNumber,
-  obj: Record<string, unknown>,
-  msg?: string,
-): Parameters<Logger["emit"]>[0] => {
-  const err = obj.err;
-  const hasError = err instanceof Error;
-  let body = msg ? { msg, ...obj } : obj;
-  const attributes = hasError ? { "error.type": err.name } : undefined;
-
-  if (hasError) {
-    const rest = { ...obj };
-    delete rest.err;
-    body = {
-      ...(msg ? { msg } : {}),
-      ...rest,
-      err: serializeError(err),
-    };
-  }
-
-  return {
-    severityNumber,
-    body: asBody(body),
-    ...(attributes ? { attributes } : {}),
-  };
-};
-
 const createLogHandler = (
   otelLogger: Logger,
 ): ((level: LogLevel, ...args: unknown[]) => void) => {
@@ -105,11 +78,27 @@ const createLogHandler = (
         attributes: { "error.type": first.name },
       };
     } else if (typeof first === "object" && first !== null) {
-      logRecord = buildObjectLog(
+      const obj = first as Record<string, unknown>;
+      const err = obj.err;
+      const hasError = err instanceof Error;
+      let body = msg ? { msg, ...obj } : obj;
+      const attributes = hasError ? { "error.type": err.name } : undefined;
+
+      if (hasError) {
+        const rest = { ...obj };
+        delete rest.err;
+        body = {
+          ...(msg ? { msg } : {}),
+          ...rest,
+          err: serializeError(err),
+        };
+      }
+
+      logRecord = {
         severityNumber,
-        first as Record<string, unknown>,
-        msg,
-      );
+        body: asBody(body),
+        ...(attributes ? { attributes } : {}),
+      };
     } else {
       logRecord = {
         severityNumber,

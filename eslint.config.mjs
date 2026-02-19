@@ -122,6 +122,7 @@ const eslintConfig = [
         },
       ],
       'sonarjs/no-commented-code': 'off',
+      'sonarjs/cognitive-complexity': ['error', 23],
       'sonarjs/todo-tag': 'warn',
       'tailwindcss/no-custom-classname': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
