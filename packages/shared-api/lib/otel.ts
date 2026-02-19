@@ -10,17 +10,14 @@ import {
   SimpleLogRecordProcessor,
   createLoggerConfigurator,
 } from "@opentelemetry/sdk-logs";
-import {
-  BatchSpanProcessor,
-  ConsoleSpanExporter,
-  SimpleSpanProcessor,
-} from "@opentelemetry/sdk-trace-base";
+import { ConsoleSpanExporter } from "@opentelemetry/sdk-trace-base";
 import {
   PrismaInstrumentation,
   registerInstrumentations,
 } from "@prisma/instrumentation";
 
 import { betterStackConfig } from "./better-stack";
+import { isProduction } from "../env";
 import { otelSeverityByLevel } from "../utils/otel/log-levels";
 import { isRootPathUrl } from "../utils/url";
 
@@ -44,7 +41,9 @@ const getOtlpGrpcExporterConfig = () => {
   };
 };
 
-const otlpExporterConfig = getOtlpGrpcExporterConfig();
+const otlpExporterConfig = isProduction
+  ? getOtlpGrpcExporterConfig()
+  : undefined;
 
 export const createOtelLogger = (serviceName: string, logLevel: string) => {
   const loggerProvider = new LoggerProvider({
@@ -62,7 +61,7 @@ export const createOtelLogger = (serviceName: string, logLevel: string) => {
       },
     ]),
     processors: [
-      otlpExporterConfig
+      isProduction
         ? new BatchLogRecordProcessor(new OTLPLogExporter(otlpExporterConfig))
         : new SimpleLogRecordProcessor(new ConsoleLogRecordExporter()),
     ],
@@ -97,9 +96,7 @@ export const getOtelTraceConfig = (
     if (request.method !== "GET") return true;
     return !isRootPathUrl(request.url);
   },
-  spanProcessors: [
-    otlpExporterConfig
-      ? new BatchSpanProcessor(new OTLPTraceExporter(otlpExporterConfig))
-      : new SimpleSpanProcessor(new ConsoleSpanExporter()),
-  ],
+  traceExporter: isProduction
+    ? new OTLPTraceExporter(otlpExporterConfig)
+    : new ConsoleSpanExporter(),
 });
