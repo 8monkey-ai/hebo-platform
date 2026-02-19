@@ -17,7 +17,7 @@ const levelWeightByLevel: Record<ConfigLogLevel, number> = {
 const getLogLevelWeight = (level: string): number =>
   levelWeightByLevel[level as ConfigLogLevel] ?? levelWeightByLevel.info;
 
-const getSeverityNumber = (level: LogLevel): SeverityNumber => {
+const getOtelSeverityNumber = (level: LogLevel): SeverityNumber => {
   switch (level) {
     case "trace": {
       return SeverityNumber.TRACE;
@@ -79,7 +79,7 @@ const createLogHandler = (
 ): ((level: LogLevel, ...args: unknown[]) => void) => {
   return (level: LogLevel, ...args: unknown[]) => {
     if (getLogLevelWeight(level) < configuredLogLevelWeight) return;
-    const severityNumber = getSeverityNumber(level);
+    const severityNumber = getOtelSeverityNumber(level);
 
     const first = args[0];
     const second = args[1];
