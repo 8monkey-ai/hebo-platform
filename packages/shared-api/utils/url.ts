@@ -1,8 +1,24 @@
-// Used in a request hot path; string checks avoid per-request URL allocation.
-export function isRootPathUrl(url: string): boolean {
-  // Elysia passes Request.url as an absolute URL.
+const getPathStartIndex = (url: string) => {
   const schemeIdx = url.indexOf("://");
-  const slash = url.indexOf("/", schemeIdx === -1 ? 0 : schemeIdx + 3);
+  return url.indexOf("/", schemeIdx + 3);
+};
+
+export function getPathnameFromUrl(url: string): string {
+  const pathStart = getPathStartIndex(url);
+  if (pathStart === -1) return "/";
+
+  const queryStart = url.indexOf("?", pathStart);
+  const hashStart = url.indexOf("#", pathStart);
+  let pathEnd = url.length;
+  if (queryStart !== -1) pathEnd = Math.min(pathEnd, queryStart);
+  if (hashStart !== -1) pathEnd = Math.min(pathEnd, hashStart);
+
+  const path = url.slice(pathStart, pathEnd);
+  return path.length === 0 ? "/" : path;
+}
+
+export function isRootPathUrl(url: string): boolean {
+  const slash = getPathStartIndex(url);
   if (slash === -1) return true;
 
   const next = slash + 1;

@@ -10,7 +10,6 @@ import {
   SimpleLogRecordProcessor,
   createLoggerConfigurator,
 } from "@opentelemetry/sdk-logs";
-import { ConsoleSpanExporter } from "@opentelemetry/sdk-trace-base";
 import {
   PrismaInstrumentation,
   registerInstrumentations,
@@ -90,13 +89,15 @@ registerInstrumentations({
 
 export const getOtelTraceConfig = (
   serviceName: string,
-): ElysiaOpenTelemetryOptions => ({
-  serviceName,
-  checkIfShouldTrace: (request) => {
-    if (request.method !== "GET") return true;
-    return !isRootPathUrl(request.url);
-  },
-  traceExporter: isProduction
-    ? new OTLPTraceExporter(otlpExporterConfig)
-    : new ConsoleSpanExporter(),
-});
+): ElysiaOpenTelemetryOptions => {
+  return {
+    serviceName,
+    checkIfShouldTrace: (request) => {
+      if (request.method !== "GET") return true;
+      return !isRootPathUrl(request.url);
+    },
+    ...(isProduction
+      ? { traceExporter: new OTLPTraceExporter(otlpExporterConfig) }
+      : {}),
+  };
+};

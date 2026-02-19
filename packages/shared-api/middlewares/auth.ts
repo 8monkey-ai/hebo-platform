@@ -9,6 +9,8 @@ import { AuthError, BadRequestError } from "../errors";
 import { betterAuthCookieOptions } from "../lib/cookie-options";
 import { getSecret } from "../utils/secrets";
 
+import type { ServiceLogger } from "./logging";
+
 const authSecret = await getSecret("AuthSecret");
 const cookieConfig = getCookies(betterAuthCookieOptions);
 
@@ -48,6 +50,7 @@ const createAuthClient = (request: Request) => {
 
 export const authService = new Elysia({ name: "auth-service" })
   .resolve(async function resolveAuthContext(ctx) {
+    const logger = (ctx as unknown as { logger: ServiceLogger }).logger;
     const authorization = ctx.request.headers.get("authorization");
     const cookie = ctx.request.headers.get("cookie");
 
@@ -71,7 +74,11 @@ export const authService = new Elysia({ name: "auth-service" })
     }
 
     if (error || !session) {
-      // Clear the session cookie when unauthorized
+      logger.info(
+        { error },
+        "Authentication failed or no credentials provided",
+      );
+
       const { attributes, name } = cookieConfig.sessionToken;
       ctx.cookie[name] = {
         value: "",
