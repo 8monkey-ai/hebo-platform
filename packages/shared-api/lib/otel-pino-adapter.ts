@@ -49,23 +49,24 @@ const buildObjectLog = (
   msg?: string,
 ): Parameters<Logger["emit"]>[0] => {
   const err = obj.err;
-  if (err instanceof Error) {
+  const hasError = err instanceof Error;
+  let body = msg ? { msg, ...obj } : obj;
+  const attributes = hasError ? { "error.type": err.name } : undefined;
+
+  if (hasError) {
     const rest = { ...obj };
     delete rest.err;
-    return {
-      severityNumber,
-      body: asBody({
-        ...(msg ? { msg } : {}),
-        ...rest,
-        err: serializeError(err),
-      }),
-      attributes: { "error.type": err.name },
+    body = {
+      ...(msg ? { msg } : {}),
+      ...rest,
+      err: serializeError(err),
     };
   }
 
   return {
     severityNumber,
-    body: asBody(msg ? { msg, ...obj } : obj),
+    body: asBody(body),
+    ...(attributes ? { attributes } : {}),
   };
 };
 
