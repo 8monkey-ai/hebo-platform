@@ -1,52 +1,11 @@
-import { SeverityNumber } from "@opentelemetry/api-logs";
 import { serializeError } from "serialize-error";
+
+import { otelLogLevels, otelSeverityByLevel } from "./otel-log-levels";
 
 import type { Logger } from "@opentelemetry/api-logs";
 
-export type LogLevel = "trace" | "debug" | "info" | "warn" | "error";
-type ConfigLogLevel = LogLevel | "silent";
-
-const levelWeightByLevel: Record<ConfigLogLevel, number> = {
-  trace: 10,
-  debug: 20,
-  info: 30,
-  warn: 40,
-  error: 50,
-  silent: 60,
-};
-
-const getLogLevelWeight = (level: string): number =>
-  levelWeightByLevel[level as ConfigLogLevel] ?? levelWeightByLevel.info;
-
-const getOtelSeverityNumber = (level: LogLevel): SeverityNumber => {
-  switch (level) {
-    case "trace": {
-      return SeverityNumber.TRACE;
-    }
-    case "debug": {
-      return SeverityNumber.DEBUG;
-    }
-    case "info": {
-      return SeverityNumber.INFO;
-    }
-    case "warn": {
-      return SeverityNumber.WARN;
-    }
-    case "error": {
-      return SeverityNumber.ERROR;
-    }
-  }
-};
-
-type LogFn = (...args: unknown[]) => void;
-const noop: LogFn = () => {};
-const NOOP_LOGGER = {
-  trace: noop,
-  debug: noop,
-  info: noop,
-  warn: noop,
-  error: noop,
-} satisfies Record<LogLevel, LogFn>;
+type LogLevel = (typeof otelLogLevels)[number];
+const getOtelSeverityNumber = (level: LogLevel) => otelSeverityByLevel[level];
 
 const asBody = (value: unknown) =>
   value as NonNullable<Parameters<Logger["emit"]>[0]["body"]>;
@@ -109,28 +68,12 @@ const createLogHandler = (
   };
 };
 
-export const createPinoCompatibleOtelLogger = ({
-  serviceName,
-  logLevel,
-  createOtelLogger,
-}: {
-  serviceName: string;
-  logLevel: string;
-  createOtelLogger: (serviceName: string) => Logger;
-}) => {
-  const otelLogger = createOtelLogger(serviceName || "unknown_service:bun");
-  const handlers = { ...NOOP_LOGGER };
+export const createPinoCompatibleOtelLogger = (otelLogger: Logger) => {
   const log = createLogHandler(otelLogger);
+  const handlers = {} as Record<LogLevel, (...args: unknown[]) => void>;
 
-  for (const [level, levelWeight] of Object.entries(levelWeightByLevel) as [
-    ConfigLogLevel,
-    number,
-  ][]) {
-    if (level === "silent") continue;
-
-    if (levelWeight >= getLogLevelWeight(logLevel)) {
-      handlers[level] = (...args: unknown[]) => log(level, ...args);
-    }
+  for (const level of otelLogLevels) {
+    handlers[level] = (...args: unknown[]) => log(level, ...args);
   }
 
   return handlers;

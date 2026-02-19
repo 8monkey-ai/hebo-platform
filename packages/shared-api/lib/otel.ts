@@ -8,6 +8,7 @@ import {
   ConsoleLogRecordExporter,
   LoggerProvider,
   SimpleLogRecordProcessor,
+  createLoggerConfigurator,
 } from "@opentelemetry/sdk-logs";
 import {
   BatchSpanProcessor,
@@ -20,6 +21,7 @@ import {
 } from "@prisma/instrumentation";
 
 import { betterStackConfig } from "./better-stack";
+import { otelSeverityByLevel } from "./otel-log-levels";
 import { isRootPathUrl } from "../utils/url";
 
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
@@ -44,16 +46,26 @@ const getOtlpGrpcExporterConfig = () => {
 
 const otlpExporterConfig = getOtlpGrpcExporterConfig();
 
-export const createOtelLogger = (serviceName: string) => {
-  const logRecordProcessor = otlpExporterConfig
-    ? new BatchLogRecordProcessor(new OTLPLogExporter(otlpExporterConfig))
-    : new SimpleLogRecordProcessor(new ConsoleLogRecordExporter());
-
+export const createOtelLogger = (serviceName: string, logLevel: string) => {
   const loggerProvider = new LoggerProvider({
     resource: resourceFromAttributes({
       "service.name": serviceName,
     }),
-    processors: [logRecordProcessor],
+    loggerConfigurator: createLoggerConfigurator([
+      {
+        pattern: "*",
+        config: {
+          minimumSeverity:
+            otelSeverityByLevel[logLevel as keyof typeof otelSeverityByLevel] ??
+            otelSeverityByLevel.info,
+        },
+      },
+    ]),
+    processors: [
+      otlpExporterConfig
+        ? new BatchLogRecordProcessor(new OTLPLogExporter(otlpExporterConfig))
+        : new SimpleLogRecordProcessor(new ConsoleLogRecordExporter()),
+    ],
   });
 
   return loggerProvider.getLogger(serviceName);

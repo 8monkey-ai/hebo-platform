@@ -60,11 +60,9 @@ export const gw = gateway({
     resolveModelId,
     resolveProvider,
   },
-  logger: createPinoCompatibleOtelLogger({
-    serviceName: "hebo-ai-gateway",
-    logLevel,
-    createOtelLogger,
-  }),
+  logger: createPinoCompatibleOtelLogger(
+    createOtelLogger("hebo-ai-gateway", logLevel),
+  ),
   telemetry: {
     enabled: true,
     tracer: trace.getTracer("hebo-ai-gateway"),
