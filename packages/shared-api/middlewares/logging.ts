@@ -23,7 +23,7 @@ export const serviceLogging = (
     seed: { serviceName },
   })
     .decorate("logger", logger)
-    .onRequest(({ request }) => {
+    .onRequest(function logIncomingRequest({ request }) {
       if (isProduction) return;
 
       logger.info(getRequestMeta(request), "request:incoming");
