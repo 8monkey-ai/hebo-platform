@@ -38,7 +38,15 @@ const getOtelSeverityNumber = (level: LogLevel): SeverityNumber => {
   }
 };
 
-const noop = () => {};
+type LogFn = (...args: unknown[]) => void;
+const noop: LogFn = () => {};
+const NOOP_LOGGER = {
+  trace: noop,
+  debug: noop,
+  info: noop,
+  warn: noop,
+  error: noop,
+} satisfies Record<LogLevel, LogFn>;
 
 const asBody = (value: unknown) =>
   value as NonNullable<Parameters<Logger["emit"]>[0]["body"]>;
@@ -72,10 +80,8 @@ const buildObjectLog = (
 
 const createLogHandler = (
   otelLogger: Logger,
-  configuredLogLevelWeight: number,
 ): ((level: LogLevel, ...args: unknown[]) => void) => {
   return (level: LogLevel, ...args: unknown[]) => {
-    if (getLogLevelWeight(level) < configuredLogLevelWeight) return;
     const severityNumber = getOtelSeverityNumber(level);
 
     const first = args[0];
@@ -123,25 +129,20 @@ export const createPinoCompatibleOtelLogger = ({
   logLevel: string;
   createOtelLogger: (serviceName: string) => Logger;
 }) => {
-  const minLogLevelWeight = getLogLevelWeight(logLevel);
-  if (minLogLevelWeight === levelWeightByLevel.silent) {
-    return {
-      trace: noop,
-      debug: noop,
-      info: noop,
-      warn: noop,
-      error: noop,
-    };
+  const otelLogger = createOtelLogger(serviceName || "unknown_service:bun");
+  const handlers = { ...NOOP_LOGGER };
+  const log = createLogHandler(otelLogger);
+
+  for (const [level, levelWeight] of Object.entries(levelWeightByLevel) as [
+    ConfigLogLevel,
+    number,
+  ][]) {
+    if (level === "silent") continue;
+
+    if (levelWeight >= getLogLevelWeight(logLevel)) {
+      handlers[level] = (...args: unknown[]) => log(level, ...args);
+    }
   }
 
-  const otelLogger = createOtelLogger(serviceName || "unknown_service:bun");
-  const log = createLogHandler(otelLogger, minLogLevelWeight);
-
-  return {
-    trace: (...args: unknown[]) => log("trace", ...args),
-    debug: (...args: unknown[]) => log("debug", ...args),
-    info: (...args: unknown[]) => log("info", ...args),
-    warn: (...args: unknown[]) => log("warn", ...args),
-    error: (...args: unknown[]) => log("error", ...args),
-  };
+  return handlers;
 };
