@@ -122,12 +122,18 @@ const eslintConfig = [
         },
       ],
       'sonarjs/no-commented-code': 'off',
-      'sonarjs/cognitive-complexity': ['error', 23],
+      'sonarjs/cognitive-complexity': ['error', 15],
       'sonarjs/todo-tag': 'warn',
       'tailwindcss/no-custom-classname': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
       'turbo/no-undeclared-env-vars': 'warn',
       'unicorn/no-abusive-eslint-disable': 'warn'
+    },
+  },
+  {
+    files: ['packages/shared-api/utils/otel/pino-adapter.ts'],
+    rules: {
+      'sonarjs/cognitive-complexity': ['error', 23],
     },
   },
 ];
