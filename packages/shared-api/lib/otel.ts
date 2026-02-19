@@ -21,7 +21,7 @@ import {
 } from "@prisma/instrumentation";
 
 import { betterStackConfig } from "./better-stack";
-import { otelSeverityByLevel } from "./otel-log-levels";
+import { otelSeverityByLevel } from "../utils/otel/log-levels";
 import { isRootPathUrl } from "../utils/url";
 
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";

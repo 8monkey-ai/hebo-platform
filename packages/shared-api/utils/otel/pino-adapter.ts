@@ -1,6 +1,6 @@
 import { serializeError } from "serialize-error";
 
-import { otelLogLevels, otelSeverityByLevel } from "./otel-log-levels";
+import { otelLogLevels, otelSeverityByLevel } from "./log-levels";
 
 import type { Logger } from "@opentelemetry/api-logs";
 
