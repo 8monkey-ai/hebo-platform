@@ -126,8 +126,8 @@ export const createPinoCompatibleOtelLogger = ({
   logLevel: string;
   createOtelLogger: (serviceName: string) => Logger;
 }) => {
-  const configuredLogLevelWeight = getLogLevelWeight(logLevel);
-  if (configuredLogLevelWeight === levelWeightByLevel.silent) {
+  const minLogLevelWeight = getLogLevelWeight(logLevel);
+  if (minLogLevelWeight === levelWeightByLevel.silent) {
     return {
       trace: noop,
       debug: noop,
@@ -138,7 +138,7 @@ export const createPinoCompatibleOtelLogger = ({
   }
 
   const otelLogger = createOtelLogger(serviceName || "unknown_service:bun");
-  const log = createLogHandler(otelLogger, configuredLogLevelWeight);
+  const log = createLogHandler(otelLogger, minLogLevelWeight);
 
   return {
     trace: (...args: unknown[]) => log("trace", ...args),
