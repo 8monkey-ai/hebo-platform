@@ -65,7 +65,7 @@ export const gw = gateway({
     signals: {
       gen_ai: "full",
       http: "recommended",
-      hebo: "recommended",
+      hebo: "full",
     },
   },
 });
