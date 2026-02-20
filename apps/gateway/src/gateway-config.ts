@@ -5,7 +5,7 @@ import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
 import { voyage35 } from "@hebo-ai/gateway/models/voyage";
 import { trace } from "@opentelemetry/api";
 
-import { logLevel } from "@hebo/shared-api/env";
+import { logSeverity } from "@hebo/shared-api/env";
 import { getOtelLogger } from "@hebo/shared-api/lib/otel";
 import { createPinoAdapter } from "@hebo/shared-api/utils/otel/pino-adapter";
 
@@ -60,7 +60,7 @@ export const gw = gateway({
     resolveModelId,
     resolveProvider,
   },
-  logger: createPinoAdapter(getOtelLogger("hebo-ai-gateway", logLevel)),
+  logger: createPinoAdapter(getOtelLogger("hebo-ai-gateway", logSeverity)),
   telemetry: {
     enabled: true,
     tracer: trace.getTracer("hebo-ai-gateway"),

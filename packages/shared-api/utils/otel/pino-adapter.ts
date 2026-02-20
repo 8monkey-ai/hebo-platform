@@ -1,7 +1,18 @@
-import { otelSeverityByLevel, type LogLevel } from "./log-levels";
+import {
+  SeverityNumber,
+  type Logger,
+  type AnyValueMap,
+} from "@opentelemetry/api-logs";
 
-import type { Logger, AnyValueMap } from "@opentelemetry/api-logs";
+const otelSeverityByLevel = {
+  trace: SeverityNumber.TRACE,
+  debug: SeverityNumber.DEBUG,
+  info: SeverityNumber.INFO,
+  warn: SeverityNumber.WARN,
+  error: SeverityNumber.ERROR,
+} as const;
 
+type LogLevel = keyof typeof otelSeverityByLevel;
 type LogRecord = Parameters<Logger["emit"]>[0];
 
 const isRecord = (value: unknown): value is AnyValueMap =>
@@ -87,4 +98,13 @@ export const createPinoAdapter = (otelLogger: Logger) => {
       },
     ]),
   ) as Record<LogLevel, (...args: unknown[]) => void>;
+};
+
+export const parseLogSeverity = (raw: string): SeverityNumber => {
+  if (!(raw in otelSeverityByLevel)) {
+    throw new Error(
+      `Unsupported LOG_LEVEL "${raw}". Must be one of: ${Object.keys(otelSeverityByLevel).join(", ")}`,
+    );
+  }
+  return otelSeverityByLevel[raw as LogLevel];
 };

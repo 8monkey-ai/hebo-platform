@@ -19,10 +19,10 @@ import {
 
 import { betterStackConfig } from "./better-stack";
 import { isProduction } from "../env";
-import { otelSeverityByLevel, type LogLevel } from "../utils/otel/log-levels";
 import { isRootPathUrl } from "../utils/url";
 
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
+import type { SeverityNumber } from "@opentelemetry/api-logs";
 
 const getOtlpGrpcExporterConfig = () => {
   if (!betterStackConfig) {
@@ -42,7 +42,10 @@ const getOtlpGrpcExporterConfig = () => {
   };
 };
 
-export const getOtelLogger = (serviceName: string, logLevel: LogLevel) => {
+export const getOtelLogger = (
+  serviceName: string,
+  minimumSeverity: SeverityNumber,
+) => {
   const loggerProvider = new LoggerProvider({
     resource: resourceFromAttributes({
       "service.name": serviceName,
@@ -51,7 +54,7 @@ export const getOtelLogger = (serviceName: string, logLevel: LogLevel) => {
       {
         pattern: "*",
         config: {
-          minimumSeverity: otelSeverityByLevel[logLevel],
+          minimumSeverity,
         },
       },
     ]),

@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 
-import { isProduction, logLevel } from "../env";
+import { isProduction, logSeverity } from "../env";
 import { getOtelLogger } from "../lib/otel";
 import { createPinoAdapter } from "../utils/otel/pino-adapter";
 import { getPathnameFromUrl } from "../utils/url";
@@ -9,7 +9,7 @@ export type Logger = ReturnType<typeof createPinoAdapter>;
 
 export const logger = (
   serviceName: string,
-  logger = createPinoAdapter(getOtelLogger(serviceName, logLevel)),
+  logger = createPinoAdapter(getOtelLogger(serviceName, logSeverity)),
 ) => {
   const app = new Elysia({ name: "hebo-logging" }).decorate("logger", logger);
 
