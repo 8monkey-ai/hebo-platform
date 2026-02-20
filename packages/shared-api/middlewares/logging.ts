@@ -12,7 +12,7 @@ const getRequestMeta = (request: Request) => ({
   path: getPathnameFromUrl(request.url),
 });
 
-export const serviceLogging = (
+export const logger = (
   serviceName: string,
   logger = createPinoCompatibleOtelLogger(
     createOtelLogger(serviceName, logLevel),
