@@ -87,7 +87,7 @@ const severityEntries = Object.entries(otelSeverityByLevel) as [
   (typeof otelSeverityByLevel)[LogLevel],
 ][];
 
-export const createServiceLogger = (otelLogger: Logger) =>
+export const createLogger = (otelLogger: Logger) =>
   Object.fromEntries(
     severityEntries.map(([level, severity]) => [
       level,

@@ -7,7 +7,7 @@ import { trace } from "@opentelemetry/api";
 
 import { logLevel } from "@hebo/shared-api/env";
 import { getOtelLogger } from "@hebo/shared-api/lib/otel";
-import { createServiceLogger } from "@hebo/shared-api/utils/otel/logger-factory";
+import { createLogger } from "@hebo/shared-api/utils/otel/logger-factory";
 
 import { resolveModelId, resolveProvider } from "./services/model-resolver";
 import {
@@ -60,7 +60,7 @@ export const gw = gateway({
     resolveModelId,
     resolveProvider,
   },
-  logger: createServiceLogger(getOtelLogger("hebo-ai-gateway", logLevel)),
+  logger: createLogger(getOtelLogger("hebo-ai-gateway", logLevel)),
   telemetry: {
     enabled: true,
     tracer: trace.getTracer("hebo-ai-gateway"),

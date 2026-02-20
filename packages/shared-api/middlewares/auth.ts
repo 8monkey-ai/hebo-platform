@@ -9,7 +9,7 @@ import { AuthError, BadRequestError } from "../errors";
 import { betterAuthCookieOptions } from "../lib/cookie-options";
 import { getSecret } from "../utils/secrets";
 
-import type { ServiceLogger } from "./logging";
+import type { Logger } from "./logging";
 
 const authSecret = await getSecret("AuthSecret");
 const cookieConfig = getCookies(betterAuthCookieOptions);
@@ -50,7 +50,7 @@ const createAuthClient = (request: Request) => {
 
 export const authService = new Elysia({ name: "auth-service" })
   .resolve(async function resolveAuthContext(ctx) {
-    const logger = (ctx as unknown as { logger: ServiceLogger }).logger;
+    const logger = (ctx as unknown as { logger: Logger }).logger;
     const authorization = ctx.request.headers.get("authorization");
     const cookie = ctx.request.headers.get("cookie");
 

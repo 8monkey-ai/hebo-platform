@@ -2,14 +2,14 @@ import { Elysia } from "elysia";
 
 import { isProduction, logLevel } from "../env";
 import { getOtelLogger } from "../lib/otel";
-import { createServiceLogger } from "../utils/otel/logger-factory";
+import { createLogger } from "../utils/otel/logger-factory";
 import { getPathnameFromUrl } from "../utils/url";
 
-export type ServiceLogger = ReturnType<typeof createServiceLogger>;
+export type Logger = ReturnType<typeof createLogger>;
 
 export const logger = (
   serviceName: string,
-  logger = createServiceLogger(getOtelLogger(serviceName, logLevel)),
+  logger = createLogger(getOtelLogger(serviceName, logLevel)),
 ) => {
   const app = new Elysia({ name: "hebo-logging" }).decorate("logger", logger);
 
