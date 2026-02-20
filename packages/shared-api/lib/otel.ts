@@ -86,7 +86,7 @@ registerInstrumentations({
   ],
 });
 
-export const getOtelConfig = (
+export const createOtelConfig = (
   serviceName: string,
 ): ElysiaOpenTelemetryOptions => {
   return {
