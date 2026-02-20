@@ -16,10 +16,7 @@ export const logger = (
   serviceName: string,
   logger = createServiceLogger(createOtelLogger(serviceName, logLevel)),
 ) =>
-  new Elysia({
-    name: "hebo-logging",
-    seed: { serviceName },
-  })
+  new Elysia({ name: "hebo-logging" })
     .decorate("logger", logger)
     .onRequest(function logIncomingRequest({ request }) {
       if (isProduction) return;
