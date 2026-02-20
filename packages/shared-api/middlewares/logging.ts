@@ -7,11 +7,6 @@ import { getPathnameFromUrl } from "../utils/url";
 
 export type ServiceLogger = ReturnType<typeof createServiceLogger>;
 
-const getRequestMeta = (request: Request) => ({
-  method: request.method,
-  path: getPathnameFromUrl(request.url),
-});
-
 export const logger = (
   serviceName: string,
   logger = createServiceLogger(createOtelLogger(serviceName, logLevel)),
@@ -20,15 +15,17 @@ export const logger = (
 
   if (!isProduction) {
     app.onRequest(({ request }) => {
-      logger.info(getRequestMeta(request), "request:incoming");
+      logger.info(
+        { method: request.method, path: getPathnameFromUrl(request.url) },
+        "request:incoming",
+      );
     });
   }
 
   return app
-    .onError(({ request, error, set }) => {
+    .onError(({ error, set }) => {
       logger.error(
         {
-          ...getRequestMeta(request),
           status: typeof set.status === "number" ? set.status : 500,
           err: error,
         },
