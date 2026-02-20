@@ -42,7 +42,7 @@ const getOtlpGrpcExporterConfig = () => {
   };
 };
 
-export const createOtelLogger = (serviceName: string, logLevel: string) => {
+export const getOtelLogger = (serviceName: string, logLevel: string) => {
   const loggerProvider = new LoggerProvider({
     resource: resourceFromAttributes({
       "service.name": serviceName,
@@ -86,7 +86,7 @@ registerInstrumentations({
   ],
 });
 
-export const createOtelConfig = (
+export const getOtelConfig = (
   serviceName: string,
 ): ElysiaOpenTelemetryOptions => {
   return {
