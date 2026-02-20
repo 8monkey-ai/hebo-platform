@@ -8,9 +8,10 @@ export const otelLogLevels = [
   "error",
 ] as const;
 
-export type OtelLogLevel = (typeof otelLogLevels)[number];
-
-export const otelSeverityByLevel: Record<OtelLogLevel, SeverityNumber> = {
+export const otelSeverityByLevel: Record<
+  (typeof otelLogLevels)[number],
+  SeverityNumber
+> = {
   trace: SeverityNumber.TRACE,
   debug: SeverityNumber.DEBUG,
   info: SeverityNumber.INFO,
