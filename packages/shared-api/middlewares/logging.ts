@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 
 import { isProduction, logLevel } from "../env";
 import { getOtelLogger } from "../lib/otel";
-import { createLogger } from "../utils/otel/logger-factory";
+import { createLogger } from "../utils/otel/logger-adapter";
 import { getPathnameFromUrl } from "../utils/url";
 
 export type Logger = ReturnType<typeof createLogger>;

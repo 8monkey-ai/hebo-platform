@@ -7,7 +7,7 @@ import { trace } from "@opentelemetry/api";
 
 import { logLevel } from "@hebo/shared-api/env";
 import { getOtelLogger } from "@hebo/shared-api/lib/otel";
-import { createLogger } from "@hebo/shared-api/utils/otel/logger-factory";
+import { createLogger } from "@hebo/shared-api/utils/otel/logger-adapter";
 
 import { resolveModelId, resolveProvider } from "./services/model-resolver";
 import {
