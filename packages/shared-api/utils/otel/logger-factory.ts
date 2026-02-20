@@ -8,10 +8,10 @@ type LogRecord = Parameters<Logger["emit"]>[0];
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null && !(value instanceof Error);
 
-function serializeError(
+const serializeError = (
   err: unknown,
   _seen?: WeakSet<object>,
-): Record<string, unknown> {
+): Record<string, unknown> => {
   if (!(err instanceof Error)) return { message: String(err) };
 
   const seen = _seen ?? new WeakSet();
@@ -37,7 +37,7 @@ function serializeError(
   }
 
   return out;
-}
+};
 
 const buildLogRecord = (args: unknown[]): LogRecord => {
   if (args.length === 0) return {};
