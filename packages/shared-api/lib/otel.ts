@@ -42,10 +42,6 @@ const getOtlpGrpcExporterConfig = () => {
   };
 };
 
-const otlpExporterConfig = isProduction
-  ? getOtlpGrpcExporterConfig()
-  : undefined;
-
 export const createOtelLogger = (serviceName: string, logLevel: string) => {
   const loggerProvider = new LoggerProvider({
     resource: resourceFromAttributes({
@@ -63,7 +59,9 @@ export const createOtelLogger = (serviceName: string, logLevel: string) => {
     ]),
     processors: [
       isProduction
-        ? new BatchLogRecordProcessor(new OTLPLogExporter(otlpExporterConfig))
+        ? new BatchLogRecordProcessor(
+            new OTLPLogExporter(getOtlpGrpcExporterConfig()),
+          )
         : new SimpleLogRecordProcessor(new ConsoleLogRecordExporter()),
     ],
   });
@@ -99,9 +97,9 @@ export const getOtelConfig = (
     },
     ...(isProduction
       ? {
-          traceExporter: new OTLPTraceExporter(otlpExporterConfig),
+          traceExporter: new OTLPTraceExporter(getOtlpGrpcExporterConfig()),
           metricReader: new PeriodicExportingMetricReader({
-            exporter: new OTLPMetricExporter(otlpExporterConfig),
+            exporter: new OTLPMetricExporter(getOtlpGrpcExporterConfig()),
           }),
         }
       : {}),
