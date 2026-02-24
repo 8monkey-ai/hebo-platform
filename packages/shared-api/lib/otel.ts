@@ -1,17 +1,15 @@
 import { Metadata } from "@grpc/grpc-js";
-import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-grpc";
-import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-grpc";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";
+import { OTLPLogExporter as OTLPLogExporterGrpc } from "@opentelemetry/exporter-logs-otlp-grpc";
+import { OTLPLogExporter as OTLPLogExporterProto } from "@opentelemetry/exporter-logs-otlp-proto";
+import { OTLPTraceExporter as OTLPTraceExporterGrpc } from "@opentelemetry/exporter-trace-otlp-grpc";
+import { OTLPTraceExporter as OTLPTraceExporterProto } from "@opentelemetry/exporter-trace-otlp-proto";
 import { CompressionAlgorithm } from "@opentelemetry/otlp-exporter-base";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import {
   BatchLogRecordProcessor,
-  ConsoleLogRecordExporter,
   LoggerProvider,
-  SimpleLogRecordProcessor,
   createLoggerConfigurator,
 } from "@opentelemetry/sdk-logs";
-import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import {
   PrismaInstrumentation,
   registerInstrumentations,
@@ -24,7 +22,10 @@ import { isRootPathUrl } from "../utils/url";
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
 import type { SeverityNumber } from "@opentelemetry/api-logs";
 
-const getOtlpGrpcExporterConfig = () => {
+export const greptimeOtlpEndpoint =
+  process.env.GREPTIMEDB_OTLP_ENDPOINT ?? "http://localhost:4000/v1/otlp";
+
+export const getOtlpGrpcExporterConfig = () => {
   if (!betterStackConfig) {
     console.warn(
       "⚠️ OpenTelemetry exporter not configured. Falling back to console exporters.",
@@ -41,6 +42,20 @@ const getOtlpGrpcExporterConfig = () => {
     compression: CompressionAlgorithm.GZIP,
   };
 };
+
+const getGreptimeTraceExporter = () =>
+  new OTLPTraceExporterProto({
+    url: `${greptimeOtlpEndpoint}/v1/traces`,
+    headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
+    compression: CompressionAlgorithm.GZIP,
+  });
+
+const getGreptimeLogExporter = () =>
+  new OTLPLogExporterProto({
+    url: `${greptimeOtlpEndpoint}/v1/logs`,
+    headers: { "x-greptime-pipeline-name": "greptime_identity" },
+    compression: CompressionAlgorithm.GZIP,
+  });
 
 export const getOtelLogger = (
   serviceName: string,
@@ -59,11 +74,11 @@ export const getOtelLogger = (
       },
     ]),
     processors: [
-      isProduction
-        ? new BatchLogRecordProcessor(
-            new OTLPLogExporter(getOtlpGrpcExporterConfig()),
-          )
-        : new SimpleLogRecordProcessor(new ConsoleLogRecordExporter()),
+      new BatchLogRecordProcessor(
+        isProduction
+          ? new OTLPLogExporterGrpc(getOtlpGrpcExporterConfig())
+          : getGreptimeLogExporter(),
+      ),
     ],
   });
 
@@ -96,13 +111,8 @@ export const getOtelConfig = (
       if (request.method !== "GET") return true;
       return !isRootPathUrl(request.url);
     },
-    ...(isProduction
-      ? {
-          traceExporter: new OTLPTraceExporter(getOtlpGrpcExporterConfig()),
-          metricReader: new PeriodicExportingMetricReader({
-            exporter: new OTLPMetricExporter(getOtlpGrpcExporterConfig()),
-          }),
-        }
-      : {}),
+    traceExporter: isProduction
+      ? new OTLPTraceExporterGrpc(getOtlpGrpcExporterConfig())
+      : getGreptimeTraceExporter(),
   };
 };

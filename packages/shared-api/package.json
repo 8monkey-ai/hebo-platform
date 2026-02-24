@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "sideEffects": [
-    "lib/otel.ts"
+    "lib/otel.ts",
+    "lib/otel-metrics.ts"
   ],
   "exports": {
     "./lib/*": "./lib/*.ts",
@@ -23,8 +24,11 @@
     "@opentelemetry/api": "catalog:",
     "@opentelemetry/api-logs": "^0.212.0",
     "@opentelemetry/exporter-logs-otlp-grpc": "^0.212.0",
+    "@opentelemetry/exporter-logs-otlp-proto": "^0.212.0",
     "@opentelemetry/exporter-metrics-otlp-grpc": "^0.212.0",
+    "@opentelemetry/exporter-metrics-otlp-proto": "^0.212.0",
     "@opentelemetry/exporter-trace-otlp-grpc": "^0.212.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.212.0",
     "@opentelemetry/otlp-exporter-base": "^0.212.0",
     "@opentelemetry/resources": "^2.5.1",
     "@opentelemetry/sdk-logs": "^0.212.0",
