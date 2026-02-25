@@ -1,7 +1,10 @@
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
 import { createVertex } from "@ai-sdk/google-vertex";
 import { createGroq } from "@ai-sdk/groq";
-import { fromTemporaryCredentials } from "@aws-sdk/credential-providers";
+import {
+  fromContainerMetadata,
+  fromTemporaryCredentials,
+} from "@aws-sdk/credential-providers";
 import { withCanonicalIdsForBedrock } from "@hebo-ai/gateway/providers/bedrock";
 import { withCanonicalIdsForGroq } from "@hebo-ai/gateway/providers/groq";
 import { withCanonicalIdsForVertex } from "@hebo-ai/gateway/providers/vertex";
@@ -67,6 +70,7 @@ export function createProvider(
           region,
           credentialProvider: fromTemporaryCredentials({
             params: { RoleArn: bedrockRoleArn },
+            masterCredentials: fromContainerMetadata(),
             clientConfig: region ? { region } : undefined,
           }),
         }),
