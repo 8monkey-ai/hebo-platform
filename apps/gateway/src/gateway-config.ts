@@ -3,6 +3,7 @@ import { claudeOpus46 } from "@hebo-ai/gateway/models/anthropic";
 import { gemini } from "@hebo-ai/gateway/models/google";
 import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
 import { voyage35 } from "@hebo-ai/gateway/models/voyage";
+import { instrumentFetch } from "@hebo-ai/gateway/telemetry";
 import { trace } from "@opentelemetry/api";
 
 import { getOtelLogger } from "@hebo/shared-api/lib/otel";
@@ -13,6 +14,8 @@ import {
   createProvider,
   loadProviderSecrets,
 } from "./services/provider-factory";
+
+instrumentFetch("full");
 
 export const basePath = "/v1";
 const secrets = await loadProviderSecrets();
