@@ -22,7 +22,7 @@ export const logger = (
   }
 
   return app
-    .onError(({ error, set }) => {
+    .onError(function logRequestError({ error, set }) {
       logger.error(
         {
           status: typeof set.status === "number" ? set.status : 500,
