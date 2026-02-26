@@ -71,9 +71,14 @@ export function createProvider(
           credentialProvider: fromTemporaryCredentials({
             params: { RoleArn: bedrockRoleArn },
             masterCredentials: fromContainerMetadata(),
-            clientConfig: region ? { region } : undefined,
+            clientConfig: { region },
           }),
         }),
+        {
+          inferenceProfile: {
+            arn: { accountId: bedrockRoleArn.split(":")[4], region },
+          },
+        },
       );
     }
     case "groq": {
