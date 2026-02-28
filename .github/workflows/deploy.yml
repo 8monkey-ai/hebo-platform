@@ -58,6 +58,4 @@ jobs:
           printf '%s' "${{ secrets.GOOGLE_VERTEX_AWS_PROVIDER_AUDIENCE }}" | bun run sst secret set VertexAwsProviderAudience --stage production
           printf '%s' "${{ secrets.GOOGLE_VERTEX_PROJECT }}" | bun run sst secret set VertexProject --stage production
           printf '%s' "${{ secrets.GOOGLE_VERTEX_LOCATION }}" | bun run sst secret set VertexLocation --stage production
-          printf '%s' "${{ secrets.BETTER_STACK_ENDPOINT }}" | bun run sst secret set BetterStackEndpoint --stage production
-          printf '%s' "${{ secrets.BETTER_STACK_SOURCE_TOKEN }}" | bun run sst secret set BetterStackSourceToken --stage production
           bun run sst deploy --stage production

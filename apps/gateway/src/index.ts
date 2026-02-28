@@ -1,5 +1,3 @@
- 
-import "@hebo/shared-api/lib/otel-metrics";
 
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";

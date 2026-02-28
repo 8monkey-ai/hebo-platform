@@ -4,8 +4,7 @@
   "private": true,
   "type": "module",
   "sideEffects": [
-    "lib/otel.ts",
-    "lib/otel-metrics.ts"
+    "lib/otel.ts"
   ],
   "exports": {
     "./lib/*": "./lib/*.ts",
