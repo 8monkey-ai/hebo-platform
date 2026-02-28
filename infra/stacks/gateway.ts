@@ -4,13 +4,8 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase from "./db";
-import {
-  authSecret,
-  isProduction,
-  llmSecrets,
-  normalizedStage,
-  otelSecrets,
-} from "./env";
+import { authSecret, isProduction, llmSecrets, normalizedStage } from "./env";
+import { greptimeEndpoint } from "./greptime";
 
 const gatewayDomain = isProduction
   ? "gateway.hebo.ai"
@@ -28,7 +23,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
       resources: ["*"],
     },
   ],
-  link: [heboDatabase, authSecret, ...llmSecrets, ...otelSecrets],
+  link: [heboDatabase, authSecret, ...llmSecrets],
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.gateway",
@@ -40,6 +35,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   environment: {
     AUTH_URL: heboAuth.url,
     GATEWAY_URL: `https://${gatewayDomain}`,
+    GREPTIMEDB_OTLP_ENDPOINT: $interpolate`http://${greptimeEndpoint}:4000/v1/otlp`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: gatewayPort,
   },

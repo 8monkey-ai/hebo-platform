@@ -2,7 +2,8 @@
 /// <reference path="../../.sst/platform/config.d.ts" />
 
 import heboCluster from "./cluster";
-import { otelSecrets, isProduction, normalizedStage } from "./env";
+import { isProduction, normalizedStage } from "./env";
+import { greptimeEndpoint } from "./greptime";
 
 const mcpDomain = isProduction
   ? "mcp.hebo.ai"
@@ -14,7 +15,6 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
   architecture: "arm64",
   cpu: "0.25 vCPU",
   memory: "0.5 GB",
-  link: [...otelSecrets],
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.mcp",
@@ -24,6 +24,7 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
     },
   },
   environment: {
+    GREPTIMEDB_OTLP_ENDPOINT: $interpolate`http://${greptimeEndpoint}:4000/v1/otlp`,
     PORT: mcpPort,
   },
   loadBalancer: {

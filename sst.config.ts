@@ -9,11 +9,17 @@ export default $config({
       protect: ["production"].includes(input?.stage),
       home: "aws",
       region: "us-east-2",
-      providers: { aws: "6.83.2", docker: "4.8.2" },
+      providers: {
+        aws: "6.83.2",
+        docker: "4.8.2",
+        eks: "3.9.0",
+        kubernetes: "4.26.0",
+      },
     };
   },
   async run() {
     await import("./infra/stacks/db");
+    await import("./infra/stacks/greptime");
     await import("./infra/stacks/auth");
     await import("./infra/stacks/api");
     await import("./infra/stacks/gateway");

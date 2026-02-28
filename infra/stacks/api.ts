@@ -4,7 +4,8 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
-import { authSecret, isProduction, normalizedStage, otelSecrets } from "./env";
+import { authSecret, isProduction, normalizedStage } from "./env";
+import { greptimeEndpoint } from "./greptime";
 
 const apiDomain = isProduction
   ? "api.hebo.ai"
@@ -16,7 +17,7 @@ const heboApi = new sst.aws.Service("HeboApi", {
   architecture: "arm64",
   cpu: isProduction ? "1 vCPU" : "0.25 vCPU",
   memory: isProduction ? "2 GB" : "0.5 GB",
-  link: [heboDatabase, authSecret, ...otelSecrets],
+  link: [heboDatabase, authSecret],
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.api",
@@ -28,6 +29,7 @@ const heboApi = new sst.aws.Service("HeboApi", {
   environment: {
     API_URL: `https://${apiDomain}`,
     AUTH_URL: heboAuth.url,
+    GREPTIMEDB_OTLP_ENDPOINT: $interpolate`http://${greptimeEndpoint}:4000/v1/otlp`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: apiPort,
   },
