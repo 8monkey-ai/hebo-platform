@@ -8,7 +8,7 @@ const greptimeEks = new eks.Cluster("GreptimeEks", {
   privateSubnetIds: heboVpc.privateSubnets,
   publicSubnetIds: heboVpc.publicSubnets,
   endpointPrivateAccess: true,
-  version: "1.31",
+  version: "1.35",
   skipDefaultNodeGroup: true,
   createInstanceRole: true,
   createOidcProvider: true,
@@ -19,7 +19,7 @@ const greptimeEks = new eks.Cluster("GreptimeEks", {
 new eks.ManagedNodeGroup("GreptimeNodes", {
   cluster: greptimeEks,
   nodeRole: greptimeEks.instanceRoles.apply((roles) => roles[0]),
-  instanceTypes: ["m7g.small"],
+  instanceTypes: ["t4g.medium"],
   amiType: "AL2023_ARM_64_STANDARD",
   scalingConfig: { minSize: 1, desiredSize: 1, maxSize: 1 },
 });
