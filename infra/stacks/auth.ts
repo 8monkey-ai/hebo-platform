@@ -3,8 +3,12 @@
 
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
-import { authSecrets, isProduction, normalizedStage } from "./env";
-import { greptimeEndpoint } from "./greptime";
+import {
+  authSecrets,
+  isProduction,
+  greptimeEndpoint,
+  normalizedStage,
+} from "./env";
 
 const authDomain = isProduction
   ? "auth.hebo.ai"

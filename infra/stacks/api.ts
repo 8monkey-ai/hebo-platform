@@ -4,8 +4,12 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
-import { authSecret, isProduction, normalizedStage } from "./env";
-import { greptimeEndpoint } from "./greptime";
+import {
+  authSecret,
+  isProduction,
+  greptimeEndpoint,
+  normalizedStage,
+} from "./env";
 
 const apiDomain = isProduction
   ? "api.hebo.ai"

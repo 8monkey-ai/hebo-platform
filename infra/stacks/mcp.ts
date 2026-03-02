@@ -2,8 +2,7 @@
 /// <reference path="../../.sst/platform/config.d.ts" />
 
 import heboCluster from "./cluster";
-import { isProduction, normalizedStage } from "./env";
-import { greptimeEndpoint } from "./greptime";
+import { isProduction, greptimeEndpoint, normalizedStage } from "./env";
 
 const mcpDomain = isProduction
   ? "mcp.hebo.ai"

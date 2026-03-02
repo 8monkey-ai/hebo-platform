@@ -20,13 +20,14 @@ import {
   registerInstrumentations,
 } from "@prisma/instrumentation";
 
+import { getSecret } from "../utils/secrets";
 import { isRootPathUrl } from "../utils/url";
 
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
 import type { SeverityNumber } from "@opentelemetry/api-logs";
 
 export const greptimeOtlpEndpoint =
-  process.env.GREPTIMEDB_OTLP_ENDPOINT ?? "http://localhost:4000/v1/otlp";
+  (await getSecret("GreptimeEndpoint")) ?? "http://localhost:4000/v1/otlp";
 
 // Register the MeterProvider eagerly so that any library calling
 // metrics.getMeter() at import time gets a real meter instead of a NoopMeter.

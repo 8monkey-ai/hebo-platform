@@ -33,6 +33,9 @@ export const vertexAwsProviderAudience = getSstSecret(
 export const vertexProject = getSstSecret("VertexProject");
 export const vertexLocation = getSstSecret("VertexLocation");
 
+// OTEL Exporter
+export const greptimeEndpoint = getSstSecret("GreptimeEndpoint");
+
 export const authSecrets = [
   authSecret,
   githubClientId,
