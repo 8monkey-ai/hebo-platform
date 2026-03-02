@@ -61,9 +61,6 @@ sst-env.d.ts
 # Cursor
 .cursor
 
-# docker
-docker-compose.override.yaml
-
 # db
 .local-storage
 
