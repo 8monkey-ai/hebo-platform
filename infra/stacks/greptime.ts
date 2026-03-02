@@ -4,8 +4,6 @@
 import heboCluster from "./cluster";
 import { isProduction } from "./env";
 
-const greptimePort = "4000";
-
 const heboGreptime = isProduction
   ? undefined
   : new sst.aws.Service("HeboGreptime", {
@@ -14,27 +12,16 @@ const heboGreptime = isProduction
       cpu: "0.25 vCPU",
       memory: "0.5 GB",
       image: "greptime/greptimedb:v1.0.0-rc.1",
-      entrypoint: [
-        "greptime",
+      command: [
         "standalone",
         "start",
-        "--http-addr",
-        "0.0.0.0:4000",
-        "--rpc-bind-addr",
-        "0.0.0.0:4001",
-        "--mysql-addr",
-        "0.0.0.0:4002",
-        "--postgres-addr",
-        "0.0.0.0:4003",
+        "--http-addr=0.0.0.0:4000",
+        "--rpc-bind-addr=0.0.0.0:4001",
+        "--mysql-addr=0.0.0.0:4002",
+        "--postgres-addr=0.0.0.0:4003",
       ],
-      loadBalancer: {
-        public: false,
-        rules: [
-          {
-            listen: `${greptimePort}/http`,
-            forward: `${greptimePort}/http`,
-          },
-        ],
+      serviceRegistry: {
+        port: 4000,
       },
       scaling: {
         min: 1,
