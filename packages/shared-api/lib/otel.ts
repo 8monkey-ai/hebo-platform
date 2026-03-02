@@ -20,6 +20,7 @@ import {
   registerInstrumentations,
 } from "@prisma/instrumentation";
 
+import { isProduction } from "../env";
 import { getSecret } from "../utils/secrets";
 import { isRootPathUrl } from "../utils/url";
 
@@ -63,7 +64,9 @@ export const getOtelLogger = (
       },
     ]),
     processors: [
-      new SimpleLogRecordProcessor(new ConsoleLogRecordExporter()),
+      ...(isProduction
+        ? []
+        : [new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())]),
       new BatchLogRecordProcessor(
         new OTLPLogExporter({
           url: `${greptimeOtlpEndpoint}/v1/logs`,
