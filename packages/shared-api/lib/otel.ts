@@ -33,15 +33,18 @@ export const greptimeOtlpEndpoint =
 // metrics.getMeter() at import time gets a real meter instead of a NoopMeter.
 // Unlike traces, the metrics API does not use proxies — meters created before
 // the provider is registered stay noop forever.
-const metricReader = new PeriodicExportingMetricReader({
-  exporter: new OTLPMetricExporter({
-    url: `${greptimeOtlpEndpoint}/v1/metrics`,
-    headers: { "x-greptime-pipeline-name": "greptime_identity" },
-    compression: CompressionAlgorithm.GZIP,
+metrics.setGlobalMeterProvider(
+  new MeterProvider({
+    readers: [
+      new PeriodicExportingMetricReader({
+        exporter: new OTLPMetricExporter({
+          url: `${greptimeOtlpEndpoint}/v1/metrics`,
+          compression: CompressionAlgorithm.GZIP,
+        }),
+      }),
+    ],
   }),
-});
-
-metrics.setGlobalMeterProvider(new MeterProvider({ readers: [metricReader] }));
+);
 
 export const getOtelLogger = (
   serviceName: string,
@@ -64,7 +67,6 @@ export const getOtelLogger = (
       new BatchLogRecordProcessor(
         new OTLPLogExporter({
           url: `${greptimeOtlpEndpoint}/v1/logs`,
-          headers: { "x-greptime-pipeline-name": "greptime_identity" },
           compression: CompressionAlgorithm.GZIP,
         }),
       ),
