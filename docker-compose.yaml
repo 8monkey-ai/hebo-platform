@@ -12,7 +12,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
-greptimedb:
+  greptimedb:
     container_name: greptime
     image: greptime/greptimedb:v1.0.0-rc.1
     restart: unless-stopped
