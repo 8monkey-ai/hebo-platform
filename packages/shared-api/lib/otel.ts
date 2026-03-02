@@ -39,7 +39,6 @@ const metricReader = new PeriodicExportingMetricReader({
     headers: { "x-greptime-pipeline-name": "greptime_identity" },
     compression: CompressionAlgorithm.GZIP,
   }),
-  exportIntervalMillis: 60_000,
 });
 
 metrics.setGlobalMeterProvider(new MeterProvider({ readers: [metricReader] }));
