@@ -5,7 +5,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --target=bun --outfile dist/server",
+    "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --keep-names --target=bun --outfile dist/server",
     "clean": "git clean -fdx -e '.env*' .",
     "dev": "bun --hot src/index.ts",
     "lint": "eslint .",
@@ -24,7 +24,7 @@
     "@elysiajs/cors": "catalog:",
     "@elysiajs/openapi": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
-    "@hebo-ai/gateway": "^0.5.0-beta.0",
+    "@hebo-ai/gateway": "0.6.0-rc1",
     "@hebo/api": "workspace:*",
     "@hebo/shared-api": "workspace:*",
     "@opentelemetry/api": "catalog:",
