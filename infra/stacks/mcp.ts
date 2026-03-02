@@ -14,6 +14,7 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
   architecture: "arm64",
   cpu: "0.25 vCPU",
   memory: "0.5 GB",
+  link: [greptimeEndpoint],
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.mcp",
@@ -23,7 +24,6 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
     },
   },
   environment: {
-    GREPTIMEDB_OTLP_ENDPOINT: $interpolate`http://${greptimeEndpoint}:4000/v1/otlp`,
     PORT: mcpPort,
   },
   loadBalancer: {

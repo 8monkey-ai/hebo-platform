@@ -21,7 +21,7 @@ const heboApi = new sst.aws.Service("HeboApi", {
   architecture: "arm64",
   cpu: isProduction ? "1 vCPU" : "0.25 vCPU",
   memory: isProduction ? "2 GB" : "0.5 GB",
-  link: [heboDatabase, authSecret],
+  link: [heboDatabase, authSecret, greptimeEndpoint],
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.api",
@@ -33,7 +33,6 @@ const heboApi = new sst.aws.Service("HeboApi", {
   environment: {
     API_URL: `https://${apiDomain}`,
     AUTH_URL: heboAuth.url,
-    GREPTIMEDB_OTLP_ENDPOINT: $interpolate`http://${greptimeEndpoint}:4000/v1/otlp`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: apiPort,
   },
