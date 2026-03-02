@@ -44,20 +44,6 @@ const metricReader = new PeriodicExportingMetricReader({
 
 metrics.setGlobalMeterProvider(new MeterProvider({ readers: [metricReader] }));
 
-const getGreptimeTraceExporter = () =>
-  new OTLPTraceExporter({
-    url: `${greptimeOtlpEndpoint}/v1/traces`,
-    headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
-    compression: CompressionAlgorithm.GZIP,
-  });
-
-const getGreptimeLogExporter = () =>
-  new OTLPLogExporter({
-    url: `${greptimeOtlpEndpoint}/v1/logs`,
-    headers: { "x-greptime-pipeline-name": "greptime_identity" },
-    compression: CompressionAlgorithm.GZIP,
-  });
-
 export const getOtelLogger = (
   serviceName: string,
   minimumSeverity: SeverityNumber,
@@ -76,7 +62,13 @@ export const getOtelLogger = (
     ]),
     processors: [
       new SimpleLogRecordProcessor(new ConsoleLogRecordExporter()),
-      new BatchLogRecordProcessor(getGreptimeLogExporter()),
+      new BatchLogRecordProcessor(
+        new OTLPLogExporter({
+          url: `${greptimeOtlpEndpoint}/v1/logs`,
+          headers: { "x-greptime-pipeline-name": "greptime_identity" },
+          compression: CompressionAlgorithm.GZIP,
+        }),
+      ),
     ],
   });
 
@@ -109,6 +101,10 @@ export const getOtelConfig = (
       if (request.method !== "GET") return true;
       return !isRootPathUrl(request.url);
     },
-    traceExporter: getGreptimeTraceExporter(),
+    traceExporter: new OTLPTraceExporter({
+      url: `${greptimeOtlpEndpoint}/v1/traces`,
+      headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
+      compression: CompressionAlgorithm.GZIP,
+    }),
   };
 };
