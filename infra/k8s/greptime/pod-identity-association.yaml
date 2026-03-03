@@ -7,8 +7,8 @@ metadata:
 
 iam:
   podIdentityAssociations:
-    - namespace: greptime
-      serviceAccountName: greptime-sa
+    - namespace: <GREPTIME_NS>
+      serviceAccountName: <GREPTIME_SA>
       roleName: GreptimeS3Role-<CLUSTER_NAME>
       permissionPolicy:
         Version: "2012-10-17"

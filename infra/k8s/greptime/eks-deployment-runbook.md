@@ -13,6 +13,7 @@ export AWS_REGION="us-east-2"
 export CLUSTER="greptime-eks"
 export S3_BUCKET="greptime-bucket"
 export GREPTIME_NS="greptime"
+export GREPTIME_SA="greptime-sa"
 export HELM_RELEASE_CLUSTER="greptime-cluster"
 ```
 
@@ -62,7 +63,7 @@ kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
 
 ## 6) Create Pod Identity association (S3 access)
 
-Replace `<PLACEHOLDER>` values in `pod-identity-association.yaml` first, then apply:
+Replace `<PLACEHOLDER>` values in `pod-identity-association.yaml` first (including `<GREPTIME_NS>` and `<GREPTIME_SA>` to match your shell values), then apply:
 
 ```
 eksctl create podidentityassociation -f infra/k8s/greptime/pod-identity-association.yaml
