@@ -25,18 +25,19 @@ Replace the `<PLACEHOLDER>` values in `cluster.yaml` with your VPC, subnet, and 
 eksctl create cluster -f infra/k8s/greptime/cluster.yaml
 ```
 
-## 2) Install EKS add-ons (EBS CSI + Pod Identity agent)
+## 2) Install EKS add-ons (Pod Identity agent + EBS CSI)
 
 ```
 eksctl create addon \
   --cluster "$CLUSTER" \
   --region "$AWS_REGION" \
-  --name aws-ebs-csi-driver
+  --name eks-pod-identity-agent
 
-aws eks create-addon \
+eksctl create addon \
+  --cluster "$CLUSTER" \
   --region "$AWS_REGION" \
-  --cluster-name "$CLUSTER" \
-  --addon-name eks-pod-identity-agent
+  --name aws-ebs-csi-driver \
+  --auto-apply-pod-identity-associations
 ```
 
 ## 3) Create S3 bucket (object storage)
@@ -55,7 +56,7 @@ kubectl create namespace "$GREPTIME_NS" --dry-run=client -o yaml | kubectl apply
 kubectl -n "$GREPTIME_NS" create serviceaccount "$GREPTIME_SA" --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-## 5) Pod Identity: IAM policy + role + association (S3 access)
+## 5) Pod Identity: IAM policy + association (S3 access)
 
 ### 5.1 Create IAM policy (S3 RW to bucket/prefix)
 
@@ -83,43 +84,16 @@ export GREPTIME_S3_POLICY_ARN="$(aws iam list-policies --scope Local \
   --output text)"
 ```
 
-### 5.2 Create IAM role for Pod Identity
+### 5.2 Create Pod Identity association for ServiceAccount
 
 ```
-cat > /tmp/greptime-podid-trust.json <<'EOF'
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Principal": { "Service": "pods.eks.amazonaws.com" },
-      "Action": ["sts:AssumeRole","sts:TagSession"]
-    }
-  ]
-}
-EOF
-
-aws iam create-role \
-  --role-name "GreptimeS3Role-${CLUSTER}" \
-  --assume-role-policy-document file:///tmp/greptime-podid-trust.json
-
-aws iam attach-role-policy \
-  --role-name "GreptimeS3Role-${CLUSTER}" \
-  --policy-arn "$GREPTIME_S3_POLICY_ARN"
-
-export GREPTIME_ROLE_ARN="$(aws iam get-role --role-name "GreptimeS3Role-${CLUSTER}" \
-  --query "Role.Arn" --output text)"
-```
-
-### 5.3 Associate role ↔ ServiceAccount (Pod Identity)
-
-```
-aws eks create-pod-identity-association \
+eksctl create podidentityassociation \
   --region "$AWS_REGION" \
-  --cluster-name "$CLUSTER" \
+  --cluster "$CLUSTER" \
   --namespace "$GREPTIME_NS" \
-  --service-account "$GREPTIME_SA" \
-  --role-arn "$GREPTIME_ROLE_ARN"
+  --service-account-name "$GREPTIME_SA" \
+  --permission-policy-arns "$GREPTIME_S3_POLICY_ARN" \
+  --role-name "GreptimeS3Role-${CLUSTER}"
 ```
 
 ## 6) Create Aurora credentials secret (metasrv backend)

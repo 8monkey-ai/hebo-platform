@@ -13,9 +13,6 @@ vpc:
       <AWS_REGION>a: { id: <SUBNET_A> }
       <AWS_REGION>b: { id: <SUBNET_B> }
 
-iam:
-  withOIDC: true
-
 managedNodeGroups:
   - name: ng-arm
     amiFamily: AmazonLinux2023
