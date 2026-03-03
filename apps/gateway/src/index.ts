@@ -112,7 +112,7 @@ export const createGateway = () =>
     );
 
 if (import.meta.main) {
-  const app = createGateway().listen({ port: PORT, idleTimeout: 255 });
+  const app = createGateway().listen({ port: PORT, idleTimeout: 0 }); // Prevent idle timeout
   console.log(`🐵 Hebo Gateway running at ${app.server!.url}`);
 }
 
