@@ -1,0 +1,26 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: <CLUSTER_NAME>
+  region: <AWS_REGION>
+  version: "1.35"
+
+vpc:
+  id: <VPC_ID>
+  subnets:
+    private:
+      <AWS_REGION>a: { id: <SUBNET_A> }
+      <AWS_REGION>b: { id: <SUBNET_B> }
+
+iam:
+  withOIDC: true
+
+managedNodeGroups:
+  - name: ng-arm
+    amiFamily: AmazonLinux2023
+    instanceType: m7g.large
+    desiredCapacity: 3
+    minSize: 3
+    maxSize: 3
+    privateNetworking: true
