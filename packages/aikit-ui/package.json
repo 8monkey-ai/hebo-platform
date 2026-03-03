@@ -19,7 +19,7 @@
   },
   "peerDependencies": {
     "@ai-sdk/provider-utils": "catalog:",
-    "@ai-sdk/react": "^2.0.130",
+    "@ai-sdk/react": "^3.0.110",
     "@base-ui/react": "catalog:",
     "@base-ui/utils": "catalog:",
     "@streamdown/cjk": "^1.0.2",
@@ -29,7 +29,7 @@
     "ai": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
-    "cmdk": "^1.1.1",
+    "cmdk-base": "^1.0.0",
     "lucide-react": "catalog:",
     "motion": "^12.34.4",
     "react": "catalog:",

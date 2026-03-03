@@ -376,9 +376,7 @@ export function Chat({
             {modelsConfig.length > 1 && (
               <PromptInputSelect
                 id="chat-model-select"
-                onValueChange={(alias) =>
-                  setSelectedModelAlias(alias as string)
-                }
+                onValueChange={(alias: string) => setSelectedModelAlias(alias)}
                 value={currentModelAlias}
                 disabled={status === "submitted" || modelsConfig.length === 0}
                 aria-label="Select model"
