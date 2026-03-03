@@ -1,5 +1,5 @@
 base:
-  serviceAccountName: greptime-sa
+  serviceAccountName: <GREPTIME_SA>
 
 frontend:
   replicas: 3
