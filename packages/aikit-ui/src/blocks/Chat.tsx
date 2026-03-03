@@ -13,6 +13,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Attachment,
+  AttachmentInfo,
   AttachmentPreview,
   AttachmentRemove,
   Attachments,
@@ -446,15 +447,20 @@ function PromptInputAttachmentsDisplay() {
   }
 
   return (
-    <Attachments variant="inline" className="p-0">
+    <Attachments variant="inline" className="p-1">
       {attachments.files.map((attachment) => (
         <Attachment
           key={attachment.id}
           data={attachment}
           onRemove={() => handleRemove(attachment.id)}
         >
-          <AttachmentPreview />
-          <AttachmentRemove />
+          <div className="relative size-5 shrink-0">
+            <div className="absolute inset-0 transition-opacity group-hover:opacity-0">
+              <AttachmentPreview />
+            </div>
+            <AttachmentRemove className="absolute inset-0" />
+          </div>
+          <AttachmentInfo />
         </Attachment>
       ))}
     </Attachments>
