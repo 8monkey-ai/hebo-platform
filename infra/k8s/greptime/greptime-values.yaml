@@ -12,6 +12,7 @@ meta:
   replicas: 3
   configData: |
     backend_tls.mode = "require"
+    meta_schema_name = "greptime_schema_prod"
   backendStorage:
     postgresql:
       host: "<AURORA_HOST>"
