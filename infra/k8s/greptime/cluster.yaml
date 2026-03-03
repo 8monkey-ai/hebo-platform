@@ -14,11 +14,10 @@ vpc:
       <AWS_REGION>b: { id: <SUBNET_B> }
       <AWS_REGION>c: { id: <SUBNET_C> }
 
-addonsConfig:
-  autoApplyPodIdentityAssociations: true
+iam:
+  withOIDC: true
 
 addons:
-  - name: eks-pod-identity-agent
   - name: aws-ebs-csi-driver
 
 managedNodeGroups:
