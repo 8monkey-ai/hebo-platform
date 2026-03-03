@@ -53,7 +53,7 @@ helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
 
 ```
 kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
-  --from-literal=username="<POSTGRE_USER>" \
+  --from-literal=username="<POSTGRES_USER>" \
   --from-literal=password="<POSTGRES_PASSWORD>"
 ```
 
