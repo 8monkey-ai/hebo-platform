@@ -24,4 +24,4 @@ iam:
               - s3:PutObject
               - s3:DeleteObject
             Resource:
-              - arn:aws:s3:::<S3_BUCKET>/greptime/*
+              - arn:aws:s3:::<S3_BUCKET>/*

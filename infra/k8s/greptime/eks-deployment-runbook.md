@@ -13,7 +13,6 @@ export AWS_REGION="us-east-2"
 export CLUSTER="greptime-eks"
 export S3_BUCKET="greptime-bucket"
 export GREPTIME_NS="greptime"
-export GREPTIME_SA="greptime-sa"
 export HELM_RELEASE_CLUSTER="greptime-cluster"
 ```
 
@@ -34,19 +33,23 @@ aws s3api create-bucket \
   --create-bucket-configuration LocationConstraint="$AWS_REGION"
 ```
 
-## 3) Create namespace + ServiceAccount for Greptime
+## 3) Install GreptimeDB operator (Helm)
 
 ```
-kubectl create namespace "$GREPTIME_NS" --dry-run=client -o yaml | kubectl apply -f -
-kubectl -n "$GREPTIME_NS" create serviceaccount "$GREPTIME_SA" --dry-run=client -o yaml | kubectl apply -f -
+helm repo add greptime https://greptimeteam.github.io/helm-charts/
+helm repo update
+
+helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n greptimedb-admin --create-namespace
 ```
 
-## 4) Pod Identity association (S3 access)
+## 4) Deploy Greptime cluster (Helm)
 
-Replace `<PLACEHOLDER>` values in `pod-identity-association.yaml` first, then apply:
+Replace the `<PLACEHOLDER>` values in `greptime-values.yaml` with your Aurora host, database, S3 bucket, region, and prefix before running.
 
 ```
-eksctl create podidentityassociation -f infra/k8s/greptime/pod-identity-association.yaml
+helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
+  -n "$GREPTIME_NS" --create-namespace \
+  -f infra/k8s/greptime/greptime-values.yaml
 ```
 
 ## 5) Create Aurora credentials secret (metasrv backend)
@@ -57,23 +60,20 @@ kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
   --from-literal=password="REPLACE_ME"
 ```
 
-## 6) Install GreptimeDB operator (Helm)
+## 6) Create Pod Identity association (S3 access)
+
+Replace `<PLACEHOLDER>` values in `pod-identity-association.yaml` first, then apply:
 
 ```
-helm repo add greptime https://greptimeteam.github.io/helm-charts/
-helm repo update
-
-helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n greptimedb-admin --create-namespace
+eksctl create podidentityassociation -f infra/k8s/greptime/pod-identity-association.yaml
 ```
 
-## 7) Deploy Greptime cluster (Helm)
+## 7) Restart Greptime workloads
 
-Replace the `<PLACEHOLDER>` values in `greptime-values.yaml` with your Aurora host, database, S3 bucket, region, and prefix before running.
+Restart Greptime workloads so pods refresh credentials after the secret and Pod Identity association are attached:
 
 ```
-helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
-  -n "$GREPTIME_NS" --create-namespace \
-  -f infra/k8s/greptime/greptime-values.yaml
+kubectl -n "$GREPTIME_NS" rollout restart deployment,statefulset -l app.kubernetes.io/instance="$HELM_RELEASE_CLUSTER"
 ```
 
 ## 8) Verify (pods, service, health, meta logs)
