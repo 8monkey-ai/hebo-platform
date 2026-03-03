@@ -9,11 +9,7 @@ Environment-specific values (VPC, subnets, Aurora host, S3 bucket, etc.) are mar
 ## 0) One-time shell setup
 
 ```
-export AWS_REGION="us-east-2"
-export CLUSTER="greptime-eks"
-export S3_BUCKET="greptime-bucket"
 export GREPTIME_NS="greptime"
-export GREPTIME_SA="greptime-sa"
 export HELM_RELEASE_CLUSTER="greptime-cluster"
 ```
 
@@ -29,9 +25,9 @@ eksctl create cluster -f infra/k8s/greptime/cluster.yaml
 
 ```
 aws s3api create-bucket \
-  --bucket "$S3_BUCKET" \
-  --region "$AWS_REGION" \
-  --create-bucket-configuration LocationConstraint="$AWS_REGION"
+  --bucket "<S3_BUCKET>" \
+  --region "<AWS_REGION>" \
+  --create-bucket-configuration LocationConstraint="<AWS_REGION>"
 ```
 
 ## 3) Install GreptimeDB operator (Helm)
@@ -63,7 +59,7 @@ kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
 
 ## 6) Create Pod Identity association (S3 access)
 
-Replace `<PLACEHOLDER>` values in `pod-identity-association.yaml` first (including `<GREPTIME_NS>` and `<GREPTIME_SA>` to match your shell values), then apply:
+Replace `<PLACEHOLDER>` values in `pod-identity-association.yaml` first (including `<GREPTIME_NS>` and `<GREPTIME_SA>` to match your Helm namespace and `base.serviceAccountName`), then apply:
 
 ```
 eksctl create podidentityassociation -f infra/k8s/greptime/pod-identity-association.yaml
