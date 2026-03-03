@@ -12,6 +12,7 @@ vpc:
     private:
       <AWS_REGION>a: { id: <SUBNET_A> }
       <AWS_REGION>b: { id: <SUBNET_B> }
+      <AWS_REGION>c: { id: <SUBNET_C> }
 
 addonsConfig:
   autoApplyPodIdentityAssociations: true
