@@ -12,7 +12,21 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
+  greptimedb:
+    container_name: greptime
+    image: greptime/greptimedb:v1.0.0-rc.1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:4000:4000"
+      - "127.0.0.1:4001:4001"
+      - "127.0.0.1:4002:4002"
+      - "127.0.0.1:4003:4003"
+    volumes:
+      - greptimedb-data:/greptimedb_data
+    command: standalone start --http-addr 0.0.0.0:4000 --rpc-bind-addr 0.0.0.0:4001 --mysql-addr 0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
+
 volumes:
   postgres-data:
+  greptimedb-data:
 
 

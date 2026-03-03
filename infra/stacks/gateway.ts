@@ -8,8 +8,8 @@ import {
   authSecret,
   isProduction,
   llmSecrets,
+  greptimeEndpoint,
   normalizedStage,
-  otelSecrets,
 } from "./env";
 
 const gatewayDomain = isProduction
@@ -28,7 +28,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
       resources: ["*"],
     },
   ],
-  link: [heboDatabase, authSecret, ...llmSecrets, ...otelSecrets],
+  link: [heboDatabase, authSecret, ...llmSecrets, greptimeEndpoint],
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.gateway",

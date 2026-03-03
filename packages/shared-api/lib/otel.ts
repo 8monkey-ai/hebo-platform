@@ -1,7 +1,7 @@
-import { Metadata } from "@grpc/grpc-js";
-import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-grpc";
-import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-grpc";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-grpc";
+import { metrics } from "@opentelemetry/api";
+import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
+import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { CompressionAlgorithm } from "@opentelemetry/otlp-exporter-base";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import {
@@ -11,36 +11,41 @@ import {
   SimpleLogRecordProcessor,
   createLoggerConfigurator,
 } from "@opentelemetry/sdk-logs";
-import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
+import {
+  MeterProvider,
+  PeriodicExportingMetricReader,
+} from "@opentelemetry/sdk-metrics";
 import {
   PrismaInstrumentation,
   registerInstrumentations,
 } from "@prisma/instrumentation";
 
-import { betterStackConfig } from "./better-stack";
 import { isProduction } from "../env";
+import { getSecret } from "../utils/secrets";
 import { isRootPathUrl } from "../utils/url";
 
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
 import type { SeverityNumber } from "@opentelemetry/api-logs";
 
-const getOtlpGrpcExporterConfig = () => {
-  if (!betterStackConfig) {
-    console.warn(
-      "⚠️ OpenTelemetry exporter not configured. Falling back to console exporters.",
-    );
-    return;
-  }
+export const greptimeOtlpEndpoint =
+  (await getSecret("GreptimeEndpoint")) ?? "http://localhost:4000/v1/otlp";
 
-  const metadata = new Metadata();
-  metadata.set("Authorization", `Bearer ${betterStackConfig.sourceToken}`);
-
-  return {
-    url: betterStackConfig.endpoint,
-    metadata,
-    compression: CompressionAlgorithm.GZIP,
-  };
-};
+// Register the MeterProvider eagerly so that any library calling
+// metrics.getMeter() at import time gets a real meter instead of a NoopMeter.
+// Unlike traces, the metrics API does not use proxies — meters created before
+// the provider is registered stay noop forever.
+metrics.setGlobalMeterProvider(
+  new MeterProvider({
+    readers: [
+      new PeriodicExportingMetricReader({
+        exporter: new OTLPMetricExporter({
+          url: `${greptimeOtlpEndpoint}/v1/metrics`,
+          compression: CompressionAlgorithm.GZIP,
+        }),
+      }),
+    ],
+  }),
+);
 
 export const getOtelLogger = (
   serviceName: string,
@@ -59,11 +64,15 @@ export const getOtelLogger = (
       },
     ]),
     processors: [
-      isProduction
-        ? new BatchLogRecordProcessor(
-            new OTLPLogExporter(getOtlpGrpcExporterConfig()),
-          )
-        : new SimpleLogRecordProcessor(new ConsoleLogRecordExporter()),
+      ...(isProduction
+        ? []
+        : [new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())]),
+      new BatchLogRecordProcessor(
+        new OTLPLogExporter({
+          url: `${greptimeOtlpEndpoint}/v1/logs`,
+          compression: CompressionAlgorithm.GZIP,
+        }),
+      ),
     ],
   });
 
@@ -96,13 +105,10 @@ export const getOtelConfig = (
       if (request.method !== "GET") return true;
       return !isRootPathUrl(request.url);
     },
-    ...(isProduction
-      ? {
-          traceExporter: new OTLPTraceExporter(getOtlpGrpcExporterConfig()),
-          metricReader: new PeriodicExportingMetricReader({
-            exporter: new OTLPMetricExporter(getOtlpGrpcExporterConfig()),
-          }),
-        }
-      : {}),
+    traceExporter: new OTLPTraceExporter({
+      url: `${greptimeOtlpEndpoint}/v1/traces`,
+      headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
+      compression: CompressionAlgorithm.GZIP,
+    }),
   };
 };

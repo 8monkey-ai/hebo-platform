@@ -15,7 +15,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@ai-sdk/amazon-bedrock": "^4.0.52",
+    "@ai-sdk/amazon-bedrock": "^4.0.72",
     "@ai-sdk/google-vertex": "^4.0.47",
     "@ai-sdk/groq": "^3.0.22",
     "@ai-sdk/provider": "^3.0.8",
@@ -24,7 +24,7 @@
     "@elysiajs/cors": "catalog:",
     "@elysiajs/openapi": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
-    "@hebo-ai/gateway": "0.6.0-rc1",
+    "@hebo-ai/gateway": "0.6.1-rc1",
     "@hebo/api": "workspace:*",
     "@hebo/shared-api": "workspace:*",
     "@opentelemetry/api": "catalog:",

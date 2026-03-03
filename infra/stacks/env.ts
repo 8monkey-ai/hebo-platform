@@ -33,9 +33,8 @@ export const vertexAwsProviderAudience = getSstSecret(
 export const vertexProject = getSstSecret("VertexProject");
 export const vertexLocation = getSstSecret("VertexLocation");
 
-// Better Stack (OTEL Exporter)
-export const betterStackEndpoint = getSstSecret("BetterStackEndpoint");
-export const betterStackSourceToken = getSstSecret("BetterStackSourceToken");
+// OTEL Exporter
+export const greptimeEndpoint = getSstSecret("GreptimeEndpoint");
 
 export const authSecrets = [
   authSecret,
@@ -62,8 +61,6 @@ export const llmSecrets = [
   vertexProject,
   vertexLocation,
 ];
-
-export const otelSecrets = [betterStackEndpoint, betterStackSourceToken];
 
 export const normalizedStage = $app.stage
   .trim()

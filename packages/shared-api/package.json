@@ -19,12 +19,11 @@
     "clean": "git clean -fdx -e '.env*' ."
   },
   "dependencies": {
-    "@grpc/grpc-js": "^1.13.3",
     "@opentelemetry/api": "catalog:",
     "@opentelemetry/api-logs": "^0.212.0",
-    "@opentelemetry/exporter-logs-otlp-grpc": "^0.212.0",
-    "@opentelemetry/exporter-metrics-otlp-grpc": "^0.212.0",
-    "@opentelemetry/exporter-trace-otlp-grpc": "^0.212.0",
+    "@opentelemetry/exporter-logs-otlp-proto": "^0.212.0",
+    "@opentelemetry/exporter-metrics-otlp-proto": "^0.212.0",
+    "@opentelemetry/exporter-trace-otlp-proto": "^0.212.0",
     "@opentelemetry/otlp-exporter-base": "^0.212.0",
     "@opentelemetry/resources": "^2.5.1",
     "@opentelemetry/sdk-logs": "^0.212.0",
