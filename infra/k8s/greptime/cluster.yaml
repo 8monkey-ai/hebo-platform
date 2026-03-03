@@ -13,6 +13,13 @@ vpc:
       <AWS_REGION>a: { id: <SUBNET_A> }
       <AWS_REGION>b: { id: <SUBNET_B> }
 
+addonsConfig:
+  autoApplyPodIdentityAssociations: true
+
+addons:
+  - name: eks-pod-identity-agent
+  - name: aws-ebs-csi-driver
+
 managedNodeGroups:
   - name: ng-arm
     amiFamily: AmazonLinux2023

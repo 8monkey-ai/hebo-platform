@@ -1,0 +1,27 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: <CLUSTER_NAME>
+  region: <AWS_REGION>
+
+iam:
+  podIdentityAssociations:
+    - namespace: greptime
+      serviceAccountName: greptime-sa
+      roleName: GreptimeS3Role-<CLUSTER_NAME>
+      permissionPolicy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:ListBucket
+            Resource:
+              - arn:aws:s3:::<S3_BUCKET>
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+              - s3:DeleteObject
+            Resource:
+              - arn:aws:s3:::<S3_BUCKET>/greptime/*
