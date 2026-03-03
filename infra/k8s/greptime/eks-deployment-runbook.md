@@ -53,8 +53,8 @@ helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
 
 ```
 kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
-  --from-literal=username="greptime_user" \
-  --from-literal=password="REPLACE_ME"
+  --from-literal=username="<POSTGRE_USER>" \
+  --from-literal=password="<POSTGRES_PASSWORD>"
 ```
 
 ## 6) Create Pod Identity association (S3 access)
@@ -70,7 +70,7 @@ eksctl create podidentityassociation -f infra/k8s/greptime/pod-identity-associat
 Restart Greptime workloads so pods refresh credentials after the secret and Pod Identity association are attached:
 
 ```
-kubectl -n "$GREPTIME_NS" rollout restart deployment,statefulset -l app.kubernetes.io/instance="$HELM_RELEASE_CLUSTER"
+kubectl -n "$GREPTIME_NS" rollout restart deployment,statefulset
 ```
 
 ## 8) Verify (pods, service, health, meta logs)
