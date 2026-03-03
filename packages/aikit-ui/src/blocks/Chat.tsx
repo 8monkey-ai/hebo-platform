@@ -9,14 +9,19 @@ import {
   Paperclip,
   TriangleAlert,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import {
+  Attachment,
+  AttachmentPreview,
+  AttachmentRemove,
+  Attachments,
+} from "#/_ai-elements/attachments";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
 } from "#/_ai-elements/conversation";
-import { Loader } from "#/_ai-elements/loader";
 import {
   Message,
   MessageContent,
@@ -24,7 +29,10 @@ import {
 } from "#/_ai-elements/message";
 import {
   PromptInput,
+  // FUTURE: PromptInputActionAddAttachments
   PromptInputBody,
+  PromptInputButton,
+  PromptInputHeader,
   type PromptInputMessage,
   PromptInputSelect,
   PromptInputSelectContent,
@@ -35,11 +43,6 @@ import {
   PromptInputTextarea,
   PromptInputFooter,
   PromptInputTools,
-  PromptInputAttachment,
-  PromptInputHeader,
-  PromptInputAttachments,
-  PromptInputButton,
-  PromptInputProvider,
   usePromptInputAttachments,
 } from "#/_ai-elements/prompt-input";
 import {
@@ -56,7 +59,7 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "#/_shadcn/ui/empty";
+} from "#/_shadcn/ui/empty"; // FUTURE: replace with ConversationEmptyState
 import {
   Item,
   ItemActions,
@@ -65,6 +68,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "#/_shadcn/ui/item";
+import { Spinner } from "#/_shadcn/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "#/_shadcn/ui/tooltip";
 import { OpenAIHttpChatTransport } from "#/lib/openai-transport";
 import { cn } from "#/lib/utils";
@@ -319,7 +323,7 @@ export function Chat({
                 })}
               </div>
             ))}
-            {status === "submitted" && <Loader />}
+            {status === "submitted" && <Spinner />}
             {error && (
               <Alert variant="destructive" className="overflow-x-auto">
                 <TriangleAlert />
@@ -335,90 +339,82 @@ export function Chat({
       )}
 
       {/* Input area */}
-      <PromptInputProvider>
-        <PromptInput
-          onSubmit={handleSubmit}
-          role="form"
-          className="bg-background mt-4 rounded-md"
-          globalDrop
-          multiple
-        >
-          <PromptInputHeader className="p-0">
-            <PromptInputAttachments className="max-w-full pb-0">
-              {(attachment) => (
-                <PromptInputAttachment data={attachment} className="truncate" />
-              )}
-            </PromptInputAttachments>
-          </PromptInputHeader>
-          <PromptInputBody>
-            <PromptInputTextarea
-              ref={chatInputRef}
-              disabled={!currentModelAlias}
-              onChange={(e) => setInput(e.target.value)}
-              value={input}
-              placeholder="Ask anything …"
-              aria-label="Chat message input"
-              aria-describedby="input-help"
-              className="min-h-0 pb-0"
-            />
+      <PromptInput
+        onSubmit={handleSubmit}
+        role="form"
+        className="bg-background mt-4 rounded-md"
+        globalDrop
+        multiple
+      >
+        <PromptInputHeader className="p-0">
+          <PromptInputAttachmentsDisplay />
+        </PromptInputHeader>
+        <PromptInputBody>
+          <PromptInputTextarea
+            ref={chatInputRef}
+            disabled={!currentModelAlias}
+            onChange={(e) => setInput(e.target.value)}
+            value={input}
+            placeholder="Ask anything …"
+            aria-label="Chat message input"
+            aria-describedby="input-help"
+            className="min-h-0 pb-0"
+          />
 
-            {/* Hidden help text */}
-            <div id="input-help" className="sr-only">
-              Press Enter to send message, Shift+Enter for new line
-            </div>
-          </PromptInputBody>
+          {/* Hidden help text */}
+          <div id="input-help" className="sr-only">
+            Press Enter to send message, Shift+Enter for new line
+          </div>
+        </PromptInputBody>
 
-          <PromptInputFooter className="pb-2">
-            <PromptInputTools className="h-6 w-full">
-              {/* File upload */}
-              <PromptInputActionAddAttachment ref={attachBtnRef} />
+        <PromptInputFooter className="pb-2">
+          <PromptInputTools className="h-6 w-full">
+            {/* File upload */}
+            <PromptInputActionAddAttachment ref={attachBtnRef} />
 
-              {/* Model selector */}
-              {modelsConfig.length > 1 && (
-                <PromptInputSelect
-                  id="chat-model-select"
-                  onValueChange={(alias) =>
-                    setSelectedModelAlias(alias as string)
-                  }
-                  value={currentModelAlias}
-                  disabled={status === "submitted" || modelsConfig.length === 0}
-                  aria-label="Select model"
-                >
-                  <PromptInputSelectTrigger className="ml-auto max-w-3xs">
-                    <>
-                      <Brain />
-                      <PromptInputSelectValue className="truncate" />
-                    </>
-                  </PromptInputSelectTrigger>
-                  <PromptInputSelectContent>
-                    {modelsConfig.map((model) => (
-                      <PromptInputSelectItem
-                        key={model.alias}
-                        value={model.alias}
-                      >
-                        {model.alias.split("/").pop()}
-                      </PromptInputSelectItem>
-                    ))}
-                  </PromptInputSelectContent>
-                </PromptInputSelect>
-              )}
-            </PromptInputTools>
+            {/* Model selector */}
+            {modelsConfig.length > 1 && (
+              <PromptInputSelect
+                id="chat-model-select"
+                onValueChange={(alias) =>
+                  setSelectedModelAlias(alias as string)
+                }
+                value={currentModelAlias}
+                disabled={status === "submitted" || modelsConfig.length === 0}
+                aria-label="Select model"
+              >
+                <PromptInputSelectTrigger className="ml-auto max-w-3xs">
+                  <>
+                    <Brain />
+                    <PromptInputSelectValue className="truncate" />
+                  </>
+                </PromptInputSelectTrigger>
+                <PromptInputSelectContent>
+                  {modelsConfig.map((model) => (
+                    <PromptInputSelectItem
+                      key={model.alias}
+                      value={model.alias}
+                    >
+                      {model.alias.split("/").pop()}
+                    </PromptInputSelectItem>
+                  ))}
+                </PromptInputSelectContent>
+              </PromptInputSelect>
+            )}
+          </PromptInputTools>
 
-            {/* Submit button - disable when no model is selected */}
-            <PromptInputSubmit
-              disabled={
-                !currentModelAlias || (!input && status !== "streaming")
-              }
-              status={status === "error" ? "ready" : status}
-            />
-          </PromptInputFooter>
-        </PromptInput>
-      </PromptInputProvider>
+          {/* Submit button - disable when no model is selected */}
+          <PromptInputSubmit
+            disabled={!currentModelAlias || (!input && status !== "streaming")}
+            status={status === "error" ? "ready" : status}
+          />
+        </PromptInputFooter>
+      </PromptInput>
     </div>
   );
 }
 
-export function PromptInputActionAddAttachment(
+function PromptInputActionAddAttachment(
   props: React.ComponentProps<typeof PromptInputButton>,
 ) {
   const attachments = usePromptInputAttachments();
@@ -434,5 +430,35 @@ export function PromptInputActionAddAttachment(
     >
       <Paperclip className="size-4" />
     </PromptInputButton>
+  );
+}
+
+function PromptInputAttachmentsDisplay() {
+  const attachments = usePromptInputAttachments();
+
+  const handleRemove = useCallback(
+    (id: string) => {
+      attachments.remove(id);
+    },
+    [attachments],
+  );
+
+  if (attachments.files.length === 0) {
+    return;
+  }
+
+  return (
+    <Attachments variant="inline" className="p-0">
+      {attachments.files.map((attachment) => (
+        <Attachment
+          key={attachment.id}
+          data={attachment}
+          onRemove={() => handleRemove(attachment.id)}
+        >
+          <AttachmentPreview />
+          <AttachmentRemove />
+        </Attachment>
+      ))}
+    </Attachments>
   );
 }
