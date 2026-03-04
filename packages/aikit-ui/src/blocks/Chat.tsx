@@ -9,7 +9,7 @@ import {
   Paperclip,
   TriangleAlert,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Attachment,
@@ -377,7 +377,9 @@ export function Chat({
             {modelsConfig.length > 1 && (
               <PromptInputSelect
                 id="chat-model-select"
-                onValueChange={(alias: string) => setSelectedModelAlias(alias)}
+                onValueChange={(alias: unknown) =>
+                  setSelectedModelAlias(alias as string)
+                }
                 value={currentModelAlias}
                 disabled={status === "submitted" || modelsConfig.length === 0}
                 aria-label="Select model"
@@ -435,13 +437,6 @@ function PromptInputActionAddAttachment(
 function PromptInputAttachmentsDisplay() {
   const attachments = usePromptInputAttachments();
 
-  const handleRemove = useCallback(
-    (id: string) => {
-      attachments.remove(id);
-    },
-    [attachments],
-  );
-
   if (attachments.files.length === 0) {
     return;
   }
@@ -452,7 +447,7 @@ function PromptInputAttachmentsDisplay() {
         <Attachment
           key={attachment.id}
           data={attachment}
-          onRemove={() => handleRemove(attachment.id)}
+          onRemove={() => attachments.remove(attachment.id)}
         >
           <div className="relative size-5 shrink-0">
             <div className="absolute inset-0 transition-opacity group-hover:opacity-0">
