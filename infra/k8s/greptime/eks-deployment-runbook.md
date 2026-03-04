@@ -46,7 +46,7 @@ Deploys: EKS 1.35, AL2023, 3x m7g.large, 3 AZs, EBS CSI, AWS Load Balancer Contr
 
 ## 0) One-time shell setup
 
-```
+```bash
 export GREPTIME_NS="greptime"
 export HELM_RELEASE_CLUSTER="greptime-cluster"
 ```
@@ -55,13 +55,13 @@ export HELM_RELEASE_CLUSTER="greptime-cluster"
 
 Replace the `<PLACEHOLDER>` values in `cluster.yaml` with your VPC, subnets (both public and private), and region before running.
 
-```
+```bash
 eksctl create cluster -f infra/k8s/greptime/cluster.yaml
 ```
 
 ## 2) Create S3 bucket (object storage)
 
-```
+```bash
 aws s3api create-bucket \
   --bucket "<S3_BUCKET>" \
   --region "<AWS_REGION>" \
@@ -70,7 +70,7 @@ aws s3api create-bucket \
 
 ## 3) Install GreptimeDB operator (Helm)
 
-```
+```bash
 helm repo add greptime https://greptimeteam.github.io/helm-charts/
 helm repo update
 
@@ -81,7 +81,7 @@ helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n grept
 
 Replace the `<PLACEHOLDER>` values in `greptime-values.yaml` with your Aurora host, database, S3 bucket, region, and auth credentials before running.
 
-```
+```bash
 helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
   -n "$GREPTIME_NS" --create-namespace \
   -f infra/k8s/greptime/greptime-values.yaml
@@ -92,7 +92,7 @@ helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
 Use an S3 policy ARN, then let `eksctl` create the IRSA role/trust for the datanode service account.
 Set `<GREPTIME_S3_ROLE_ARN>` in `greptime-values.yaml` to the printed role ARN, then run Helm upgrade again to apply it.
 
-```
+```bash
 eksctl create iamserviceaccount \
   --cluster "<CLUSTER_NAME>" \
   --region "<AWS_REGION>" \
@@ -108,7 +108,7 @@ aws iam get-role --role-name "GreptimeS3Role-<CLUSTER_NAME>" --query 'Role.Arn' 
 
 ## 6) Create Aurora credentials secret (metasrv backend)
 
-```
+```bash
 kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
   --from-literal=username="<POSTGRES_USER>" \
   --from-literal=password="<POSTGRES_PASSWORD>"
@@ -118,7 +118,7 @@ kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
 
 After setting `<GREPTIME_S3_ROLE_ARN>` in `greptime-values.yaml` and creating the Aurora secret, re-apply Helm values and restart to pick up all changes:
 
-```
+```bash
 helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
   -n "$GREPTIME_NS" \
   -f infra/k8s/greptime/greptime-values.yaml
@@ -128,7 +128,7 @@ kubectl -n "$GREPTIME_NS" rollout restart deployment,statefulset
 
 ## 8) Verify base cluster
 
-```
+```bash
 # All pods Running/Ready
 kubectl -n "$GREPTIME_NS" get pods -o wide
 
@@ -156,7 +156,7 @@ Adds an internet-facing NLB that forwards HTTPS (443) to GreptimeDB's HTTP port 
 
 The AWS Load Balancer Controller uses subnet tags to discover where to place load balancers.
 
-```
+```bash
 aws ec2 create-tags \
   --resources <PUBLIC_SUBNET_A> <PUBLIC_SUBNET_B> <PUBLIC_SUBNET_C> \
   --tags Key=kubernetes.io/role/elb,Value=1
@@ -166,7 +166,7 @@ aws ec2 create-tags \
 
 Request a public TLS certificate for the dashboard hostname. DNS validation with Route53 auto-approves.
 
-```
+```bash
 aws acm request-certificate \
   --domain-name "<DASHBOARD_HOSTNAME>" \
   --validation-method DNS \
@@ -180,7 +180,7 @@ Note the returned ARN -- this is `<ACM_CERTIFICATE_ARN>`.
 
 ExternalDNS watches Service annotations and automatically creates Route53 records. The IAM role and service account were already created by eksctl via Pod Identity (see `cluster.yaml`).
 
-```
+```bash
 helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
 helm repo update
 
@@ -200,7 +200,7 @@ helm upgrade --install external-dns external-dns/external-dns \
 
 Replace `<ACM_CERTIFICATE_ARN>` and `<DASHBOARD_HOSTNAME>` in `dashboard-nlb.yaml` with the ACM certificate ARN from step 1 and the desired dashboard hostname.
 
-```
+```bash
 kubectl apply -n "$GREPTIME_NS" -f infra/k8s/greptime/dashboard-nlb.yaml
 ```
 
@@ -208,7 +208,7 @@ The AWS Load Balancer Controller provisions an internet-facing NLB that terminat
 
 ## 5) Verify public dashboard
 
-```
+```bash
 # NLB service exists
 kubectl -n "$GREPTIME_NS" get svc greptime-dashboard-nlb
 
@@ -238,13 +238,13 @@ GreptimeDB uses the `static_user_provider` which loads credentials at startup. T
 
 1. Update the `auth.users` credentials in `greptime-values.yaml` with new values.
 2. Run Helm upgrade:
-   ```
+   ```bash
    helm upgrade "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
      -n "$GREPTIME_NS" \
      -f infra/k8s/greptime/greptime-values.yaml
    ```
 3. Restart frontend pods to pick up the new credentials:
-   ```
+   ```bash
    kubectl -n "$GREPTIME_NS" rollout restart deployment/${HELM_RELEASE_CLUSTER}-frontend
    ```
 4. Rolling restart means brief interruption per pod but no full downtime (3 replicas).
@@ -255,7 +255,7 @@ ACM certificates validated via DNS are automatically renewed by AWS before expir
 
 To verify certificate status:
 
-```
+```bash
 aws acm describe-certificate \
   --certificate-arn "<ACM_CERTIFICATE_ARN>" \
   --region "<AWS_REGION>" \
