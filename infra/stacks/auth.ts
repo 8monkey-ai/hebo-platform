@@ -1,18 +1,11 @@
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+// oxlint-disable-next-line triple-slash-reference
 /// <reference path="../../.sst/platform/config.d.ts" />
 
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
-import {
-  authSecrets,
-  isProduction,
-  greptimeEndpoint,
-  normalizedStage,
-} from "./env";
+import { authSecrets, isProduction, greptimeEndpoint, normalizedStage } from "./env";
 
-const authDomain = isProduction
-  ? "auth.hebo.ai"
-  : `auth.${normalizedStage}.hebo.ai`;
+const authDomain = isProduction ? "auth.hebo.ai" : `auth.${normalizedStage}.hebo.ai`;
 const authPort = "3000";
 
 const heboAuth = new sst.aws.Service("HeboAuth", {

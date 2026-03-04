@@ -64,9 +64,6 @@ sst-env.d.ts
 # db
 .local-storage
 
-# eslint
-.eslintcache
-
 # bun
 server
 *.bun-build

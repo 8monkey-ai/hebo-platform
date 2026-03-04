@@ -6,9 +6,9 @@ export function clientLoader() {
 }
 
 export default function UnknownRoute() {
-  return <></>
+  return <></>;
 }
 
-export function ErrorBoundary () {
+export function ErrorBoundary() {
   return <ErrorView />;
-};
+}

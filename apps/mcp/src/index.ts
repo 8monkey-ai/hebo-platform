@@ -13,11 +13,7 @@ const PORT = Number(process.env.PORT ?? 3003);
 
 function createMcpServer() {
   const mcp = new McpServer({ name: "hebo-mcp", version: "0.0.3" });
-  mcp.registerTool(
-    countLetterTool.name,
-    countLetterTool.config,
-    countLetterTool.handler,
-  );
+  mcp.registerTool(countLetterTool.name, countLetterTool.config, countLetterTool.handler);
   return mcp;
 }
 

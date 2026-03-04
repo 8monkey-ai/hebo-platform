@@ -1,6 +1,11 @@
-import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@hebo/shared-ui/components/Sidebar";
 import { BrainCog, Home } from "lucide-react";
 import { Link, useLocation } from "react-router";
+
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@hebo/shared-ui/components/Sidebar";
 
 const navItems = [
   {
@@ -31,16 +36,20 @@ export const SidebarNav = ({ activeAgent, activeBranch }: SidebarNavProps) => {
         const active = pathname === path;
 
         return (
-          <SidebarMenuItem key={label} className="group-data-[state=expanded]:mx-0.5 transition-[margin]">
-            <SidebarMenuButton 
+          <SidebarMenuItem
+            key={label}
+            className="transition-[margin] group-data-[state=expanded]:mx-0.5"
+          >
+            <SidebarMenuButton
               isActive={active}
               tooltip={label}
               render={
-                <Link to={path} viewTransition >
+                <Link to={path} viewTransition>
                   <Icon aria-hidden="true" />
                   <span>{label}</span>
                 </Link>
-              } />
+              }
+            />
           </SidebarMenuItem>
         );
       })}

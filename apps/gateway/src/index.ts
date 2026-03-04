@@ -6,14 +6,8 @@ import {
   ChatCompletionsChunkSchema,
   ChatCompletionsSchema,
 } from "@hebo-ai/gateway/endpoints/chat-completions";
-import {
-  EmbeddingsBodySchema,
-  EmbeddingsSchema,
-} from "@hebo-ai/gateway/endpoints/embeddings";
-import {
-  ModelListSchema,
-  ModelSchema,
-} from "@hebo-ai/gateway/endpoints/models";
+import { EmbeddingsBodySchema, EmbeddingsSchema } from "@hebo-ai/gateway/endpoints/embeddings";
+import { ModelListSchema, ModelSchema } from "@hebo-ai/gateway/endpoints/models";
 import { OpenAIErrorSchema } from "@hebo-ai/gateway/errors/openai";
 import Elysia from "elysia";
 
@@ -40,20 +34,14 @@ export const createGateway = () =>
     .use(cors(corsConfig))
     .use(
       openapi(
-        getOpenapiConfig(
-          "Hebo Gateway",
-          "OpenAI-compatible AI Gateway",
-          GATEWAY_URL,
-          "0.1.0",
-        ),
+        getOpenapiConfig("Hebo Gateway", "OpenAI-compatible AI Gateway", GATEWAY_URL, "0.1.0"),
       ),
     )
     .use(errorHandler)
     // Public routes (no authentication required)
     .get(
       "/v1/models",
-      (({ request }: { request: Request }) =>
-        gw.routes["/models"].handler(request)) as any,
+      (({ request }: { request: Request }) => gw.routes["/models"].handler(request)) as any,
       {
         response: {
           200: ModelListSchema,
@@ -64,8 +52,7 @@ export const createGateway = () =>
     )
     .get(
       "/v1/models/*",
-      (({ request }: { request: Request }) =>
-        gw.routes["/models"].handler(request)) as any,
+      (({ request }: { request: Request }) => gw.routes["/models"].handler(request)) as any,
       {
         response: {
           200: ModelSchema,
@@ -81,7 +68,7 @@ export const createGateway = () =>
         .use(dbClient)
         .post(
           "/chat/completions",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- https://github.com/elysiajs/elysia/issues/1721
+          // FUTURE: remove any - https://github.com/elysiajs/elysia/issues/1721
           (({ request, dbClient, organizationId }: any) =>
             gw.handler(request, { dbClient, organizationId })) as any,
           {
@@ -96,7 +83,7 @@ export const createGateway = () =>
         )
         .post(
           "/embeddings",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any -- https://github.com/elysiajs/elysia/issues/1721
+          // FUTURE: remove any - https://github.com/elysiajs/elysia/issues/1721
           (({ request, dbClient, organizationId }: any) =>
             gw.handler(request, { dbClient, organizationId })) as any,
           {

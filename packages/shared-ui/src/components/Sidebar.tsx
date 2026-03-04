@@ -48,7 +48,7 @@ export function SidebarTrigger({
       data-slot="sidebar-trigger"
       variant="ghost"
       size="icon"
-      className={cn("size-7 z-20 hover:bg-sidebar-accent", className)}
+      className={cn("z-20 size-7 hover:bg-sidebar-accent", className)}
       onClick={(event) => {
         onClick?.(event);
         toggleSidebar();

@@ -24,9 +24,7 @@ const createApi = () =>
     // Root route ("/") is unauthenticated and unprotected for health checks.
     .get("/", () => "🐵 Hebo API says hello!")
     .use(cors(corsConfig))
-    .use(
-      openapi(getOpenapiConfig("Hebo API", "Platform API", API_URL, "0.1.0")),
-    )
+    .use(openapi(getOpenapiConfig("Hebo API", "Platform API", API_URL, "0.1.0")))
     .use(authService)
     .use(errorHandler)
     .group(

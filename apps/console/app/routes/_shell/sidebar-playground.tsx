@@ -1,9 +1,10 @@
 import { Chat } from "@hebo/aikit-ui/blocks/Chat";
+
 import { gatewayUrl, kyFetch } from "~console/lib/service";
 
 type Agent = {
   name: string;
-}
+};
 
 type Branch = {
   agent_slug: string;
@@ -13,7 +14,13 @@ type Branch = {
   slug: string;
 };
 
-export function PlaygroundSidebar({ activeAgent, activeBranch }: { activeAgent?: Agent, activeBranch?: Branch }) {
+export function PlaygroundSidebar({
+  activeAgent,
+  activeBranch,
+}: {
+  activeAgent?: Agent;
+  activeBranch?: Branch;
+}) {
   const modelsConfig = (activeBranch?.models ?? []).map((model) => ({
     alias: `${activeBranch?.agent_slug}/${activeBranch?.slug}/${model.alias}`,
     endpoint: {
@@ -23,5 +30,12 @@ export function PlaygroundSidebar({ activeAgent, activeBranch }: { activeAgent?:
     },
   }));
 
-  return <Chat key={`pg-${activeAgent?.name}/${activeBranch?.slug}`} name={activeAgent?.name} modelsConfig={modelsConfig} mode="full" />;
+  return (
+    <Chat
+      key={`pg-${activeAgent?.name}/${activeBranch?.slug}`}
+      name={activeAgent?.name}
+      modelsConfig={modelsConfig}
+      mode="full"
+    />
+  );
 }

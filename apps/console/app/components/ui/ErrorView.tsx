@@ -1,9 +1,4 @@
-import {
-  useLocation,
-  useNavigate,
-  useNavigation,
-  useRouteError,
-} from "react-router";
+import { useLocation, useNavigate, useNavigation, useRouteError } from "react-router";
 
 import { Button } from "@hebo/shared-ui/components/Button";
 

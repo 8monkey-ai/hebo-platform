@@ -6,9 +6,7 @@ export const countLetterTool = {
     description: "Counts occurrences of specific letters in a given word",
     inputSchema: {
       word: z.string().describe("The word to analyze"),
-      letters: z
-        .string()
-        .describe("The letters to count (e.g., 'aeiou' for vowels)"),
+      letters: z.string().describe("The letters to count (e.g., 'aeiou' for vowels)"),
     },
   },
   handler: async ({ word, letters }: { word: string; letters: string }) => {
@@ -24,9 +22,7 @@ export const countLetterTool = {
       }
     }
 
-    const breakdown = [...counts.entries()]
-      .map(([l, c]) => `'${l}': ${c}`)
-      .join(", ");
+    const breakdown = [...counts.entries()].map(([l, c]) => `'${l}': ${c}`).join(", ");
 
     return {
       content: [

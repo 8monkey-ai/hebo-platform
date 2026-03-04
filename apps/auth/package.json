@@ -2,8 +2,8 @@
   "name": "@hebo/auth",
   "version": "0.1.1",
   "private": true,
-  "sideEffects": false,
   "type": "module",
+  "sideEffects": false,
   "scripts": {
     "prebuild": "bun run db generate",
     "build": "bun build src/index.ts --compile --minify-whitespace --minify-syntax --keep-names --target=bun --outfile dist/server",
@@ -12,7 +12,8 @@
     "db": "prisma",
     "predev": "test -d src/generated || bun run db generate",
     "dev": "bun --hot src/index.ts",
-    "lint": "eslint .",
+    "format": "oxfmt .",
+    "lint": "oxlint",
     "type-check": "tsc --noEmit",
     "prestart": "bun run build",
     "start": "./dist/server"
@@ -21,9 +22,9 @@
     "@elysiajs/cors": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",
+    "@prisma/client": "catalog:",
     "@upyo/core": "^0.4.0",
     "@upyo/smtp": "^0.4.0",
-    "@prisma/client": "catalog:",
     "better-auth": "catalog:",
     "elysia": "catalog:"
   },

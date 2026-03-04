@@ -15,11 +15,7 @@ export async function injectMetadataCredentials() {
 
   const response = await fetch(`http://169.254.170.2${relativeUri}`);
   const credentials = (await response.json()) as AwsContainerCredentialResponse;
-  if (
-    credentials.AccessKeyId &&
-    credentials.SecretAccessKey &&
-    credentials.Token
-  ) {
+  if (credentials.AccessKeyId && credentials.SecretAccessKey && credentials.Token) {
     process.env.AWS_ACCESS_KEY_ID = credentials.AccessKeyId;
     process.env.AWS_SECRET_ACCESS_KEY = credentials.SecretAccessKey;
     process.env.AWS_SESSION_TOKEN = credentials.Token;

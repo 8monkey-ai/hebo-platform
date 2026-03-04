@@ -1,8 +1,8 @@
+import { useForm } from "@conform-to/react";
+import { getZodConstraint } from "@conform-to/zod/v4";
 import { Form, useActionData, useNavigation } from "react-router";
 import { useSnapshot } from "valtio";
 import { z } from "zod";
-import { useForm } from "@conform-to/react";
-import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
@@ -28,7 +28,6 @@ import { ModelSelector } from "~console/components/ui/ModelSelector";
 import { useFormErrorToast } from "~console/lib/errors";
 import { shellStore } from "~console/lib/shell";
 
-
 export const AgentCreateSchema = z.object({
   agentName: ((msg) => z.string(msg).trim().min(1, msg))("Please enter an agent name"),
   defaultModel: z.string(),
@@ -45,24 +44,30 @@ export function AgentCreateForm() {
     constraint: getZodConstraint(AgentCreateSchema),
     defaultValue: {
       defaultModel: (function selectModelWithMostMonthlyFreeTokens() {
-        return Object.entries(models ?? {})
-          .sort(([, a], [, b]) => b.monthlyFreeTokens - a.monthlyFreeTokens)[0]?.[0];
-      })()
-    }
+        return Object.entries(models ?? {}).toSorted(
+          ([, a], [, b]) => b.monthlyFreeTokens - a.monthlyFreeTokens,
+        )[0]?.[0];
+      })(),
+    },
   });
   useFormErrorToast(form.allErrors);
 
   return (
     <FormControl form={form} as={Form}>
-      <Card className="sm:max-w-lg min-w-0 w-full ring-0 shadow-none bg-transparent">
-
+      <Card className="w-full min-w-0 bg-transparent shadow-none ring-0 sm:max-w-lg">
         <CardHeader>
-          <CardTitle><h1>Create a new agent</h1></CardTitle>
+          <CardTitle>
+            <h1>Create a new agent</h1>
+          </CardTitle>
           <CardDescription>
-            Each agent has its own set of models. Model choice usually depends on use case and pricing. <a href="https://hebo.ai/docs" target="_blank" rel="noopener">Learn more</a>
+            Each agent has its own set of models. Model choice usually depends on use case and
+            pricing.{" "}
+            <a href="https://hebo.ai/docs" target="_blank" rel="noopener">
+              Learn more
+            </a>
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent>
           <FieldGroup>
             <Field name={fields.agentName.name} orientation="responsive">
@@ -95,7 +100,6 @@ export function AgentCreateForm() {
             Create
           </Button>
         </CardFooter>
-
       </Card>
     </FormControl>
   );

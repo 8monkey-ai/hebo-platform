@@ -1,3 +1,4 @@
+import { MoreVertical, Undo2 } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
@@ -16,21 +17,18 @@ import {
   TableHeader,
   TableRow,
 } from "@hebo/shared-ui/components/Table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@hebo/shared-ui/components/Tooltip";
-import { MoreVertical, Undo2 } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@hebo/shared-ui/components/Tooltip";
 
 import type { ApiKey } from "~console/lib/auth/types";
-
-import { RevokeApiKeyDialog } from "./revoke";
 import { formatDateTime } from "~console/lib/utils";
 
+import { RevokeApiKeyDialog } from "./revoke";
 
 export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
-  const [revokeDialog, setRevokeDialog] = useState({open: false, apiKey: undefined as ApiKey | undefined});
+  const [revokeDialog, setRevokeDialog] = useState({
+    open: false,
+    apiKey: undefined as ApiKey | undefined,
+  });
 
   return (
     <div>
@@ -47,34 +45,37 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
         <TableBody>
           {apiKeys.length === 0 ? (
             <TableRow>
-              <TableCell
-                colSpan={5}
-                className="text-center text-muted-foreground"
-              >
+              <TableCell colSpan={5} className="text-center text-muted-foreground">
                 No API keys yet.
               </TableCell>
             </TableRow>
           ) : (
             apiKeys.map((key) => {
               const isExpired = key.expiresAt.getTime() <= Date.now();
-              const isExpiringSoon = !isExpired && key.expiresAt.getTime() - Date.now() <= 7 * 24 * 60 * 60 * 1000; // 7 Days
+              const isExpiringSoon =
+                !isExpired && key.expiresAt.getTime() - Date.now() <= 7 * 24 * 60 * 60 * 1000; // 7 Days
 
               return (
                 <TableRow key={key.id}>
                   <TableCell>{key.name || "—"}</TableCell>
                   <TableCell className="align-middle">
                     <Tooltip>
-                      <TooltipTrigger render={
-                        <Badge
-                          variant="outline"
-                          className={isExpired ? "border-destructive text-destructive"
-                            : isExpiringSoon
-                              ? "border-amber-600 text-amber-600"
-                              : "border-emerald-600 text-emerald-600"}
-                        >
-                          {isExpired? "Expired" : isExpiringSoon? "Expires Soon": "Active"}
-                        </Badge>
-                      } />
+                      <TooltipTrigger
+                        render={
+                          <Badge
+                            variant="outline"
+                            className={
+                              isExpired
+                                ? "border-destructive text-destructive"
+                                : isExpiringSoon
+                                  ? "border-amber-600 text-amber-600"
+                                  : "border-emerald-600 text-emerald-600"
+                            }
+                          >
+                            {isExpired ? "Expired" : isExpiringSoon ? "Expires Soon" : "Active"}
+                          </Badge>
+                        }
+                      />
                       <TooltipContent>
                         {isExpired ? "Expired " : "Expires "}
                         {formatDateTime(key.expiresAt)}
@@ -91,15 +92,13 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger render={
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label="API key actions"
-                        >
-                          <MoreVertical className="size-4" aria-hidden="true" />
-                        </Button>
-                      } />
+                      <DropdownMenuTrigger
+                        render={
+                          <Button variant="ghost" size="icon" aria-label="API key actions">
+                            <MoreVertical className="size-4" aria-hidden="true" />
+                          </Button>
+                        }
+                      />
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           className="text-destructive"
@@ -123,7 +122,7 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
       <RevokeApiKeyDialog
         {...revokeDialog}
         onOpenChange={(open: boolean) => {
-          if (!open) setRevokeDialog({ open: false, apiKey: undefined})
+          if (!open) setRevokeDialog({ open: false, apiKey: undefined });
         }}
       />
     </div>

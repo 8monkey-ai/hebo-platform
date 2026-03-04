@@ -5,8 +5,7 @@ import { HttpError } from "@hebo/shared-api/errors";
 
 export const errorHandler = new Elysia({ name: "error-handler" })
   .onError(function handleGatewayError({ error }) {
-    if (error instanceof HttpError)
-      return toOpenAIErrorResponse(error, { status: error.status });
+    if (error instanceof HttpError) return toOpenAIErrorResponse(error, { status: error.status });
 
     return toOpenAIErrorResponse(error);
   })

@@ -16,5 +16,5 @@ async function defaultAgentMiddleware() {
 export const clientMiddleware = [defaultAgentMiddleware];
 
 export default function EmptyRoute() {
-  return <></>
+  return <></>;
 }

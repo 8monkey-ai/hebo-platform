@@ -1,9 +1,9 @@
+import type { ComponentProps } from "react";
+
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Select } from "@hebo/shared-ui/components/Select";
 
 import type { Models } from "~console/lib/shell";
-
-import type { ComponentProps } from "react";
 
 type ModelSelectorProps = Omit<ComponentProps<typeof Select>, "items"> & {
   models: Models | undefined;
@@ -28,9 +28,7 @@ function ModelSelector({ models, ...props }: ModelSelectorProps) {
       }))}
       disabled={Object.keys(models ?? {}).length === 0}
       placeholder={
-        Object.keys(models ?? {}).length > 0
-          ? "Select the model"
-          : "Error: Couldn't load models"
+        Object.keys(models ?? {}).length > 0 ? "Select the model" : "Error: Couldn't load models"
       }
       {...props}
     />

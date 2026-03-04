@@ -1,10 +1,9 @@
 import { treaty } from "@elysiajs/eden";
 import ky, { HTTPError } from "ky";
-
-import { isDevLocal } from "~console/lib/env";
-
 import type { Api } from "~api";
 import type { Gateway } from "~gateway";
+
+import { isDevLocal } from "~console/lib/env";
 
 export const apiUrl = isDevLocal
   ? "http://localhost:5173/api"

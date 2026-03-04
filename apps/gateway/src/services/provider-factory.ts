@@ -1,10 +1,8 @@
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
 import { createVertex } from "@ai-sdk/google-vertex";
 import { createGroq } from "@ai-sdk/groq";
-import {
-  fromContainerMetadata,
-  fromTemporaryCredentials,
-} from "@aws-sdk/credential-providers";
+import type { ProviderV3 } from "@ai-sdk/provider";
+import { fromContainerMetadata, fromTemporaryCredentials } from "@aws-sdk/credential-providers";
 import { withCanonicalIdsForBedrock } from "@hebo-ai/gateway/providers/bedrock";
 import { withCanonicalIdsForGroq } from "@hebo-ai/gateway/providers/groq";
 import { withCanonicalIdsForVertex } from "@hebo-ai/gateway/providers/vertex";
@@ -21,8 +19,6 @@ import type {
 } from "~api/modules/providers/types";
 
 import { buildWifOptions } from "./aws-wif";
-
-import type { ProviderV3 } from "@ai-sdk/provider";
 
 export async function loadProviderSecrets() {
   const [
@@ -57,10 +53,7 @@ export async function loadProviderSecrets() {
   };
 }
 
-export function createProvider(
-  slug: ProviderSlug,
-  config: unknown,
-): ProviderV3 | undefined {
+export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 | undefined {
   switch (slug) {
     case "bedrock": {
       const { bedrockRoleArn, region } = config as BedrockProviderConfig;
@@ -87,8 +80,7 @@ export function createProvider(
       return withCanonicalIdsForGroq(createGroq({ apiKey }));
     }
     case "vertex": {
-      const { serviceAccountEmail, audience, location, project } =
-        config as VertexProviderConfig;
+      const { serviceAccountEmail, audience, location, project } = config as VertexProviderConfig;
       if (!serviceAccountEmail || !audience || !location || !project) return;
       return withCanonicalIdsForVertex(
         createVertex({

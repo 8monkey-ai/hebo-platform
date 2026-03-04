@@ -48,10 +48,9 @@ type ToolCall = {
   arguments: string;
 };
 
-type OpenAIHttpChatTransportOptions =
-  HttpChatTransportInitOptions<UIMessage> & {
-    credentials?: RequestCredentials;
-  };
+type OpenAIHttpChatTransportOptions = HttpChatTransportInitOptions<UIMessage> & {
+  credentials?: RequestCredentials;
+};
 
 export class OpenAIHttpChatTransport<
   UI_MESSAGE extends UIMessage = UIMessage,
@@ -66,9 +65,7 @@ export class OpenAIHttpChatTransport<
           messages.map((m) => toOpenAIMessage(m as UIMessage)),
         );
 
-        const reasoning = body!.reasoningEffort
-          ? { effort: body!.reasoningEffort }
-          : undefined;
+        const reasoning = body!.reasoningEffort ? { effort: body!.reasoningEffort } : undefined;
 
         return {
           ...(credentials ? { credentials } : {}),
@@ -146,8 +143,7 @@ async function toFileContent(part: {
 
   if (part.url.startsWith("data:")) {
     const [meta, data] = part.url.split(",");
-    const mediaType =
-      part.mediaType ?? meta.slice("data:".length, meta.indexOf(";")).trim();
+    const mediaType = part.mediaType ?? meta.slice("data:".length, meta.indexOf(";")).trim();
     if (!mediaType || !data) return;
     return { type: "file", file: { data, media_type: mediaType, filename } };
   }
@@ -164,9 +160,7 @@ async function toFileContent(part: {
   }
 }
 
-function handleSSEStream(
-  stream: ReadableStream<Uint8Array>,
-): ReadableStream<UIMessageChunk> {
+function handleSSEStream(stream: ReadableStream<Uint8Array>): ReadableStream<UIMessageChunk> {
   const messageId = crypto.randomUUID();
   const textId = `text-${messageId}`;
   const reasoningId = `reasoning-${messageId}`;
@@ -201,8 +195,7 @@ function handleSSEStream(
           hasError = true;
           ctrl.enqueue({
             type: "error",
-            errorText:
-              parsed.error.message ?? "An error occurred during streaming",
+            errorText: parsed.error.message ?? "An error occurred during streaming",
           });
           return;
         }
@@ -274,9 +267,7 @@ function normalizeToolCalls(
   }));
 }
 
-function asText(
-  content: string | Array<{ text?: string }> | undefined,
-): string {
+function asText(content: string | Array<{ text?: string }> | undefined): string {
   if (!content) return "";
   if (typeof content === "string") return content;
   return content.map((p) => p.text ?? "").join("");

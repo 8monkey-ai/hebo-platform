@@ -1,8 +1,5 @@
 const lazyGetConnectionString = (schema: string) => {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  return require("@hebo/shared-api/lib/db/connection").getConnectionString(
-    schema,
-  );
+  return require("@hebo/shared-api/lib/db/connection").getConnectionString(schema);
 };
 
 export default {

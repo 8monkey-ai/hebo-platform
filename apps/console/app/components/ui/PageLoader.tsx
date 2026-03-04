@@ -19,7 +19,6 @@ export function PageLoader() {
     }
 
     const id = setInterval(() => {
-      // eslint-disable-next-line sonarjs/pseudo-random
       setProgress((p) => Math.min(p + Math.random() * 10, 90));
     }, 200);
 
@@ -28,7 +27,7 @@ export function PageLoader() {
 
   return (
     <div
-      className="bg-secondary fixed top-0 left-0 h-0.5 transition-all duration-300 ease-out"
+      className="fixed top-0 left-0 h-0.5 bg-secondary transition-all duration-300 ease-out"
       style={{ width: `${progress}%`, opacity: progress === 0 ? 0 : 1 }}
       aria-hidden="true"
     />

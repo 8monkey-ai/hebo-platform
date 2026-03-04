@@ -13,10 +13,5 @@
     "types": ["vite/client", "mdx"],
     "verbatimModuleSyntax": true
   },
-  "include": [
-    "**/*",
-    "**/.server/**/*",
-    "**/.client/**/*",
-    ".react-router/types/**/*"
-  ]
+  "include": ["**/*", "**/.server/**/*", "**/.client/**/*", ".react-router/types/**/*"]
 }

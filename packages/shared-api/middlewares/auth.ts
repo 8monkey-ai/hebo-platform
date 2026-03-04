@@ -8,7 +8,6 @@ import { authUrl } from "../env";
 import { AuthError, BadRequestError } from "../errors";
 import { betterAuthCookieOptions } from "../lib/cookie-options";
 import { getSecret } from "../utils/secrets";
-
 import type { Logger } from "./logging";
 
 const authSecret = await getSecret("AuthSecret");
@@ -55,9 +54,7 @@ export const authService = new Elysia({ name: "auth-service" })
     const cookie = ctx.request.headers.get("cookie");
 
     if (authorization && cookie) {
-      throw new BadRequestError(
-        "Provide exactly one credential: Bearer API Key or JWT Header",
-      );
+      throw new BadRequestError("Provide exactly one credential: Bearer API Key or JWT Header");
     }
 
     const authClient = createAuthClient(ctx.request);
@@ -74,10 +71,7 @@ export const authService = new Elysia({ name: "auth-service" })
     }
 
     if (error || !session) {
-      logger.info(
-        { error },
-        "Authentication failed or no credentials provided",
-      );
+      logger.info({ error }, "Authentication failed or no credentials provided");
 
       // Clear the session cookie when unauthorized
       const { attributes, name } = cookieConfig.sessionToken;

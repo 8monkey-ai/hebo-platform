@@ -1,8 +1,4 @@
-import {
-  SeverityNumber,
-  type Logger,
-  type AnyValueMap,
-} from "@opentelemetry/api-logs";
+import { SeverityNumber, type Logger, type AnyValueMap } from "@opentelemetry/api-logs";
 
 const otelSeverityByLevel = {
   trace: SeverityNumber.TRACE,
@@ -22,8 +18,7 @@ const serializeError = (err: unknown, _seen?: WeakSet<object>) => {
   if (!(err instanceof Error)) return { message: String(err) };
 
   const seen = _seen ?? new WeakSet();
-  if (seen.has(err))
-    return { name: err.name, message: err.message, circular: true };
+  if (seen.has(err)) return { name: err.name, message: err.message, circular: true };
   seen.add(err);
 
   const out: AnyValueMap = {};

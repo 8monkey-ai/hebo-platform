@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@hebo/shared-ui/components/Dialog";
+
 import { kbs } from "~console/lib/utils";
 
 const SHORTCUT_GROUPS = [
@@ -29,10 +30,10 @@ const SHORTCUT_GROUPS = [
   },
 ] as const;
 
-
 export function KeyboardShortcuts(props: React.ComponentProps<typeof Dialog>) {
-
-  useHotkeys("mod+slash", () => {
+  useHotkeys(
+    "mod+slash",
+    () => {
       props.onOpenChange(true);
     },
     { preventDefault: true, enableOnFormTags: true },
@@ -41,7 +42,7 @@ export function KeyboardShortcuts(props: React.ComponentProps<typeof Dialog>) {
 
   return (
     <Dialog {...props}>
-      <DialogContent className="sm:max-w-2xs gap-6">
+      <DialogContent className="gap-6 sm:max-w-2xs">
         <DialogHeader>
           <DialogTitle>Keyboard shortcuts</DialogTitle>
         </DialogHeader>
@@ -49,21 +50,12 @@ export function KeyboardShortcuts(props: React.ComponentProps<typeof Dialog>) {
         <div className="space-y-6">
           {SHORTCUT_GROUPS.map((group) => (
             <div key={group.title} className="space-y-2">
-              <p className="font-medium text-muted-foreground">
-                {group.title}
-              </p>
+              <p className="font-medium text-muted-foreground">{group.title}</p>
               <div className="space-y-3">
                 {group.shortcuts.map((shortcut) => (
-                  <div
-                    key={shortcut.combo}
-                    className="flex justify-between text-sm"
-                  >
-                    <span>
-                      {shortcut.label}
-                    </span>
-                    <span className="text-muted-foreground">
-                      {kbs(shortcut.combo)}
-                    </span>
+                  <div key={shortcut.combo} className="flex justify-between text-sm">
+                    <span>{shortcut.label}</span>
+                    <span className="text-muted-foreground">{kbs(shortcut.combo)}</span>
                   </div>
                 ))}
               </div>

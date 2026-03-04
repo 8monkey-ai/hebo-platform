@@ -47,7 +47,7 @@ export function CopyButton({
           <button
             type="button"
             className={cn(
-              "[&_svg:not([class*='size-'])]:size-4.5 p-1.5",
+              "p-1.5 [&_svg:not([class*='size-'])]:size-4.5",
               "opacity-70 hover:opacity-100 disabled:opacity-50!",
               className,
             )}
