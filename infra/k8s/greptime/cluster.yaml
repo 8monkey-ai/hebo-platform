@@ -14,6 +14,9 @@ vpc:
       <AWS_REGION>b: { id: <SUBNET_B> }
       <AWS_REGION>c: { id: <SUBNET_C> }
 
+iam:
+  withOIDC: true
+
 addonsConfig:
   autoApplyPodIdentityAssociations: true
 
