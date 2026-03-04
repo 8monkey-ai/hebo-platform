@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { MoreVertical, Trash } from "lucide-react";
+import { useState } from "react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -19,23 +19,23 @@ import {
   TableRow,
 } from "@hebo/shared-ui/components/Table";
 
-import DeleteBranchDialog from "./delete";
 import { formatDateTime } from "~console/lib/utils";
 
+import DeleteBranchDialog from "./delete";
 
 type BranchesTableProps = {
   agent: {
-    slug: string,
+    slug: string;
     branches?: {
-      slug: string,
-      updated_by?: string,
-      updated_at?: Date,
+      slug: string;
+      updated_by?: string;
+      updated_at?: Date;
     }[];
   };
 };
 
 export default function BranchesTable({ agent }: BranchesTableProps) {
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, branchSlug: ""});
+  const [deleteDialog, setDeleteDialog] = useState({ open: false, branchSlug: "" });
 
   return (
     <div>
@@ -62,28 +62,28 @@ export default function BranchesTable({ agent }: BranchesTableProps) {
                   <TableCell className="align-middle">
                     <div className="flex items-center gap-1">
                       <Badge variant="outline">
-                        <span className="text-ellipsis-start">
-                          {branch.slug}
-                        </span>
+                        <span className="text-ellipsis-start">{branch.slug}</span>
                       </Badge>
                       <CopyButton value={copyValue} />
                     </div>
                   </TableCell>
-                  <TableCell className="hidden sm:table-cell text-muted-foreground">
+                  <TableCell className="hidden text-muted-foreground sm:table-cell">
                     {`${branch.updated_by ?? "Dummy User"} (${formatDateTime(branch.updated_at ?? new Date(0))})`}
                   </TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
-                      <DropdownMenuTrigger render={
-                        <Button variant="ghost" size="icon" aria-label="Branch actions">
-                          <MoreVertical className="size-4" aria-hidden="true" />
-                        </Button>
-                      } />
+                      <DropdownMenuTrigger
+                        render={
+                          <Button variant="ghost" size="icon" aria-label="Branch actions">
+                            <MoreVertical className="size-4" aria-hidden="true" />
+                          </Button>
+                        }
+                      />
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem
                           className="text-destructive"
                           onClick={() => {
-                            setDeleteDialog({ open: true, branchSlug: branch.slug })
+                            setDeleteDialog({ open: true, branchSlug: branch.slug });
                           }}
                         >
                           <Trash aria-hidden="true" />
@@ -102,7 +102,7 @@ export default function BranchesTable({ agent }: BranchesTableProps) {
       <DeleteBranchDialog
         {...deleteDialog}
         onOpenChange={(open: boolean) => {
-          if (!open) setDeleteDialog({ open: false, branchSlug: ""});
+          if (!open) setDeleteDialog({ open: false, branchSlug: "" });
         }}
       />
     </div>

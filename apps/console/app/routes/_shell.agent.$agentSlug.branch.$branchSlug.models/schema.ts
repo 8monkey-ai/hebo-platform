@@ -5,8 +5,9 @@ export const modelConfigSchema = z.object({
   type: ((msg) => z.string(msg).trim().min(1, msg))("Select one of the supported models"),
   routing: z
     .object({
-      only: z.array(z.string().optional())
-        .transform((value) => (value[0] === undefined ? [] : value))
+      only: z
+        .array(z.string().optional())
+        .transform((value) => (value[0] === undefined ? [] : value)),
     })
     .optional(),
 });

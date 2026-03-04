@@ -27,10 +27,11 @@ This is the monorepo for Hebo, containing all our applications and shared packag
 │
 ├── bunfig.toml                     # Bun configuration
 ├── lefthook.yml                    # Git hooks configuration
-├── eslint.config.mjs               # ESLint configuration
 ├── sst.config.ts                   # SST configuration
 ├── tsconfig.base.json              # Base TypeScript configuration
-└── turbo.json                      # Turborepo configuration
+├── turbo.json                      # Turborepo configuration
+├── .oxlintrc.json                  # Oxlint configuration
+└── .oxfmtrc.json                   # Oxfmt configuration
 ```
 
 ## Prerequisites
@@ -138,11 +139,11 @@ bun run sst secret remove GithubClientId --stage <stage>
 
 ## Run modes
 
-| #   | Mode                         | Command                          | Database              | API availability                        |
-|-----|------------------------------|----------------------------------|-----------------------|-----------------------------------------|
-| 1   | **Frontend-only** (offline)  | `bun run -F @hebo/console dev`   | —                     | none – UI relies on mock services      |
-| 2   | **Local full-stack**         | `bun run dev`                    | Dockerized PostgreSQL | URLs from env                           |
-| 3   | **Remote full-stack**        | `bun run sst deploy`             | Aurora PostgreSQL     | HTTPS URLs exported by SST              |
+| #   | Mode                        | Command                        | Database              | API availability                  |
+| --- | --------------------------- | ------------------------------ | --------------------- | --------------------------------- |
+| 1   | **Frontend-only** (offline) | `bun run -F @hebo/console dev` | —                     | none – UI relies on mock services |
+| 2   | **Local full-stack**        | `bun run dev`                  | Dockerized PostgreSQL | URLs from env                     |
+| 3   | **Remote full-stack**       | `bun run sst deploy`           | Aurora PostgreSQL     | HTTPS URLs exported by SST        |
 
 ## Building
 

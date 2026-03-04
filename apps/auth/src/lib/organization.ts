@@ -23,7 +23,6 @@ export const createOrganizationHook = (prisma: PrismaClient) => {
         },
       });
       await tx.sessions.updateMany({
-        // eslint-disable-next-line unicorn/no-null
         where: { userId: user.id, activeOrganizationId: null },
         data: { activeOrganizationId: org.id },
       });

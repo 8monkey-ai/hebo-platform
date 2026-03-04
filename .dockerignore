@@ -16,8 +16,8 @@ Dockerfile
 .dockerignore
 
 # Tooling/config
-.prettierignore
-eslint.config.mjs
+.oxfmtrc.json
+.oxlintrc.json
 .cursorrules
 
 # sst
@@ -90,9 +90,6 @@ sst-env.d.ts
 
 # db
 .local-storage
-
-# eslint
-.eslintcache
 
 # bun
 server

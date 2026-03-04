@@ -1,23 +1,27 @@
 import { Eraser, FileSliders, HelpCircle, MoreVertical } from "lucide-react";
 import { useState } from "react";
 
+import { Avatar } from "@hebo/shared-ui/components/Avatar";
 import { Button } from "@hebo/shared-ui/components/Button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@hebo/shared-ui/components/DropdownMenu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@hebo/shared-ui/components/DropdownMenu";
 import {
   Item,
   ItemActions,
   ItemContent,
   ItemMedia,
-  ItemTitle
+  ItemTitle,
 } from "@hebo/shared-ui/components/Item";
 
 import { Bedrock, Voyage, Groq, Vertex } from "~console/components/ui/Icons";
-
-import { ConfigureProviderDialog } from "./configure";
-import { ClearCredentialsDialog } from "./clear";
 import { formatDateTime } from "~console/lib/utils";
-import { Avatar } from "@hebo/shared-ui/components/Avatar";
 
+import { ClearCredentialsDialog } from "./clear";
+import { ConfigureProviderDialog } from "./configure";
 
 const ProviderIcons = {
   bedrock: Bedrock,
@@ -34,88 +38,93 @@ type Provider = {
 };
 
 export function ProvidersList({ providers }: { providers: Provider[] }) {
-    const [configureDialog, setConfigureDialog] = useState({
-      open: false,
-      provider: undefined as Provider | undefined
-    });
+  const [configureDialog, setConfigureDialog] = useState({
+    open: false,
+    provider: undefined as Provider | undefined,
+  });
 
-    const [clearDialog, setClearDialog] = useState({
-      open: false,
-      provider: undefined as Provider | undefined
-    });
+  const [clearDialog, setClearDialog] = useState({
+    open: false,
+    provider: undefined as Provider | undefined,
+  });
 
-    return (
-        <div className="flex flex-col gap-2">
-            {providers.map((provider) => {
-                return (
-                    <Item key={provider.slug} variant="outline" className="bg-background">
-                        <ItemMedia>
-                            <Avatar className="overflow-hidden" >
-                                {(() => {
-                                    const Icon = ProviderIcons[provider.slug as keyof typeof ProviderIcons] ?? HelpCircle;
-                                    return <Icon size={32} />;
-                                })()}
-                            </Avatar>
-                        </ItemMedia>
-                        <ItemContent>
-                            <ItemTitle>{provider.name}</ItemTitle>
-                        </ItemContent>
-                        <ItemActions>
-                            {provider.config ? (
-                                <>
-                                    Last updated {formatDateTime(provider.updated_at ?? new Date(0))}
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger className="size-4" render={
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                aria-label="Provider actions"
-                                                >
-                                                <MoreVertical aria-hidden="true" />
-                                            </Button>
-                                        } />
-                                            <DropdownMenuContent className="min-w-44" align="end">
-                                            <DropdownMenuItem onClick={() => setConfigureDialog({ open: true, provider })}>
-                                                <FileSliders />
-                                                Configure
-                                            </DropdownMenuItem>
-                                            <DropdownMenuItem onClick={() => setClearDialog({ open: true, provider })} className="text-destructive">
-                                                <Eraser />
-                                                Clear Credentials
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </>
-                            ) : (
-                                <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => setConfigureDialog({ open: true, provider })}
-                                    >
-                                    Configure
-                                </Button>
-                            )}
-                        </ItemActions>
-                    </Item>
-                );
-            })}
+  return (
+    <div className="flex flex-col gap-2">
+      {providers.map((provider) => {
+        return (
+          <Item key={provider.slug} variant="outline" className="bg-background">
+            <ItemMedia>
+              <Avatar className="overflow-hidden">
+                {(() => {
+                  const Icon =
+                    ProviderIcons[provider.slug as keyof typeof ProviderIcons] ?? HelpCircle;
+                  return <Icon size={32} />;
+                })()}
+              </Avatar>
+            </ItemMedia>
+            <ItemContent>
+              <ItemTitle>{provider.name}</ItemTitle>
+            </ItemContent>
+            <ItemActions>
+              {provider.config ? (
+                <>
+                  Last updated {formatDateTime(provider.updated_at ?? new Date(0))}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger
+                      className="size-4"
+                      render={
+                        <Button variant="ghost" size="icon" aria-label="Provider actions">
+                          <MoreVertical aria-hidden="true" />
+                        </Button>
+                      }
+                    />
+                    <DropdownMenuContent className="min-w-44" align="end">
+                      <DropdownMenuItem
+                        onClick={() => setConfigureDialog({ open: true, provider })}
+                      >
+                        <FileSliders />
+                        Configure
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => setClearDialog({ open: true, provider })}
+                        className="text-destructive"
+                      >
+                        <Eraser />
+                        Clear Credentials
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
+              ) : (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => setConfigureDialog({ open: true, provider })}
+                >
+                  Configure
+                </Button>
+              )}
+            </ItemActions>
+          </Item>
+        );
+      })}
 
-            <ConfigureProviderDialog
-                {...configureDialog}
-                onOpenChange={(open: boolean) => {
-                  if (!open) setConfigureDialog(prev => ({...prev, open}))
-                }}
-                onOpenChangeComplete={(open: boolean) => {
-                  if (!open) setConfigureDialog({ open: false, provider: undefined});
-                }}
-                />
+      <ConfigureProviderDialog
+        {...configureDialog}
+        onOpenChange={(open: boolean) => {
+          if (!open) setConfigureDialog((prev) => ({ ...prev, open }));
+        }}
+        onOpenChangeComplete={(open: boolean) => {
+          if (!open) setConfigureDialog({ open: false, provider: undefined });
+        }}
+      />
 
-            <ClearCredentialsDialog
-                {...clearDialog}
-                onOpenChange={(open: boolean) => {
-                  if (!open) setClearDialog({ open: false, provider: undefined});
-                }}
-            />
-        </div>
-    );
+      <ClearCredentialsDialog
+        {...clearDialog}
+        onOpenChange={(open: boolean) => {
+          if (!open) setClearDialog({ open: false, provider: undefined });
+        }}
+      />
+    </div>
+  );
 }

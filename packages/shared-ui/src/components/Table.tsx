@@ -8,33 +8,20 @@ import { cn } from "#/lib/utils";
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <ShadCnTable
-      className={cn(
-        "rounded-lg overflow-hidden [&_td]:px-4 [&_th]:px-4",
-        className,
-      )}
+      className={cn("overflow-hidden rounded-lg [&_td]:px-4 [&_th]:px-4", className)}
       {...props}
     />
   );
 }
 
 function TableHeader({ className, ...props }: React.ComponentProps<"thead">) {
-  return (
-    <ShadCnTableHeader className={cn("bg-accent", className)} {...props} />
-  );
+  return <ShadCnTableHeader className={cn("bg-accent", className)} {...props} />;
 }
 
 function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
-  return (
-    <ShadCnTableBody className={cn("bg-background", className)} {...props} />
-  );
+  return <ShadCnTableBody className={cn("bg-background", className)} {...props} />;
 }
 
 export { Table, TableHeader, TableBody };
 
-export {
-  TableFooter,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableCaption,
-} from "#/_shadcn/ui/table";
+export { TableFooter, TableHead, TableRow, TableCell, TableCaption } from "#/_shadcn/ui/table";

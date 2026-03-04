@@ -1,8 +1,6 @@
 export function getCookie(name: string): string | undefined {
   if (typeof document !== "undefined") {
-    const value = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith(name + "="));
+    const value = document.cookie.split("; ").find((row) => row.startsWith(name + "="));
     return value?.split("=")[1];
   }
 }
@@ -19,12 +17,10 @@ export const kbs = (shortcut: string): string => {
     ? { mod: "⌘", option: "⌥", ctrl: "⌃", shift: "⇧" }
     : { mod: "Ctrl", option: "Alt", ctrl: "Ctrl", shift: "Shift" };
 
-  return shortcut
-    .replaceAll("+", "")
-    .replaceAll(/(mod|option|ctrl|shift)/gi, (match) => {
-      const lower = match.toLowerCase();
-      return map[lower] ?? match.toUpperCase();
-    });
+  return shortcut.replaceAll("+", "").replaceAll(/(mod|option|ctrl|shift)/gi, (match) => {
+    const lower = match.toLowerCase();
+    return map[lower] ?? match.toUpperCase();
+  });
 };
 
 export const formatDateTime = (date: Date) => {
@@ -36,7 +32,5 @@ export const formatDateTime = (date: Date) => {
 
 // Create human readable labels, e.g. "serviceAccount" => "Service Account"
 export function labelize(value: string) {
-  return value
-    .replaceAll(/([a-z\d])([A-Z])/g, "$1 $2")
-    .replace(/^\w/, (c) => c.toUpperCase());
+  return value.replaceAll(/([a-z\d])([A-Z])/g, "$1 $2").replace(/^\w/, (c) => c.toUpperCase());
 }

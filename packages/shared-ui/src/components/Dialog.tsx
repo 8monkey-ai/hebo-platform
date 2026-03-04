@@ -7,9 +7,7 @@ export function DialogTitle({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Title>) {
-  return (
-    <ShadCnDialogTitle className={cn("font-medium", className)} {...props} />
-  );
+  return <ShadCnDialogTitle className={cn("font-medium", className)} {...props} />;
 }
 
 export {

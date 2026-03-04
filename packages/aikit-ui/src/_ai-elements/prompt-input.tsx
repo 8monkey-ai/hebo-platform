@@ -83,12 +83,12 @@ const convertBlobUrlToDataUrl = async (url: string): Promise<string | null> => {
     const response = await fetch(url);
     const blob = await response.blob();
     // FileReader uses callback-based API, wrapping in Promise is necessary
-    // oxlint-disable-next-line eslint-plugin-promise(avoid-new)
+    // oxlint-disable-next-line avoid-new
     return new Promise((resolve) => {
       const reader = new FileReader();
-      // oxlint-disable-next-line eslint-plugin-unicorn(prefer-add-event-listener)
+      // oxlint-disable-next-line prefer-add-event-listener
       reader.onloadend = () => resolve(reader.result as string);
-      // oxlint-disable-next-line eslint-plugin-unicorn(prefer-add-event-listener)
+      // oxlint-disable-next-line prefer-add-event-listener
       reader.onerror = () => resolve(null);
       reader.readAsDataURL(blob);
     });
@@ -181,7 +181,7 @@ export const PromptInputProvider = ({
     (FileUIPart & { id: string })[]
   >([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  // oxlint-disable-next-line eslint(no-empty-function)
+  // oxlint-disable-next-line no-empty-function
   const openRef = useRef<() => void>(() => {});
 
   const add = useCallback((files: File[] | FileList) => {
@@ -674,7 +674,7 @@ export const PromptInput = ({
         }
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- cleanup only on unmount; filesRef always current
+    // oxlint-disable-next-line exhaustive-deps -- cleanup only on unmount; filesRef always current
     [usingProvider]
   );
 
@@ -1239,7 +1239,7 @@ export const PromptInputTabLabel = ({
   ...props
 }: PromptInputTabLabelProps) => (
   // Content provided via children in props
-  // oxlint-disable-next-line eslint-plugin-jsx-a11y(heading-has-content)
+  // oxlint-disable-next-line heading-has-content
   <h3
     className={cn(
       "mb-2 px-3 font-medium text-muted-foreground text-xs",

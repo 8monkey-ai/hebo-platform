@@ -5,7 +5,9 @@ import { kbs } from "~console/lib/utils";
 
 <Logo className="hidden md:flex" />
 
-<p className="text-base font-semibold">Hi <UserName />!</p>
+<p className="text-base font-semibold">
+  Hi <UserName />!
+</p>
 
 Start using our interactive playground ({kbs("mod+P")}) or code your first agent with our gateway.
 
@@ -46,7 +48,7 @@ import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 const hebo = createOpenAICompatible({
   name: "hebo",
   baseURL: "https://gateway.hebo.ai/v1",
-  apiKey: "<HEBO_API_KEY>",  // Replace with your generated key
+  apiKey: "<HEBO_API_KEY>", // Replace with your generated key
 });
 
 const { text } = await generateText({

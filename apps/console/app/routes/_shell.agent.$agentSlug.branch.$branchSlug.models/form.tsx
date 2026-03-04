@@ -1,18 +1,30 @@
-import { useFetcher } from "react-router";
-import { useEffect, useRef, useState } from "react";
 import { useForm, type FieldMetadata } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 import { Brain, ChevronsUpDown, Edit } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useFetcher } from "react-router";
 import { useSnapshot } from "valtio";
 
+import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@hebo/shared-ui/components/Card";
+import { Card, CardContent, CardFooter, CardHeader } from "@hebo/shared-ui/components/Card";
 import { Checkbox } from "@hebo/shared-ui/components/Checkbox";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@hebo/shared-ui/components/Collapsible";
+import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@hebo/shared-ui/components/Dialog";
 import {
   FieldControl,
   Field,
@@ -26,34 +38,16 @@ import {
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Select } from "@hebo/shared-ui/components/Select";
 import { Separator } from "@hebo/shared-ui/components/Separator";
-import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
-import { Badge } from "@hebo/shared-ui/components/Badge";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@hebo/shared-ui/components/Dialog";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@hebo/shared-ui/components/Collapsible";
 
+import { ModelSelector } from "~console/components/ui/ModelSelector";
 import { useFormErrorToast } from "~console/lib/errors";
 import { shellStore } from "~console/lib/shell";
-import { ModelSelector } from "~console/components/ui/ModelSelector";
 
 import {
   modelsConfigFormSchema,
   type ModelConfigFormValue,
   type ModelsConfigFormValues,
 } from "./schema";
-
 
 type ModelsConfigProps = {
   agentSlug: string;
@@ -62,13 +56,18 @@ type ModelsConfigProps = {
   providers: Array<{ slug: string; name: string }>;
 };
 
-export default function ModelsConfigForm({ agentSlug, branchSlug, models, providers }: ModelsConfigProps) {
+export default function ModelsConfigForm({
+  agentSlug,
+  branchSlug,
+  models,
+  providers,
+}: ModelsConfigProps) {
   const fetcher = useFetcher();
 
   const [form, fields] = useForm<ModelsConfigFormValues>({
     lastResult: fetcher.state === "idle" ? fetcher.data : undefined,
     constraint: getZodConstraint(modelsConfigFormSchema),
-    defaultValue: { models }
+    defaultValue: { models },
   });
   useFormErrorToast(form.allErrors);
 
@@ -80,18 +79,14 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
         setExpandedCardId(null);
       }
     }
+    // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
 
   const formRef = useRef<HTMLFormElement>(null);
 
   return (
-    <FormControl
-      form={form}
-      as={fetcher.Form}
-      ref={formRef}
-      className="flex flex-col gap-4"
-    >
-      <button type="submit" hidden aria-hidden="true" tabIndex={-1} disabled={!form.dirty}/>
+    <FormControl form={form} as={fetcher.Form} ref={formRef} className="flex flex-col gap-4">
+      <button type="submit" hidden aria-hidden="true" tabIndex={-1} disabled={!form.dirty} />
 
       {fields.models.getFieldList().map((model, index) => (
         <ModelCard
@@ -101,19 +96,19 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
           branchSlug={branchSlug}
           providers={providers}
           isExpanded={expandedCardId === index}
-          onOpenChange={(open) => { 
-            form.dirty && form.reset({ name: fields.models.name  });
-            open && setExpandedCardId(index);
+          onOpenChange={(open) => {
+            if (form.dirty) form.reset({ name: fields.models.name });
+            if (open) setExpandedCardId(index);
           }}
           onRemove={() => {
             setExpandedCardId(null);
-            form.remove({ name: fields.models.name, index })
-            // FUTURE: this is a quirk to work around a current Conform limitation. 
+            form.remove({ name: fields.models.name, index });
+            // FUTURE: this is a quirk to work around a current Conform limitation.
             // Remove once upgrade to future APIs in conform 1.9+
             setTimeout(() => formRef.current?.requestSubmit(), 2000);
           }}
           onCancel={() => {
-            form.dirty && form.reset({ name: fields.models.name  });
+            if (form.dirty) form.reset({ name: fields.models.name });
             setExpandedCardId(null);
           }}
           isSubmitting={fetcher.state === "submitting"}
@@ -140,7 +135,6 @@ export default function ModelsConfigForm({ agentSlug, branchSlug, models, provid
   );
 }
 
-
 function ModelCard(props: {
   model: FieldMetadata<ModelConfigFormValue>;
   agentSlug: string;
@@ -165,28 +159,28 @@ function ModelCard(props: {
   } = props;
 
   const { models: supportedModels } = useSnapshot(shellStore);
-  const availableProviders = providers.filter((p) => supportedModels?.[model.getFieldset().type.value ?? ""]?.providers?.includes(p.slug));
+  const availableProviders = providers.filter((p) =>
+    supportedModels?.[model.getFieldset().type.value ?? ""]?.providers?.includes(p.slug),
+  );
 
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [routingEnabled, setRoutingEnabled] = useState(Boolean(model.getFieldset().routing.value));
 
   const aliasPath = [agentSlug, branchSlug, model.getFieldset().alias.value || "alias"].join("/");
 
-  const cardRef = useRef<HTMLDivElement>(null); 
+  const cardRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (isExpanded) cardRef.current?.focus();
   }, [isExpanded]);
 
   return (
-    <Collapsible 
-      open={isExpanded}
-      onOpenChange={onOpenChange}>
+    <Collapsible open={isExpanded} onOpenChange={onOpenChange}>
       <Card size="sm">
-        <CardHeader className="grid gap-4 min-w-0 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center focus:outline-none focus:ring-2 focus:ring-ring/40 focus:ring-offset-2 focus:ring-offset-background">
+        <CardHeader className="grid min-w-0 gap-4 focus:ring-2 focus:ring-ring/40 focus:ring-offset-2 focus:ring-offset-background focus:outline-none sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
           <div className="flex min-w-0 flex-col gap-2">
-            <span className="text-xs uppercase text-muted-foreground">Alias path</span>
-            <div className="inline-flex gap-1 items-center">
-              <span className="text-sm font-medium text-ellipsis-start">{aliasPath}</span>
+            <span className="text-xs text-muted-foreground uppercase">Alias path</span>
+            <div className="inline-flex items-center gap-1">
+              <span className="text-ellipsis-start text-sm font-medium">{aliasPath}</span>
               <CopyButton value={aliasPath} />
             </div>
           </div>
@@ -196,33 +190,34 @@ function ModelCard(props: {
             {model.getFieldset().type.value ?? "not set"}
           </Badge>
 
-          <CollapsibleTrigger render={
-            <Button type="button" variant="outline" disabled={isExpanded}>
-              <Edit />
-              Edit
-            </Button>
-          } />
+          <CollapsibleTrigger
+            render={
+              <Button type="button" variant="outline" disabled={isExpanded}>
+                <Edit />
+                Edit
+              </Button>
+            }
+          />
         </CardHeader>
 
-        <CollapsibleContent 
+        <CollapsibleContent
           keepMounted
           inert={!isExpanded}
-          className="
-            h-(--collapsible-panel-height)
-            [&[data-starting-style],&[data-ending-style]]:h-0
-            transition-all duration-150 ease-out
-            "
-          >
-
+          className="h-(--collapsible-panel-height) transition-all duration-150 ease-out [&[data-starting-style],&[data-ending-style]]:h-0"
+        >
           <Separator />
 
-          <CardContent ref={cardRef} tabIndex={-1} className="flex flex-col gap-4 my-3 focus:outline-none">
-            <FieldGroup className="grid gap-4 grid-cols-1 md:grid-cols-2">
+          <CardContent
+            ref={cardRef}
+            tabIndex={-1}
+            className="my-3 flex flex-col gap-4 focus:outline-none"
+          >
+            <FieldGroup className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Field name={model.getFieldset().alias.name}>
                 <FieldLabel>Alias</FieldLabel>
                 <FieldControl>
                   <Input placeholder="Set alias name" autoComplete="off" />
-                </FieldControl> 
+                </FieldControl>
                 <FieldError />
               </Field>
 
@@ -238,13 +233,19 @@ function ModelCard(props: {
             <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
               <div className="flex items-center gap-1">
                 <h4 className="text-sm font-medium">Advanced options</h4>
-                <CollapsibleTrigger render={
-                  <Button variant="ghost" size="icon" className="size-6" type="button">
-                    <ChevronsUpDown />
-                  </Button>
-                } />
+                <CollapsibleTrigger
+                  render={
+                    <Button variant="ghost" size="icon" className="size-6" type="button">
+                      <ChevronsUpDown />
+                    </Button>
+                  }
+                />
               </div>
-              <CollapsibleContent keepMounted inert={!advancedOpen} className="overflow-hidden h-(--collapsible-panel-height) pt-2">
+              <CollapsibleContent
+                keepMounted
+                inert={!advancedOpen}
+                className="h-(--collapsible-panel-height) overflow-hidden pt-2"
+              >
                 <Field orientation="horizontal" className="border border-border px-4 py-3.5">
                   <Checkbox
                     id={`byo-${aliasPath}`}
@@ -253,22 +254,22 @@ function ModelCard(props: {
                   />
                   <FieldContent>
                     <FieldLabel htmlFor={`byo-${aliasPath}`}>Bring Your Own Provider</FieldLabel>
-                    <FieldDescription>Setup your credentials first in providers settings</FieldDescription>
+                    <FieldDescription>
+                      Setup your credentials first in providers settings
+                    </FieldDescription>
                   </FieldContent>
                   <Field
-                    name={`${model.getFieldset().routing.getFieldset().only.name}[0]`} 
-                    className="max-w-44">
+                    name={`${model.getFieldset().routing.getFieldset().only.name}[0]`}
+                    className="max-w-44"
+                  >
                     <FieldControl disabled={!routingEnabled}>
                       <Select
-                        items={
-                          availableProviders
-                            .map((provider) => ({
-                              value: provider.slug,
-                              label: provider.name,
-                            }))
-                          }
+                        items={availableProviders.map((provider) => ({
+                          value: provider.slug,
+                          label: provider.name,
+                        }))}
                         placeholder={
-                          availableProviders.length
+                          availableProviders.length > 0
                             ? "Select provider"
                             : "No supported providers configured"
                         }
@@ -283,15 +284,13 @@ function ModelCard(props: {
 
           <CardFooter>
             <Dialog>
-              <DialogTrigger render={
-                <Button
-                  type="button"
-                  variant="destructive"
-                  disabled={isSubmitting}
-                >
-                  Remove
-                </Button>
-              } />
+              <DialogTrigger
+                render={
+                  <Button type="button" variant="destructive" disabled={isSubmitting}>
+                    Remove
+                  </Button>
+                }
+              />
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Remove model</DialogTitle>
@@ -300,11 +299,13 @@ function ModelCard(props: {
                   </DialogDescription>
                 </DialogHeader>
                 <DialogFooter>
-                  <DialogClose render={
-                    <Button type="button" variant="outline">
-                      Cancel
-                    </Button>
-                  } />
+                  <DialogClose
+                    render={
+                      <Button type="button" variant="outline">
+                        Cancel
+                      </Button>
+                    }
+                  />
 
                   <Button
                     type="button"

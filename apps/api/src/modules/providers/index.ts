@@ -3,12 +3,7 @@ import { Elysia, status, t } from "elysia";
 import { dbClient } from "~api/middleware/db-client";
 
 import { type Models } from "./types";
-import {
-  Provider,
-  ProviderConfig,
-  ProviderSlug,
-  supportedProviders,
-} from "./types";
+import { Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./types";
 
 export const providersModule = new Elysia({
   prefix: "/providers",
@@ -24,8 +19,7 @@ export const providersModule = new Elysia({
           ({
             slug: slug as ProviderSlug,
             name,
-            config: providerConfigs.find((p) => p.provider_slug === slug)
-              ?.value,
+            config: providerConfigs.find((p) => p.provider_slug === slug)?.value,
           }) as Provider,
       );
 
@@ -81,9 +75,7 @@ export const providersModule = new Elysia({
 
       const affectedBranches = branches.filter((branch) => {
         const models = branch.models as Models;
-        return models.some((model) =>
-          model.routing?.only?.includes(params.slug),
-        );
+        return models.some((model) => model.routing?.only?.includes(params.slug));
       });
 
       // Batch update all affected branches + delete provider in a single transaction

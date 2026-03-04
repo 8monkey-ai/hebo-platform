@@ -5,19 +5,10 @@
     "build": {
       "dependsOn": ["^build"],
       "env": ["NODE_ENV", "VITE_"],
-      "outputs": [
-        "**/generated/**",
-        ".react-router/types/**",
-        "build/**",
-        "dist/**",
-        "out/**"
-      ]
+      "outputs": ["**/generated/**", ".react-router/types/**", "build/**", "dist/**", "out/**"]
     },
     "predev": {
-      "outputs": [
-        "**/generated/**",
-        ".react-router/types/**"
-      ]
+      "outputs": ["**/generated/**", ".react-router/types/**"]
     },
     "dev": {
       "dependsOn": ["^predev", "predev"],

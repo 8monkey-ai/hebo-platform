@@ -8,13 +8,11 @@ import { cn } from "@hebo/shared-ui/lib/utils";
 import { authService } from "~console/lib/auth";
 
 export function GenerateApiKey() {
-  const [loading, setLoading] = useState<"idle" | "loading" | "success">(
-    "idle",
-  );
+  const [loading, setLoading] = useState<"idle" | "loading" | "success">("idle");
   const [key, setKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleGenerateAPIKey = async() => {
+  const handleGenerateAPIKey = async () => {
     setLoading("loading");
 
     setError(null);
@@ -29,22 +27,17 @@ export function GenerateApiKey() {
       setKey((error_ as Error).message);
       setLoading("idle");
     }
-  }
+  };
 
   return (
-    <div
-      className={cn(
-        "flex flex-row gap-2",
-        error ? "text-destructive" : "text-foreground",
-      )}
-    >
+    <div className={cn("flex flex-row gap-2", error ? "text-destructive" : "text-foreground")}>
       <Input
         readOnly
         icon={KeyRound}
         copy={true}
         value={key ?? ""}
         placeholder="Generate API Key …"
-        tabIndex={key ? 0 : -1} 
+        tabIndex={key ? 0 : -1}
         aria-disabled={!key}
         aria-label="Generated API key"
       />

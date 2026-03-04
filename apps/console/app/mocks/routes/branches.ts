@@ -13,13 +13,9 @@ export const branchHandlers = [
       };
       const branchSlug = slugify(body.name, { lower: true, strict: true });
 
-      const agent = db.agents.findFirst((q) =>
-        q.where({ slug: params.agentSlug }),
-      );
+      const agent = db.agents.findFirst((q) => q.where({ slug: params.agentSlug }));
 
-      const sourceBranch = agent!.branches.find(
-        (b) => b.slug === body.sourceBranchSlug,
-      );
+      const sourceBranch = agent!.branches.find((b) => b.slug === body.sourceBranchSlug);
 
       const existingBranch = agent!.branches.find((b) => b.slug === branchSlug);
       if (existingBranch)
@@ -47,20 +43,15 @@ export const branchHandlers = [
     },
   ),
 
-  http.get<{ agentSlug: string }>(
-    "/api/v1/agents/:agentSlug/branches",
-    async ({ params }) => {
-      const agent = db.agents.findFirst((q) =>
-        q.where({ slug: params.agentSlug }),
-      );
-      if (!agent)
-        return new HttpResponse("Agent with the slug not found", {
-          status: 404,
-        });
+  http.get<{ agentSlug: string }>("/api/v1/agents/:agentSlug/branches", async ({ params }) => {
+    const agent = db.agents.findFirst((q) => q.where({ slug: params.agentSlug }));
+    if (!agent)
+      return new HttpResponse("Agent with the slug not found", {
+        status: 404,
+      });
 
-      return HttpResponse.json(agent.branches);
-    },
-  ),
+    return HttpResponse.json(agent.branches);
+  }),
 
   http.patch<{ agentSlug: string; branchSlug: string }>(
     "/api/v1/agents/:agentSlug/branches/:branchSlug",

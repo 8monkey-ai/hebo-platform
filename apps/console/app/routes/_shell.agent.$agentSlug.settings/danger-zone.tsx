@@ -1,7 +1,7 @@
-import { Form, useActionData, useNavigation } from "react-router";
-import { z } from "zod";
 import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
+import { Form, useActionData, useNavigation } from "react-router";
+import { z } from "zod";
 
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -23,20 +23,25 @@ import {
   FieldError,
 } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
-import { Item, ItemActions, ItemContent, ItemDescription, ItemTitle } from "@hebo/shared-ui/components/Item";
+import {
+  Item,
+  ItemActions,
+  ItemContent,
+  ItemDescription,
+  ItemTitle,
+} from "@hebo/shared-ui/components/Item";
 
 import { useFormErrorToast } from "~console/lib/errors";
 
-
 export function createAgentDeleteSchema(agentSlug: string) {
   return z.object({
-    slugConfirm: z.literal(agentSlug, "You must type your EXACT agent slug")
+    slugConfirm: z.literal(agentSlug, "You must type your EXACT agent slug"),
   });
 }
 
 export type AgentDeleteFormValues = z.infer<ReturnType<typeof createAgentDeleteSchema>>;
 
-export function DangerSettings({ agent }: { agent: { slug: string }}) {
+export function DangerSettings({ agent }: { agent: { slug: string } }) {
   const navigation = useNavigation();
 
   const lastResult = useActionData();
@@ -50,7 +55,7 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
     <div className="flex flex-col gap-2">
       <h2>Danger Zone</h2>
 
-      <Item variant="outline" className="bg-background border-destructive border-dashed">
+      <Item variant="outline" className="border-dashed border-destructive bg-background">
         <ItemContent>
           <ItemTitle>Delete Agent</ItemTitle>
           <ItemDescription>
@@ -58,34 +63,26 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
           </ItemDescription>
         </ItemContent>
         <ItemActions className="self-center">
-
           <Dialog>
-            <DialogTrigger render={
-              <Button variant="destructive">Delete agent</Button>
-            } />
+            <DialogTrigger render={<Button variant="destructive">Delete agent</Button>} />
 
             <DialogContent>
               <FormControl form={form} as={Form}>
                 <DialogHeader>
                   <DialogTitle>Delete Agent</DialogTitle>
-                  <DialogDescription>
-                    This will delete your agent irreversibly.
-                  </DialogDescription>
+                  <DialogDescription>This will delete your agent irreversibly.</DialogDescription>
                 </DialogHeader>
 
                 <div className="flex flex-col gap-4">
                   <Alert variant="destructive">
                     <AlertTitle>
-                      <strong>Warning:</strong> This action is not reversible.
-                      Be certain.
+                      <strong>Warning:</strong> This action is not reversible. Be certain.
                     </AlertTitle>
                   </Alert>
 
                   <Field name={fields.slugConfirm.name}>
                     <FieldLabel className="block">
-                      To confirm, type{" "}
-                      <strong>{agent.slug}</strong> in
-                      the box below:
+                      To confirm, type <strong>{agent.slug}</strong> in the box below:
                     </FieldLabel>
                     <FieldControl>
                       <Input autoComplete="off" />
@@ -95,17 +92,23 @@ export function DangerSettings({ agent }: { agent: { slug: string }}) {
                 </div>
 
                 <DialogFooter>
-                  <DialogClose render={
-                    <Button variant="outline" type="button">Cancel</Button>
-                  } />
-                  <Button isLoading={navigation.state !== "idle" && navigation.formData != null} type="submit">
+                  <DialogClose
+                    render={
+                      <Button variant="outline" type="button">
+                        Cancel
+                      </Button>
+                    }
+                  />
+                  <Button
+                    isLoading={navigation.state !== "idle" && navigation.formData != null}
+                    type="submit"
+                  >
                     Delete
                   </Button>
                 </DialogFooter>
               </FormControl>
             </DialogContent>
           </Dialog>
-
         </ItemActions>
       </Item>
     </div>

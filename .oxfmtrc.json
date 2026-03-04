@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "sortImports": {
+    "customGroups": [
+      { "groupName": "workspace", "elementNamePattern": ["@hebo/**"] },
+      { "groupName": "app", "elementNamePattern": ["~*/**"] },
+      { "groupName": "package", "elementNamePattern": ["#/**"] }
+    ],
+    "groups": [
+      "builtin",
+      "external",
+      "workspace",
+      "app",
+      "package",
+      "subpath",
+      ["parent", "sibling", "index"],
+      "style",
+      "unknown"
+    ],
+    "newlinesBetween": true
+  },
+  "sortTailwindcss": {
+    "attributes": ["class", "className"],
+    "functions": ["clsx", "cn", "cva", "tw"],
+    "stylesheet": "apps/console/app/styles/tailwind.css"
+  },
+  "ignorePatterns": [
+    "**/_*/**",
+    "!apps/console/app/routes/_*/**",
+    "apps/console/public/mockServiceWorker.js",
+    "**/migrations/**",
+    "**/generated/**",
+    "apps/console/app/routes/_shell.agent.*.branch.*._index/route.mdx"
+  ]
+}

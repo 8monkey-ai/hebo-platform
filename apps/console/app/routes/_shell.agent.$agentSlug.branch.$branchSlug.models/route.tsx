@@ -1,13 +1,12 @@
-import { unstable_useRoute as useRoute } from "react-router";
 import { parseWithZod } from "@conform-to/zod/v4";
+import { unstable_useRoute as useRoute } from "react-router";
 
-import { api } from "~console/lib/service";
 import { parseError } from "~console/lib/errors";
-
-import ModelsConfigForm from "./form";
-import { modelsConfigFormSchema } from "./schema";
+import { api } from "~console/lib/service";
 
 import type { Route } from "./+types/route";
+import ModelsConfigForm from "./form";
+import { modelsConfigFormSchema } from "./schema";
 
 export async function clientLoader() {
   const providers = (await api.providers.get({ query: { configured: true } })).data ?? [];
@@ -16,7 +15,6 @@ export async function clientLoader() {
 }
 
 export async function clientAction({ request, params }: Route.ClientActionArgs) {
-
   const formData = await request.formData();
   const submission = parseWithZod(formData, {
     schema: modelsConfigFormSchema,
@@ -34,7 +32,6 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
       .patch({
         models: submission.value.models ?? [],
       });
-
   } catch (error) {
     return submission.reply({ formErrors: [parseError(error).message] });
   }
@@ -46,26 +43,29 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
   return submission.reply({ resetForm: true });
 }
 
-
 export default function ModelsConfigRoute({ loaderData }: Route.ComponentProps) {
-
   const { agent, branch } = useRoute("routes/_shell.agent.$agentSlug")!.loaderData!;
 
   return (
-      <>
-        <div>
-          <h1>Model Configuration</h1>
-          <p className="text-muted-foreground text-sm">
-            Configure access for your agent to different models. Use our managed providers or connect your existing inference endpoints. For latest pricing visit our <a href="https://hebo.ai/docs" target="_blank" rel="noopener">Models</a> documentation.
-          </p>
-        </div>
+    <>
+      <div>
+        <h1>Model Configuration</h1>
+        <p className="text-sm text-muted-foreground">
+          Configure access for your agent to different models. Use our managed providers or connect
+          your existing inference endpoints. For latest pricing visit our{" "}
+          <a href="https://hebo.ai/docs" target="_blank" rel="noopener">
+            Models
+          </a>{" "}
+          documentation.
+        </p>
+      </div>
 
-        <ModelsConfigForm
-          agentSlug={agent.slug}
-          branchSlug={branch!.slug}
-          models={branch!.models}
-          providers={loaderData.providers}
-        />
-      </>
+      <ModelsConfigForm
+        agentSlug={agent.slug}
+        branchSlug={branch!.slug}
+        models={branch!.models}
+        providers={loaderData.providers}
+      />
+    </>
   );
 }

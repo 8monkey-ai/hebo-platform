@@ -1,4 +1,6 @@
+import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
 import { metrics } from "@opentelemetry/api";
+import type { SeverityNumber } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
@@ -11,32 +13,20 @@ import {
   SimpleLogRecordProcessor,
   createLoggerConfigurator,
 } from "@opentelemetry/sdk-logs";
-import {
-  MeterProvider,
-  PeriodicExportingMetricReader,
-} from "@opentelemetry/sdk-metrics";
-import {
-  PrismaInstrumentation,
-  registerInstrumentations,
-} from "@prisma/instrumentation";
+import { MeterProvider, PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
+import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrumentation";
 
 import { isProduction } from "../env";
 import { getSecret } from "../utils/secrets";
 import { isRootPathUrl } from "../utils/url";
 
-import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
-import type { SeverityNumber } from "@opentelemetry/api-logs";
+const [greptimeEndpointRaw, greptimeUser, greptimePassword] = await Promise.all([
+  getSecret("GreptimeEndpoint"),
+  getSecret("GreptimeUser"),
+  getSecret("GreptimePassword"),
+]);
 
-const [greptimeEndpointRaw, greptimeUser, greptimePassword] = await Promise.all(
-  [
-    getSecret("GreptimeEndpoint"),
-    getSecret("GreptimeUser"),
-    getSecret("GreptimePassword"),
-  ],
-);
-
-const greptimeOtlpEndpoint =
-  greptimeEndpointRaw ?? "http://localhost:4000/v1/otlp";
+const greptimeOtlpEndpoint = greptimeEndpointRaw ?? "http://localhost:4000/v1/otlp";
 const greptimeAuthHeaders: Record<string, string> =
   greptimeUser && greptimePassword
     ? {
@@ -62,10 +52,7 @@ metrics.setGlobalMeterProvider(
   }),
 );
 
-export const getOtelLogger = (
-  serviceName: string,
-  minimumSeverity: SeverityNumber,
-) => {
+export const getOtelLogger = (serviceName: string, minimumSeverity: SeverityNumber) => {
   const loggerProvider = new LoggerProvider({
     resource: resourceFromAttributes({
       "service.name": serviceName,
@@ -79,9 +66,7 @@ export const getOtelLogger = (
       },
     ]),
     processors: [
-      ...(isProduction
-        ? []
-        : [new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())]),
+      ...(isProduction ? [] : [new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())]),
       new BatchLogRecordProcessor(
         new OTLPLogExporter({
           url: `${greptimeOtlpEndpoint}/v1/logs`,
@@ -112,9 +97,7 @@ registerInstrumentations({
   ],
 });
 
-export const getOtelConfig = (
-  serviceName: string,
-): ElysiaOpenTelemetryOptions => {
+export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
   return {
     serviceName,
     checkIfShouldTrace: (request) => {

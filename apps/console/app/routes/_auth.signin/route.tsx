@@ -8,7 +8,6 @@ import { Logo } from "~console/components/ui/Logo";
 import { MagicLinkSignIn } from "./magiclink";
 import { OAuthSignIn } from "./oauth";
 
-
 export default function SignIn() {
   return (
     <div className="relative min-h-dvh">
@@ -23,30 +22,27 @@ export default function SignIn() {
               <BookOpen />
               <span>Docs</span>
             </a>
-        } />
+          }
+        />
 
         <div className="space-y-5 px-19 py-30 text-xl">
           <div className="flex items-center gap-2 text-3xl font-semibold">
             Hebo is{}
-            <Badge className="text-foreground bg-lime-400 text-3xl h-10 font-semibold">
-              FREE
-            </Badge>
+            <Badge className="h-10 bg-lime-400 text-3xl font-semibold text-foreground">FREE</Badge>
           </div>
           <div className="space-y-2">
             <div className="font-semibold">Deploy agents to production:</div>
             <ul className="space-y-2">
-              <li>
-                ✔️ Choose from a set of free open-source models
-              </li>
-              <li>
-                ✔️ Use commercial models within fair-usage policy
-              </li>
-              <li>
-                ✔️ Bring your own key to use 3rd party credits
-              </li>
+              <li>✔️ Choose from a set of free open-source models</li>
+              <li>✔️ Use commercial models within fair-usage policy</li>
+              <li>✔️ Bring your own key to use 3rd party credits</li>
             </ul>
           </div>
-          <span className="font-semibold">Get in touch</span> with us on <a href="https://discord.com/invite/cCJtXZRU5p" target="_blank" rel="noopener noreferrer">Discord</a> to learn about our special programs, including student ambassadors.
+          <span className="font-semibold">Get in touch</span> with us on{" "}
+          <a href="https://discord.com/invite/cCJtXZRU5p" target="_blank" rel="noopener noreferrer">
+            Discord
+          </a>{" "}
+          to learn about our special programs, including student ambassadors.
         </div>
       </aside>
 
@@ -54,9 +50,7 @@ export default function SignIn() {
       <main className="flex min-h-dvh flex-1 items-center justify-center transition-all duration-300 lg:ml-128">
         <div className="flex w-xs flex-col items-center gap-4">
           <Logo />
-          <p className="text-center text-base">
-            The fastest way to build & scale agents
-          </p>
+          <p className="text-center text-base">The fastest way to build & scale agents</p>
 
           <div className="w-full space-y-4">
             <OAuthSignIn />

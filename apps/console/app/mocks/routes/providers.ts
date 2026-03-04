@@ -16,9 +16,7 @@ export const providerHandlers = [
     const providers = [];
 
     for (const slug in SUPPORTED_PROVIDERS) {
-      const configuredProvider = db.providers.findFirst((q) =>
-        q.where({ slug: slug }),
-      );
+      const configuredProvider = db.providers.findFirst((q) => q.where({ slug: slug }));
 
       if (configuredProvider) {
         providers.push(configuredProvider);
@@ -38,29 +36,23 @@ export const providerHandlers = [
     return HttpResponse.json(providers);
   }),
 
-  http.put<{ slug: string }>(
-    "/api/v1/providers/:slug/config",
-    async ({ params, request }) => {
-      const body = (await request.json()) as unknown;
+  http.put<{ slug: string }>("/api/v1/providers/:slug/config", async ({ params, request }) => {
+    const body = (await request.json()) as unknown;
 
-      db.providers.delete((q) => q.where({ slug: params.slug }));
+    db.providers.delete((q) => q.where({ slug: params.slug }));
 
-      const provider = await db.providers.create({
-        slug: params.slug,
-        name: SUPPORTED_PROVIDERS[params.slug].name,
-        config: body,
-      });
+    const provider = await db.providers.create({
+      slug: params.slug,
+      name: SUPPORTED_PROVIDERS[params.slug].name,
+      config: body,
+    });
 
-      return HttpResponse.json(provider, { status: 201 });
-    },
-  ),
+    return HttpResponse.json(provider, { status: 201 });
+  }),
 
-  http.delete<{ slug: string }>(
-    "/api/v1/providers/:slug/config",
-    async ({ params }) => {
-      db.providers.delete((q) => q.where({ slug: params.slug }));
+  http.delete<{ slug: string }>("/api/v1/providers/:slug/config", async ({ params }) => {
+    db.providers.delete((q) => q.where({ slug: params.slug }));
 
-      return new HttpResponse(undefined, { status: 200 });
-    },
-  ),
+    return new HttpResponse(undefined, { status: 200 });
+  }),
 ];

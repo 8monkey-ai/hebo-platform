@@ -41,23 +41,19 @@ export const agentsModule = new Elysia({
     async ({ body, dbClient, organizationId, userId, authClient }) => {
       const agentSlug = slugFromString(body.name, 3);
 
-      const { data: team, error: createTeamError } =
-        await authClient!.organization.createTeam({
-          name: `${body.name}'s Team`,
-          organizationId: organizationId!,
-          agentSlug,
-        });
+      const { data: team, error: createTeamError } = await authClient!.organization.createTeam({
+        name: `${body.name}'s Team`,
+        organizationId: organizationId!,
+        agentSlug,
+      });
       if (createTeamError || !team) {
-        throw new Error(
-          `Failed to create team: ${createTeamError?.message ?? "Unknown error"}`,
-        );
+        throw new Error(`Failed to create team: ${createTeamError?.message ?? "Unknown error"}`);
       }
 
-      const { error: addTeamMemberError } =
-        await authClient!.organization.addTeamMember({
-          teamId: team.id,
-          userId: userId,
-        });
+      const { error: addTeamMemberError } = await authClient!.organization.addTeamMember({
+        teamId: team.id,
+        userId: userId,
+      });
       if (addTeamMemberError) {
         throw new Error(
           `Failed to add team member: ${addTeamMemberError?.message ?? "Unknown error"}`,

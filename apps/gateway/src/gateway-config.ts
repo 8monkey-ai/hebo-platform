@@ -10,10 +10,7 @@ import { getOtelLogger } from "@hebo/shared-api/lib/otel";
 import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino-adapter";
 
 import { resolveModelId, resolveProvider } from "./services/model-resolver";
-import {
-  createProvider,
-  loadProviderSecrets,
-} from "./services/provider-factory";
+import { createProvider, loadProviderSecrets } from "./services/provider-factory";
 
 instrumentFetch("full");
 
@@ -51,9 +48,7 @@ export const gw = gateway({
       providers: ["bedrock", "groq"],
       ...withFreeTokens(6_000_000_000),
     }),
-    gemini["v3.x"].map((preset) =>
-      preset({ providers: ["vertex"], ...withFreeTokens(0) }),
-    ),
+    gemini["v3.x"].map((preset) => preset({ providers: ["vertex"], ...withFreeTokens(0) })),
     claudeOpus46({ providers: ["bedrock"], ...withFreeTokens(0) }),
     voyage35({ providers: ["voyage"], ...withFreeTokens(0) }),
   ),

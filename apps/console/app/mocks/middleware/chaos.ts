@@ -10,12 +10,9 @@ import {
 const CHAOS_NETWORK_RATE = Number(import.meta.env.VITE_CHAOS_NETWORK ?? 0.1);
 const CHAOS_HTTP_RATE = Number(import.meta.env.VITE_CHAOS_HTTP ?? 0.2);
 
-const chaosResolver: HttpResponseResolver<PathParams, DefaultBodyType> = (
-  info,
-) => {
+const chaosResolver: HttpResponseResolver<PathParams, DefaultBodyType> = (info) => {
   if (info.request.headers.get("x-no-chaos") === "1") return;
 
-  // eslint-disable-next-line sonarjs/pseudo-random
   const roll = Math.random();
 
   if (roll < CHAOS_NETWORK_RATE) return HttpResponse.error();

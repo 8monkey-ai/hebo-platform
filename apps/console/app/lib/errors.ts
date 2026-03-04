@@ -1,10 +1,7 @@
 import isNetworkError from "is-network-error";
 import { HTTPError, TimeoutError } from "ky";
 import { useEffect } from "react";
-import {
-  isRouteErrorResponse,
-  type ShouldRevalidateFunction,
-} from "react-router";
+import { isRouteErrorResponse, type ShouldRevalidateFunction } from "react-router";
 import { toast } from "sonner";
 
 export function parseError(error: unknown) {
@@ -12,8 +9,7 @@ export function parseError(error: unknown) {
   let status: number | undefined;
 
   if (isRouteErrorResponse(error)) {
-    const msg =
-      typeof error.data === "string" ? error.data : error.data?.message;
+    const msg = typeof error.data === "string" ? error.data : error.data?.message;
     message = `${error.statusText}: ${msg}`;
     status = error.status;
   } else if (error instanceof TimeoutError) {
@@ -31,8 +27,7 @@ export function parseError(error: unknown) {
 
   const stack = error instanceof Error && error.stack ? error.stack : undefined;
 
-  let retryable =
-    !!status && (status >= 500 || [408, 409, 425, 429].includes(status));
+  let retryable = !!status && (status >= 500 || [408, 409, 425, 429].includes(status));
   if (!retryable && error instanceof TimeoutError) retryable = true;
   if (!retryable && isNetworkError(error)) retryable = true;
 

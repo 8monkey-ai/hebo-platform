@@ -1,10 +1,9 @@
+import { useForm } from "@conform-to/react";
+import { getZodConstraint } from "@conform-to/zod/v4";
 import { Info } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
-
-import { useForm } from "@conform-to/react";
-import { getZodConstraint } from "@conform-to/zod/v4";
 
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -19,13 +18,19 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@hebo/shared-ui/components/Dialog";
-import { FieldControl, Field, FieldLabel, FieldError, FieldGroup, FormControl } from "@hebo/shared-ui/components/Field";
+import {
+  FieldControl,
+  Field,
+  FieldLabel,
+  FieldError,
+  FieldGroup,
+  FormControl,
+} from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Label } from "@hebo/shared-ui/components/Label";
 import { Select } from "@hebo/shared-ui/components/Select";
 
 import { useFormErrorToast } from "~console/lib/errors";
-
 
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
@@ -74,17 +79,19 @@ export function CreateApiKeyDialog() {
     <>
       <Dialog open={createOpen} onOpenChange={createSetOpen}>
         <div>
-          <DialogTrigger render={
-            <Button variant="outline" type="button">+ Create API Key</Button>
-          } />
+          <DialogTrigger
+            render={
+              <Button variant="outline" type="button">
+                + Create API Key
+              </Button>
+            }
+          />
         </div>
         <DialogContent>
           <FormControl form={form} as={fetcher.Form}>
             <DialogHeader>
               <DialogTitle>Create API key</DialogTitle>
-              <DialogDescription>
-                Provide a name and expiration window.
-              </DialogDescription>
+              <DialogDescription>Provide a name and expiration window.</DialogDescription>
             </DialogHeader>
             <FieldGroup>
               <Field name={fields.name.name}>
@@ -108,11 +115,13 @@ export function CreateApiKeyDialog() {
               </Field>
             </FieldGroup>
             <DialogFooter>
-              <DialogClose render={
-                <Button type="button" variant="ghost">
-                  Cancel
-                </Button>
-              } />
+              <DialogClose
+                render={
+                  <Button type="button" variant="ghost">
+                    Cancel
+                  </Button>
+                }
+              />
               <Button
                 type="submit"
                 name="intent"
@@ -134,7 +143,6 @@ export function CreateApiKeyDialog() {
     </>
   );
 }
-
 
 type ApiKeyRevealDialogProps = {
   apiKey: string;
@@ -161,9 +169,7 @@ function ApiKeyRevealDialog({ apiKey, ...props }: ApiKeyRevealDialogProps) {
         </DialogHeader>
 
         <div className="flex flex-col gap-2">
-          <span className="text-sm font-medium text-muted-foreground">
-            Secret API Key
-          </span>
+          <span className="text-sm font-medium text-muted-foreground">Secret API Key</span>
           <Input readOnly copy value={apiKey} className="font-mono" />
         </div>
 
@@ -183,14 +189,13 @@ function ApiKeyRevealDialog({ apiKey, ...props }: ApiKeyRevealDialogProps) {
         </Alert>
 
         <DialogFooter>
-          <DialogClose render={
-            <Button
-              type="button"
-              disabled={!acknowledged}
-            >
-              Close
-            </Button>
-          } />
+          <DialogClose
+            render={
+              <Button type="button" disabled={!acknowledged}>
+                Close
+              </Button>
+            }
+          />
         </DialogFooter>
       </DialogContent>
     </Dialog>

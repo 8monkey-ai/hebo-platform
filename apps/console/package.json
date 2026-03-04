@@ -11,7 +11,8 @@
     "clean": "git clean -fdx -e '.env*' .",
     "predev": "react-router typegen",
     "dev": "react-router dev",
-    "lint": "eslint .",
+    "format": "oxfmt .",
+    "lint": "oxlint",
     "start": "vite preview",
     "typecheck": "react-router typegen && tsc"
   },

@@ -1,12 +1,10 @@
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+// oxlint-disable-next-line triple-slash-reference
 /// <reference path="../../.sst/platform/config.d.ts" />
 
 import heboCluster from "./cluster";
 import { isProduction, otelSecrets, normalizedStage } from "./env";
 
-const mcpDomain = isProduction
-  ? "mcp.hebo.ai"
-  : `mcp.${normalizedStage}.hebo.ai`;
+const mcpDomain = isProduction ? "mcp.hebo.ai" : `mcp.${normalizedStage}.hebo.ai`;
 const mcpPort = "3003";
 
 const heboMcp = new sst.aws.Service("HeboMcp", {
