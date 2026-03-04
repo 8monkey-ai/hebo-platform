@@ -14,7 +14,11 @@
     "max-lines": "off",
     "anchor-has-content": "off",
     "max-dependencies": "off",
-    "no-inline-comments": "off"
+    "no-inline-comments": "off",
+    "no-array-reverse": "off",
+    "no-array-sort": "off",
+    "prefer-array-to-reversed": "off",
+    "prefer-array-to-sorted": "off"
   },
   "ignorePatterns": [
     "**/_*/**",

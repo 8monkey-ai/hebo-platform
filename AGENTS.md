@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-Deployable apps live in `apps/` (`api`, `console`, `gateway`, `mcp`) while shared libraries sit in `packages/` (database, UI kits, shared data). Infrastructure code is under `infra/`. Colocate feature tests beside the implementation (`*.test.ts` / `*.spec.ts`) to keep ownership clear.
+Deployable apps live in `apps/` (`auth`, `api`, `console`, `gateway`, `mcp`) while shared libraries sit in `packages/` (database, UI kits, shared data). Infrastructure code is under `infra/`. Colocate feature tests beside the implementation (`*.test.ts` / `*.spec.ts`) to keep ownership clear.
 
 ## Build, Test, and Development Commands
 
