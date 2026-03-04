@@ -146,13 +146,6 @@ kubectl -n "$GREPTIME_NS" run curl-test --rm -i --restart=Never \
 kubectl -n "$GREPTIME_NS" logs statefulset/${HELM_RELEASE_CLUSTER}-datanode --since=10m | rg "AccessDenied|OpenDAL operator failed|no valid credential found|Unable to load credentials"
 ```
 
-At this point GreptimeDB is running with an internal LoadBalancer reachable within the VPC on ports 4000-4003. All HTTP endpoints require Basic Auth. Set the machine credentials as SST secrets so downstream services (api, auth, gateway, mcp) can authenticate:
-
-```bash
-bun run sst secret set GreptimeUser "<GREPTIME_MACHINE_USER>" --stage <stage>
-bun run sst secret set GreptimePassword "<GREPTIME_MACHINE_PASSWORD>" --stage <stage>
-```
-
 ---
 
 # Public dashboard (HTTPS + NLB)
