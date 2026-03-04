@@ -11,12 +11,12 @@ bun run dev          # Run all services with hot reload (spawns local Postgres i
 bun run -F @hebo/console dev   # Console-only development with MSW data
 bun run build        # Turborepo build across workspaces
 bun run test         # Aggregate test runner
-bun run lint         # ESLint across workspaces
+bun run lint         # Oxlint across workspaces
 bun run format       # Prettier formatting
 ```
 
 ## Coding Style & Naming Conventions
-TypeScript + React drive the codebase. Trust Prettier and ESLint for formatting. Use PascalCase for components, camelCase for functions and variables, and kebab-case file names (e.g., `billing-summary.tsx`). Follow the Shadcn design system inside `packages/*-ui`, and keep Tailwind utility-first unless a pattern graduates into shared UI.
+TypeScript + React drive the codebase. Trust Oxfmt and Oxlint for formatting. Use PascalCase for components, camelCase for functions and variables, and kebab-case file names (e.g., `billing-summary.tsx`). Follow the Shadcn design system inside `packages/*-ui`, and keep Tailwind utility-first unless a pattern graduates into shared UI.
 
 ## Key Technologies & Use Cases
 ElysiaJS powers `apps/api` and `apps/gateway`; call helpers from `packages/shared-api` for auth, CORS, and typing. Console features run on React Router 7 (Framework mode) + Tailwind 4 (CSS) + ShadCN (Components) + Conform (Forms) + Zod v4 (Schema) + Valtio (Client State). Each service manages its own data access using Prisma (e.g., `apps/api` uses the `api` schema, `apps/auth` uses the `auth` schema). SST manages infrastructure, so declare stacks in `infra/stacks` and ship secrets with `bun run sst secret set`.
