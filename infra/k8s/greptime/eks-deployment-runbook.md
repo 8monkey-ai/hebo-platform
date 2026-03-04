@@ -18,25 +18,27 @@ Environment-specific values are marked as `<PLACEHOLDER>` in `cluster.yaml`, `gr
 
 ## Placeholder reference
 
-| Placeholder              | Where used                               | Description                                                 |
-| ------------------------ | ---------------------------------------- | ----------------------------------------------------------- |
-| `<CLUSTER_NAME>`         | `cluster.yaml`, runbook commands         | EKS cluster name                                            |
-| `<AWS_REGION>`           | `cluster.yaml`, `greptime-values.yaml`   | AWS region (e.g., `eu-west-1`)                              |
-| `<VPC_ID>`               | `cluster.yaml`                           | VPC ID                                                      |
-| `<PUBLIC_SUBNET_A/B/C>`  | `cluster.yaml`                           | Public subnet IDs (3 AZs, used by the public dashboard NLB) |
-| `<PRIVATE_SUBNET_A/B/C>` | `cluster.yaml`                           | Private subnet IDs (3 AZs)                                  |
-| `<AURORA_HOST>`          | `greptime-values.yaml`                   | Aurora PostgreSQL endpoint                                  |
-| `<AURORA_DATABASE>`      | `greptime-values.yaml`                   | Aurora database name                                        |
-| `<S3_BUCKET>`            | `greptime-values.yaml`, runbook commands | S3 bucket for object storage                                |
-| `<S3_PREFIX>`            | `greptime-values.yaml`                   | S3 key prefix                                               |
-| `<GREPTIME_S3_ROLE_ARN>` | `greptime-values.yaml`                   | IRSA role ARN for S3 access                                 |
-| `<DASHBOARD_USER>`       | `greptime-values.yaml`                   | Basic Auth username                                         |
-| `<DASHBOARD_PASSWORD>`   | `greptime-values.yaml`                   | Basic Auth password                                         |
-| `<ACM_CERTIFICATE_ARN>`  | `dashboard-nlb.yaml`                     | ACM certificate ARN for TLS                                 |
-| `<DASHBOARD_HOSTNAME>`   | `dashboard-nlb.yaml`                     | Public hostname (e.g., `greptime.example.com`)              |
-| `<DASHBOARD_DOMAIN>`     | runbook commands                         | Parent domain for ExternalDNS (e.g., `example.com`)         |
-| `<POSTGRES_USER>`        | runbook commands                         | Aurora PostgreSQL username                                  |
-| `<POSTGRES_PASSWORD>`    | runbook commands                         | Aurora PostgreSQL password                                  |
+| Placeholder                   | Where used                               | Description                                                 |
+| ----------------------------- | ---------------------------------------- | ----------------------------------------------------------- |
+| `<CLUSTER_NAME>`              | `cluster.yaml`, runbook commands         | EKS cluster name                                            |
+| `<AWS_REGION>`                | `cluster.yaml`, `greptime-values.yaml`   | AWS region (e.g., `eu-west-1`)                              |
+| `<VPC_ID>`                    | `cluster.yaml`                           | VPC ID                                                      |
+| `<PUBLIC_SUBNET_A/B/C>`       | `cluster.yaml`                           | Public subnet IDs (3 AZs, used by the public dashboard NLB) |
+| `<PRIVATE_SUBNET_A/B/C>`      | `cluster.yaml`                           | Private subnet IDs (3 AZs)                                  |
+| `<AURORA_HOST>`               | `greptime-values.yaml`                   | Aurora PostgreSQL endpoint                                  |
+| `<AURORA_DATABASE>`           | `greptime-values.yaml`                   | Aurora database name                                        |
+| `<S3_BUCKET>`                 | `greptime-values.yaml`, runbook commands | S3 bucket for object storage                                |
+| `<S3_PREFIX>`                 | `greptime-values.yaml`                   | S3 key prefix                                               |
+| `<GREPTIME_S3_ROLE_ARN>`      | `greptime-values.yaml`                   | IRSA role ARN for S3 access                                 |
+| `<DASHBOARD_USER>`            | `greptime-values.yaml`                   | Basic Auth username (dashboard, readwrite)                  |
+| `<DASHBOARD_PASSWORD>`        | `greptime-values.yaml`                   | Basic Auth password (dashboard, readwrite)                  |
+| `<GREPTIME_MACHINE_USER>`     | `greptime-values.yaml`                   | Machine Auth username (telemetry, writeonly)                |
+| `<GREPTIME_MACHINE_PASSWORD>` | `greptime-values.yaml`                   | Machine Auth password (telemetry, writeonly)                |
+| `<ACM_CERTIFICATE_ARN>`       | `dashboard-nlb.yaml`                     | ACM certificate ARN for TLS                                 |
+| `<DASHBOARD_HOSTNAME>`        | `dashboard-nlb.yaml`                     | Public hostname (e.g., `greptime.example.com`)              |
+| `<DASHBOARD_DOMAIN>`          | runbook commands                         | Parent domain for ExternalDNS (e.g., `example.com`)         |
+| `<POSTGRES_USER>`             | runbook commands                         | Aurora PostgreSQL username                                  |
+| `<POSTGRES_PASSWORD>`         | runbook commands                         | Aurora PostgreSQL password                                  |
 
 ---
 
@@ -144,7 +146,12 @@ kubectl -n "$GREPTIME_NS" run curl-test --rm -i --restart=Never \
 kubectl -n "$GREPTIME_NS" logs statefulset/${HELM_RELEASE_CLUSTER}-datanode --since=10m | rg "AccessDenied|OpenDAL operator failed|no valid credential found|Unable to load credentials"
 ```
 
-At this point GreptimeDB is running with an internal LoadBalancer reachable within the VPC on ports 4000-4003. All HTTP endpoints require Basic Auth.
+At this point GreptimeDB is running with an internal LoadBalancer reachable within the VPC on ports 4000-4003. All HTTP endpoints require Basic Auth. Set the machine credentials as SST secrets so downstream services (api, auth, gateway, mcp) can authenticate:
+
+```bash
+bun run sst secret set GreptimeUser "<GREPTIME_MACHINE_USER>" --stage <stage>
+bun run sst secret set GreptimePassword "<GREPTIME_MACHINE_PASSWORD>" --stage <stage>
+```
 
 ---
 

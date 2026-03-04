@@ -35,6 +35,8 @@ export const vertexLocation = getSstSecret("VertexLocation");
 
 // OTEL Exporter
 export const greptimeEndpoint = getSstSecret("GreptimeEndpoint");
+export const greptimeUser = getSstSecret("GreptimeUser");
+export const greptimePassword = getSstSecret("GreptimePassword");
 
 export const authSecrets = [
   authSecret,
@@ -62,9 +64,11 @@ export const llmSecrets = [
   vertexLocation,
 ];
 
+export const otelSecrets = [greptimeEndpoint, greptimeUser, greptimePassword];
+
 export const normalizedStage = $app.stage
   .trim()
   .toLowerCase()
   .replaceAll(/[^a-z0-9]+/g, "-")
-  // eslint-disable-next-line sonarjs/anchor-precedence, sonarjs/slow-regex
+  // eslint-disable-next-line sonarjs/slow-regex
   .replaceAll(/^-+|-+$/g, "");

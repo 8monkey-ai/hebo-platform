@@ -27,8 +27,22 @@ import { isRootPathUrl } from "../utils/url";
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
 import type { SeverityNumber } from "@opentelemetry/api-logs";
 
-export const greptimeOtlpEndpoint =
-  (await getSecret("GreptimeEndpoint")) ?? "http://localhost:4000/v1/otlp";
+const [greptimeEndpointRaw, greptimeUser, greptimePassword] = await Promise.all(
+  [
+    getSecret("GreptimeEndpoint"),
+    getSecret("GreptimeUser"),
+    getSecret("GreptimePassword"),
+  ],
+);
+
+const greptimeOtlpEndpoint =
+  greptimeEndpointRaw ?? "http://localhost:4000/v1/otlp";
+const greptimeAuthHeaders: Record<string, string> =
+  greptimeUser && greptimePassword
+    ? {
+        Authorization: `Basic ${btoa(greptimeUser + ":" + greptimePassword)}`,
+      }
+    : {};
 
 // Register the MeterProvider eagerly so that any library calling
 // metrics.getMeter() at import time gets a real meter instead of a NoopMeter.
@@ -40,6 +54,7 @@ metrics.setGlobalMeterProvider(
       new PeriodicExportingMetricReader({
         exporter: new OTLPMetricExporter({
           url: `${greptimeOtlpEndpoint}/v1/metrics`,
+          headers: greptimeAuthHeaders,
           compression: CompressionAlgorithm.GZIP,
         }),
       }),
@@ -70,6 +85,7 @@ export const getOtelLogger = (
       new BatchLogRecordProcessor(
         new OTLPLogExporter({
           url: `${greptimeOtlpEndpoint}/v1/logs`,
+          headers: greptimeAuthHeaders,
           compression: CompressionAlgorithm.GZIP,
         }),
       ),
@@ -107,7 +123,10 @@ export const getOtelConfig = (
     },
     traceExporter: new OTLPTraceExporter({
       url: `${greptimeOtlpEndpoint}/v1/traces`,
-      headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
+      headers: {
+        "x-greptime-pipeline-name": "greptime_trace_v1",
+        ...greptimeAuthHeaders,
+      },
       compression: CompressionAlgorithm.GZIP,
     }),
   };

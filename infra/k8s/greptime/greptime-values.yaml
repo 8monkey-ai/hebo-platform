@@ -4,6 +4,9 @@ auth:
     - username: "<DASHBOARD_USER>"
       password: "<DASHBOARD_PASSWORD>"
       permission: "readwrite"
+    - username: "<GREPTIME_MACHINE_USER>"
+      password: "<GREPTIME_MACHINE_PASSWORD>"
+      permission: "writeonly"
 
 frontend:
   replicas: 3
