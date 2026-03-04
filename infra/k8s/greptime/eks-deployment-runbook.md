@@ -23,22 +23,22 @@ Environment-specific values are marked as `<PLACEHOLDER>` in `cluster.yaml`, `gr
 | `<CLUSTER_NAME>`              | `cluster.yaml`, runbook commands         | EKS cluster name                                    |
 | `<AWS_REGION>`                | `cluster.yaml`, `greptime-values.yaml`   | AWS region (e.g., `eu-west-1`)                      |
 | `<VPC_ID>`                    | `cluster.yaml`                           | VPC ID                                              |
-| `<PUBLIC_SUBNET>`             | `cluster.yaml`                           | Public subnet ID for the dashboard NLB              |
 | `<PRIVATE_SUBNET_A/B/C>`      | `cluster.yaml`                           | Private subnet IDs (3 AZs)                          |
 | `<AURORA_HOST>`               | `greptime-values.yaml`                   | Aurora PostgreSQL endpoint                          |
 | `<AURORA_DATABASE>`           | `greptime-values.yaml`                   | Aurora database name                                |
+| `<POSTGRES_USER>`             | runbook commands                         | Aurora PostgreSQL username                          |
+| `<POSTGRES_PASSWORD>`         | runbook commands                         | Aurora PostgreSQL password                          |
 | `<S3_BUCKET>`                 | `greptime-values.yaml`, runbook commands | S3 bucket for object storage                        |
 | `<S3_PREFIX>`                 | `greptime-values.yaml`                   | S3 key prefix                                       |
 | `<GREPTIME_S3_ROLE_ARN>`      | `greptime-values.yaml`                   | IRSA role ARN for S3 access                         |
-| `<DASHBOARD_USER>`            | `greptime-values.yaml`                   | Basic Auth username (dashboard, readwrite)          |
-| `<DASHBOARD_PASSWORD>`        | `greptime-values.yaml`                   | Basic Auth password (dashboard, readwrite)          |
 | `<GREPTIME_MACHINE_USER>`     | `greptime-values.yaml`                   | Machine Auth username (telemetry, writeonly)        |
 | `<GREPTIME_MACHINE_PASSWORD>` | `greptime-values.yaml`                   | Machine Auth password (telemetry, writeonly)        |
+| `<PUBLIC_SUBNET>`             | `cluster.yaml`                           | Public subnet ID for the dashboard NLB              |
 | `<ACM_CERTIFICATE_ARN>`       | `dashboard-nlb.yaml`                     | ACM certificate ARN for TLS                         |
 | `<DASHBOARD_HOSTNAME>`        | `dashboard-nlb.yaml`                     | Public hostname (e.g., `greptime.example.com`)      |
 | `<DASHBOARD_DOMAIN>`          | runbook commands                         | Parent domain for ExternalDNS (e.g., `example.com`) |
-| `<POSTGRES_USER>`             | runbook commands                         | Aurora PostgreSQL username                          |
-| `<POSTGRES_PASSWORD>`         | runbook commands                         | Aurora PostgreSQL password                          |
+| `<DASHBOARD_USER>`            | `greptime-values.yaml`                   | Basic Auth username (dashboard, readwrite)          |
+| `<DASHBOARD_PASSWORD>`        | `greptime-values.yaml`                   | Basic Auth password (dashboard, readwrite)          |
 
 ---
 
