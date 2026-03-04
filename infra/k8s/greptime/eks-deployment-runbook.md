@@ -12,33 +12,33 @@ Environment-specific values are marked as `<PLACEHOLDER>` in `cluster.yaml`, `gr
 ## Prerequisites
 
 - An AWS account with permissions to create EKS clusters, IAM roles, ACM certificates, and Route53 records
-- A VPC with **both public and private subnets** across 3 AZs
+- A VPC with **private subnets** across 3 AZs and **at least one public subnet** for the NLB
 - A Route53 hosted zone for the dashboard domain
 - CLI tools: `eksctl`, `kubectl`, `helm`, `aws`
 
 ## Placeholder reference
 
-| Placeholder                   | Where used                               | Description                                                 |
-| ----------------------------- | ---------------------------------------- | ----------------------------------------------------------- |
-| `<CLUSTER_NAME>`              | `cluster.yaml`, runbook commands         | EKS cluster name                                            |
-| `<AWS_REGION>`                | `cluster.yaml`, `greptime-values.yaml`   | AWS region (e.g., `eu-west-1`)                              |
-| `<VPC_ID>`                    | `cluster.yaml`                           | VPC ID                                                      |
-| `<PUBLIC_SUBNET_A/B/C>`       | `cluster.yaml`                           | Public subnet IDs (3 AZs, used by the public dashboard NLB) |
-| `<PRIVATE_SUBNET_A/B/C>`      | `cluster.yaml`                           | Private subnet IDs (3 AZs)                                  |
-| `<AURORA_HOST>`               | `greptime-values.yaml`                   | Aurora PostgreSQL endpoint                                  |
-| `<AURORA_DATABASE>`           | `greptime-values.yaml`                   | Aurora database name                                        |
-| `<S3_BUCKET>`                 | `greptime-values.yaml`, runbook commands | S3 bucket for object storage                                |
-| `<S3_PREFIX>`                 | `greptime-values.yaml`                   | S3 key prefix                                               |
-| `<GREPTIME_S3_ROLE_ARN>`      | `greptime-values.yaml`                   | IRSA role ARN for S3 access                                 |
-| `<DASHBOARD_USER>`            | `greptime-values.yaml`                   | Basic Auth username (dashboard, readwrite)                  |
-| `<DASHBOARD_PASSWORD>`        | `greptime-values.yaml`                   | Basic Auth password (dashboard, readwrite)                  |
-| `<GREPTIME_MACHINE_USER>`     | `greptime-values.yaml`                   | Machine Auth username (telemetry, writeonly)                |
-| `<GREPTIME_MACHINE_PASSWORD>` | `greptime-values.yaml`                   | Machine Auth password (telemetry, writeonly)                |
-| `<ACM_CERTIFICATE_ARN>`       | `dashboard-nlb.yaml`                     | ACM certificate ARN for TLS                                 |
-| `<DASHBOARD_HOSTNAME>`        | `dashboard-nlb.yaml`                     | Public hostname (e.g., `greptime.example.com`)              |
-| `<DASHBOARD_DOMAIN>`          | runbook commands                         | Parent domain for ExternalDNS (e.g., `example.com`)         |
-| `<POSTGRES_USER>`             | runbook commands                         | Aurora PostgreSQL username                                  |
-| `<POSTGRES_PASSWORD>`         | runbook commands                         | Aurora PostgreSQL password                                  |
+| Placeholder                   | Where used                               | Description                                         |
+| ----------------------------- | ---------------------------------------- | --------------------------------------------------- |
+| `<CLUSTER_NAME>`              | `cluster.yaml`, runbook commands         | EKS cluster name                                    |
+| `<AWS_REGION>`                | `cluster.yaml`, `greptime-values.yaml`   | AWS region (e.g., `eu-west-1`)                      |
+| `<VPC_ID>`                    | `cluster.yaml`                           | VPC ID                                              |
+| `<PUBLIC_SUBNET>`             | `cluster.yaml`                           | Public subnet ID for the dashboard NLB              |
+| `<PRIVATE_SUBNET_A/B/C>`      | `cluster.yaml`                           | Private subnet IDs (3 AZs)                          |
+| `<AURORA_HOST>`               | `greptime-values.yaml`                   | Aurora PostgreSQL endpoint                          |
+| `<AURORA_DATABASE>`           | `greptime-values.yaml`                   | Aurora database name                                |
+| `<S3_BUCKET>`                 | `greptime-values.yaml`, runbook commands | S3 bucket for object storage                        |
+| `<S3_PREFIX>`                 | `greptime-values.yaml`                   | S3 key prefix                                       |
+| `<GREPTIME_S3_ROLE_ARN>`      | `greptime-values.yaml`                   | IRSA role ARN for S3 access                         |
+| `<DASHBOARD_USER>`            | `greptime-values.yaml`                   | Basic Auth username (dashboard, readwrite)          |
+| `<DASHBOARD_PASSWORD>`        | `greptime-values.yaml`                   | Basic Auth password (dashboard, readwrite)          |
+| `<GREPTIME_MACHINE_USER>`     | `greptime-values.yaml`                   | Machine Auth username (telemetry, writeonly)        |
+| `<GREPTIME_MACHINE_PASSWORD>` | `greptime-values.yaml`                   | Machine Auth password (telemetry, writeonly)        |
+| `<ACM_CERTIFICATE_ARN>`       | `dashboard-nlb.yaml`                     | ACM certificate ARN for TLS                         |
+| `<DASHBOARD_HOSTNAME>`        | `dashboard-nlb.yaml`                     | Public hostname (e.g., `greptime.example.com`)      |
+| `<DASHBOARD_DOMAIN>`          | runbook commands                         | Parent domain for ExternalDNS (e.g., `example.com`) |
+| `<POSTGRES_USER>`             | runbook commands                         | Aurora PostgreSQL username                          |
+| `<POSTGRES_PASSWORD>`         | runbook commands                         | Aurora PostgreSQL password                          |
 
 ---
 
@@ -55,7 +55,7 @@ export HELM_RELEASE_CLUSTER="greptime-cluster"
 
 ## 1) Create EKS cluster
 
-Replace the `<PLACEHOLDER>` values in `cluster.yaml` with your VPC, subnets (both public and private), and region before running.
+Replace the `<PLACEHOLDER>` values in `cluster.yaml` with your VPC, subnets, and region before running.
 
 ```bash
 eksctl create cluster -f infra/k8s/greptime/cluster.yaml
@@ -165,7 +165,7 @@ The AWS Load Balancer Controller uses subnet tags to discover where to place loa
 
 ```bash
 aws ec2 create-tags \
-  --resources <PUBLIC_SUBNET_A> <PUBLIC_SUBNET_B> <PUBLIC_SUBNET_C> \
+  --resources <PUBLIC_SUBNET> \
   --tags Key=kubernetes.io/role/elb,Value=1
 ```
 

@@ -10,9 +10,7 @@ vpc:
   id: <VPC_ID>
   subnets:
     public:
-      <AWS_REGION>a: { id: <PUBLIC_SUBNET_A> }
-      <AWS_REGION>b: { id: <PUBLIC_SUBNET_B> }
-      <AWS_REGION>c: { id: <PUBLIC_SUBNET_C> }
+      <AWS_REGION>a: { id: <PUBLIC_SUBNET> }
     private:
       <AWS_REGION>a: { id: <PRIVATE_SUBNET_A> }
       <AWS_REGION>b: { id: <PRIVATE_SUBNET_B> }
