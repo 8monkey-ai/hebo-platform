@@ -29,6 +29,7 @@
     "!apps/console/app/routes/_*/**",
     "apps/console/public/mockServiceWorker.js",
     "**/migrations/**",
-    "**/generated/**"
+    "**/generated/**",
+    "apps/console/app/routes/_shell.agent.*.branch.*._index/route.mdx"
   ]
 }

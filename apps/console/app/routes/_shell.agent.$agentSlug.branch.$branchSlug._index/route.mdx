@@ -1,5 +1,3 @@
-// oxfmt-ignore
-// https://github.com/oxc-project/oxc/issues/16608
 import { UserName } from "~console/components/ui/UserName";
 import { Logo } from "~console/components/ui/Logo";
 import { GenerateApiKey } from "./api-key";
@@ -38,7 +36,6 @@ npm install openai
 ```bash Langchain
 pip install -U langchain-openai
 ```
-
 </CodeGroup>
 
 Then, use them in your code:
@@ -49,9 +46,9 @@ import { generateText } from "ai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
 const hebo = createOpenAICompatible({
-name: "hebo",
-baseURL: "https://gateway.hebo.ai/v1",
-apiKey: "<HEBO_API_KEY>", // Replace with your generated key
+  name: "hebo",
+  baseURL: "https://gateway.hebo.ai/v1",
+  apiKey: "<HEBO_API_KEY>", // Replace with your generated key
 });
 
 const { text } = await generateText({
@@ -60,8 +57,7 @@ prompt: "Tell me a joke about monkeys."
 });
 
 console.log(text);
-
-````
+```
 
 ```ts OpenAI SDK
 import OpenAI from "openai";
@@ -80,7 +76,7 @@ const completion = await hebo.chat.completions.create({
 });
 
 console.log(completion.choices[0].message);
-````
+```
 
 ```python Langchain
 from langchain_openai import ChatOpenAI
@@ -95,7 +91,6 @@ response = hebo.invoke("Tell me a joke about monkeys.")
 
 print(response.content)
 ```
-
 </CodeGroup>
 
 ## Next: Use your observability tools & evals as usual
