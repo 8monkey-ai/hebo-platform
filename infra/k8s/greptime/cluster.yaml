@@ -17,7 +17,11 @@ vpc:
 iam:
   withOIDC: true
 
+addonsConfig:
+  autoApplyPodIdentityAssociations: true
+
 addons:
+  - name: eks-pod-identity-agent
   - name: aws-ebs-csi-driver
 
 managedNodeGroups:
