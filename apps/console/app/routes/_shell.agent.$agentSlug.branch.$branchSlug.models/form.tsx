@@ -1,5 +1,10 @@
 import { useForm, type FieldMetadata } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
+import { Brain, ChevronsUpDown, Edit } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useFetcher } from "react-router";
+import { useSnapshot } from "valtio";
+
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
 import { Card, CardContent, CardFooter, CardHeader } from "@hebo/shared-ui/components/Card";
@@ -33,10 +38,6 @@ import {
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Select } from "@hebo/shared-ui/components/Select";
 import { Separator } from "@hebo/shared-ui/components/Separator";
-import { Brain, ChevronsUpDown, Edit } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { useFetcher } from "react-router";
-import { useSnapshot } from "valtio";
 
 import { ModelSelector } from "~console/components/ui/ModelSelector";
 import { useFormErrorToast } from "~console/lib/errors";
@@ -78,7 +79,8 @@ export default function ModelsConfigForm({
         setExpandedCardId(null);
       }
     }
-  }, [fetcher.state, form.status, form.dirty]);
+    // eslint-disable-next-line exhaustive-deps
+  }, [fetcher.state, form.status]);
 
   const formRef = useRef<HTMLFormElement>(null);
 

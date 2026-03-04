@@ -29,9 +29,9 @@ This is the monorepo for Hebo, containing all our applications and shared packag
 ├── lefthook.yml                    # Git hooks configuration
 ├── sst.config.ts                   # SST configuration
 ├── tsconfig.base.json              # Base TypeScript configuration
-└── turbo.json                      # Turborepo configuration
+├── turbo.json                      # Turborepo configuration
 ├── .oxlintrc.json                  # Oxlint configuration
-├── .oxfmtrc.json                   # Oxfmt configuration
+└── .oxfmtrc.json                   # Oxfmt configuration
 ```
 
 ## Prerequisites
