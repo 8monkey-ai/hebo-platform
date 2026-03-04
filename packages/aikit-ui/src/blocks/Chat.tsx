@@ -1,14 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import {
-  Brain,
-  Download,
-  Edit,
-  FileUp,
-  Paperclip,
-  TriangleAlert,
-} from "lucide-react";
+import { Brain, Download, Edit, FileUp, Paperclip, TriangleAlert } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import {
@@ -23,11 +16,7 @@ import {
   ConversationContent,
   ConversationScrollButton,
 } from "#/_ai-elements/conversation";
-import {
-  Message,
-  MessageContent,
-  MessageResponse,
-} from "#/_ai-elements/message";
+import { Message, MessageContent, MessageResponse } from "#/_ai-elements/message";
 import {
   PromptInput,
   // FUTURE: PromptInputActionAddAttachments
@@ -46,21 +35,11 @@ import {
   PromptInputTools,
   usePromptInputAttachments,
 } from "#/_ai-elements/prompt-input";
-import {
-  Reasoning,
-  ReasoningContent,
-  ReasoningTrigger,
-} from "#/_ai-elements/reasoning";
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "#/_ai-elements/reasoning";
 import { Alert, AlertDescription, AlertTitle } from "#/_shadcn/ui/alert";
 import { Avatar, AvatarFallback } from "#/_shadcn/ui/avatar";
 import { Button } from "#/_shadcn/ui/button";
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from "#/_shadcn/ui/empty"; // FUTURE: replace with ConversationEmptyState
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "#/_shadcn/ui/empty"; // FUTURE: replace with ConversationEmptyState
 import {
   Item,
   ItemActions,
@@ -95,9 +74,7 @@ export function Chat({
   name?: string;
   mode?: ChatMode;
 }) {
-  const [selectedModelAlias, setSelectedModelAlias] = useState<
-    string | undefined
-  >();
+  const [selectedModelAlias, setSelectedModelAlias] = useState<string | undefined>();
   const aliases = modelsConfig.map((m) => m.alias);
   const currentModelAlias =
     selectedModelAlias && aliases.includes(selectedModelAlias)
@@ -113,7 +90,11 @@ export function Chat({
         fetch: currentModel?.endpoint.fetch || fetch,
         credentials: currentModel?.endpoint.credentials,
       }),
-    [currentModel?.endpoint.baseUrl],
+    [
+      currentModel?.endpoint.baseUrl,
+      currentModel?.endpoint.credentials,
+      currentModel?.endpoint.fetch,
+    ],
   );
   const { messages, sendMessage, setMessages, status, error, stop } = useChat({
     transport,
@@ -157,11 +138,7 @@ export function Chat({
   const clearBtnRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (
-        e.shiftKey &&
-        (e.metaKey || e.ctrlKey) &&
-        e.key.toLowerCase() === "o"
-      ) {
+      if (e.shiftKey && (e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "o") {
         e.preventDefault();
         if (clearBtnRef.current?.disabled) return;
         clearBtnRef.current?.click();
@@ -205,7 +182,7 @@ export function Chat({
                 disabled={!currentModelAlias}
                 variant="ghost"
                 size="icon"
-                className="hover:bg-sidebar-accent size-7"
+                className="size-7 hover:bg-sidebar-accent"
                 onClick={() => setMessages([])}
               >
                 <Edit />
@@ -232,11 +209,7 @@ export function Chat({
       ) : (
         // Conversation area
         <Conversation className="h-full">
-          <ConversationContent
-            className="gap-5 px-2"
-            aria-label="Chat conversation"
-            tabIndex={-1}
-          >
+          <ConversationContent className="gap-5 px-2" aria-label="Chat conversation" tabIndex={-1}>
             {messages.map((message) => (
               <div key={message.id}>
                 {message.parts.map((part, i) => {
@@ -275,12 +248,7 @@ export function Chat({
                       );
                     }
                     case "file": {
-                      const IMAGE_TYPES = [
-                        "image/jpeg",
-                        "image/png",
-                        "image/webp",
-                        "image/gif",
-                      ];
+                      const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
                       return IMAGE_TYPES.includes(part.mediaType) ? (
                         <img
                           key={`${message.id}-${i}`}
@@ -293,21 +261,15 @@ export function Chat({
                         <Item
                           key={`${message.id}-${i}`}
                           variant="outline"
-                          className="bg-card ml-auto w-3xs py-2"
+                          className="ml-auto w-3xs bg-card py-2"
                         >
-                          <a
-                            href={part.url}
-                            download={part.filename}
-                            className="contents"
-                          >
+                          <a href={part.url} download={part.filename} className="contents">
                             <ItemMedia className="translate-y-0! self-center!">
                               <FileUp size={24} className="text-foreground" />
                             </ItemMedia>
                             <ItemContent className="gap-0 truncate">
                               <ItemTitle>{part.filename}</ItemTitle>
-                              <ItemDescription>
-                                {part.mediaType}
-                              </ItemDescription>
+                              <ItemDescription>{part.mediaType}</ItemDescription>
                             </ItemContent>
                             <ItemActions>
                               <Download className="size-4" />
@@ -343,7 +305,7 @@ export function Chat({
       <PromptInput
         onSubmit={handleSubmit}
         role="form"
-        className="bg-background mt-4 rounded-md"
+        className="mt-4 rounded-md bg-background"
         globalDrop
         multiple
       >
@@ -377,9 +339,7 @@ export function Chat({
             {modelsConfig.length > 1 && (
               <PromptInputSelect
                 id="chat-model-select"
-                onValueChange={(alias: unknown) =>
-                  setSelectedModelAlias(alias as string)
-                }
+                onValueChange={(alias: unknown) => setSelectedModelAlias(alias as string)}
                 value={currentModelAlias}
                 disabled={status === "submitted" || modelsConfig.length === 0}
                 aria-label="Select model"
@@ -392,10 +352,7 @@ export function Chat({
                 </PromptInputSelectTrigger>
                 <PromptInputSelectContent>
                   {modelsConfig.map((model) => (
-                    <PromptInputSelectItem
-                      key={model.alias}
-                      value={model.alias}
-                    >
+                    <PromptInputSelectItem key={model.alias} value={model.alias}>
                       {model.alias.split("/").pop()}
                     </PromptInputSelectItem>
                   ))}
@@ -415,9 +372,7 @@ export function Chat({
   );
 }
 
-function PromptInputActionAddAttachment(
-  props: React.ComponentProps<typeof PromptInputButton>,
-) {
+function PromptInputActionAddAttachment(props: React.ComponentProps<typeof PromptInputButton>) {
   const attachments = usePromptInputAttachments();
 
   return (

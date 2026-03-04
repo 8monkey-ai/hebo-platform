@@ -1,0 +1,19 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "experimentalSortImports": {
+    "internalPattern": ["#", "~"]
+  },
+  "experimentalTailwindcss": {
+    "enabled": true,
+    "attributes": ["class", "className"],
+    "functions": ["clsx", "cn", "cva", "tw"],
+    "stylesheet": "apps/console/app/styles/tailwind.css"
+  },
+  "ignorePatterns": [
+    "**/_*/**",
+    "!apps/console/app/routes/_*/**",
+    "apps/console/public/mockServiceWorker.js",
+    "**/migrations/**",
+    "**/generated/**"
+  ]
+}

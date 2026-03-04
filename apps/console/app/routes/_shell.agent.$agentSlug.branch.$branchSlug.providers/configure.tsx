@@ -1,10 +1,5 @@
-import { useEffect } from "react";
-import { useFetcher } from "react-router";
-import { z } from "zod";
-
 import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
-
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
   Dialog,
@@ -15,25 +10,38 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@hebo/shared-ui/components/Dialog";
-import { FormControl, FieldControl, Field, FieldLabel, FieldError, FieldGroup } from "@hebo/shared-ui/components/Field";
+import {
+  FormControl,
+  FieldControl,
+  Field,
+  FieldLabel,
+  FieldError,
+  FieldGroup,
+} from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
+import { useEffect } from "react";
+import { useFetcher } from "react-router";
+import { z } from "zod";
 
 import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
-
 
 export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
   z.object({
     slug: z.enum(["bedrock"]),
     config: z.object({
-      bedrockRoleArn: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a valid Bedrock ARN role"),
+      bedrockRoleArn: ((msg) => z.string(msg).trim().min(1, msg))(
+        "Please enter a valid Bedrock ARN role",
+      ),
       region: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a valid AWS region"),
     }),
   }),
   z.object({
     slug: z.enum(["vertex"]),
     config: z.object({
-      serviceAccountEmail: ((msg) => z.email(msg).trim().min(1, msg))("Please enter a valid service account email"),
+      serviceAccountEmail: ((msg) => z.email(msg).trim().min(1, msg))(
+        "Please enter a valid service account email",
+      ),
       audience: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a valid audience"),
       location: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a valid location"),
       project: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a valid project"),
@@ -49,9 +57,8 @@ export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
 
 type ProviderConfigureFormValues = z.infer<typeof ProviderConfigureSchema>;
 
-
 type ConfigureProviderDialogProps = {
-  provider?: { name: string; slug: string; config: Record<string, unknown>; };
+  provider?: { name: string; slug: string; config: Record<string, unknown> };
 } & React.ComponentProps<typeof Dialog>;
 
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
@@ -61,16 +68,17 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
     id: provider?.slug,
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
     constraint: getZodConstraint(ProviderConfigureSchema),
-    defaultValue: { 
-      ...provider
-    }
+    defaultValue: {
+      ...provider,
+    },
   });
   useFormErrorToast(form.allErrors);
-  
+
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
       props.onOpenChange(false);
     }
+    // eslint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
 
   const providerFields = Object.fromEntries(
@@ -78,11 +86,11 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
       const slugEnum = opt.shape.slug;
       const configKeys = Object.keys(opt.shape.config.shape);
       return slugEnum.options.map((slug) => [slug, configKeys]);
-    })
+    }),
   );
-    
+
   const configFieldset = fields.config.getFieldset();
-  const activeKeys = provider ? providerFields[provider.slug] ?? [] : [];
+  const activeKeys = provider ? (providerFields[provider.slug] ?? []) : [];
 
   return (
     <Dialog {...props}>
@@ -90,7 +98,9 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
         <FormControl form={form} as={fetcher.Form}>
           <DialogHeader>
             <DialogTitle>Configure {provider?.name} Credentials</DialogTitle>
-            <DialogDescription>Learn how to retrieve the credentials in our documentation.</DialogDescription>
+            <DialogDescription>
+              Learn how to retrieve the credentials in our documentation.
+            </DialogDescription>
           </DialogHeader>
 
           <FieldGroup>
@@ -110,31 +120,30 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
                   </FieldControl>
                   <FieldError />
                 </Field>
-              )
+              );
             })}
           </FieldGroup>
 
           <div className="text-sm">
-            The configured provider will only handle requests after you enable it for a specific model. 
+            The configured provider will only handle requests after you enable it for a specific
+            model.
           </div>
 
           <DialogFooter>
-            <DialogClose render={
-              <Button 
-                type="button"
-                variant="ghost"
-                onClick={() => props.onOpenChange(false)}
-                >
-                Cancel
-              </Button>
-            } />
+            <DialogClose
+              render={
+                <Button type="button" variant="ghost" onClick={() => props.onOpenChange(false)}>
+                  Cancel
+                </Button>
+              }
+            />
             <Button
-                type="submit"
-                name="intent"
-                value="configure"
-                isLoading={fetcher.state !== "idle"}
-                >
-                Set
+              type="submit"
+              name="intent"
+              value="configure"
+              isLoading={fetcher.state !== "idle"}
+            >
+              Set
             </Button>
           </DialogFooter>
         </FormControl>

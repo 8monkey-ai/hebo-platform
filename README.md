@@ -27,10 +27,11 @@ This is the monorepo for Hebo, containing all our applications and shared packag
 │
 ├── bunfig.toml                     # Bun configuration
 ├── lefthook.yml                    # Git hooks configuration
-├── eslint.config.mjs               # ESLint configuration
 ├── sst.config.ts                   # SST configuration
 ├── tsconfig.base.json              # Base TypeScript configuration
 └── turbo.json                      # Turborepo configuration
+├── .oxlintrc.json                  # Oxlint configuration
+├── .oxfmtrc.json                   # Oxfmt configuration
 ```
 
 ## Prerequisites

@@ -1,9 +1,8 @@
+import { Button } from "@hebo/shared-ui/components/Button";
 import React from "react";
 
-import { Button } from "@hebo/shared-ui/components/Button";
-
-import { authService } from "~console/lib/auth";
 import { Github, Google, Microsoft } from "~console/components/ui/Icons";
+import { authService } from "~console/lib/auth";
 
 export function OAuthSignIn() {
   return (
@@ -15,9 +14,9 @@ export function OAuthSignIn() {
   );
 }
 
-function SignInButton({ provider, icon: Icon }: { provider: string, icon?: React.ComponentType }) {
+function SignInButton({ provider, icon: Icon }: { provider: string; icon?: React.ComponentType }) {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [ error, setError ] = React.useState<string | undefined>();
+  const [error, setError] = React.useState<string | undefined>();
 
   return (
     <>
@@ -30,7 +29,7 @@ function SignInButton({ provider, icon: Icon }: { provider: string, icon?: React
             setIsLoading(true);
             await authService.signInWithOAuth(provider);
           } catch (error) {
-            error instanceof Error && setError(error.message);
+            if (error instanceof Error) setError(error.message);
           } finally {
             setIsLoading(false);
           }
@@ -38,14 +37,17 @@ function SignInButton({ provider, icon: Icon }: { provider: string, icon?: React
       >
         {!isLoading && (
           <>
-            { Icon && <span className="absolute left-4"><Icon aria-hidden="true" /></span> }
-            Sign in with {provider.charAt(0).toUpperCase()}{provider.slice(1)}
+            {Icon && (
+              <span className="absolute left-4">
+                <Icon aria-hidden="true" />
+              </span>
+            )}
+            Sign in with {provider.charAt(0).toUpperCase()}
+            {provider.slice(1)}
           </>
-        )
-        }
+        )}
       </Button>
-      {error && <div className="text-destructive text-sm">{error}</div>}
+      {error && <div className="text-sm text-destructive">{error}</div>}
     </>
   );
 }
-

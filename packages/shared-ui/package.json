@@ -2,20 +2,26 @@
   "name": "@hebo/shared-ui",
   "version": "0.0.1",
   "private": true,
-  "sideEffects": false,
   "type": "module",
+  "sideEffects": false,
+  "imports": {
+    "#/*": "./src/*"
+  },
   "exports": {
     "./_mintlify/code/*": "./src/_mintlify/code/*.tsx",
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
     "./lib/*": "./src/lib/*.ts"
   },
-  "imports": {
-    "#/*": "./src/*"
-  },
   "scripts": {
     "clean": "git clean -fdx -e '.env*' .",
-    "lint": "eslint ."
+    "format": "oxfmt .",
+    "lint": "oxlint"
+  },
+  "devDependencies": {
+    "@hebo/typescript-config": "workspace:*",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:"
   },
   "peerDependencies": {
     "@base-ui/react": "catalog:",
@@ -26,12 +32,7 @@
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "tailwindcss": "catalog:",
-    "tailwind-merge": "catalog:"
-  },
-  "devDependencies": {
-    "@hebo/typescript-config": "workspace:*",
-    "@types/react": "catalog:",
-    "@types/react-dom": "catalog:"
+    "tailwind-merge": "catalog:",
+    "tailwindcss": "catalog:"
   }
 }
