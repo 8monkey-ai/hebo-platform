@@ -24,6 +24,12 @@ addons:
   - name: eks-pod-identity-agent
   - name: aws-ebs-csi-driver
 
+podIdentityAssociations:
+  - namespace: kube-system
+    serviceAccountName: aws-load-balancer-controller
+    wellKnownPolicies:
+      awsLoadBalancerController: true
+
 managedNodeGroups:
   - name: ng-arm
     amiFamily: AmazonLinux2023

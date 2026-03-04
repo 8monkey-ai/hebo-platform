@@ -2,6 +2,7 @@ frontend:
   replicas: 3
   service:
     type: LoadBalancer
+    loadBalancerClass: "service.k8s.aws/nlb"
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
 
