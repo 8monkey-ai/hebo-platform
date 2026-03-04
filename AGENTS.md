@@ -12,7 +12,7 @@ bun run -F @hebo/console dev   # Console-only development with MSW data
 bun run build        # Turborepo build across workspaces
 bun run test         # Aggregate test runner
 bun run lint         # Oxlint across workspaces
-bun run format       # Prettier formatting
+bun run format       # Oxfmt formatting
 ```
 
 ## Coding Style & Naming Conventions
