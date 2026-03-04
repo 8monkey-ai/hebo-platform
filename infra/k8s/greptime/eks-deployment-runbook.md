@@ -205,7 +205,7 @@ helm upgrade --install external-dns external-dns/external-dns \
 
 ## 4) Create the public NLB for the dashboard
 
-Replace `<ACM_CERTIFICATE_ARN>` and `<DASHBOARD_HOSTNAME>` in `dashboard-nlb.yaml` with the ACM certificate ARN from step 1 and the desired dashboard hostname.
+Replace `<ACM_CERTIFICATE_ARN>` and `<DASHBOARD_HOSTNAME>` in `dashboard-nlb.yaml` with the ACM certificate ARN from step 2 and the desired dashboard hostname.
 
 ```bash
 kubectl apply -n "$GREPTIME_NS" -f infra/k8s/greptime/dashboard-nlb.yaml
