@@ -324,7 +324,7 @@ export function Chat({
                 })}
               </div>
             ))}
-            {status === "submitted" && <Spinner />}
+            {status === "submitted" && <Spinner role="status" />}
             {error && (
               <Alert variant="destructive" className="overflow-x-auto">
                 <TriangleAlert />
