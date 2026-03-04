@@ -1,5 +1,9 @@
 import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
+import { useEffect } from "react";
+import { useFetcher } from "react-router";
+import { z } from "zod";
+
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
   Dialog,
@@ -19,9 +23,6 @@ import {
   FieldGroup,
 } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
-import { useEffect } from "react";
-import { useFetcher } from "react-router";
-import { z } from "zod";
 
 import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
@@ -78,7 +79,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
     if (fetcher.state === "idle" && form.status !== "error") {
       props.onOpenChange(false);
     }
-    // eslint-disable-next-line exhaustive-deps
+    // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
 
   const providerFields = Object.fromEntries(

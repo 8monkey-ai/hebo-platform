@@ -1,5 +1,9 @@
 import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
+import { useEffect } from "react";
+import { useFetcher } from "react-router";
+import { z } from "zod";
+
 import { Alert, AlertDescription } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
@@ -11,9 +15,6 @@ import {
   DialogTitle,
 } from "@hebo/shared-ui/components/Dialog";
 import { FieldControl, Field, FormControl } from "@hebo/shared-ui/components/Field";
-import { useEffect } from "react";
-import { useFetcher } from "react-router";
-import { z } from "zod";
 
 import { useFormErrorToast } from "~console/lib/errors";
 
@@ -45,7 +46,7 @@ export function ClearCredentialsDialog({ provider, ...props }: ClearCredentialsD
     if (fetcher.state === "idle" && form.status !== "error") {
       props.onOpenChange(false);
     }
-    // eslint-disable-next-line exhaustive-deps
+    // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
 
   return (

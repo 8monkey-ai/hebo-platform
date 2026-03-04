@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/triple-slash-reference
+// oxlint-disable-next-line triple-slash-reference
 /// <reference path="../../.sst/platform/config.d.ts" />
 
 import { isProduction, normalizedStage } from "./env";
@@ -44,13 +44,11 @@ export function createMigrator(schema: string) {
     ],
     environment: {
       NODE_EXTRA_CA_CERTS: "/var/runtime/ca-cert.pem",
-      // eslint-disable-next-line sonarjs/publicly-writable-directories -- Lambda /tmp is execution-isolated
       NPM_CONFIG_CACHE: "/tmp/.npm",
     },
     timeout: "300 seconds",
   });
 
-  // eslint-disable-next-line sonarjs/constructor-for-side-effects
   new aws.lambda.Invocation(`${schema}DatabaseMigratorInvocation`, {
     input: JSON.stringify({ schema }),
     functionName: migrator.name,

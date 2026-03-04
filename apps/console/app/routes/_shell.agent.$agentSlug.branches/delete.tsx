@@ -1,5 +1,9 @@
 import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
+import React, { useEffect } from "react";
+import { useFetcher } from "react-router";
+import { z } from "zod";
+
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
@@ -18,9 +22,6 @@ import {
   FieldError,
 } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
-import React, { useEffect } from "react";
-import { useFetcher } from "react-router";
-import { z } from "zod";
 
 import { useFormErrorToast } from "~console/lib/errors";
 
@@ -50,7 +51,7 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
     if (fetcher.state === "idle" && form.status !== "error") {
       props.onOpenChange(false);
     }
-    // eslint-disable-next-line exhaustive-deps
+    // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
 
   return (

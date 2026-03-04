@@ -4,7 +4,6 @@ import { Prisma, PrismaClient } from "~api/generated/prisma/client";
 import { redactProviderConfigValue } from "~api/lib/redact-provider";
 import type { ProviderConfig } from "~api/modules/providers/types";
 
-// eslint-disable-next-line unicorn/no-null
 const dbNull = null;
 
 export const prisma = new PrismaClient({
@@ -69,7 +68,6 @@ export const createDbClient = (organizationId: string, userId: string) => {
       $allModels: {
         async softDelete<T, W>(this: T, where: W) {
           const context = Prisma.getExtensionContext(this);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return (context as any).update({
             where,
             data: {

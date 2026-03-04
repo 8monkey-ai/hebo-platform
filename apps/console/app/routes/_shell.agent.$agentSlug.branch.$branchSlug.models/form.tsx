@@ -79,7 +79,7 @@ export default function ModelsConfigForm({
         setExpandedCardId(null);
       }
     }
-    // eslint-disable-next-line exhaustive-deps
+    // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
 
   const formRef = useRef<HTMLFormElement>(null);

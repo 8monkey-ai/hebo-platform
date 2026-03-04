@@ -3,19 +3,13 @@ import { betterAuth } from "better-auth/minimal";
 import { apiKey, emailOTP, organization } from "better-auth/plugins";
 
 import { authUrl, logLevel } from "@hebo/shared-api/env";
-import {
-  betterAuthCookieOptions,
-  cookieDomain,
-} from "@hebo/shared-api/lib/cookie-options";
+import { betterAuthCookieOptions, cookieDomain } from "@hebo/shared-api/lib/cookie-options";
 import { createPrismaAdapter } from "@hebo/shared-api/lib/db/connection";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import { PrismaClient } from "~auth/generated/prisma/client";
 
-import {
-  sendOrganizationInvitationEmail,
-  sendVerificationOtpEmail,
-} from "./lib/email";
+import { sendOrganizationInvitationEmail, sendVerificationOtpEmail } from "./lib/email";
 import { createOrganizationHook, createSessionHook } from "./lib/organization";
 
 export const prisma = new PrismaClient({
@@ -61,9 +55,7 @@ export const auth = betterAuth({
         maxRequests: 3600, // 3600 requests per hour
       },
       customAPIKeyGetter: (ctx) =>
-        ctx.request?.headers.get("authorization")?.replace("Bearer ", "") ??
-        // eslint-disable-next-line unicorn/no-null
-        null,
+        ctx.request?.headers.get("authorization")?.replace("Bearer ", "") ?? null,
     }),
     emailOTP({
       async sendVerificationOTP({ email, otp }, ctx) {
