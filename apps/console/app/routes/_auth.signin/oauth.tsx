@@ -1,5 +1,6 @@
-import { Button } from "@hebo/shared-ui/components/Button";
 import React from "react";
+
+import { Button } from "@hebo/shared-ui/components/Button";
 
 import { Github, Google, Microsoft } from "~console/components/ui/Icons";
 import { authService } from "~console/lib/auth";

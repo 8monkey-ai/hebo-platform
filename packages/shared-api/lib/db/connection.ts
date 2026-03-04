@@ -12,10 +12,7 @@ export const getConnectionString = (schema: string) => {
   }
 };
 
-export const createPrismaAdapter = (
-  schema: string,
-  max: number = 25,
-): PrismaPg => {
+export const createPrismaAdapter = (schema: string, max: number = 25): PrismaPg => {
   return new PrismaPg(
     {
       connectionString: getConnectionString(schema),

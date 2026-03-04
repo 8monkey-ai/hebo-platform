@@ -2,12 +2,7 @@ const DEFAULT_SIZE = 24;
 
 export function Github({ size = DEFAULT_SIZE }: { size?: number }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 32 32"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 32 32">
       <path
         fill="#24292E"
         fillRule="evenodd"
@@ -20,12 +15,7 @@ export function Github({ size = DEFAULT_SIZE }: { size?: number }) {
 
 export function Google({ size = DEFAULT_SIZE }: { size?: number }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24">
       <path
         fill="#4285F4"
         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -49,19 +39,10 @@ export function Google({ size = DEFAULT_SIZE }: { size?: number }) {
 
 export function Microsoft({ size = DEFAULT_SIZE }: { size?: number }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 48 48"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 48 48">
       <path fill="#ff5722" d="M6 6H22V22H6z" transform="rotate(-180 14 14)" />
       <path fill="#4caf50" d="M26 6H42V22H26z" transform="rotate(-180 34 14)" />
-      <path
-        fill="#ffc107"
-        d="M26 26H42V42H26z"
-        transform="rotate(-180 34 34)"
-      />
+      <path fill="#ffc107" d="M26 26H42V42H26z" transform="rotate(-180 34 34)" />
       <path fill="#03a9f4" d="M6 26H22V42H6z" transform="rotate(-180 14 34)" />
     </svg>
   );
@@ -69,12 +50,7 @@ export function Microsoft({ size = DEFAULT_SIZE }: { size?: number }) {
 
 export function Bedrock({ size = DEFAULT_SIZE }: { size?: number }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 64 64"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 64 64">
       <g stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
         <g fill="#01A88D">
           <rect x="0" y="0" width="64" height="64" />
@@ -89,12 +65,7 @@ export function Bedrock({ size = DEFAULT_SIZE }: { size?: number }) {
 
 export function Vertex({ size = DEFAULT_SIZE }: { size?: number }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 48 48"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 48 48">
       <path
         fill="#1976d2"
         d="M38.193,18.359c-0.771-2.753-2.319-5.177-4.397-7.03l-4.598,4.598	c1.677,1.365,2.808,3.374,3.014,5.648v1.508c0.026,0,0.05-0.008,0.076-0.008c2.322,0,4.212,1.89,4.212,4.212S34.61,31.5,32.288,31.5	c-0.026,0-0.05-0.007-0.076-0.008V31.5h-6.666H24V38h8.212v-0.004c0.026,0,0.05,0.004,0.076,0.004C38.195,38,43,33.194,43,27.288	C43,23.563,41.086,20.279,38.193,18.359z"
@@ -132,12 +103,7 @@ export function Vertex({ size = DEFAULT_SIZE }: { size?: number }) {
 
 export function Groq({ size = DEFAULT_SIZE }: { size?: number }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 26.3 26.3"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 26.3 26.3">
       <circle cx="13.15" cy="13.15" fill="#f05237" r="13.15" />
       <path
         fill="#fff"
@@ -149,12 +115,7 @@ export function Groq({ size = DEFAULT_SIZE }: { size?: number }) {
 
 export function Voyage({ size = DEFAULT_SIZE }: { size?: number }) {
   return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="-6 -6 36 36"
-    >
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="-6 -6 36 36">
       <path
         d="M5.407 0v.066a.974.974 0 00-.048.245c-.011.11-.016.208-.016.295 0 .339.043.715.128 1.13.097.405.274.912.531 1.524l7.125 16.366L20.011 3.39c.161-.404.333-.846.515-1.327.182-.48.273-.966.273-1.458a1.406 1.406 0 00-.096-.54V0H24v.066c-.204.207-.45.578-.74 1.114-.29.535-.606 1.195-.949 1.982L13.095 24h-1.287L3.075 3.965c-.204-.47-.418-.923-.644-1.36-.214-.437-.418-.83-.61-1.18-.194-.36-.365-.66-.515-.9A5.666 5.666 0 001 .064V0h4.407z"
         fill="#012E33"

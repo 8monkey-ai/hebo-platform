@@ -2,10 +2,7 @@ import { ProviderConfig } from "~api/modules/providers/types";
 
 const MASK = "***" as const;
 
-export function redactProviderConfigValue(
-  value: ProviderConfig,
-  mask = MASK,
-): ProviderConfig {
+export function redactProviderConfigValue(value: ProviderConfig, mask = MASK): ProviderConfig {
   const variants = ProviderConfig.anyOf ?? ProviderConfig.oneOf ?? [];
   const clone = structuredClone(value) as Record<string, unknown>;
   for (const variant of variants) {

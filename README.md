@@ -139,11 +139,11 @@ bun run sst secret remove GithubClientId --stage <stage>
 
 ## Run modes
 
-| #   | Mode                         | Command                          | Database              | API availability                        |
-|-----|------------------------------|----------------------------------|-----------------------|-----------------------------------------|
-| 1   | **Frontend-only** (offline)  | `bun run -F @hebo/console dev`   | —                     | none – UI relies on mock services      |
-| 2   | **Local full-stack**         | `bun run dev`                    | Dockerized PostgreSQL | URLs from env                           |
-| 3   | **Remote full-stack**        | `bun run sst deploy`             | Aurora PostgreSQL     | HTTPS URLs exported by SST              |
+| #   | Mode                        | Command                        | Database              | API availability                  |
+| --- | --------------------------- | ------------------------------ | --------------------- | --------------------------------- |
+| 1   | **Frontend-only** (offline) | `bun run -F @hebo/console dev` | —                     | none – UI relies on mock services |
+| 2   | **Local full-stack**        | `bun run dev`                  | Dockerized PostgreSQL | URLs from env                     |
+| 3   | **Remote full-stack**       | `bun run sst deploy`           | Aurora PostgreSQL     | HTTPS URLs exported by SST        |
 
 ## Building
 

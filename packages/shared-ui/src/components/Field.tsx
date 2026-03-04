@@ -1,11 +1,6 @@
 import { useRender } from "@base-ui/react";
 import { mergeProps } from "@base-ui/react/merge-props";
-import {
-  FormMetadata,
-  FormProvider,
-  getFormProps,
-  useField,
-} from "@conform-to/react";
+import { FormMetadata, FormProvider, getFormProps, useField } from "@conform-to/react";
 import * as React from "react";
 
 import {
@@ -17,17 +12,13 @@ import {
 } from "#/_shadcn/ui/field";
 import { cn } from "#/lib/utils";
 
-const FieldCtx = React.createContext<
-  ReturnType<typeof useField>[0] | undefined
->(undefined);
+const FieldCtx = React.createContext<ReturnType<typeof useField>[0] | undefined>(undefined);
 
 const useF = () => {
   const field = React.useContext(FieldCtx);
 
   if (!field)
-    console.warn(
-      'Wrap your component into <Field name="..."> to provide Conform context.',
-    );
+    console.warn('Wrap your component into <Field name="..."> to provide Conform context.');
 
   return field;
 };
@@ -44,7 +35,7 @@ function Field({
     <FieldCtx.Provider value={name ? field : undefined}>
       <ShadCnField
         className={cn(
-          "gap-2 @md/field-group:[&>[data-slot=field-label]]:flex-initial @md/field-group:[&>[data-slot=field-label]]:min-w-32",
+          "gap-2 @md/field-group:[&>[data-slot=field-label]]:min-w-32 @md/field-group:[&>[data-slot=field-label]]:flex-initial",
           (orientation === "horizontal" || orientation === "responsive") &&
             "@md/field-group:[&>[data-slot=field-label]]:mt-2",
           className,
@@ -56,9 +47,7 @@ function Field({
   );
 }
 
-function FieldLabel({
-  ...props
-}: React.ComponentProps<typeof ShadCnFieldLabel>) {
+function FieldLabel({ ...props }: React.ComponentProps<typeof ShadCnFieldLabel>) {
   const field = useF();
 
   return (
@@ -70,31 +59,22 @@ function FieldLabel({
   );
 }
 
-function FieldDescription({
-  ...props
-}: React.ComponentProps<typeof ShadCnFieldDescription>) {
+function FieldDescription({ ...props }: React.ComponentProps<typeof ShadCnFieldDescription>) {
   const field = useF();
 
-  return (
-    <ShadCnFieldDescription id={field?.descriptionId ?? props.id} {...props} />
-  );
+  return <ShadCnFieldDescription id={field?.descriptionId ?? props.id} {...props} />;
 }
 
 function FieldError() {
   const field = useF();
 
   const errors = field?.errors;
-  const errorsDict = Array.isArray(errors)
-    ? errors.map((message) => ({ message }))
-    : undefined;
+  const errorsDict = Array.isArray(errors) ? errors.map((message) => ({ message })) : undefined;
 
   return <ShadCnFieldError id={field?.errorId} errors={errorsDict} />;
 }
 
-function FieldGroup({
-  className,
-  ...props
-}: React.ComponentProps<typeof ShadCnFieldGroup>) {
+function FieldGroup({ className, ...props }: React.ComponentProps<typeof ShadCnFieldGroup>) {
   return <ShadCnFieldGroup className={cn("gap-4", className)} {...props} />;
 }
 
@@ -111,11 +91,8 @@ function FieldControl({ children, ...props }: FieldControlProps) {
   };
 
   if (field) {
-    controlProps.defaultValue =
-      (field.initialValue as string | number | string[]) ?? "";
-    controlProps["aria-describedby"] = field.valid
-      ? field.descriptionId
-      : field.errorId;
+    controlProps.defaultValue = (field.initialValue as string | number | string[]) ?? "";
+    controlProps["aria-describedby"] = field.valid ? field.descriptionId : field.errorId;
     controlProps["aria-invalid"] = !field.valid;
   }
 
@@ -131,36 +108,19 @@ type FormControlProps = {
   as: React.ElementType;
 } & React.ComponentProps<"form">;
 
-export function FormControl({
-  form,
-  as,
-  children,
-  ...props
-}: FormControlProps) {
+export function FormControl({ form, as, children, ...props }: FormControlProps) {
   const Comp = as;
 
   return (
     <FormProvider context={form.context}>
-      <Comp
-        method="post"
-        className="contents"
-        {...getFormProps(form)}
-        {...props}
-      >
+      <Comp method="post" className="contents" {...getFormProps(form)} {...props}>
         {children}
       </Comp>
     </FormProvider>
   );
 }
 
-export {
-  Field,
-  FieldControl,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-  FieldGroup,
-};
+export { Field, FieldControl, FieldDescription, FieldError, FieldLabel, FieldGroup };
 
 export {
   FieldLegend,

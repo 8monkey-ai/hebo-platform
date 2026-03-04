@@ -14,7 +14,7 @@ type SelectProps = React.ComponentProps<typeof ShadCnSelect> & {
 function Select({ items, placeholder, ...props }: SelectProps) {
   return (
     <ShadCnSelect {...props}>
-      <SelectTrigger className="bg-background w-full min-w-0 truncate">
+      <SelectTrigger className="w-full min-w-0 truncate bg-background">
         <SelectValue>
           {(value) =>
             items.find((item) => item.value === value)?.label ?? (

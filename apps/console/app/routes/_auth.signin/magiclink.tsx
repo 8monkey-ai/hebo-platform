@@ -1,9 +1,10 @@
+import { Loader2Icon } from "lucide-react";
+import { useState } from "react";
+
 import { Button } from "@hebo/shared-ui/components/Button";
 import { Input } from "@hebo/shared-ui/components/Input";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@hebo/shared-ui/components/InputOTP";
 import { Label } from "@hebo/shared-ui/components/Label";
-import { Loader2Icon } from "lucide-react";
-import { useState } from "react";
 
 import { authService } from "~console/lib/auth";
 

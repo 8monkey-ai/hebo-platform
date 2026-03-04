@@ -1,20 +1,11 @@
 import { createAuthClient } from "better-auth/client";
-import {
-  apiKeyClient,
-  emailOTPClient,
-  organizationClient,
-} from "better-auth/client/plugins";
+import { apiKeyClient, emailOTPClient, organizationClient } from "better-auth/client/plugins";
 import { getSessionCookie } from "better-auth/cookies";
 
 import { authUrl } from "~console/lib/service";
 import { shellStore } from "~console/lib/shell";
 
-import {
-  DEFAULT_EXPIRATION_MS,
-  type ApiKey,
-  type AuthService,
-  type User,
-} from "./types";
+import { DEFAULT_EXPIRATION_MS, type ApiKey, type AuthService, type User } from "./types";
 
 const appRedirectPath = "/?after-signin";
 const appRedirectURL = `${globalThis.location.origin}${appRedirectPath}`;
@@ -56,9 +47,7 @@ export const authService: AuthService = {
     }
 
     // Disable cookie cache only after fresh sign-in to ensure we get the latest session
-    const isComingFromSignIn = new URL(
-      globalThis.location.href,
-    ).searchParams.has("after-signin");
+    const isComingFromSignIn = new URL(globalThis.location.href).searchParams.has("after-signin");
     const session = await authClient.getSession({
       query: { disableCookieCache: isComingFromSignIn },
     });
@@ -93,9 +82,7 @@ export const authService: AuthService = {
       ...key,
       key: `${key.start}******`,
     })) as ApiKey[];
-    return keys.toSorted(
-      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-    );
+    return keys.toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   },
 
   async signInWithOAuth(provider: string) {

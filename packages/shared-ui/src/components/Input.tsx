@@ -1,23 +1,16 @@
+import type { LucideIcon } from "lucide-react";
+
 import { Input as ShadCnInput } from "#/_shadcn/ui/input";
 import { cn } from "#/lib/utils";
 
 import { CopyButton } from "./CopyButton";
-
-import type { LucideIcon } from "lucide-react";
 
 interface InputProps extends React.ComponentProps<"input"> {
   icon?: LucideIcon;
   copy?: boolean;
 }
 
-export function Input({
-  icon: Icon,
-  copy,
-  value,
-  className,
-  tabIndex,
-  ...props
-}: InputProps) {
+export function Input({ icon: Icon, copy, value, className, tabIndex, ...props }: InputProps) {
   return (
     <div className="relative w-full min-w-0">
       {Icon && (
@@ -31,12 +24,7 @@ export function Input({
       <ShadCnInput
         value={value}
         tabIndex={tabIndex}
-        className={cn(
-          "bg-background text-sm",
-          Icon && "pl-8",
-          copy && "pr-8 truncate",
-          className,
-        )}
+        className={cn("bg-background text-sm", Icon && "pl-8", copy && "truncate pr-8", className)}
         {...props}
       />
       {copy && (

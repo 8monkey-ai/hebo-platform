@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
 
+import type { ProviderV3 } from "@ai-sdk/provider";
 import {
   CANONICAL_MODEL_IDS,
   GatewayError,
@@ -13,8 +14,6 @@ import type { Models, ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "./aws-wif";
 import { createProvider } from "./provider-factory";
-
-import type { ProviderV3 } from "@ai-sdk/provider";
 
 export type DbClient = ReturnType<typeof createDbClient>;
 
@@ -51,23 +50,13 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
   });
 
   if (!branch) {
-    throw new GatewayError(
-      `Model alias not found: ${aliasPath}`,
-      404,
-      "MODEL_NOT_FOUND",
-    );
+    throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
   }
 
-  const model = (branch.models as Models)?.find(
-    ({ alias }) => alias === modelAlias,
-  );
+  const model = (branch.models as Models)?.find(({ alias }) => alias === modelAlias);
 
   if (!model) {
-    throw new GatewayError(
-      `Model alias not found: ${aliasPath}`,
-      404,
-      "MODEL_NOT_FOUND",
-    );
+    throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
   }
 
   state.modelConfig = {
@@ -92,14 +81,11 @@ async function resolveCustomProvider(
     // No custom config exists, use default providers
     if (cachedConfigHash === "default") return;
 
-    const cachedProvider = providerCache.get(
-      `${configCacheKey}:${cachedConfigHash}`,
-    );
+    const cachedProvider = providerCache.get(`${configCacheKey}:${cachedConfigHash}`);
     if (cachedProvider) return cachedProvider;
   }
 
-  const config =
-    await dbClient.provider_configs.getUnredacted(customProviderSlug);
+  const config = await dbClient.provider_configs.getUnredacted(customProviderSlug);
 
   const configHash = config
     ? createHash("sha256").update(JSON.stringify(config.value)).digest("hex")
@@ -137,11 +123,6 @@ export async function resolveProvider(ctx: ResolveProviderHookContext) {
   };
 
   if (customProviderSlug) {
-    return resolveCustomProvider(
-      dbClient,
-      organizationId,
-      modelId,
-      customProviderSlug,
-    );
+    return resolveCustomProvider(dbClient, organizationId, modelId, customProviderSlug);
   }
 }

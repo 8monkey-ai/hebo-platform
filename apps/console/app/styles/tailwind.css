@@ -139,20 +139,16 @@
     position: fixed;
     inset: 0;
     background:
-      linear-gradient(
-          0deg,
-          oklch(0.985 0.03 100) 0%,
-          oklch(0.975 0.005 240) 60%
-        )
-        0 0 / 100% 100vh no-repeat,
+      linear-gradient(0deg, oklch(0.985 0.03 100) 0%, oklch(0.975 0.005 240) 60%) 0 0 / 100% 100vh
+        no-repeat,
       oklch(0.985 0.03 100);
     z-index: -1;
   }
 
   .dark body::before {
     background:
-      linear-gradient(0deg, oklch(0.15 0.042 265) 0%, oklch(0.13 0.04 265) 60%)
-        0 0 / 100% 100vh no-repeat,
+      linear-gradient(0deg, oklch(0.15 0.042 265) 0%, oklch(0.13 0.04 265) 60%) 0 0 / 100% 100vh
+        no-repeat,
       oklch(0.15 0.042 265);
   }
 
@@ -200,11 +196,11 @@
   }
 
   .mdx h1 {
-    @apply text-2xl font-medium pt-2;
+    @apply pt-2 text-2xl font-medium;
   }
 
   .mdx h2 {
-    @apply text-xl font-medium p-0 pt-4;
+    @apply p-0 pt-4 text-xl font-medium;
   }
 
   .mdx p,

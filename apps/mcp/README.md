@@ -21,12 +21,9 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
 async function main() {
-  const transport = new StreamableHTTPClientTransport(
-    new URL("https://mcp.hebo.ai/aikit"),
-    {
-      fetch: globalThis.fetch,
-    },
-  );
+  const transport = new StreamableHTTPClientTransport(new URL("https://mcp.hebo.ai/aikit"), {
+    fetch: globalThis.fetch,
+  });
 
   const client = new Client(
     {

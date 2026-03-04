@@ -21,4 +21,3 @@ export const clientMiddleware = [verifyMagicLinkMiddleware];
 export default function MagicLinkVerification() {
   return null;
 }
-
