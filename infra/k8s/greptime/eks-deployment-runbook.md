@@ -17,7 +17,7 @@ Environment-specific values are marked as `<PLACEHOLDER>` in `cluster.yaml`, `gr
 Before starting, ensure you have:
 
 - An AWS account with permissions to create EKS clusters, IAM roles, ACM certificates, and Route53 records
-- A VPC with **both public and private subnets** across 3 AZs (subnet tagging is handled in step 2)
+- A VPC with **both public and private subnets** across 3 AZs
 - A Route53 hosted zone for the dashboard domain
 - CLI tools: `eksctl`, `kubectl`, `helm`, `aws`
 
