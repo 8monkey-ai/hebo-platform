@@ -1,20 +1,15 @@
 # GreptimeDB on EKS Deployment Runbook
 
-From-scratch runbook for deploying GreptimeDB on EKS with:
+From-scratch runbook for deploying GreptimeDB on EKS. You will deploy:
 
-- **Public dashboard** over HTTPS (NLB + ACM) with Basic Auth
-- **Private internal endpoint** for VPC consumers (all Greptime ports)
-- EKS 1.35, AL2023, 3x m7g.large, 3 AZs
-- Hybrid IAM wiring (IRSA for Greptime datanodes + Pod Identity for EKS managed addons)
-- EBS CSI, S3 object storage, EBS WAL, Aurora Postgres metadata with SSL Require
-- AWS Load Balancer Controller for NLB TLS termination
-- ExternalDNS for automatic Route53 record management
+- **GreptimeDB cluster** -- Private, internal-only deployment
+- **Public dashboard** -- HTTPS exposure with Basic Auth via NLB
 
-Environment-specific values are marked as `<PLACEHOLDER>` in `cluster.yaml`, `greptime-values.yaml`, and `dashboard-public-service.yaml` -- replace them before running the corresponding steps.
+The public dashboard section depends on the cluster section but can be done at any time after.
+
+Environment-specific values are marked as `<PLACEHOLDER>` in `cluster.yaml`, `greptime-values.yaml`, and `dashboard-nlb.yaml` -- replace them before running the corresponding steps.
 
 ## Prerequisites
-
-Before starting, ensure you have:
 
 - An AWS account with permissions to create EKS clusters, IAM roles, ACM certificates, and Route53 records
 - A VPC with **both public and private subnets** across 3 AZs
@@ -23,25 +18,31 @@ Before starting, ensure you have:
 
 ## Placeholder reference
 
-| Placeholder              | Where used                               | Description                                                      |
-| ------------------------ | ---------------------------------------- | ---------------------------------------------------------------- |
-| `<CLUSTER_NAME>`         | `cluster.yaml`, runbook commands         | EKS cluster name                                                 |
-| `<AWS_REGION>`           | `cluster.yaml`, `greptime-values.yaml`   | AWS region (e.g., `eu-west-1`)                                   |
-| `<VPC_ID>`               | `cluster.yaml`                           | VPC ID                                                           |
-| `<PUBLIC_SUBNET_A/B/C>`  | `cluster.yaml`                           | Public subnet IDs (3 AZs)                                        |
-| `<PRIVATE_SUBNET_A/B/C>` | `cluster.yaml`                           | Private subnet IDs (3 AZs)                                       |
-| `<AURORA_HOST>`          | `greptime-values.yaml`                   | Aurora PostgreSQL endpoint                                       |
-| `<AURORA_DATABASE>`      | `greptime-values.yaml`                   | Aurora database name                                             |
-| `<S3_BUCKET>`            | `greptime-values.yaml`, runbook commands | S3 bucket for object storage                                     |
-| `<S3_PREFIX>`            | `greptime-values.yaml`                   | S3 key prefix                                                    |
-| `<GREPTIME_S3_ROLE_ARN>` | `greptime-values.yaml`                   | IRSA role ARN for S3 access                                      |
-| `<DASHBOARD_USER>`       | `greptime-values.yaml`                   | Dashboard Basic Auth username                                    |
-| `<DASHBOARD_PASSWORD>`   | `greptime-values.yaml`                   | Dashboard Basic Auth password                                    |
-| `<ACM_CERTIFICATE_ARN>`  | `dashboard-public-service.yaml`          | ACM certificate ARN for TLS                                      |
-| `<DASHBOARD_HOSTNAME>`   | `dashboard-public-service.yaml`          | Public hostname for the dashboard (e.g., `greptime.example.com`) |
-| `<DASHBOARD_DOMAIN>`     | runbook commands                         | Parent domain for ExternalDNS filtering (e.g., `example.com`)    |
-| `<POSTGRES_USER>`        | runbook commands                         | Aurora PostgreSQL username                                       |
-| `<POSTGRES_PASSWORD>`    | runbook commands                         | Aurora PostgreSQL password                                       |
+| Placeholder              | Where used                               | Description                                                 |
+| ------------------------ | ---------------------------------------- | ----------------------------------------------------------- |
+| `<CLUSTER_NAME>`         | `cluster.yaml`, runbook commands         | EKS cluster name                                            |
+| `<AWS_REGION>`           | `cluster.yaml`, `greptime-values.yaml`   | AWS region (e.g., `eu-west-1`)                              |
+| `<VPC_ID>`               | `cluster.yaml`                           | VPC ID                                                      |
+| `<PUBLIC_SUBNET_A/B/C>`  | `cluster.yaml`                           | Public subnet IDs (3 AZs, used by the public dashboard NLB) |
+| `<PRIVATE_SUBNET_A/B/C>` | `cluster.yaml`                           | Private subnet IDs (3 AZs)                                  |
+| `<AURORA_HOST>`          | `greptime-values.yaml`                   | Aurora PostgreSQL endpoint                                  |
+| `<AURORA_DATABASE>`      | `greptime-values.yaml`                   | Aurora database name                                        |
+| `<S3_BUCKET>`            | `greptime-values.yaml`, runbook commands | S3 bucket for object storage                                |
+| `<S3_PREFIX>`            | `greptime-values.yaml`                   | S3 key prefix                                               |
+| `<GREPTIME_S3_ROLE_ARN>` | `greptime-values.yaml`                   | IRSA role ARN for S3 access                                 |
+| `<DASHBOARD_USER>`       | `greptime-values.yaml`                   | Basic Auth username                                         |
+| `<DASHBOARD_PASSWORD>`   | `greptime-values.yaml`                   | Basic Auth password                                         |
+| `<ACM_CERTIFICATE_ARN>`  | `dashboard-nlb.yaml`                     | ACM certificate ARN for TLS                                 |
+| `<DASHBOARD_HOSTNAME>`   | `dashboard-nlb.yaml`                     | Public hostname (e.g., `greptime.example.com`)              |
+| `<DASHBOARD_DOMAIN>`     | runbook commands                         | Parent domain for ExternalDNS (e.g., `example.com`)         |
+| `<POSTGRES_USER>`        | runbook commands                         | Aurora PostgreSQL username                                  |
+| `<POSTGRES_PASSWORD>`    | runbook commands                         | Aurora PostgreSQL password                                  |
+
+---
+
+# GreptimeDB cluster
+
+Deploys: EKS 1.35, AL2023, 3x m7g.large, 3 AZs, EBS CSI, AWS Load Balancer Controller, ExternalDNS (Pod Identity), S3 object storage, EBS WAL, Aurora Postgres metadata with SSL Require, internal LoadBalancer for the frontend.
 
 ## 0) One-time shell setup
 
@@ -50,41 +51,7 @@ export GREPTIME_NS="greptime"
 export HELM_RELEASE_CLUSTER="greptime-cluster"
 ```
 
-## 1) Request ACM certificate
-
-Request a public TLS certificate for the dashboard hostname. DNS validation with Route53 auto-approves.
-
-```
-aws acm request-certificate \
-  --domain-name "<DASHBOARD_HOSTNAME>" \
-  --validation-method DNS \
-  --region "<AWS_REGION>" \
-  --query 'CertificateArn' --output text
-```
-
-Note the returned ARN -- this is `<ACM_CERTIFICATE_ARN>`.
-
-## 2) Tag subnets for load balancer discovery
-
-The AWS Load Balancer Controller uses subnet tags to determine where to place load balancers.
-
-**Public subnets** (for internet-facing NLB):
-
-```
-aws ec2 create-tags \
-  --resources <PUBLIC_SUBNET_A> <PUBLIC_SUBNET_B> <PUBLIC_SUBNET_C> \
-  --tags Key=kubernetes.io/role/elb,Value=1
-```
-
-**Private subnets** (for internal NLB):
-
-```
-aws ec2 create-tags \
-  --resources <PRIVATE_SUBNET_A> <PRIVATE_SUBNET_B> <PRIVATE_SUBNET_C> \
-  --tags Key=kubernetes.io/role/internal-elb,Value=1
-```
-
-## 3) Create EKS cluster
+## 1) Create EKS cluster
 
 Replace the `<PLACEHOLDER>` values in `cluster.yaml` with your VPC, subnets (both public and private), and region before running.
 
@@ -92,7 +59,7 @@ Replace the `<PLACEHOLDER>` values in `cluster.yaml` with your VPC, subnets (bot
 eksctl create cluster -f infra/k8s/greptime/cluster.yaml
 ```
 
-## 4) Create S3 bucket (object storage)
+## 2) Create S3 bucket (object storage)
 
 ```
 aws s3api create-bucket \
@@ -101,7 +68,7 @@ aws s3api create-bucket \
   --create-bucket-configuration LocationConstraint="<AWS_REGION>"
 ```
 
-## 5) Install GreptimeDB operator (Helm)
+## 3) Install GreptimeDB operator (Helm)
 
 ```
 helm repo add greptime https://greptimeteam.github.io/helm-charts/
@@ -110,7 +77,7 @@ helm repo update
 helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n greptimedb-admin --create-namespace
 ```
 
-## 6) Deploy Greptime cluster (Helm)
+## 4) Deploy Greptime cluster (Helm)
 
 Replace the `<PLACEHOLDER>` values in `greptime-values.yaml` with your Aurora host, database, S3 bucket, region, and auth credentials before running.
 
@@ -120,7 +87,7 @@ helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
   -f infra/k8s/greptime/greptime-values.yaml
 ```
 
-## 7) Create IAM role for datanode S3 access (IRSA)
+## 5) Create IAM role for datanode S3 access (IRSA)
 
 Use an S3 policy ARN, then let `eksctl` create the IRSA role/trust for the datanode service account.
 Set `<GREPTIME_S3_ROLE_ARN>` in `greptime-values.yaml` to the printed role ARN, then run Helm upgrade again to apply it.
@@ -139,7 +106,7 @@ eksctl create iamserviceaccount \
 aws iam get-role --role-name "GreptimeS3Role-<CLUSTER_NAME>" --query 'Role.Arn' --output text
 ```
 
-## 8) Create Aurora credentials secret (metasrv backend)
+## 6) Create Aurora credentials secret (metasrv backend)
 
 ```
 kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
@@ -147,7 +114,7 @@ kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
   --from-literal=password="<POSTGRES_PASSWORD>"
 ```
 
-## 9) Apply updated Helm values and restart workloads
+## 7) Apply updated Helm values and restart workloads
 
 After setting `<GREPTIME_S3_ROLE_ARN>` in `greptime-values.yaml` and creating the Aurora secret, re-apply Helm values and restart to pick up all changes:
 
@@ -159,7 +126,57 @@ helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
 kubectl -n "$GREPTIME_NS" rollout restart deployment,statefulset
 ```
 
-## 10) Install ExternalDNS
+## 8) Verify base cluster
+
+```
+# All pods Running/Ready
+kubectl -n "$GREPTIME_NS" get pods -o wide
+
+# Internal service exists
+kubectl -n "$GREPTIME_NS" get svc
+
+# Health check (expect {})
+kubectl -n "$GREPTIME_NS" run curl-test --rm -i --restart=Never \
+  --image=curlimages/curl:8.6.0 \
+  --command -- curl -sS http://${HELM_RELEASE_CLUSTER}-frontend.${GREPTIME_NS}.svc.cluster.local:4000/health
+
+# S3 access (expect no output)
+kubectl -n "$GREPTIME_NS" logs statefulset/${HELM_RELEASE_CLUSTER}-datanode --since=10m | rg "AccessDenied|OpenDAL operator failed|no valid credential found|Unable to load credentials"
+```
+
+At this point GreptimeDB is running with an internal LoadBalancer reachable within the VPC on ports 4000-4003. All HTTP endpoints require Basic Auth.
+
+---
+
+# Public dashboard (HTTPS + NLB)
+
+Adds an internet-facing NLB that forwards HTTPS (443) to GreptimeDB's HTTP port (4000), with ACM-managed TLS and automatic DNS via ExternalDNS. Only port 4000 is exposed publicly -- ports 4001/4002/4003 are never on the public NLB.
+
+## 1) Tag public subnets for the internet-facing NLB
+
+The AWS Load Balancer Controller uses subnet tags to discover where to place load balancers.
+
+```
+aws ec2 create-tags \
+  --resources <PUBLIC_SUBNET_A> <PUBLIC_SUBNET_B> <PUBLIC_SUBNET_C> \
+  --tags Key=kubernetes.io/role/elb,Value=1
+```
+
+## 2) Request ACM certificate
+
+Request a public TLS certificate for the dashboard hostname. DNS validation with Route53 auto-approves.
+
+```
+aws acm request-certificate \
+  --domain-name "<DASHBOARD_HOSTNAME>" \
+  --validation-method DNS \
+  --region "<AWS_REGION>" \
+  --query 'CertificateArn' --output text
+```
+
+Note the returned ARN -- this is `<ACM_CERTIFICATE_ARN>`.
+
+## 3) Install ExternalDNS
 
 ExternalDNS watches Service annotations and automatically creates Route53 records. The IAM role and service account were already created by eksctl via Pod Identity (see `cluster.yaml`).
 
@@ -179,37 +196,30 @@ helm upgrade --install external-dns external-dns/external-dns \
 
 `<DASHBOARD_DOMAIN>` is the parent domain (e.g., `example.com` if the dashboard hostname is `greptime.example.com`).
 
-## 11) Deploy public dashboard Service
+## 4) Create the public NLB for the dashboard
 
-Replace `<ACM_CERTIFICATE_ARN>` and `<DASHBOARD_HOSTNAME>` in `dashboard-public-service.yaml` with the ACM certificate ARN from step 1 and the desired dashboard hostname.
-
-```
-kubectl apply -n "$GREPTIME_NS" -f infra/k8s/greptime/dashboard-public-service.yaml
-```
-
-The AWS Load Balancer Controller provisions the NLB, and ExternalDNS automatically creates the Route53 alias record pointing `<DASHBOARD_HOSTNAME>` to it.
-
-## 12) Verify
+Replace `<ACM_CERTIFICATE_ARN>` and `<DASHBOARD_HOSTNAME>` in `dashboard-nlb.yaml` with the ACM certificate ARN from step 1 and the desired dashboard hostname.
 
 ```
-# All pods Running/Ready
-kubectl -n "$GREPTIME_NS" get pods -o wide
+kubectl apply -n "$GREPTIME_NS" -f infra/k8s/greptime/dashboard-nlb.yaml
+```
 
-# Both services exist (internal + public)
-kubectl -n "$GREPTIME_NS" get svc
+The AWS Load Balancer Controller provisions an internet-facing NLB that terminates TLS and forwards to the existing Greptime frontend pods on port 4000. ExternalDNS automatically creates the Route53 alias record for `<DASHBOARD_HOSTNAME>`.
 
-# Internal health check (expect {})
-kubectl -n "$GREPTIME_NS" run curl-test --rm -i --restart=Never \
-  --image=curlimages/curl:8.6.0 \
-  --command -- curl -sS http://${HELM_RELEASE_CLUSTER}-frontend.${GREPTIME_NS}.svc.cluster.local:4000/health
+## 5) Verify public dashboard
 
-# Public dashboard -- should return 401 without credentials, 200 with
+```
+# NLB service exists
+kubectl -n "$GREPTIME_NS" get svc greptime-dashboard-nlb
+
+# Should return 401 without credentials, 200 with
 curl -sS -o /dev/null -w "%{http_code}" https://<DASHBOARD_HOSTNAME>/dashboard/
 curl -sS -o /dev/null -w "%{http_code}" -u "<DASHBOARD_USER>:<DASHBOARD_PASSWORD>" https://<DASHBOARD_HOSTNAME>/dashboard/
-
-# S3 access (expect no output)
-kubectl -n "$GREPTIME_NS" logs statefulset/${HELM_RELEASE_CLUSTER}-datanode --since=10m | rg "AccessDenied|OpenDAL operator failed|no valid credential found|Unable to load credentials"
 ```
+
+---
+
+# Reference
 
 ## Access boundaries
 
