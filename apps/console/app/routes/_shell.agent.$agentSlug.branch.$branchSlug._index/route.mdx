@@ -52,8 +52,8 @@ const hebo = createOpenAICompatible({
 });
 
 const { text } = await generateText({
-model: hebo("<HEBO_MODEL_ALIAS>"), // For example "my-first-agent/main/default"
-prompt: "Tell me a joke about monkeys."
+  model: hebo("<HEBO_MODEL_ALIAS>"), // For example "my-first-agent/main/default"
+  prompt: "Tell me a joke about monkeys."
 });
 
 console.log(text);
