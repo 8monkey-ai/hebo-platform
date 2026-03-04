@@ -125,7 +125,8 @@ helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
   -n "$GREPTIME_NS" \
   -f infra/k8s/greptime/greptime-values.yaml
 
-kubectl -n "$GREPTIME_NS" rollout restart deployment,statefulset
+kubectl -n "$GREPTIME_NS" rollout restart deployment
+kubectl -n "$GREPTIME_NS" rollout restart statefulset
 ```
 
 ## 8) Verify base cluster
