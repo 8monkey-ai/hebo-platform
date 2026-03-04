@@ -9,13 +9,23 @@ metadata:
 vpc:
   id: <VPC_ID>
   subnets:
+    public:
+      <AWS_REGION>a: { id: <PUBLIC_SUBNET_A> }
+      <AWS_REGION>b: { id: <PUBLIC_SUBNET_B> }
+      <AWS_REGION>c: { id: <PUBLIC_SUBNET_C> }
     private:
-      <AWS_REGION>a: { id: <SUBNET_A> }
-      <AWS_REGION>b: { id: <SUBNET_B> }
-      <AWS_REGION>c: { id: <SUBNET_C> }
+      <AWS_REGION>a: { id: <PRIVATE_SUBNET_A> }
+      <AWS_REGION>b: { id: <PRIVATE_SUBNET_B> }
+      <AWS_REGION>c: { id: <PRIVATE_SUBNET_C> }
 
 iam:
   withOIDC: true
+  podIdentityAssociations:
+    - namespace: kube-system
+      serviceAccountName: external-dns
+      createServiceAccount: true
+      wellKnownPolicies:
+        externalDNS: true
 
 addonsConfig:
   autoApplyPodIdentityAssociations: true
@@ -23,6 +33,9 @@ addonsConfig:
 addons:
   - name: eks-pod-identity-agent
   - name: aws-ebs-csi-driver
+  - name: aws-load-balancer-controller
+    wellKnownPolicies:
+      awsLoadBalancerController: true
 
 managedNodeGroups:
   - name: ng-arm

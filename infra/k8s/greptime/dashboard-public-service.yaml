@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: greptime-dashboard-public
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "<ACM_CERTIFICATE_ARN>"
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443"
+    external-dns.alpha.kubernetes.io/hostname: "<DASHBOARD_HOSTNAME>"
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 443
+      targetPort: 4000
+      protocol: TCP
+      name: https
+  selector:
+    app.greptime.io/component: frontend

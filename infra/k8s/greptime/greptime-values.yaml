@@ -1,3 +1,10 @@
+auth:
+  enabled: true
+  users:
+    - username: "<DASHBOARD_USER>"
+      password: "<DASHBOARD_PASSWORD>"
+      permission: "readwrite"
+
 frontend:
   replicas: 3
   service:
