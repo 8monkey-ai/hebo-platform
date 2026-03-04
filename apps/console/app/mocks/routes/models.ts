@@ -36,7 +36,22 @@ export const modelHandlers = [
 
     return HttpResponse.json({
       object: "list" as const,
-      data: SUPPORTED_MODELS.map((model) => (Object.assign({object:`model` as const,id:model.type,name:model.displayName,created:model.created,owned_by:model.owner,architecture:{output_modalities:[model.modality]},pricing:{monthly_free_tokens:model.monthlyFreeTokens??0}}, includeEndpoints&&{endpoints:Object.keys(model.providers[0]).map(tag=>({tag}))}))),
+      data: SUPPORTED_MODELS.map((model) =>
+        Object.assign(
+          {
+            object: `model` as const,
+            id: model.type,
+            name: model.displayName,
+            created: model.created,
+            owned_by: model.owner,
+            architecture: { output_modalities: [model.modality] },
+            pricing: { monthly_free_tokens: model.monthlyFreeTokens ?? 0 },
+          },
+          includeEndpoints && {
+            endpoints: Object.keys(model.providers[0]).map((tag) => ({ tag })),
+          },
+        ),
+      ),
     });
   }),
 ];
