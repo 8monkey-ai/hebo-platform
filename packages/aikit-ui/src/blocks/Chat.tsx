@@ -261,7 +261,8 @@ export function Chat({
                         <Item
                           key={`${message.id}-${i}`}
                           variant="outline"
-                          className="ml-auto w-3xs bg-card py-2"
+                          size="xs"
+                          className="ml-auto w-3xs bg-card"
                         >
                           <a href={part.url} download={part.filename} className="contents">
                             <ItemMedia className="translate-y-0! self-center!">
