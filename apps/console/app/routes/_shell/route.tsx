@@ -93,7 +93,7 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
         } as React.CSSProperties
       }
     >
-      <Sidebar collapsible="icon" state>
+      <Sidebar collapsible="icon">
         <div className="flex h-full flex-col transition-[padding] group-data-[state=collapsed]:px-2">
           <SidebarHeader>
             <AgentSelect agents={agents} activeAgent={activeAgent} />
