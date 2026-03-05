@@ -9,7 +9,7 @@ export default $config({
       protect: ["production"].includes(input?.stage),
       home: "aws",
       region: "us-east-2",
-      providers: { aws: "6.83.2", docker: "4.8.2" },
+      providers: { aws: "7.21.0", docker: "4.8.2" },
     };
   },
   async run() {
