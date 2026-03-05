@@ -2,9 +2,9 @@
 
 From-scratch runbook for deploying GreptimeDB on EKS with a mostly declarative `eksctl` flow.
 
-It deploys: EKS 1.35, AL2023, 3x m7g.large, 3 AZs, hybrid IAM wiring (Pod Identity for the AWS Load Balancer Controller and EKS managed addons, IRSA for Greptime datanodes), EBS CSI, AWS Load Balancer Controller (internal NLB), S3 object storage, EBS WAL, Aurora Postgres metadata with SSL Require.
+It deploys: EKS 1.35, AL2023, 3x m7g.large, 3 AZs, IRSA for Greptime datanodes, EBS CSI, S3 object storage, EBS WAL, Aurora Postgres metadata with SSL Require.
 
-The frontend service is exposed only via an **internal NLB** (VPC-only). ECS services reach it through the private DNS name. Human access to the dashboard is via `kubectl port-forward`.
+The frontend service is exposed only via an **internal NLB** (VPC-only) using the in-tree cloud controller. ECS services reach it through the private DNS name. Human access to the dashboard is via `kubectl port-forward`.
 
 Environment-specific values (VPC, subnets, Aurora host, S3 bucket, IAM role, etc.) are marked as `<PLACEHOLDER>` in `cluster.yaml` and `greptime-values.yaml` -- replace them before running the corresponding steps.
 
@@ -23,18 +23,7 @@ Replace the `<PLACEHOLDER>` values in `cluster.yaml` with your VPC, subnet, and 
 eksctl create cluster -f infra/k8s/greptime/cluster.yaml
 ```
 
-## 2) Install the AWS Load Balancer Controller
-
-```
-helm repo add eks https://aws.github.io/eks-charts
-helm repo update
-
-helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
-  -n kube-system \
-  --set clusterName="<CLUSTER_NAME>"
-```
-
-## 3) Create S3 bucket (object storage)
+## 2) Create S3 bucket (object storage)
 
 ```
 aws s3api create-bucket \
@@ -43,7 +32,7 @@ aws s3api create-bucket \
   --create-bucket-configuration LocationConstraint="<AWS_REGION>"
 ```
 
-## 4) Install GreptimeDB operator (Helm)
+## 3) Install GreptimeDB operator (Helm)
 
 ```
 helm repo add greptime https://greptimeteam.github.io/helm-charts/
@@ -52,7 +41,7 @@ helm repo update
 helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n greptimedb-admin --create-namespace
 ```
 
-## 5) Deploy Greptime cluster (Helm)
+## 4) Deploy Greptime cluster (Helm)
 
 Replace the `<PLACEHOLDER>` values in `greptime-values.yaml` with your Aurora host, database, S3 bucket, and region before running.
 
@@ -62,7 +51,7 @@ helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
   -f infra/k8s/greptime/greptime-values.yaml
 ```
 
-## 6) Create IAM role for datanode S3 access (IRSA)
+## 5) Create IAM role for datanode S3 access (IRSA)
 
 Use an S3 policy ARN, then let `eksctl` create the IRSA role/trust for the datanode service account.
 Set `<GREPTIME_S3_ROLE_ARN>` in `greptime-values.yaml` to the printed role ARN, then run Helm upgrade again to apply it.
@@ -81,7 +70,7 @@ eksctl create iamserviceaccount \
 aws iam get-role --role-name "GreptimeS3Role-<CLUSTER_NAME>" --query 'Role.Arn' --output text
 ```
 
-## 7) Apply updated Helm values (role ARN)
+## 6) Apply updated Helm values (role ARN)
 
 ```
 helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
@@ -89,7 +78,7 @@ helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
   -f infra/k8s/greptime/greptime-values.yaml
 ```
 
-## 8) Create Aurora credentials secret (metasrv backend)
+## 7) Create Aurora credentials secret (metasrv backend)
 
 ```
 kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
@@ -97,13 +86,13 @@ kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
   --from-literal=password="<POSTGRES_PASSWORD>"
 ```
 
-## 9) Restart Greptime workloads (pick up secret and updated ServiceAccount configuration)
+## 8) Restart Greptime workloads (pick up secret and updated ServiceAccount configuration)
 
 ```
 kubectl -n "$GREPTIME_NS" rollout restart deployment,statefulset
 ```
 
-## 10) Verify (pods, service, health, load balancer)
+## 9) Verify (pods, service, health, load balancer)
 
 ```
 # Pods should be Running/Ready
