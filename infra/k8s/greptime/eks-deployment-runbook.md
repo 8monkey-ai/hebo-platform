@@ -2,7 +2,7 @@
 
 From-scratch runbook for deploying GreptimeDB on EKS with a mostly declarative `eksctl` flow.
 
-It deploys: EKS 1.35, AL2023, 3x m7g.large, 3 AZs, hybrid IAM wiring (IRSA for Greptime datanodes + Pod Identity for EKS managed addons), EBS CSI, S3 object storage, EBS WAL, Aurora Postgres metadata with SSL Require,
+It deploys: EKS 1.35, AL2023, 3x m7g.large, 3 AZs, hybrid IAM wiring (IRSA for Greptime datanodes + Pod Identity for EKS managed addons), EBS CSI, S3 object storage, EBS WAL, Aurora Postgres metadata with SSL Require.
 
 The frontend service is exposed only via an **internal NLB** (VPC-only) using the in-tree cloud controller. ECS services reach it through the private DNS name. Human access to the dashboard is via `kubectl port-forward`.
 
