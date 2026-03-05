@@ -12,9 +12,6 @@ ALTER TABLE "apikeys" DROP CONSTRAINT "apikeys_userId_fkey";
 DROP INDEX "apikeys_userId_idx";
 
 -- AlterTable
-ALTER TABLE "apikeys" DROP COLUMN "userId";
-
--- AlterTable
 ALTER TABLE "apikeys" ADD COLUMN     "configId" TEXT NOT NULL DEFAULT 'default',
 ADD COLUMN     "referenceId" TEXT;
 
@@ -23,6 +20,9 @@ UPDATE "apikeys" SET "referenceId" = "userId" WHERE "referenceId" IS NULL;
 
 -- Make referenceId required
 ALTER TABLE "apikeys" ALTER COLUMN "referenceId" SET NOT NULL;
+
+-- AlterTable
+ALTER TABLE "apikeys" DROP COLUMN "userId";
 
 -- CreateIndex
 CREATE INDEX "apikeys_configId_idx" ON "apikeys"("configId");
