@@ -79,6 +79,36 @@ model Verifications {
   @@map("verifications")
 }
 
+model Apikeys {
+  id                  String    @id
+  configId            String    @default("default")
+  name                String?
+  start               String?
+  referenceId         String
+  prefix              String?
+  key                 String
+  refillInterval      Int?
+  refillAmount        Int?
+  lastRefillAt        DateTime?
+  enabled             Boolean?  @default(true)
+  rateLimitEnabled    Boolean?  @default(true)
+  rateLimitTimeWindow Int?      @default(3600000)
+  rateLimitMax        Int?      @default(3600)
+  requestCount        Int?      @default(0)
+  remaining           Int?
+  lastRequest         DateTime?
+  expiresAt           DateTime?
+  createdAt           DateTime
+  updatedAt           DateTime
+  permissions         String?
+  metadata            String?
+
+  @@index([configId])
+  @@index([referenceId])
+  @@index([key])
+  @@map("apikeys")
+}
+
 model Organizations {
   id          String        @id
   name        String
@@ -151,34 +181,4 @@ model Invitations {
   @@index([organizationId])
   @@index([email])
   @@map("invitations")
-}
-
-model Apikeys {
-  id                  String    @id
-  configId            String    @default("default")
-  name                String?
-  start               String?
-  referenceId         String
-  prefix              String?
-  key                 String
-  refillInterval      Int?
-  refillAmount        Int?
-  lastRefillAt        DateTime?
-  enabled             Boolean?  @default(true)
-  rateLimitEnabled    Boolean?  @default(true)
-  rateLimitTimeWindow Int?      @default(3600000)
-  rateLimitMax        Int?      @default(3600)
-  requestCount        Int?      @default(0)
-  remaining           Int?
-  lastRequest         DateTime?
-  expiresAt           DateTime?
-  createdAt           DateTime
-  updatedAt           DateTime
-  permissions         String?
-  metadata            String?
-
-  @@index([configId])
-  @@index([referenceId])
-  @@index([key])
-  @@map("apikeys")
 }
