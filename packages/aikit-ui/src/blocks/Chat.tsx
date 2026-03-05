@@ -211,7 +211,7 @@ export function Chat({
         <Conversation className="h-full">
           <ConversationContent className="gap-5 px-2" aria-label="Chat conversation" tabIndex={-1}>
             {messages.map((message) => (
-              <div key={message.id}>
+              <div key={message.id} className="flex flex-col gap-1">
                 {message.parts.map((part, i) => {
                   switch (part.type) {
                     case "text": {
@@ -223,7 +223,7 @@ export function Chat({
                           role="article"
                           aria-label={`Message from ${message.role}`}
                         >
-                          <MessageContent>
+                          <MessageContent className="group-[.is-user]:px-3 group-[.is-user]:py-2">
                             <MessageResponse>{part.text}</MessageResponse>
                           </MessageContent>
                         </Message>
@@ -397,7 +397,7 @@ function PromptInputAttachmentsDisplay() {
   }
 
   return (
-    <Attachments variant="inline" className="p-1">
+    <Attachments variant="inline" className="p-2 pb-0">
       {attachments.files.map((attachment) => (
         <Attachment
           key={attachment.id}

@@ -176,7 +176,7 @@ function ModelCard(props: {
   return (
     <Collapsible open={isExpanded} onOpenChange={onOpenChange}>
       <Card size="sm">
-        <CardHeader className="grid min-w-0 gap-4 focus:ring-2 focus:ring-ring/40 focus:ring-offset-2 focus:ring-offset-background focus:outline-none sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-center">
+        <CardHeader className="grid min-w-0 gap-4 focus:ring-2 focus:ring-ring/40 focus:ring-offset-2 focus:ring-offset-background focus:outline-none @md:grid-cols-[minmax(0,1fr)_auto_auto] @md:items-center">
           <div className="flex min-w-0 flex-col gap-2">
             <span className="text-xs text-muted-foreground uppercase">Alias path</span>
             <div className="inline-flex items-center gap-1">
@@ -212,7 +212,7 @@ function ModelCard(props: {
             tabIndex={-1}
             className="my-3 flex flex-col gap-4 focus:outline-none"
           >
-            <FieldGroup className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <FieldGroup className="grid grid-cols-1 gap-4 @md:grid-cols-2">
               <Field name={model.getFieldset().alias.name}>
                 <FieldLabel>Alias</FieldLabel>
                 <FieldControl>

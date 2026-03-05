@@ -54,7 +54,7 @@ export function AgentCreateForm() {
 
   return (
     <FormControl form={form} as={Form}>
-      <Card className="w-full min-w-0 bg-transparent shadow-none ring-0 sm:max-w-lg">
+      <Card className="w-full min-w-0 bg-transparent shadow-none ring-0 @md:max-w-lg">
         <CardHeader>
           <CardTitle>
             <h1>Create a new agent</h1>

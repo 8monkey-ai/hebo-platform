@@ -93,7 +93,7 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
         } as React.CSSProperties
       }
     >
-      <Sidebar collapsible="icon">
+      <Sidebar collapsible="icon" state>
         <div className="flex h-full flex-col transition-[padding] group-data-[state=collapsed]:px-2">
           <SidebarHeader>
             <AgentSelect agents={agents} activeAgent={activeAgent} />
@@ -133,7 +133,7 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
           tabIndex={-1}
           className="flex min-w-0 flex-1 flex-col gap-4 px-4 py-10 focus:outline-none sm:px-10"
         >
-          <div className="mx-auto w-full max-w-4xl min-w-0">
+          <div className="@container mx-auto w-full max-w-4xl min-w-0">
             <PageLoader />
             <Outlet />
           </div>
