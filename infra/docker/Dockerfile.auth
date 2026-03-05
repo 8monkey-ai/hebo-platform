@@ -18,7 +18,8 @@ ARG NODE_ENV
 WORKDIR /repo
 
 COPY --from=pruner /repo/out/json/ ./
-RUN bun install --frozen-lockfile
+# Removed --frozed-lockfile because of https://github.com/oven-sh/bun/issues/26973
+RUN bun install
 
 COPY --from=pruner /repo/out/full/ ./
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /rds-bundle.pem
