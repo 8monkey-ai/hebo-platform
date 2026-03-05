@@ -31,7 +31,7 @@
     "oxlint": "^1.51.0",
     "sst": "catalog:",
     "tailwindcss": "catalog:",
-    "turbo": "^2.8.13",
+    "turbo": "2.8.11",
     "typescript": "catalog:"
   },
   "engines": {
