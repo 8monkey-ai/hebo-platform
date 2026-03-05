@@ -1,6 +1,7 @@
+import { apiKey } from "@better-auth/api-key";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { betterAuth } from "better-auth/minimal";
-import { apiKey, emailOTP, organization } from "better-auth/plugins";
+import { emailOTP, organization } from "better-auth/plugins";
 
 import { authUrl, logLevel } from "@hebo/shared-api/env";
 import { betterAuthCookieOptions, cookieDomain } from "@hebo/shared-api/lib/cookie-options";

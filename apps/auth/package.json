@@ -19,6 +19,7 @@
     "start": "./dist/server"
   },
   "dependencies": {
+    "@better-auth/api-key": "catalog:",
     "@elysiajs/cors": "catalog:",
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",

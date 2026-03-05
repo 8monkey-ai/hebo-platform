@@ -17,6 +17,7 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@better-auth/api-key": "catalog:",
     "@conform-to/react": "catalog:",
     "@conform-to/zod": "catalog:",
     "@elysiajs/eden": "catalog:",

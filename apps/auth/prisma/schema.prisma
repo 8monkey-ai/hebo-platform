@@ -104,8 +104,13 @@ model Apikeys {
   permissions         String?
   metadata            String?
 
+  configId    String @default("default")
+  referenceId String
+
   @@index([key])
   @@index([userId])
+  @@index([configId])
+  @@index([referenceId])
   @@map("apikeys")
 }
 
