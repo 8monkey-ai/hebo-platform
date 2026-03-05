@@ -21,7 +21,6 @@ model Users {
   updatedAt     DateTime      @updatedAt
   sessions      Sessions[]
   accounts      Accounts[]
-  apikeys       Apikeys[]
   teammembers   TeamMembers[]
   members       Members[]
   invitations   Invitations[]
@@ -78,40 +77,6 @@ model Verifications {
 
   @@index([identifier])
   @@map("verifications")
-}
-
-model Apikeys {
-  id                  String    @id
-  name                String?
-  start               String?
-  prefix              String?
-  key                 String
-  userId              String
-  users               Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  refillInterval      Int?
-  refillAmount        Int?
-  lastRefillAt        DateTime?
-  enabled             Boolean?  @default(true)
-  rateLimitEnabled    Boolean?  @default(true)
-  rateLimitTimeWindow Int?      @default(3600000)
-  rateLimitMax        Int?      @default(3600)
-  requestCount        Int?      @default(0)
-  remaining           Int?
-  lastRequest         DateTime?
-  expiresAt           DateTime?
-  createdAt           DateTime
-  updatedAt           DateTime
-  permissions         String?
-  metadata            String?
-
-  configId    String @default("default")
-  referenceId String
-
-  @@index([key])
-  @@index([userId])
-  @@index([configId])
-  @@index([referenceId])
-  @@map("apikeys")
 }
 
 model Organizations {
@@ -186,4 +151,34 @@ model Invitations {
   @@index([organizationId])
   @@index([email])
   @@map("invitations")
+}
+
+model Apikeys {
+  id                  String    @id
+  configId            String    @default("default")
+  name                String?
+  start               String?
+  referenceId         String
+  prefix              String?
+  key                 String
+  refillInterval      Int?
+  refillAmount        Int?
+  lastRefillAt        DateTime?
+  enabled             Boolean?  @default(true)
+  rateLimitEnabled    Boolean?  @default(true)
+  rateLimitTimeWindow Int?      @default(3600000)
+  rateLimitMax        Int?      @default(3600)
+  requestCount        Int?      @default(0)
+  remaining           Int?
+  lastRequest         DateTime?
+  expiresAt           DateTime?
+  createdAt           DateTime
+  updatedAt           DateTime
+  permissions         String?
+  metadata            String?
+
+  @@index([configId])
+  @@index([referenceId])
+  @@index([key])
+  @@map("apikeys")
 }
