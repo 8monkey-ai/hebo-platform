@@ -21,7 +21,6 @@ model Users {
   updatedAt     DateTime      @updatedAt
   sessions      Sessions[]
   accounts      Accounts[]
-  apikeys       Apikeys[]
   teammembers   TeamMembers[]
   members       Members[]
   invitations   Invitations[]
@@ -82,12 +81,12 @@ model Verifications {
 
 model Apikeys {
   id                  String    @id
+  configId            String    @default("default")
   name                String?
   start               String?
+  referenceId         String
   prefix              String?
   key                 String
-  userId              String
-  users               Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
   refillInterval      Int?
   refillAmount        Int?
   lastRefillAt        DateTime?
@@ -104,8 +103,9 @@ model Apikeys {
   permissions         String?
   metadata            String?
 
+  @@index([configId])
+  @@index([referenceId])
   @@index([key])
-  @@index([userId])
   @@map("apikeys")
 }
 

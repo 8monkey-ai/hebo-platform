@@ -1,5 +1,6 @@
+import { apiKeyClient } from "@better-auth/api-key/client";
 import { createAuthClient } from "better-auth/client";
-import { apiKeyClient, emailOTPClient, organizationClient } from "better-auth/client/plugins";
+import { emailOTPClient, organizationClient } from "better-auth/client/plugins";
 import { getSessionCookie } from "better-auth/cookies";
 
 import { authUrl } from "~console/lib/service";

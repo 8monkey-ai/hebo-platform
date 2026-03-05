@@ -41,7 +41,7 @@ export const createGateway = () =>
     // Public routes (no authentication required)
     .get(
       "/v1/models",
-      (({ request }: { request: Request }) => gw.routes["/models"].handler(request)) as any,
+      ({ request }: { request: Request }) => gw.routes["/models"].handler(request),
       {
         response: {
           200: ModelListSchema,
@@ -52,7 +52,7 @@ export const createGateway = () =>
     )
     .get(
       "/v1/models/*",
-      (({ request }: { request: Request }) => gw.routes["/models"].handler(request)) as any,
+      ({ request }: { request: Request }) => gw.routes["/models"].handler(request),
       {
         response: {
           200: ModelSchema,
@@ -68,9 +68,8 @@ export const createGateway = () =>
         .use(dbClient)
         .post(
           "/chat/completions",
-          // FUTURE: remove any - https://github.com/elysiajs/elysia/issues/1721
-          (({ request, dbClient, organizationId }: any) =>
-            gw.handler(request, { dbClient, organizationId })) as any,
+          ({ request, dbClient, organizationId }) =>
+            gw.handler(request, { dbClient, organizationId }),
           {
             parse: "none",
             body: ChatCompletionsBodySchema,
@@ -83,9 +82,8 @@ export const createGateway = () =>
         )
         .post(
           "/embeddings",
-          // FUTURE: remove any - https://github.com/elysiajs/elysia/issues/1721
-          (({ request, dbClient, organizationId }: any) =>
-            gw.handler(request, { dbClient, organizationId })) as any,
+          ({ request, dbClient, organizationId }) =>
+            gw.handler(request, { dbClient, organizationId }),
           {
             parse: "none",
             body: EmbeddingsBodySchema,
