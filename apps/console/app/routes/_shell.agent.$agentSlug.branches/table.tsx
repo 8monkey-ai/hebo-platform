@@ -43,7 +43,7 @@ export default function BranchesTable({ agent }: BranchesTableProps) {
         <TableHeader>
           <TableRow>
             <TableHead className="w-1/3">Branch</TableHead>
-            <TableHead className="hidden sm:table-cell">Updated</TableHead>
+            <TableHead className="hidden @md:table-cell">Updated</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -67,7 +67,7 @@ export default function BranchesTable({ agent }: BranchesTableProps) {
                       <CopyButton value={copyValue} />
                     </div>
                   </TableCell>
-                  <TableCell className="hidden text-muted-foreground sm:table-cell">
+                  <TableCell className="hidden text-muted-foreground @md:table-cell">
                     {`${branch.updated_by ?? "Dummy User"} (${formatDateTime(branch.updated_at ?? new Date(0))})`}
                   </TableCell>
                   <TableCell className="text-right">
