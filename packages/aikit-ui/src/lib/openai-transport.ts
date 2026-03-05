@@ -17,14 +17,14 @@ type OpenAIContentPart =
 type OpenAIMessage = {
   role: "system" | "user" | "assistant";
   content: string | OpenAIContentPart[];
-  reasoning_content?: string;
+  reasoning?: string;
 };
 
 type OpenAIChatDelta = {
   choices?: Array<{
     delta?: {
       content?: string;
-      reasoning_content?: string | Array<{ text?: string }>;
+      reasoning?: string | Array<{ text?: string }>;
       tool_calls?: Array<{
         index?: number;
         id?: string;
@@ -117,7 +117,7 @@ async function toOpenAIMessage(message: UIMessage): Promise<OpenAIMessage> {
     return {
       role: "assistant",
       content: contentParts.map((p) => ("text" in p ? p.text : "")).join(""),
-      reasoning_content: reasoningText.join("") || undefined,
+      reasoning: reasoningText.join("") || undefined,
     };
   }
 
@@ -215,7 +215,7 @@ function handleSSEStream(stream: ReadableStream<Uint8Array>): ReadableStream<UIM
           });
         }
 
-        if (delta?.reasoning_content) {
+        if (delta?.reasoning) {
           if (!reasoningStarted) {
             ctrl.enqueue({ type: "reasoning-start", id: reasoningId });
             reasoningStarted = true;
@@ -223,7 +223,7 @@ function handleSSEStream(stream: ReadableStream<Uint8Array>): ReadableStream<UIM
           ctrl.enqueue({
             type: "reasoning-delta",
             id: reasoningId,
-            delta: asText(delta.reasoning_content),
+            delta: asText(delta.reasoning),
           });
         }
 
