@@ -9,7 +9,7 @@ WORKDIR /repo
 COPY . .
 RUN bun install --frozen-lockfile -F @hebo/gateway
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /rds-bundle.pem
-RUN bun run -F @hebo/gateway build $( [ "$NODE_ENV" = "production" ] && echo "-- --production" )
+RUN bun run -F @hebo/gateway -F @hebo/api build $( [ "$NODE_ENV" = "production" ] && echo "-- --production" )
 
 ########################  runner stage  ########################
 FROM gcr.io/distroless/base
