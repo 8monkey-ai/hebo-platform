@@ -21,7 +21,8 @@
     "lint:staged": "oxlint --fix",
     "lint:deps": "check-dependency-version-consistency .",
     "prepare": "test -n \"$CI\" || lefthook install",
-    "secret": "bun run scripts/secrets.ts"
+    "secret": "bun run scripts/secrets.ts",
+    "test": "bun run --workspaces --if-present --parallel test"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
