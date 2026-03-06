@@ -4,12 +4,13 @@
 FROM oven/bun:1 AS builder
 ENV CI=1
 ARG NODE_ENV
+ENV NODE_ENV=$NODE_ENV
 WORKDIR /repo
 
 COPY . .
 RUN bun install --frozen-lockfile --filter @hebo/api
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /rds-bundle.pem
-RUN bun run -F @hebo/api build $( [ "$NODE_ENV" = "production" ] && echo "-- --production" )
+RUN bun run --filter @hebo/api build
 
 ########################  runner stage  ########################
 FROM gcr.io/distroless/base

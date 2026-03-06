@@ -9,8 +9,8 @@
   "scripts": {
     "build": "bun run --workspaces --if-present --sequential build",
     "clean": "git clean -fdx -e '.env*'",
-    "db:migrate": "bun run -F @hebo/api db migrate dev && bun run -F @hebo/auth db migrate dev",
-    "db:reset": "bun run -F @hebo/api db migrate reset --force && bun run -F @hebo/auth db migrate reset --force",
+    "db:migrate": "bun run --workspaces --if-present --sequential db migrate dev",
+    "db:reset": "bun run --workspaces --if-present --sequential db migrate reset --force",
     "predev": "bun run --workspaces --if-present --sequential predev",
     "dev": "bun run --workspaces --if-present --parallel dev",
     "dev:infra:up": "docker compose up -d",
