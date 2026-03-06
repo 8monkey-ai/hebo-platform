@@ -10,6 +10,8 @@
     "clean": "git clean -fdx -e '.env*' .",
     "generate-schema": "bunx --bun @better-auth/cli generate --config src/better-auth.ts",
     "db": "prisma",
+    "db:migrate": "bun run db migrate dev",
+    "db:reset": "bun run db migrate reset --force",
     "predev": "test -d src/generated || bun run db generate",
     "dev": "bun --hot src/index.ts",
     "format": "oxfmt .",
