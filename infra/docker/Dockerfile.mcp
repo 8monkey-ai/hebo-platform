@@ -1,27 +1,14 @@
 # syntax=docker/dockerfile:1
 
-########################  pruner stage  ########################
-FROM oven/bun:1 AS pruner
-ENV CI=1
-WORKDIR /repo
-RUN bun install --global turbo@2.8.11
-
-COPY . .
-
-# FUTURE: move to the SST/Pulumi script
-RUN turbo prune @hebo/mcp --docker
-
 ########################  installer + builder stage  ########################
 FROM oven/bun:1 AS builder
 ENV CI=1
 ARG NODE_ENV
 WORKDIR /repo
 
-COPY --from=pruner /repo/out/json/ ./
-RUN bun install --frozen-lockfile
-
-COPY --from=pruner /repo/out/full/ ./
-RUN [ "$NODE_ENV" = "production" ] && bun run build -- -- --production || bun run build
+COPY . .
+RUN bun install --frozen-lockfile --filter @hebo/mcp
+RUN [ "$NODE_ENV" = "production" ] && bun run -F @hebo/mcp build -- --production || bun run -F @hebo/mcp build
 
 ########################  runner stage  ########################
 FROM gcr.io/distroless/base
