@@ -7,7 +7,7 @@ ARG NODE_ENV
 WORKDIR /repo
 
 COPY . .
-RUN bun install --frozen-lockfile -F @hebo/auth
+RUN bun install --frozen-lockfile --filter @hebo/auth
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /rds-bundle.pem
 RUN bun run -F @hebo/auth build $( [ "$NODE_ENV" = "production" ] && echo "-- --production" )
 
