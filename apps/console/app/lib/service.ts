@@ -5,12 +5,14 @@ import type { Gateway } from "~gateway";
 
 import { useMocks } from "~console/lib/env";
 
-export const apiUrl = useMocks ? "/api" : import.meta.env.VITE_API_URL || "http://localhost:3001";
+export const apiUrl = useMocks
+  ? "http://localhost:5173/api"
+  : import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 export const authUrl = import.meta.env.VITE_AUTH_URL || "http://localhost:3000";
 
 export const gatewayUrl = useMocks
-  ? "/gateway"
+  ? "http://localhost:5173/gateway"
   : import.meta.env.VITE_GATEWAY_URL || "http://localhost:3002";
 
 export const kyFetch = ky.extend({
