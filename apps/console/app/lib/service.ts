@@ -3,16 +3,14 @@ import ky, { HTTPError } from "ky";
 import type { Api } from "~api";
 import type { Gateway } from "~gateway";
 
-import { isDevLocal } from "~console/lib/env";
+import { useMocks } from "~console/lib/env";
 
-export const apiUrl = isDevLocal
-  ? "http://localhost:5173/api"
-  : import.meta.env.VITE_API_URL || "http://localhost:3001";
+export const apiUrl = useMocks ? "/api" : import.meta.env.VITE_API_URL || "http://localhost:3001";
 
 export const authUrl = import.meta.env.VITE_AUTH_URL || "http://localhost:3000";
 
-export const gatewayUrl = isDevLocal
-  ? "http://localhost:5173/gateway"
+export const gatewayUrl = useMocks
+  ? "/gateway"
   : import.meta.env.VITE_GATEWAY_URL || "http://localhost:3002";
 
 export const kyFetch = ky.extend({

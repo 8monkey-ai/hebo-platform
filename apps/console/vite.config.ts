@@ -40,9 +40,5 @@ export default defineConfig(({ mode }) => {
       }),
       ...(mode === "development" ? [devtoolsJson()] : []),
     ],
-    // Expose TURBO_HASH to browser enable to detect local dev run
-    define: {
-      "import.meta.env.TURBO_HASH": JSON.stringify(process.env.TURBO_HASH),
-    },
   };
 });
