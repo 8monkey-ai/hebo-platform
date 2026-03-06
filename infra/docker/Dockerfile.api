@@ -7,9 +7,9 @@ ARG NODE_ENV
 WORKDIR /repo
 
 COPY . .
-RUN bun install --frozen-lockfile --filter @hebo/api
+RUN bun install --frozen-lockfile -F @hebo/api
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /rds-bundle.pem
-RUN [ "$NODE_ENV" = "production" ] && bun run -F @hebo/api build -- --production || bun run -F @hebo/api build
+RUN bun run -F @hebo/api build $( [ "$NODE_ENV" = "production" ] && echo "-- --production" )
 
 ########################  runner stage  ########################
 FROM gcr.io/distroless/base
