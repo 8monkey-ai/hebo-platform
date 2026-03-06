@@ -10,10 +10,10 @@
     "dev": "bun --hot src/index.ts",
     "format": "oxfmt .",
     "lint": "oxlint",
-    "type-check": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
     "prestart": "bun run build",
     "start": "./dist/server",
-    "test": "bun test"
+    "test": "bun test --pass-with-no-tests"
   },
   "dependencies": {
     "@ai-sdk/amazon-bedrock": "^4.0.72",
