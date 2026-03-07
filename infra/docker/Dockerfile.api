@@ -1,28 +1,16 @@
 # syntax=docker/dockerfile:1
 
-########################  pruner stage  ########################
-FROM oven/bun:1 AS pruner
-ENV CI=1
-WORKDIR /repo
-RUN bun install --global turbo@2.8.11
-
-COPY . .
-
-# FUTURE: move to the SST/Pulumi script
-RUN turbo prune @hebo/api --docker
-
 ########################  installer + builder stage  ########################
 FROM oven/bun:1 AS builder
 ENV CI=1
 ARG NODE_ENV
+ENV NODE_ENV=$NODE_ENV
 WORKDIR /repo
 
-COPY --from=pruner /repo/out/json/ ./
-RUN bun install --frozen-lockfile
-
-COPY --from=pruner /repo/out/full/ ./
+COPY . .
+RUN bun install --frozen-lockfile --filter @hebo/api
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /rds-bundle.pem
-RUN [ "$NODE_ENV" = "production" ] && bun run build -- -- --production || bun run build
+RUN bun run --filter @hebo/api build
 
 ########################  runner stage  ########################
 FROM gcr.io/distroless/base

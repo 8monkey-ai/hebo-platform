@@ -7,11 +7,12 @@
     "packages/*"
   ],
   "scripts": {
-    "build": "turbo run build",
+    "build": "bun run --workspaces --if-present --sequential build",
     "clean": "git clean -fdx -e '.env*'",
-    "db:migrate": "bun run -F @hebo/api db migrate dev && bun run -F @hebo/auth db migrate dev",
-    "db:reset": "bun run -F @hebo/api db migrate reset --force && bun run -F @hebo/auth db migrate reset --force",
-    "dev": "turbo run dev",
+    "db:migrate": "bun run --workspaces --if-present --sequential db:migrate",
+    "db:reset": "bun run --workspaces --if-present --sequential db:reset",
+    "predev": "bun run --workspaces --if-present --sequential predev",
+    "dev": "bun run --workspaces --if-present --parallel dev",
     "dev:infra:up": "docker compose up -d",
     "dev:infra:down": "docker compose down",
     "format": "oxfmt .",
@@ -21,7 +22,7 @@
     "lint:deps": "check-dependency-version-consistency .",
     "prepare": "test -n \"$CI\" || lefthook install",
     "secret": "bun run scripts/secrets.ts",
-    "test": "turbo run test"
+    "test": "bun run --workspaces --if-present --parallel test"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
@@ -31,7 +32,6 @@
     "oxlint": "^1.51.0",
     "sst": "catalog:",
     "tailwindcss": "catalog:",
-    "turbo": "2.8.11",
     "typescript": "catalog:"
   },
   "engines": {

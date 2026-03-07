@@ -6,12 +6,12 @@ Deployable apps live in `apps/` (`auth`, `api`, `console`, `gateway`, `mcp`) whi
 
 ## Build, Test, and Development Commands
 
-Install dependencies with `bun install`. Use the Turborepo scripts from the root:
+Install dependencies with `bun install`. Use the root scripts:
 
 ```bash
 bun run dev          # Run all services with hot reload (spawns local Postgres if needed)
 bun run -F @hebo/console dev   # Console-only development with MSW data
-bun run build        # Turborepo build across workspaces
+bun run build        # Workspace build across apps/packages
 bun run test         # Aggregate test runner
 bun run lint         # Oxlint across workspaces
 bun run format       # Oxfmt formatting

@@ -38,10 +38,6 @@ logs
 # local env files
 .env*.local
 
-# turbo
-.turbo
-out/
-
 # sst
 .sst
 sst-env.d.ts

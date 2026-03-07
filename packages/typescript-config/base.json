@@ -15,5 +15,5 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "exclude": ["dist", ".next", ".react-router", ".turbo"]
+  "exclude": ["dist", ".next", ".react-router"]
 }

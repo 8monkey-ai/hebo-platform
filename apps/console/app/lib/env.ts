@@ -1,7 +1,9 @@
-// isDevLocal is true only in pure local dev: no Turbo/CI context and no explicit service URLs
-export const isDevLocal =
-  !import.meta.env.TURBO_HASH &&
-  !import.meta.env.VITE_API_URL &&
-  !import.meta.env.VITE_AUTH_URL &&
-  !import.meta.env.VITE_GATEWAY_URL;
-export const isDev = import.meta.env.DEV;
+const shouldAutoDetect = import.meta.env.DEV && !import.meta.env.VITE_API_URL;
+
+const isReachable = (url: string) =>
+  fetch(url, { signal: AbortSignal.timeout(400) }).then(
+    () => true,
+    () => false,
+  );
+
+export const useMocks = shouldAutoDetect && !(await isReachable("http://localhost:3001"));
