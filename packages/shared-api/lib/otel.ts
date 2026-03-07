@@ -1,11 +1,10 @@
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
-import { metrics } from "@opentelemetry/api";
-import type { SeverityNumber } from "@opentelemetry/api-logs";
+import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
+import { logs, SeverityNumber } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { CompressionAlgorithm } from "@opentelemetry/otlp-exporter-base";
-import { resourceFromAttributes } from "@opentelemetry/resources";
 import {
   BatchLogRecordProcessor,
   ConsoleLogRecordExporter,
@@ -13,88 +12,91 @@ import {
   SimpleLogRecordProcessor,
   createLoggerConfigurator,
 } from "@opentelemetry/sdk-logs";
-import { MeterProvider, PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
-import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrumentation";
+import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { PrismaInstrumentation } from "@prisma/instrumentation";
 
 import { isProduction } from "../env";
 import { getSecret } from "../utils/secrets";
 import { isRootPathUrl } from "../utils/url";
 
-export const greptimeOtlpEndpoint =
+const greptimeOtlpEndpoint =
   (await getSecret("GreptimeEndpoint")) ?? "http://localhost:4000/v1/otlp";
 
-// Register the MeterProvider eagerly so that any library calling
-// metrics.getMeter() at import time gets a real meter instead of a NoopMeter.
-// Unlike traces, the metrics API does not use proxies — meters created before
-// the provider is registered stay noop forever.
-metrics.setGlobalMeterProvider(
-  new MeterProvider({
-    readers: [
-      new PeriodicExportingMetricReader({
-        exporter: new OTLPMetricExporter({
-          url: `${greptimeOtlpEndpoint}/v1/metrics`,
-          compression: CompressionAlgorithm.GZIP,
-        }),
+let initPromise: Promise<void> | undefined;
+
+export function initOtel(serviceName: string, minimumSeverity?: SeverityNumber) {
+  if (initPromise) return initPromise;
+
+  initPromise = (async () => {
+    diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
+
+    const sdk = new NodeSDK({
+      serviceName,
+      traceExporter: new OTLPTraceExporter({
+        url: `${greptimeOtlpEndpoint}/v1/traces`,
+        headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
+        compression: CompressionAlgorithm.GZIP,
       }),
-    ],
-  }),
-);
-
-export const getOtelLogger = (serviceName: string, minimumSeverity: SeverityNumber) => {
-  const loggerProvider = new LoggerProvider({
-    resource: resourceFromAttributes({
-      "service.name": serviceName,
-    }),
-    loggerConfigurator: createLoggerConfigurator([
-      {
-        pattern: "*",
-        config: {
-          minimumSeverity,
-        },
-      },
-    ]),
-    processors: [
-      ...(isProduction ? [] : [new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())]),
-      new BatchLogRecordProcessor(
-        new OTLPLogExporter({
-          url: `${greptimeOtlpEndpoint}/v1/logs`,
-          compression: CompressionAlgorithm.GZIP,
+      metricReaders: [
+        new PeriodicExportingMetricReader({
+          exporter: new OTLPMetricExporter({
+            url: `${greptimeOtlpEndpoint}/v1/metrics`,
+            compression: CompressionAlgorithm.GZIP,
+          }),
         }),
-      ),
-    ],
-  });
-
-  return loggerProvider.getLogger(serviceName);
-};
-
-registerInstrumentations({
-  instrumentations: [
-    new PrismaInstrumentation({
-      ignoreSpanTypes: [
-        "prisma:client:compile",
-        "prisma:client:connect",
-        "prisma:client:serialize",
-        "prisma:engine:query",
-        "prisma:engine:response_json_serialization",
-        "prisma:engine:serialize",
-        "prisma:engine:db_query",
-        "prisma:engine:connection",
       ],
-    }),
-  ],
-});
+      instrumentations: [
+        new PrismaInstrumentation({
+          ignoreSpanTypes: [
+            "prisma:client:compile",
+            "prisma:client:connect",
+            "prisma:client:serialize",
+            "prisma:engine:query",
+            "prisma:engine:response_json_serialization",
+            "prisma:engine:serialize",
+            "prisma:engine:db_query",
+            "prisma:engine:connection",
+          ],
+        }),
+      ],
+    });
 
-export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
+    sdk.start();
+
+    const loggerProvider = new LoggerProvider({
+      loggerConfigurator: createLoggerConfigurator([
+        {
+          pattern: "*",
+          config: {
+            minimumSeverity:
+              minimumSeverity ?? (isProduction ? SeverityNumber.INFO : SeverityNumber.DEBUG),
+          },
+        },
+      ]),
+      processors: [
+        ...(isProduction ? [] : [new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())]),
+        new BatchLogRecordProcessor(
+          new OTLPLogExporter({
+            url: `${greptimeOtlpEndpoint}/v1/logs`,
+            compression: CompressionAlgorithm.GZIP,
+          }),
+        ),
+      ],
+    });
+
+    logs.setGlobalLoggerProvider(loggerProvider);
+  })();
+
+  return initPromise;
+}
+
+export const getElysiaOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
   return {
     serviceName,
     checkIfShouldTrace: (request) => {
       if (request.method !== "GET") return true;
       return !isRootPathUrl(request.url);
     },
-    traceExporter: new OTLPTraceExporter({
-      url: `${greptimeOtlpEndpoint}/v1/traces`,
-      headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
-      compression: CompressionAlgorithm.GZIP,
-    }),
   };
 };

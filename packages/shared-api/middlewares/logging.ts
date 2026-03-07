@@ -1,14 +1,14 @@
+import { logs } from "@opentelemetry/api-logs";
 import { Elysia } from "elysia";
 
-import { isProduction, logSeverity } from "../env";
-import { getOtelLogger } from "../lib/otel";
+import { isProduction } from "../env";
 import { createPinoOtelAdapter } from "../utils/otel-pino-adapter";
 
 export type Logger = ReturnType<typeof createPinoOtelAdapter>;
 
 export const logger = (
   serviceName: string,
-  logger = createPinoOtelAdapter(getOtelLogger(serviceName, logSeverity)),
+  logger = createPinoOtelAdapter(logs.getLogger(serviceName)),
 ) => {
   const app = new Elysia({ name: "hebo-logging" }).decorate("logger", logger);
 
