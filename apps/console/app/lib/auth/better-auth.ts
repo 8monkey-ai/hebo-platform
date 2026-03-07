@@ -31,12 +31,16 @@ const authClient = createAuthClient({
   ],
 });
 
+const redirectToSignIn = () => {
+  shellStore.user = undefined;
+  globalThis.location.replace("/signin");
+};
+
 export const authService: AuthService = {
   async ensureSignedIn() {
     const headers = new Headers({ cookie: document.cookie });
     if (!getSessionCookie(headers)) {
-      shellStore.user = undefined;
-      globalThis.location.replace("/signin");
+      redirectToSignIn();
       return;
     }
 
@@ -52,7 +56,11 @@ export const authService: AuthService = {
     const session = await authClient.getSession({
       query: { disableCookieCache: isComingFromSignIn },
     });
-    const user = session.data?.user as User;
+    if (!session?.data?.user) {
+      redirectToSignIn();
+      return;
+    }
+    const user = session.data.user as User;
     const initialsSource = user?.name || user.email;
     const initialsSeparator = user?.name ? " " : "@";
     user.initials = initialsSource
