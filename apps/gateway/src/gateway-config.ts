@@ -7,11 +7,13 @@ import { instrumentFetch } from "@hebo-ai/gateway/telemetry";
 import { trace } from "@opentelemetry/api";
 import { logs } from "@opentelemetry/api-logs";
 
+import { initOtel } from "@hebo/shared-api/lib/otel";
 import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino-adapter";
 
 import { resolveModelId, resolveProvider } from "./services/model-resolver";
 import { createProvider, loadProviderSecrets } from "./services/provider-factory";
 
+await initOtel("hebo-gateway");
 instrumentFetch("full");
 
 export const basePath = "/v1";

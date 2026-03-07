@@ -13,7 +13,7 @@ import Elysia from "elysia";
 
 import { corsConfig } from "@hebo/shared-api/lib/cors";
 import { getOpenapiConfig } from "@hebo/shared-api/lib/openapi";
-import { getElysiaOtelConfig, initOtel } from "@hebo/shared-api/lib/otel";
+import { getElysiaOtelConfig } from "@hebo/shared-api/lib/otel";
 import { authService } from "@hebo/shared-api/middlewares/auth";
 import { logger } from "@hebo/shared-api/middlewares/logging";
 
@@ -21,8 +21,6 @@ import { dbClient } from "~api/middleware/db-client";
 
 import { basePath, gw } from "./gateway-config";
 import { errorHandler } from "./middlewares/error-handler";
-
-await initOtel("hebo-gateway");
 
 const PORT = Number(process.env.PORT ?? 3002);
 const GATEWAY_URL = process.env.GATEWAY_URL ?? `http://localhost:${PORT}`;
