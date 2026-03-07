@@ -4,13 +4,11 @@ import { organizationClient } from "better-auth/client/plugins";
 import { getCookieCache, getCookies } from "better-auth/cookies";
 import { type Cookie, Elysia } from "elysia";
 
-import { authUrl } from "../env";
+import { authSecret, authUrl } from "../env";
 import { AuthError, BadRequestError } from "../errors";
 import { betterAuthCookieOptions } from "../lib/cookie-options";
-import { getSecret } from "../utils/secrets";
 import type { Logger } from "./logging";
 
-const authSecret = await getSecret("AuthSecret");
 const cookieConfig = getCookies(betterAuthCookieOptions);
 
 const createAuthClient = (request: Request) => {
