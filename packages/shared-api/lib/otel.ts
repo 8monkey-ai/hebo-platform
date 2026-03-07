@@ -14,6 +14,7 @@ import {
   createLoggerConfigurator,
 } from "@opentelemetry/sdk-logs";
 import { MeterProvider, PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrumentation";
 
 import { isProduction } from "../env";
@@ -93,10 +94,18 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
       if (request.method !== "GET") return true;
       return !isRootPathUrl(request.url);
     },
-    traceExporter: new OTLPTraceExporter({
-      url: `${greptimeOtlpEndpoint}/v1/traces`,
-      headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
-      compression: CompressionAlgorithm.GZIP,
-    }),
+    spanProcessors: [
+      new BatchSpanProcessor(
+        new OTLPTraceExporter({
+          url: `${greptimeOtlpEndpoint}/v1/traces`,
+          headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
+          compression: CompressionAlgorithm.GZIP,
+        }),
+        {
+          maxQueueSize: 8192,
+          scheduledDelayMillis: 1000,
+        },
+      ),
+    ],
   };
 };
