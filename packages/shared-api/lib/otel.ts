@@ -1,5 +1,5 @@
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
-import { metrics } from "@opentelemetry/api";
+import { DiagConsoleLogger, DiagLogLevel, diag, metrics } from "@opentelemetry/api";
 import type { SeverityNumber } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
@@ -19,6 +19,8 @@ import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrum
 import { isProduction } from "../env";
 import { getSecret } from "../utils/secrets";
 import { isRootPathUrl } from "../utils/url";
+
+diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
 export const greptimeOtlpEndpoint =
   (await getSecret("GreptimeEndpoint")) ?? "http://localhost:4000/v1/otlp";

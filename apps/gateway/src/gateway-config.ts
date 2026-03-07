@@ -57,10 +57,10 @@ export const gw = gateway({
     resolveModelId,
     resolveProvider,
   },
-  logger: createPinoOtelAdapter(getOtelLogger("hebo-ai-gateway", 1)), // trace severity
+  logger: createPinoOtelAdapter(getOtelLogger("hebo-gateway", 1)), // trace severity
   telemetry: {
     enabled: true,
-    tracer: trace.getTracer("hebo-ai-gateway"),
+    tracer: trace.getTracer("hebo-gateway"),
     signals: {
       gen_ai: "full",
       http: "recommended",
