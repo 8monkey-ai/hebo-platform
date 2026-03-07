@@ -3,7 +3,7 @@ import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { betterAuth } from "better-auth/minimal";
 import { emailOTP, organization } from "better-auth/plugins";
 
-import { authUrl, logLevel } from "@hebo/shared-api/env";
+import { authSecret, authUrl, logLevel } from "@hebo/shared-api/env";
 import { betterAuthCookieOptions, cookieDomain } from "@hebo/shared-api/lib/cookie-options";
 import { createPrismaAdapter } from "@hebo/shared-api/lib/db/connection";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
@@ -92,7 +92,7 @@ export const auth = betterAuth({
       },
     }),
   ],
-  secret: await getSecret("AuthSecret"),
+  secret: authSecret,
   session: {
     cookieCache: { enabled: true },
   },
