@@ -104,7 +104,7 @@ registerInstrumentations({
 
 const REDACTED = "[REDACTED]";
 
-const createRedactingSpanProcessor = (exporter: SpanExporter, config?: BufferConfig) => {
+const createRedactingBatchSpanProcessor = (exporter: SpanExporter, config?: BufferConfig) => {
   const processor = new BatchSpanProcessor(exporter, config);
   const originalOnEnd = processor.onEnd.bind(processor);
   const keys = SENSITIVE_SPAN_ATTRIBUTES;
@@ -131,7 +131,7 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
       return !isRootPathUrl(request.url);
     },
     spanProcessors: [
-      createRedactingSpanProcessor(
+      createRedactingBatchSpanProcessor(
         new OTLPTraceExporter({
           url: `${greptimeOtlpEndpoint}/v1/traces`,
           headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
