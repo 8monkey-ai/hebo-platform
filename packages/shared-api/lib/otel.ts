@@ -14,12 +14,22 @@ import {
   createLoggerConfigurator,
 } from "@opentelemetry/sdk-logs";
 import { MeterProvider, PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import {
+  type BufferConfig,
+  type SpanExporter,
+  BatchSpanProcessor,
+} from "@opentelemetry/sdk-trace-base";
 import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrumentation";
 
 import { isProduction } from "../env";
 import { getSecret } from "../utils/secrets";
 import { isRootPathUrl } from "../utils/url";
+
+const SENSITIVE_SPAN_ATTRIBUTES = [
+  "http.request.header.authorization",
+  "http.request.header.cookie",
+  "http.request.cookie",
+];
 
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
@@ -63,6 +73,11 @@ export const getOtelLogger = (serviceName: string, minimumSeverity: SeverityNumb
           url: `${greptimeOtlpEndpoint}/v1/logs`,
           compression: CompressionAlgorithm.GZIP,
         }),
+        {
+          maxQueueSize: 8192,
+          maxExportBatchSize: 1024,
+          scheduledDelayMillis: 2000,
+        },
       ),
     ],
   });
@@ -87,6 +102,21 @@ registerInstrumentations({
   ],
 });
 
+const createRedactingSpanProcessor = (exporter: SpanExporter, config?: BufferConfig) => {
+  const processor = new BatchSpanProcessor(exporter, config);
+
+  const originalOnEnd = processor.onEnd.bind(processor);
+  processor.onEnd = (span) => {
+    const attrs = span.attributes as Record<string, unknown>;
+    for (const key of SENSITIVE_SPAN_ATTRIBUTES) {
+      if (key in attrs) attrs[key] = "[REDACTED]";
+    }
+    originalOnEnd(span);
+  };
+
+  return processor;
+};
+
 export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
   return {
     serviceName,
@@ -95,7 +125,7 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
       return !isRootPathUrl(request.url);
     },
     spanProcessors: [
-      new BatchSpanProcessor(
+      createRedactingSpanProcessor(
         new OTLPTraceExporter({
           url: `${greptimeOtlpEndpoint}/v1/traces`,
           headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
@@ -103,7 +133,8 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
         }),
         {
           maxQueueSize: 8192,
-          scheduledDelayMillis: 1000,
+          maxExportBatchSize: 1024,
+          scheduledDelayMillis: 2000,
         },
       ),
     ],
