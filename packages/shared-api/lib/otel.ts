@@ -102,15 +102,21 @@ registerInstrumentations({
   ],
 });
 
+const REDACTED = "[REDACTED]";
+
 const createRedactingSpanProcessor = (exporter: SpanExporter, config?: BufferConfig) => {
   const processor = new BatchSpanProcessor(exporter, config);
-
   const originalOnEnd = processor.onEnd.bind(processor);
+  const keys = SENSITIVE_SPAN_ATTRIBUTES;
+
   processor.onEnd = (span) => {
     const attrs = span.attributes as Record<string, unknown>;
-    for (const key of SENSITIVE_SPAN_ATTRIBUTES) {
-      if (key in attrs) attrs[key] = "[REDACTED]";
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]!;
+      if (attrs[key] !== undefined) attrs[key] = REDACTED;
     }
+
     originalOnEnd(span);
   };
 
