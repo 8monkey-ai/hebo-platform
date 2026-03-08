@@ -14,7 +14,11 @@ import {
   createLoggerConfigurator,
 } from "@opentelemetry/sdk-logs";
 import { MeterProvider, PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
-import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
+import {
+  type BufferConfig,
+  type SpanExporter,
+  BatchSpanProcessor,
+} from "@opentelemetry/sdk-trace-base";
 import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrumentation";
 
 import { isProduction } from "../env";
@@ -98,8 +102,8 @@ registerInstrumentations({
   ],
 });
 
-function createRedactingSpanProcessor(...args: ConstructorParameters<typeof BatchSpanProcessor>) {
-  const processor = new BatchSpanProcessor(...args);
+const createRedactingSpanProcessor = (exporter: SpanExporter, config?: BufferConfig) => {
+  const processor = new BatchSpanProcessor(exporter, config);
 
   const originalOnEnd = processor.onEnd.bind(processor);
   processor.onEnd = (span) => {
@@ -111,7 +115,7 @@ function createRedactingSpanProcessor(...args: ConstructorParameters<typeof Batc
   };
 
   return processor;
-}
+};
 
 export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
   return {
