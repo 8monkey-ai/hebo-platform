@@ -21,6 +21,12 @@ import { isProduction } from "../env";
 import { getSecret } from "../utils/secrets";
 import { isRootPathUrl } from "../utils/url";
 
+const SENSITIVE_SPAN_ATTRIBUTES = [
+  "http.request.header.authorization",
+  "http.request.header.cookie",
+  "http.request.cookie",
+];
+
 diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.INFO);
 
 export const greptimeOtlpEndpoint =
@@ -92,6 +98,21 @@ registerInstrumentations({
   ],
 });
 
+function createRedactingSpanProcessor(...args: ConstructorParameters<typeof BatchSpanProcessor>) {
+  const processor = new BatchSpanProcessor(...args);
+
+  const originalOnEnd = processor.onEnd.bind(processor);
+  processor.onEnd = (span) => {
+    const attrs = span.attributes as Record<string, unknown>;
+    for (const key of SENSITIVE_SPAN_ATTRIBUTES) {
+      if (key in attrs) attrs[key] = "[REDACTED]";
+    }
+    originalOnEnd(span);
+  };
+
+  return processor;
+}
+
 export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
   return {
     serviceName,
@@ -100,7 +121,7 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
       return !isRootPathUrl(request.url);
     },
     spanProcessors: [
-      new BatchSpanProcessor(
+      createRedactingSpanProcessor(
         new OTLPTraceExporter({
           url: `${greptimeOtlpEndpoint}/v1/traces`,
           headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
