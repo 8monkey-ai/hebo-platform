@@ -13,7 +13,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   cluster: heboCluster,
   architecture: "arm64",
   cpu: isProduction ? "1 vCPU" : "0.25 vCPU",
-  memory: isProduction ? "2 GB" : "0.5 GB",
+  memory: isProduction ? "4 GB" : "0.5 GB",
   permissions: [
     {
       actions: ["sts:AssumeRole"],
