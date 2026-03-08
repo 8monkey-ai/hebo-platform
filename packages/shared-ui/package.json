@@ -16,7 +16,8 @@
   "scripts": {
     "clean": "git clean -fdx -e '.env*' .",
     "format": "oxfmt .",
-    "lint": "oxlint"
+    "lint": "oxlint",
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",

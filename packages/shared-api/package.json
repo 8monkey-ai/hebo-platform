@@ -16,7 +16,10 @@
     "./errors": "./errors.ts"
   },
   "scripts": {
-    "clean": "git clean -fdx -e '.env*' ."
+    "clean": "git clean -fdx -e '.env*' .",
+    "format": "oxfmt .",
+    "lint": "oxlint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@opentelemetry/api": "catalog:",

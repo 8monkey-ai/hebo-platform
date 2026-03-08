@@ -1,5 +1,9 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "options": {
+    "typeAware": true,
+    "typeCheck": true
+  },
   "plugins": ["eslint", "unicorn", "typescript", "oxc", "react", "promise", "jsx-a11y", "import"],
   "categories": {
     "correctness": "error",
@@ -18,13 +22,17 @@
     "no-array-reverse": "off",
     "no-array-sort": "off",
     "prefer-array-to-reversed": "off",
-    "prefer-array-to-sorted": "off"
+    "prefer-array-to-sorted": "off",
+    "no-unsafe-type-assertion": "off",
+    "strict-boolean-expressions": "off"
   },
   "ignorePatterns": [
     "**/_*/**",
     "!apps/console/app/routes/_*/**",
     "apps/console/public/mockServiceWorker.js",
     "**/migrations/**",
-    "**/generated/**"
+    "**/generated/**",
+    "infra/**",
+    "sst.config.ts"
   ]
 }

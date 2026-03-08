@@ -22,7 +22,8 @@
     "lint:deps": "check-dependency-version-consistency .",
     "prepare": "test -n \"$CI\" || lefthook install",
     "secret": "bun run scripts/secrets.ts",
-    "test": "bun run --workspaces --if-present --parallel test"
+    "test": "bun run --workspaces --if-present --parallel test",
+    "typecheck": "bun run --workspaces --if-present --parallel typecheck"
   },
   "devDependencies": {
     "@types/bun": "catalog:",
@@ -30,6 +31,7 @@
     "lefthook": "^2.0.15",
     "oxfmt": "^0.36.0",
     "oxlint": "^1.51.0",
+    "oxlint-tsgolint": "^0.16.0",
     "sst": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"
