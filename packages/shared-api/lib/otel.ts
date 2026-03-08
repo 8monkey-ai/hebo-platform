@@ -63,6 +63,11 @@ export const getOtelLogger = (serviceName: string, minimumSeverity: SeverityNumb
           url: `${greptimeOtlpEndpoint}/v1/logs`,
           compression: CompressionAlgorithm.GZIP,
         }),
+        {
+          maxQueueSize: 8192,
+          maxExportBatchSize: 1024,
+          scheduledDelayMillis: 2000,
+        },
       ),
     ],
   });
@@ -103,7 +108,8 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
         }),
         {
           maxQueueSize: 8192,
-          scheduledDelayMillis: 1000,
+          maxExportBatchSize: 1024,
+          scheduledDelayMillis: 2000,
         },
       ),
     ],
