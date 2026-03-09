@@ -19,7 +19,7 @@
     "clean": "git clean -fdx -e '.env*' .",
     "format": "oxfmt .",
     "lint": "oxlint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "oxlint --type-aware --type-check"
   },
   "dependencies": {
     "@opentelemetry/api": "catalog:",

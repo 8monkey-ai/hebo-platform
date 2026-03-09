@@ -14,7 +14,7 @@
     "format": "oxfmt .",
     "lint": "oxlint",
     "start": "vite preview",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "bun run predev && oxlint --type-aware --type-check"
   },
   "dependencies": {
     "@better-auth/api-key": "catalog:",
@@ -61,7 +61,6 @@
     "slugify": "^1.6.6",
     "tailwindcss": "catalog:",
     "tw-animate-css": "catalog:",
-    "typescript": "catalog:",
     "vite": "^7.3.1",
     "vite-plugin-babel": "^1.4.1",
     "vite-plugin-devtools-json": "^1.0.0",

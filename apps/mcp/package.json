@@ -9,7 +9,7 @@
     "dev": "bun --hot src/index.ts",
     "format": "oxfmt .",
     "lint": "oxlint",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "oxlint --type-aware --type-check",
     "prestart": "bun run build",
     "start": "./dist/server"
   },

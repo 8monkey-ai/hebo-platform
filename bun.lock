@@ -13,7 +13,6 @@
         "oxlint-tsgolint": "^0.16.0",
         "sst": "catalog:",
         "tailwindcss": "catalog:",
-        "typescript": "catalog:",
       },
     },
     "apps/api": {
@@ -103,7 +102,6 @@
         "slugify": "^1.6.6",
         "tailwindcss": "catalog:",
         "tw-animate-css": "catalog:",
-        "typescript": "catalog:",
         "vite": "^7.3.1",
         "vite-plugin-babel": "^1.4.1",
         "vite-plugin-devtools-json": "^1.0.0",
@@ -239,9 +237,6 @@
     "packages/typescript-config": {
       "name": "@hebo/typescript-config",
       "version": "0.0.1",
-      "devDependencies": {
-        "typescript": "catalog:",
-      },
     },
   },
   "catalog": {
@@ -275,7 +270,6 @@
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.1.18",
     "tw-animate-css": "^1.4.0",
-    "typescript": "^5.9.3",
     "zod": "^4.3.5",
   },
   "packages": {
