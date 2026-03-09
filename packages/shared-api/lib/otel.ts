@@ -25,7 +25,7 @@ import { isProduction } from "../env";
 import { getSecret } from "../utils/secrets";
 import { isRootPathUrl } from "../utils/url";
 
-const SENSITIVE_SPAN_ATTRIBUTES = [
+const SensitiveSpanAttributes = [
   "http.request.header.authorization",
   "http.request.header.cookie",
   "http.request.cookie",
@@ -100,19 +100,19 @@ registerInstrumentations({
   ],
 });
 
-const REDACTED = "[REDACTED]";
+const Redacted = "[REDACTED]";
 
 const createRedactingBatchSpanProcessor = (exporter: SpanExporter, config?: BufferConfig) => {
   const processor = new BatchSpanProcessor(exporter, config);
   const originalOnEnd = processor.onEnd.bind(processor);
-  const keys = SENSITIVE_SPAN_ATTRIBUTES;
+  const keys = SensitiveSpanAttributes;
 
   processor.onEnd = (span) => {
     const attrs = span.attributes as Record<string, unknown>;
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]!;
-      if (attrs[key] !== undefined) attrs[key] = REDACTED;
+      if (attrs[key] !== undefined) attrs[key] = Redacted;
     }
 
     originalOnEnd(span);
