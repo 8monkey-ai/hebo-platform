@@ -89,6 +89,7 @@ export const createPinoOtelAdapter = (otelLogger: Logger) => {
       (...args: unknown[]) => {
         const record = buildLogRecord(args);
         record.severityNumber = otelSeverityByLevel[level];
+        record.severityText = level.toUpperCase();
         otelLogger.emit(record);
       },
     ]),
