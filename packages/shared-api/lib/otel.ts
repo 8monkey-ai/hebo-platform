@@ -1,5 +1,4 @@
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
-import { metrics } from "@opentelemetry/api";
 import type { SeverityNumber } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
@@ -13,7 +12,7 @@ import {
   SimpleLogRecordProcessor,
   createLoggerConfigurator,
 } from "@opentelemetry/sdk-logs";
-import { MeterProvider, PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
+import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import {
   type BufferConfig,
   type SpanExporter,
@@ -33,23 +32,6 @@ const SensitiveSpanAttributes = [
 
 export const greptimeOtlpEndpoint =
   (await getSecret("GreptimeEndpoint")) ?? "http://localhost:4000/v1/otlp";
-
-// Register the MeterProvider eagerly so that any library calling
-// metrics.getMeter() at import time gets a real meter instead of a NoopMeter.
-// Unlike traces, the metrics API does not use proxies — meters created before
-// the provider is registered stay noop forever.
-metrics.setGlobalMeterProvider(
-  new MeterProvider({
-    readers: [
-      new PeriodicExportingMetricReader({
-        exporter: new OTLPMetricExporter({
-          url: `${greptimeOtlpEndpoint}/v1/metrics`,
-          compression: CompressionAlgorithm.GZIP,
-        }),
-      }),
-    ],
-  }),
-);
 
 export const getOtelLogger = (serviceName: string, minimumSeverity: SeverityNumber) => {
   const loggerProvider = new LoggerProvider({
@@ -124,6 +106,12 @@ const createRedactingBatchSpanProcessor = (exporter: SpanExporter, config?: Buff
 export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
   return {
     serviceName,
+    metricReader: new PeriodicExportingMetricReader({
+      exporter: new OTLPMetricExporter({
+        url: `${greptimeOtlpEndpoint}/v1/metrics`,
+        compression: CompressionAlgorithm.GZIP,
+      }),
+    }),
     checkIfShouldTrace: (request) => {
       if (request.method !== "GET") return true;
       return !isRootPathUrl(request.url);
