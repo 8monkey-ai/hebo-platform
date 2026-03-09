@@ -1,5 +1,3 @@
-// Must evaluate before @hebo-ai/gateway — see comment in otel.ts.
-import "@hebo/shared-api/lib/otel";
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 import { opentelemetry } from "@elysiajs/opentelemetry";
