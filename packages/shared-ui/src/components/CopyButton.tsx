@@ -1,8 +1,7 @@
 import { Check, Copy } from "lucide-react";
 import * as React from "react";
 
-import { cn } from "#/lib/utils";
-
+import { cn } from "../lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
 
 export function CopyButton({
@@ -27,7 +26,7 @@ export function CopyButton({
 
   const copy = () => {
     try {
-      navigator.clipboard.writeText(value);
+      void navigator.clipboard.writeText(value);
       setHasCopied(true);
     } catch (error) {
       console.error("Failed to copy to clipboard:", error);

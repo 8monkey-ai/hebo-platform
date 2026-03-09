@@ -1,5 +1,5 @@
-import { Alert as ShadCnAlert } from "#/_shadcn/ui/alert";
-import { cn } from "#/lib/utils";
+import { Alert as ShadCnAlert } from "../_shadcn/ui/alert";
+import { cn } from "../lib/utils";
 
 export function Alert({ className, variant, ...props }: React.ComponentProps<typeof ShadCnAlert>) {
   return (
@@ -13,4 +13,4 @@ export function Alert({ className, variant, ...props }: React.ComponentProps<typ
   );
 }
 
-export { AlertTitle, AlertDescription } from "#/_shadcn/ui/alert";
+export { AlertTitle, AlertDescription } from "../_shadcn/ui/alert";

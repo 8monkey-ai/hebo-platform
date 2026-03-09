@@ -9,8 +9,8 @@ import {
   FieldDescription as ShadCnFieldDescription,
   FieldError as ShadCnFieldError,
   FieldGroup as ShadCnFieldGroup,
-} from "#/_shadcn/ui/field";
-import { cn } from "#/lib/utils";
+} from "../_shadcn/ui/field";
+import { cn } from "../lib/utils";
 
 const FieldCtx = React.createContext<ReturnType<typeof useField>[0] | undefined>(undefined);
 
@@ -128,4 +128,4 @@ export {
   FieldSet,
   FieldContent,
   FieldTitle,
-} from "#/_shadcn/ui/field";
+} from "../_shadcn/ui/field";

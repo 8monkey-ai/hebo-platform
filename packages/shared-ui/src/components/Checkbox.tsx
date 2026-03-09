@@ -1,1 +1,1 @@
-export { Checkbox } from "#/_shadcn/ui/checkbox";
+export { Checkbox } from "../_shadcn/ui/checkbox";

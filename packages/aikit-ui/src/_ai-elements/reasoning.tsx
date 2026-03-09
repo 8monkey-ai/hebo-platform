@@ -8,8 +8,8 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "#/_shadcn/ui/collapsible";
-import { cn } from "#/lib/utils";
+} from "../_shadcn/ui/collapsible";
+import { cn } from "../lib/utils";
 import { cjk } from "@streamdown/cjk";
 import { code } from "@streamdown/code";
 import { math } from "@streamdown/math";

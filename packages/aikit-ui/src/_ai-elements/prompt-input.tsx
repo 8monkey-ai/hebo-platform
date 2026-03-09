@@ -23,38 +23,38 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "#/_shadcn/ui/command";
+} from "../_shadcn/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "#/_shadcn/ui/dropdown-menu";
+} from "../_shadcn/ui/dropdown-menu";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "#/_shadcn/ui/hover-card";
+} from "../_shadcn/ui/hover-card";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupTextarea,
-} from "#/_shadcn/ui/input-group";
+} from "../_shadcn/ui/input-group";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "#/_shadcn/ui/select";
-import { Spinner } from "#/_shadcn/ui/spinner";
+} from "../_shadcn/ui/select";
+import { Spinner } from "../_shadcn/ui/spinner";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "#/_shadcn/ui/tooltip";
-import { cn } from "#/lib/utils";
+} from "../_shadcn/ui/tooltip";
+import { cn } from "../lib/utils";
 import {
   CornerDownLeftIcon,
   ImageIcon,

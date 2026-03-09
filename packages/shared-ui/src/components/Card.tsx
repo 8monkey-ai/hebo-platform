@@ -6,4 +6,4 @@ export {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "#/_shadcn/ui/card";
+} from "../_shadcn/ui/card";

@@ -4,9 +4,6 @@
   "private": true,
   "type": "module",
   "sideEffects": false,
-  "imports": {
-    "#/*": "./src/*"
-  },
   "exports": {
     "./blocks/*": "./src/blocks/*.tsx"
   },

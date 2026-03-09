@@ -4,9 +4,6 @@
   "private": true,
   "type": "module",
   "sideEffects": false,
-  "imports": {
-    "#/*": "./src/*"
-  },
   "exports": {
     "./_mintlify/code/*": "./src/_mintlify/code/*.tsx",
     "./components/*": "./src/components/*.tsx",

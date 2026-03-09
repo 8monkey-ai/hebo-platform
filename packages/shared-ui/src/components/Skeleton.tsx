@@ -1,5 +1,4 @@
-import { Skeleton as ShadCnSkeleton } from "#/_shadcn/ui/skeleton";
-
+import { Skeleton as ShadCnSkeleton } from "../_shadcn/ui/skeleton";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "./Table";
 
 interface SkeletonProps extends React.ComponentProps<"div"> {

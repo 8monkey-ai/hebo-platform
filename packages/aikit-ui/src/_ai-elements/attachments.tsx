@@ -3,13 +3,13 @@
 import type { FileUIPart, SourceDocumentUIPart } from "ai";
 import type { ComponentProps, HTMLAttributes, ReactNode } from "react";
 
-import { Button } from "#/_shadcn/ui/button";
+import { Button } from "../_shadcn/ui/button";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "#/_shadcn/ui/hover-card";
-import { cn } from "#/lib/utils";
+} from "../_shadcn/ui/hover-card";
+import { cn } from "../lib/utils";
 import {
   FileTextIcon,
   GlobeIcon,

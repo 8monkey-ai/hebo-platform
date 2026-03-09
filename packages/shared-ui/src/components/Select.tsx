@@ -4,7 +4,7 @@ import {
   SelectValue,
   SelectContent,
   SelectItem,
-} from "#/_shadcn/ui/select";
+} from "../_shadcn/ui/select";
 
 type SelectProps = React.ComponentProps<typeof ShadCnSelect> & {
   items: Array<{ value: string; label: React.ReactNode }>;
