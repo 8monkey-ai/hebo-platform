@@ -1,5 +1,5 @@
 export interface AuthService {
-  ensureSignedIn(): Promise<void>;
+  ensureSignedIn(): Promise<boolean>;
   generateApiKey(name: string, expiresInMs?: number): Promise<ApiKey>;
   revokeApiKey(apiKeyId: string): Promise<void>;
   listApiKeys(): Promise<Array<ApiKey>>;
