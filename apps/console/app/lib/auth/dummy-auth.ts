@@ -24,6 +24,7 @@ export const authService = {
       initials: "DU",
       image: "",
     };
+    shellStore.organizationId = "dummy-org-id";
   },
 
   async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
@@ -58,5 +59,6 @@ export const authService = {
 
   async signOut() {
     shellStore.user = undefined;
+    shellStore.organizationId = undefined;
   },
 } satisfies AuthService;

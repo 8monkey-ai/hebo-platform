@@ -69,23 +69,34 @@ export const authService: AuthService = {
       .join("");
 
     shellStore.user = user;
+    shellStore.organizationId = session.data.session.activeOrganizationId;
   },
 
   async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
     // Better Auth expects seconds.
     const expiresIn = Math.max(1, Math.floor(expiresInMs / 1000));
-    const { data, error } = await authClient.apiKey.create({ name, expiresIn });
+    const { data, error } = await authClient.apiKey.create({
+      name,
+      expiresIn,
+      organizationId: shellStore.organizationId,
+      metadata: { createdByUserId: shellStore.user?.email },
+    });
     if (error) throw new Error(error.message);
     return data as ApiKey;
   },
 
   async revokeApiKey(apiKeyId) {
-    const { error } = await authClient.apiKey.delete({ keyId: apiKeyId });
+    const { error } = await authClient.apiKey.delete({
+      keyId: apiKeyId,
+      organizationId: shellStore.organizationId,
+    });
     if (error) throw new Error(error.message);
   },
 
   async listApiKeys() {
-    const { data, error } = await authClient.apiKey.list();
+    const { data, error } = await authClient.apiKey.list({
+      organizationId: shellStore.organizationId,
+    });
     if (error) throw new Error(error.message);
     const keys = data.apiKeys.map((key) => ({
       ...key,
@@ -129,5 +140,6 @@ export const authService: AuthService = {
   async signOut() {
     await authClient.signOut();
     shellStore.user = undefined;
+    shellStore.organizationId = undefined;
   },
 };
