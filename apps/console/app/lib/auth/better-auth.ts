@@ -69,12 +69,8 @@ export const authService: AuthService = {
       .map((part) => part[0])
       .join("");
 
-    const organizationId = session.data.session.activeOrganizationId;
-    if (!organizationId) {
-      return redirectToSignIn();
-    }
     user.userId = session.data.user.id;
-    user.organizationId = organizationId;
+    user.organizationId = session.data.session.activeOrganizationId;
     shellStore.user = user;
     return true;
   },
