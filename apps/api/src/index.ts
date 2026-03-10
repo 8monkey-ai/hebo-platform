@@ -13,6 +13,7 @@ import { errorHandler } from "./middleware/error-handler";
 import { agentsModule } from "./modules/agents";
 import { branchesModule } from "./modules/branches";
 import { providersModule } from "./modules/providers";
+import { tracesModule } from "./modules/traces";
 
 const PORT = Number(process.env.PORT ?? 3001);
 const API_URL = process.env.API_URL ?? `http://localhost:${PORT}`;
@@ -34,8 +35,8 @@ const createApi = () =>
       },
       (app) =>
         app
-          // /agents and /agents/:agentSlug/branches
-          .use(agentsModule.use(branchesModule))
+          // /agents and /agents/:agentSlug/branches (+ traces under branches)
+          .use(agentsModule.use(branchesModule.use(tracesModule)))
           // /providers
           .use(providersModule),
     );
