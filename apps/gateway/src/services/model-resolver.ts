@@ -7,6 +7,7 @@ import {
   type ResolveModelHookContext,
   type ResolveProviderHookContext,
 } from "@hebo-ai/gateway";
+import { trace } from "@opentelemetry/api";
 import { LRUCache } from "lru-cache";
 
 import type { createDbClient } from "~api/lib/db/client";
@@ -44,6 +45,12 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
   const { dbClient } = state as { dbClient: DbClient };
 
   const [agentSlug, branchSlug, modelAlias] = aliasPath.split("/");
+
+  trace.getActiveSpan()?.setAttributes({
+    "hebo.agent.slug": agentSlug,
+    "hebo.branch.slug": branchSlug,
+  });
+
   const branch = await dbClient.branches.findFirst({
     where: { agent_slug: agentSlug, slug: branchSlug },
     select: { models: true },

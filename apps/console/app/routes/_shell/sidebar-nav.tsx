@@ -1,4 +1,4 @@
-import { BrainCog, Home } from "lucide-react";
+import { Activity, BrainCog, Home } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
 import {
@@ -18,6 +18,11 @@ const navItems = [
     icon: BrainCog,
     postfix: "/models",
   },
+  {
+    label: "Traces",
+    icon: Activity,
+    postfix: "/traces",
+  },
 ] as const;
 
 type SidebarNavProps = {
@@ -33,7 +38,7 @@ export const SidebarNav = ({ activeAgent, activeBranch }: SidebarNavProps) => {
     <SidebarMenu>
       {navItems.map(({ label, icon: Icon, postfix }) => {
         const path = `${basePath}${postfix}`;
-        const active = pathname === path;
+        const active = postfix ? pathname.startsWith(path) : pathname === path;
 
         return (
           <SidebarMenuItem
