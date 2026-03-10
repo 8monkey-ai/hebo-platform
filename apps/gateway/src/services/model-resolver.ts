@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
 import type { ProviderV3 } from "@ai-sdk/provider";
+import { trace } from "@opentelemetry/api";
 import {
   CANONICAL_MODEL_IDS,
   GatewayError,
@@ -44,6 +45,15 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
   const { dbClient } = state as { dbClient: DbClient };
 
   const [agentSlug, branchSlug, modelAlias] = aliasPath.split("/");
+
+  const activeSpan = trace.getActiveSpan();
+  if (activeSpan) {
+    activeSpan.setAttributes({
+      "hebo.agent.slug": agentSlug,
+      "hebo.branch.slug": branchSlug,
+    });
+  }
+
   const branch = await dbClient.branches.findFirst({
     where: { agent_slug: agentSlug, slug: branchSlug },
     select: { models: true },
