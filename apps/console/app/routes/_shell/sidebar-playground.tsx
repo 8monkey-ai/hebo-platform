@@ -1,6 +1,7 @@
 import { Chat } from "@hebo/aikit-ui/blocks/Chat";
 
-import { gatewayUrl, kyFetch } from "~console/lib/service";
+import { gatewayUrl } from "~console/lib/env";
+import { kyFetch } from "~console/lib/service";
 
 type Agent = {
   name: string;
