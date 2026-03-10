@@ -17,15 +17,15 @@ const apiKeys = new Collection({
 
 export const authService = {
   async ensureSignedIn() {
-    if (shellStore.user && shellStore.organizationId) return true;
+    if (shellStore.user?.organizationId) return true;
     shellStore.user = {
+      userId: "dummy-user-id",
+      organizationId: "dummy-org-id",
       name: "Dummy User",
       email: "dummy@user.com",
       initials: "DU",
       image: "",
     };
-    shellStore.userId = "dummy-user-id";
-    shellStore.organizationId = "dummy-org-id";
     return true;
   },
 
@@ -61,7 +61,5 @@ export const authService = {
 
   async signOut() {
     shellStore.user = undefined;
-    shellStore.userId = undefined;
-    shellStore.organizationId = undefined;
   },
 } satisfies AuthService;

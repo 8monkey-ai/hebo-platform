@@ -14,12 +14,8 @@ export type Models = Record<
 
 export const shellStore = proxy<{
   user: User | undefined;
-  userId: string | undefined;
-  organizationId: string | undefined;
   models: Models | undefined;
 }>({
   user: undefined,
-  userId: undefined,
-  organizationId: undefined,
   models: undefined,
 });

@@ -47,7 +47,7 @@ export const authService: AuthService = {
     const hasSessionDataCookie = getSessionCookie(headers, {
       cookieName: "session_data",
     });
-    if (shellStore.user && shellStore.organizationId && hasSessionDataCookie) {
+    if (shellStore.user?.organizationId && hasSessionDataCookie) {
       return true;
     }
 
@@ -67,12 +67,13 @@ export const authService: AuthService = {
       .map((part) => part[0])
       .join("");
 
-    shellStore.user = user;
-    shellStore.userId = session.data.user.id;
-    shellStore.organizationId = session.data.session.activeOrganizationId;
-    if (!shellStore.organizationId) {
+    const organizationId = session.data.session.activeOrganizationId;
+    if (!organizationId) {
       return redirectToSignIn();
     }
+    user.userId = session.data.user.id;
+    user.organizationId = organizationId;
+    shellStore.user = user;
     return true;
   },
 
@@ -82,8 +83,8 @@ export const authService: AuthService = {
     const { data, error } = await authClient.apiKey.create({
       name,
       expiresIn,
-      organizationId: shellStore.organizationId,
-      metadata: { createdByUserId: shellStore.userId },
+      organizationId: shellStore.user?.organizationId,
+      metadata: { createdByUserId: shellStore.user?.userId },
     });
     if (error) throw new Error(error.message);
     return data as ApiKey;
@@ -92,14 +93,14 @@ export const authService: AuthService = {
   async revokeApiKey(apiKeyId) {
     const { error } = await authClient.apiKey.delete({
       keyId: apiKeyId,
-      organizationId: shellStore.organizationId,
+      organizationId: shellStore.user?.organizationId,
     });
     if (error) throw new Error(error.message);
   },
 
   async listApiKeys() {
     const { data, error } = await authClient.apiKey.list({
-      organizationId: shellStore.organizationId,
+      organizationId: shellStore.user?.organizationId,
     });
     if (error) throw new Error(error.message);
     const keys = data.apiKeys.map((key) => ({
@@ -144,7 +145,5 @@ export const authService: AuthService = {
   async signOut() {
     await authClient.signOut();
     shellStore.user = undefined;
-    shellStore.userId = undefined;
-    shellStore.organizationId = undefined;
   },
 };
