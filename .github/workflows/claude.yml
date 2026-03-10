@@ -57,4 +57,4 @@ jobs:
         with:
           github_token: ${{ steps.app-token.outputs.token }}
           use_bedrock: "true"
-          claude_args: "--model us.anthropic.claude-opus-4-6-v1"
+          claude_args: '--model us.anthropic.claude-opus-4-6-v1 --allowedTools "Bash(bun install),Bash(bun run build),Bash(bun run lint),Bash(bun run test)"'
