@@ -47,6 +47,8 @@ export const authService: AuthService = {
     const hasSessionDataCookie = getSessionCookie(headers, {
       cookieName: "session_data",
     });
+    // FUTURE: This early return caches organizationId and will go stale on org switches.
+    // Revisit when organisation invitations are enabled (re-fetch session or listen for org-switch events).
     if (shellStore.user?.organizationId && hasSessionDataCookie) {
       return true;
     }
