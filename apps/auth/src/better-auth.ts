@@ -49,7 +49,6 @@ export const auth = betterAuth({
       },
       defaultPrefix: "sk_",
       enableMetadata: true,
-      enableSessionForAPIKeys: true,
       rateLimit: {
         enabled: false,
       },
