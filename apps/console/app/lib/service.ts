@@ -3,6 +3,7 @@ import ky, { HTTPError } from "ky";
 import type { Api } from "~api";
 import type { Gateway } from "~gateway";
 
+import { authService } from "~console/lib/auth";
 import { useMocks } from "~console/lib/env";
 
 export const apiUrl = useMocks
@@ -20,6 +21,11 @@ export const kyFetch = ky.extend({
   timeout: 60_000, // 60 seconds
   throwHttpErrors: false,
   hooks: {
+    beforeRequest: [
+      async () => {
+        await authService.ensureSignedIn();
+      },
+    ],
     afterResponse: [
       async (_req, _opts, res) => {
         // Successful response, all good
