@@ -47,7 +47,7 @@ export const authService: AuthService = {
     const hasSessionDataCookie = getSessionCookie(headers, {
       cookieName: "session_data",
     });
-    if (shellStore.user && hasSessionDataCookie) {
+    if (shellStore.user && shellStore.organizationId && hasSessionDataCookie) {
       return true;
     }
 
@@ -68,24 +68,39 @@ export const authService: AuthService = {
       .join("");
 
     shellStore.user = user;
+    shellStore.userId = session.data.user.id;
+    shellStore.organizationId = session.data.session.activeOrganizationId;
+    if (!shellStore.organizationId) {
+      return redirectToSignIn();
+    }
     return true;
   },
 
   async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
     // Better Auth expects seconds.
     const expiresIn = Math.max(1, Math.floor(expiresInMs / 1000));
-    const { data, error } = await authClient.apiKey.create({ name, expiresIn });
+    const { data, error } = await authClient.apiKey.create({
+      name,
+      expiresIn,
+      organizationId: shellStore.organizationId,
+      metadata: { createdByUserId: shellStore.userId },
+    });
     if (error) throw new Error(error.message);
     return data as ApiKey;
   },
 
   async revokeApiKey(apiKeyId) {
-    const { error } = await authClient.apiKey.delete({ keyId: apiKeyId });
+    const { error } = await authClient.apiKey.delete({
+      keyId: apiKeyId,
+      organizationId: shellStore.organizationId,
+    });
     if (error) throw new Error(error.message);
   },
 
   async listApiKeys() {
-    const { data, error } = await authClient.apiKey.list();
+    const { data, error } = await authClient.apiKey.list({
+      organizationId: shellStore.organizationId,
+    });
     if (error) throw new Error(error.message);
     const keys = data.apiKeys.map((key) => ({
       ...key,
@@ -129,5 +144,7 @@ export const authService: AuthService = {
   async signOut() {
     await authClient.signOut();
     shellStore.user = undefined;
+    shellStore.userId = undefined;
+    shellStore.organizationId = undefined;
   },
 };

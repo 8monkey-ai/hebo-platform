@@ -49,12 +49,15 @@ export const auth = betterAuth({
       },
       defaultPrefix: "sk_",
       enableMetadata: true,
-      enableSessionForAPIKeys: true,
       rateLimit: {
         enabled: false,
       },
-      customAPIKeyGetter: (ctx) =>
-        ctx.request?.headers.get("authorization")?.replace("Bearer ", "") ?? null,
+      customAPIKeyGetter: (ctx) => {
+        const header = ctx.request?.headers.get("authorization");
+        if (!header || header.length < 7) return null;
+        if (header.substring(0, 7).toLowerCase() !== "bearer ") return null;
+        return header.substring(7);
+      },
     }),
     emailOTP({
       async sendVerificationOTP({ email, otp }, ctx) {

@@ -45,6 +45,42 @@ const createAuthClient = (request: Request) => {
   });
 };
 
+type VerifyApiKeyResult = {
+  valid: boolean;
+  key?: {
+    referenceId: string;
+    metadata?: string | null;
+  };
+};
+
+function extractBearerToken(header: string): string | null {
+  if (header.length < 7) return null;
+  if (header.substring(0, 7).toLowerCase() !== "bearer ") return null;
+  return header.substring(7);
+}
+
+async function verifyApiKey(authorization: string): Promise<VerifyApiKeyResult | null> {
+  const key = extractBearerToken(authorization);
+  if (!key) return null;
+
+  const headers = new Headers({ "content-type": "application/json" });
+  propagation.inject(context.active(), headers, {
+    set: (carrier, k, value) => carrier.set(k, value),
+  });
+
+  try {
+    const response = await fetch(new URL("/v1/api-key/verify", authUrl), {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ key }),
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as VerifyApiKeyResult;
+  } catch {
+    return null;
+  }
+}
+
 export const authService = new Elysia({ name: "auth-service" })
   .resolve(async function resolveAuthContext(ctx) {
     const logger = (ctx as unknown as { logger: Logger }).logger;
@@ -57,19 +93,40 @@ export const authService = new Elysia({ name: "auth-service" })
 
     const authClient = createAuthClient(ctx.request);
 
-    let session, error;
+    let organizationId: string | undefined;
+    let userId: string | undefined;
 
     if (cookie) {
-      session = await getCookieCache(ctx.request, {
+      const session = await getCookieCache(ctx.request, {
         secret: authSecret,
         isSecure: betterAuthCookieOptions.advanced.useSecureCookies,
       });
-    } else {
-      ({ data: session, error } = await authClient.getSession());
+
+      if (session) {
+        organizationId = session.session.activeOrganizationId;
+        userId = session.user.id;
+      }
+    } else if (authorization) {
+      const result = await verifyApiKey(authorization);
+
+      if (result?.valid && result.key) {
+        // For org-owned keys, referenceId is the organization ID
+        organizationId = result.key.referenceId;
+
+        // userId was removed from the apikeys table; resolve from key metadata
+        if (result.key.metadata) {
+          try {
+            const metadata = JSON.parse(result.key.metadata);
+            userId = metadata.createdByUserId;
+          } catch {
+            // Ignore malformed metadata
+          }
+        }
+      }
     }
 
-    if (error || !session) {
-      logger.info({ error }, "Authentication failed or no credentials provided");
+    if (!organizationId || !userId) {
+      logger.info("Authentication failed or no credentials provided");
 
       // Clear the session cookie when unauthorized
       const { attributes, name } = cookieConfig.sessionToken;
@@ -86,19 +143,9 @@ export const authService = new Elysia({ name: "auth-service" })
       } as const;
     }
 
-    // For API key sessions, activeOrganizationId is missing (mock session bypasses hooks).
-    // Fall back to fetching from organization list.
-    let organizationId = session.session.activeOrganizationId;
-    if (!organizationId) {
-      const { data: orgs } = await authClient.organization.list();
-      if (orgs && orgs.length > 0) {
-        organizationId = orgs[0].id;
-      }
-    }
-
     return {
       organizationId,
-      userId: session.user.id,
+      userId,
       authClient,
     } as const;
   })
