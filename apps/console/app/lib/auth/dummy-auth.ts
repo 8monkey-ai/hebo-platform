@@ -17,13 +17,14 @@ const apiKeys = new Collection({
 
 export const authService = {
   async ensureSignedIn() {
-    if (shellStore.user) return;
+    if (shellStore.user) return true;
     shellStore.user = {
       name: "Dummy User",
       email: "dummy@user.com",
       initials: "DU",
       image: "",
     };
+    return true;
   },
 
   async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {

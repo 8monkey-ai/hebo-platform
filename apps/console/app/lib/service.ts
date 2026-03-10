@@ -3,23 +3,22 @@ import ky, { HTTPError } from "ky";
 import type { Api } from "~api";
 import type { Gateway } from "~gateway";
 
-import { useMocks } from "~console/lib/env";
-
-export const apiUrl = useMocks
-  ? "http://localhost:5173/api"
-  : import.meta.env.VITE_API_URL || "http://localhost:3001";
-
-export const authUrl = import.meta.env.VITE_AUTH_URL || "http://localhost:3000";
-
-export const gatewayUrl = useMocks
-  ? "http://localhost:5173/gateway"
-  : import.meta.env.VITE_GATEWAY_URL || "http://localhost:3002";
+import { authService } from "~console/lib/auth";
+import { apiUrl, gatewayUrl } from "~console/lib/env";
 
 export const kyFetch = ky.extend({
   credentials: "include",
   timeout: 60_000, // 60 seconds
   throwHttpErrors: false,
   hooks: {
+    beforeRequest: [
+      async () => {
+        const signedIn = await authService.ensureSignedIn();
+        if (!signedIn) {
+          throw new DOMException("Session expired, redirecting to sign-in", "AbortError");
+        }
+      },
+    ],
     afterResponse: [
       async (_req, _opts, res) => {
         // Successful response, all good
