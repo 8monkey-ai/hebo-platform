@@ -43,6 +43,7 @@ export const auth = betterAuth({
   experimental: { joins: true },
   plugins: [
     apiKey({
+      references: "organization",
       startingCharactersConfig: {
         shouldStore: true,
         charactersLength: 8,

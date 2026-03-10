@@ -118,9 +118,14 @@ export const authService = new Elysia({ name: "auth-service" })
           try {
             const metadata = JSON.parse(result.key.metadata);
             userId = metadata.createdByUserId;
+            if (!userId) {
+              logger.warn("API key missing createdByUserId in metadata");
+            }
           } catch {
-            // Ignore malformed metadata
+            logger.warn("Failed to parse API key metadata");
           }
+        } else {
+          logger.warn("API key has no metadata");
         }
       }
     }
