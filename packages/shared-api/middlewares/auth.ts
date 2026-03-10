@@ -10,6 +10,12 @@ import { betterAuthCookieOptions } from "../lib/cookie-options";
 import type { Logger } from "./logging";
 
 const cookieConfig = getCookies(betterAuthCookieOptions);
+const verifyApiKeyUrl = new URL("/v1/api-key/verify", authUrl).toString();
+
+type VerifyApiKeyResult = {
+  valid: boolean;
+  key?: { userId: string; referenceId: string };
+};
 
 const createAuthClient = (request: Request) => {
   const headers = new Headers();
@@ -45,6 +51,31 @@ const createAuthClient = (request: Request) => {
   });
 };
 
+function extractBearerToken(authorization: string): string | null {
+  if (authorization.length < 8 || authorization.substring(0, 7).toLowerCase() !== "bearer ") return null;
+  return authorization.substring(7);
+}
+
+async function verifyApiKey(key: string): Promise<VerifyApiKeyResult | null> {
+  try {
+    const headers: Record<string, string> = { "content-type": "application/json" };
+    propagation.inject(context.active(), headers, {
+      set: (carrier, key, value) => {
+        carrier[key] = value;
+      },
+    });
+    const response = await fetch(verifyApiKeyUrl, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ key }),
+    });
+    if (!response.ok) return null;
+    return (await response.json()) as VerifyApiKeyResult;
+  } catch {
+    return null;
+  }
+}
+
 export const authService = new Elysia({ name: "auth-service" })
   .resolve(async function resolveAuthContext(ctx) {
     const logger = (ctx as unknown as { logger: Logger }).logger;
@@ -57,48 +88,70 @@ export const authService = new Elysia({ name: "auth-service" })
 
     const authClient = createAuthClient(ctx.request);
 
-    let session, error;
-
+    // Cookie auth path
     if (cookie) {
-      session = await getCookieCache(ctx.request, {
+      const session = await getCookieCache(ctx.request, {
         secret: authSecret,
         isSecure: betterAuthCookieOptions.advanced.useSecureCookies,
       });
-    } else {
-      ({ data: session, error } = await authClient.getSession());
-    }
 
-    if (error || !session) {
-      logger.info({ error }, "Authentication failed or no credentials provided");
+      if (!session) {
+        logger.info("Cookie authentication failed");
+        const { attributes, name } = cookieConfig.sessionToken;
+        ctx.cookie[name] = {
+          value: "",
+          maxAge: 0,
+          ...attributes,
+        } as Cookie<string>;
 
-      // Clear the session cookie when unauthorized
-      const { attributes, name } = cookieConfig.sessionToken;
-      ctx.cookie[name] = {
-        value: "",
-        maxAge: 0,
-        ...attributes,
-      } as Cookie<string>;
+        return {
+          organizationId: undefined,
+          userId: undefined,
+          authClient,
+        } as const;
+      }
 
       return {
-        organizationId: undefined,
-        userId: undefined,
-        authClient: undefined,
+        organizationId: session.session.activeOrganizationId as string | undefined,
+        userId: session.user.id,
+        authClient,
       } as const;
     }
 
-    // For API key sessions, activeOrganizationId is missing (mock session bypasses hooks).
-    // Fall back to fetching from organization list.
-    let organizationId = session.session.activeOrganizationId;
-    if (!organizationId) {
-      const { data: orgs } = await authClient.organization.list();
-      if (orgs && orgs.length > 0) {
-        organizationId = orgs[0].id;
+    // API key auth path
+    if (authorization) {
+      const token = extractBearerToken(authorization);
+      if (!token) {
+        logger.info("Invalid authorization header format");
+        return {
+          organizationId: undefined,
+          userId: undefined,
+          authClient,
+        } as const;
       }
+
+      const result = await verifyApiKey(token);
+      if (!result?.valid || !result.key) {
+        logger.info("API key verification failed");
+        return {
+          organizationId: undefined,
+          userId: undefined,
+          authClient,
+        } as const;
+      }
+
+      // For org-owned keys, referenceId is the organization ID
+      return {
+        organizationId: result.key.referenceId,
+        userId: result.key.userId,
+        authClient,
+      } as const;
     }
 
+    // No credentials provided
     return {
-      organizationId,
-      userId: session.user.id,
+      organizationId: undefined,
+      userId: undefined,
       authClient,
     } as const;
   })
