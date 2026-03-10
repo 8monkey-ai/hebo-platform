@@ -3,7 +3,7 @@ import { createAuthClient } from "better-auth/client";
 import { emailOTPClient, organizationClient } from "better-auth/client/plugins";
 import { getSessionCookie } from "better-auth/cookies";
 
-import { authUrl } from "~console/lib/service";
+import { authUrl } from "~console/lib/env";
 import { shellStore } from "~console/lib/shell";
 
 import { DEFAULT_EXPIRATION_MS, type ApiKey, type AuthService, type User } from "./types";
@@ -34,21 +34,21 @@ const authClient = createAuthClient({
 const redirectToSignIn = () => {
   shellStore.user = undefined;
   globalThis.location.replace("/signin");
+  return false as const;
 };
 
 export const authService: AuthService = {
   async ensureSignedIn() {
     const headers = new Headers({ cookie: document.cookie });
     if (!getSessionCookie(headers)) {
-      redirectToSignIn();
-      return;
+      return redirectToSignIn();
     }
 
     const hasSessionDataCookie = getSessionCookie(headers, {
       cookieName: "session_data",
     });
     if (shellStore.user && hasSessionDataCookie) {
-      return;
+      return true;
     }
 
     // Disable cookie cache only after fresh sign-in to ensure we get the latest session
@@ -57,8 +57,7 @@ export const authService: AuthService = {
       query: { disableCookieCache: isComingFromSignIn },
     });
     if (!session?.data?.user) {
-      redirectToSignIn();
-      return;
+      return redirectToSignIn();
     }
     const user = session.data.user as User;
     const initialsSource = user?.name || user.email;
@@ -69,6 +68,7 @@ export const authService: AuthService = {
       .join("");
 
     shellStore.user = user;
+    return true;
   },
 
   async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
