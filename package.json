@@ -10,7 +10,7 @@
     "build": "bun run --workspaces --if-present --sequential build",
     "clean": "git clean -fdx -e '.env*'",
     "db:migrate": "bun run --workspaces --if-present --sequential db:migrate",
-    "db:reset": "docker compose rm -sf greptimedb && docker volume rm hebo_greptimedb-data -f && docker compose up -d greptimedb && bun run --workspaces --if-present --sequential db:reset",
+    "db:reset": "docker compose rm -sf greptimedb && docker volume rm $(docker volume ls -q --filter label=com.docker.compose.volume=greptimedb-data) -f 2>/dev/null; docker compose up -d greptimedb && bun run --workspaces --if-present --sequential db:reset",
     "predev": "bun run --workspaces --if-present --sequential predev",
     "dev": "bun run --workspaces --if-present --parallel dev",
     "dev:infra:up": "docker compose up -d",
