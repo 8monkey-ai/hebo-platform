@@ -91,14 +91,15 @@ export const authService: AuthService = {
   async revokeApiKey(apiKeyId) {
     const { error } = await authClient.apiKey.delete({
       keyId: apiKeyId,
-      organizationId: shellStore.user?.organizationId,
     });
     if (error) throw new Error(error.message);
   },
 
   async listApiKeys() {
     const { data, error } = await authClient.apiKey.list({
-      organizationId: shellStore.user?.organizationId,
+      query: {
+        organizationId: shellStore.user?.organizationId,
+      },
     });
     if (error) throw new Error(error.message);
     const keys = data.apiKeys.map((key) => ({
