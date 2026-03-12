@@ -47,6 +47,7 @@ export const authService: AuthService = {
     const hasSessionDataCookie = getSessionCookie(headers, {
       cookieName: "session_data",
     });
+
     // FUTURE: This early return caches organizationId and will go stale on org switches.
     // Revisit when organisation invitations are enabled (re-fetch session or listen for org-switch events).
     if (shellStore.user?.organizationId && hasSessionDataCookie) {
@@ -61,16 +62,19 @@ export const authService: AuthService = {
     if (!session?.data?.user) {
       return redirectToSignIn();
     }
-    const user = session.data.user as unknown as User;
-    const initialsSource = user?.name || user.email;
-    const initialsSeparator = user?.name ? " " : "@";
-    user.initials = initialsSource
-      .split(initialsSeparator)
-      .map((part) => part[0])
+
+    const user: User = {
+      name: session.data.user.name,
+      email: session.data.user.email,
+      userId: session.data.user.id,
+      organizationId: session.data.session.activeOrganizationId!,
+    };
+
+    user.initials = (user?.name ?? user.email)
+      .split(user?.name ? " " : "@")
+      .map((p) => p[0])
       .join("");
 
-    user.userId = session.data.user.id;
-    user.organizationId = session.data.session.activeOrganizationId!;
     shellStore.user = user;
     return true;
   },
