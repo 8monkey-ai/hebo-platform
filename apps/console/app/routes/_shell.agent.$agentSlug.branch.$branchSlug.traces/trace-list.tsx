@@ -73,7 +73,7 @@ export function TraceList({
             <button
               key={`${trace.traceId}-${trace.spanId}`}
               type="button"
-              className={`w-full rounded-lg border p-3 text-left transition-colors hover:bg-accent/50 ${
+              className={`w-full rounded-lg border bg-background p-3 text-left transition-colors hover:bg-accent/50 ${
                 isSelected ? "border-primary bg-accent/50" : "border-border"
               }`}
               onClick={() => onSelectTrace(trace.traceId)}

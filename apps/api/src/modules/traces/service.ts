@@ -22,16 +22,11 @@ const GEN_AI_COLUMNS = {
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
 function extractSummary(outputMessages: unknown): string {
-  if (!outputMessages || !Array.isArray(outputMessages)) return "";
-  const lastMsg = outputMessages.at(-1);
-  if (!lastMsg) return "";
+  const last = Array.isArray(outputMessages) && outputMessages.at(-1);
   const content =
-    typeof lastMsg === "string"
-      ? lastMsg
-      : typeof lastMsg.content === "string"
-        ? lastMsg.content
-        : "";
-  return content.length > 150 ? `${content.slice(0, 150)}...` : content;
+    typeof last === "string" ? last : typeof last?.content === "string" ? last.content : "";
+
+  return content.slice(0, 150) + (content.length > 150 ? "..." : "");
 }
 
 export type ListTracesOpts = {
