@@ -87,7 +87,7 @@ export const authService = new Elysia({ name: "auth-service" })
 
       if (result?.valid && result.key) {
         if (result.key.metadata?.createdByUserId) {
-          userId = result.key.metadata?.createdByUserId;
+          userId = result.key.metadata.createdByUserId;
         } else {
           logger.warn("API key missing createdByUserId in metadata");
         }
