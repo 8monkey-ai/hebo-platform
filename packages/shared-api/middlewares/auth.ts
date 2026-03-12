@@ -4,6 +4,8 @@ import { organizationClient } from "better-auth/client/plugins";
 import { getCookieCache, getCookies } from "better-auth/cookies";
 import { type Cookie, Elysia } from "elysia";
 
+import type { verifyApiKeyPlugin } from "@hebo/auth/lib/verify-api-key-plugin";
+
 import { authSecret, authUrl } from "../env";
 import { AuthError, BadRequestError } from "../errors";
 import { betterAuthCookieOptions } from "../lib/cookie-options";
@@ -45,13 +47,15 @@ const createAuthClient = (request: Request) => {
   });
 };
 
-type VerifyApiKeyResult = {
-  valid: boolean;
-  key?: {
-    referenceId: string;
-    metadata?: string | null;
-  };
-};
+const internalAuthClient = createBetterAuthClient({
+  baseURL: new URL("/v1", authUrl).toString(),
+  plugins: [
+    {
+      id: "infer-server-plugin" as const,
+      $InferServerPlugin: {} as typeof verifyApiKeyPlugin,
+    },
+  ],
+});
 
 function extractBearerToken(header: string): string | null {
   if (header.length < 7) return null;
@@ -59,23 +63,22 @@ function extractBearerToken(header: string): string | null {
   return header.substring(7);
 }
 
-async function verifyApiKey(authorization: string): Promise<VerifyApiKeyResult | null> {
+async function verifyApiKey(authorization: string) {
   const key = extractBearerToken(authorization);
   if (!key) return null;
 
-  const headers = new Headers({ "content-type": "application/json" });
+  const headers = new Headers({ "x-internal-secret": authSecret });
   propagation.inject(context.active(), headers, {
     set: (carrier, k, value) => carrier.set(k, value),
   });
 
   try {
-    const response = await fetch(new URL("/v1/api-key/verify", authUrl), {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ key }),
+    const { data, error } = await internalAuthClient.verifyApiKeyInternal.verify({
+      key,
+      fetchOptions: { headers },
     });
-    if (!response.ok) return null;
-    return (await response.json()) as VerifyApiKeyResult;
+    if (error || !data) return null;
+    return data;
   } catch {
     return null;
   }
@@ -116,7 +119,7 @@ export const authService = new Elysia({ name: "auth-service" })
         // userId was removed from the apikeys table; resolve from key metadata
         if (result.key.metadata) {
           try {
-            const metadata = JSON.parse(result.key.metadata);
+            const metadata = JSON.parse(result.key.metadata as string);
             userId = metadata.createdByUserId;
             if (!userId) {
               logger.warn("API key missing createdByUserId in metadata");

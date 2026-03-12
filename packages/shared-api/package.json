@@ -36,6 +36,7 @@
     "crypto-random-string": "^5.0.0"
   },
   "devDependencies": {
+    "@hebo/auth": "workspace:*",
     "@hebo/typescript-config": "workspace:*",
     "@types/bun": "catalog:"
   },
