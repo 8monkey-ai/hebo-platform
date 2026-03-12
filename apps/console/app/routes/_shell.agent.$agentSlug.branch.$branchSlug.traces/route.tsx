@@ -73,8 +73,8 @@ export default function TracesRoute() {
   }, [selectedTraceId, agentSlug, branchSlug]);
 
   return (
-    <div className="grid h-full min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] gap-8 overflow-hidden">
-      <div className="max-w-5xl shrink-0">
+    <div className="grid h-full min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] gap-4 overflow-x-visible overflow-y-hidden">
+      <div className="max-w-4xl shrink-0 space-y-2">
         <h1>Observability</h1>
         <p className="text-sm text-muted-foreground">
           Inspect recent gen_ai executions for the active branch. Evaluate prompt, model, response,
@@ -82,12 +82,8 @@ export default function TracesRoute() {
         </p>
       </div>
 
-      <div className="grid min-h-0 flex-1 gap-6 overflow-hidden xl:grid-cols-[28rem_minmax(0,1fr)]">
-        <div
-          className={`flex h-full min-h-0 flex-col overflow-hidden rounded-[1.75rem] border bg-background/80 px-5 pt-5 pb-3 ${
-            selectedTraceId ? "" : "xl:col-span-1"
-          }`}
-        >
+      <div className="grid min-h-0 flex-1 gap-6 overflow-x-visible overflow-y-hidden xl:grid-cols-[28rem_minmax(0,1fr)]">
+        <div className="relative z-10 flex h-full min-h-0 flex-col rounded-2xl border bg-card pt-5 pb-3">
           <TraceListPanel
             agentSlug={agentSlug}
             branchSlug={branchSlug}

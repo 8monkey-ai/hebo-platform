@@ -43,7 +43,6 @@ export function TraceListPanel({
   const [traces, setTraces] = useState<TraceListItem[]>([]);
   const [total, setTotal] = useState(0);
   const [listLoading, setListLoading] = useState(true);
-  const [listError, setListError] = useState<string | null>(null);
   const [metadataTags, setMetadataTags] = useState<Record<string, string[]>>({});
 
   const [showFilters, setShowFilters] = useState(false);
@@ -88,8 +87,6 @@ export function TraceListPanel({
     let cancelled = false;
 
     setListLoading(true);
-    setListError(null);
-
     (async () => {
       try {
         const query = {
@@ -108,12 +105,12 @@ export function TraceListPanel({
           .traces.get({ query: query as any });
 
         if (cancelled) return;
-        if (error) return void setListError(String(error));
+        if (error) throw error;
 
         setTraces(data?.data ?? []);
         setTotal(data?.total ?? 0);
       } catch (err) {
-        if (!cancelled) setListError(err instanceof Error ? err.message : "Failed to load traces");
+        if (!cancelled) throw err;
       } finally {
         if (!cancelled) setListLoading(false);
       }
@@ -176,12 +173,12 @@ export function TraceListPanel({
   function handleRefresh() {
     const nextParams = new URLSearchParams(searchParams);
 
-    if (activePreset !== "custom") {
+    if (activePreset === "custom") {
+      nextParams.set("_t", String(Date.now()));
+    } else {
       const { from, to } = timeRangeToParams(activePreset);
       nextParams.set("from", from);
       nextParams.set("to", to);
-    } else {
-      nextParams.set("_t", String(Date.now()));
     }
 
     setSearchParams(nextParams);
@@ -216,111 +213,122 @@ export function TraceListPanel({
   }
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden">
-      <h2 className="mb-3 shrink-0 text-sm font-medium">GenAI executions</h2>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 px-5">
+        <h2 className="mb-4 text-xl font-semibold tracking-tight text-foreground">
+          GenAI executions
+        </h2>
 
-      <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2">
-        <div className="flex items-center rounded-md border">
-          {TIME_PRESETS.map((preset) => (
-            <button
-              key={preset}
-              type="button"
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                activePreset === preset ? "bg-primary text-primary-foreground" : "hover:bg-accent"
-              } ${preset === "15m" ? "rounded-l-md" : ""} ${preset === "custom" ? "rounded-r-md" : ""}`}
-              onClick={() => handlePresetChange(preset)}
+        <div className="mb-3 flex flex-wrap items-center gap-2">
+          <div className="flex items-center rounded-lg bg-muted p-1">
+            {TIME_PRESETS.map((preset) => (
+              <button
+                key={preset}
+                type="button"
+                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                  activePreset === preset
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+                onClick={() => handlePresetChange(preset)}
+              >
+                {preset === "custom" ? "Custom" : preset}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={() => setShowFilters(!showFilters)}
             >
-              {preset === "custom" ? "Custom" : preset}
-            </button>
-          ))}
-        </div>
-
-        <div className="relative">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-1"
-            onClick={() => setShowFilters(!showFilters)}
-          >
-            <Filter className="size-3" />
-            Filters
-            {activeFilterCount > 0 && (
-              <Badge variant="secondary" className="ml-1 px-1.5 text-xs">
-                {activeFilterCount}
-              </Badge>
-            )}
-          </Button>
-
-          {showFilters && (
-            <div className="absolute top-full left-0 z-50 mt-1 w-72 rounded-md border bg-popover p-3 shadow-md">
-              <h4 className="mb-2 text-sm font-medium">Edit filters</h4>
-
+              <Filter className="size-3" />
+              Filters
               {activeFilterCount > 0 && (
-                <div className="mb-3">
-                  <p className="mb-1 text-xs text-muted-foreground">Active filters</p>
-                  <div className="flex flex-col gap-1">
-                    {Object.entries(metaFilters).map(([key, value]) => (
-                      <div
-                        key={key}
-                        className="flex items-center justify-between rounded-md bg-muted px-2 py-1.5 text-xs"
-                      >
-                        <span>
-                          {key}: {value}
-                        </span>
-                        <button
-                          type="button"
-                          className="ml-2 text-muted-foreground hover:text-foreground"
-                          onClick={() => handleRemoveFilter(key)}
-                        >
-                          <X className="size-3" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                <Badge variant="secondary" className="ml-1">
+                  {activeFilterCount}
+                </Badge>
               )}
+            </Button>
 
-              <div>
-                <p className="mb-1 text-xs text-muted-foreground">Add filter</p>
-                <div className="flex items-end gap-1">
-                  <div className="flex-1">
-                    <Select
-                      value={filterKey}
-                      onValueChange={setFilterKey}
-                      items={Object.keys(metadataTags).map((key) => ({
-                        value: key,
-                        label: key,
-                      }))}
-                      placeholder="Key"
-                    />
+            {showFilters && (
+              <div className="absolute top-full left-0 z-50 mt-2 w-72 rounded-lg border bg-popover p-3 shadow-md">
+                <h4 className="mb-2 text-sm font-medium">Edit filters</h4>
+
+                {activeFilterCount > 0 && (
+                  <div className="mb-3">
+                    <p className="mb-1 text-xs text-muted-foreground">Active filters</p>
+                    <div className="flex flex-col gap-1">
+                      {Object.entries(metaFilters).map(([key, value]) => (
+                        <div
+                          key={key}
+                          className="flex items-center justify-between rounded-md border bg-muted/50 px-2 py-1.5 text-xs"
+                        >
+                          <span>
+                            {key}: {value}
+                          </span>
+                          <button
+                            type="button"
+                            className="ml-2 text-muted-foreground hover:text-foreground"
+                            onClick={() => handleRemoveFilter(key)}
+                          >
+                            <X className="size-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <Select
-                      value={filterValue}
-                      onValueChange={setFilterValue}
-                      items={(metadataTags[filterKey] ?? []).map((value) => ({
-                        value,
-                        label: value,
-                      }))}
-                      placeholder="Value"
-                    />
+                )}
+
+                <div>
+                  <p className="mb-1 text-xs text-muted-foreground">Add filter</p>
+                  <div className="flex items-end gap-2">
+                    <div className="min-w-0 flex-1">
+                      <Select
+                        value={filterKey}
+                        onValueChange={setFilterKey}
+                        items={Object.keys(metadataTags).map((key) => ({
+                          value: key,
+                          label: key,
+                        }))}
+                        placeholder="Key"
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <Select
+                        value={filterValue}
+                        onValueChange={setFilterValue}
+                        items={(metadataTags[filterKey] ?? []).map((value) => ({
+                          value,
+                          label: value,
+                        }))}
+                        placeholder="Value"
+                      />
+                    </div>
+                    <Button
+                      size="sm"
+                      className="shrink-0"
+                      onClick={handleAddFilter}
+                      disabled={!filterKey || !filterValue}
+                    >
+                      Add
+                    </Button>
                   </div>
-                  <Button size="sm" onClick={handleAddFilter} disabled={!filterKey || !filterValue}>
-                    Add
-                  </Button>
                 </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
 
-        <Button variant="outline" size="icon-sm" onClick={handleRefresh}>
-          <RefreshCw className={`size-3.5 ${listLoading ? "animate-spin" : ""}`} />
-        </Button>
+          <Button variant="outline" size="icon-sm" onClick={handleRefresh}>
+            <RefreshCw className={`size-3.5 ${listLoading ? "animate-spin" : ""}`} />
+          </Button>
+        </div>
       </div>
 
       {showCustomRange && activePreset === "custom" && (
-        <div className="mb-2 flex shrink-0 flex-wrap items-end gap-3 rounded-md border bg-muted/50 p-3">
+        <div className="mx-5 mb-3 flex shrink-0 flex-wrap items-end gap-3 rounded-lg border bg-muted/30 p-3">
           <div>
             <label htmlFor="custom-from" className="mb-1 block text-xs text-muted-foreground">
               Start
@@ -352,7 +360,7 @@ export function TraceListPanel({
       )}
 
       {(fromParam || activeFilterCount > 0) && (
-        <p className="mb-3 shrink-0 text-xs text-muted-foreground">
+        <p className="mb-4 shrink-0 px-5 text-sm text-muted-foreground">
           {fromParam && toParam && formatDateRangeSummary(fromParam, toParam)}
           {activeFilterCount > 0 && (
             <>
@@ -363,12 +371,6 @@ export function TraceListPanel({
             </>
           )}
         </p>
-      )}
-
-      {listError && (
-        <div className="mb-3 shrink-0 rounded-md border border-destructive/50 bg-destructive/10 p-3">
-          <p className="text-sm text-destructive">{listError}</p>
-        </div>
       )}
 
       <div className="min-h-0 flex-1 overflow-hidden">

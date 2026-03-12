@@ -66,8 +66,8 @@ export function TraceList({
     <div
       className={`flex h-full min-h-0 flex-col ${loading ? "pointer-events-none opacity-60" : ""}`}
     >
-      <div className="min-h-0 flex-1 overflow-y-auto pr-1">
-        <div className="flex flex-col gap-2">
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="flex flex-col divide-y">
           {traces.map((trace) => {
             const status = formatStatus(trace.status);
             const isSelected = trace.traceId === selectedTraceId;
@@ -76,13 +76,13 @@ export function TraceList({
               <button
                 key={`${trace.traceId}-${trace.spanId}`}
                 type="button"
-                className={`w-full rounded-lg border bg-background p-3 text-left transition-colors hover:bg-accent/50 ${
-                  isSelected ? "border-primary bg-accent/50" : "border-border"
+                className={`w-full px-5 py-5 text-left transition-colors hover:bg-accent/40 ${
+                  isSelected ? "bg-accent/60" : ""
                 }`}
                 onClick={() => onSelectTrace(trace.traceId)}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="truncate text-sm font-medium">
+                  <span className="truncate text-base font-semibold text-foreground">
                     {formatOperationName(trace.operationName)}
                   </span>
                   <span className="shrink-0 text-xs text-muted-foreground">
@@ -91,21 +91,24 @@ export function TraceList({
                 </div>
 
                 {trace.summary && (
-                  <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
+                  <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                     {truncateText(trace.summary, 120)}
                   </p>
                 )}
 
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  <span className="max-w-[180px] truncate text-xs text-muted-foreground">
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <Badge
+                    variant="secondary"
+                    className="max-w-full bg-muted break-all whitespace-normal"
+                  >
                     {formatModelDisplay(trace.provider, trace.model)}
-                  </span>
-                  <Badge variant="outline" className="shrink-0 text-xs">
+                  </Badge>
+                  <Badge variant="secondary" className="shrink-0">
                     {formatDuration(trace.durationMs)}
                   </Badge>
                   <Badge
                     variant={status === "error" ? "destructive" : "secondary"}
-                    className="shrink-0 text-xs"
+                    className="shrink-0"
                   >
                     {status}
                   </Badge>
@@ -148,9 +151,9 @@ export function TraceList({
 
 function TraceListSkeleton() {
   return (
-    <div className="flex h-full min-h-0 flex-col gap-2 overflow-y-auto pr-1">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div key={i} className="rounded-lg border border-border p-3">
+    <div className="flex h-full min-h-0 flex-col divide-y overflow-y-auto">
+      {["one", "two", "three", "four", "five"].map((item) => (
+        <div key={item} className="px-5 py-5">
           <div className="flex items-center justify-between">
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-3 w-12" />

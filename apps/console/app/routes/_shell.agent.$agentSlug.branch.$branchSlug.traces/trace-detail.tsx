@@ -70,59 +70,67 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
 
   return (
     <DetailShell>
-      {/* Header */}
-      <div className="border-b px-4 py-3">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="truncate text-lg font-semibold">
-            {formatOperationName(trace.operationName)}
-          </h2>
-          <div className="flex shrink-0 items-center gap-2">
-            <Badge variant="outline">{formatDuration(trace.durationMs)}</Badge>
-            <Badge variant={status === "error" ? "destructive" : "secondary"}>{status}</Badge>
+      <Tabs defaultValue="formatted" className="flex min-h-0 flex-1 flex-col">
+        <div className="border-b px-5 py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="truncate text-2xl font-semibold tracking-tight text-foreground">
+                {formatOperationName(trace.operationName)}
+              </h2>
+              <p className="mt-1 truncate text-sm text-muted-foreground">
+                {trace.model} &middot; {formatTimestampFull(trace.timestamp)} &middot; trace{" "}
+                {trace.traceId.slice(0, 16)}
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Badge variant="outline">{formatDuration(trace.durationMs)}</Badge>
+              <Badge variant={status === "error" ? "destructive" : "secondary"}>{status}</Badge>
+            </div>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between gap-4">
+            <TabsList>
+              <TabsTrigger value="formatted">Formatted details</TabsTrigger>
+              <TabsTrigger value="raw">Raw JSON</TabsTrigger>
+              <TabsTrigger value="metadata">Metadata</TabsTrigger>
+            </TabsList>
+
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 text-xs text-muted-foreground">
+              {trace.inputTokens !== null && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
+                  <span className="font-medium text-foreground">
+                    {formatTokenCount(trace.inputTokens)}
+                  </span>
+                  <span>in</span>
+                </span>
+              )}
+              {trace.outputTokens !== null && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
+                  <span className="font-medium text-foreground">
+                    {formatTokenCount(trace.outputTokens)}
+                  </span>
+                  <span>out</span>
+                </span>
+              )}
+              {toolCallCount > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
+                  <span>tool call</span>
+                  <span className="font-medium text-foreground">{toolCallCount}</span>
+                </span>
+              )}
+            </div>
           </div>
         </div>
-        <p className="mt-1 truncate text-xs text-muted-foreground">
-          {trace.model} &middot; {formatTimestampFull(trace.timestamp)} &middot; trace{" "}
-          {trace.traceId.slice(0, 16)}
-        </p>
-      </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="formatted" className="flex min-h-0 flex-1 flex-col">
-        <div className="border-b px-4">
-          <TabsList className="bg-transparent">
-            <TabsTrigger value="formatted">Formatted</TabsTrigger>
-            <TabsTrigger value="raw">Raw JSON</TabsTrigger>
-            <TabsTrigger value="metadata">Metadata</TabsTrigger>
-          </TabsList>
-        </div>
-
-        {/* Stats row */}
-        <div className="flex items-center gap-4 border-b px-4 py-2 text-xs text-muted-foreground">
-          {trace.inputTokens !== null && <span>{formatTokenCount(trace.inputTokens)} in</span>}
-          {trace.outputTokens !== null && <span>{formatTokenCount(trace.outputTokens)} out</span>}
-          {trace.reasoningTokens !== null && trace.reasoningTokens > 0 && (
-            <span>{formatTokenCount(trace.reasoningTokens)} reasoning</span>
-          )}
-          {toolCallCount > 0 && (
-            <span>
-              {toolCallCount} tool call{toolCallCount > 1 ? "s" : ""}
-            </span>
-          )}
-        </div>
-
-        {/* Formatted tab */}
-        <TabsContent value="formatted" className="mt-0 flex-1 overflow-y-auto p-4">
+        <TabsContent value="formatted" className="mt-0 min-h-0 flex-1 overflow-y-auto px-5 py-5">
           <FormattedView trace={trace} />
         </TabsContent>
 
-        {/* Raw JSON tab */}
-        <TabsContent value="raw" className="mt-0 flex-1 overflow-y-auto p-4">
+        <TabsContent value="raw" className="mt-0 min-h-0 flex-1 overflow-y-auto px-5 py-5">
           <RawJsonView trace={trace} />
         </TabsContent>
 
-        {/* Metadata tab */}
-        <TabsContent value="metadata" className="mt-0 flex-1 overflow-y-auto p-4">
+        <TabsContent value="metadata" className="mt-0 min-h-0 flex-1 overflow-y-auto px-5 py-5">
           <MetadataView trace={trace} />
         </TabsContent>
       </Tabs>
@@ -132,7 +140,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
 
 function DetailShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.75rem] border bg-background/80">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border bg-card">
       {children}
     </div>
   );
@@ -145,18 +153,15 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
   const outputMessages = normalizeMessages(trace.outputMessages);
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Input messages */}
-      {inputMessages.map((msg, i) => (
-        <MessageBlock key={`in-${i}`} message={msg} />
+    <div className="flex min-h-0 flex-col divide-y">
+      {inputMessages.map((msg) => (
+        <MessageBlock key={getMessageKey("in", msg)} message={msg} />
       ))}
 
-      {/* Output messages */}
-      {outputMessages.map((msg, i) => (
-        <MessageBlock key={`out-${i}`} message={msg} />
+      {outputMessages.map((msg) => (
+        <MessageBlock key={getMessageKey("out", msg)} message={msg} />
       ))}
 
-      {/* If no messages, show a note */}
       {inputMessages.length === 0 && outputMessages.length === 0 && (
         <p className="text-sm text-muted-foreground">No message content available.</p>
       )}
@@ -218,57 +223,52 @@ function normalizeMessages(messages: unknown): NormalizedMessage[] {
 }
 
 function MessageBlock({ message }: { message: NormalizedMessage }) {
-  const roleColors: Record<string, string> = {
+  const roleAccents: Record<string, string> = {
     system: "border-l-amber-500",
     user: "border-l-blue-500",
     assistant: "border-l-green-500",
-    tool: "border-l-purple-500",
+    tool: "border-l-violet-500",
   };
-
-  const borderColor = roleColors[message.role] ?? "border-l-gray-400";
   const roleLabel = message.role.charAt(0).toUpperCase() + message.role.slice(1);
   const fullContent = buildFullContent(message);
 
   return (
-    <div className={`border-l-2 ${borderColor} pl-3`}>
+    <section
+      className={`space-y-4 border-l-2 py-5 pl-4 first:pt-0 last:pb-0 ${roleAccents[message.role] ?? "border-l-border"}`}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium">{roleLabel}</span>
+          <span className="text-lg font-semibold tracking-tight text-foreground">{roleLabel}</span>
           {message.toolName && (
-            <Badge variant="outline" className="gap-1 text-xs">
+            <Badge variant="outline" className="gap-1">
               <Wrench className="size-3" />
               {message.toolName}
             </Badge>
           )}
         </div>
-        {fullContent && <CopyButton value={fullContent} className="size-6" />}
+        {fullContent && <CopyButton value={fullContent} className="rounded-md hover:bg-muted" />}
       </div>
 
-      {/* Reasoning */}
       {message.reasoning && (
-        <ExpandableContent label="Reasoning" className="mt-2">
+        <ExpandableContent label="Reasoning">
           <p className="text-sm whitespace-pre-wrap text-muted-foreground italic">
             {message.reasoning}
           </p>
         </ExpandableContent>
       )}
 
-      {/* Main content */}
-      {message.content && (
-        <CollapsibleText text={message.content} maxLength={500} className="mt-1" />
-      )}
+      {message.content && <CollapsibleText text={message.content} maxLength={500} />}
 
-      {/* Tool calls */}
-      {message.toolCalls?.map((tc, i) => (
-        <div key={i} className="mt-2">
-          <div className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
+      {message.toolCalls?.map((tc) => (
+        <div key={`${tc.name}:${tc.arguments}`} className="space-y-2">
+          <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Wrench className="size-3" />
             <span className="font-medium">{tc.name}</span>
           </div>
           <CollapsibleCode code={tc.arguments} maxLength={300} />
         </div>
       ))}
-    </div>
+    </section>
   );
 }
 
@@ -282,6 +282,21 @@ function buildFullContent(message: NormalizedMessage): string {
     }
   }
   return parts.join("\n\n");
+}
+
+function getMessageKey(prefix: string, message: NormalizedMessage) {
+  const toolKey = message.toolCalls
+    ?.map((toolCall) => `${toolCall.name}:${toolCall.arguments}`)
+    .join("|");
+
+  return [
+    prefix,
+    message.role,
+    message.toolName ?? "",
+    message.reasoning ?? "",
+    message.content,
+    toolKey ?? "",
+  ].join(":");
 }
 
 function CollapsibleText({
@@ -299,7 +314,9 @@ function CollapsibleText({
 
   return (
     <div className={className}>
-      <p className="text-sm break-words whitespace-pre-wrap">{displayText}</p>
+      <p className="text-sm leading-6 break-words whitespace-pre-wrap text-foreground">
+        {displayText}
+      </p>
       {needsTruncation && (
         <button
           type="button"
@@ -320,7 +337,7 @@ function CollapsibleCode({ code, maxLength }: { code: string; maxLength: number 
 
   return (
     <div>
-      <pre className="overflow-x-auto rounded-md bg-muted p-2 text-xs break-words whitespace-pre-wrap">
+      <pre className="overflow-x-auto rounded-lg border bg-muted/30 p-4 text-sm break-words whitespace-pre-wrap text-foreground">
         {displayCode}
       </pre>
       {needsTruncation && (
@@ -351,7 +368,7 @@ function ExpandableContent({
     <div className={className}>
       <button
         type="button"
-        className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
         onClick={() => setExpanded(!expanded)}
       >
         {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
@@ -382,8 +399,8 @@ function RawJsonView({ trace }: { trace: TraceDetailData }) {
 
   return (
     <div className="relative">
-      <CopyButton value={jsonStr} className="absolute top-2 right-2" />
-      <pre className="overflow-x-auto rounded-md bg-muted p-4 text-xs break-words whitespace-pre-wrap">
+      <CopyButton value={jsonStr} className="absolute top-3 right-3 rounded-md hover:bg-muted" />
+      <pre className="overflow-x-auto rounded-lg border bg-muted/30 p-4 text-sm break-words whitespace-pre-wrap text-foreground">
         {jsonStr}
       </pre>
     </div>
@@ -397,11 +414,10 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Request Metadata */}
       {metadataEntries.length > 0 && (
         <div>
-          <h3 className="mb-2 text-sm font-medium">Request Metadata</h3>
-          <div className="rounded-md border">
+          <h3 className="mb-3 text-sm font-medium text-foreground">Request Metadata</h3>
+          <div className="overflow-hidden rounded-lg border">
             <table className="w-full text-sm">
               <tbody>
                 {metadataEntries.map(([key, value]) => (
@@ -416,10 +432,9 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
         </div>
       )}
 
-      {/* Identifiers */}
       <div>
-        <h3 className="mb-2 text-sm font-medium">Identifiers</h3>
-        <div className="rounded-md border">
+        <h3 className="mb-3 text-sm font-medium text-foreground">Identifiers</h3>
+        <div className="overflow-hidden rounded-lg border">
           <table className="w-full text-sm">
             <tbody>
               <IdentifierRow label="Trace ID" value={trace.traceId} />
