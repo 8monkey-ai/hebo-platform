@@ -79,7 +79,7 @@ export const authService = new Elysia({ name: "auth-service" })
       }
     } else if (authorization) {
       const { data: result } = await authClient.internal.verifyApiKey({
-        key: authorization.slice(7) ?? "no-key",
+        key: authorization.slice(7) || "invalid-key",
         fetchOptions: {
           headers: { "x-internal-secret": authSecret },
         },
