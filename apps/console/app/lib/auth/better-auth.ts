@@ -61,7 +61,7 @@ export const authService: AuthService = {
     if (!session?.data?.user) {
       return redirectToSignIn();
     }
-    const user = session.data.user as User;
+    const user = session.data.user as unknown as User;
     const initialsSource = user?.name || user.email;
     const initialsSeparator = user?.name ? " " : "@";
     user.initials = initialsSource
@@ -70,7 +70,7 @@ export const authService: AuthService = {
       .join("");
 
     user.userId = session.data.user.id;
-    user.organizationId = session.data.session.activeOrganizationId;
+    user.organizationId = session.data.session.activeOrganizationId!;
     shellStore.user = user;
     return true;
   },
