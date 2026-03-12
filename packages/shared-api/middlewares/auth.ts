@@ -1,8 +1,5 @@
 import { context, propagation } from "@opentelemetry/api";
-import {
-  BetterAuthClientPlugin,
-  createAuthClient as createBetterAuthClient,
-} from "better-auth/client";
+import { createAuthClient as createBetterAuthClient } from "better-auth/client";
 import { organizationClient } from "better-auth/client/plugins";
 import { getCookieCache, getCookies } from "better-auth/cookies";
 import { type Cookie, Elysia } from "elysia";
@@ -46,7 +43,7 @@ const createAuthClient = (request: Request) => {
       {
         id: "verify-api-key-plugin" as const,
         $InferServerPlugin: {} as ReturnType<VerifyApiKeyPlugin>,
-      } satisfies BetterAuthClientPlugin,
+      },
     ],
     fetchOptions: {
       headers,
