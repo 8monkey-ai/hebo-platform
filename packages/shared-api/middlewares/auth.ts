@@ -14,15 +14,15 @@ import type { Logger } from "./logging";
 const cookieConfig = getCookies(betterAuthCookieOptions);
 
 const createAuthClient = (request: Request) => {
-  const headers = new Headers();
+  const headers: Record<string, string> = {};
   for (const name of ["cookie", "authorization", "origin"]) {
     const value = request.headers.get(name);
-    if (value) headers.set(name, value);
+    if (value) headers[name] = value;
   }
 
   // Inject OTEL trace context (traceparent, tracestate) for distributed tracing
   propagation.inject(context.active(), headers, {
-    set: (carrier, key, value) => carrier.set(key, value),
+    set: (carrier, key, value) => (carrier[key] = value),
   });
 
   return createBetterAuthClient({
@@ -87,7 +87,7 @@ export const authService = new Elysia({ name: "auth-service" })
       const { data: result } = await authClient.internal.verifyApiKey({
         key: extractBearerToken(authorization) || "no-key",
         fetchOptions: {
-          headers: new Headers({ "x-internal-secret": authSecret }),
+          headers: { "x-internal-secret": authSecret },
         },
       });
 
