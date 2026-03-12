@@ -54,12 +54,7 @@ export const auth = betterAuth({
       rateLimit: {
         enabled: false,
       },
-      customAPIKeyGetter: (ctx) => {
-        const header = ctx.request?.headers.get("authorization");
-        if (!header || header.length < 7) return null;
-        if (header.slice(0, 7).toLowerCase() !== "bearer ") return null;
-        return header.slice(7);
-      },
+      customAPIKeyGetter: (ctx) => ctx.request?.headers.get("authorization")?.slice(7) || null,
     }),
     emailOTP({
       async sendVerificationOTP({ email, otp }, ctx) {

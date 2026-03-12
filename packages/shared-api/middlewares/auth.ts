@@ -51,12 +51,6 @@ const createAuthClient = (request: Request) => {
   });
 };
 
-function extractBearerToken(header: string): string | null {
-  if (header.length < 7) return null;
-  if (header.slice(0, 7).toLowerCase() !== "bearer ") return null;
-  return header.slice(7);
-}
-
 export const authService = new Elysia({ name: "auth-service" })
   .resolve(async function resolveAuthContext(ctx) {
     const logger = (ctx as unknown as { logger: Logger }).logger;
@@ -85,7 +79,7 @@ export const authService = new Elysia({ name: "auth-service" })
       }
     } else if (authorization) {
       const { data: result } = await authClient.internal.verifyApiKey({
-        key: extractBearerToken(authorization) || "no-key",
+        key: authorization.slice(7) || "no-key",
         fetchOptions: {
           headers: { "x-internal-secret": authSecret },
         },
