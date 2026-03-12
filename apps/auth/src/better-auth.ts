@@ -12,6 +12,7 @@ import { PrismaClient } from "~auth/generated/prisma/client";
 
 import { sendOrganizationInvitationEmail, sendVerificationOtpEmail } from "./lib/email";
 import { createOrganizationHook, createSessionHook } from "./lib/organization";
+import { verifyApiKeyPlugin, type AuthWithApiKeyPlugin } from "./lib/verify-api-key-plugin";
 
 export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
@@ -56,8 +57,8 @@ export const auth = betterAuth({
       customAPIKeyGetter: (ctx) => {
         const header = ctx.request?.headers.get("authorization");
         if (!header || header.length < 7) return null;
-        if (header.substring(0, 7).toLowerCase() !== "bearer ") return null;
-        return header.substring(7);
+        if (header.slice(0, 7).toLowerCase() !== "bearer ") return null;
+        return header.slice(7);
       },
     }),
     emailOTP({
@@ -93,6 +94,7 @@ export const auth = betterAuth({
         });
       },
     }),
+    verifyApiKeyPlugin((): AuthWithApiKeyPlugin => auth as unknown as AuthWithApiKeyPlugin),
   ],
   secret: authSecret,
   session: {
@@ -115,3 +117,5 @@ export const auth = betterAuth({
   },
   trustedOrigins: cookieDomain ? [`https://*.${cookieDomain}`] : ["*"],
 });
+
+export type VerifyApiKeyPlugin = typeof verifyApiKeyPlugin;

@@ -1,8 +1,13 @@
 import { context, propagation } from "@opentelemetry/api";
-import { createAuthClient as createBetterAuthClient } from "better-auth/client";
+import {
+  BetterAuthClientPlugin,
+  createAuthClient as createBetterAuthClient,
+} from "better-auth/client";
 import { organizationClient } from "better-auth/client/plugins";
 import { getCookieCache, getCookies } from "better-auth/cookies";
 import { type Cookie, Elysia } from "elysia";
+
+import type { VerifyApiKeyPlugin } from "@hebo/auth/better-auth";
 
 import { authSecret, authUrl } from "../env";
 import { AuthError, BadRequestError } from "../errors";
@@ -38,6 +43,10 @@ const createAuthClient = (request: Request) => {
           },
         },
       }),
+      {
+        id: "verify-api-key-plugin" as const,
+        $InferServerPlugin: {} as ReturnType<VerifyApiKeyPlugin>,
+      } satisfies BetterAuthClientPlugin,
     ],
     fetchOptions: {
       headers,
@@ -45,40 +54,10 @@ const createAuthClient = (request: Request) => {
   });
 };
 
-type VerifyApiKeyResult = {
-  valid: boolean;
-  key?: {
-    referenceId: string;
-    metadata?: string | null;
-  };
-};
-
 function extractBearerToken(header: string): string | null {
   if (header.length < 7) return null;
-  if (header.substring(0, 7).toLowerCase() !== "bearer ") return null;
-  return header.substring(7);
-}
-
-async function verifyApiKey(authorization: string): Promise<VerifyApiKeyResult | null> {
-  const key = extractBearerToken(authorization);
-  if (!key) return null;
-
-  const headers = new Headers({ "content-type": "application/json" });
-  propagation.inject(context.active(), headers, {
-    set: (carrier, k, value) => carrier.set(k, value),
-  });
-
-  try {
-    const response = await fetch(new URL("/v1/api-key/verify", authUrl), {
-      method: "POST",
-      headers,
-      body: JSON.stringify({ key }),
-    });
-    if (!response.ok) return null;
-    return (await response.json()) as VerifyApiKeyResult;
-  } catch {
-    return null;
-  }
+  if (header.slice(0, 7).toLowerCase() !== "bearer ") return null;
+  return header.slice(7);
 }
 
 export const authService = new Elysia({ name: "auth-service" })
@@ -107,25 +86,22 @@ export const authService = new Elysia({ name: "auth-service" })
         userId = session.user.id;
       }
     } else if (authorization) {
-      const result = await verifyApiKey(authorization);
+      const { data: result } = await authClient.internal.verifyApiKey({
+        key: extractBearerToken(authorization) || "no-key",
+        fetchOptions: {
+          headers: new Headers({ "x-internal-secret": authSecret }),
+        },
+      });
 
       if (result?.valid && result.key) {
         // For org-owned keys, referenceId is the organization ID
         organizationId = result.key.referenceId;
 
         // userId was removed from the apikeys table; resolve from key metadata
-        if (result.key.metadata) {
-          try {
-            const metadata = JSON.parse(result.key.metadata);
-            userId = metadata.createdByUserId;
-            if (!userId) {
-              logger.warn("API key missing createdByUserId in metadata");
-            }
-          } catch {
-            logger.warn("Failed to parse API key metadata");
-          }
+        if (result.key.metadata?.createdByUserId) {
+          userId = result.key.metadata?.createdByUserId;
         } else {
-          logger.warn("API key has no metadata");
+          logger.warn("API key missing createdByUserId in metadata");
         }
       }
     }
