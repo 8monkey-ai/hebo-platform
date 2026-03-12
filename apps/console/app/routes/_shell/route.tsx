@@ -131,7 +131,7 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
         <div
           ref={mainRef}
           tabIndex={-1}
-          className="flex h-full min-h-0 min-w-0 flex-1 flex-col gap-4 px-4 pt-12 focus:outline-none sm:px-10"
+          className="flex h-full min-h-0 min-w-0 flex-1 flex-col gap-4 px-4 pt-12 focus:outline-none"
         >
           <div className="@container mx-auto flex h-full min-h-0 w-full min-w-0 flex-1 flex-col">
             <PageLoader />
