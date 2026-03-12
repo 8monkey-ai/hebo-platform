@@ -32,3 +32,5 @@ export const verifyApiKeyPlugin = (getAuth: () => AuthWithApiKeyPlugin) => {
     },
   } satisfies BetterAuthPlugin;
 };
+
+export type VerifyApiKeyPlugin = typeof verifyApiKeyPlugin;

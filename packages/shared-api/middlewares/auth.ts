@@ -4,7 +4,7 @@ import { organizationClient } from "better-auth/client/plugins";
 import { getCookieCache, getCookies } from "better-auth/cookies";
 import { type Cookie, Elysia } from "elysia";
 
-import type { VerifyApiKeyPlugin } from "@hebo/auth/better-auth";
+import type { VerifyApiKeyPlugin } from "~auth/lib/verify-api-key-plugin";
 
 import { authSecret, authUrl } from "../env";
 import { AuthError, BadRequestError } from "../errors";

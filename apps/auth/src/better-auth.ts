@@ -112,5 +112,3 @@ export const auth = betterAuth({
   },
   trustedOrigins: cookieDomain ? [`https://*.${cookieDomain}`] : ["*"],
 });
-
-export type VerifyApiKeyPlugin = typeof verifyApiKeyPlugin;
