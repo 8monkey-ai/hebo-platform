@@ -75,22 +75,22 @@ export function TraceDetail({ trace, loading, onClose }: TraceDetailProps) {
       {/* Header */}
       <div className="border-b px-4 py-3">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-lg font-semibold truncate">
+          <h2 className="truncate text-lg font-semibold">
             {formatOperationName(trace.operationName)}
           </h2>
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex shrink-0 items-center gap-2">
             <Badge variant="outline">{formatDuration(trace.durationMs)}</Badge>
             <Badge variant={status === "error" ? "destructive" : "secondary"}>{status}</Badge>
           </div>
         </div>
-        <p className="text-xs text-muted-foreground mt-1 truncate">
+        <p className="mt-1 truncate text-xs text-muted-foreground">
           {trace.model} &middot; {formatTimestampFull(trace.timestamp)} &middot; trace{" "}
           {trace.traceId.slice(0, 16)}
         </p>
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="formatted" className="flex-1 flex flex-col min-h-0">
+      <Tabs defaultValue="formatted" className="flex min-h-0 flex-1 flex-col">
         <div className="border-b px-4">
           <TabsList className="bg-transparent">
             <TabsTrigger value="formatted">Formatted</TabsTrigger>
@@ -100,13 +100,9 @@ export function TraceDetail({ trace, loading, onClose }: TraceDetailProps) {
         </div>
 
         {/* Stats row */}
-        <div className="flex items-center gap-4 px-4 py-2 border-b text-xs text-muted-foreground">
-          {trace.inputTokens !== null && (
-            <span>{formatTokenCount(trace.inputTokens)} in</span>
-          )}
-          {trace.outputTokens !== null && (
-            <span>{formatTokenCount(trace.outputTokens)} out</span>
-          )}
+        <div className="flex items-center gap-4 border-b px-4 py-2 text-xs text-muted-foreground">
+          {trace.inputTokens !== null && <span>{formatTokenCount(trace.inputTokens)} in</span>}
+          {trace.outputTokens !== null && <span>{formatTokenCount(trace.outputTokens)} out</span>}
           {trace.reasoningTokens !== null && trace.reasoningTokens > 0 && (
             <span>{formatTokenCount(trace.reasoningTokens)} reasoning</span>
           )}
@@ -118,17 +114,17 @@ export function TraceDetail({ trace, loading, onClose }: TraceDetailProps) {
         </div>
 
         {/* Formatted tab */}
-        <TabsContent value="formatted" className="flex-1 overflow-y-auto p-4 mt-0">
+        <TabsContent value="formatted" className="mt-0 flex-1 overflow-y-auto p-4">
           <FormattedView trace={trace} />
         </TabsContent>
 
         {/* Raw JSON tab */}
-        <TabsContent value="raw" className="flex-1 overflow-y-auto p-4 mt-0">
+        <TabsContent value="raw" className="mt-0 flex-1 overflow-y-auto p-4">
           <RawJsonView trace={trace} />
         </TabsContent>
 
         {/* Metadata tab */}
-        <TabsContent value="metadata" className="flex-1 overflow-y-auto p-4 mt-0">
+        <TabsContent value="metadata" className="mt-0 flex-1 overflow-y-auto p-4">
           <MetadataView trace={trace} />
         </TabsContent>
       </Tabs>
@@ -136,16 +132,10 @@ export function TraceDetail({ trace, loading, onClose }: TraceDetailProps) {
   );
 }
 
-function DetailShell({
-  children,
-  onClose,
-}: {
-  children: React.ReactNode;
-  onClose: () => void;
-}) {
+function DetailShell({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
   return (
-    <div className="flex flex-col h-full border-l">
-      <div className="flex items-center justify-end px-2 py-1 border-b">
+    <div className="flex h-full flex-col border-l">
+      <div className="flex items-center justify-end border-b px-2 py-1">
         <Button variant="ghost" size="icon-sm" onClick={onClose}>
           <X className="size-4" />
         </Button>
@@ -252,7 +242,7 @@ function MessageBlock({ message }: { message: NormalizedMessage }) {
         <div className="flex items-center gap-2">
           <span className="text-sm font-medium">{roleLabel}</span>
           {message.toolName && (
-            <Badge variant="outline" className="text-xs gap-1">
+            <Badge variant="outline" className="gap-1 text-xs">
               <Wrench className="size-3" />
               {message.toolName}
             </Badge>
@@ -264,7 +254,7 @@ function MessageBlock({ message }: { message: NormalizedMessage }) {
       {/* Reasoning */}
       {message.reasoning && (
         <ExpandableContent label="Reasoning" className="mt-2">
-          <p className="text-sm italic text-muted-foreground whitespace-pre-wrap">
+          <p className="text-sm whitespace-pre-wrap text-muted-foreground italic">
             {message.reasoning}
           </p>
         </ExpandableContent>
@@ -278,7 +268,7 @@ function MessageBlock({ message }: { message: NormalizedMessage }) {
       {/* Tool calls */}
       {message.toolCalls?.map((tc, i) => (
         <div key={i} className="mt-2">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground mb-1">
+          <div className="mb-1 flex items-center gap-1 text-xs text-muted-foreground">
             <Wrench className="size-3" />
             <span className="font-medium">{tc.name}</span>
           </div>
@@ -316,11 +306,11 @@ function CollapsibleText({
 
   return (
     <div className={className}>
-      <p className="text-sm whitespace-pre-wrap break-words">{displayText}</p>
+      <p className="text-sm break-words whitespace-pre-wrap">{displayText}</p>
       {needsTruncation && (
         <button
           type="button"
-          className="text-xs text-primary hover:underline mt-1"
+          className="mt-1 text-xs text-primary hover:underline"
           onClick={() => setExpanded(!expanded)}
         >
           {expanded ? "Show less" : "Show more"}
@@ -330,26 +320,20 @@ function CollapsibleText({
   );
 }
 
-function CollapsibleCode({
-  code,
-  maxLength,
-}: {
-  code: string;
-  maxLength: number;
-}) {
+function CollapsibleCode({ code, maxLength }: { code: string; maxLength: number }) {
   const [expanded, setExpanded] = useState(false);
   const needsTruncation = code.length > maxLength;
   const displayCode = needsTruncation && !expanded ? `${code.slice(0, maxLength)}...` : code;
 
   return (
     <div>
-      <pre className="text-xs bg-muted rounded-md p-2 overflow-x-auto whitespace-pre-wrap break-words">
+      <pre className="overflow-x-auto rounded-md bg-muted p-2 text-xs break-words whitespace-pre-wrap">
         {displayCode}
       </pre>
       {needsTruncation && (
         <button
           type="button"
-          className="text-xs text-primary hover:underline mt-1"
+          className="mt-1 text-xs text-primary hover:underline"
           onClick={() => setExpanded(!expanded)}
         >
           {expanded ? "Show less" : "Show more"}
@@ -406,7 +390,7 @@ function RawJsonView({ trace }: { trace: TraceDetailData }) {
   return (
     <div className="relative">
       <CopyButton value={jsonStr} className="absolute top-2 right-2" />
-      <pre className="text-xs bg-muted rounded-md p-4 overflow-x-auto whitespace-pre-wrap break-words">
+      <pre className="overflow-x-auto rounded-md bg-muted p-4 text-xs break-words whitespace-pre-wrap">
         {jsonStr}
       </pre>
     </div>
@@ -423,13 +407,13 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
       {/* Request Metadata */}
       {metadataEntries.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium mb-2">Request Metadata</h3>
+          <h3 className="mb-2 text-sm font-medium">Request Metadata</h3>
           <div className="rounded-md border">
             <table className="w-full text-sm">
               <tbody>
                 {metadataEntries.map(([key, value]) => (
                   <tr key={key} className="border-b last:border-b-0">
-                    <td className="px-3 py-2 text-muted-foreground font-medium w-1/3">{key}</td>
+                    <td className="w-1/3 px-3 py-2 font-medium text-muted-foreground">{key}</td>
                     <td className="px-3 py-2 break-all">{value}</td>
                   </tr>
                 ))}
@@ -441,7 +425,7 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
 
       {/* Identifiers */}
       <div>
-        <h3 className="text-sm font-medium mb-2">Identifiers</h3>
+        <h3 className="mb-2 text-sm font-medium">Identifiers</h3>
         <div className="rounded-md border">
           <table className="w-full text-sm">
             <tbody>
@@ -472,8 +456,8 @@ function IdentifierRow({ label, value }: { label: string; value: string }) {
   if (!value) return null;
   return (
     <tr className="border-b last:border-b-0">
-      <td className="px-3 py-2 text-muted-foreground font-medium w-1/3">{label}</td>
-      <td className="px-3 py-2 break-all font-mono text-xs">
+      <td className="w-1/3 px-3 py-2 font-medium text-muted-foreground">{label}</td>
+      <td className="px-3 py-2 font-mono text-xs break-all">
         <div className="flex items-center gap-1">
           <span className="truncate">{value}</span>
           <CopyButton value={value} className="size-5 shrink-0" />

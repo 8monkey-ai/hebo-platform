@@ -9,7 +9,13 @@ import { traceHandlers } from "~console/mocks/routes/traces";
 import { addChaos } from "./middleware/chaos";
 import { addDelays } from "./middleware/delays";
 
-let handlers = [...traceHandlers, ...agentHandlers, ...branchHandlers, ...providerHandlers, ...modelHandlers];
+let handlers = [
+  ...traceHandlers,
+  ...agentHandlers,
+  ...branchHandlers,
+  ...providerHandlers,
+  ...modelHandlers,
+];
 
 const CHAOS = import.meta.env.DEV && import.meta.env.VITE_CHAOS_DISABLE !== "true";
 handlers = addDelays(CHAOS ? addChaos(handlers) : handlers);

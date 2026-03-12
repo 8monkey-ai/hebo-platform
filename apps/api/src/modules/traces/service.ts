@@ -23,7 +23,7 @@ const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
 function extractSummary(outputMessages: unknown): string {
   if (!outputMessages || !Array.isArray(outputMessages)) return "";
-  const lastMsg = outputMessages[outputMessages.length - 1];
+  const lastMsg = outputMessages.at(-1);
   if (!lastMsg) return "";
   const content =
     typeof lastMsg === "string"
@@ -168,9 +168,9 @@ export async function getTrace(agentSlug: string, branchSlug: string, traceId: s
     outputTokens: row[GEN_AI_COLUMNS.outputTokens] ?? null,
     totalTokens: row[GEN_AI_COLUMNS.totalTokens] ?? null,
     reasoningTokens: row[GEN_AI_COLUMNS.reasoningTokens] ?? null,
-    inputMessages: parseJson(row[GEN_AI_COLUMNS.inputMessages]),
-    outputMessages: parseJson(row[GEN_AI_COLUMNS.outputMessages]),
-    finishReasons: parseJson(row[GEN_AI_COLUMNS.finishReasons]),
+    inputMessages: parseJsonArray(row[GEN_AI_COLUMNS.inputMessages]),
+    outputMessages: parseJsonArray(row[GEN_AI_COLUMNS.outputMessages]),
+    finishReasons: parseJsonArray(row[GEN_AI_COLUMNS.finishReasons]),
     responseId: String(row[GEN_AI_COLUMNS.responseId] ?? ""),
     metadata,
     spanAttributes,
@@ -178,12 +178,7 @@ export async function getTrace(agentSlug: string, branchSlug: string, traceId: s
   };
 }
 
-export async function getMetadataTags(
-  agentSlug: string,
-  branchSlug: string,
-  from: Date,
-  to: Date,
-) {
+export async function getMetadataTags(agentSlug: string, branchSlug: string, from: Date, to: Date) {
   // Step 1: Get metadata column names from information_schema
   const colRows = await greptimeDb.unsafe(
     `SELECT column_name FROM information_schema.columns
@@ -238,4 +233,9 @@ function parseJson(value: unknown): unknown {
     }
   }
   return value;
+}
+
+function parseJsonArray(value: unknown): any[] | null {
+  const parsed = parseJson(value);
+  return Array.isArray(parsed) ? parsed : null;
 }

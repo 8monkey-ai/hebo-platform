@@ -383,8 +383,8 @@ export const traceHandlers = [
     async ({ request }) => {
       const url = new URL(request.url);
 
-      // Handle metadata-tags sub-route
-      if (url.pathname.endsWith("/metadata-tags")) {
+      // Handle metadata sub-route
+      if (url.pathname.endsWith("/metadata")) {
         return HttpResponse.json({
           tags: {
             session_id: ["sess_abc123", "sess_def456", "sess_ghi789"],
@@ -423,7 +423,7 @@ export const traceHandlers = [
 
   // Metadata tags
   http.get<{ agentSlug: string; branchSlug: string }>(
-    "/api/v1/agents/:agentSlug/branches/:branchSlug/traces/metadata-tags",
+    "/api/v1/agents/:agentSlug/branches/:branchSlug/traces/metadata",
     async () => {
       return HttpResponse.json({
         tags: {

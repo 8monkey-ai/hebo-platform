@@ -63,7 +63,7 @@ export function TraceList({
   }
 
   return (
-    <div className={loading ? "opacity-60 pointer-events-none" : ""}>
+    <div className={loading ? "pointer-events-none opacity-60" : ""}>
       <div className="flex flex-col gap-2">
         {traces.map((trace) => {
           const status = formatStatus(trace.status);
@@ -79,30 +79,30 @@ export function TraceList({
               onClick={() => onSelectTrace(trace.traceId)}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="text-sm font-medium truncate">
+                <span className="truncate text-sm font-medium">
                   {formatOperationName(trace.operationName)}
                 </span>
-                <span className="text-xs text-muted-foreground shrink-0">
+                <span className="shrink-0 text-xs text-muted-foreground">
                   {formatTimestampShort(trace.timestamp)}
                 </span>
               </div>
 
               {trace.summary && (
-                <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
                   {truncateText(trace.summary, 120)}
                 </p>
               )}
 
-              <div className="mt-2 flex items-center gap-2 flex-wrap">
-                <span className="text-xs text-muted-foreground truncate max-w-[180px]">
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="max-w-[180px] truncate text-xs text-muted-foreground">
                   {formatModelDisplay(trace.provider, trace.model)}
                 </span>
-                <Badge variant="outline" className="text-xs shrink-0">
+                <Badge variant="outline" className="shrink-0 text-xs">
                   {formatDuration(trace.durationMs)}
                 </Badge>
                 <Badge
                   variant={status === "error" ? "destructive" : "secondary"}
-                  className="text-xs shrink-0"
+                  className="shrink-0 text-xs"
                 >
                   {status}
                 </Badge>
@@ -113,10 +113,8 @@ export function TraceList({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between mt-4 pt-4 border-t">
-          <span className="text-xs text-muted-foreground">
-            {total} total
-          </span>
+        <div className="mt-4 flex items-center justify-between border-t pt-4">
+          <span className="text-xs text-muted-foreground">{total} total</span>
           <div className="flex items-center gap-1">
             <Button
               variant="outline"
@@ -126,7 +124,7 @@ export function TraceList({
             >
               <ChevronLeft className="size-4" />
             </Button>
-            <span className="text-xs px-2">
+            <span className="px-2 text-xs">
               {page} / {totalPages}
             </span>
             <Button

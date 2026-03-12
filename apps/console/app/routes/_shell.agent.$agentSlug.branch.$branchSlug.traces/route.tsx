@@ -1,8 +1,4 @@
-import {
-  Filter,
-  RefreshCw,
-  X,
-} from "lucide-react";
+import { Filter, RefreshCw, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams, useSearchParams } from "react-router";
 
@@ -102,9 +98,10 @@ export default function TracesRoute() {
   const activeFilterCount = Object.keys(metaFilters).length;
 
   // Compute from/to
-  const timeRange = fromParam && toParam
-    ? { from: fromParam, to: toParam }
-    : timeRangeToParams(activePreset === "custom" ? "1h" : activePreset);
+  const timeRange =
+    fromParam && toParam
+      ? { from: fromParam, to: toParam }
+      : timeRangeToParams(activePreset === "custom" ? "1h" : activePreset);
 
   // Serialize searchParams for stable dependency
   const searchParamsKey = searchParams.toString();
@@ -167,7 +164,7 @@ export default function TracesRoute() {
         const result = await api
           .agents({ agentSlug })
           .branches({ branchSlug })
-          .traces["metadata-tags"].get({ query: { from: timeRange.from, to: timeRange.to } });
+          .traces.metadata.get({ query: { from: timeRange.from, to: timeRange.to } });
 
         if (result.error) return;
         const data = result.data as any;
@@ -193,7 +190,8 @@ export default function TracesRoute() {
         const result = await api
           .agents({ agentSlug })
           .branches({ branchSlug })
-          .traces({ traceId: selectedTraceId! }).get();
+          .traces({ traceId: selectedTraceId! })
+          .get();
 
         if (cancelled) return;
 
@@ -287,7 +285,7 @@ export default function TracesRoute() {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full flex-col">
       {/* Page header */}
       <div className="mb-4">
         <h1>Observability</h1>
@@ -298,7 +296,7 @@ export default function TracesRoute() {
       </div>
 
       {/* Controls row */}
-      <div className="flex flex-wrap items-center gap-2 mb-2">
+      <div className="mb-2 flex flex-wrap items-center gap-2">
         {/* Time presets */}
         <div className="flex items-center rounded-md border">
           {TIME_PRESETS.map((preset) => (
@@ -306,9 +304,7 @@ export default function TracesRoute() {
               key={preset}
               type="button"
               className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                activePreset === preset
-                  ? "bg-primary text-primary-foreground"
-                  : "hover:bg-accent"
+                activePreset === preset ? "bg-primary text-primary-foreground" : "hover:bg-accent"
               } ${preset === "15m" ? "rounded-l-md" : ""} ${preset === "custom" ? "rounded-r-md" : ""}`}
               onClick={() => handlePresetChange(preset)}
             >
@@ -336,25 +332,25 @@ export default function TracesRoute() {
 
           {/* Filter popover */}
           {showFilters && (
-            <div className="absolute z-50 top-full mt-1 left-0 w-72 rounded-md border bg-popover p-3 shadow-md">
-              <h4 className="text-sm font-medium mb-2">Edit filters</h4>
+            <div className="absolute top-full left-0 z-50 mt-1 w-72 rounded-md border bg-popover p-3 shadow-md">
+              <h4 className="mb-2 text-sm font-medium">Edit filters</h4>
 
               {/* Active filters */}
               {activeFilterCount > 0 && (
                 <div className="mb-3">
-                  <p className="text-xs text-muted-foreground mb-1">Active filters</p>
+                  <p className="mb-1 text-xs text-muted-foreground">Active filters</p>
                   <div className="flex flex-col gap-1">
                     {Object.entries(metaFilters).map(([key, value]) => (
                       <div
                         key={key}
-                        className="flex items-center justify-between text-xs bg-muted rounded-md px-2 py-1.5"
+                        className="flex items-center justify-between rounded-md bg-muted px-2 py-1.5 text-xs"
                       >
                         <span>
                           {key}: {value}
                         </span>
                         <button
                           type="button"
-                          className="text-muted-foreground hover:text-foreground ml-2"
+                          className="ml-2 text-muted-foreground hover:text-foreground"
                           onClick={() => handleRemoveFilter(key)}
                         >
                           <X className="size-3" />
@@ -367,7 +363,7 @@ export default function TracesRoute() {
 
               {/* Add filter */}
               <div>
-                <p className="text-xs text-muted-foreground mb-1">Add filter</p>
+                <p className="mb-1 text-xs text-muted-foreground">Add filter</p>
                 <div className="flex items-end gap-1">
                   <div className="flex-1">
                     <Select
@@ -408,23 +404,27 @@ export default function TracesRoute() {
 
       {/* Custom time range popover */}
       {showCustomRange && activePreset === "custom" && (
-        <div className="mb-2 p-3 rounded-md border bg-muted/50 flex flex-wrap items-end gap-3">
+        <div className="mb-2 flex flex-wrap items-end gap-3 rounded-md border bg-muted/50 p-3">
           <div>
-            <label htmlFor="custom-from" className="text-xs text-muted-foreground block mb-1">Start</label>
+            <label htmlFor="custom-from" className="mb-1 block text-xs text-muted-foreground">
+              Start
+            </label>
             <input
               id="custom-from"
               type="datetime-local"
-              className="text-xs rounded-md border bg-background px-2 py-1.5"
+              className="rounded-md border bg-background px-2 py-1.5 text-xs"
               value={customFrom}
               onChange={(e) => setCustomFrom(e.target.value)}
             />
           </div>
           <div>
-            <label htmlFor="custom-to" className="text-xs text-muted-foreground block mb-1">End</label>
+            <label htmlFor="custom-to" className="mb-1 block text-xs text-muted-foreground">
+              End
+            </label>
             <input
               id="custom-to"
               type="datetime-local"
-              className="text-xs rounded-md border bg-background px-2 py-1.5"
+              className="rounded-md border bg-background px-2 py-1.5 text-xs"
               value={customTo}
               onChange={(e) => setCustomTo(e.target.value)}
             />
@@ -437,11 +437,11 @@ export default function TracesRoute() {
 
       {/* Filter summary */}
       {(fromParam || activeFilterCount > 0) && (
-        <p className="text-xs text-muted-foreground mb-3">
+        <p className="mb-3 text-xs text-muted-foreground">
           {fromParam && toParam && formatDateRangeSummary(fromParam, toParam)}
           {activeFilterCount > 0 && (
             <>
-              {fromParam && " \u00b7 "}
+              {fromParam && " \u00B7 "}
               {Object.entries(metaFilters)
                 .map(([k, v]) => `${k}:${v}`)
                 .join(", ")}
@@ -452,20 +452,20 @@ export default function TracesRoute() {
 
       {/* Error state */}
       {listError && (
-        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 mb-3">
+        <div className="mb-3 rounded-md border border-destructive/50 bg-destructive/10 p-3">
           <p className="text-sm text-destructive">{listError}</p>
         </div>
       )}
 
       {/* Main content: list + detail side by side */}
-      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-0">
+      <div className="flex min-h-0 flex-1 flex-col gap-0 lg:flex-row">
         {/* Trace list */}
         <div
           className={`${
             selectedTraceId ? "lg:w-2/5 lg:min-w-[320px]" : "w-full"
           } overflow-y-auto pr-0 lg:pr-2`}
         >
-          <h2 className="text-sm font-medium mb-2">GenAI executions</h2>
+          <h2 className="mb-2 text-sm font-medium">GenAI executions</h2>
           <TraceList
             traces={traces}
             total={total}
@@ -480,7 +480,7 @@ export default function TracesRoute() {
 
         {/* Detail panel */}
         {selectedTraceId && (
-          <div className="flex-1 min-w-0 overflow-y-auto mt-4 lg:mt-0">
+          <div className="mt-4 min-w-0 flex-1 overflow-y-auto lg:mt-0">
             <TraceDetail
               trace={traceDetail}
               loading={detailLoading}

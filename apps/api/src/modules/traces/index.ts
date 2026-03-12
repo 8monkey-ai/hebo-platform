@@ -4,17 +4,11 @@ import { getMetadataTags, getTrace, listTraces } from "./service";
 import { MetadataTagsResponse, TraceDetail, TraceListResponse } from "./types";
 
 export const tracesModule = new Elysia({
-  prefix: "/:branchSlug/traces",
+  prefix: "/:agentSlug/branches/:branchSlug/traces",
 })
   .get(
     "/",
     async ({ params, query }) => {
-      const now = new Date();
-      const from = query.from ? new Date(query.from) : new Date(now.getTime() - 60 * 60 * 1000);
-      const to = query.to ? new Date(query.to) : now;
-      const page = Number(query.page ?? 1);
-      const pageSize = Math.min(Number(query.pageSize ?? 50), 200);
-
       // Extract metadata filters from query params (meta.key=value)
       const metadataFilters: Record<string, string> = {};
       for (const [key, value] of Object.entries(query)) {
@@ -28,44 +22,71 @@ export const tracesModule = new Elysia({
         await listTraces({
           agentSlug: params.agentSlug,
           branchSlug: params.branchSlug,
-          from,
-          to,
-          page,
-          pageSize,
+          from: new Date(query.from!),
+          to: new Date(query.to!),
+          page: query.page!,
+          pageSize: query.pageSize!,
           metadataFilters,
         }),
       );
     },
     {
-      query: t.Object({
-        from: t.Optional(t.String()),
-        to: t.Optional(t.String()),
-        page: t.Optional(t.String()),
-        pageSize: t.Optional(t.String()),
-      }),
+      query: t.Object(
+        {
+          from: t.Optional(
+            t.String({
+              default: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+              format: "date-time",
+            }),
+          ),
+          to: t.Optional(
+            t.String({
+              default: new Date().toISOString(),
+              format: "date-time",
+            }),
+          ),
+          page: t.Optional(t.Number({ default: 1 })),
+          pageSize: t.Optional(t.Number({ default: 50 })),
+        },
+        {
+          additionalProperties: false,
+          patternProperties: {
+            "^meta\\..+": t.String(),
+          },
+        },
+      ),
       response: { 200: TraceListResponse },
-      detail: { description: "List gen_ai traces for a branch" },
     },
   )
   .get(
-    "/metadata-tags",
+    "/metadata",
     async ({ params, query }) => {
-      const now = new Date();
-      const from = query.from ? new Date(query.from) : new Date(now.getTime() - 60 * 60 * 1000);
-      const to = query.to ? new Date(query.to) : now;
-
       return status(
         200,
-        await getMetadataTags(params.agentSlug, params.branchSlug, from, to),
+        await getMetadataTags(
+          params.agentSlug,
+          params.branchSlug,
+          new Date(query.from!),
+          new Date(query.to!),
+        ),
       );
     },
     {
       query: t.Object({
-        from: t.Optional(t.String()),
-        to: t.Optional(t.String()),
+        from: t.Optional(
+          t.String({
+            default: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+            format: "date-time",
+          }),
+        ),
+        to: t.Optional(
+          t.String({
+            default: new Date().toISOString(),
+            format: "date-time",
+          }),
+        ),
       }),
       response: { 200: MetadataTagsResponse },
-      detail: { description: "Get available metadata tag keys and values" },
     },
   )
   .get(
@@ -79,6 +100,5 @@ export const tracesModule = new Elysia({
     },
     {
       response: { 200: TraceDetail, 404: t.String() },
-      detail: { description: "Get full trace detail" },
     },
   );
