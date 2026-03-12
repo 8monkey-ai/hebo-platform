@@ -47,7 +47,7 @@
         "@upyo/smtp": "^0.4.0",
         "better-auth": "catalog:",
         "elysia": "catalog:",
-        "zod": "^4.3.6",
+        "zod": "catalog:",
       },
       "devDependencies": {
         "@hebo/typescript-config": "workspace:*",
@@ -206,7 +206,6 @@
         "crypto-random-string": "^5.0.0",
       },
       "devDependencies": {
-        "@hebo/auth": "workspace:*",
         "@hebo/typescript-config": "workspace:*",
         "@types/bun": "catalog:",
       },
