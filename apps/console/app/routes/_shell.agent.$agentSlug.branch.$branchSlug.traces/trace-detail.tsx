@@ -74,7 +74,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
         <div className="border-b px-5 py-5">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
-              <h2 className="truncate text-2xl font-semibold tracking-tight text-foreground">
+              <h2 className="truncate text-2xl font-semibold tracking-tight">
                 {formatOperationName(trace.operationName)}
               </h2>
               <p className="mt-1 truncate text-sm text-muted-foreground">
@@ -98,24 +98,20 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
             <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 text-xs text-muted-foreground">
               {trace.inputTokens !== null && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
-                  <span className="font-medium text-foreground">
-                    {formatTokenCount(trace.inputTokens)}
-                  </span>
+                  <span className="font-medium">{formatTokenCount(trace.inputTokens)}</span>
                   <span>in</span>
                 </span>
               )}
               {trace.outputTokens !== null && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
-                  <span className="font-medium text-foreground">
-                    {formatTokenCount(trace.outputTokens)}
-                  </span>
+                  <span className="font-medium">{formatTokenCount(trace.outputTokens)}</span>
                   <span>out</span>
                 </span>
               )}
               {toolCallCount > 0 && (
                 <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
                   <span>tool call</span>
-                  <span className="font-medium text-foreground">{toolCallCount}</span>
+                  <span className="font-medium">{toolCallCount}</span>
                 </span>
               )}
             </div>
@@ -238,7 +234,7 @@ function MessageBlock({ message }: { message: NormalizedMessage }) {
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold tracking-tight text-foreground">{roleLabel}</span>
+          <span className="text-lg font-semibold tracking-tight">{roleLabel}</span>
           {message.toolName && (
             <Badge variant="outline" className="gap-1">
               <Wrench className="size-3" />
@@ -299,24 +295,14 @@ function getMessageKey(prefix: string, message: NormalizedMessage) {
   ].join(":");
 }
 
-function CollapsibleText({
-  text,
-  maxLength,
-  className = "",
-}: {
-  text: string;
-  maxLength: number;
-  className?: string;
-}) {
+function CollapsibleText({ text, maxLength }: { text: string; maxLength: number }) {
   const [expanded, setExpanded] = useState(false);
   const needsTruncation = text.length > maxLength;
   const displayText = needsTruncation && !expanded ? `${text.slice(0, maxLength)}...` : text;
 
   return (
-    <div className={className}>
-      <p className="text-sm leading-6 break-words whitespace-pre-wrap text-foreground">
-        {displayText}
-      </p>
+    <div>
+      <p className="text-sm leading-6 break-words whitespace-pre-wrap">{displayText}</p>
       {needsTruncation && (
         <button
           type="button"
@@ -353,19 +339,11 @@ function CollapsibleCode({ code, maxLength }: { code: string; maxLength: number 
   );
 }
 
-function ExpandableContent({
-  label,
-  children,
-  className = "",
-}: {
-  label: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
+function ExpandableContent({ label, children }: { label: string; children: React.ReactNode }) {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className={className}>
+    <div>
       <button
         type="button"
         className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"

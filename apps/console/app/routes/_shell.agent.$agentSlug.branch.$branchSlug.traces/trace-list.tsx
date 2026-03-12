@@ -82,7 +82,7 @@ export function TraceList({
                 onClick={() => onSelectTrace(trace.traceId)}
               >
                 <div className="flex items-center justify-between gap-2">
-                  <span className="truncate text-base font-semibold text-foreground">
+                  <span className="truncate text-base font-semibold">
                     {formatOperationName(trace.operationName)}
                   </span>
                   <span className="shrink-0 text-xs text-muted-foreground">
@@ -103,15 +103,8 @@ export function TraceList({
                   >
                     {formatModelDisplay(trace.provider, trace.model)}
                   </Badge>
-                  <Badge variant="secondary" className="shrink-0">
-                    {formatDuration(trace.durationMs)}
-                  </Badge>
-                  <Badge
-                    variant={status === "error" ? "destructive" : "secondary"}
-                    className="shrink-0"
-                  >
-                    {status}
-                  </Badge>
+                  <Badge variant="secondary">{formatDuration(trace.durationMs)}</Badge>
+                  <Badge variant={status === "error" ? "destructive" : "secondary"}>{status}</Badge>
                 </div>
               </button>
             );

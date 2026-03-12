@@ -215,9 +215,7 @@ export function TraceListPanel({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="shrink-0 px-5">
-        <h2 className="mb-4 text-xl font-semibold tracking-tight text-foreground">
-          GenAI executions
-        </h2>
+        <h2 className="mb-4 text-xl font-semibold tracking-tight">GenAI executions</h2>
 
         <div className="mb-3 flex flex-wrap items-center gap-2">
           <div className="flex items-center rounded-lg bg-muted p-1">
