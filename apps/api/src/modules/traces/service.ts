@@ -56,12 +56,11 @@ export async function listTraces(opts: ListTracesOpts) {
   // We need to use raw SQL since Bun.SQL tagged templates don't support dynamic column names
   const queryText = `
     SELECT
-      "timestamp",
-      trace_id,
-      span_id,
-      span_name,
-      span_status_code,
-      duration_nano,
+      "timestamp" AS timestamp,
+      "trace_id" AS trace_id,
+      "span_id" AS span_id,
+      "span_status_code" AS span_status_code,
+      "duration_nano" AS duration_nano,
       "span_attributes.gen_ai.operation.name" AS operation_name,
       "span_attributes.gen_ai.response.model" AS response_model,
       "span_attributes.gen_ai.provider.name" AS provider_name,
@@ -131,14 +130,14 @@ export async function getTrace(
 ) {
   const queryText = `
     SELECT
-      "timestamp",
-      "timestamp_end",
-      trace_id,
-      span_id,
-      span_name,
-      span_status_code,
-      span_status_message,
-      duration_nano,
+      "timestamp" AS timestamp,
+      "timestamp_end" AS timestamp_end,
+      "trace_id" AS trace_id,
+      "span_id" AS span_id,
+      "span_name" AS span_name,
+      "span_status_code" AS span_status_code,
+      "span_status_message" AS span_status_message,
+      "duration_nano" AS duration_nano,
       "span_attributes.gen_ai.operation.name" AS operation_name,
       "span_attributes.gen_ai.request.model" AS request_model,
       "span_attributes.gen_ai.response.model" AS response_model,
@@ -155,7 +154,7 @@ export async function getTrace(
       "span_attributes.hebo.branch.slug",
       "span_attributes.hebo.organization.id"
     FROM opentelemetry_traces
-    WHERE trace_id = $1
+    WHERE "trace_id" = $1
       AND "span_attributes.hebo.organization.id" = $2
       AND "span_attributes.hebo.agent.slug" = $3
       AND "span_attributes.hebo.branch.slug" = $4
@@ -167,9 +166,7 @@ export async function getTrace(
   const row = (rows as any[])[0];
   if (!row) return null;
 
-  // Extract all columns into spanAttributes and resourceAttributes maps
   const spanAttributes: Record<string, unknown> = {};
-  const resourceAttributes: Record<string, unknown> = {};
   const metadata: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(row)) {
@@ -179,8 +176,6 @@ export async function getTrace(
       if (key.startsWith(METADATA_PREFIX)) {
         metadata[key.replace(METADATA_PREFIX, "")] = String(value);
       }
-    } else if (key.startsWith("resource_attributes.")) {
-      resourceAttributes[key.replace("resource_attributes.", "")] = value;
     }
   }
 
@@ -207,7 +202,7 @@ export async function getTrace(
     responseId: String(row.response_id ?? ""),
     metadata,
     spanAttributes,
-    resourceAttributes,
+    resourceAttributes: {},
   };
 }
 
@@ -218,7 +213,6 @@ export async function getMetadataTags(
   from: Date,
   to: Date,
 ) {
-  // Step 1: Get metadata column names from information_schema
   const colRows = await greptimeDb.unsafe(
     `SELECT column_name FROM information_schema.columns
      WHERE table_name = 'opentelemetry_traces'
@@ -229,7 +223,6 @@ export async function getMetadataTags(
   const keys = (colRows as any[]).map((r) => String(r.column_name));
   if (keys.length === 0) return { tags: {} };
 
-  // Step 2: For each key, get distinct values (capped at 50)
   const tags: Record<string, string[]> = {};
 
   await Promise.all(
