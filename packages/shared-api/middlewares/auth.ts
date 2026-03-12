@@ -60,17 +60,18 @@ function extractBearerToken(header: string): string | null {
 export const authService = new Elysia({ name: "auth-service" })
   .resolve(async function resolveAuthContext(ctx) {
     const logger = (ctx as unknown as { logger: Logger }).logger;
-    const authorization = ctx.request.headers.get("authorization");
-    const cookie = ctx.request.headers.get("cookie");
 
-    if (authorization && cookie) {
+    const cookie = ctx.request.headers.get("cookie");
+    const authorization = ctx.request.headers.get("authorization");
+
+    if (cookie && authorization) {
       throw new BadRequestError("Provide exactly one credential: Bearer API Key or JWT Header");
     }
 
     const authClient = createAuthClient(ctx.request);
 
-    let organizationId: string | undefined;
     let userId: string | undefined;
+    let organizationId: string | undefined;
 
     if (cookie) {
       const session = await getCookieCache(ctx.request, {
@@ -79,8 +80,8 @@ export const authService = new Elysia({ name: "auth-service" })
       });
 
       if (session) {
-        organizationId = session.session.activeOrganizationId;
         userId = session.user.id;
+        organizationId = session.session.activeOrganizationId;
       }
     } else if (authorization) {
       const { data: result } = await authClient.internal.verifyApiKey({
@@ -91,15 +92,14 @@ export const authService = new Elysia({ name: "auth-service" })
       });
 
       if (result?.valid && result.key) {
-        // For org-owned keys, referenceId is the organization ID
-        organizationId = result.key.referenceId;
-
-        // userId was removed from the apikeys table; resolve from key metadata
         if (result.key.metadata?.createdByUserId) {
           userId = result.key.metadata?.createdByUserId;
         } else {
           logger.warn("API key missing createdByUserId in metadata");
         }
+
+        // For org-owned keys, referenceId is the organization ID
+        organizationId = result.key.referenceId;
       }
     }
 
@@ -113,18 +113,12 @@ export const authService = new Elysia({ name: "auth-service" })
         maxAge: 0,
         ...attributes,
       } as Cookie<string>;
-
-      return {
-        organizationId: undefined,
-        userId: undefined,
-        authClient: undefined,
-      } as const;
     }
 
     return {
-      organizationId,
       userId,
-      authClient,
+      organizationId,
+      authClient: userId ? authClient : undefined,
     } as const;
   })
   .macro({
