@@ -176,48 +176,49 @@ type NormalizedMessage = {
 };
 
 function normalizeMessages(messages: unknown): NormalizedMessage[] {
-  if (!messages || !Array.isArray(messages)) return [];
-  return messages.map((msg) => {
-    if (typeof msg === "string") return { role: "unknown", content: msg };
-    const role = String(msg.role ?? "unknown");
-    let content = "";
-    let reasoning: string | undefined;
-    let toolCalls: Array<{ name: string; arguments: string }> | undefined;
-    let toolName: string | undefined;
+  if (!Array.isArray(messages)) return [];
 
-    if (typeof msg.content === "string") {
-      content = msg.content;
-    } else if (Array.isArray(msg.content)) {
-      // Multi-part content (text + tool use etc)
+  return messages
+    .filter(
+      (m): m is { role?: unknown; name?: unknown; parts?: unknown } => !!m && typeof m === "object",
+    )
+    .map((msg) => {
       const textParts: string[] = [];
-      for (const part of msg.content) {
-        if (part.type === "text" && typeof part.text === "string") {
-          textParts.push(part.text);
-        } else if (part.type === "reasoning" && typeof part.text === "string") {
-          reasoning = part.text;
+      const toolCalls: Array<{ name: string; arguments: string }> = [];
+      let reasoning: string | undefined;
+
+      for (const part of Array.isArray(msg.parts) ? msg.parts : []) {
+        if (!part || typeof part !== "object") continue;
+
+        const {
+          type,
+          content,
+          name,
+          arguments: args,
+        } = part as {
+          type?: unknown;
+          content?: unknown;
+          name?: unknown;
+          arguments?: unknown;
+        };
+
+        if (type === "text" && typeof content === "string") {
+          textParts.push(content);
+        } else if (type === "reasoning" && typeof content === "string") {
+          reasoning = content;
+        } else if (type === "tool_call" && typeof name === "string" && typeof args === "string") {
+          toolCalls.push({ name, arguments: args });
         }
       }
-      content = textParts.join("\n");
-    }
 
-    // Tool calls in the message
-    if (Array.isArray(msg.tool_calls)) {
-      toolCalls = msg.tool_calls.map((tc: any) => ({
-        name: tc.function?.name ?? tc.name ?? "unknown",
-        arguments:
-          typeof tc.function?.arguments === "string"
-            ? tc.function.arguments
-            : JSON.stringify(tc.function?.arguments ?? tc.arguments ?? {}, null, 2),
-      }));
-    }
-
-    // Tool result message
-    if (role === "tool" && msg.name) {
-      toolName = String(msg.name);
-    }
-
-    return { role, content, toolCalls, toolName, reasoning };
-  });
+      return {
+        role: String(msg.role ?? "unknown"),
+        content: textParts.join("\n"),
+        toolCalls: toolCalls.length ? toolCalls : undefined,
+        toolName: msg.role === "tool" && typeof msg.name === "string" ? msg.name : undefined,
+        reasoning,
+      };
+    });
 }
 
 function MessageBlock({ message }: { message: NormalizedMessage }) {
@@ -464,8 +465,11 @@ function countToolCalls(outputMessages: unknown): number {
   if (!outputMessages || !Array.isArray(outputMessages)) return 0;
   let count = 0;
   for (const msg of outputMessages) {
-    if (Array.isArray(msg?.tool_calls)) {
-      count += msg.tool_calls.length;
+    if (Array.isArray(msg?.parts)) {
+      count += msg.parts.filter(
+        (part: unknown) =>
+          part && typeof part === "object" && (part as { type?: unknown }).type === "tool_call",
+      ).length;
     }
   }
   return count;

@@ -1,5 +1,12 @@
 import { SQL } from "bun";
 
+import {
+  parseJson,
+  parseJsonArrayItems,
+  parseNullableNumber,
+  toGreptimeDatetime,
+} from "./greptime";
+
 const greptimeDb = new SQL({
   url: process.env.GREPTIME_PG_URL ?? "postgres://localhost:4003/public",
 });
@@ -22,11 +29,19 @@ const GEN_AI_COLUMNS = {
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
 function extractSummary(outputMessages: unknown): string {
-  const last = Array.isArray(outputMessages) && outputMessages.at(-1);
-  const content =
-    typeof last === "string" ? last : typeof last?.content === "string" ? last.content : "";
+  const message = parseJson(outputMessages);
+  const parts =
+    message && typeof message === "object" && Array.isArray((message as { parts?: unknown }).parts)
+      ? ((message as { parts: unknown[] }).parts ?? [])
+      : [];
 
-  return content.slice(0, 150) + (content.length > 150 ? "..." : "");
+  const content = parts
+    .map((part) => (part && typeof part === "object" ? (part as Record<string, unknown>) : null))
+    .filter((part) => part?.type === "text" && typeof part.content === "string")
+    .map((part) => String(part?.content))
+    .join(" ");
+
+  return content.slice(0, 200) + (content.length > 200 ? "..." : "");
 }
 
 export type ListTracesOpts = {
@@ -65,7 +80,7 @@ export async function listTraces(opts: ListTracesOpts) {
       "${GEN_AI_COLUMNS.operationName}" AS operation_name,
       "${GEN_AI_COLUMNS.requestModel}" AS request_model,
       "${GEN_AI_COLUMNS.provider}" AS provider_name,
-      "${GEN_AI_COLUMNS.outputMessages}" AS output_messages
+      json_get_string("${GEN_AI_COLUMNS.outputMessages}", '$[last - 0]') AS output_message
     FROM opentelemetry_traces
     WHERE "${GEN_AI_COLUMNS.operationName}" IS NOT NULL
       AND "span_attributes.hebo.agent.slug" = $1
@@ -94,8 +109,8 @@ export async function listTraces(opts: ListTracesOpts) {
     agentSlug,
     branchSlug,
     organizationId,
-    from.toISOString(),
-    to.toISOString(),
+    toGreptimeDatetime(from),
+    toGreptimeDatetime(to),
     ...metaValues,
   ];
 
@@ -107,7 +122,6 @@ export async function listTraces(opts: ListTracesOpts) {
   const total = Number(countRows[0]?.cnt ?? 0);
 
   const data = (rows as any[]).map((row) => {
-    const outputMessages = parseJson(row.output_messages);
     return {
       timestamp: String(row.timestamp),
       traceId: String(row.trace_id ?? ""),
@@ -117,7 +131,7 @@ export async function listTraces(opts: ListTracesOpts) {
       provider: String(row.provider_name ?? ""),
       status: formatStatus(row.span_status_code),
       durationMs: Number(row.duration_nano ?? 0) / 1e6,
-      summary: extractSummary(outputMessages),
+      summary: extractSummary(row.output_message),
     };
   });
 
@@ -131,7 +145,30 @@ export async function getTrace(
   traceId: string,
 ) {
   const queryText = `
-    SELECT *
+    SELECT
+      "timestamp",
+      "timestamp_end",
+      trace_id,
+      span_id,
+      span_name,
+      span_status_code,
+      span_status_message,
+      duration_nano,
+      "${GEN_AI_COLUMNS.operationName}" AS operation_name,
+      "${GEN_AI_COLUMNS.requestModel}" AS request_model,
+      "${GEN_AI_COLUMNS.responseModel}" AS response_model,
+      "${GEN_AI_COLUMNS.provider}" AS provider_name,
+      json_to_string("${GEN_AI_COLUMNS.inputMessages}") AS input_messages,
+      json_to_string("${GEN_AI_COLUMNS.outputMessages}") AS output_messages,
+      json_to_string("${GEN_AI_COLUMNS.finishReasons}") AS finish_reasons,
+      "${GEN_AI_COLUMNS.responseId}" AS response_id,
+      "${GEN_AI_COLUMNS.inputTokens}" AS input_tokens,
+      "${GEN_AI_COLUMNS.outputTokens}" AS output_tokens,
+      "${GEN_AI_COLUMNS.totalTokens}" AS total_tokens,
+      "${GEN_AI_COLUMNS.reasoningTokens}" AS reasoning_tokens,
+      "span_attributes.hebo.agent.slug",
+      "span_attributes.hebo.branch.slug",
+      "span_attributes.hebo.organization.id"
     FROM opentelemetry_traces
     WHERE trace_id = $1
       AND "span_attributes.hebo.organization.id" = $2
@@ -168,21 +205,21 @@ export async function getTrace(
     traceId: String(row.trace_id ?? ""),
     spanId: String(row.span_id ?? ""),
     spanName: String(row.span_name ?? ""),
-    operationName: String(row[GEN_AI_COLUMNS.operationName] ?? ""),
-    model: String(row[GEN_AI_COLUMNS.requestModel] ?? ""),
-    responseModel: String(row[GEN_AI_COLUMNS.responseModel] ?? ""),
-    provider: String(row[GEN_AI_COLUMNS.provider] ?? ""),
+    operationName: String(row.operation_name ?? ""),
+    model: String(row.request_model ?? ""),
+    responseModel: String(row.response_model ?? ""),
+    provider: String(row.provider_name ?? ""),
     status: formatStatus(row.span_status_code),
     statusMessage: String(row.span_status_message ?? ""),
     durationMs: Number(row.duration_nano ?? 0) / 1e6,
-    inputTokens: row[GEN_AI_COLUMNS.inputTokens] ?? null,
-    outputTokens: row[GEN_AI_COLUMNS.outputTokens] ?? null,
-    totalTokens: row[GEN_AI_COLUMNS.totalTokens] ?? null,
-    reasoningTokens: row[GEN_AI_COLUMNS.reasoningTokens] ?? null,
-    inputMessages: parseJsonArray(row[GEN_AI_COLUMNS.inputMessages]),
-    outputMessages: parseJsonArray(row[GEN_AI_COLUMNS.outputMessages]),
-    finishReasons: parseJsonArray(row[GEN_AI_COLUMNS.finishReasons]),
-    responseId: String(row[GEN_AI_COLUMNS.responseId] ?? ""),
+    inputTokens: parseNullableNumber(row.input_tokens),
+    outputTokens: parseNullableNumber(row.output_tokens),
+    totalTokens: parseNullableNumber(row.total_tokens),
+    reasoningTokens: parseNullableNumber(row.reasoning_tokens),
+    inputMessages: parseJsonArrayItems(row.input_messages),
+    outputMessages: parseJsonArrayItems(row.output_messages),
+    finishReasons: parseJsonArrayItems(row.finish_reasons),
+    responseId: String(row.response_id ?? ""),
     metadata,
     spanAttributes,
     resourceAttributes,
@@ -224,7 +261,7 @@ export async function getMetadataTags(
            AND "timestamp" <= $5
            AND "${colName}" IS NOT NULL
          LIMIT 50`,
-        [agentSlug, branchSlug, organizationId, from.toISOString(), to.toISOString()],
+        [agentSlug, branchSlug, organizationId, toGreptimeDatetime(from), toGreptimeDatetime(to)],
       );
       tags[keyName] = (valRows as any[]).map((r) => String(r.val));
     }),
@@ -238,22 +275,4 @@ function formatStatus(statusCode: string | null): string {
   if (statusCode === "STATUS_CODE_OK" || statusCode === "STATUS_CODE_UNSET") return "ok";
   if (statusCode === "STATUS_CODE_ERROR") return "error";
   return statusCode.replace("STATUS_CODE_", "").toLowerCase();
-}
-
-function parseJson(value: unknown): unknown {
-  if (value === null || value === undefined) return null;
-  if (typeof value === "object") return value;
-  if (typeof value === "string") {
-    try {
-      return JSON.parse(value);
-    } catch {
-      return value;
-    }
-  }
-  return value;
-}
-
-function parseJsonArray(value: unknown): any[] | null {
-  const parsed = parseJson(value);
-  return Array.isArray(parsed) ? parsed : null;
 }
