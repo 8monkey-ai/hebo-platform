@@ -30,6 +30,7 @@ function extractSummary(outputMessages: unknown): string {
 }
 
 export type ListTracesOpts = {
+  organizationId: string;
   agentSlug: string;
   branchSlug: string;
   from: Date;
@@ -40,7 +41,7 @@ export type ListTracesOpts = {
 };
 
 export async function listTraces(opts: ListTracesOpts) {
-  const { agentSlug, branchSlug, from, to, page, pageSize, metadataFilters } = opts;
+  const { organizationId, agentSlug, branchSlug, from, to, page, pageSize, metadataFilters } = opts;
   const offset = (page - 1) * pageSize;
 
   // Build dynamic metadata filter clauses
@@ -48,7 +49,7 @@ export async function listTraces(opts: ListTracesOpts) {
   let metaFilterSql = "";
   const metaValues: string[] = [];
   for (const key of metaKeys) {
-    metaFilterSql += ` AND "${METADATA_PREFIX}${key}" = $${metaValues.length + 5}`;
+    metaFilterSql += ` AND "${METADATA_PREFIX}${key}" = $${metaValues.length + 6}`;
     metaValues.push(metadataFilters[key]!);
   }
 
@@ -69,8 +70,9 @@ export async function listTraces(opts: ListTracesOpts) {
     WHERE "${GEN_AI_COLUMNS.operationName}" IS NOT NULL
       AND "span_attributes.hebo.agent.slug" = $1
       AND "span_attributes.hebo.branch.slug" = $2
-      AND "timestamp" >= $3
-      AND "timestamp" <= $4
+      AND "span_attributes.hebo.organization.id" = $3
+      AND "timestamp" >= $4
+      AND "timestamp" <= $5
       ${metaFilterSql}
     ORDER BY "timestamp" DESC
     LIMIT ${pageSize} OFFSET ${offset}
@@ -82,12 +84,20 @@ export async function listTraces(opts: ListTracesOpts) {
     WHERE "${GEN_AI_COLUMNS.operationName}" IS NOT NULL
       AND "span_attributes.hebo.agent.slug" = $1
       AND "span_attributes.hebo.branch.slug" = $2
-      AND "timestamp" >= $3
-      AND "timestamp" <= $4
+      AND "span_attributes.hebo.organization.id" = $3
+      AND "timestamp" >= $4
+      AND "timestamp" <= $5
       ${metaFilterSql}
   `;
 
-  const params = [agentSlug, branchSlug, from.toISOString(), to.toISOString(), ...metaValues];
+  const params = [
+    agentSlug,
+    branchSlug,
+    organizationId,
+    from.toISOString(),
+    to.toISOString(),
+    ...metaValues,
+  ];
 
   const [rows, countRows] = await Promise.all([
     greptimeDb.unsafe(queryText, params),
@@ -114,18 +124,24 @@ export async function listTraces(opts: ListTracesOpts) {
   return { data, total, page, pageSize };
 }
 
-export async function getTrace(agentSlug: string, branchSlug: string, traceId: string) {
+export async function getTrace(
+  organizationId: string,
+  agentSlug: string,
+  branchSlug: string,
+  traceId: string,
+) {
   const queryText = `
     SELECT *
     FROM opentelemetry_traces
     WHERE trace_id = $1
-      AND "span_attributes.hebo.agent.slug" = $2
-      AND "span_attributes.hebo.branch.slug" = $3
+      AND "span_attributes.hebo.organization.id" = $2
+      AND "span_attributes.hebo.agent.slug" = $3
+      AND "span_attributes.hebo.branch.slug" = $4
       AND "${GEN_AI_COLUMNS.operationName}" IS NOT NULL
     LIMIT 1
   `;
 
-  const rows = await greptimeDb.unsafe(queryText, [traceId, agentSlug, branchSlug]);
+  const rows = await greptimeDb.unsafe(queryText, [traceId, organizationId, agentSlug, branchSlug]);
   const row = (rows as any[])[0];
   if (!row) return null;
 
@@ -173,7 +189,13 @@ export async function getTrace(agentSlug: string, branchSlug: string, traceId: s
   };
 }
 
-export async function getMetadataTags(agentSlug: string, branchSlug: string, from: Date, to: Date) {
+export async function getMetadataTags(
+  organizationId: string,
+  agentSlug: string,
+  branchSlug: string,
+  from: Date,
+  to: Date,
+) {
   // Step 1: Get metadata column names from information_schema
   const colRows = await greptimeDb.unsafe(
     `SELECT column_name FROM information_schema.columns
@@ -197,11 +219,12 @@ export async function getMetadataTags(agentSlug: string, branchSlug: string, fro
          WHERE "${GEN_AI_COLUMNS.operationName}" IS NOT NULL
            AND "span_attributes.hebo.agent.slug" = $1
            AND "span_attributes.hebo.branch.slug" = $2
-           AND "timestamp" >= $3
-           AND "timestamp" <= $4
+           AND "span_attributes.hebo.organization.id" = $3
+           AND "timestamp" >= $4
+           AND "timestamp" <= $5
            AND "${colName}" IS NOT NULL
          LIMIT 50`,
-        [agentSlug, branchSlug, from.toISOString(), to.toISOString()],
+        [agentSlug, branchSlug, organizationId, from.toISOString(), to.toISOString()],
       );
       tags[keyName] = (valRows as any[]).map((r) => String(r.val));
     }),

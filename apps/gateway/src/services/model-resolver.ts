@@ -32,6 +32,15 @@ const providerCache = new LRUCache<string, ProviderV3>({
 export async function resolveModelId(ctx: ResolveModelHookContext) {
   const { modelId: aliasPath, models, state } = ctx;
 
+  const { dbClient, organizationId } = state as {
+    dbClient: DbClient;
+    organizationId: string;
+  };
+
+  trace.getActiveSpan()?.setAttributes({
+    "hebo.organization.id": organizationId,
+  });
+
   if (canonicalModelIds.has(aliasPath)) {
     const modelConfig = models[aliasPath as keyof typeof models];
     state.modelConfig = {
@@ -41,8 +50,6 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
     };
     return aliasPath;
   }
-
-  const { dbClient } = state as { dbClient: DbClient };
 
   const [agentSlug, branchSlug, modelAlias] = aliasPath.split("/");
 
@@ -116,6 +123,7 @@ async function resolveCustomProvider(
 
 export async function resolveProvider(ctx: ResolveProviderHookContext) {
   const { resolvedModelId: modelId, state } = ctx;
+
   const { dbClient, organizationId } = state as {
     dbClient: DbClient;
     organizationId: string;

@@ -1,14 +1,17 @@
 import { Elysia, status, t } from "elysia";
 
+import { authService } from "@hebo/shared-api/middlewares/auth";
+
 import { getMetadataTags, getTrace, listTraces } from "./service";
 import { MetadataTagsResponse, TraceDetail, TraceListResponse } from "./types";
 
 export const tracesModule = new Elysia({
   prefix: "/:agentSlug/branches/:branchSlug/traces",
 })
+  .use(authService)
   .get(
     "/",
-    async ({ params, query }) => {
+    async ({ organizationId, params, query }) => {
       // Extract metadata filters from query params (meta.key=value)
       const metadataFilters: Record<string, string> = {};
       for (const [key, value] of Object.entries(query)) {
@@ -20,6 +23,7 @@ export const tracesModule = new Elysia({
       return status(
         200,
         await listTraces({
+          organizationId: organizationId!,
           agentSlug: params.agentSlug,
           branchSlug: params.branchSlug,
           from: new Date(query.from!),
@@ -60,10 +64,11 @@ export const tracesModule = new Elysia({
   )
   .get(
     "/metadata",
-    async ({ params, query }) => {
+    async ({ organizationId, params, query }) => {
       return status(
         200,
         await getMetadataTags(
+          organizationId!,
           params.agentSlug,
           params.branchSlug,
           new Date(query.from!),
@@ -91,8 +96,13 @@ export const tracesModule = new Elysia({
   )
   .get(
     "/:traceId",
-    async ({ params }) => {
-      const trace = await getTrace(params.agentSlug, params.branchSlug, params.traceId);
+    async ({ organizationId, params }) => {
+      const trace = await getTrace(
+        organizationId!,
+        params.agentSlug,
+        params.branchSlug,
+        params.traceId,
+      );
       if (!trace) {
         return status(404, "Trace not found");
       }
