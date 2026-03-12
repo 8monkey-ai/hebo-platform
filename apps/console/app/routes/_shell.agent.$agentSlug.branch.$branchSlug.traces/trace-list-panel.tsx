@@ -70,6 +70,11 @@ export function TraceListPanel({
   const pageSize = 50;
   const fromParam = searchParams.get("from");
   const toParam = searchParams.get("to");
+  const [fallbackRange] = useState(() =>
+    timeRangeToParams(activePreset === "custom" ? "1h" : activePreset),
+  );
+  const effectiveFrom = fromParam ?? fallbackRange.from;
+  const effectiveTo = toParam ?? fallbackRange.to;
 
   const metaFilters: Record<string, string> = {};
   for (const [key, value] of searchParams.entries()) {
@@ -79,32 +84,28 @@ export function TraceListPanel({
   }
   const activeFilterCount = Object.keys(metaFilters).length;
   const searchParamsKey = searchParams.toString();
-  const hasTimeRange = Boolean(fromParam && toParam);
 
   useEffect(() => {
     if (fromParam && toParam) return;
 
-    const { from, to } = timeRangeToParams(activePreset === "custom" ? "1h" : activePreset);
     const next = new URLSearchParams(searchParams);
-    next.set("from", from);
-    next.set("to", to);
+    next.set("from", effectiveFrom);
+    next.set("to", effectiveTo);
 
     if (next.toString() !== searchParams.toString()) {
       setSearchParams(next, { replace: true });
     }
-  }, [activePreset, fromParam, toParam, searchParams, setSearchParams]);
+  }, [effectiveFrom, effectiveTo, fromParam, toParam, searchParams, setSearchParams]);
 
   useEffect(() => {
-    if (!fromParam || !toParam) return;
-
     let cancelled = false;
 
     setListLoading(true);
     (async () => {
       try {
         const query = {
-          from: fromParam,
-          to: toParam,
+          from: effectiveFrom,
+          to: effectiveTo,
           page: String(page),
           pageSize: String(pageSize),
           ...Object.fromEntries(
@@ -132,29 +133,27 @@ export function TraceListPanel({
     return () => {
       cancelled = true;
     };
-  }, [agentSlug, branchSlug, fromParam, toParam, page, pageSize, searchParamsKey]);
+  }, [agentSlug, branchSlug, effectiveFrom, effectiveTo, page, pageSize, searchParamsKey]);
 
   useEffect(() => {
-    if (!fromParam || !toParam) return;
-
     (async () => {
       try {
         const { data, error } = await api
           .agents({ agentSlug })
           .branches({ branchSlug })
-          .traces.metadata.get({ query: { from: fromParam, to: toParam } });
+          .traces.metadata.get({ query: { from: effectiveFrom, to: effectiveTo } });
 
         if (!error) setMetadataTags(data?.tags ?? {});
       } catch {
         // Tag suggestions are optional.
       }
     })();
-  }, [agentSlug, branchSlug, fromParam, toParam]);
+  }, [agentSlug, branchSlug, effectiveFrom, effectiveTo]);
 
   function handlePresetChange(preset: string) {
     if (preset === "custom") {
-      setCustomFrom(toDateTimeLocalValue(fromParam ?? new Date().toISOString()));
-      setCustomTo(toDateTimeLocalValue(toParam ?? new Date().toISOString()));
+      setCustomFrom(toDateTimeLocalValue(effectiveFrom));
+      setCustomTo(toDateTimeLocalValue(effectiveTo));
       setShowCustomRange(true);
       return;
     }
@@ -219,12 +218,8 @@ export function TraceListPanel({
     setSearchParams(nextParams);
   }
 
-  if (!hasTimeRange) {
-    return null;
-  }
-
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex h-full min-h-0 flex-1 flex-col">
       <div className="shrink-0 px-4">
         <h2 className="mb-3 text-xl font-semibold tracking-tight">GenAI executions</h2>
 
@@ -388,21 +383,19 @@ export function TraceListPanel({
         </div>
       </div>
 
-      {(fromParam || activeFilterCount > 0) && (
-        <p className="mb-3 shrink-0 px-4 text-sm text-muted-foreground">
-          {fromParam && toParam && formatDateRangeSummary(fromParam, toParam)}
-          {activeFilterCount > 0 && (
-            <>
-              {fromParam && " · "}
-              {Object.entries(metaFilters)
-                .map(([key, value]) => `${key}:${value}`)
-                .join(", ")}
-            </>
-          )}
-        </p>
-      )}
+      <p className="mb-3 shrink-0 px-4 text-sm text-muted-foreground">
+        {formatDateRangeSummary(effectiveFrom, effectiveTo)}
+        {activeFilterCount > 0 && (
+          <>
+            {" · "}
+            {Object.entries(metaFilters)
+              .map(([key, value]) => `${key}:${value}`)
+              .join(", ")}
+          </>
+        )}
+      </p>
 
-      <div className="min-h-0 flex-1 overflow-hidden">
+      <div className="flex h-0 min-h-0 flex-1 overflow-hidden">
         <TraceList
           traces={traces}
           total={total}

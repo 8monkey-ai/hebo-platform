@@ -73,8 +73,8 @@ export default function TracesRoute() {
   }, [selectedTraceId, agentSlug, branchSlug]);
 
   return (
-    <div className="grid h-full min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] gap-3 overflow-y-hidden">
-      <div className="grid min-h-0 flex-1 gap-3 overflow-y-hidden xl:grid-cols-[28rem_minmax(0,1fr)]">
+    <div className="h-full min-h-0 flex-1 overflow-y-hidden">
+      <div className="grid h-full min-h-0 gap-3 overflow-y-hidden pb-4 xl:grid-cols-[28rem_minmax(0,1fr)]">
         <div className="relative z-10 flex h-full min-h-0 flex-col rounded-2xl border bg-card pt-4 pb-2">
           <TraceListPanel
             agentSlug={agentSlug}

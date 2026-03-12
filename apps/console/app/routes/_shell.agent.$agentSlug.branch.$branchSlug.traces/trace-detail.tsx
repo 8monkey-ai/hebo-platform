@@ -48,8 +48,10 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
   if (loading) {
     return (
       <DetailShell>
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+        <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-4">
+          <div className="-translate-y-6">
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          </div>
         </div>
       </DetailShell>
     );
@@ -58,8 +60,8 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
   if (!trace) {
     return (
       <DetailShell>
-        <div className="flex items-center justify-center py-20 text-sm text-muted-foreground">
-          Select a trace to view details
+        <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-4 text-sm text-muted-foreground">
+          <div className="-translate-y-6">Select a trace to view details</div>
         </div>
       </DetailShell>
     );
