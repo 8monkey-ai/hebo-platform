@@ -71,8 +71,8 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
   return (
     <DetailShell>
       <Tabs defaultValue="formatted" className="flex min-h-0 flex-1 flex-col">
-        <div className="border-b px-5 py-5">
-          <div className="flex items-start justify-between gap-4">
+        <div className="border-b px-4 py-4">
+          <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="truncate text-2xl font-semibold tracking-tight">
                 {formatOperationName(trace.operationName)}
@@ -88,7 +88,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-between gap-4">
+          <div className="mt-3 flex items-center justify-between gap-3">
             <TabsList>
               <TabsTrigger value="formatted">Formatted details</TabsTrigger>
               <TabsTrigger value="raw">Raw JSON</TabsTrigger>
@@ -118,15 +118,15 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
           </div>
         </div>
 
-        <TabsContent value="formatted" className="mt-0 min-h-0 flex-1 overflow-y-auto px-5 py-5">
+        <TabsContent value="formatted" className="mt-0 min-h-0 flex-1 overflow-y-auto px-4 py-4">
           <FormattedView trace={trace} />
         </TabsContent>
 
-        <TabsContent value="raw" className="mt-0 min-h-0 flex-1 overflow-y-auto px-5 py-5">
+        <TabsContent value="raw" className="mt-0 min-h-0 flex-1 overflow-y-auto px-4 py-4">
           <RawJsonView trace={trace} />
         </TabsContent>
 
-        <TabsContent value="metadata" className="mt-0 min-h-0 flex-1 overflow-y-auto px-5 py-5">
+        <TabsContent value="metadata" className="mt-0 min-h-0 flex-1 overflow-y-auto px-4 py-4">
           <MetadataView trace={trace} />
         </TabsContent>
       </Tabs>
@@ -230,7 +230,7 @@ function MessageBlock({ message }: { message: NormalizedMessage }) {
 
   return (
     <section
-      className={`space-y-4 border-l-2 py-5 pl-4 first:pt-0 last:pb-0 ${roleAccents[message.role] ?? "border-l-border"}`}
+      className={`space-y-3 border-l-2 py-4 pl-3 first:pt-0 last:pb-0 ${roleAccents[message.role] ?? "border-l-border"}`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -323,7 +323,7 @@ function CollapsibleCode({ code, maxLength }: { code: string; maxLength: number 
 
   return (
     <div>
-      <pre className="overflow-x-auto rounded-lg border bg-muted/30 p-4 text-sm break-words whitespace-pre-wrap text-foreground">
+      <pre className="overflow-x-auto rounded-lg border bg-muted/30 p-3 text-sm break-words whitespace-pre-wrap text-foreground">
         {displayCode}
       </pre>
       {needsTruncation && (
@@ -377,8 +377,11 @@ function RawJsonView({ trace }: { trace: TraceDetailData }) {
 
   return (
     <div className="relative">
-      <CopyButton value={jsonStr} className="absolute top-3 right-3 rounded-md hover:bg-muted" />
-      <pre className="overflow-x-auto rounded-lg border bg-muted/30 p-4 text-sm break-words whitespace-pre-wrap text-foreground">
+      <CopyButton
+        value={jsonStr}
+        className="absolute top-2.5 right-2.5 rounded-md hover:bg-muted"
+      />
+      <pre className="overflow-x-auto rounded-lg border bg-muted/30 p-3 text-sm break-words whitespace-pre-wrap text-foreground">
         {jsonStr}
       </pre>
     </div>
@@ -391,7 +394,7 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
   const metadataEntries = Object.entries(trace.metadata);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5">
       {metadataEntries.length > 0 && (
         <div>
           <h3 className="mb-3 text-sm font-medium text-foreground">Request Metadata</h3>

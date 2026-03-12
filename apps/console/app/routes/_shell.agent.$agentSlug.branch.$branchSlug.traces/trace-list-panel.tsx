@@ -225,10 +225,10 @@ export function TraceListPanel({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="shrink-0 px-5">
-        <h2 className="mb-4 text-xl font-semibold tracking-tight">GenAI executions</h2>
+      <div className="shrink-0 px-4">
+        <h2 className="mb-3 text-xl font-semibold tracking-tight">GenAI executions</h2>
 
-        <div className="mb-3 flex flex-wrap items-center gap-2">
+        <div className="mb-2 flex flex-wrap items-center gap-2">
           <div className="relative">
             <div className="flex items-center rounded-lg bg-muted p-1">
               {TIME_PRESETS.map((preset) => {
@@ -255,9 +255,9 @@ export function TraceListPanel({
             </div>
 
             {showCustomRange && (
-              <div className="absolute top-full left-0 z-50 mt-2 w-80 rounded-lg border bg-popover p-3 shadow-md">
+              <div className="absolute top-full left-0 z-50 mt-2 w-80 rounded-lg border bg-popover p-2.5 shadow-md">
                 <h4 className="mb-2 text-sm font-medium">Custom range</h4>
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2.5">
                   <div>
                     <label
                       htmlFor="custom-from"
@@ -315,11 +315,11 @@ export function TraceListPanel({
             </Button>
 
             {showFilters && (
-              <div className="absolute top-full left-0 z-50 mt-2 w-72 rounded-lg border bg-popover p-3 shadow-md">
+              <div className="absolute top-full left-0 z-50 mt-2 w-72 rounded-lg border bg-popover p-2.5 shadow-md">
                 <h4 className="mb-2 text-sm font-medium">Edit filters</h4>
 
                 {activeFilterCount > 0 && (
-                  <div className="mb-3">
+                  <div className="mb-2.5">
                     <p className="mb-1 text-xs text-muted-foreground">Active filters</p>
                     <div className="flex flex-col gap-1">
                       {Object.entries(metaFilters).map(([key, value]) => (
@@ -389,7 +389,7 @@ export function TraceListPanel({
       </div>
 
       {(fromParam || activeFilterCount > 0) && (
-        <p className="mb-4 shrink-0 px-5 text-sm text-muted-foreground">
+        <p className="mb-3 shrink-0 px-4 text-sm text-muted-foreground">
           {fromParam && toParam && formatDateRangeSummary(fromParam, toParam)}
           {activeFilterCount > 0 && (
             <>

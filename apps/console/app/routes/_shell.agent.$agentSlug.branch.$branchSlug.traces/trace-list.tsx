@@ -76,7 +76,7 @@ export function TraceList({
               <button
                 key={`${trace.traceId}-${trace.spanId}`}
                 type="button"
-                className={`w-full px-5 py-5 text-left transition-colors hover:bg-accent/40 ${
+                className={`w-full px-4 py-4 text-left transition-colors hover:bg-accent/40 ${
                   isSelected ? "bg-accent/60" : ""
                 }`}
                 onClick={() => onSelectTrace(trace.traceId)}
@@ -113,7 +113,7 @@ export function TraceList({
       </div>
 
       {totalPages > 1 && (
-        <div className="mt-4 flex shrink-0 items-center justify-between border-t pt-4">
+        <div className="mt-3 flex shrink-0 items-center justify-between border-t pt-3">
           <span className="text-xs text-muted-foreground">{total} total</span>
           <div className="flex items-center gap-1">
             <Button
@@ -146,7 +146,7 @@ function TraceListSkeleton() {
   return (
     <div className="flex h-full min-h-0 flex-col divide-y overflow-y-auto">
       {["one", "two", "three", "four", "five"].map((item) => (
-        <div key={item} className="px-5 py-5">
+        <div key={item} className="px-4 py-4">
           <div className="flex items-center justify-between">
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-3 w-12" />
