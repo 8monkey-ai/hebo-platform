@@ -25,6 +25,19 @@ type TraceListItem = {
 
 const TIME_PRESETS = ["15m", "1h", "24h", "custom"] as const;
 
+const padDatePart = (part: number) => String(part).padStart(2, "0");
+
+function toDateTimeLocalValue(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "";
+
+  return [date.getFullYear(), padDatePart(date.getMonth() + 1), padDatePart(date.getDate())]
+    .join("-")
+    .concat("T")
+    .concat([padDatePart(date.getHours()), padDatePart(date.getMinutes())].join(":"));
+}
+
 type TraceListPanelProps = {
   agentSlug: string;
   branchSlug: string;
@@ -140,11 +153,9 @@ export function TraceListPanel({
 
   function handlePresetChange(preset: string) {
     if (preset === "custom") {
+      setCustomFrom(toDateTimeLocalValue(fromParam ?? new Date().toISOString()));
+      setCustomTo(toDateTimeLocalValue(toParam ?? new Date().toISOString()));
       setShowCustomRange(true);
-      const nextParams = new URLSearchParams(searchParams);
-      nextParams.set("preset", "custom");
-      nextParams.delete("page");
-      setSearchParams(nextParams);
       return;
     }
 
@@ -218,21 +229,73 @@ export function TraceListPanel({
         <h2 className="mb-4 text-xl font-semibold tracking-tight">GenAI executions</h2>
 
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <div className="flex items-center rounded-lg bg-muted p-1">
-            {TIME_PRESETS.map((preset) => (
-              <button
-                key={preset}
-                type="button"
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  activePreset === preset
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-                onClick={() => handlePresetChange(preset)}
-              >
-                {preset === "custom" ? "Custom" : preset}
-              </button>
-            ))}
+          <div className="relative">
+            <div className="flex items-center rounded-lg bg-muted p-1">
+              {TIME_PRESETS.map((preset) => {
+                const isActive =
+                  preset === "custom"
+                    ? activePreset === "custom" || showCustomRange
+                    : activePreset === preset;
+
+                return (
+                  <button
+                    key={preset}
+                    type="button"
+                    className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                    onClick={() => handlePresetChange(preset)}
+                  >
+                    {preset === "custom" ? "Custom" : preset}
+                  </button>
+                );
+              })}
+            </div>
+
+            {showCustomRange && (
+              <div className="absolute top-full left-0 z-50 mt-2 w-80 rounded-lg border bg-popover p-3 shadow-md">
+                <h4 className="mb-2 text-sm font-medium">Custom range</h4>
+                <div className="flex flex-col gap-3">
+                  <div>
+                    <label
+                      htmlFor="custom-from"
+                      className="mb-1 block text-xs text-muted-foreground"
+                    >
+                      Start
+                    </label>
+                    <input
+                      id="custom-from"
+                      type="datetime-local"
+                      className="w-full rounded-md border bg-background px-2 py-1.5 text-xs"
+                      value={customFrom}
+                      onChange={(event) => setCustomFrom(event.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="custom-to" className="mb-1 block text-xs text-muted-foreground">
+                      End
+                    </label>
+                    <input
+                      id="custom-to"
+                      type="datetime-local"
+                      className="w-full rounded-md border bg-background px-2 py-1.5 text-xs"
+                      value={customTo}
+                      onChange={(event) => setCustomTo(event.target.value)}
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button variant="outline" size="sm" onClick={() => setShowCustomRange(false)}>
+                      Cancel
+                    </Button>
+                    <Button size="sm" onClick={handleApplyCustomRange}>
+                      Apply range
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="relative">
@@ -324,38 +387,6 @@ export function TraceListPanel({
           </Button>
         </div>
       </div>
-
-      {showCustomRange && activePreset === "custom" && (
-        <div className="mx-5 mb-3 flex shrink-0 flex-wrap items-end gap-3 rounded-lg border bg-muted/30 p-3">
-          <div>
-            <label htmlFor="custom-from" className="mb-1 block text-xs text-muted-foreground">
-              Start
-            </label>
-            <input
-              id="custom-from"
-              type="datetime-local"
-              className="rounded-md border bg-background px-2 py-1.5 text-xs"
-              value={customFrom}
-              onChange={(event) => setCustomFrom(event.target.value)}
-            />
-          </div>
-          <div>
-            <label htmlFor="custom-to" className="mb-1 block text-xs text-muted-foreground">
-              End
-            </label>
-            <input
-              id="custom-to"
-              type="datetime-local"
-              className="rounded-md border bg-background px-2 py-1.5 text-xs"
-              value={customTo}
-              onChange={(event) => setCustomTo(event.target.value)}
-            />
-          </div>
-          <Button size="sm" onClick={handleApplyCustomRange}>
-            Apply range
-          </Button>
-        </div>
-      )}
 
       {(fromParam || activeFilterCount > 0) && (
         <p className="mb-4 shrink-0 px-5 text-sm text-muted-foreground">
