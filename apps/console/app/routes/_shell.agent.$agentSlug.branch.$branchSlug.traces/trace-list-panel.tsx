@@ -216,8 +216,10 @@ export function TraceListPanel({
   }
 
   return (
-    <>
-      <div className="mb-2 flex flex-wrap items-center gap-2">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <h2 className="mb-3 shrink-0 text-sm font-medium">GenAI executions</h2>
+
+      <div className="mb-2 flex shrink-0 flex-wrap items-center gap-2">
         <div className="flex items-center rounded-md border">
           {TIME_PRESETS.map((preset) => (
             <button
@@ -318,7 +320,7 @@ export function TraceListPanel({
       </div>
 
       {showCustomRange && activePreset === "custom" && (
-        <div className="mb-2 flex flex-wrap items-end gap-3 rounded-md border bg-muted/50 p-3">
+        <div className="mb-2 flex shrink-0 flex-wrap items-end gap-3 rounded-md border bg-muted/50 p-3">
           <div>
             <label htmlFor="custom-from" className="mb-1 block text-xs text-muted-foreground">
               Start
@@ -350,7 +352,7 @@ export function TraceListPanel({
       )}
 
       {(fromParam || activeFilterCount > 0) && (
-        <p className="mb-3 text-xs text-muted-foreground">
+        <p className="mb-3 shrink-0 text-xs text-muted-foreground">
           {fromParam && toParam && formatDateRangeSummary(fromParam, toParam)}
           {activeFilterCount > 0 && (
             <>
@@ -364,22 +366,23 @@ export function TraceListPanel({
       )}
 
       {listError && (
-        <div className="mb-3 rounded-md border border-destructive/50 bg-destructive/10 p-3">
+        <div className="mb-3 shrink-0 rounded-md border border-destructive/50 bg-destructive/10 p-3">
           <p className="text-sm text-destructive">{listError}</p>
         </div>
       )}
 
-      <h2 className="mb-2 text-sm font-medium">GenAI executions</h2>
-      <TraceList
-        traces={traces}
-        total={total}
-        page={page}
-        pageSize={pageSize}
-        selectedTraceId={selectedTraceId}
-        loading={listLoading}
-        onSelectTrace={onSelectTrace}
-        onPageChange={handlePageChange}
-      />
-    </>
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <TraceList
+          traces={traces}
+          total={total}
+          page={page}
+          pageSize={pageSize}
+          selectedTraceId={selectedTraceId}
+          loading={listLoading}
+          onSelectTrace={onSelectTrace}
+          onPageChange={handlePageChange}
+        />
+      </div>
+    </div>
   );
 }

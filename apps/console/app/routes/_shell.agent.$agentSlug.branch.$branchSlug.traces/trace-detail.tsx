@@ -1,8 +1,7 @@
-import { ChevronDown, ChevronRight, Loader2, Wrench, X } from "lucide-react";
+import { ChevronDown, ChevronRight, Loader2, Wrench } from "lucide-react";
 import { useState } from "react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
-import { Button } from "@hebo/shared-ui/components/Button";
 import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@hebo/shared-ui/components/Tabs";
 
@@ -43,13 +42,12 @@ type TraceDetailData = {
 type TraceDetailProps = {
   trace: TraceDetailData | null;
   loading: boolean;
-  onClose: () => void;
 };
 
-export function TraceDetail({ trace, loading, onClose }: TraceDetailProps) {
+export function TraceDetail({ trace, loading }: TraceDetailProps) {
   if (loading) {
     return (
-      <DetailShell onClose={onClose}>
+      <DetailShell>
         <div className="flex items-center justify-center py-20">
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </div>
@@ -59,7 +57,7 @@ export function TraceDetail({ trace, loading, onClose }: TraceDetailProps) {
 
   if (!trace) {
     return (
-      <DetailShell onClose={onClose}>
+      <DetailShell>
         <div className="flex items-center justify-center py-20 text-sm text-muted-foreground">
           Select a trace to view details
         </div>
@@ -71,7 +69,7 @@ export function TraceDetail({ trace, loading, onClose }: TraceDetailProps) {
   const toolCallCount = countToolCalls(trace.outputMessages);
 
   return (
-    <DetailShell onClose={onClose}>
+    <DetailShell>
       {/* Header */}
       <div className="border-b px-4 py-3">
         <div className="flex items-center justify-between gap-2">
@@ -132,14 +130,9 @@ export function TraceDetail({ trace, loading, onClose }: TraceDetailProps) {
   );
 }
 
-function DetailShell({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+function DetailShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-full flex-col border-l">
-      <div className="flex items-center justify-end border-b px-2 py-1">
-        <Button variant="ghost" size="icon-sm" onClick={onClose}>
-          <X className="size-4" />
-        </Button>
-      </div>
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[1.75rem] border bg-background/80">
       {children}
     </div>
   );

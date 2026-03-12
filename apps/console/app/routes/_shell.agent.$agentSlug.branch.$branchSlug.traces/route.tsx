@@ -73,20 +73,20 @@ export default function TracesRoute() {
   }, [selectedTraceId, agentSlug, branchSlug]);
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="mb-4">
+    <div className="grid h-full min-h-0 flex-1 grid-rows-[auto_minmax(0,1fr)] gap-8 overflow-hidden">
+      <div className="max-w-5xl shrink-0">
         <h1>Observability</h1>
         <p className="text-sm text-muted-foreground">
           Inspect recent gen_ai executions for the active branch. Evaluate prompt, model, response,
-          and tool behavior for your current branch.
+          and tool behavior.
         </p>
       </div>
 
-      <div className="flex min-h-0 flex-1 flex-col gap-0 lg:flex-row">
+      <div className="grid min-h-0 flex-1 gap-6 overflow-hidden xl:grid-cols-[28rem_minmax(0,1fr)]">
         <div
-          className={`${
-            selectedTraceId ? "lg:w-2/5 lg:min-w-[320px]" : "w-full"
-          } overflow-y-auto pr-0 lg:pr-2`}
+          className={`flex h-full min-h-0 flex-col overflow-hidden rounded-[1.75rem] border bg-background/80 px-5 pt-5 pb-3 ${
+            selectedTraceId ? "" : "xl:col-span-1"
+          }`}
         >
           <TraceListPanel
             agentSlug={agentSlug}
@@ -96,15 +96,11 @@ export default function TracesRoute() {
           />
         </div>
 
-        {selectedTraceId && (
-          <div className="mt-4 min-w-0 flex-1 overflow-y-auto lg:mt-0">
-            <TraceDetail
-              trace={traceDetail}
-              loading={detailLoading}
-              onClose={() => setSelectedTraceId(null)}
-            />
-          </div>
-        )}
+        <div
+          className={`h-full min-h-0 overflow-hidden ${selectedTraceId ? "" : "hidden xl:block"}`}
+        >
+          <TraceDetail trace={traceDetail} loading={detailLoading} />
+        </div>
       </div>
     </div>
   );

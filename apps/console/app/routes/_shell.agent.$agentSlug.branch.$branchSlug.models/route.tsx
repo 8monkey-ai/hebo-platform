@@ -47,7 +47,7 @@ export default function ModelsConfigRoute({ loaderData }: Route.ComponentProps) 
   const { agent, branch } = useRoute("routes/_shell.agent.$agentSlug")!.loaderData!;
 
   return (
-    <>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <div>
         <h1>Model Configuration</h1>
         <p className="text-sm text-muted-foreground">
@@ -66,6 +66,6 @@ export default function ModelsConfigRoute({ loaderData }: Route.ComponentProps) 
         models={branch!.models}
         providers={loaderData.providers}
       />
-    </>
+    </div>
   );
 }

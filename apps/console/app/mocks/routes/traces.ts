@@ -2,6 +2,29 @@ import { http, HttpResponse } from "msw";
 
 const now = Date.now();
 const min = 60 * 1000;
+const longFlightNarrative = [
+  "I checked multiple fare buckets, nearby departure windows, and whether baggage pricing changed the effective total cost.",
+  "I prioritized direct flights first, then reviewed one-stop options only when they reduced the fare by a meaningful amount.",
+  "I also compared early-morning departures with mid-day flights because some budget carriers shift prices aggressively across the day.",
+  "When the cheapest itinerary had stricter change rules, I called that out so the recommendation was still practical and not just numerically cheapest.",
+  "Weather risk and airport transfer time were considered as tie-breakers because they materially affect whether the plan is actually usable.",
+  "I kept the explanation intentionally detailed so the detail pane has enough content to demonstrate independent scrolling behavior.",
+].join("\n\n");
+
+const longToolPayload = {
+  flights: Array.from({ length: 12 }).map((_, index) => ({
+    airline: index % 3 === 0 ? "AirAsia X" : index % 3 === 1 ? "Malaysia Airlines" : "JAL",
+    flight_number: `HX ${510 + index}`,
+    cabin: index % 2 === 0 ? "Economy" : "Premium Economy",
+    departure: `2026-03-20T${String(7 + index).padStart(2, "0")}:30:00`,
+    arrival: `2026-03-20T${String(14 + index).padStart(2, "0")}:45:00`,
+    duration: `${7 + (index % 3)}h ${15 + index}m`,
+    price_usd: 187 + index * 23,
+    baggage: index % 2 === 0 ? "20kg included" : "Carry-on only",
+    notes:
+      "Mock payload intentionally expanded to force internal scrolling in the trace detail panel.",
+  })),
+};
 
 const mockTraces = [
   {
@@ -61,6 +84,38 @@ const mockTraces = [
     summary: "",
   },
 ];
+
+const generatedMockTraces = Array.from({ length: 18 }).map((_, index) => {
+  const timestamp = new Date(now - (30 + index * 4) * min).toISOString();
+  const traceId = `90000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
+  const spanId = `feedfacecafe${String(index + 1).padStart(4, "0")}`;
+  const provider = index % 3 === 0 ? "openai" : index % 3 === 1 ? "anthropic" : "google";
+  const model =
+    provider === "openai"
+      ? "gpt-oss-120b"
+      : provider === "anthropic"
+        ? "claude-sonnet-4-20250514"
+        : "gemini-2.5-pro";
+  const status = index % 5 === 0 ? "error" : "ok";
+  const operationName = index % 4 === 0 ? "response.create" : "chat.completion";
+
+  return {
+    timestamp,
+    traceId,
+    spanId,
+    operationName,
+    model,
+    provider,
+    status,
+    durationMs: 620 + index * 87,
+    summary:
+      status === "error"
+        ? "Provider timeout after a long tool-augmented reasoning pass. User-safe fallback was not emitted."
+        : "Expanded mock trace generated to make the list scroll region obvious while keeping realistic-looking summaries.",
+  };
+});
+
+mockTraces.push(...generatedMockTraces);
 
 const mockTraceDetails: Record<string, object> = {
   "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e": {
@@ -375,6 +430,111 @@ const mockTraceDetails: Record<string, object> = {
     },
   },
 };
+
+for (const [index, trace] of generatedMockTraces.entries()) {
+  mockTraceDetails[trace.traceId] = {
+    timestamp: trace.timestamp,
+    timestampEnd: new Date(new Date(trace.timestamp).getTime() + trace.durationMs).toISOString(),
+    traceId: trace.traceId,
+    spanId: trace.spanId,
+    spanName: trace.operationName,
+    operationName: trace.operationName,
+    model: trace.model,
+    responseModel: `${trace.model}-2026-03-01`,
+    provider: trace.provider,
+    status: trace.status,
+    statusMessage:
+      trace.status === "error" ? "Provider timeout while aggregating tool results" : "",
+    durationMs: trace.durationMs,
+    inputTokens: 1200 + index * 40,
+    outputTokens: trace.status === "error" ? 0 : 480 + index * 20,
+    totalTokens: trace.status === "error" ? 1200 + index * 40 : 1680 + index * 60,
+    reasoningTokens: index % 2 === 0 ? 220 + index * 10 : null,
+    inputMessages: [
+      {
+        role: "system",
+        content:
+          "You are an operations copilot. Explain your recommendation clearly, cite tradeoffs, and preserve enough detail for audit review.",
+      },
+      {
+        role: "user",
+        content:
+          "Compare flight options for next Friday, explain the tradeoffs, and include any operational caveats that might change the recommendation.",
+      },
+    ],
+    outputMessages: [
+      {
+        role: "assistant",
+        content: [
+          {
+            type: "reasoning",
+            text: "I should compare direct and one-stop options, weigh refund/change restrictions, and make the explanation long enough to exercise the scroll area in the mock UI.",
+          },
+          {
+            type: "text",
+            text: longFlightNarrative,
+          },
+        ],
+        tool_calls: [
+          {
+            function: {
+              name: "search_flights",
+              arguments: JSON.stringify(
+                {
+                  from: "KUL",
+                  to: "NRT",
+                  date: "2026-03-20",
+                  includeNearbyAirports: false,
+                  sort: "price_asc",
+                  maxResults: 12,
+                },
+                null,
+                2,
+              ),
+            },
+          },
+        ],
+      },
+      {
+        role: "tool",
+        name: "search_flights",
+        content: JSON.stringify(longToolPayload, null, 2),
+      },
+      {
+        role: "assistant",
+        content:
+          trace.status === "error"
+            ? ""
+            : `${longFlightNarrative}\n\nRecommended option: AirAsia X remains the best balance of price and schedule, but premium-economy alternatives become more attractive once baggage and change flexibility are priced in.`,
+      },
+    ],
+    finishReasons: trace.status === "error" ? [] : ["stop"],
+    responseId: trace.status === "error" ? "" : `chatcmpl-generated-${index + 1}`,
+    metadata: {
+      environment: index % 2 === 0 ? "production" : "staging",
+      provider: trace.provider,
+      scenario: "scroll-demo",
+      session_id: `sess_scroll_${index + 1}`,
+    },
+    spanAttributes: {
+      "gen_ai.operation.name": trace.operationName,
+      "gen_ai.request.model": trace.model,
+      "gen_ai.response.model": `${trace.model}-2026-03-01`,
+      "gen_ai.provider.name": trace.provider,
+      "gen_ai.usage.input_tokens": 1200 + index * 40,
+      "gen_ai.usage.output_tokens": trace.status === "error" ? 0 : 480 + index * 20,
+      "gen_ai.usage.total_tokens": trace.status === "error" ? 1200 + index * 40 : 1680 + index * 60,
+      "gen_ai.request.metadata.environment": index % 2 === 0 ? "production" : "staging",
+      "gen_ai.request.metadata.scenario": "scroll-demo",
+      "hebo.agent.slug": "my-agent",
+      "hebo.branch.slug": "main",
+    },
+    resourceAttributes: {
+      "service.name": "hebo-gateway",
+      "telemetry.sdk.language": "nodejs",
+    },
+  };
+}
 
 export const traceHandlers = [
   // List traces

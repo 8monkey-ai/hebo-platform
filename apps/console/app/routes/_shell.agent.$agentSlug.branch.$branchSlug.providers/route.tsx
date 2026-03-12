@@ -64,7 +64,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 
 export default function ProviderRoute({ loaderData }: Route.ComponentProps) {
   return (
-    <>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <div>
         <h1>Providers</h1>
         <p className="text-sm text-muted-foreground">
@@ -73,6 +73,6 @@ export default function ProviderRoute({ loaderData }: Route.ComponentProps) {
       </div>
 
       <ProvidersList providers={loaderData.providers} />
-    </>
+    </div>
   );
 }

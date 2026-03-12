@@ -119,7 +119,7 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
         </div>
       </Sidebar>
 
-      <SidebarInset className="min-w-0 bg-transparent">
+      <SidebarInset className="h-svh min-h-0 min-w-0 bg-transparent">
         <Tooltip>
           <TooltipTrigger render={<SidebarTrigger className="fixed m-2" />} />
           <TooltipContent side="right">Toggle Sidebar ({kbs("mod+S")})</TooltipContent>
@@ -131,9 +131,9 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
         <div
           ref={mainRef}
           tabIndex={-1}
-          className="flex min-w-0 flex-1 flex-col gap-4 px-4 py-10 focus:outline-none sm:px-10"
+          className="flex h-full min-h-0 min-w-0 flex-1 flex-col gap-4 px-4 pt-10 pb-6 focus:outline-none sm:px-10"
         >
-          <div className="@container mx-auto w-full max-w-4xl min-w-0">
+          <div className="@container mx-auto flex h-full min-h-0 w-full min-w-0 flex-1 flex-col">
             <PageLoader />
             <Outlet />
           </div>
