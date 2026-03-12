@@ -16,7 +16,8 @@
     "./errors": "./errors.ts"
   },
   "scripts": {
-    "clean": "git clean -fdx -e '.env*' ."
+    "clean": "git clean -fdx -e '.env*' .",
+    "db:reset": "curl -sS -X POST http://127.0.0.1:4000/v1/sql -d 'sql=DROP DATABASE IF EXISTS public' && curl -sS -X POST http://127.0.0.1:4000/v1/sql -d 'sql=CREATE DATABASE public'"
   },
   "dependencies": {
     "@opentelemetry/api": "catalog:",
