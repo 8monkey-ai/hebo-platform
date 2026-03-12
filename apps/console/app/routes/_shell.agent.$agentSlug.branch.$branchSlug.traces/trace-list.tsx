@@ -4,14 +4,7 @@ import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
 import { Skeleton } from "@hebo/shared-ui/components/Skeleton";
 
-import {
-  formatDuration,
-  formatModelDisplay,
-  formatOperationName,
-  formatStatus,
-  formatTimestampShort,
-  truncateText,
-} from "./utils";
+import { formatDuration, formatTimestampShort, truncateText } from "./utils";
 
 type TraceListItem = {
   timestamp: string;
@@ -64,7 +57,8 @@ export function TraceList({
     content = (
       <div className="flex flex-col divide-y">
         {traces.map((trace) => {
-          const status = formatStatus(trace.status);
+          const status =
+            trace.status === "ok" || trace.status === "error" ? trace.status : "unknown";
           const isSelected = trace.traceId === selectedTraceId;
 
           return (
@@ -77,9 +71,7 @@ export function TraceList({
               onClick={() => onSelectTrace(trace.traceId)}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="truncate text-base font-semibold">
-                  {formatOperationName(trace.operationName)}
-                </span>
+                <span className="truncate text-base font-semibold">{trace.operationName}</span>
                 <span className="shrink-0 text-xs text-muted-foreground">
                   {formatTimestampShort(trace.timestamp)}
                 </span>
@@ -96,7 +88,7 @@ export function TraceList({
                   variant="secondary"
                   className="max-w-full bg-muted break-all whitespace-normal"
                 >
-                  {formatModelDisplay(trace.provider, trace.model)}
+                  {trace.model || trace.provider || "unknown"}
                 </Badge>
                 <Badge variant="secondary">{formatDuration(trace.durationMs)}</Badge>
                 <Badge variant={status === "error" ? "destructive" : "secondary"}>{status}</Badge>

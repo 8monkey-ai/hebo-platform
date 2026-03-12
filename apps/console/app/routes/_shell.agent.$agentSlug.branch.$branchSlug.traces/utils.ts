@@ -1,23 +1,8 @@
 import { format, formatDistanceToNow } from "date-fns";
 import prettyMs from "pretty-ms";
 
-export function formatOperationName(name: string): string {
-  return name.replace(/^gen_ai\./, "");
-}
-
 export function formatDuration(durationMs: number): string {
   return prettyMs(durationMs, { compact: true });
-}
-
-export function formatModelDisplay(provider: string, model: string): string {
-  if (provider && model) return `${provider}/${model}`;
-  return model || provider || "unknown";
-}
-
-export function formatStatus(status: string): "ok" | "error" | "unknown" {
-  if (status === "ok") return "ok";
-  if (status === "error") return "error";
-  return "unknown";
 }
 
 export function formatTimestampShort(ts: string): string {

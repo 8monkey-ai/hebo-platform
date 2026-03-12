@@ -11,21 +11,6 @@ const greptimeDb = new SQL({
   url: process.env.GREPTIME_PG_URL ?? "postgres://localhost:4003/public",
 });
 
-const GEN_AI_COLUMNS = {
-  operationName: "span_attributes.gen_ai.operation.name",
-  requestModel: "span_attributes.gen_ai.request.model",
-  responseModel: "span_attributes.gen_ai.response.model",
-  provider: "span_attributes.gen_ai.provider.name",
-  inputMessages: "span_attributes.gen_ai.input.messages",
-  outputMessages: "span_attributes.gen_ai.output.messages",
-  responseId: "span_attributes.gen_ai.response.id",
-  finishReasons: "span_attributes.gen_ai.response.finish_reasons",
-  inputTokens: "span_attributes.gen_ai.usage.input_tokens",
-  outputTokens: "span_attributes.gen_ai.usage.output_tokens",
-  totalTokens: "span_attributes.gen_ai.usage.total_tokens",
-  reasoningTokens: "span_attributes.gen_ai.usage.reasoning.output_tokens",
-} as const;
-
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
 function extractSummary(outputMessages: unknown): string {
@@ -77,12 +62,12 @@ export async function listTraces(opts: ListTracesOpts) {
       span_name,
       span_status_code,
       duration_nano,
-      "${GEN_AI_COLUMNS.operationName}" AS operation_name,
-      "${GEN_AI_COLUMNS.requestModel}" AS request_model,
-      "${GEN_AI_COLUMNS.provider}" AS provider_name,
-      json_get_string("${GEN_AI_COLUMNS.outputMessages}", '$[last - 0]') AS output_message
+      "span_attributes.gen_ai.operation.name" AS operation_name,
+      "span_attributes.gen_ai.response.model" AS response_model,
+      "span_attributes.gen_ai.provider.name" AS provider_name,
+      json_get_string("span_attributes.gen_ai.output.messages", '$[last - 0]') AS output_message
     FROM opentelemetry_traces
-    WHERE "${GEN_AI_COLUMNS.operationName}" IS NOT NULL
+    WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
       AND "span_attributes.hebo.agent.slug" = $1
       AND "span_attributes.hebo.branch.slug" = $2
       AND "span_attributes.hebo.organization.id" = $3
@@ -96,7 +81,7 @@ export async function listTraces(opts: ListTracesOpts) {
   const countText = `
     SELECT COUNT(*) AS cnt
     FROM opentelemetry_traces
-    WHERE "${GEN_AI_COLUMNS.operationName}" IS NOT NULL
+    WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
       AND "span_attributes.hebo.agent.slug" = $1
       AND "span_attributes.hebo.branch.slug" = $2
       AND "span_attributes.hebo.organization.id" = $3
@@ -127,7 +112,7 @@ export async function listTraces(opts: ListTracesOpts) {
       traceId: String(row.trace_id ?? ""),
       spanId: String(row.span_id ?? ""),
       operationName: String(row.operation_name ?? ""),
-      model: String(row.request_model ?? ""),
+      model: String(row.response_model ?? ""),
       provider: String(row.provider_name ?? ""),
       status: formatStatus(row.span_status_code),
       durationMs: Number(row.duration_nano ?? 0) / 1e6,
@@ -154,18 +139,18 @@ export async function getTrace(
       span_status_code,
       span_status_message,
       duration_nano,
-      "${GEN_AI_COLUMNS.operationName}" AS operation_name,
-      "${GEN_AI_COLUMNS.requestModel}" AS request_model,
-      "${GEN_AI_COLUMNS.responseModel}" AS response_model,
-      "${GEN_AI_COLUMNS.provider}" AS provider_name,
-      json_to_string("${GEN_AI_COLUMNS.inputMessages}") AS input_messages,
-      json_to_string("${GEN_AI_COLUMNS.outputMessages}") AS output_messages,
-      json_to_string("${GEN_AI_COLUMNS.finishReasons}") AS finish_reasons,
-      "${GEN_AI_COLUMNS.responseId}" AS response_id,
-      "${GEN_AI_COLUMNS.inputTokens}" AS input_tokens,
-      "${GEN_AI_COLUMNS.outputTokens}" AS output_tokens,
-      "${GEN_AI_COLUMNS.totalTokens}" AS total_tokens,
-      "${GEN_AI_COLUMNS.reasoningTokens}" AS reasoning_tokens,
+      "span_attributes.gen_ai.operation.name" AS operation_name,
+      "span_attributes.gen_ai.request.model" AS request_model,
+      "span_attributes.gen_ai.response.model" AS response_model,
+      "span_attributes.gen_ai.provider.name" AS provider_name,
+      json_to_string("span_attributes.gen_ai.input.messages") AS input_messages,
+      json_to_string("span_attributes.gen_ai.output.messages") AS output_messages,
+      json_to_string("span_attributes.gen_ai.response.finish_reasons") AS finish_reasons,
+      "span_attributes.gen_ai.response.id" AS response_id,
+      "span_attributes.gen_ai.usage.input_tokens" AS input_tokens,
+      "span_attributes.gen_ai.usage.output_tokens" AS output_tokens,
+      "span_attributes.gen_ai.usage.total_tokens" AS total_tokens,
+      "span_attributes.gen_ai.usage.reasoning.output_tokens" AS reasoning_tokens,
       "span_attributes.hebo.agent.slug",
       "span_attributes.hebo.branch.slug",
       "span_attributes.hebo.organization.id"
@@ -174,7 +159,7 @@ export async function getTrace(
       AND "span_attributes.hebo.organization.id" = $2
       AND "span_attributes.hebo.agent.slug" = $3
       AND "span_attributes.hebo.branch.slug" = $4
-      AND "${GEN_AI_COLUMNS.operationName}" IS NOT NULL
+      AND "span_attributes.gen_ai.operation.name" IS NOT NULL
     LIMIT 1
   `;
 
@@ -253,7 +238,7 @@ export async function getMetadataTags(
       const valRows = await greptimeDb.unsafe(
         `SELECT DISTINCT "${colName}" AS val
          FROM opentelemetry_traces
-         WHERE "${GEN_AI_COLUMNS.operationName}" IS NOT NULL
+         WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
            AND "span_attributes.hebo.agent.slug" = $1
            AND "span_attributes.hebo.branch.slug" = $2
            AND "span_attributes.hebo.organization.id" = $3

@@ -5,13 +5,7 @@ import { Badge } from "@hebo/shared-ui/components/Badge";
 import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@hebo/shared-ui/components/Tabs";
 
-import {
-  formatDuration,
-  formatOperationName,
-  formatStatus,
-  formatTimestampFull,
-  formatTokenCount,
-} from "./utils";
+import { formatDuration, formatTimestampFull, formatTokenCount } from "./utils";
 
 type TraceDetailData = {
   timestamp: string;
@@ -67,7 +61,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
     );
   }
 
-  const status = formatStatus(trace.status);
+  const status = trace.status === "ok" || trace.status === "error" ? trace.status : "unknown";
   const toolCallCount = countToolCalls(trace.outputMessages);
 
   return (
@@ -77,7 +71,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2 className="truncate text-2xl font-semibold tracking-tight">
-                {formatOperationName(trace.operationName)}
+                {trace.operationName}
               </h2>
               <p className="mt-1 truncate text-sm text-muted-foreground">
                 {trace.model} &middot; {formatTimestampFull(trace.timestamp)} &middot; trace{" "}
