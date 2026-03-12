@@ -33,7 +33,8 @@
     "@upyo/core": "^0.4.0",
     "@upyo/smtp": "^0.4.0",
     "better-auth": "catalog:",
-    "elysia": "catalog:"
+    "elysia": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
