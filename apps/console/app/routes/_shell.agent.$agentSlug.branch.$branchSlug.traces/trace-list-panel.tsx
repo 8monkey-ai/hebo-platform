@@ -1,5 +1,5 @@
 import { Filter, RefreshCw, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
@@ -70,11 +70,13 @@ export function TraceListPanel({
   const pageSize = 50;
   const fromParam = searchParams.get("from");
   const toParam = searchParams.get("to");
-  const [fallbackRange] = useState(() =>
-    timeRangeToParams(activePreset === "custom" ? "15m" : activePreset),
+  const presetRange = useMemo(
+    () => (activePreset === "custom" ? null : timeRangeToParams(activePreset)),
+    [activePreset],
   );
-  const effectiveFrom = fromParam ?? fallbackRange.from;
-  const effectiveTo = toParam ?? fallbackRange.to;
+  const fallbackCustomRange = activePreset === "custom" ? timeRangeToParams("15m") : null;
+  const effectiveFrom = presetRange?.from ?? fromParam ?? fallbackCustomRange!.from;
+  const effectiveTo = presetRange?.to ?? toParam ?? fallbackCustomRange!.to;
 
   const metaFilters: Record<string, string> = {};
   for (const [key, value] of searchParams.entries()) {
@@ -159,11 +161,10 @@ export function TraceListPanel({
     }
 
     setShowCustomRange(false);
-    const { from, to } = timeRangeToParams(preset);
     const nextParams = new URLSearchParams(searchParams);
     nextParams.set("preset", preset);
-    nextParams.set("from", from);
-    nextParams.set("to", to);
+    nextParams.delete("from");
+    nextParams.delete("to");
     nextParams.delete("page");
     setSearchParams(nextParams);
   }
@@ -183,15 +184,6 @@ export function TraceListPanel({
   function handleRefresh() {
     const nextParams = new URLSearchParams(searchParams);
     nextParams.delete("page");
-
-    if (activePreset === "custom") {
-      nextParams.set("_t", String(Date.now()));
-    } else {
-      const { from, to } = timeRangeToParams(activePreset);
-      nextParams.set("from", from);
-      nextParams.set("to", to);
-    }
-
     setSearchParams(nextParams);
   }
 
