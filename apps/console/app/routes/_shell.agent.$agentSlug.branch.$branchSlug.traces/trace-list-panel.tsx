@@ -1,6 +1,7 @@
 import { Filter, RefreshCw, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router";
+import { toast } from "sonner";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -115,7 +116,9 @@ export function TraceListPanel({
         });
         setHasNextPage(data?.hasNextPage ?? false);
       } catch (err) {
-        if (!cancelled) throw err;
+        if (!cancelled) {
+          toast.error(err instanceof Error ? err.message : "Failed to load traces");
+        }
       } finally {
         if (!cancelled) setListLoading(false);
       }

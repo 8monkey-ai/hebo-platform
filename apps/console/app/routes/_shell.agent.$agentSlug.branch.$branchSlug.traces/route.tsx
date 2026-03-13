@@ -1,6 +1,7 @@
 import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
+import { toast } from "sonner";
 
 import { Button } from "@hebo/shared-ui/components/Button";
 
@@ -37,9 +38,15 @@ export default function TracesRoute() {
           .traces({ spanId: selectedSpanId })
           .get();
 
-        if (!cancelled) setTraceDetail(error ? null : data);
-      } catch {
-        if (!cancelled) setTraceDetail(null);
+        if (cancelled) return;
+        if (error) throw error;
+
+        setTraceDetail(data);
+      } catch (err) {
+        if (!cancelled) {
+          setTraceDetail(null);
+          toast.error(err instanceof Error ? err.message : "Failed to load trace details");
+        }
       } finally {
         if (!cancelled) setDetailLoading(false);
       }
