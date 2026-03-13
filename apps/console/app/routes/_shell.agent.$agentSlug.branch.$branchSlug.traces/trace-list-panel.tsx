@@ -11,6 +11,7 @@ import { api } from "~console/lib/service";
 import { TraceList } from "./trace-list";
 import type { TraceListData, TraceMetadataTags } from "./types";
 import { formatDateRangeSummary, timeRangeToParams } from "./utils";
+
 const TIME_PRESETS = ["15m", "1h", "24h", "custom"] as const;
 
 const padDatePart = (part: number) => String(part).padStart(2, "0");
@@ -54,7 +55,8 @@ export function TraceListPanel({
   const [customTo, setCustomTo] = useState("");
 
   const activePreset = searchParams.get("preset") ?? "1h";
-  const page = Number(searchParams.get("page") ?? 1);
+  const rawPage = Number(searchParams.get("page") ?? 1);
+  const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
   const pageSize = 50;
   const fromParam = searchParams.get("from");
   const toParam = searchParams.get("to");
@@ -83,7 +85,7 @@ export function TraceListPanel({
     if (next.toString() !== searchParams.toString()) {
       setSearchParams(next, { replace: true });
     }
-  }, [effectiveFrom, effectiveTo, fromParam, toParam, searchParams, setSearchParams]);
+  }, [effectiveFrom, effectiveTo, fromParam, searchParams, setSearchParams, toParam]);
 
   useEffect(() => {
     let cancelled = false;
@@ -179,6 +181,7 @@ export function TraceListPanel({
 
   function handleRefresh() {
     const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("page");
 
     if (activePreset === "custom") {
       nextParams.set("_t", String(Date.now()));

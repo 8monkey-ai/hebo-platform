@@ -149,7 +149,7 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
 type NormalizedMessage = {
   role: string;
   content: string;
-  toolCalls: Array<{ name: string; arguments: string }>;
+  toolCalls: NonNullable<TraceDetailData["inputMessages"][number]["toolCalls"]>;
   toolName?: string;
   reasoning?: string;
 };
@@ -157,71 +157,18 @@ type NormalizedMessage = {
 function normalizeMessages(messages: TraceDetailData["inputMessages"]): NormalizedMessage[] {
   return messages.map((message) => {
     const textParts: string[] = [];
-    const toolCalls: Array<{ name: string; arguments: string }> = [];
-    let reasoning: string | undefined;
+    const toolCalls = message.toolCalls ?? [];
 
     if (typeof message.content === "string") {
       textParts.push(message.content);
-    } else if (Array.isArray(message.content)) {
-      for (const part of message.content) {
-        if (!part || typeof part !== "object") continue;
-        const { type, text } = part as { type?: unknown; text?: unknown };
-        if (type === "text" && typeof text === "string") {
-          textParts.push(text);
-        } else if (type === "reasoning" && typeof text === "string") {
-          reasoning = text;
-        }
-      }
-    }
-
-    for (const part of Array.isArray(message.parts) ? message.parts : []) {
-      if (!part || typeof part !== "object") continue;
-
-      const {
-        type,
-        content,
-        name,
-        arguments: args,
-      } = part as {
-        type?: unknown;
-        content?: unknown;
-        name?: unknown;
-        arguments?: unknown;
-      };
-
-      if (type === "text" && typeof content === "string") {
-        textParts.push(content);
-      } else if (type === "reasoning" && typeof content === "string") {
-        reasoning = content;
-      } else if (type === "tool_call" && typeof name === "string" && typeof args === "string") {
-        toolCalls.push({ name, arguments: args });
-      }
-    }
-
-    for (const toolCall of Array.isArray(message.tool_calls) ? message.tool_calls : []) {
-      if (!toolCall || typeof toolCall !== "object") continue;
-      const fn =
-        "function" in toolCall && toolCall.function && typeof toolCall.function === "object"
-          ? toolCall.function
-          : null;
-
-      if (
-        fn &&
-        "name" in fn &&
-        typeof fn.name === "string" &&
-        "arguments" in fn &&
-        typeof fn.arguments === "string"
-      ) {
-        toolCalls.push({ name: fn.name, arguments: fn.arguments });
-      }
     }
 
     return {
       role: message.role,
       content: textParts.join("\n"),
       toolCalls,
-      toolName: message.role === "tool" ? message.name : undefined,
-      reasoning,
+      toolName: message.role === "tool" ? (message.toolName ?? undefined) : undefined,
+      reasoning: message.reasoning,
     };
   });
 }
@@ -237,41 +184,43 @@ function MessageBlock({ message }: { message: NormalizedMessage }) {
   const fullContent = buildFullContent(message);
 
   return (
-    <section
-      className={`space-y-3 border-l-2 py-4 pl-3 first:pt-0 last:pb-0 ${roleAccents[message.role] ?? "border-l-border"}`}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-base font-semibold tracking-tight">{roleLabel}</span>
-          {message.toolName && (
-            <Badge variant="outline" className="gap-1">
-              <Wrench className="size-3" />
-              {message.toolName}
-            </Badge>
-          )}
-        </div>
-        {fullContent && <CopyButton value={fullContent} className="rounded-md hover:bg-muted" />}
-      </div>
-
-      {message.reasoning && (
-        <ExpandableContent label="Reasoning">
-          <p className="text-sm whitespace-pre-wrap text-muted-foreground italic">
-            {message.reasoning}
-          </p>
-        </ExpandableContent>
-      )}
-
-      {message.content && <CollapsibleText text={message.content} maxLength={500} />}
-
-      {message.toolCalls.map((tc) => (
-        <div key={`${tc.name}:${tc.arguments}`} className="space-y-2">
-          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            <Wrench className="size-3" />
-            <span className="font-medium">{tc.name}</span>
+    <section className="py-4 first:pt-0 last:pb-0">
+      <div
+        className={`space-y-3 border-l-2 pl-3 ${roleAccents[message.role] ?? "border-l-border"}`}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-base font-semibold tracking-tight">{roleLabel}</span>
+            {message.toolName && (
+              <Badge variant="outline" className="gap-1">
+                <Wrench className="size-3" />
+                {message.toolName}
+              </Badge>
+            )}
           </div>
-          <CollapsibleCode code={tc.arguments} maxLength={300} />
+          {fullContent && <CopyButton value={fullContent} className="rounded-md hover:bg-muted" />}
         </div>
-      ))}
+
+        {message.reasoning && (
+          <ExpandableContent label="Reasoning">
+            <p className="text-sm whitespace-pre-wrap text-muted-foreground italic">
+              {message.reasoning}
+            </p>
+          </ExpandableContent>
+        )}
+
+        {message.content && <CollapsibleText text={message.content} maxLength={500} />}
+
+        {message.toolCalls.map((tc) => (
+          <div key={`${tc.name}:${tc.arguments}`} className="space-y-2">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Wrench className="size-3" />
+              <span className="font-medium">{tc.name}</span>
+            </div>
+            <CollapsibleCode code={tc.arguments} maxLength={300} />
+          </div>
+        ))}
+      </div>
     </section>
   );
 }
@@ -330,7 +279,7 @@ function CollapsibleCode({ code, maxLength }: { code: string; maxLength: number 
 
   return (
     <div>
-      <pre className="overflow-x-auto rounded-lg border bg-muted/30 p-3 text-sm break-words whitespace-pre-wrap text-foreground">
+      <pre className="overflow-x-auto rounded-lg border bg-muted/30 p-3 text-xs break-words whitespace-pre-wrap text-foreground">
         {displayCode}
       </pre>
       {needsTruncation && (
