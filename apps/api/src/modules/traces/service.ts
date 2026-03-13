@@ -36,14 +36,14 @@ export async function listTraces(
   metadataFilters: Record<string, string>,
 ) {
   const offset = (page - 1) * pageSize;
+  const limit = pageSize + 1;
 
   // Build dynamic metadata filter clauses
-  const metaKeys = Object.keys(metadataFilters);
   let metaFilterSql = "";
   const metaValues: string[] = [];
-  for (const key of metaKeys) {
+  for (const [key, value] of Object.entries(metadataFilters)) {
     metaFilterSql += ` AND "${METADATA_PREFIX}${key}" = $${metaValues.length + 6}`;
-    metaValues.push(metadataFilters[key]!);
+    metaValues.push(value!);
   }
 
   // We need to use raw SQL since Bun.SQL tagged templates don't support dynamic column names
@@ -67,19 +67,7 @@ export async function listTraces(
       AND "timestamp" <= $5
       ${metaFilterSql}
     ORDER BY "timestamp" DESC
-    LIMIT ${pageSize} OFFSET ${offset}
-  `;
-
-  const countText = `
-    SELECT COUNT(*) AS cnt
-    FROM opentelemetry_traces
-    WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
-      AND "span_attributes.hebo.agent.slug" = $1
-      AND "span_attributes.hebo.branch.slug" = $2
-      AND "span_attributes.hebo.organization.id" = $3
-      AND "timestamp" >= $4
-      AND "timestamp" <= $5
-      ${metaFilterSql}
+    LIMIT ${limit} OFFSET ${offset}
   `;
 
   const params = [
@@ -91,14 +79,11 @@ export async function listTraces(
     ...metaValues,
   ];
 
-  const [rows, countRows] = await Promise.all([
-    greptimeDb.unsafe(queryText, params),
-    greptimeDb.unsafe(countText, params),
-  ]);
+  const rows = (await greptimeDb.unsafe(queryText, params)) as any[];
+  const hasNextPage = rows.length > pageSize;
+  const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
 
-  const total = Number(countRows[0]?.cnt ?? 0);
-
-  const data = (rows as any[]).map((row) => {
+  const data = pageRows.map((row) => {
     return {
       timestamp: String(row.timestamp),
       traceId: String(row.trace_id ?? ""),
@@ -112,7 +97,7 @@ export async function listTraces(
     };
   });
 
-  return { data, total, page, pageSize };
+  return { data, hasNextPage, page, pageSize };
 }
 
 export async function getTrace(

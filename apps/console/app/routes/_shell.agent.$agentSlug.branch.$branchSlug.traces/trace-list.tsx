@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -20,27 +20,23 @@ type TraceListItem = {
 
 type TraceListProps = {
   traces: TraceListItem[];
-  total: number;
-  page: number;
+  hasNextPage: boolean;
   pageSize: number;
   selectedTraceId: string | null;
   loading: boolean;
   onSelectTrace: (traceId: string) => void;
-  onPageChange: (page: number) => void;
+  onLoadMore: () => void;
 };
 
 export function TraceList({
   traces,
-  total,
-  page,
+  hasNextPage,
   pageSize,
   selectedTraceId,
   loading,
   onSelectTrace,
-  onPageChange,
+  onLoadMore,
 }: TraceListProps) {
-  const totalPages = Math.ceil(total / pageSize);
-
   let content: React.ReactNode;
 
   if (loading && traces.length === 0) {
@@ -97,30 +93,17 @@ export function TraceList({
           );
         })}
 
-        {totalPages > 1 && (
+        {(traces.length >= pageSize || hasNextPage) && (
           <div className="flex items-center justify-between px-4 py-3">
-            <span className="text-xs text-muted-foreground">{total} total</span>
-            <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="icon-sm"
-                disabled={page <= 1}
-                onClick={() => onPageChange(page - 1)}
-              >
-                <ChevronLeft className="size-4" />
-              </Button>
-              <span className="px-2 text-xs">
-                {page} / {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="icon-sm"
-                disabled={page >= totalPages}
-                onClick={() => onPageChange(page + 1)}
-              >
+            <span className="text-xs text-muted-foreground">
+              Loaded {traces.length} trace{traces.length === 1 ? "" : "s"}
+            </span>
+            {hasNextPage ? (
+              <Button variant="outline" size="sm" disabled={loading} onClick={onLoadMore}>
+                Load more
                 <ChevronRight className="size-4" />
               </Button>
-            </div>
+            ) : null}
           </div>
         )}
       </div>

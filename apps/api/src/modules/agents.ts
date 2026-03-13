@@ -23,7 +23,7 @@ export const agentsModule = new Elysia({
   .use(prismaClient)
   .get(
     "/",
-    async ({ dbClient, query }) => {
+    async ({ prismaClient: dbClient, query }) => {
       return status(
         200,
         await dbClient.agents.findMany({
@@ -38,7 +38,7 @@ export const agentsModule = new Elysia({
   )
   .post(
     "/",
-    async ({ body, dbClient, organizationId, userId, authClient }) => {
+    async ({ body, prismaClient: dbClient, organizationId, userId, authClient }) => {
       const agentSlug = slugFromString(body.name, 3);
 
       const { data: team, error: createTeamError } = await authClient!.organization.createTeam({
@@ -89,7 +89,7 @@ export const agentsModule = new Elysia({
   )
   .get(
     "/:agentSlug",
-    async ({ dbClient, params, query }) => {
+    async ({ prismaClient: dbClient, params, query }) => {
       return status(
         200,
         await dbClient.agents.findFirstOrThrow({
@@ -105,7 +105,7 @@ export const agentsModule = new Elysia({
   )
   .patch(
     "/:agentSlug",
-    async ({ body, dbClient, params, query }) => {
+    async ({ body, prismaClient: dbClient, params, query }) => {
       return status(
         200,
         await dbClient.agents.update({
@@ -123,7 +123,7 @@ export const agentsModule = new Elysia({
   )
   .delete(
     "/:agentSlug",
-    async ({ dbClient, params }) => {
+    async ({ prismaClient: dbClient, params }) => {
       await dbClient.agents.softDelete({ slug: params.agentSlug });
       return status(204);
     },

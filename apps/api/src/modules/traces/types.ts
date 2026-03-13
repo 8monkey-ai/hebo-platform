@@ -17,6 +17,10 @@ const TraceToQuery = t.Optional(
   }),
 );
 
+const NullableAnyArray = t.Nullable(t.Array(t.Any()));
+const StringArrayRecord = t.Record(t.String(), t.Array(t.String()));
+const AnyRecord = t.Record(t.String(), t.Any());
+
 export const TraceListQuery = t.Object(
   {
     from: TraceFromQuery,
@@ -51,7 +55,7 @@ export const TraceListItem = t.Object({
 
 export const TraceListResponse = t.Object({
   data: t.Array(TraceListItem),
-  total: t.Number(),
+  hasNextPage: t.Boolean(),
   page: t.Number(),
   pageSize: t.Number(),
 });
@@ -73,15 +77,15 @@ export const TraceDetail = t.Object({
   outputTokens: t.Nullable(t.Number()),
   totalTokens: t.Nullable(t.Number()),
   reasoningTokens: t.Nullable(t.Number()),
-  inputMessages: t.Nullable(t.Array(t.Any())),
-  outputMessages: t.Nullable(t.Array(t.Any())),
-  finishReasons: t.Nullable(t.Array(t.Any())),
+  inputMessages: NullableAnyArray,
+  outputMessages: NullableAnyArray,
+  finishReasons: NullableAnyArray,
   responseId: t.String(),
   metadata: t.Record(t.String(), t.String()),
-  spanAttributes: t.Record(t.String(), t.Any()),
-  resourceAttributes: t.Record(t.String(), t.Any()),
+  spanAttributes: AnyRecord,
+  resourceAttributes: AnyRecord,
 });
 
 export const MetadataTagsResponse = t.Object({
-  tags: t.Record(t.String(), t.Array(t.String())),
+  tags: StringArrayRecord,
 });

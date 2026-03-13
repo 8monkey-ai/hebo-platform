@@ -17,7 +17,7 @@ import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { authService } from "@hebo/shared-api/middlewares/auth";
 import { logger } from "@hebo/shared-api/middlewares/logging";
 
-import { dbClient } from "~api/middleware/db-client";
+import { prismaClient } from "~api/middleware/prisma";
 
 import { basePath, gw } from "./gateway-config";
 import { errorHandler } from "./middlewares/error-handler";
@@ -65,11 +65,11 @@ export const createGateway = () =>
     .use(authService)
     .group(basePath, { isSignedIn: true }, (app) =>
       app
-        .use(dbClient)
+        .use(prismaClient)
         .post(
           "/chat/completions",
-          ({ request, dbClient, organizationId }) =>
-            gw.handler(request, { dbClient, organizationId }),
+          ({ request, prismaClient, organizationId }) =>
+            gw.handler(request, { prismaClient, organizationId }),
           {
             parse: "none",
             body: ChatCompletionsBodySchema,
@@ -82,7 +82,7 @@ export const createGateway = () =>
         )
         .post(
           "/embeddings",
-          ({ request, dbClient, organizationId }) =>
+          ({ request, prismaClient: dbClient, organizationId }) =>
             gw.handler(request, { dbClient, organizationId }),
           {
             parse: "none",

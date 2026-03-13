@@ -17,7 +17,7 @@ export const branchesModule = new Elysia({
   .use(prismaClient)
   .get(
     "/",
-    async ({ dbClient, params }) => {
+    async ({ prismaClient: dbClient, params }) => {
       return status(
         200,
         await dbClient.branches.findMany({
@@ -31,7 +31,7 @@ export const branchesModule = new Elysia({
   )
   .post(
     "/",
-    async ({ body, dbClient, params }) => {
+    async ({ body, prismaClient: dbClient, params }) => {
       const { models } = await dbClient.branches.findFirstOrThrow({
         where: { agent_slug: params.agentSlug, slug: body.sourceBranchSlug },
       });
@@ -57,7 +57,7 @@ export const branchesModule = new Elysia({
   )
   .get(
     "/:branchSlug",
-    async ({ dbClient, params }) => {
+    async ({ prismaClient: dbClient, params }) => {
       return status(
         200,
         await dbClient.branches.findFirstOrThrow({
@@ -71,7 +71,7 @@ export const branchesModule = new Elysia({
   )
   .patch(
     "/:branchSlug",
-    async ({ body, dbClient, params }) => {
+    async ({ body, prismaClient: dbClient, params }) => {
       const { id } = await dbClient.branches.findFirstOrThrow({
         where: { agent_slug: params.agentSlug, slug: params.branchSlug },
       });
@@ -93,7 +93,7 @@ export const branchesModule = new Elysia({
   )
   .delete(
     "/:branchSlug",
-    async ({ dbClient, params }) => {
+    async ({ prismaClient: dbClient, params }) => {
       const [totalBranches, { id }] = await dbClient.$transaction([
         dbClient.branches.count({
           where: { agent_slug: params.agentSlug },

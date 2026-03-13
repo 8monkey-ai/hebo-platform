@@ -571,10 +571,11 @@ export const traceHandlers = [
 
       const start = (page - 1) * pageSize;
       const paged = filtered.slice(start, start + pageSize);
+      const hasNextPage = start + pageSize < filtered.length;
 
       return HttpResponse.json({
         data: paged,
-        total: filtered.length,
+        hasNextPage,
         page,
         pageSize,
       });

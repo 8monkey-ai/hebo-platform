@@ -54,7 +54,7 @@ export function TraceListPanel({
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [traces, setTraces] = useState<TraceListItem[]>([]);
-  const [total, setTotal] = useState(0);
+  const [hasNextPage, setHasNextPage] = useState(false);
   const [listLoading, setListLoading] = useState(true);
   const [metadataTags, setMetadataTags] = useState<Record<string, string[]>>({});
 
@@ -121,8 +121,14 @@ export function TraceListPanel({
         if (cancelled) return;
         if (error) throw error;
 
-        setTraces(data?.data ?? []);
-        setTotal(data?.total ?? 0);
+        setTraces((current) => {
+          if (page <= 1) {
+            return data?.data ?? [];
+          }
+
+          return [...current, ...(data?.data ?? [])];
+        });
+        setHasNextPage(data?.hasNextPage ?? false);
       } catch (err) {
         if (!cancelled) throw err;
       } finally {
@@ -194,9 +200,9 @@ export function TraceListPanel({
     setSearchParams(nextParams);
   }
 
-  function handlePageChange(nextPage: number) {
+  function handleLoadMore() {
     const nextParams = new URLSearchParams(searchParams);
-    nextParams.set("page", String(nextPage));
+    nextParams.set("page", String(page + 1));
     setSearchParams(nextParams);
   }
 
@@ -398,13 +404,12 @@ export function TraceListPanel({
       <div className="flex h-0 min-h-0 flex-1 overflow-hidden">
         <TraceList
           traces={traces}
-          total={total}
-          page={page}
+          hasNextPage={hasNextPage}
           pageSize={pageSize}
           selectedTraceId={selectedTraceId}
           loading={listLoading}
           onSelectTrace={onSelectTrace}
-          onPageChange={handlePageChange}
+          onLoadMore={handleLoadMore}
         />
       </div>
     </div>

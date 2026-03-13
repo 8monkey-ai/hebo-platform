@@ -11,7 +11,7 @@ export const prismaClient = new Elysia({
   .use(authService)
   .resolve(function resolvePrismaClient({ organizationId, userId }) {
     return {
-      dbClient: createPrismaClient(organizationId!, userId!),
+      prismaClient: createPrismaClient(organizationId!, userId!),
     };
   })
   .as("scoped");

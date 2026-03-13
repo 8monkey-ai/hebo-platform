@@ -11,7 +11,7 @@ export const providersModule = new Elysia({
   .use(prismaClient)
   .get(
     "/",
-    async ({ dbClient, query }) => {
+    async ({ prismaClient: dbClient, query }) => {
       const providerConfigs = await dbClient.provider_configs.findMany();
 
       let providers = Object.entries(supportedProviders).map(
@@ -38,7 +38,7 @@ export const providersModule = new Elysia({
   )
   .put(
     "/:slug/config",
-    async ({ body, dbClient, params }) => {
+    async ({ body, prismaClient: dbClient, params }) => {
       const existing = await dbClient.provider_configs.findFirst({
         where: { provider_slug: params.slug },
         select: { id: true },
@@ -65,7 +65,7 @@ export const providersModule = new Elysia({
   )
   .delete(
     "/:slug/config",
-    async ({ dbClient, params }) => {
+    async ({ prismaClient: dbClient, params }) => {
       const { id } = await dbClient.provider_configs.findFirstOrThrow({
         where: { provider_slug: params.slug },
         select: { id: true },
