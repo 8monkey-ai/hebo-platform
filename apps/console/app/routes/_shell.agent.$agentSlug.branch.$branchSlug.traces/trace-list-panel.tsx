@@ -4,7 +4,12 @@ import { useSearchParams } from "react-router";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
+import { Input } from "@hebo/shared-ui/components/Input";
+import { Label } from "@hebo/shared-ui/components/Label";
 import { Select } from "@hebo/shared-ui/components/Select";
+import { Toggle } from "@hebo/shared-ui/components/Toggle";
+import { ToggleGroup, ToggleGroupItem } from "@hebo/shared-ui/components/ToggleGroup";
+import { cn } from "@hebo/shared-ui/lib/utils";
 
 import { api } from "~console/lib/service";
 
@@ -13,6 +18,11 @@ import type { TraceListData, TraceMetadataTags } from "./types";
 import { formatDateRangeSummary, timeRangeToParams } from "./utils";
 
 const TIME_PRESETS = ["15m", "1h", "24h", "custom"] as const;
+const STANDARD_TIME_PRESETS = TIME_PRESETS.filter((preset) => preset !== "custom");
+const POPOVER_CLASS_NAME =
+  "absolute top-full left-0 z-50 mt-2 rounded-lg border bg-popover p-2.5 shadow-md";
+const FILTER_ROW_CLASS_NAME =
+  "flex items-center justify-between rounded-md border bg-muted/50 px-2 py-1.5 text-xs";
 
 const padDatePart = (part: number) => String(part).padStart(2, "0");
 
@@ -73,6 +83,8 @@ export function TraceListPanel({
     }
   }
   const activeFilterCount = Object.keys(metaFilters).length;
+  const isCustomPresetActive = activePreset === "custom" || showCustomRange;
+  const selectedPresetValue = activePreset === "custom" ? undefined : activePreset;
   const searchParamsKey = searchParams.toString();
 
   useEffect(() => {
@@ -221,61 +233,68 @@ export function TraceListPanel({
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
       <div className="shrink-0 px-4">
-        <h2 className="mb-3 text-xl font-semibold tracking-tight">GenAI executions</h2>
+        <h2 className="mb-3">GenAI executions</h2>
 
         <div className="mb-2 flex flex-wrap items-center gap-2">
           <div className="relative">
-            <div className="flex items-center rounded-lg bg-muted p-1">
-              {TIME_PRESETS.map((preset) => {
-                const isActive =
-                  preset === "custom"
-                    ? activePreset === "custom" || showCustomRange
-                    : activePreset === preset;
-
-                return (
-                  <button
+            <div className="inline-flex items-center overflow-hidden rounded-md border border-input bg-background shadow-xs">
+              <ToggleGroup
+                type="single"
+                size="sm"
+                value={selectedPresetValue}
+                onValueChange={(value) => {
+                  if (value) handlePresetChange(value);
+                }}
+              >
+                {STANDARD_TIME_PRESETS.map((preset) => (
+                  <ToggleGroupItem
                     key={preset}
-                    type="button"
-                    className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                      isActive
-                        ? "bg-background text-foreground shadow-sm"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                    onClick={() => handlePresetChange(preset)}
+                    value={preset}
+                    size="sm"
+                    className="rounded-none shadow-none"
                   >
-                    {preset === "custom" ? "Custom" : preset}
-                  </button>
-                );
-              })}
+                    {preset}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+
+              <Toggle
+                size="sm"
+                aria-pressed={isCustomPresetActive}
+                className={cn(
+                  "rounded-none border-l border-input shadow-none",
+                  isCustomPresetActive && "bg-muted text-foreground",
+                )}
+                onClick={() => handlePresetChange("custom")}
+              >
+                Custom
+              </Toggle>
             </div>
 
             {showCustomRange && (
-              <div className="absolute top-full left-0 z-50 mt-2 w-80 rounded-lg border bg-popover p-2.5 shadow-md">
+              <div className={cn(POPOVER_CLASS_NAME, "w-80")}>
                 <h4 className="mb-2 text-sm font-medium">Custom range</h4>
                 <div className="flex flex-col gap-2.5">
                   <div>
-                    <label
-                      htmlFor="custom-from"
-                      className="mb-1 block text-xs text-muted-foreground"
-                    >
+                    <Label htmlFor="custom-from" className="mb-1 text-xs text-muted-foreground">
                       Start
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       id="custom-from"
                       type="datetime-local"
-                      className="w-full rounded-md border bg-background px-2 py-1.5 text-xs"
+                      className="text-xs"
                       value={customFrom}
                       onChange={(event) => setCustomFrom(event.target.value)}
                     />
                   </div>
                   <div>
-                    <label htmlFor="custom-to" className="mb-1 block text-xs text-muted-foreground">
+                    <Label htmlFor="custom-to" className="mb-1 text-xs text-muted-foreground">
                       End
-                    </label>
-                    <input
+                    </Label>
+                    <Input
                       id="custom-to"
                       type="datetime-local"
-                      className="w-full rounded-md border bg-background px-2 py-1.5 text-xs"
+                      className="text-xs"
                       value={customTo}
                       onChange={(event) => setCustomTo(event.target.value)}
                     />
@@ -294,83 +313,75 @@ export function TraceListPanel({
           </div>
 
           <div className="relative">
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-1.5"
-              onClick={() => setShowFilters(!showFilters)}
-            >
+            <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
               <Filter className="size-3" />
               Filters
-              {activeFilterCount > 0 && (
-                <Badge variant="secondary" className="ml-1">
-                  {activeFilterCount}
-                </Badge>
-              )}
+              {activeFilterCount > 0 && <Badge variant="secondary">{activeFilterCount}</Badge>}
             </Button>
 
             {showFilters && (
-              <div className="absolute top-full left-0 z-50 mt-2 w-72 rounded-lg border bg-popover p-2.5 shadow-md">
-                <h4 className="mb-2 text-sm font-medium">Edit filters</h4>
-
-                {activeFilterCount > 0 && (
-                  <div className="mb-2.5">
-                    <p className="mb-1 text-xs text-muted-foreground">Active filters</p>
-                    <div className="flex flex-col gap-1">
-                      {Object.entries(metaFilters).map(([key, value]) => (
-                        <div
-                          key={key}
-                          className="flex items-center justify-between rounded-md border bg-muted/50 px-2 py-1.5 text-xs"
-                        >
-                          <span>
-                            {key}: {value}
-                          </span>
-                          <button
-                            type="button"
-                            className="ml-2 text-muted-foreground hover:text-foreground"
-                            onClick={() => handleRemoveFilter(key)}
-                          >
-                            <X className="size-3" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
+              <div className={cn(POPOVER_CLASS_NAME, "w-72")}>
+                <h4 className="text-sm font-medium">Edit filters</h4>
+                <div className="-mx-2.5 my-2 border-t" />
                 <div>
-                  <p className="mb-1 text-xs text-muted-foreground">Add filter</p>
-                  <div className="flex items-end gap-2">
-                    <div className="min-w-0 flex-1">
-                      <Select
-                        value={filterKey}
-                        onValueChange={setFilterKey}
-                        items={Object.keys(metadataTags).map((key) => ({
-                          value: key,
-                          label: key,
-                        }))}
-                        placeholder="Key"
-                      />
+                  {activeFilterCount > 0 && (
+                    <div className="mb-2.5">
+                      <p className="text-xs text-muted-foreground">Active filters</p>
+                      <div className="my-1.5 border-t" />
+                      <div className="flex flex-col gap-1">
+                        {Object.entries(metaFilters).map(([key, value]) => (
+                          <div key={key} className={FILTER_ROW_CLASS_NAME}>
+                            <span>
+                              {key}: {value}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              aria-label={`Remove ${key} filter`}
+                              onClick={() => handleRemoveFilter(key)}
+                            >
+                              <X className="size-3" />
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <Select
-                        value={filterValue}
-                        onValueChange={setFilterValue}
-                        items={(metadataTags[filterKey] ?? []).map((value) => ({
-                          value,
-                          label: value,
-                        }))}
-                        placeholder="Value"
-                      />
+                  )}
+
+                  <div>
+                    <p className="mb-1 text-xs text-muted-foreground">Add filter</p>
+                    <div className="flex items-end gap-2">
+                      <div className="min-w-0 flex-1">
+                        <Select
+                          value={filterKey}
+                          onValueChange={setFilterKey}
+                          items={Object.keys(metadataTags).map((key) => ({
+                            value: key,
+                            label: key,
+                          }))}
+                          placeholder="Key"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <Select
+                          value={filterValue}
+                          onValueChange={setFilterValue}
+                          items={(metadataTags[filterKey] ?? []).map((value) => ({
+                            value,
+                            label: value,
+                          }))}
+                          placeholder="Value"
+                        />
+                      </div>
+                      <Button
+                        size="sm"
+                        className="shrink-0"
+                        onClick={handleAddFilter}
+                        disabled={!filterKey || !filterValue}
+                      >
+                        Add
+                      </Button>
                     </div>
-                    <Button
-                      size="sm"
-                      className="shrink-0"
-                      onClick={handleAddFilter}
-                      disabled={!filterKey || !filterValue}
-                    >
-                      Add
-                    </Button>
                   </div>
                 </div>
               </div>

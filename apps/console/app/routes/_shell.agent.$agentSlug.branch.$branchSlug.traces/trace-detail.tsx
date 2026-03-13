@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@hebo/shared-ui/components/Tabs";
+import { cn } from "@hebo/shared-ui/lib/utils";
 
 import type { TraceDetailData } from "./types";
 import {
@@ -13,6 +14,10 @@ import {
   getTraceStatusBadgeProps,
 } from "./utils";
 type TraceDetailProps = { trace: TraceDetailData | null; loading: boolean };
+const COLLAPSE_TOGGLE_CLASS_NAME =
+  "mt-3 inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase transition-colors hover:bg-muted hover:text-foreground";
+const CODE_BLOCK_CLASS_NAME =
+  "overflow-x-auto rounded-lg border bg-muted/30 p-3 text-xs break-words whitespace-pre-wrap text-foreground";
 
 export function TraceDetail({ trace, loading }: TraceDetailProps) {
   if (loading) {
@@ -60,9 +65,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <Badge variant="secondary" className="font-normal">
-                {formatDuration(trace.durationMs)}
-              </Badge>
+              <Badge variant="secondary">{formatDuration(trace.durationMs)}</Badge>
               <Badge variant={statusBadge.variant} className={statusBadge.className}>
                 {trace.status}
               </Badge>
@@ -76,38 +79,35 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
               <TabsTrigger value="metadata">Metadata</TabsTrigger>
             </TabsList>
 
-            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 text-xs text-muted-foreground">
+            <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
               {trace.inputTokens !== null && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
-                  <span className="font-medium">{formatTokenCount(trace.inputTokens)}</span>
-                  <span>in</span>
-                </span>
+                <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                  {formatTokenCount(trace.inputTokens)} in
+                </Badge>
               )}
               {trace.outputTokens !== null && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
-                  <span className="font-medium">{formatTokenCount(trace.outputTokens)}</span>
-                  <span>out</span>
-                </span>
+                <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                  {formatTokenCount(trace.outputTokens)} out
+                </Badge>
               )}
               {toolCallCount > 0 && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1">
-                  <span>tool call</span>
-                  <span className="font-medium">{toolCallCount}</span>
-                </span>
+                <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                  tool call {toolCallCount}
+                </Badge>
               )}
             </div>
           </div>
         </div>
 
-        <TabsContent value="formatted" className="mt-0 min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        <TabsContent value="formatted" className="min-h-0 overflow-y-auto px-4 py-4">
           <FormattedView trace={trace} />
         </TabsContent>
 
-        <TabsContent value="raw" className="mt-0 min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        <TabsContent value="raw" className="min-h-0 overflow-y-auto px-4 py-4">
           <RawJsonView trace={trace} />
         </TabsContent>
 
-        <TabsContent value="metadata" className="mt-0 min-h-0 flex-1 overflow-y-auto px-4 py-4">
+        <TabsContent value="metadata" className="min-h-0 overflow-y-auto px-4 py-4">
           <MetadataView trace={trace} />
         </TabsContent>
       </Tabs>
@@ -156,16 +156,11 @@ type NormalizedMessage = {
 
 function normalizeMessages(messages: TraceDetailData["inputMessages"]): NormalizedMessage[] {
   return messages.map((message) => {
-    const textParts: string[] = [];
     const toolCalls = message.toolCalls ?? [];
-
-    if (typeof message.content === "string") {
-      textParts.push(message.content);
-    }
 
     return {
       role: message.role,
-      content: textParts.join("\n"),
+      content: typeof message.content === "string" ? message.content : "",
       toolCalls,
       toolName: message.role === "tool" ? (message.toolName ?? undefined) : undefined,
       reasoning: message.reasoning,
@@ -184,43 +179,44 @@ function MessageBlock({ message }: { message: NormalizedMessage }) {
   const fullContent = buildFullContent(message);
 
   return (
-    <section className="py-4 first:pt-0 last:pb-0">
-      <div
-        className={`space-y-3 border-l-2 pl-3 ${roleAccents[message.role] ?? "border-l-border"}`}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-base font-semibold tracking-tight">{roleLabel}</span>
-            {message.toolName && (
-              <Badge variant="outline" className="gap-1">
-                <Wrench className="size-3" />
-                {message.toolName}
-              </Badge>
-            )}
-          </div>
-          {fullContent && <CopyButton value={fullContent} className="rounded-md hover:bg-muted" />}
-        </div>
-
-        {message.reasoning && (
-          <ExpandableContent label="Reasoning">
-            <p className="text-sm whitespace-pre-wrap text-muted-foreground italic">
-              {message.reasoning}
-            </p>
-          </ExpandableContent>
-        )}
-
-        {message.content && <CollapsibleText text={message.content} maxLength={500} />}
-
-        {message.toolCalls.map((tc) => (
-          <div key={`${tc.name}:${tc.arguments}`} className="space-y-2">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+    <section
+      className={cn(
+        "space-y-3 border-l-2 py-4 pl-3 first:pt-0 last:pb-0",
+        roleAccents[message.role] ?? "border-l-border",
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-base font-semibold tracking-tight">{roleLabel}</span>
+          {message.toolName && (
+            <Badge variant="outline">
               <Wrench className="size-3" />
-              <span className="font-medium">{tc.name}</span>
-            </div>
-            <CollapsibleCode code={tc.arguments} maxLength={300} />
-          </div>
-        ))}
+              {message.toolName}
+            </Badge>
+          )}
+        </div>
+        {fullContent && <CopyButton value={fullContent} />}
       </div>
+
+      {message.reasoning && (
+        <ExpandableContent label="Reasoning">
+          <p className="text-sm whitespace-pre-wrap text-muted-foreground italic">
+            {message.reasoning}
+          </p>
+        </ExpandableContent>
+      )}
+
+      {message.content && <CollapsibleText text={message.content} maxLength={500} />}
+
+      {message.toolCalls.map((tc) => (
+        <div key={`${tc.name}:${tc.arguments}`} className="space-y-2">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Wrench className="size-3" />
+            <span className="font-medium">{tc.name}</span>
+          </div>
+          <CollapsibleCode code={tc.arguments} maxLength={300} />
+        </div>
+      ))}
     </section>
   );
 }
@@ -261,7 +257,7 @@ function CollapsibleText({ text, maxLength }: { text: string; maxLength: number 
       {needsTruncation && (
         <button
           type="button"
-          className="mt-3 inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase transition-colors hover:bg-muted hover:text-foreground"
+          className={COLLAPSE_TOGGLE_CLASS_NAME}
           onClick={() => setExpanded(!expanded)}
         >
           {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
@@ -279,13 +275,11 @@ function CollapsibleCode({ code, maxLength }: { code: string; maxLength: number 
 
   return (
     <div>
-      <pre className="overflow-x-auto rounded-lg border bg-muted/30 p-3 text-xs break-words whitespace-pre-wrap text-foreground">
-        {displayCode}
-      </pre>
+      <pre className={CODE_BLOCK_CLASS_NAME}>{displayCode}</pre>
       {needsTruncation && (
         <button
           type="button"
-          className="mt-3 inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase transition-colors hover:bg-muted hover:text-foreground"
+          className={COLLAPSE_TOGGLE_CLASS_NAME}
           onClick={() => setExpanded(!expanded)}
         >
           {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
@@ -321,13 +315,8 @@ function RawJsonView({ trace }: { trace: TraceDetailData }) {
 
   return (
     <div className="relative">
-      <CopyButton
-        value={jsonStr}
-        className="absolute top-2.5 right-2.5 rounded-md hover:bg-muted"
-      />
-      <pre className="overflow-x-auto rounded-lg border bg-muted/30 p-3 text-xs break-words whitespace-pre-wrap text-foreground">
-        {jsonStr}
-      </pre>
+      <CopyButton value={jsonStr} className="absolute top-2.5 right-2.5" />
+      <pre className={CODE_BLOCK_CLASS_NAME}>{jsonStr}</pre>
     </div>
   );
 }
@@ -343,7 +332,7 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
         <div>
           <h3 className="mb-3 text-xs font-medium text-foreground">Request Metadata</h3>
           <div className="overflow-hidden rounded-lg border">
-            <table className="w-full text-xs">
+            <table className="text-xs">
               <tbody>
                 {metadataEntries.map(([key, value]) => (
                   <tr key={key} className="border-b last:border-b-0">
@@ -360,7 +349,7 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
       <div>
         <h3 className="mb-3 text-xs font-medium text-foreground">Identifiers</h3>
         <div className="overflow-hidden rounded-lg border">
-          <table className="w-full text-xs">
+          <table className="text-xs">
             <tbody>
               <IdentifierRow label="Span ID" value={trace.spanId} />
               <IdentifierRow label="Response ID" value={trace.responseId} />
@@ -388,10 +377,7 @@ function IdentifierRow({ label, value }: { label: string; value: string | null }
       <td className="px-3 py-2 align-middle font-mono text-xs break-all">
         <div className="flex items-center gap-1">
           <span className="min-w-0 flex-1 truncate">{value}</span>
-          <CopyButton
-            value={value}
-            className="flex size-5 shrink-0 items-center justify-center self-center p-0"
-          />
+          <CopyButton value={value} className="size-5 shrink-0 p-0" />
         </div>
       </td>
     </tr>

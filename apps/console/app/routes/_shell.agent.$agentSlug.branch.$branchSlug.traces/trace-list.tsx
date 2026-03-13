@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
 import { Skeleton } from "@hebo/shared-ui/components/Skeleton";
+import { cn } from "@hebo/shared-ui/lib/utils";
 
 import type { TraceListData } from "./types";
 import {
@@ -30,6 +31,7 @@ export function TraceList({
   onSelectSpan,
   onLoadMore,
 }: TraceListProps) {
+  const loadingClassName = loading ? "pointer-events-none opacity-60" : "";
   let content: React.ReactNode;
 
   if (loading && traces.length === 0) {
@@ -51,9 +53,10 @@ export function TraceList({
             <button
               key={trace.spanId}
               type="button"
-              className={`w-full px-4 py-4 text-left transition-colors hover:bg-accent/40 ${
-                isSelected ? "bg-accent/60" : ""
-              }`}
+              className={cn(
+                "w-full px-4 py-4 text-left transition-colors hover:bg-accent/40",
+                isSelected && "bg-accent/60",
+              )}
               onClick={() => onSelectSpan(trace.spanId)}
             >
               <div className="flex items-center justify-between gap-2">
@@ -72,12 +75,10 @@ export function TraceList({
               )}
 
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Badge variant="secondary" className="bg-muted font-normal text-foreground">
+                <Badge variant="secondary" className="bg-muted text-muted-foreground">
                   {trace.operationName}
                 </Badge>
-                <Badge variant="secondary" className="font-normal">
-                  {formatDuration(trace.durationMs)}
-                </Badge>
+                <Badge variant="secondary">{formatDuration(trace.durationMs)}</Badge>
                 <Badge variant={statusBadge.variant} className={statusBadge.className}>
                   {trace.status}
                 </Badge>
@@ -104,9 +105,7 @@ export function TraceList({
   }
 
   return (
-    <div
-      className={`flex h-full min-h-0 w-full flex-col ${loading ? "pointer-events-none opacity-60" : ""}`}
-    >
+    <div className={cn("flex h-full min-h-0 w-full flex-col", loadingClassName)}>
       <div className="h-0 min-h-0 flex-1 overflow-y-auto">{content}</div>
     </div>
   );
