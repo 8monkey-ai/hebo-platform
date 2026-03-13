@@ -50,8 +50,6 @@ export default function TracesRoute() {
     };
   }, [selectedSpanId, agentSlug, branchSlug]);
 
-  const detailPane = <TraceDetail trace={traceDetail} loading={detailLoading} />;
-
   return (
     <div className="h-full min-h-0 flex-1 overflow-hidden">
       <div className="grid h-full min-h-0 grid-cols-1 gap-3 @2xl:grid-cols-[5fr_7fr]">
@@ -76,11 +74,15 @@ export default function TracesRoute() {
                 Back to traces
               </Button>
             </div>
-            <div className="min-h-0 flex-1">{detailPane}</div>
+            <div className="min-h-0 flex-1">
+              <TraceDetail trace={traceDetail} loading={detailLoading} />
+            </div>
           </div>
         </div>
 
-        <div className="hidden h-full min-h-0 @2xl:block">{detailPane}</div>
+        <div className="hidden h-full min-h-0 @2xl:block">
+          <TraceDetail trace={traceDetail} loading={detailLoading} />
+        </div>
       </div>
     </div>
   );

@@ -78,7 +78,6 @@ export function TraceListPanel({
     }
   }
   const activeFilterCount = Object.keys(metaFilters).length;
-  const selectedPresetValue = activePreset === "custom" ? undefined : activePreset;
 
   const searchParamsKey = searchParams.toString();
 
@@ -197,10 +196,10 @@ export function TraceListPanel({
 
           <div className="flex flex-wrap items-center gap-2">
             <TimePresetControl
+              activePreset={activePreset}
               effectiveFrom={effectiveFrom}
               effectiveTo={effectiveTo}
               isCustomPresetActive={activePreset === "custom"}
-              selectedPresetValue={selectedPresetValue}
               onApplyCustomRange={handleApplyCustomRange}
               onPresetChange={handlePresetChange}
             />
@@ -247,17 +246,17 @@ export function TraceListPanel({
 }
 
 function TimePresetControl({
+  activePreset,
   effectiveFrom,
   effectiveTo,
   isCustomPresetActive,
-  selectedPresetValue,
   onApplyCustomRange,
   onPresetChange,
 }: {
+  activePreset: string;
   effectiveFrom: string;
   effectiveTo: string;
   isCustomPresetActive: boolean;
-  selectedPresetValue: string | undefined;
   onApplyCustomRange: (customFrom: string, customTo: string) => void;
   onPresetChange: (preset: string) => void;
 }) {
@@ -270,7 +269,7 @@ function TimePresetControl({
         <ToggleGroup
           type="single"
           size="sm"
-          value={selectedPresetValue}
+          value={activePreset === "custom" ? undefined : activePreset}
           onValueChange={(value) => value && onPresetChange(value)}
         >
           {(["15m", "1h", "24h"] as const).map((preset) => (
@@ -335,9 +334,6 @@ function TimePresetControl({
             />
           </div>
           <div className="flex justify-end gap-2">
-            <Button variant="outline" size="sm">
-              Cancel
-            </Button>
             <Button
               size="sm"
               onClick={() => {
