@@ -2,6 +2,8 @@ import { ChevronRight } from "lucide-react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@hebo/shared-ui/components/Empty";
+import { ScrollArea } from "@hebo/shared-ui/components/ScrollArea";
 import { Skeleton } from "@hebo/shared-ui/components/Skeleton";
 import { cn } from "@hebo/shared-ui/lib/utils";
 
@@ -39,9 +41,12 @@ export function TraceList({
     content = <TraceListSkeleton />;
   } else if (traces.length === 0) {
     content = (
-      <div className="flex h-full min-h-0 flex-col items-center justify-center text-center">
-        <p className="text-sm text-muted-foreground">No traces found in the selected time range.</p>
-      </div>
+      <Empty className="min-h-full justify-center">
+        <EmptyHeader>
+          <EmptyTitle>No traces found</EmptyTitle>
+          <EmptyDescription>No traces found in the selected time range.</EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   } else {
     content = (
@@ -107,14 +112,14 @@ export function TraceList({
 
   return (
     <div className={cn("flex h-full min-h-0 w-full flex-col", loadingClassName)}>
-      <div className="h-0 min-h-0 flex-1 overflow-y-auto">{content}</div>
+      <ScrollArea className="h-0 min-h-0 flex-1">{content}</ScrollArea>
     </div>
   );
 }
 
 function TraceListSkeleton() {
   return (
-    <div className="flex min-h-full flex-col divide-y overflow-y-auto">
+    <div className="flex min-h-full flex-col divide-y">
       {["one", "two", "three", "four", "five"].map((item) => (
         <div key={item} className="px-4 py-4">
           <div className="flex items-center justify-between">

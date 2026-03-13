@@ -53,8 +53,8 @@ export default function TracesRoute() {
   const detailPane = <TraceDetail trace={traceDetail} loading={detailLoading} />;
 
   return (
-    <div className="h-full min-h-0 flex-1 overflow-y-hidden">
-      <div className="grid h-full min-h-0 grid-cols-1 gap-3 overflow-y-hidden pb-4 @2xl:grid-cols-[5fr_7fr]">
+    <div className="h-full min-h-0 flex-1 overflow-hidden">
+      <div className="grid h-full min-h-0 grid-cols-1 gap-3 @2xl:grid-cols-[5fr_7fr]">
         <div
           className={`relative flex h-full min-h-0 flex-col rounded-lg border bg-card pt-4 pb-2 ${
             selectedSpanId ? "hidden @2xl:flex" : ""
@@ -68,11 +68,7 @@ export default function TracesRoute() {
           />
         </div>
 
-        <div
-          className={`h-full min-h-0 overflow-hidden @2xl:hidden ${
-            selectedSpanId ? "block" : "hidden"
-          }`}
-        >
+        <div className={`h-full min-h-0 @2xl:hidden ${selectedSpanId ? "block" : "hidden"}`}>
           <div className="flex h-full min-h-0 flex-col gap-3">
             <div className="shrink-0">
               <Button variant="outline" size="sm" onClick={() => setSelectedSpanId(null)}>
@@ -80,11 +76,11 @@ export default function TracesRoute() {
                 Back to traces
               </Button>
             </div>
-            <div className="min-h-0 flex-1 overflow-hidden">{detailPane}</div>
+            <div className="min-h-0 flex-1">{detailPane}</div>
           </div>
         </div>
 
-        <div className="hidden h-full min-h-0 overflow-hidden @2xl:block">{detailPane}</div>
+        <div className="hidden h-full min-h-0 @2xl:block">{detailPane}</div>
       </div>
     </div>
   );

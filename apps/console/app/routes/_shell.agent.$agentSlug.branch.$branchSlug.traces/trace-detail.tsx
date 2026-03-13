@@ -1,8 +1,11 @@
-import { ChevronDown, ChevronRight, Loader2, Wrench } from "lucide-react";
+import { ChevronDown, ChevronRight, Wrench } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
+import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@hebo/shared-ui/components/Empty";
+import { ScrollArea } from "@hebo/shared-ui/components/ScrollArea";
+import { Spinner } from "@hebo/shared-ui/components/Spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@hebo/shared-ui/components/Tabs";
 import { cn } from "@hebo/shared-ui/lib/utils";
 
@@ -25,7 +28,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
       <DetailShell>
         <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-4">
           <div className="-translate-y-6">
-            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+            <Spinner className="size-6 text-muted-foreground" />
           </div>
         </div>
       </DetailShell>
@@ -35,9 +38,12 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
   if (!trace) {
     return (
       <DetailShell>
-        <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-4 text-sm text-muted-foreground">
-          <div className="-translate-y-6">Select a trace to view details</div>
-        </div>
+        <Empty className="min-h-0 flex-1 justify-center px-4 py-4">
+          <EmptyHeader>
+            <EmptyTitle>Select a trace</EmptyTitle>
+            <EmptyDescription>Select a trace to view details.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       </DetailShell>
     );
   }
@@ -51,7 +57,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
   return (
     <DetailShell>
       <Tabs defaultValue="formatted" className="flex min-h-0 flex-1 flex-col">
-        <div className="border-b px-4 py-4">
+        <div className="shrink-0 border-b px-4 py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h2>{trace.responseModel}</h2>
@@ -100,16 +106,22 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
           </div>
         </div>
 
-        <TabsContent value="formatted" className="min-h-0 overflow-y-auto px-4 py-4">
-          <FormattedView trace={trace} />
+        <TabsContent value="formatted" className="mt-0 h-0 min-h-0 flex-1">
+          <ScrollArea className="h-full px-4 py-4">
+            <FormattedView trace={trace} />
+          </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="raw" className="min-h-0 overflow-y-auto px-4 py-4">
-          <RawJsonView trace={trace} />
+        <TabsContent value="raw" className="mt-0 h-0 min-h-0 flex-1">
+          <ScrollArea className="h-full px-4 py-4">
+            <RawJsonView trace={trace} />
+          </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="metadata" className="min-h-0 overflow-y-auto px-4 py-4">
-          <MetadataView trace={trace} />
+        <TabsContent value="metadata" className="mt-0 h-0 min-h-0 flex-1">
+          <ScrollArea className="h-full px-4 py-4">
+            <MetadataView trace={trace} />
+          </ScrollArea>
         </TabsContent>
       </Tabs>
     </DetailShell>
@@ -141,7 +153,12 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
       ))}
 
       {inputMessages.length === 0 && outputMessages.length === 0 && (
-        <p className="text-sm text-muted-foreground">No message content available.</p>
+        <Empty className="min-h-0 py-8">
+          <EmptyHeader>
+            <EmptyTitle>No message content</EmptyTitle>
+            <EmptyDescription>No message content available.</EmptyDescription>
+          </EmptyHeader>
+        </Empty>
       )}
     </div>
   );
