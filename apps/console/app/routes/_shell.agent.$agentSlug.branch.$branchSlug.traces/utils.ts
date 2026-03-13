@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import prettyMs from "pretty-ms";
 
 import type { TraceStatus } from "./types";
@@ -18,14 +18,6 @@ export function formatTimestampShort(ts: string): string {
 export function formatTimestampFull(ts: string): string {
   try {
     return format(new Date(ts), "MMMM d, yyyy 'at' HH:mm:ss");
-  } catch {
-    return ts;
-  }
-}
-
-export function formatTimestampRelative(ts: string): string {
-  try {
-    return formatDistanceToNow(new Date(ts), { addSuffix: true });
   } catch {
     return ts;
   }
