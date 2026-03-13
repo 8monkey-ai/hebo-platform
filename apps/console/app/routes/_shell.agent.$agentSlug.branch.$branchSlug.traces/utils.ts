@@ -41,8 +41,11 @@ export function formatTokenCount(count: number | null): string {
   return count.toLocaleString();
 }
 
-export function timeRangeToParams(range: string): { from: string; to: string } {
-  const now = new Date();
+export function timeRangeToParams(
+  range: string,
+  nowValue: number | Date = new Date(),
+): { from: string; to: string } {
+  const now = typeof nowValue === "number" ? new Date(nowValue) : nowValue;
   let fromMs: number;
 
   switch (range) {

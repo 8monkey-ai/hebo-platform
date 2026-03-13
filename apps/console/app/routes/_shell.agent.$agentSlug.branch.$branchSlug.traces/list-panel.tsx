@@ -1,6 +1,5 @@
 import { Filter, RefreshCw, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
@@ -21,9 +20,10 @@ import { cn } from "@hebo/shared-ui/lib/utils";
 
 import { api } from "~console/lib/service";
 
-import { TraceList } from "./trace-list";
+import { TraceList } from "./list";
 import type { TraceListData, TraceMetadataTags } from "./types";
-import { formatDateRangeSummary, timeRangeToParams } from "./utils";
+import { useTraceSearchParams } from "./use-search-params";
+import { formatDateRangeSummary } from "./utils";
 
 const padDatePart = (part: number) => String(part).padStart(2, "0");
 
@@ -45,54 +45,30 @@ type TraceListPanelProps = {
   onSelectSpan: (spanId: string) => void;
 };
 
-function resolveTimeRange(activePreset: string, fromParam: string | null, toParam: string | null) {
-  if (activePreset !== "custom") {
-    return timeRangeToParams(activePreset);
-  }
-
-  const fallbackRange = timeRangeToParams("15m");
-
-  return {
-    from: fromParam ?? fallbackRange.from,
-    to: toParam ?? fallbackRange.to,
-  };
-}
-
 export function TraceListPanel({
   agentSlug,
   branchSlug,
   selectedSpanId,
   onSelectSpan,
 }: TraceListPanelProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
-
   const [traces, setTraces] = useState<TraceListData>([]);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [listLoading, setListLoading] = useState(true);
   const [metadataTags, setMetadataTags] = useState<TraceMetadataTags>({});
-  const [refreshNonce, setRefreshNonce] = useState(0);
-
-  const activePreset = searchParams.get("preset") ?? "15m";
-  const page = Math.max(1, Math.floor(Number(searchParams.get("page")) || 1));
-  const fromParam = searchParams.get("from");
-  const toParam = searchParams.get("to");
-  const [queryRange, setQueryRange] = useState(() =>
-    resolveTimeRange(activePreset, fromParam, toParam),
+  const traceSearch = useTraceSearchParams();
+  const {
+    handleAddFilter,
+    handleApplyCustomRange,
+    handleLoadMore,
+    handlePresetChange,
+    handleRefresh,
+    handleRemoveFilter,
+  } = traceSearch.actions;
+  const { activeFilterCount, activePreset, metaFilters, page, queryRange } = traceSearch.state;
+  const metaFilterEntries = Object.entries(metaFilters).sort(([leftKey], [rightKey]) =>
+    leftKey.localeCompare(rightKey),
   );
-
-  const metaFilters: Record<string, string> = {};
-  for (const [key, value] of searchParams.entries()) {
-    if (key.startsWith("meta.")) {
-      metaFilters[key.slice(5)] = value;
-    }
-  }
-  const activeFilterCount = Object.keys(metaFilters).length;
-
-  const searchParamsKey = searchParams.toString();
-
-  useEffect(() => {
-    setQueryRange(resolveTimeRange(activePreset, fromParam, toParam));
-  }, [activePreset, fromParam, refreshNonce, toParam]);
+  const metaFiltersKey = JSON.stringify(metaFilterEntries);
 
   useEffect(() => {
     let cancelled = false;
@@ -105,7 +81,10 @@ export function TraceListPanel({
           to: queryRange.to,
           page: String(page),
           ...Object.fromEntries(
-            [...new URLSearchParams(searchParamsKey)].filter(([k]) => k.startsWith("meta.")),
+            (JSON.parse(metaFiltersKey) as Array<[string, string]>).map(([key, value]) => [
+              `meta.${key}`,
+              value,
+            ]),
           ),
         };
 
@@ -138,7 +117,7 @@ export function TraceListPanel({
     return () => {
       cancelled = true;
     };
-  }, [agentSlug, branchSlug, page, queryRange.from, queryRange.to, searchParamsKey]);
+  }, [agentSlug, branchSlug, metaFiltersKey, page, queryRange.from, queryRange.to]);
 
   useEffect(() => {
     let cancelled = false;
@@ -163,51 +142,6 @@ export function TraceListPanel({
       cancelled = true;
     };
   }, [agentSlug, branchSlug, queryRange.from, queryRange.to]);
-
-  function handlePresetChange(preset: string) {
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.set("preset", preset);
-    nextParams.delete("from");
-    nextParams.delete("to");
-    nextParams.delete("page");
-    setSearchParams(nextParams);
-  }
-
-  function handleApplyCustomRange(customFrom: string, customTo: string) {
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.set("preset", "custom");
-    nextParams.set("from", new Date(customFrom).toISOString());
-    nextParams.set("to", new Date(customTo).toISOString());
-    nextParams.delete("page");
-    setSearchParams(nextParams);
-  }
-
-  function handleRefresh() {
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.delete("page");
-    setSearchParams(nextParams);
-    setRefreshNonce((current) => current + 1);
-  }
-
-  function handleLoadMore() {
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.set("page", String(page + 1));
-    setSearchParams(nextParams);
-  }
-
-  function handleAddFilter(filterKey: string, filterValue: string) {
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.set(`meta.${filterKey}`, filterValue);
-    nextParams.delete("page");
-    setSearchParams(nextParams);
-  }
-
-  function handleRemoveFilter(key: string) {
-    const nextParams = new URLSearchParams(searchParams);
-    nextParams.delete(`meta.${key}`);
-    nextParams.delete("page");
-    setSearchParams(nextParams);
-  }
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
