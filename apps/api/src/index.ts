@@ -35,7 +35,7 @@ const createApi = () =>
       },
       (app) =>
         app
-          // /agents and /agents/:agentSlug/branches
+          // /agents/[:slug/branches/[:slug/traces/[:id]]]
           .use(agentsModule.use(branchesModule).use(spansModule))
           // /providers
           .use(providersModule),

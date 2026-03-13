@@ -1,4 +1,5 @@
 import { http, HttpResponse } from "msw";
+import { z } from "zod";
 
 const now = Date.now();
 const min = 60 * 1000;
@@ -548,7 +549,7 @@ export const traceHandlers = [
   // List traces
   http.get<{ agentSlug: string; branchSlug: string }>(
     "/api/v1/agents/:agentSlug/branches/:branchSlug/traces",
-    async ({ request }) => {
+    ({ request }) => {
       const url = new URL(request.url);
 
       // Handle metadata sub-route
@@ -565,16 +566,24 @@ export const traceHandlers = [
       const page = Number(url.searchParams.get("page") ?? 1);
       const pageSize = Number(url.searchParams.get("pageSize") ?? 50);
 
+      const metadataParam = url.searchParams.get("metadata");
+      let metadataFilters: Record<string, string> | null = null;
+      try {
+        metadataFilters =
+          metadataParam === null
+            ? {}
+            : z.record(z.string(), z.string()).parse(JSON.parse(metadataParam));
+      } catch {
+        return new HttpResponse(`Invalid metadata filter: ${metadataParam}`, { status: 400 });
+      }
+
       // Apply metadata filters
       let filtered = [...mockTraces];
-      for (const [key, value] of url.searchParams.entries()) {
-        if (key.startsWith("meta.")) {
-          const metaKey = key.slice(5);
-          filtered = filtered.filter((t) => {
-            const detail = mockSpanDetails[t.spanId] as any;
-            return detail?.metadata?.[metaKey] === value;
-          });
-        }
+      for (const [metaKey, value] of Object.entries(metadataFilters)) {
+        filtered = filtered.filter((t) => {
+          const detail = mockSpanDetails[t.spanId] as any;
+          return detail?.metadata?.[metaKey] === value;
+        });
       }
 
       const start = (page - 1) * pageSize;
@@ -591,7 +600,7 @@ export const traceHandlers = [
   // Metadata tags
   http.get<{ agentSlug: string; branchSlug: string }>(
     "/api/v1/agents/:agentSlug/branches/:branchSlug/traces/metadata",
-    async () => {
+    () => {
       return HttpResponse.json({
         tags: {
           session_id: ["sess_abc123", "sess_def456", "sess_ghi789"],
@@ -605,7 +614,7 @@ export const traceHandlers = [
   // Get span detail
   http.get<{ agentSlug: string; branchSlug: string; spanId: string }>(
     "/api/v1/agents/:agentSlug/branches/:branchSlug/traces/:spanId",
-    async ({ params }) => {
+    ({ params }) => {
       const detail = mockSpanDetails[params.spanId];
       if (!detail) {
         return new HttpResponse("Span not found", { status: 404 });

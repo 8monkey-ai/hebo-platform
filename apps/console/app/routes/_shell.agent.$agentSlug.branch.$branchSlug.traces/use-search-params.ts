@@ -1,101 +1,103 @@
+import {
+  parseAsInteger,
+  parseAsIsoDateTime,
+  parseAsJson,
+  parseAsStringLiteral,
+  useQueryStates,
+} from "nuqs";
 import { useState } from "react";
-import { useSearchParams } from "react-router";
+import { z } from "zod";
 
 import { timeRangeToParams } from "./utils";
 
 export type TraceSearchParamsState = ReturnType<typeof useTraceSearchParams>;
 
-function resolveTimeRange(
-  activePreset: string,
-  fromParam: string | null,
-  toParam: string | null,
+const timePresets = ["15m", "1h", "24h", "custom"] as const;
+
+const fixedQueryParsers = {
+  from: parseAsIsoDateTime,
+  metadata: parseAsJson(z.record(z.string(), z.string())).withDefault({}),
+  page: parseAsInteger.withDefault(1),
+  preset: parseAsStringLiteral(timePresets).withDefault("15m"),
+  to: parseAsIsoDateTime,
+};
+
+function getQueryRange(
+  preset: (typeof timePresets)[number],
+  from: Date | null,
+  to: Date | null,
   rangeAnchorMs: number,
 ) {
-  if (activePreset !== "custom") {
-    return timeRangeToParams(activePreset, rangeAnchorMs);
+  if (preset !== "custom") {
+    return timeRangeToParams(preset, rangeAnchorMs);
   }
 
   const fallbackRange = timeRangeToParams("15m", rangeAnchorMs);
-
   return {
-    from: fromParam ?? fallbackRange.from,
-    to: toParam ?? fallbackRange.to,
+    from: from?.toISOString() ?? fallbackRange.from,
+    to: to?.toISOString() ?? fallbackRange.to,
   };
 }
 
-function getMetaFilters(searchParams: URLSearchParams): Record<string, string> {
-  const filters: Record<string, string> = {};
-
-  for (const [key, value] of searchParams.entries()) {
-    if (key.startsWith("meta.")) {
-      filters[key.slice(5)] = value;
-    }
-  }
-
-  return filters;
-}
-
 export function useTraceSearchParams() {
-  const [searchParams, setSearchParams] = useSearchParams();
   const [rangeAnchorMs, setRangeAnchorMs] = useState(() => Date.now());
 
-  const activePreset = searchParams.get("preset") ?? "15m";
-  const page = Math.max(1, Math.floor(Number(searchParams.get("page")) || 1));
-  const fromParam = searchParams.get("from");
-  const toParam = searchParams.get("to");
-  const metaFilters = getMetaFilters(searchParams);
-  const activeFilterCount = Object.keys(metaFilters).length;
-  const queryRange = resolveTimeRange(activePreset, fromParam, toParam, rangeAnchorMs);
+  const [{ preset, from, to, metadata, page }, setQueryStates] = useQueryStates(fixedQueryParsers);
 
-  function updateSearchParams(mutator: (nextParams: URLSearchParams) => void) {
-    const nextParams = new URLSearchParams(searchParams);
-    mutator(nextParams);
-    setSearchParams(nextParams);
-  }
+  const { from: effectiveFrom, to: effectiveTo } = getQueryRange(preset, from, to, rangeAnchorMs);
 
-  function handlePresetChange(preset: string) {
-    updateSearchParams((nextParams) => {
-      nextParams.set("preset", preset);
-      nextParams.delete("from");
-      nextParams.delete("to");
-      nextParams.delete("page");
+  const listQuery = {
+    metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : undefined,
+    from: effectiveFrom,
+    to: effectiveTo,
+    page: String(page),
+  };
+
+  function handlePresetChange(nextPreset: string) {
+    void setQueryStates({
+      from: null,
+      page: null,
+      preset: nextPreset as (typeof timePresets)[number],
+      to: null,
     });
     setRangeAnchorMs(Date.now());
   }
 
   function handleApplyCustomRange(customFrom: string, customTo: string) {
-    updateSearchParams((nextParams) => {
-      nextParams.set("preset", "custom");
-      nextParams.set("from", new Date(customFrom).toISOString());
-      nextParams.set("to", new Date(customTo).toISOString());
-      nextParams.delete("page");
+    void setQueryStates({
+      from: new Date(customFrom),
+      page: null,
+      preset: "custom",
+      to: new Date(customTo),
     });
   }
 
   function handleRefresh() {
-    updateSearchParams((nextParams) => {
-      nextParams.delete("page");
-    });
+    void setQueryStates({ page: null });
     setRangeAnchorMs(Date.now());
   }
 
   function handleLoadMore() {
-    updateSearchParams((nextParams) => {
-      nextParams.set("page", String(page + 1));
-    });
+    void setQueryStates({ page: page + 1 });
   }
 
   function handleAddFilter(filterKey: string, filterValue: string) {
-    updateSearchParams((nextParams) => {
-      nextParams.set(`meta.${filterKey}`, filterValue);
-      nextParams.delete("page");
+    void setQueryStates({
+      metadata: {
+        ...metadata,
+        [filterKey]: filterValue,
+      },
+      page: null,
     });
   }
 
   function handleRemoveFilter(key: string) {
-    updateSearchParams((nextParams) => {
-      nextParams.delete(`meta.${key}`);
-      nextParams.delete("page");
+    const nextMetadata = { ...metadata };
+    delete nextMetadata[key];
+
+    void setQueryStates({
+      metadata: Object.keys(nextMetadata).length > 0 ? nextMetadata : null,
+      page: null,
     });
   }
 
@@ -109,11 +111,12 @@ export function useTraceSearchParams() {
       handleRemoveFilter,
     },
     state: {
-      activeFilterCount,
-      activePreset,
-      metaFilters,
+      queryKey: JSON.stringify(listQuery),
+      activePreset: preset,
+      effectiveFrom,
+      effectiveTo,
+      metadata,
       page,
-      queryRange,
     },
   };
 }

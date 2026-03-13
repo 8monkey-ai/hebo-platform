@@ -142,12 +142,7 @@ export async function getSpan(
   for (const [key, value] of Object.entries(row)) {
     if (value === null || value === undefined) continue;
     if (key.startsWith("span_attributes.")) {
-      if (
-        typeof value === "string" ||
-        typeof value === "number" ||
-        typeof value === "boolean" ||
-        value === null
-      ) {
+      if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
         spanAttributes[key.replace("span_attributes.", "")] = value;
       }
       if (key.startsWith(METADATA_PREFIX)) {

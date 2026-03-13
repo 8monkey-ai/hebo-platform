@@ -1,24 +1,21 @@
 import { t } from "elysia";
 
+const TraceTimeRangeQuery = {
+  from: t.Optional(t.Date()),
+  to: t.Optional(t.Date()),
+};
+
 export const SpanListQuery = t.Object(
   {
-    from: t.Optional(t.Date()),
-    to: t.Optional(t.Date()),
+    metadata: t.Optional(t.String()),
+    ...TraceTimeRangeQuery,
     page: t.Number({ default: 1 }),
     pageSize: t.Number({ default: 50 }),
   },
-  {
-    additionalProperties: false,
-    patternProperties: {
-      "^meta\\..+": t.String(),
-    },
-  },
+  { additionalProperties: false },
 );
 
-export const SpanMetadataQuery = t.Object({
-  from: t.Optional(t.Date()),
-  to: t.Optional(t.Date()),
-});
+export const SpanMetadataQuery = t.Object(TraceTimeRangeQuery);
 
 const SpanStatus = t.Union([t.Literal("ok"), t.Literal("error"), t.Literal("unknown")]);
 

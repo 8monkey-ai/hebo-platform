@@ -1,5 +1,7 @@
 import { Elysia, status, t } from "elysia";
 
+import { BadRequestError } from "@hebo/shared-api/errors";
+
 import { greptimeDb as greptimeDbMiddleware } from "~api/middleware/greptime";
 
 import { getMetadataTags, getSpan, listSpans } from "./service";
@@ -21,14 +23,14 @@ export const spansModule = new Elysia({
   .get(
     "/",
     async ({ greptimeDb, organizationId, params, query }) => {
-      const from = query.from ?? DEFAULT_FROM();
-      const to = query.to ?? DEFAULT_TO();
-
-      // Extract metadata filters from query params (meta.key=value)
-      const metadataFilters: Record<string, string> = {};
-      for (const [key, value] of Object.entries(query)) {
-        if (key.startsWith("meta.") && typeof value === "string") {
-          metadataFilters[key.slice(5)] = value;
+      let metadata: Record<string, string> = {};
+      if (query.metadata) {
+        try {
+          const parsed = JSON.parse(query.metadata);
+          if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw 0;
+          metadata = parsed;
+        } catch {
+          throw new BadRequestError(`Invalid metadata filter: ${query.metadata}`);
         }
       }
 
@@ -39,11 +41,11 @@ export const spansModule = new Elysia({
           organizationId,
           params.agentSlug,
           params.branchSlug,
-          from,
-          to,
+          query.from ?? DEFAULT_FROM(),
+          query.to ?? DEFAULT_TO(),
           query.page,
           query.pageSize,
-          metadataFilters,
+          metadata,
         ),
       );
     },

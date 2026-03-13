@@ -64,11 +64,8 @@ export function TraceListPanel({
     handleRefresh,
     handleRemoveFilter,
   } = traceSearch.actions;
-  const { activeFilterCount, activePreset, metaFilters, page, queryRange } = traceSearch.state;
-  const metaFilterEntries = Object.entries(metaFilters).sort(([leftKey], [rightKey]) =>
-    leftKey.localeCompare(rightKey),
-  );
-  const metaFiltersKey = JSON.stringify(metaFilterEntries);
+  const { activePreset, effectiveFrom, effectiveTo, metadata, page, queryKey } = traceSearch.state;
+  const activeFilterCount = Object.keys(metadata).length;
 
   useEffect(() => {
     let cancelled = false;
@@ -76,23 +73,12 @@ export function TraceListPanel({
     setListLoading(true);
     (async () => {
       try {
-        const query = {
-          from: queryRange.from,
-          to: queryRange.to,
-          page: String(page),
-          ...Object.fromEntries(
-            (JSON.parse(metaFiltersKey) as Array<[string, string]>).map(([key, value]) => [
-              `meta.${key}`,
-              value,
-            ]),
-          ),
-        };
-
+        const listQuery = JSON.parse(queryKey) as Record<string, string | string[]>;
         const { data, error } = await api
           .agents({ agentSlug })
           .branches({ branchSlug })
           // @ts-expect-error this works in Eden
-          .traces.get({ query: query });
+          .traces.get({ query: listQuery });
 
         if (cancelled) return;
         if (error) throw error;
@@ -117,7 +103,7 @@ export function TraceListPanel({
     return () => {
       cancelled = true;
     };
-  }, [agentSlug, branchSlug, metaFiltersKey, page, queryRange.from, queryRange.to]);
+  }, [agentSlug, branchSlug, effectiveFrom, effectiveTo, page, queryKey]);
 
   useEffect(() => {
     let cancelled = false;
@@ -129,7 +115,7 @@ export function TraceListPanel({
           .branches({ branchSlug })
           .traces.metadata.get({
             // @ts-expect-error this works in Eden
-            query: { from: queryRange.from, to: queryRange.to },
+            query: { from: effectiveFrom, to: effectiveTo },
           });
 
         if (!cancelled && !error) setMetadataTags(data?.tags ?? {});
@@ -141,7 +127,7 @@ export function TraceListPanel({
     return () => {
       cancelled = true;
     };
-  }, [agentSlug, branchSlug, queryRange.from, queryRange.to]);
+  }, [agentSlug, branchSlug, effectiveFrom, effectiveTo]);
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
@@ -152,8 +138,8 @@ export function TraceListPanel({
           <div className="flex flex-wrap items-center gap-2">
             <TimePresetControl
               activePreset={activePreset}
-              effectiveFrom={queryRange.from}
-              effectiveTo={queryRange.to}
+              effectiveFrom={effectiveFrom}
+              effectiveTo={effectiveTo}
               isCustomPresetActive={activePreset === "custom"}
               onApplyCustomRange={handleApplyCustomRange}
               onPresetChange={handlePresetChange}
@@ -162,7 +148,7 @@ export function TraceListPanel({
             <FiltersControl
               activeFilterCount={activeFilterCount}
               metadataTags={metadataTags}
-              metaFilters={metaFilters}
+              metaFilters={metadata}
               onAddFilter={handleAddFilter}
               onRemoveFilter={handleRemoveFilter}
             />
@@ -173,11 +159,11 @@ export function TraceListPanel({
           </div>
 
           <p className="shrink-0 text-xs text-muted-foreground">
-            {formatDateRangeSummary(queryRange.from, queryRange.to)}
+            {formatDateRangeSummary(effectiveFrom, effectiveTo)}
             {activeFilterCount > 0 && (
               <>
                 {" · "}
-                {Object.entries(metaFilters)
+                {Object.entries(metadata)
                   .map(([key, value]) => `${key}:${value}`)
                   .join(", ")}
               </>
