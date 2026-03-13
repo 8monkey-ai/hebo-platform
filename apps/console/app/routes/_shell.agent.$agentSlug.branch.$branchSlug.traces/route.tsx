@@ -56,7 +56,7 @@ export default function TracesRoute() {
     <div className="h-full min-h-0 flex-1 overflow-y-hidden">
       <div className="@container grid h-full min-h-0 grid-cols-1 gap-3 overflow-y-hidden pb-4 @2xl:grid-cols-[5fr_7fr]">
         <div
-          className={`relative z-10 flex h-full min-h-0 flex-col rounded-2xl border bg-card pt-4 pb-2 ${
+          className={`relative z-10 flex h-full min-h-0 flex-col rounded-lg border bg-card pt-4 pb-2 ${
             selectedSpanId ? "hidden @2xl:flex" : ""
           }`}
         >

@@ -17,7 +17,7 @@ type TraceDetailProps = { trace: TraceDetailData | null; loading: boolean };
 const COLLAPSE_TOGGLE_CLASS_NAME =
   "mt-3 inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase transition-colors hover:bg-muted hover:text-foreground";
 const CODE_BLOCK_CLASS_NAME =
-  "overflow-x-auto rounded-lg border bg-muted/30 p-3 text-xs break-words whitespace-pre-wrap text-foreground";
+  "overflow-x-auto rounded-md border bg-muted/30 p-3 text-xs break-words whitespace-pre-wrap text-foreground";
 
 export function TraceDetail({ trace, loading }: TraceDetailProps) {
   if (loading) {
@@ -51,9 +51,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
         <div className="border-b px-4 py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="truncate text-xl font-semibold tracking-tight">
-                {trace.responseModel}
-              </h2>
+              <h2>{trace.responseModel}</h2>
               <p className="mt-1 truncate text-xs text-muted-foreground">
                 {[
                   trace.operationName,
@@ -74,7 +72,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
 
           <div className="mt-3 flex items-center justify-between gap-3">
             <TabsList>
-              <TabsTrigger value="formatted">Formatted details</TabsTrigger>
+              <TabsTrigger value="formatted">Formatted</TabsTrigger>
               <TabsTrigger value="raw">Raw JSON</TabsTrigger>
               <TabsTrigger value="metadata">Metadata</TabsTrigger>
             </TabsList>
@@ -117,7 +115,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
 
 function DetailShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border bg-card">
+    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border bg-card">
       {children}
     </div>
   );
@@ -330,8 +328,8 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
     <div className="flex flex-col gap-5">
       {metadataEntries.length > 0 && (
         <div>
-          <h3 className="mb-3 text-xs font-medium text-foreground">Request Metadata</h3>
-          <div className="overflow-hidden rounded-lg border">
+          <h3 className="mb-3">Request Metadata</h3>
+          <div className="overflow-hidden rounded-md border">
             <table className="text-xs">
               <tbody>
                 {metadataEntries.map(([key, value]) => (
@@ -347,8 +345,8 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
       )}
 
       <div>
-        <h3 className="mb-3 text-xs font-medium text-foreground">Identifiers</h3>
-        <div className="overflow-hidden rounded-lg border">
+        <h3 className="mb-3">Identifiers</h3>
+        <div className="overflow-hidden rounded-md border">
           <table className="text-xs">
             <tbody>
               <IdentifierRow label="Span ID" value={trace.spanId} />

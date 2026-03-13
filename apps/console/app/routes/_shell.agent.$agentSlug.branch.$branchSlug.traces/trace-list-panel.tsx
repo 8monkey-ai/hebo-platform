@@ -232,7 +232,7 @@ export function TraceListPanel({
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
-      <div className="shrink-0 px-4">
+      <div className="shrink-0 border-b px-4 pb-3.5">
         <h2 className="mb-3">GenAI executions</h2>
 
         <div className="mb-2 flex flex-wrap items-center gap-2">
@@ -273,7 +273,7 @@ export function TraceListPanel({
 
             {showCustomRange && (
               <div className={cn(POPOVER_CLASS_NAME, "w-80")}>
-                <h4 className="mb-2 text-sm font-medium">Custom range</h4>
+                <h4 className="mb-2">Custom range</h4>
                 <div className="flex flex-col gap-2.5">
                   <div>
                     <Label htmlFor="custom-from" className="mb-1 text-xs text-muted-foreground">
@@ -321,7 +321,7 @@ export function TraceListPanel({
 
             {showFilters && (
               <div className={cn(POPOVER_CLASS_NAME, "w-72")}>
-                <h4 className="text-sm font-medium">Edit filters</h4>
+                <h4>Edit filters</h4>
                 <div className="-mx-2.5 my-2 border-t" />
                 <div>
                   {activeFilterCount > 0 && (
@@ -392,19 +392,19 @@ export function TraceListPanel({
             <RefreshCw className={`size-3.5 ${listLoading ? "animate-spin" : ""}`} />
           </Button>
         </div>
-      </div>
 
-      <p className="mb-3 shrink-0 px-4 text-sm text-muted-foreground">
-        {formatDateRangeSummary(effectiveFrom, effectiveTo)}
-        {activeFilterCount > 0 && (
-          <>
-            {" · "}
-            {Object.entries(metaFilters)
-              .map(([key, value]) => `${key}:${value}`)
-              .join(", ")}
-          </>
-        )}
-      </p>
+        <p className="shrink-0 text-xs text-muted-foreground">
+          {formatDateRangeSummary(effectiveFrom, effectiveTo)}
+          {activeFilterCount > 0 && (
+            <>
+              {" · "}
+              {Object.entries(metaFilters)
+                .map(([key, value]) => `${key}:${value}`)
+                .join(", ")}
+            </>
+          )}
+        </p>
+      </div>
 
       <div className="flex h-0 min-h-0 flex-1 overflow-hidden">
         <TraceList
