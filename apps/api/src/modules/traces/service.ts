@@ -26,19 +26,22 @@ export async function listSpans(
   const offset = (page - 1) * pageSize;
   const limit = pageSize + 1;
 
-  // Build dynamic metadata filter clauses
-  let metaFilterSql = "";
-  const metaValues: string[] = [];
-  for (const [key, value] of Object.entries(metadataFilters)) {
-    const columnName = escapeSqlIdentifier(`${METADATA_PREFIX}${key}`);
-    metaFilterSql += ` AND "${columnName}" = $${metaValues.length + 6}`;
-    metaValues.push(value!);
+  const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
+  function addParam(value: unknown) {
+    params.push(value);
+    return `$${params.length}`;
   }
 
-  const limitParam = metaValues.length + 6;
-  const offsetParam = metaValues.length + 7;
+  // Build dynamic metadata filter clauses
+  let metaFilterSql = "";
+  for (const [key, value] of Object.entries(metadataFilters)) {
+    const columnName = escapeSqlIdentifier(`${METADATA_PREFIX}${key}`);
+    metaFilterSql += ` AND "${columnName}" = ${addParam(value)}`;
+  }
 
-  // We need to use raw SQL since Bun.SQL tagged templates don't support dynamic column names
+  const limitParam = addParam(limit);
+  const offsetParam = addParam(offset);
+
   const queryText = `
     SELECT
       "timestamp" AS timestamp,
@@ -58,10 +61,8 @@ export async function listSpans(
       AND "timestamp" <= $5
       ${metaFilterSql}
     ORDER BY "timestamp" DESC
-    LIMIT $${limitParam} OFFSET $${offsetParam}
+    LIMIT ${limitParam} OFFSET ${offsetParam}
   `;
-
-  const params = [agentSlug, branchSlug, organizationId, from, to, ...metaValues, limit, offset];
 
   const rows = (await greptimeDb.unsafe(queryText, params)) as any[];
   const hasNextPage = rows.length > pageSize;
