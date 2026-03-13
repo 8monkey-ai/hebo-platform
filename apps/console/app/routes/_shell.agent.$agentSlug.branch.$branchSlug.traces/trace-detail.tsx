@@ -6,7 +6,12 @@ import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@hebo/shared-ui/components/Tabs";
 
 import type { TraceDetailData } from "./types";
-import { formatDuration, formatTimestampFull, formatTokenCount } from "./utils";
+import {
+  formatDuration,
+  formatTimestampFull,
+  formatTokenCount,
+  getTraceStatusBadgeProps,
+} from "./utils";
 type TraceDetailProps = { trace: TraceDetailData | null; loading: boolean };
 
 export function TraceDetail({ trace, loading }: TraceDetailProps) {
@@ -33,6 +38,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
   }
 
   const toolCallCount = countToolCalls(trace.outputMessages);
+  const statusBadge = getTraceStatusBadgeProps(trace.status);
 
   return (
     <DetailShell>
@@ -40,22 +46,24 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
         <div className="border-b px-4 py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="truncate text-2xl font-semibold tracking-tight">
-                {trace.operationName}
+              <h2 className="truncate text-xl font-semibold tracking-tight">
+                {trace.responseModel}
               </h2>
-              <p className="mt-1 truncate text-sm text-muted-foreground">
+              <p className="mt-1 truncate text-xs text-muted-foreground">
                 {[
-                  trace.model,
+                  trace.operationName,
                   formatTimestampFull(trace.timestamp),
-                  `trace ${trace.traceId.slice(0, 16)}`,
+                  `${trace.traceId.slice(0, 16)}`,
                 ]
                   .filter(Boolean)
                   .join(" · ")}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
-              <Badge variant="outline">{formatDuration(trace.durationMs)}</Badge>
-              <Badge variant={trace.status === "error" ? "destructive" : "secondary"}>
+              <Badge variant="secondary" className="font-normal">
+                {formatDuration(trace.durationMs)}
+              </Badge>
+              <Badge variant={statusBadge.variant} className={statusBadge.className}>
                 {trace.status}
               </Badge>
             </div>
@@ -234,7 +242,7 @@ function MessageBlock({ message }: { message: NormalizedMessage }) {
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg font-semibold tracking-tight">{roleLabel}</span>
+          <span className="text-base font-semibold tracking-tight">{roleLabel}</span>
           {message.toolName && (
             <Badge variant="outline" className="gap-1">
               <Wrench className="size-3" />
@@ -257,7 +265,7 @@ function MessageBlock({ message }: { message: NormalizedMessage }) {
 
       {message.toolCalls.map((tc) => (
         <div key={`${tc.name}:${tc.arguments}`} className="space-y-2">
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
+          <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Wrench className="size-3" />
             <span className="font-medium">{tc.name}</span>
           </div>
@@ -300,14 +308,15 @@ function CollapsibleText({ text, maxLength }: { text: string; maxLength: number 
 
   return (
     <div>
-      <p className="text-sm leading-6 break-words whitespace-pre-wrap">{displayText}</p>
+      <p className="text-xs leading-4 break-words whitespace-pre-wrap">{displayText}</p>
       {needsTruncation && (
         <button
           type="button"
-          className="mt-1 text-xs text-primary hover:underline"
+          className="mt-3 inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase transition-colors hover:bg-muted hover:text-foreground"
           onClick={() => setExpanded(!expanded)}
         >
-          {expanded ? "Show less" : "Show more"}
+          {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+          <span>{expanded ? "Less" : "More"}</span>
         </button>
       )}
     </div>
@@ -327,10 +336,11 @@ function CollapsibleCode({ code, maxLength }: { code: string; maxLength: number 
       {needsTruncation && (
         <button
           type="button"
-          className="mt-1 text-xs text-primary hover:underline"
+          className="mt-3 inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase transition-colors hover:bg-muted hover:text-foreground"
           onClick={() => setExpanded(!expanded)}
         >
-          {expanded ? "Show less" : "Show more"}
+          {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+          <span>{expanded ? "Less" : "More"}</span>
         </button>
       )}
     </div>
@@ -358,15 +368,7 @@ function ExpandableContent({ label, children }: { label: string; children: React
 // --- Raw JSON View ---
 
 function RawJsonView({ trace }: { trace: TraceDetailData }) {
-  const rawData = {
-    traceId: trace.traceId,
-    timestamp: trace.timestamp,
-    durationMs: trace.durationMs,
-    status: trace.status,
-    spanAttributes: trace.spanAttributes,
-  };
-
-  const jsonStr = JSON.stringify(rawData, null, 2);
+  const jsonStr = JSON.stringify(trace, null, 2);
 
   return (
     <div className="relative">
@@ -374,7 +376,7 @@ function RawJsonView({ trace }: { trace: TraceDetailData }) {
         value={jsonStr}
         className="absolute top-2.5 right-2.5 rounded-md hover:bg-muted"
       />
-      <pre className="overflow-x-auto rounded-lg border bg-muted/30 p-3 text-sm break-words whitespace-pre-wrap text-foreground">
+      <pre className="overflow-x-auto rounded-lg border bg-muted/30 p-3 text-xs break-words whitespace-pre-wrap text-foreground">
         {jsonStr}
       </pre>
     </div>
@@ -390,9 +392,9 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
     <div className="flex flex-col gap-5">
       {metadataEntries.length > 0 && (
         <div>
-          <h3 className="mb-3 text-sm font-medium text-foreground">Request Metadata</h3>
+          <h3 className="mb-3 text-xs font-medium text-foreground">Request Metadata</h3>
           <div className="overflow-hidden rounded-lg border">
-            <table className="w-full text-sm">
+            <table className="w-full text-xs">
               <tbody>
                 {metadataEntries.map(([key, value]) => (
                   <tr key={key} className="border-b last:border-b-0">
@@ -407,9 +409,9 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
       )}
 
       <div>
-        <h3 className="mb-3 text-sm font-medium text-foreground">Identifiers</h3>
+        <h3 className="mb-3 text-xs font-medium text-foreground">Identifiers</h3>
         <div className="overflow-hidden rounded-lg border">
-          <table className="w-full text-sm">
+          <table className="w-full text-xs">
             <tbody>
               <IdentifierRow label="Trace ID" value={trace.traceId} />
               <IdentifierRow label="Response ID" value={trace.responseId} />

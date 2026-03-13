@@ -5,7 +5,12 @@ import { Button } from "@hebo/shared-ui/components/Button";
 import { Skeleton } from "@hebo/shared-ui/components/Skeleton";
 
 import type { TraceListData } from "./types";
-import { formatDuration, formatTimestampShort, truncateText } from "./utils";
+import {
+  formatDuration,
+  formatTimestampShort,
+  getTraceStatusBadgeProps,
+  truncateText,
+} from "./utils";
 type TraceListProps = {
   traces: TraceListData;
   hasNextPage: boolean;
@@ -40,6 +45,7 @@ export function TraceList({
       <div className="flex flex-col divide-y">
         {traces.map((trace) => {
           const isSelected = trace.traceId === selectedTraceId;
+          const statusBadge = getTraceStatusBadgeProps(trace.status);
 
           return (
             <button
@@ -51,27 +57,28 @@ export function TraceList({
               onClick={() => onSelectTrace(trace.traceId)}
             >
               <div className="flex items-center justify-between gap-2">
-                <span className="truncate text-base font-semibold">{trace.operationName}</span>
-                <span className="shrink-0 text-xs text-muted-foreground">
+                <span className="truncate text-sm font-semibold">
+                  {trace.model ?? trace.provider ?? "unknown"}
+                </span>
+                <span className="shrink-0 text-[11px] text-muted-foreground">
                   {formatTimestampShort(trace.timestamp)}
                 </span>
               </div>
 
               {trace.summary && (
-                <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
                   {truncateText(trace.summary, 120)}
                 </p>
               )}
 
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Badge
-                  variant="secondary"
-                  className="max-w-full bg-muted break-all whitespace-normal"
-                >
-                  {trace.model ?? trace.provider ?? "unknown"}
+                <Badge variant="secondary" className="bg-muted font-normal text-foreground">
+                  {trace.operationName}
                 </Badge>
-                <Badge variant="secondary">{formatDuration(trace.durationMs)}</Badge>
-                <Badge variant={trace.status === "error" ? "destructive" : "secondary"}>
+                <Badge variant="secondary" className="font-normal">
+                  {formatDuration(trace.durationMs)}
+                </Badge>
+                <Badge variant={statusBadge.variant} className={statusBadge.className}>
                   {trace.status}
                 </Badge>
               </div>

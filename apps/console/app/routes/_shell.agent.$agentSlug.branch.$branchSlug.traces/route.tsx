@@ -1,5 +1,8 @@
+import { ChevronLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
+
+import { Button } from "@hebo/shared-ui/components/Button";
 
 import { api } from "~console/lib/service";
 
@@ -49,8 +52,12 @@ export default function TracesRoute() {
 
   return (
     <div className="h-full min-h-0 flex-1 overflow-y-hidden">
-      <div className="grid h-full min-h-0 gap-3 overflow-y-hidden pb-4 xl:grid-cols-[28rem_minmax(0,1fr)]">
-        <div className="relative z-10 flex h-full min-h-0 flex-col rounded-2xl border bg-card pt-4 pb-2">
+      <div className="@container grid h-full min-h-0 grid-cols-1 gap-3 overflow-y-hidden pb-4 @2xl:grid-cols-[5fr_7fr]">
+        <div
+          className={`relative z-10 flex h-full min-h-0 flex-col rounded-2xl border bg-card pt-4 pb-2 ${
+            selectedTraceId ? "hidden @2xl:flex" : ""
+          }`}
+        >
           <TraceListPanel
             agentSlug={agentSlug}
             branchSlug={branchSlug}
@@ -60,8 +67,24 @@ export default function TracesRoute() {
         </div>
 
         <div
-          className={`h-full min-h-0 overflow-hidden ${selectedTraceId ? "" : "hidden xl:block"}`}
+          className={`h-full min-h-0 overflow-hidden @2xl:hidden ${
+            selectedTraceId ? "block" : "hidden"
+          }`}
         >
+          <div className="flex h-full min-h-0 flex-col gap-3">
+            <div className="shrink-0">
+              <Button variant="outline" size="sm" onClick={() => setSelectedTraceId(null)}>
+                <ChevronLeft className="size-4" />
+                Back to traces
+              </Button>
+            </div>
+            <div className="min-h-0 flex-1 overflow-hidden">
+              <TraceDetail trace={traceDetail} loading={detailLoading} />
+            </div>
+          </div>
+        </div>
+
+        <div className="hidden h-full min-h-0 overflow-hidden @2xl:block">
           <TraceDetail trace={traceDetail} loading={detailLoading} />
         </div>
       </div>

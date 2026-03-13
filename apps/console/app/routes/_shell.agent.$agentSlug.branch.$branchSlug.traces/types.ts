@@ -11,3 +11,4 @@ export type TraceListData = TraceListResponse["data"];
 export type TraceListItem = TraceListData[number];
 export type TraceDetailData = Treaty.Data<TraceDetailRoute["get"]>;
 export type TraceMetadataTags = TraceMetadataResponse["tags"];
+export type TraceStatus = TraceListItem["status"];
