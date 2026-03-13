@@ -28,7 +28,6 @@ export default function TracesRoute() {
     }
 
     let cancelled = false;
-
     setDetailLoading(true);
 
     (async () => {

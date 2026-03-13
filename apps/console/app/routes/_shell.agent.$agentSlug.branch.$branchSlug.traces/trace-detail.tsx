@@ -2,6 +2,7 @@ import { ChevronRight, ChevronUp, Wrench } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
+import { Button } from "@hebo/shared-ui/components/Button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -22,11 +23,14 @@ import {
   getTraceStatusBadgeProps,
 } from "./utils";
 
-type TraceDetailProps = { trace: TraceDetailData | null; loading: boolean };
 const COLLAPSE_TOGGLE_CLASS_NAME =
-  "mt-3 inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1 text-[10px] font-medium text-muted-foreground uppercase hover:bg-muted hover:text-foreground";
+  "mt-3 h-auto rounded-full bg-muted/60 px-2.5 py-1 text-xs font-medium uppercase text-muted-foreground hover:bg-muted hover:text-foreground";
+const INLINE_DISCLOSURE_CLASS_NAME =
+  "h-auto gap-1 px-0 py-0 text-sm text-muted-foreground hover:text-foreground";
 const CODE_BLOCK_CLASS_NAME =
   "overflow-x-auto rounded-md border bg-muted/30 p-3 text-xs break-words whitespace-pre-wrap text-foreground";
+
+type TraceDetailProps = { trace: TraceDetailData | null; loading: boolean };
 
 export function TraceDetail({ trace, loading }: TraceDetailProps) {
   if (loading) {
@@ -233,11 +237,9 @@ const ROLE_ACCENTS: Record<string, string> = {
 };
 
 function MessageBlock({ message }: { message: TraceMessage }) {
-  const contentRef = useRef<HTMLDivElement>(null);
-
   const { content, reasoning, toolCalls, otherParts } = extractMessageParts(message);
 
-  const roleLabel = message.role.charAt(0).toUpperCase() + message.role.slice(1);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   return (
     <section className="py-4 first:pt-0 last:pb-0">
@@ -246,7 +248,9 @@ function MessageBlock({ message }: { message: TraceMessage }) {
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-base font-semibold tracking-tight">{roleLabel}</span>
+            <span className="text-base font-semibold tracking-tight">
+              {message.role.charAt(0).toUpperCase() + message.role.slice(1)}
+            </span>
 
             {message.role === "tool" && message.name && (
               <Badge variant="outline">
@@ -300,7 +304,7 @@ function CollapsibleText({ text, maxLength }: { text: string; maxLength: number 
     <Collapsible open={expanded} onOpenChange={setExpanded}>
       <p
         className={cn(
-          "text-xs leading-4 break-words whitespace-pre-wrap",
+          "text-xs leading-4 wrap-break-word whitespace-pre-wrap",
           !expanded && needsTruncation && "line-clamp-6",
         )}
       >
@@ -309,10 +313,10 @@ function CollapsibleText({ text, maxLength }: { text: string; maxLength: number 
       {needsTruncation && (
         <CollapsibleTrigger
           render={
-            <button type="button" className={COLLAPSE_TOGGLE_CLASS_NAME}>
+            <Button variant="ghost" size="sm" className={COLLAPSE_TOGGLE_CLASS_NAME}>
               {expanded ? <ChevronUp className="size-3" /> : <ChevronRight className="size-3" />}
               <span>{expanded ? "Less" : "More"}</span>
-            </button>
+            </Button>
           }
         />
       )}
@@ -337,10 +341,10 @@ function CollapsibleCode({ code, maxLength }: { code: string; maxLength: number 
       {needsTruncation && (
         <CollapsibleTrigger
           render={
-            <button type="button" className={COLLAPSE_TOGGLE_CLASS_NAME}>
+            <Button variant="ghost" size="sm" className={COLLAPSE_TOGGLE_CLASS_NAME}>
               {expanded ? <ChevronUp className="size-3" /> : <ChevronRight className="size-3" />}
               <span>{expanded ? "Less" : "More"}</span>
-            </button>
+            </Button>
           }
         />
       )}
@@ -353,13 +357,10 @@ function ExpandableContent({ label, children }: { label: string; children: React
     <Collapsible>
       <CollapsibleTrigger
         render={
-          <button
-            type="button"
-            className="group flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ChevronRight className="size-3 transition-transform group-data-[panel-open]:rotate-90" />
+          <Button variant="ghost" size="sm" className={cn("group", INLINE_DISCLOSURE_CLASS_NAME)}>
+            <ChevronRight className="size-3 transition-transform group-data-panel-open:rotate-90" />
             <span>{label}</span>
-          </button>
+          </Button>
         }
       />
       <CollapsibleContent>
