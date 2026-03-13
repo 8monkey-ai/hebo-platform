@@ -311,9 +311,10 @@ function FiltersControl({
 }) {
   const [filterKey, setFilterKey] = useState("");
   const [filterValue, setFilterValue] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
   return (
-    <Popover>
+    <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
       <PopoverTrigger
         render={
           <Button variant="outline" size="sm">
@@ -389,6 +390,7 @@ function FiltersControl({
                   onAddFilter(filterKey, filterValue);
                   setFilterKey("");
                   setFilterValue("");
+                  setFiltersOpen(false);
                 }}
                 disabled={!filterKey || !filterValue}
               >
