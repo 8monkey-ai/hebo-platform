@@ -65,7 +65,7 @@ export function TraceList({
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="truncate text-sm font-semibold">
-                  {trace.model ?? trace.provider ?? "unknown"}
+                  {trace.model || trace.provider || "unknown"}
                 </span>
                 <span className="shrink-0 text-[11px] text-muted-foreground">
                   {formatTimestampShort(trace.timestamp)}

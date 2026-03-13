@@ -153,7 +153,13 @@ export function TraceListPanel({
               onRemoveFilter={handleRemoveFilter}
             />
 
-            <Button variant="outline" size="icon-sm" onClick={handleRefresh}>
+            <Button
+              variant="outline"
+              size="icon-sm"
+              onClick={handleRefresh}
+              aria-label="Refresh traces"
+              title="Refresh traces"
+            >
               <RefreshCw className={`size-3.5 ${listLoading ? "animate-spin" : ""}`} />
             </Button>
           </div>
@@ -374,7 +380,10 @@ function FiltersControl({
               <div className="min-w-0 flex-1">
                 <Select
                   value={filterValue}
-                  onValueChange={setFilterValue}
+                  onValueChange={(value) => {
+                    setFilterKey(value);
+                    setFilterValue("");
+                  }}
                   items={(metadataTags[filterKey] ?? []).map((value) => ({
                     value,
                     label: value,
