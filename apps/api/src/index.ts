@@ -39,7 +39,7 @@ const createApi = () =>
           .use(agentsModule)
           // /agents/:slug/branches/[:slug]
           .use(branchesModule)
-          // /agents/:slug/branches/:slug/traces/[:id]]
+          // /agents/:slug/branches/:slug/traces/[:id]
           .use(spansModule)
           // /providers
           .use(providersModule),
