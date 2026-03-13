@@ -151,11 +151,11 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
   return (
     <div className="flex min-h-0 flex-col divide-y">
       {inputMessages.map((msg, index) => (
-        <MessageBlock key={`in:${index}`} message={msg} />
+        <MessageBlock key={`${trace.spanId}:in:${index}`} message={msg} />
       ))}
 
       {outputMessages.map((msg, index) => (
-        <MessageBlock key={`out:${index}`} message={msg} />
+        <MessageBlock key={`${trace.spanId}:out:${index}`} message={msg} />
       ))}
 
       {inputMessages.length === 0 && outputMessages.length === 0 && (
@@ -270,8 +270,8 @@ function MessageBlock({ message }: { message: TraceMessage }) {
 
           {content && <CollapsibleText text={content} maxLength={500} />}
 
-          {toolCalls.map((tc) => (
-            <div key={`${tc.name}:${tc.arguments}`} className="space-y-2">
+          {toolCalls.map((tc, index) => (
+            <div key={`tool-call:${index}`} className="space-y-2">
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Wrench className="size-3" />
                 <span className="font-medium">{tc.name}</span>
