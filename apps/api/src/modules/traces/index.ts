@@ -1,14 +1,20 @@
 import { Elysia, status, t } from "elysia";
 
-import { greptimeDb } from "~api/middleware/greptime";
+import { greptimeDb as greptimeDbMiddleware } from "~api/middleware/greptime";
 
 import { getMetadataTags, getTrace, listTraces } from "./service";
-import { MetadataTagsResponse, TraceDetail, TraceListResponse } from "./types";
+import {
+  MetadataTagsResponse,
+  TraceDetail,
+  TraceListQuery,
+  TraceListResponse,
+  TraceMetadataQuery,
+} from "./types";
 
 export const tracesModule = new Elysia({
   prefix: "/:agentSlug/branches/:branchSlug/traces",
 })
-  .use(greptimeDb)
+  .use(greptimeDbMiddleware)
   .get(
     "/",
     async ({ greptimeDb, organizationId, params, query }) => {
@@ -36,30 +42,7 @@ export const tracesModule = new Elysia({
       );
     },
     {
-      query: t.Object(
-        {
-          from: t.Optional(
-            t.String({
-              default: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-              format: "date-time",
-            }),
-          ),
-          to: t.Optional(
-            t.String({
-              default: new Date().toISOString(),
-              format: "date-time",
-            }),
-          ),
-          page: t.Optional(t.Number({ default: 1 })),
-          pageSize: t.Optional(t.Number({ default: 50 })),
-        },
-        {
-          additionalProperties: false,
-          patternProperties: {
-            "^meta\\..+": t.String(),
-          },
-        },
-      ),
+      query: TraceListQuery,
       response: { 200: TraceListResponse },
     },
   )
@@ -79,20 +62,7 @@ export const tracesModule = new Elysia({
       );
     },
     {
-      query: t.Object({
-        from: t.Optional(
-          t.String({
-            default: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-            format: "date-time",
-          }),
-        ),
-        to: t.Optional(
-          t.String({
-            default: new Date().toISOString(),
-            format: "date-time",
-          }),
-        ),
-      }),
+      query: TraceMetadataQuery,
       response: { 200: MetadataTagsResponse },
     },
   )

@@ -1,11 +1,10 @@
-import type { GreptimeDb } from "~api/middleware/greptime";
-
 import {
   parseJson,
   parseJsonArrayItems,
   parseNullableNumber,
   toGreptimeDatetime,
-} from "./greptime";
+} from "~api/lib/greptime";
+import type { GreptimeDb } from "~api/middleware/greptime";
 
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 

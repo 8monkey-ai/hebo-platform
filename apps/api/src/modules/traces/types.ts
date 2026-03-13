@@ -1,5 +1,42 @@
 import { t } from "elysia";
 
+const DefaultFromDate = () => new Date(Date.now() - 60 * 60 * 1000).toISOString();
+const DefaultToDate = () => new Date().toISOString();
+
+const TraceFromQuery = t.Optional(
+  t.String({
+    default: DefaultFromDate(),
+    format: "date-time",
+  }),
+);
+
+const TraceToQuery = t.Optional(
+  t.String({
+    default: DefaultToDate(),
+    format: "date-time",
+  }),
+);
+
+export const TraceListQuery = t.Object(
+  {
+    from: TraceFromQuery,
+    to: TraceToQuery,
+    page: t.Optional(t.Number({ default: 1 })),
+    pageSize: t.Optional(t.Number({ default: 50 })),
+  },
+  {
+    additionalProperties: false,
+    patternProperties: {
+      "^meta\\..+": t.String(),
+    },
+  },
+);
+
+export const TraceMetadataQuery = t.Object({
+  from: TraceFromQuery,
+  to: TraceToQuery,
+});
+
 export const TraceListItem = t.Object({
   timestamp: t.String(),
   traceId: t.String(),
