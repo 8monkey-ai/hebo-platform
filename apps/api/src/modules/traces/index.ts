@@ -5,13 +5,13 @@ import { greptimeDb as greptimeDbMiddleware } from "~api/middleware/greptime";
 import { getMetadataTags, getSpan, listSpans } from "./service";
 import {
   MetadataTagsResponse,
-  TraceDetail,
-  TraceListQuery,
-  TraceListResponse,
-  TraceMetadataQuery,
+  SpanDetail,
+  SpanListQuery,
+  SpanListResponse,
+  SpanMetadataQuery,
 } from "./types";
 
-export const tracesModule = new Elysia({
+export const spansModule = new Elysia({
   prefix: "/:agentSlug/branches/:branchSlug/traces",
 })
   .use(greptimeDbMiddleware)
@@ -42,8 +42,8 @@ export const tracesModule = new Elysia({
       );
     },
     {
-      query: TraceListQuery,
-      response: { 200: TraceListResponse },
+      query: SpanListQuery,
+      response: { 200: SpanListResponse },
     },
   )
   .get(
@@ -62,7 +62,7 @@ export const tracesModule = new Elysia({
       );
     },
     {
-      query: TraceMetadataQuery,
+      query: SpanMetadataQuery,
       response: { 200: MetadataTagsResponse },
     },
   )
@@ -82,6 +82,6 @@ export const tracesModule = new Elysia({
       return status(200, trace);
     },
     {
-      response: { 200: TraceDetail, 404: t.String() },
+      response: { 200: SpanDetail, 404: t.String() },
     },
   );
