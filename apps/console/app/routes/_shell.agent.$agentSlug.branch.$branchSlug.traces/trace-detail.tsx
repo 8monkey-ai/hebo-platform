@@ -59,9 +59,9 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
       <Tabs defaultValue="formatted" className="flex min-h-0 flex-1 flex-col">
         <div className="shrink-0 border-b px-4 py-4">
           <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0">
+            <div className="min-w-0 space-y-1">
               <h2>{trace.responseModel}</h2>
-              <p className="mt-1 truncate text-xs text-muted-foreground">
+              <p className="truncate text-xs text-muted-foreground">
                 {[
                   trace.operationName,
                   formatTimestampFull(trace.timestamp),
@@ -79,7 +79,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
             </div>
           </div>
 
-          <div className="mt-3 flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3 pt-3">
             <TabsList>
               <TabsTrigger value="formatted">Formatted</TabsTrigger>
               <TabsTrigger value="raw">Raw JSON</TabsTrigger>

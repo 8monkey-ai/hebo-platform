@@ -60,7 +60,7 @@ export function TraceList({
               key={trace.spanId}
               type="button"
               className={cn(
-                "w-full px-4 py-4 text-left transition-colors hover:bg-accent/40",
+                "flex w-full flex-col gap-3 px-4 py-4 text-left transition-colors hover:bg-accent/40",
                 isSelected && "bg-accent/60",
               )}
               onClick={() => onSelectSpan(trace.spanId)}
@@ -75,12 +75,12 @@ export function TraceList({
               </div>
 
               {trace.summary && (
-                <p className="mt-2 line-clamp-2 text-xs text-muted-foreground">
+                <p className="line-clamp-2 text-xs text-muted-foreground">
                   {truncateText(trace.summary, 120)}
                 </p>
               )}
 
-              <div className="mt-3 flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <Badge variant="secondary" className="bg-muted text-muted-foreground">
                   {trace.operationName}
                 </Badge>
@@ -121,13 +121,13 @@ function TraceListSkeleton() {
   return (
     <div className="flex min-h-full flex-col divide-y">
       {["one", "two", "three", "four", "five"].map((item) => (
-        <div key={item} className="px-4 py-4">
+        <div key={item} className="flex flex-col gap-2 px-4 py-4">
           <div className="flex items-center justify-between">
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-3 w-12" />
           </div>
-          <Skeleton className="mt-2 h-3 w-full" />
-          <div className="mt-2 flex gap-2">
+          <Skeleton className="h-3 w-full" />
+          <div className="flex gap-2">
             <Skeleton className="h-5 w-24" />
             <Skeleton className="h-5 w-12" />
             <Skeleton className="h-5 w-8" />
