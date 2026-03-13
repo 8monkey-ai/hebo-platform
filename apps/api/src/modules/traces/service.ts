@@ -32,6 +32,9 @@ export async function listSpans(
     metaValues.push(value!);
   }
 
+  const limitParam = metaValues.length + 6;
+  const offsetParam = metaValues.length + 7;
+
   // We need to use raw SQL since Bun.SQL tagged templates don't support dynamic column names
   const queryText = `
     SELECT
@@ -52,27 +55,25 @@ export async function listSpans(
       AND "timestamp" <= $5
       ${metaFilterSql}
     ORDER BY "timestamp" DESC
-    LIMIT ${limit} OFFSET ${offset}
+    LIMIT $${limitParam} OFFSET $${offsetParam}
   `;
 
-  const params = [agentSlug, branchSlug, organizationId, from, to, ...metaValues];
+  const params = [agentSlug, branchSlug, organizationId, from, to, ...metaValues, limit, offset];
 
   const rows = (await greptimeDb.unsafe(queryText, params)) as any[];
   const hasNextPage = rows.length > pageSize;
   const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
 
-  const data = pageRows.map((row) => {
-    return {
-      timestamp: String(row.timestamp),
-      spanId: String(row.span_id ?? ""),
-      operationName: String(row.operation_name ?? ""),
-      model: String(row.response_model ?? ""),
-      provider: String(row.provider_name ?? ""),
-      status: formatStatus(row.span_status_code),
-      durationMs: Number(row.duration_nano ?? 0) / 1e6,
-      summary: extractSummary(row.output_message),
-    };
-  });
+  const data = pageRows.map((row) => ({
+    timestamp: String(row.timestamp),
+    spanId: String(row.span_id ?? ""),
+    operationName: String(row.operation_name ?? ""),
+    model: String(row.response_model ?? ""),
+    provider: String(row.provider_name ?? ""),
+    status: formatStatus(row.span_status_code),
+    durationMs: Number(row.duration_nano ?? 0) / 1e6,
+    summary: extractSummary(row.output_message),
+  }));
 
   return { data, hasNextPage };
 }
@@ -186,9 +187,9 @@ export async function getMetadataTags(
 
   const colRows = (await greptimeDb.unsafe(
     `SELECT column_name
-     FROM information_schema.columns
-     WHERE table_name = 'opentelemetry_traces'
-       AND column_name LIKE $1`,
+    FROM information_schema.columns
+    WHERE table_name = 'opentelemetry_traces'
+      AND column_name LIKE $1`,
     [`${METADATA_PREFIX}%`],
   )) as Array<{ column_name: unknown }>;
 
@@ -204,16 +205,16 @@ export async function getMetadataTags(
 
   const rows = (await greptimeDb.unsafe(
     `SELECT ${columns.map(({ colName }) => `"${escapeSqlIdentifier(colName)}"`).join(", ")}
-     FROM opentelemetry_traces
-     WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
-       AND "span_attributes.hebo.agent.slug" = $1
-       AND "span_attributes.hebo.branch.slug" = $2
-       AND "span_attributes.hebo.organization.id" = $3
-       AND "timestamp" >= $4
-       AND "timestamp" <= $5
-     ORDER BY "timestamp" DESC
-     LIMIT ${MAX_ROWS}`,
-    [agentSlug, branchSlug, organizationId, from, to],
+    FROM opentelemetry_traces
+    WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
+      AND "span_attributes.hebo.agent.slug" = $1
+      AND "span_attributes.hebo.branch.slug" = $2
+      AND "span_attributes.hebo.organization.id" = $3
+      AND "timestamp" >= $4
+      AND "timestamp" <= $5
+    ORDER BY "timestamp" DESC
+    LIMIT $6`,
+    [agentSlug, branchSlug, organizationId, from, to, MAX_ROWS],
   )) as Array<Record<string, unknown>>;
 
   const tagSets = Object.fromEntries(
