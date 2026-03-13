@@ -8,16 +8,12 @@ import { TraceListPanel } from "./trace-list-panel";
 
 type TraceDetailData = {
   timestamp: string;
-  timestampEnd: string;
   traceId: string;
-  spanId: string;
-  spanName: string;
   operationName: string;
   model: string;
   responseModel: string;
   provider: string;
   status: string;
-  statusMessage: string;
   durationMs: number;
   inputTokens: number | null;
   outputTokens: number | null;

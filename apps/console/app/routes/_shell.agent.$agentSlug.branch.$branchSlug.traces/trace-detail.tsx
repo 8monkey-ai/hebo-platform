@@ -9,16 +9,12 @@ import { formatDuration, formatTimestampFull, formatTokenCount } from "./utils";
 
 type TraceDetailData = {
   timestamp: string;
-  timestampEnd: string;
   traceId: string;
-  spanId: string;
-  spanName: string;
   operationName: string;
   model: string;
   responseModel: string;
   provider: string;
   status: string;
-  statusMessage: string;
   durationMs: number;
   inputTokens: number | null;
   outputTokens: number | null;
@@ -208,7 +204,7 @@ function normalizeMessages(messages: unknown): NormalizedMessage[] {
       return {
         role: String(msg.role ?? "unknown"),
         content: textParts.join("\n"),
-        toolCalls: toolCalls.length ? toolCalls : undefined,
+        toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
         toolName: msg.role === "tool" && typeof msg.name === "string" ? msg.name : undefined,
         reasoning,
       };
@@ -359,13 +355,9 @@ function ExpandableContent({ label, children }: { label: string; children: React
 function RawJsonView({ trace }: { trace: TraceDetailData }) {
   const rawData = {
     traceId: trace.traceId,
-    spanId: trace.spanId,
-    spanName: trace.spanName,
     timestamp: trace.timestamp,
-    timestampEnd: trace.timestampEnd,
     durationMs: trace.durationMs,
     status: trace.status,
-    statusMessage: trace.statusMessage,
     spanAttributes: trace.spanAttributes,
     resourceAttributes: trace.resourceAttributes,
   };
@@ -416,7 +408,6 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
           <table className="w-full text-sm">
             <tbody>
               <IdentifierRow label="Trace ID" value={trace.traceId} />
-              <IdentifierRow label="Span ID" value={trace.spanId} />
               <IdentifierRow label="Response ID" value={trace.responseId} />
               <IdentifierRow label="Model" value={trace.model} />
               <IdentifierRow label="Response Model" value={trace.responseModel} />

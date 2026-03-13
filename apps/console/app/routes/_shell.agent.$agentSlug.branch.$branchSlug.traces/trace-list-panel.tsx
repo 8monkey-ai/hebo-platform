@@ -14,7 +14,6 @@ import { formatDateRangeSummary, timeRangeToParams } from "./utils";
 type TraceListItem = {
   timestamp: string;
   traceId: string;
-  spanId: string;
   operationName: string;
   model: string;
   provider: string;

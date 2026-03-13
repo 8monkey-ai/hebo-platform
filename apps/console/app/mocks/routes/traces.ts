@@ -30,7 +30,6 @@ const mockTraces = [
   {
     timestamp: new Date(now - 3 * min).toISOString(),
     traceId: "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e",
-    spanId: "a1b2c3d4e5f60001",
     operationName: "chat",
     model: "gpt-oss-120b",
     provider: "openai",
@@ -42,7 +41,6 @@ const mockTraces = [
   {
     timestamp: new Date(now - 6 * min).toISOString(),
     traceId: "7a2b3c4d-e5f6-7890-abcd-ef1234567890",
-    spanId: "a1b2c3d4e5f60002",
     operationName: "chat",
     model: "gpt-4.1",
     provider: "openai",
@@ -53,7 +51,6 @@ const mockTraces = [
   {
     timestamp: new Date(now - 12 * min).toISOString(),
     traceId: "3c4d5e6f-7890-abcd-ef12-345678901234",
-    spanId: "a1b2c3d4e5f60003",
     operationName: "chat",
     model: "claude-sonnet-4-20250514",
     provider: "anthropic",
@@ -64,7 +61,6 @@ const mockTraces = [
   {
     timestamp: new Date(now - 18 * min).toISOString(),
     traceId: "4d5e6f70-8901-bcde-f123-456789012345",
-    spanId: "a1b2c3d4e5f60004",
     operationName: "chat",
     model: "gpt-oss-20b",
     provider: "openai",
@@ -75,7 +71,6 @@ const mockTraces = [
   {
     timestamp: new Date(now - 25 * min).toISOString(),
     traceId: "5e6f7081-9012-cdef-0123-567890123456",
-    spanId: "a1b2c3d4e5f60005",
     operationName: "embeddings",
     model: "voyage-3.5",
     provider: "voyage",
@@ -88,7 +83,6 @@ const mockTraces = [
 const generatedMockTraces = Array.from({ length: 18 }).map((_, index) => {
   const timestamp = new Date(now - (30 + index * 4) * min).toISOString();
   const traceId = `90000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
-  const spanId = `feedfacecafe${String(index + 1).padStart(4, "0")}`;
   const provider = index % 3 === 0 ? "openai" : index % 3 === 1 ? "anthropic" : "google";
   const model =
     provider === "openai"
@@ -102,7 +96,6 @@ const generatedMockTraces = Array.from({ length: 18 }).map((_, index) => {
   return {
     timestamp,
     traceId,
-    spanId,
     operationName,
     model,
     provider,
@@ -120,16 +113,12 @@ mockTraces.push(...generatedMockTraces);
 const mockTraceDetails: Record<string, object> = {
   "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e": {
     timestamp: mockTraces[0]!.timestamp,
-    timestampEnd: new Date(new Date(mockTraces[0]!.timestamp).getTime() + 842).toISOString(),
     traceId: "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e",
-    spanId: "a1b2c3d4e5f60001",
-    spanName: "gen_ai.chat",
     operationName: "chat",
     model: "gpt-oss-120b",
     responseModel: "gpt-oss-120b-2026-03-01",
     provider: "openai",
     status: "ok",
-    statusMessage: "",
     durationMs: 842,
     inputTokens: 912,
     outputTokens: 372,
@@ -230,16 +219,12 @@ const mockTraceDetails: Record<string, object> = {
   },
   "7a2b3c4d-e5f6-7890-abcd-ef1234567890": {
     timestamp: mockTraces[1]!.timestamp,
-    timestampEnd: new Date(new Date(mockTraces[1]!.timestamp).getTime() + 1234).toISOString(),
     traceId: "7a2b3c4d-e5f6-7890-abcd-ef1234567890",
-    spanId: "a1b2c3d4e5f60002",
-    spanName: "gen_ai.chat",
     operationName: "chat",
     model: "gpt-4.1",
     responseModel: "gpt-4.1-2026-04-14",
     provider: "openai",
     status: "ok",
-    statusMessage: "",
     durationMs: 1234,
     inputTokens: 2048,
     outputTokens: 1536,
@@ -299,16 +284,12 @@ const mockTraceDetails: Record<string, object> = {
   },
   "3c4d5e6f-7890-abcd-ef12-345678901234": {
     timestamp: mockTraces[2]!.timestamp,
-    timestampEnd: new Date(new Date(mockTraces[2]!.timestamp).getTime() + 2834).toISOString(),
     traceId: "3c4d5e6f-7890-abcd-ef12-345678901234",
-    spanId: "a1b2c3d4e5f60003",
-    spanName: "gen_ai.chat",
     operationName: "chat",
     model: "claude-sonnet-4-20250514",
     responseModel: "claude-sonnet-4-20250514",
     provider: "anthropic",
     status: "error",
-    statusMessage: "Rate limit exceeded",
     durationMs: 2834,
     inputTokens: 4096,
     outputTokens: 0,
@@ -346,16 +327,12 @@ const mockTraceDetails: Record<string, object> = {
   },
   "4d5e6f70-8901-bcde-f123-456789012345": {
     timestamp: mockTraces[3]!.timestamp,
-    timestampEnd: new Date(new Date(mockTraces[3]!.timestamp).getTime() + 456).toISOString(),
     traceId: "4d5e6f70-8901-bcde-f123-456789012345",
-    spanId: "a1b2c3d4e5f60004",
-    spanName: "gen_ai.chat",
     operationName: "chat",
     model: "gpt-oss-20b",
     responseModel: "gpt-oss-20b",
     provider: "openai",
     status: "ok",
-    statusMessage: "",
     durationMs: 456,
     inputTokens: 128,
     outputTokens: 64,
@@ -393,16 +370,12 @@ const mockTraceDetails: Record<string, object> = {
   },
   "5e6f7081-9012-cdef-0123-567890123456": {
     timestamp: mockTraces[4]!.timestamp,
-    timestampEnd: new Date(new Date(mockTraces[4]!.timestamp).getTime() + 89).toISOString(),
     traceId: "5e6f7081-9012-cdef-0123-567890123456",
-    spanId: "a1b2c3d4e5f60005",
-    spanName: "gen_ai.embeddings",
     operationName: "embeddings",
     model: "voyage-3.5",
     responseModel: "voyage-3.5",
     provider: "voyage",
     status: "ok",
-    statusMessage: "",
     durationMs: 89,
     inputTokens: 256,
     outputTokens: null,
@@ -434,17 +407,12 @@ const mockTraceDetails: Record<string, object> = {
 for (const [index, trace] of generatedMockTraces.entries()) {
   mockTraceDetails[trace.traceId] = {
     timestamp: trace.timestamp,
-    timestampEnd: new Date(new Date(trace.timestamp).getTime() + trace.durationMs).toISOString(),
     traceId: trace.traceId,
-    spanId: trace.spanId,
-    spanName: trace.operationName,
     operationName: trace.operationName,
     model: trace.model,
     responseModel: `${trace.model}-2026-03-01`,
     provider: trace.provider,
     status: trace.status,
-    statusMessage:
-      trace.status === "error" ? "Provider timeout while aggregating tool results" : "",
     durationMs: trace.durationMs,
     inputTokens: 1200 + index * 40,
     outputTokens: trace.status === "error" ? 0 : 480 + index * 20,

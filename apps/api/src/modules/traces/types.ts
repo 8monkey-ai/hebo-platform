@@ -44,7 +44,6 @@ export const TraceMetadataQuery = t.Object({
 export const TraceListItem = t.Object({
   timestamp: t.String(),
   traceId: t.String(),
-  spanId: t.String(),
   operationName: t.String(),
   model: t.String(),
   provider: t.String(),
@@ -62,16 +61,12 @@ export const TraceListResponse = t.Object({
 
 export const TraceDetail = t.Object({
   timestamp: t.String(),
-  timestampEnd: t.String(),
   traceId: t.String(),
-  spanId: t.String(),
-  spanName: t.String(),
   operationName: t.String(),
   model: t.String(),
   responseModel: t.String(),
   provider: t.String(),
   status: t.String(),
-  statusMessage: t.String(),
   durationMs: t.Number(),
   inputTokens: t.Nullable(t.Number()),
   outputTokens: t.Nullable(t.Number()),

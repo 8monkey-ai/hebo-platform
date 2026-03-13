@@ -9,7 +9,6 @@ import { formatDuration, formatTimestampShort, truncateText } from "./utils";
 type TraceListItem = {
   timestamp: string;
   traceId: string;
-  spanId: string;
   operationName: string;
   model: string;
   provider: string;
@@ -59,7 +58,7 @@ export function TraceList({
 
           return (
             <button
-              key={`${trace.traceId}-${trace.spanId}`}
+              key={trace.traceId}
               type="button"
               className={`w-full px-4 py-4 text-left transition-colors hover:bg-accent/40 ${
                 isSelected ? "bg-accent/60" : ""

@@ -5,10 +5,6 @@ export function toGreptimeDatetime(date: Date): string {
 export function parseNullableNumber(value: unknown): number | null {
   if (value === null || value === undefined || value === "") return null;
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
   return null;
 }
 
@@ -24,16 +20,11 @@ export function parseJson(value: unknown): unknown {
   if (typeof value === "object") return value;
   if (typeof value === "string") {
     try {
-      return JSON.parse(value);
+      return JSON.parse(normalizeJsonUnicodeEscapes(value));
     } catch {
-      try {
-        return JSON.parse(normalizeJsonUnicodeEscapes(value));
-      } catch {
-        return value;
-      }
+      return value;
     }
   }
-  return value;
 }
 
 export function parseJsonArray(value: unknown): unknown[] | null {

@@ -8,20 +8,37 @@ import type { GreptimeDb } from "~api/middleware/greptime";
 
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
+function formatStatus(statusCode: string | null): string {
+  if (!statusCode) return "unknown";
+  if (statusCode === "STATUS_CODE_OK" || statusCode === "STATUS_CODE_UNSET") return "ok";
+  if (statusCode === "STATUS_CODE_ERROR") return "error";
+  return statusCode.replace("STATUS_CODE_", "").toLowerCase();
+}
+
 function extractSummary(outputMessages: unknown): string {
   const message = parseJson(outputMessages);
   const parts =
-    message && typeof message === "object" && Array.isArray((message as { parts?: unknown }).parts)
-      ? ((message as { parts: unknown[] }).parts ?? [])
-      : [];
+    message && typeof message === "object" ? (message as { parts?: unknown }).parts : undefined;
 
-  const content = parts
-    .map((part) => (part && typeof part === "object" ? (part as Record<string, unknown>) : null))
-    .filter((part) => part?.type === "text" && typeof part.content === "string")
-    .map((part) => String(part?.content))
-    .join(" ");
+  if (!Array.isArray(parts)) return "";
 
-  return content.slice(0, 200) + (content.length > 200 ? "..." : "");
+  let content = "";
+
+  for (const part of parts) {
+    if (!part || typeof part !== "object") continue;
+
+    const { type, content: text } = part as {
+      type?: unknown;
+      content?: unknown;
+    };
+
+    if (type === "text" && typeof text === "string") {
+      content += (content ? " " : "") + text;
+      if (content.length > 200) break;
+    }
+  }
+
+  return content.length > 200 ? `${content.slice(0, 200)}...` : content;
 }
 
 export async function listTraces(
@@ -51,7 +68,6 @@ export async function listTraces(
     SELECT
       "timestamp" AS timestamp,
       "trace_id" AS trace_id,
-      "span_id" AS span_id,
       "span_status_code" AS span_status_code,
       "duration_nano" AS duration_nano,
       "span_attributes.gen_ai.operation.name" AS operation_name,
@@ -87,7 +103,6 @@ export async function listTraces(
     return {
       timestamp: String(row.timestamp),
       traceId: String(row.trace_id ?? ""),
-      spanId: String(row.span_id ?? ""),
       operationName: String(row.operation_name ?? ""),
       model: String(row.response_model ?? ""),
       provider: String(row.provider_name ?? ""),
@@ -110,12 +125,8 @@ export async function getTrace(
   const queryText = `
     SELECT
       "timestamp" AS timestamp,
-      "timestamp_end" AS timestamp_end,
       "trace_id" AS trace_id,
-      "span_id" AS span_id,
-      "span_name" AS span_name,
       "span_status_code" AS span_status_code,
-      "span_status_message" AS span_status_message,
       "duration_nano" AS duration_nano,
       "span_attributes.gen_ai.operation.name" AS operation_name,
       "span_attributes.gen_ai.request.model" AS request_model,
@@ -160,16 +171,12 @@ export async function getTrace(
 
   return {
     timestamp: String(row.timestamp),
-    timestampEnd: String(row.timestamp_end ?? ""),
     traceId: String(row.trace_id ?? ""),
-    spanId: String(row.span_id ?? ""),
-    spanName: String(row.span_name ?? ""),
     operationName: String(row.operation_name ?? ""),
     model: String(row.request_model ?? ""),
     responseModel: String(row.response_model ?? ""),
     provider: String(row.provider_name ?? ""),
     status: formatStatus(row.span_status_code),
-    statusMessage: String(row.span_status_message ?? ""),
     durationMs: Number(row.duration_nano ?? 0) / 1e6,
     inputTokens: parseNullableNumber(row.input_tokens),
     outputTokens: parseNullableNumber(row.output_tokens),
@@ -218,7 +225,7 @@ export async function getMetadataTags(
            AND "timestamp" >= $4
            AND "timestamp" <= $5
            AND "${colName}" IS NOT NULL
-         LIMIT 50`,
+         LIMIT 1000`,
         [agentSlug, branchSlug, organizationId, toGreptimeDatetime(from), toGreptimeDatetime(to)],
       );
       tags[keyName] = (valRows as any[]).map((r) => String(r.val));
@@ -226,11 +233,4 @@ export async function getMetadataTags(
   );
 
   return { tags };
-}
-
-function formatStatus(statusCode: string | null): string {
-  if (!statusCode) return "unknown";
-  if (statusCode === "STATUS_CODE_OK" || statusCode === "STATUS_CODE_UNSET") return "ok";
-  if (statusCode === "STATUS_CODE_ERROR") return "error";
-  return statusCode.replace("STATUS_CODE_", "").toLowerCase();
 }
