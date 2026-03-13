@@ -23,10 +23,10 @@ export const agentsModule = new Elysia({
   .use(prismaClient)
   .get(
     "/",
-    async ({ prismaClient: dbClient, query }) => {
+    async ({ prismaClient, query }) => {
       return status(
         200,
-        await dbClient.agents.findMany({
+        await prismaClient.agents.findMany({
           include: query,
         }),
       );
@@ -38,7 +38,7 @@ export const agentsModule = new Elysia({
   )
   .post(
     "/",
-    async ({ body, prismaClient: dbClient, organizationId, userId, authClient }) => {
+    async ({ body, prismaClient, organizationId, userId, authClient }) => {
       const agentSlug = slugFromString(body.name, 3);
 
       const { data: team, error: createTeamError } = await authClient!.organization.createTeam({
@@ -62,7 +62,7 @@ export const agentsModule = new Elysia({
 
       return status(
         201,
-        await dbClient.agents.create({
+        await prismaClient.agents.create({
           data: {
             name: body.name,
             slug: agentSlug,
@@ -89,10 +89,10 @@ export const agentsModule = new Elysia({
   )
   .get(
     "/:agentSlug",
-    async ({ prismaClient: dbClient, params, query }) => {
+    async ({ prismaClient, params, query }) => {
       return status(
         200,
-        await dbClient.agents.findFirstOrThrow({
+        await prismaClient.agents.findFirstOrThrow({
           where: { slug: params.agentSlug },
           include: query,
         }),
@@ -105,10 +105,10 @@ export const agentsModule = new Elysia({
   )
   .patch(
     "/:agentSlug",
-    async ({ body, prismaClient: dbClient, params, query }) => {
+    async ({ body, prismaClient, params, query }) => {
       return status(
         200,
-        await dbClient.agents.update({
+        await prismaClient.agents.update({
           where: { slug: params.agentSlug },
           data: { name: body.name },
           include: query,
@@ -123,8 +123,8 @@ export const agentsModule = new Elysia({
   )
   .delete(
     "/:agentSlug",
-    async ({ prismaClient: dbClient, params }) => {
-      await dbClient.agents.softDelete({ slug: params.agentSlug });
+    async ({ prismaClient, params }) => {
+      await prismaClient.agents.softDelete({ slug: params.agentSlug });
       return status(204);
     },
     {

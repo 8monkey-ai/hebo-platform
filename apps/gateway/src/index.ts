@@ -82,8 +82,8 @@ export const createGateway = () =>
         )
         .post(
           "/embeddings",
-          ({ request, prismaClient: dbClient, organizationId }) =>
-            gw.handler(request, { dbClient, organizationId }),
+          ({ request, prismaClient, organizationId }) =>
+            gw.handler(request, { prismaClient, organizationId }),
           {
             parse: "none",
             body: EmbeddingsBodySchema,
