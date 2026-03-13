@@ -1,4 +1,4 @@
-import { parseJson, parseJsonArrayItems, parseNullableNumber } from "~api/lib/greptime";
+import { parseJson, parseJsonArray, parseNullableNumber } from "~api/lib/greptime";
 import type { GreptimeDb } from "~api/middleware/greptime";
 
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
@@ -180,9 +180,9 @@ export async function getTrace(
     outputTokens: parseNullableNumber(row.output_tokens),
     totalTokens: parseNullableNumber(row.total_tokens),
     reasoningTokens: parseNullableNumber(row.reasoning_tokens),
-    inputMessages: parseJsonArrayItems(row.input_messages) ?? [],
-    outputMessages: parseJsonArrayItems(row.output_messages) ?? [],
-    finishReasons: parseJsonArrayItems(row.finish_reasons) ?? null,
+    inputMessages: parseJsonArray(row.input_messages) ?? [],
+    outputMessages: parseJsonArray(row.output_messages) ?? [],
+    finishReasons: parseJsonArray(row.finish_reasons) ?? null,
     responseId: String(row.response_id ?? ""),
     metadata,
     spanAttributes,
