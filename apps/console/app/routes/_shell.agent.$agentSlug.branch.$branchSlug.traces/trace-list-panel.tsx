@@ -135,7 +135,10 @@ export function TraceListPanel({
         const { data, error } = await api
           .agents({ agentSlug })
           .branches({ branchSlug })
-          .traces.metadata.get({ query: { from: effectiveFrom, to: effectiveTo } });
+          .traces.metadata.get({
+            // @ts-expect-error this works in Eden
+            query: { from: effectiveFrom, to: effectiveTo },
+          });
 
         if (!error) setMetadataTags(data?.tags ?? {});
       } catch {

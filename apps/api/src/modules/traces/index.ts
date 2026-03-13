@@ -30,13 +30,13 @@ export const tracesModule = new Elysia({
         200,
         await listTraces(
           greptimeDb,
-          organizationId!,
+          organizationId,
           params.agentSlug,
           params.branchSlug,
-          new Date(query.from!),
-          new Date(query.to!),
-          query.page!,
-          query.pageSize!,
+          query.from,
+          query.to,
+          query.page,
+          query.pageSize,
           metadataFilters,
         ),
       );
@@ -53,11 +53,11 @@ export const tracesModule = new Elysia({
         200,
         await getMetadataTags(
           greptimeDb,
-          organizationId!,
+          organizationId,
           params.agentSlug,
           params.branchSlug,
-          new Date(query.from!),
-          new Date(query.to!),
+          query.from,
+          query.to,
         ),
       );
     },
@@ -71,7 +71,7 @@ export const tracesModule = new Elysia({
     async ({ greptimeDb, organizationId, params }) => {
       const trace = await getTrace(
         greptimeDb,
-        organizationId!,
+        organizationId,
         params.agentSlug,
         params.branchSlug,
         params.traceId,

@@ -1,43 +1,22 @@
 import { t } from "elysia";
 
-const DefaultFromDate = () => new Date(Date.now() - 60 * 60 * 1000).toISOString();
-const DefaultToDate = () => new Date().toISOString();
+const DefaultFromDate = () => new Date(Date.now() - 60 * 60 * 1000);
+const DefaultToDate = () => new Date();
 
-const TraceFromQuery = t.Optional(
-  t.String({
-    default: DefaultFromDate(),
-    format: "date-time",
-  }),
-);
+const TraceDateQuery = (defaultValue: () => Date) =>
+  t.Date({
+    default: defaultValue(),
+  });
 
-const TraceToQuery = t.Optional(
-  t.String({
-    default: DefaultToDate(),
-    format: "date-time",
-  }),
-);
-
-const StringArrayRecord = t.Record(t.String(), t.Array(t.String()));
-
-const TraceStatus = t.Union([t.Literal("ok"), t.Literal("error"), t.Literal("unknown")]);
-
-const TraceAttributeValue = t.Union([t.String(), t.Number(), t.Boolean(), t.Null()]);
-const TraceAttributes = t.Record(t.String(), TraceAttributeValue);
-
-const TraceMessage = t.Object({
-  role: t.String(),
-  name: t.Optional(t.String()),
-  content: t.Optional(t.Any()),
-  parts: t.Optional(t.Array(t.Any())),
-  tool_calls: t.Optional(t.Array(t.Any())),
-});
+const TraceFromQuery = TraceDateQuery(DefaultFromDate);
+const TraceToQuery = TraceDateQuery(DefaultToDate);
 
 export const TraceListQuery = t.Object(
   {
     from: TraceFromQuery,
     to: TraceToQuery,
-    page: t.Optional(t.Number({ default: 1 })),
-    pageSize: t.Optional(t.Number({ default: 50 })),
+    page: t.Number({ default: 1 }),
+    pageSize: t.Number({ default: 50 }),
   },
   {
     additionalProperties: false,
@@ -51,6 +30,8 @@ export const TraceMetadataQuery = t.Object({
   from: TraceFromQuery,
   to: TraceToQuery,
 });
+
+const TraceStatus = t.Union([t.Literal("ok"), t.Literal("error"), t.Literal("unknown")]);
 
 export const TraceListItem = t.Object({
   timestamp: t.String(),
@@ -66,6 +47,19 @@ export const TraceListItem = t.Object({
 export const TraceListResponse = t.Object({
   data: t.Array(TraceListItem),
   hasNextPage: t.Boolean(),
+});
+
+const TraceAttributes = t.Record(
+  t.String(),
+  t.Union([t.String(), t.Number(), t.Boolean(), t.Null()]),
+);
+
+const TraceMessage = t.Object({
+  role: t.String(),
+  name: t.Optional(t.String()),
+  content: t.Optional(t.Any()),
+  parts: t.Optional(t.Array(t.Any())),
+  tool_calls: t.Optional(t.Array(t.Any())),
 });
 
 export const TraceDetail = t.Object({
@@ -88,6 +82,8 @@ export const TraceDetail = t.Object({
   metadata: t.Record(t.String(), t.String()),
   spanAttributes: TraceAttributes,
 });
+
+const StringArrayRecord = t.Record(t.String(), t.Array(t.String()));
 
 export const MetadataTagsResponse = t.Object({
   tags: StringArrayRecord,

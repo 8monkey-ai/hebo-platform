@@ -1,9 +1,4 @@
-import {
-  parseJson,
-  parseJsonArrayItems,
-  parseNullableNumber,
-  toGreptimeDatetime,
-} from "~api/lib/greptime";
+import { parseJson, parseJsonArrayItems, parseNullableNumber } from "~api/lib/greptime";
 import type { GreptimeDb } from "~api/middleware/greptime";
 
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
@@ -15,66 +10,33 @@ function formatStatus(statusCode: string | null): "ok" | "error" | "unknown" {
   return "unknown";
 }
 
-function extractMessageText(message: unknown): string {
-  const parsed = parseJson(message);
-
-  if (!parsed) return "";
-  if (typeof parsed === "string") return parsed.trim();
-  if (typeof parsed !== "object") return "";
-
-  let text = "";
-
-  const { content, parts } = parsed as {
-    content?: unknown;
-    parts?: unknown;
-  };
-
-  const append = (value: string) => {
-    text += text ? "\n" + value : value;
-  };
-
-  if (typeof content === "string") append(content);
-
-  if (Array.isArray(content)) {
-    for (const part of content) {
-      if (!part || typeof part !== "object") continue;
-
-      const { type, text: value } = part as {
-        type?: unknown;
-        text?: unknown;
-      };
-
-      if ((type === "text" || type === "reasoning") && typeof value === "string") {
-        append(value);
-      }
-    }
-  }
-
-  if (Array.isArray(parts)) {
-    for (const part of parts) {
-      if (!part || typeof part !== "object") continue;
-
-      const { type, content: value } = part as {
-        type?: unknown;
-        content?: unknown;
-      };
-
-      if ((type === "text" || type === "reasoning") && typeof value === "string") {
-        append(value);
-      }
-    }
-  }
-
-  return text.trim();
+function truncateSummary(value: string): string {
+  return value.length > 200 ? `${value.slice(0, 200)}...` : value;
 }
 
-function extractSummary(outputMessages: unknown): string {
-  const content = extractMessageText(outputMessages);
-  if (!content) return "";
-  if (content.length > 200) {
-    return `${content.slice(0, 200)}...`;
+function extractSummary(message: unknown): string {
+  const parsed = parseJson(message);
+  if (!parsed) return "";
+
+  if (typeof parsed === "string") return truncateSummary(parsed.trim());
+  if (typeof parsed !== "object") return "";
+
+  const { content, parts } = parsed as any;
+  const texts: string[] = [];
+
+  if (typeof content === "string") texts.push(content);
+
+  for (const arr of [content, parts]) {
+    if (!Array.isArray(arr)) continue;
+    for (const p of arr) {
+      const v = p?.text ?? p?.content;
+      if ((p?.type === "text" || p?.type === "reasoning") && typeof v === "string") {
+        texts.push(v);
+      }
+    }
   }
-  return content;
+
+  return truncateSummary(texts.join("\n").trim());
 }
 
 export async function listTraces(
@@ -122,14 +84,7 @@ export async function listTraces(
     LIMIT ${limit} OFFSET ${offset}
   `;
 
-  const params = [
-    agentSlug,
-    branchSlug,
-    organizationId,
-    toGreptimeDatetime(from),
-    toGreptimeDatetime(to),
-    ...metaValues,
-  ];
+  const params = [agentSlug, branchSlug, organizationId, from, to, ...metaValues];
 
   const rows = (await greptimeDb.unsafe(queryText, params)) as any[];
   const hasNextPage = rows.length > pageSize;
@@ -274,7 +229,7 @@ export async function getMetadataTags(
        AND "timestamp" <= $5
      ORDER BY "timestamp" DESC
      LIMIT ${MAX_ROWS}`,
-    [agentSlug, branchSlug, organizationId, toGreptimeDatetime(from), toGreptimeDatetime(to)],
+    [agentSlug, branchSlug, organizationId, from, to],
   )) as Array<Record<string, unknown>>;
 
   const tagSets = Object.fromEntries(
