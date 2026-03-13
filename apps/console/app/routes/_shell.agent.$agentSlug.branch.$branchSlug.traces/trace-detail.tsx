@@ -2,6 +2,11 @@ import { ChevronDown, ChevronRight, Wrench } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@hebo/shared-ui/components/Collapsible";
 import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@hebo/shared-ui/components/Empty";
 import { ScrollArea } from "@hebo/shared-ui/components/ScrollArea";
@@ -16,9 +21,10 @@ import {
   formatTokenCount,
   getTraceStatusBadgeProps,
 } from "./utils";
+
 type TraceDetailProps = { trace: TraceDetailData | null; loading: boolean };
 const COLLAPSE_TOGGLE_CLASS_NAME =
-  "mt-3 inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1 text-[10px] font-medium tracking-wide text-muted-foreground uppercase transition-colors hover:bg-muted hover:text-foreground";
+  "mt-3 inline-flex items-center gap-1 rounded-full bg-muted/60 px-2.5 py-1 text-[10px] font-medium text-muted-foreground uppercase hover:bg-muted hover:text-foreground";
 const CODE_BLOCK_CLASS_NAME =
   "overflow-x-auto rounded-md border bg-muted/30 p-3 text-xs break-words whitespace-pre-wrap text-foreground";
 
@@ -292,19 +298,19 @@ function CollapsibleText({ text, maxLength }: { text: string; maxLength: number 
   const displayText = needsTruncation && !expanded ? `${text.slice(0, maxLength)}...` : text;
 
   return (
-    <div>
+    <Collapsible open={expanded} onOpenChange={setExpanded}>
       <p className="text-xs leading-4 break-words whitespace-pre-wrap">{displayText}</p>
       {needsTruncation && (
-        <button
-          type="button"
-          className={COLLAPSE_TOGGLE_CLASS_NAME}
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
-          <span>{expanded ? "Less" : "More"}</span>
-        </button>
+        <CollapsibleTrigger
+          render={
+            <button type="button" className={COLLAPSE_TOGGLE_CLASS_NAME}>
+              {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+              <span>{expanded ? "Less" : "More"}</span>
+            </button>
+          }
+        />
       )}
-    </div>
+    </Collapsible>
   );
 }
 
@@ -314,37 +320,40 @@ function CollapsibleCode({ code, maxLength }: { code: string; maxLength: number 
   const displayCode = needsTruncation && !expanded ? `${code.slice(0, maxLength)}...` : code;
 
   return (
-    <div>
+    <Collapsible open={expanded} onOpenChange={setExpanded}>
       <pre className={CODE_BLOCK_CLASS_NAME}>{displayCode}</pre>
       {needsTruncation && (
-        <button
-          type="button"
-          className={COLLAPSE_TOGGLE_CLASS_NAME}
-          onClick={() => setExpanded(!expanded)}
-        >
-          {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
-          <span>{expanded ? "Less" : "More"}</span>
-        </button>
+        <CollapsibleTrigger
+          render={
+            <button type="button" className={COLLAPSE_TOGGLE_CLASS_NAME}>
+              {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+              <span>{expanded ? "Less" : "More"}</span>
+            </button>
+          }
+        />
       )}
-    </div>
+    </Collapsible>
   );
 }
 
 function ExpandableContent({ label, children }: { label: string; children: React.ReactNode }) {
-  const [expanded, setExpanded] = useState(false);
-
   return (
-    <div>
-      <button
-        type="button"
-        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        onClick={() => setExpanded(!expanded)}
-      >
-        {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
-        <span>{label}</span>
-      </button>
-      {expanded && <div className="mt-1">{children}</div>}
-    </div>
+    <Collapsible>
+      <CollapsibleTrigger
+        render={
+          <button
+            type="button"
+            className="group flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <ChevronRight className="size-3 transition-transform group-data-[panel-open]:rotate-90" />
+            <span>{label}</span>
+          </button>
+        }
+      />
+      <CollapsibleContent>
+        <div className="pt-1">{children}</div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 

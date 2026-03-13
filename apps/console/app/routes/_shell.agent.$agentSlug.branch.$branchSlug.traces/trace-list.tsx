@@ -18,7 +18,6 @@ import {
 type TraceListProps = {
   traces: TraceListData;
   hasNextPage: boolean;
-  pageSize: number;
   selectedSpanId: string | null;
   loading: boolean;
   onSelectSpan: (spanId: string) => void;
@@ -28,7 +27,6 @@ type TraceListProps = {
 export function TraceList({
   traces,
   hasNextPage,
-  pageSize,
   selectedSpanId,
   loading,
   onSelectSpan,
@@ -93,7 +91,7 @@ export function TraceList({
           );
         })}
 
-        {(traces.length >= pageSize || hasNextPage) && (
+        {(traces.length > 0 || hasNextPage) && (
           <div className="flex items-center justify-between px-4 py-3">
             <span className="text-xs text-muted-foreground">
               Loaded {traces.length} trace{traces.length === 1 ? "" : "s"}
