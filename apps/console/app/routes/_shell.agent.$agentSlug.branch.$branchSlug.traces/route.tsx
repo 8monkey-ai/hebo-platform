@@ -37,7 +37,7 @@ export default function TracesRoute() {
           .traces({ spanId: selectedSpanId })
           .get();
 
-        if (!cancelled) setTraceDetail(error ? null : (data as any));
+        if (!cancelled) setTraceDetail(error ? null : data);
       } catch {
         if (!cancelled) setTraceDetail(null);
       } finally {
@@ -54,9 +54,9 @@ export default function TracesRoute() {
 
   return (
     <div className="h-full min-h-0 flex-1 overflow-y-hidden">
-      <div className="@container grid h-full min-h-0 grid-cols-1 gap-3 overflow-y-hidden pb-4 @2xl:grid-cols-[5fr_7fr]">
+      <div className="grid h-full min-h-0 grid-cols-1 gap-3 overflow-y-hidden pb-4 @2xl:grid-cols-[5fr_7fr]">
         <div
-          className={`relative z-10 flex h-full min-h-0 flex-col rounded-lg border bg-card pt-4 pb-2 ${
+          className={`relative flex h-full min-h-0 flex-col rounded-lg border bg-card pt-4 pb-2 ${
             selectedSpanId ? "hidden @2xl:flex" : ""
           }`}
         >
