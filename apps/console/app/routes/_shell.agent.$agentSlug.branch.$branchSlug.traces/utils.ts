@@ -84,7 +84,7 @@ export function getTraceStatusBadgeProps(status: TraceStatus): {
       return {
         variant: "secondary",
         className:
-          "border-transparent bg-green-600 text-white [a]:hover:bg-green-700 dark:bg-green-500 dark:[a]:hover:bg-green-400",
+          "border-transparent bg-green-600 text-white [&_a:hover]:bg-green-700 dark:bg-green-500 dark:[&_a:hover]:bg-green-400",
       };
     case "error":
       return { variant: "destructive" };

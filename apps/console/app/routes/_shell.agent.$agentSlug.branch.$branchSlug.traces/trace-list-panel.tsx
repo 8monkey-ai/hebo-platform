@@ -141,6 +141,8 @@ export function TraceListPanel({
   }, [agentSlug, branchSlug, page, queryRange.from, queryRange.to, searchParamsKey]);
 
   useEffect(() => {
+    let cancelled = false;
+
     (async () => {
       try {
         const { data, error } = await api
@@ -151,11 +153,15 @@ export function TraceListPanel({
             query: { from: queryRange.from, to: queryRange.to },
           });
 
-        if (!error) setMetadataTags(data?.tags ?? {});
+        if (!cancelled && !error) setMetadataTags(data?.tags ?? {});
       } catch {
         // Tag suggestions are optional.
       }
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [agentSlug, branchSlug, queryRange.from, queryRange.to]);
 
   function handlePresetChange(preset: string) {
