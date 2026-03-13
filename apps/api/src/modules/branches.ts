@@ -12,7 +12,7 @@ import { prismaClient } from "~api/middleware/prisma";
 import { Models } from "./providers/types";
 
 export const branchesModule = new Elysia({
-  prefix: "/:agentSlug/branches",
+  prefix: "/agents/:agentSlug/branches",
 })
   .use(prismaClient)
   .get(

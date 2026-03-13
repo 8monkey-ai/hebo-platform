@@ -17,7 +17,7 @@ const DEFAULT_FROM = () => new Date(Date.now() - 60 * 60 * 1000);
 const DEFAULT_TO = () => new Date();
 
 export const spansModule = new Elysia({
-  prefix: "/:agentSlug/branches/:branchSlug/traces",
+  prefix: "/agents/:agentSlug/branches/:branchSlug/traces",
 })
   .use(greptimeDbMiddleware)
   .get(

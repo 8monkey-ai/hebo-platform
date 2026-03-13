@@ -35,8 +35,12 @@ const createApi = () =>
       },
       (app) =>
         app
-          // /agents/[:slug/branches/[:slug/traces/[:id]]]
-          .use(agentsModule.use(branchesModule).use(spansModule))
+          // /agents/[:slug]
+          .use(agentsModule)
+          // /agents/:slug/branches/[:slug]
+          .use(branchesModule)
+          // /agents/:slug/branches/:slug/traces/[:id]]
+          .use(spansModule)
           // /providers
           .use(providersModule),
     );
