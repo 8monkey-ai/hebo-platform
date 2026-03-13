@@ -80,17 +80,17 @@ export const spansModule = new Elysia({
   .get(
     "/:spanId",
     async ({ greptimeDb, organizationId, params }) => {
-      const trace = await getSpan(
+      const span = await getSpan(
         greptimeDb,
         organizationId,
         params.agentSlug,
         params.branchSlug,
         params.spanId,
       );
-      if (!trace) {
+      if (!span) {
         return status(404, "Span not found");
       }
-      return status(200, trace);
+      return status(200, span);
     },
     {
       response: { 200: SpanDetail, 404: t.String() },

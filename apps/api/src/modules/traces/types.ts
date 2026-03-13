@@ -1,4 +1,4 @@
-import { t } from "elysia";
+import { t, type Static } from "elysia";
 
 const TraceTimeRangeQuery = {
   from: t.Optional(t.Date()),
@@ -85,6 +85,9 @@ const SpanMessage = t.Object({
   parts: t.Optional(t.Array(SpanMessagePart)),
 });
 
+const SpanMessages = t.Array(SpanMessage);
+const SpanFinishReasons = t.Nullable(t.Array(t.String()));
+
 export const SpanDetail = t.Object({
   timestamp: t.String(),
   spanId: t.String(),
@@ -98,13 +101,16 @@ export const SpanDetail = t.Object({
   outputTokens: t.Nullable(t.Number()),
   totalTokens: t.Nullable(t.Number()),
   reasoningTokens: t.Nullable(t.Number()),
-  inputMessages: t.Array(SpanMessage),
-  outputMessages: t.Array(SpanMessage),
-  finishReasons: t.Nullable(t.Array(t.String())),
+  inputMessages: SpanMessages,
+  outputMessages: SpanMessages,
+  finishReasons: SpanFinishReasons,
   responseId: t.String(),
   metadata: t.Record(t.String(), t.String()),
   spanAttributes: SpanAttributes,
 });
+
+export type SpanMessages = Static<typeof SpanMessages>;
+export type SpanFinishReasons = Static<typeof SpanFinishReasons>;
 
 const StringArrayRecord = t.Record(t.String(), t.Array(t.String()));
 
