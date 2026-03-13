@@ -2,7 +2,7 @@ import { format, formatDistanceToNow } from "date-fns";
 import prettyMs from "pretty-ms";
 
 export function formatDuration(durationMs: number): string {
-  return prettyMs(durationMs, { compact: true });
+  return prettyMs(durationMs);
 }
 
 export function formatTimestampShort(ts: string): string {
