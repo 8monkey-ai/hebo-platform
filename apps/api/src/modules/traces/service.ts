@@ -8,37 +8,73 @@ import type { GreptimeDb } from "~api/middleware/greptime";
 
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
-function formatStatus(statusCode: string | null): string {
+function formatStatus(statusCode: string | null): "ok" | "error" | "unknown" {
   if (!statusCode) return "unknown";
   if (statusCode === "STATUS_CODE_OK" || statusCode === "STATUS_CODE_UNSET") return "ok";
   if (statusCode === "STATUS_CODE_ERROR") return "error";
-  return statusCode.replace("STATUS_CODE_", "").toLowerCase();
+  return "unknown";
 }
 
-function extractSummary(outputMessages: unknown): string {
-  const message = parseJson(outputMessages);
-  const parts =
-    message && typeof message === "object" ? (message as { parts?: unknown }).parts : undefined;
+function extractMessageText(message: unknown): string {
+  const parsed = parseJson(message);
 
-  if (!Array.isArray(parts)) return "";
+  if (!parsed) return "";
+  if (typeof parsed === "string") return parsed.trim();
+  if (typeof parsed !== "object") return "";
 
-  let content = "";
+  let text = "";
 
-  for (const part of parts) {
-    if (!part || typeof part !== "object") continue;
+  const { content, parts } = parsed as {
+    content?: unknown;
+    parts?: unknown;
+  };
 
-    const { type, content: text } = part as {
-      type?: unknown;
-      content?: unknown;
-    };
+  const append = (value: string) => {
+    text += text ? "\n" + value : value;
+  };
 
-    if (type === "text" && typeof text === "string") {
-      content += (content ? " " : "") + text;
-      if (content.length > 200) break;
+  if (typeof content === "string") append(content);
+
+  if (Array.isArray(content)) {
+    for (const part of content) {
+      if (!part || typeof part !== "object") continue;
+
+      const { type, text: value } = part as {
+        type?: unknown;
+        text?: unknown;
+      };
+
+      if ((type === "text" || type === "reasoning") && typeof value === "string") {
+        append(value);
+      }
     }
   }
 
-  return content.length > 200 ? `${content.slice(0, 200)}...` : content;
+  if (Array.isArray(parts)) {
+    for (const part of parts) {
+      if (!part || typeof part !== "object") continue;
+
+      const { type, content: value } = part as {
+        type?: unknown;
+        content?: unknown;
+      };
+
+      if ((type === "text" || type === "reasoning") && typeof value === "string") {
+        append(value);
+      }
+    }
+  }
+
+  return text.trim();
+}
+
+function extractSummary(outputMessages: unknown): string {
+  const content = extractMessageText(outputMessages);
+  if (!content) return "";
+  if (content.length > 200) {
+    return `${content.slice(0, 200)}...`;
+  }
+  return content;
 }
 
 export async function listTraces(
@@ -112,7 +148,7 @@ export async function listTraces(
     };
   });
 
-  return { data, hasNextPage, page, pageSize };
+  return { data, hasNextPage };
 }
 
 export async function getTrace(
@@ -156,13 +192,20 @@ export async function getTrace(
   const row = (rows as any[])[0];
   if (!row) return null;
 
-  const spanAttributes: Record<string, unknown> = {};
+  const spanAttributes: Record<string, string | number | boolean | null> = {};
   const metadata: Record<string, string> = {};
 
   for (const [key, value] of Object.entries(row)) {
     if (value === null || value === undefined) continue;
     if (key.startsWith("span_attributes.")) {
-      spanAttributes[key.replace("span_attributes.", "")] = value;
+      if (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean" ||
+        value === null
+      ) {
+        spanAttributes[key.replace("span_attributes.", "")] = value;
+      }
       if (key.startsWith(METADATA_PREFIX)) {
         metadata[key.replace(METADATA_PREFIX, "")] = String(value);
       }
@@ -182,13 +225,12 @@ export async function getTrace(
     outputTokens: parseNullableNumber(row.output_tokens),
     totalTokens: parseNullableNumber(row.total_tokens),
     reasoningTokens: parseNullableNumber(row.reasoning_tokens),
-    inputMessages: parseJsonArrayItems(row.input_messages),
-    outputMessages: parseJsonArrayItems(row.output_messages),
-    finishReasons: parseJsonArrayItems(row.finish_reasons),
+    inputMessages: parseJsonArrayItems(row.input_messages) ?? [],
+    outputMessages: parseJsonArrayItems(row.output_messages) ?? [],
+    finishReasons: parseJsonArrayItems(row.finish_reasons) ?? null,
     responseId: String(row.response_id ?? ""),
     metadata,
     spanAttributes,
-    resourceAttributes: {},
   };
 }
 
@@ -242,7 +284,9 @@ export async function getMetadataTags(
   for (const row of rows) {
     for (const { colName, keyName } of columns) {
       const value = row[colName];
-      if (value != null) tagSets[keyName].add(String(value));
+      if (value !== null && value !== undefined) {
+        tagSets[keyName].add(String(value));
+      }
     }
   }
 

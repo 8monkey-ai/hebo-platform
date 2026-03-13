@@ -17,9 +17,20 @@ const TraceToQuery = t.Optional(
   }),
 );
 
-const NullableAnyArray = t.Nullable(t.Array(t.Any()));
 const StringArrayRecord = t.Record(t.String(), t.Array(t.String()));
-const AnyRecord = t.Record(t.String(), t.Any());
+
+const TraceStatus = t.Union([t.Literal("ok"), t.Literal("error"), t.Literal("unknown")]);
+
+const TraceAttributeValue = t.Union([t.String(), t.Number(), t.Boolean(), t.Null()]);
+const TraceAttributes = t.Record(t.String(), TraceAttributeValue);
+
+const TraceMessage = t.Object({
+  role: t.String(),
+  name: t.Optional(t.String()),
+  content: t.Optional(t.Any()),
+  parts: t.Optional(t.Array(t.Any())),
+  tool_calls: t.Optional(t.Array(t.Any())),
+});
 
 export const TraceListQuery = t.Object(
   {
@@ -47,7 +58,7 @@ export const TraceListItem = t.Object({
   operationName: t.String(),
   model: t.String(),
   provider: t.String(),
-  status: t.String(),
+  status: TraceStatus,
   durationMs: t.Number(),
   summary: t.String(),
 });
@@ -55,8 +66,6 @@ export const TraceListItem = t.Object({
 export const TraceListResponse = t.Object({
   data: t.Array(TraceListItem),
   hasNextPage: t.Boolean(),
-  page: t.Number(),
-  pageSize: t.Number(),
 });
 
 export const TraceDetail = t.Object({
@@ -66,19 +75,18 @@ export const TraceDetail = t.Object({
   model: t.String(),
   responseModel: t.String(),
   provider: t.String(),
-  status: t.String(),
+  status: TraceStatus,
   durationMs: t.Number(),
   inputTokens: t.Nullable(t.Number()),
   outputTokens: t.Nullable(t.Number()),
   totalTokens: t.Nullable(t.Number()),
   reasoningTokens: t.Nullable(t.Number()),
-  inputMessages: NullableAnyArray,
-  outputMessages: NullableAnyArray,
-  finishReasons: NullableAnyArray,
+  inputMessages: t.Array(TraceMessage),
+  outputMessages: t.Array(TraceMessage),
+  finishReasons: t.Nullable(t.Array(t.String())),
   responseId: t.String(),
   metadata: t.Record(t.String(), t.String()),
-  spanAttributes: AnyRecord,
-  resourceAttributes: AnyRecord,
+  spanAttributes: TraceAttributes,
 });
 
 export const MetadataTagsResponse = t.Object({

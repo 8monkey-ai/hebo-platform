@@ -32,7 +32,6 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
     );
   }
 
-  const status = trace.status === "ok" || trace.status === "error" ? trace.status : "unknown";
   const toolCallCount = countToolCalls(trace.outputMessages);
 
   return (
@@ -45,13 +44,20 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
                 {trace.operationName}
               </h2>
               <p className="mt-1 truncate text-sm text-muted-foreground">
-                {trace.model} &middot; {formatTimestampFull(trace.timestamp)} &middot; trace{" "}
-                {trace.traceId.slice(0, 16)}
+                {[
+                  trace.model,
+                  formatTimestampFull(trace.timestamp),
+                  `trace ${trace.traceId.slice(0, 16)}`,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <Badge variant="outline">{formatDuration(trace.durationMs)}</Badge>
-              <Badge variant={status === "error" ? "destructive" : "secondary"}>{status}</Badge>
+              <Badge variant={trace.status === "error" ? "destructive" : "secondary"}>
+                {trace.status}
+              </Badge>
             </div>
           </div>
 
@@ -135,55 +141,81 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
 type NormalizedMessage = {
   role: string;
   content: string;
-  toolCalls?: Array<{ name: string; arguments: string }>;
+  toolCalls: Array<{ name: string; arguments: string }>;
   toolName?: string;
   reasoning?: string;
 };
 
-function normalizeMessages(messages: unknown): NormalizedMessage[] {
-  if (!Array.isArray(messages)) return [];
+function normalizeMessages(messages: TraceDetailData["inputMessages"]): NormalizedMessage[] {
+  return messages.map((message) => {
+    const textParts: string[] = [];
+    const toolCalls: Array<{ name: string; arguments: string }> = [];
+    let reasoning: string | undefined;
 
-  return messages
-    .filter(
-      (m): m is { role?: unknown; name?: unknown; parts?: unknown } => !!m && typeof m === "object",
-    )
-    .map((msg) => {
-      const textParts: string[] = [];
-      const toolCalls: Array<{ name: string; arguments: string }> = [];
-      let reasoning: string | undefined;
-
-      for (const part of Array.isArray(msg.parts) ? msg.parts : []) {
+    if (typeof message.content === "string") {
+      textParts.push(message.content);
+    } else if (Array.isArray(message.content)) {
+      for (const part of message.content) {
         if (!part || typeof part !== "object") continue;
-
-        const {
-          type,
-          content,
-          name,
-          arguments: args,
-        } = part as {
-          type?: unknown;
-          content?: unknown;
-          name?: unknown;
-          arguments?: unknown;
-        };
-
-        if (type === "text" && typeof content === "string") {
-          textParts.push(content);
-        } else if (type === "reasoning" && typeof content === "string") {
-          reasoning = content;
-        } else if (type === "tool_call" && typeof name === "string" && typeof args === "string") {
-          toolCalls.push({ name, arguments: args });
+        const { type, text } = part as { type?: unknown; text?: unknown };
+        if (type === "text" && typeof text === "string") {
+          textParts.push(text);
+        } else if (type === "reasoning" && typeof text === "string") {
+          reasoning = text;
         }
       }
+    }
 
-      return {
-        role: String(msg.role ?? "unknown"),
-        content: textParts.join("\n"),
-        toolCalls: toolCalls.length > 0 ? toolCalls : undefined,
-        toolName: msg.role === "tool" && typeof msg.name === "string" ? msg.name : undefined,
-        reasoning,
+    for (const part of Array.isArray(message.parts) ? message.parts : []) {
+      if (!part || typeof part !== "object") continue;
+
+      const {
+        type,
+        content,
+        name,
+        arguments: args,
+      } = part as {
+        type?: unknown;
+        content?: unknown;
+        name?: unknown;
+        arguments?: unknown;
       };
-    });
+
+      if (type === "text" && typeof content === "string") {
+        textParts.push(content);
+      } else if (type === "reasoning" && typeof content === "string") {
+        reasoning = content;
+      } else if (type === "tool_call" && typeof name === "string" && typeof args === "string") {
+        toolCalls.push({ name, arguments: args });
+      }
+    }
+
+    for (const toolCall of Array.isArray(message.tool_calls) ? message.tool_calls : []) {
+      if (!toolCall || typeof toolCall !== "object") continue;
+      const fn =
+        "function" in toolCall && toolCall.function && typeof toolCall.function === "object"
+          ? toolCall.function
+          : null;
+
+      if (
+        fn &&
+        "name" in fn &&
+        typeof fn.name === "string" &&
+        "arguments" in fn &&
+        typeof fn.arguments === "string"
+      ) {
+        toolCalls.push({ name: fn.name, arguments: fn.arguments });
+      }
+    }
+
+    return {
+      role: message.role,
+      content: textParts.join("\n"),
+      toolCalls,
+      toolName: message.role === "tool" ? message.name : undefined,
+      reasoning,
+    };
+  });
 }
 
 function MessageBlock({ message }: { message: NormalizedMessage }) {
@@ -223,7 +255,7 @@ function MessageBlock({ message }: { message: NormalizedMessage }) {
 
       {message.content && <CollapsibleText text={message.content} maxLength={500} />}
 
-      {message.toolCalls?.map((tc) => (
+      {message.toolCalls.map((tc) => (
         <div key={`${tc.name}:${tc.arguments}`} className="space-y-2">
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
             <Wrench className="size-3" />
@@ -240,17 +272,15 @@ function buildFullContent(message: NormalizedMessage): string {
   const parts: string[] = [];
   if (message.reasoning) parts.push(`[Reasoning]\n${message.reasoning}`);
   if (message.content) parts.push(message.content);
-  if (message.toolCalls) {
-    for (const tc of message.toolCalls) {
-      parts.push(`[Tool Call: ${tc.name}]\n${tc.arguments}`);
-    }
+  for (const tc of message.toolCalls) {
+    parts.push(`[Tool Call: ${tc.name}]\n${tc.arguments}`);
   }
   return parts.join("\n\n");
 }
 
 function getMessageKey(prefix: string, message: NormalizedMessage) {
   const toolKey = message.toolCalls
-    ?.map((toolCall) => `${toolCall.name}:${toolCall.arguments}`)
+    .map((toolCall) => `${toolCall.name}:${toolCall.arguments}`)
     .join("|");
 
   return [
@@ -259,7 +289,7 @@ function getMessageKey(prefix: string, message: NormalizedMessage) {
     message.toolName ?? "",
     message.reasoning ?? "",
     message.content,
-    toolKey ?? "",
+    toolKey,
   ].join(":");
 }
 
@@ -334,7 +364,6 @@ function RawJsonView({ trace }: { trace: TraceDetailData }) {
     durationMs: trace.durationMs,
     status: trace.status,
     spanAttributes: trace.spanAttributes,
-    resourceAttributes: trace.resourceAttributes,
   };
 
   const jsonStr = JSON.stringify(rawData, null, 2);
@@ -390,11 +419,7 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
               <IdentifierRow label="Duration" value={formatDuration(trace.durationMs)} />
               <IdentifierRow
                 label="Finish Reasons"
-                value={
-                  Array.isArray(trace.finishReasons)
-                    ? trace.finishReasons.join(", ")
-                    : String(trace.finishReasons ?? "-")
-                }
+                value={trace.finishReasons?.join(", ") ?? null}
               />
             </tbody>
           </table>
@@ -404,7 +429,7 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
   );
 }
 
-function IdentifierRow({ label, value }: { label: string; value: string }) {
+function IdentifierRow({ label, value }: { label: string; value: string | null }) {
   if (!value) return null;
   return (
     <tr className="border-b last:border-b-0">
@@ -419,18 +444,9 @@ function IdentifierRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-// --- Helpers ---
-
-function countToolCalls(outputMessages: unknown): number {
-  if (!outputMessages || !Array.isArray(outputMessages)) return 0;
-  let count = 0;
-  for (const msg of outputMessages) {
-    if (Array.isArray(msg?.parts)) {
-      count += msg.parts.filter(
-        (part: unknown) =>
-          part && typeof part === "object" && (part as { type?: unknown }).type === "tool_call",
-      ).length;
-    }
-  }
-  return count;
+function countToolCalls(messages: TraceDetailData["outputMessages"]): number {
+  return normalizeMessages(messages).reduce(
+    (count, message) => count + message.toolCalls.length,
+    0,
+  );
 }

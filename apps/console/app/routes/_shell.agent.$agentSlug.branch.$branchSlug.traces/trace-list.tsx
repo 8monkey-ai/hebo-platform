@@ -31,18 +31,14 @@ export function TraceList({
     content = <TraceListSkeleton />;
   } else if (traces.length === 0) {
     content = (
-      <div className="flex h-full min-h-0 flex-col items-center justify-center py-12 text-center">
-        <p className="text-sm text-muted-foreground">
-          No traces found for this branch in the selected time range.
-        </p>
+      <div className="flex h-full min-h-0 flex-col items-center justify-center text-center">
+        <p className="text-sm text-muted-foreground">No traces found in the selected time range.</p>
       </div>
     );
   } else {
     content = (
       <div className="flex flex-col divide-y">
         {traces.map((trace) => {
-          const status =
-            trace.status === "ok" || trace.status === "error" ? trace.status : "unknown";
           const isSelected = trace.traceId === selectedTraceId;
 
           return (
@@ -72,10 +68,12 @@ export function TraceList({
                   variant="secondary"
                   className="max-w-full bg-muted break-all whitespace-normal"
                 >
-                  {trace.model || trace.provider || "unknown"}
+                  {trace.model ?? trace.provider ?? "unknown"}
                 </Badge>
                 <Badge variant="secondary">{formatDuration(trace.durationMs)}</Badge>
-                <Badge variant={status === "error" ? "destructive" : "secondary"}>{status}</Badge>
+                <Badge variant={trace.status === "error" ? "destructive" : "secondary"}>
+                  {trace.status}
+                </Badge>
               </div>
             </button>
           );
@@ -100,7 +98,7 @@ export function TraceList({
 
   return (
     <div
-      className={`flex h-full min-h-0 flex-col ${loading ? "pointer-events-none opacity-60" : ""}`}
+      className={`flex h-full min-h-0 w-full flex-col ${loading ? "pointer-events-none opacity-60" : ""}`}
     >
       <div className="h-0 min-h-0 flex-1 overflow-y-auto">{content}</div>
     </div>

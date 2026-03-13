@@ -26,6 +26,107 @@ const longToolPayload = {
   })),
 };
 
+function extractMockText(message: unknown): string {
+  if (!message || typeof message !== "object") return "";
+
+  const textParts: string[] = [];
+  const { content, parts } = message as {
+    content?: unknown;
+    parts?: unknown;
+  };
+
+  if (typeof content === "string") textParts.push(content);
+
+  if (Array.isArray(content)) {
+    for (const part of content) {
+      if (!part || typeof part !== "object") continue;
+      const { type, text } = part as { type?: unknown; text?: unknown };
+      if ((type === "text" || type === "reasoning") && typeof text === "string") {
+        textParts.push(text);
+      }
+    }
+  }
+
+  if (Array.isArray(parts)) {
+    for (const part of parts) {
+      if (!part || typeof part !== "object") continue;
+      const { type, content: text } = part as { type?: unknown; content?: unknown };
+      if ((type === "text" || type === "reasoning") && typeof text === "string") {
+        textParts.push(text);
+      }
+    }
+  }
+
+  return textParts.join("\n").trim();
+}
+
+function toTraceMessages(messages: unknown[]) {
+  return messages.map((message) => {
+    const toolCalls: Array<{ name: string; arguments: string }> = [];
+    let reasoning: string | null = null;
+
+    if (message && typeof message === "object" && Array.isArray(message.parts)) {
+      for (const part of message.parts) {
+        if (!part || typeof part !== "object") continue;
+        const {
+          type,
+          content,
+          name,
+          arguments: args,
+        } = part as {
+          type?: unknown;
+          content?: unknown;
+          name?: unknown;
+          arguments?: unknown;
+        };
+
+        if (type === "reasoning" && typeof content === "string") {
+          reasoning = content;
+        } else if (type === "tool_call" && typeof name === "string" && typeof args === "string") {
+          toolCalls.push({ name, arguments: args });
+        }
+      }
+    }
+
+    if (message && typeof message === "object" && Array.isArray(message.tool_calls)) {
+      for (const toolCall of message.tool_calls) {
+        if (!toolCall || typeof toolCall !== "object") continue;
+        const fn =
+          "function" in toolCall && toolCall.function && typeof toolCall.function === "object"
+            ? toolCall.function
+            : null;
+
+        if (
+          fn &&
+          "name" in fn &&
+          typeof fn.name === "string" &&
+          "arguments" in fn &&
+          typeof fn.arguments === "string"
+        ) {
+          toolCalls.push({ name: fn.name, arguments: fn.arguments });
+        }
+      }
+    }
+
+    return {
+      role:
+        message && typeof message === "object" && typeof message.role === "string"
+          ? message.role
+          : "unknown",
+      content: extractMockText(message),
+      toolName:
+        message &&
+        typeof message === "object" &&
+        message.role === "tool" &&
+        typeof message.name === "string"
+          ? message.name
+          : null,
+      reasoning,
+      toolCalls,
+    };
+  });
+}
+
 const mockTraces = [
   {
     timestamp: new Date(now - 3 * min).toISOString(),
@@ -124,7 +225,7 @@ const mockTraceDetails: Record<string, object> = {
     outputTokens: 372,
     totalTokens: 1284,
     reasoningTokens: null,
-    inputMessages: [
+    inputMessages: toTraceMessages([
       {
         role: "system",
         content:
@@ -134,8 +235,8 @@ const mockTraceDetails: Record<string, object> = {
         role: "user",
         content: "Find me the cheapest flight from Kuala Lumpur to Tokyo Narita for March 20th",
       },
-    ],
-    outputMessages: [
+    ]),
+    outputMessages: toTraceMessages([
       {
         role: "assistant",
         content: null,
@@ -187,7 +288,7 @@ const mockTraceDetails: Record<string, object> = {
         content:
           "The cheapest flight from Kuala Lumpur to Tokyo Narita is with AirAsia for $187 on March 20th. It departs at 06:30 and arrives at 14:45 (7h 15m flight). Other options include Malaysia Airlines at $312 and JAL at $445. Would you like me to help you book the AirAsia flight?",
       },
-    ],
+    ]),
     finishReasons: ["stop"],
     responseId: "chatcmpl-abc123def456",
     metadata: {
@@ -230,7 +331,7 @@ const mockTraceDetails: Record<string, object> = {
     outputTokens: 1536,
     totalTokens: 3584,
     reasoningTokens: 512,
-    inputMessages: [
+    inputMessages: toTraceMessages([
       {
         role: "system",
         content: "You are a technical documentation assistant.",
@@ -239,8 +340,8 @@ const mockTraceDetails: Record<string, object> = {
         role: "user",
         content: "How do I deploy using the new CI/CD pipeline?",
       },
-    ],
-    outputMessages: [
+    ]),
+    outputMessages: toTraceMessages([
       {
         role: "assistant",
         content: [
@@ -254,7 +355,7 @@ const mockTraceDetails: Record<string, object> = {
           },
         ],
       },
-    ],
+    ]),
     finishReasons: ["stop"],
     responseId: "chatcmpl-def789ghi012",
     metadata: {
@@ -295,13 +396,13 @@ const mockTraceDetails: Record<string, object> = {
     outputTokens: 0,
     totalTokens: 4096,
     reasoningTokens: null,
-    inputMessages: [
+    inputMessages: toTraceMessages([
       {
         role: "user",
         content: "Analyze this dataset and provide recommendations for optimization.",
       },
-    ],
-    outputMessages: [],
+    ]),
+    outputMessages: toTraceMessages([]),
     finishReasons: [],
     responseId: "",
     metadata: {
@@ -338,16 +439,16 @@ const mockTraceDetails: Record<string, object> = {
     outputTokens: 64,
     totalTokens: 192,
     reasoningTokens: null,
-    inputMessages: [
+    inputMessages: toTraceMessages([
       { role: "system", content: "You are a friendly assistant." },
       { role: "user", content: "Hello!" },
-    ],
-    outputMessages: [
+    ]),
+    outputMessages: toTraceMessages([
       {
         role: "assistant",
         content: "Hello! How can I help you today?",
       },
-    ],
+    ]),
     finishReasons: ["stop"],
     responseId: "chatcmpl-jkl345mno678",
     metadata: {
@@ -381,8 +482,8 @@ const mockTraceDetails: Record<string, object> = {
     outputTokens: null,
     totalTokens: 256,
     reasoningTokens: null,
-    inputMessages: [],
-    outputMessages: [],
+    inputMessages: toTraceMessages([]),
+    outputMessages: toTraceMessages([]),
     finishReasons: [],
     responseId: "emb-pqr901stu234",
     metadata: {
@@ -418,7 +519,7 @@ for (const [index, trace] of generatedMockTraces.entries()) {
     outputTokens: trace.status === "error" ? 0 : 480 + index * 20,
     totalTokens: trace.status === "error" ? 1200 + index * 40 : 1680 + index * 60,
     reasoningTokens: index % 2 === 0 ? 220 + index * 10 : null,
-    inputMessages: [
+    inputMessages: toTraceMessages([
       {
         role: "system",
         content:
@@ -429,8 +530,8 @@ for (const [index, trace] of generatedMockTraces.entries()) {
         content:
           "Compare flight options for next Friday, explain the tradeoffs, and include any operational caveats that might change the recommendation.",
       },
-    ],
-    outputMessages: [
+    ]),
+    outputMessages: toTraceMessages([
       {
         role: "assistant",
         content: [
@@ -475,7 +576,7 @@ for (const [index, trace] of generatedMockTraces.entries()) {
             ? ""
             : `${longFlightNarrative}\n\nRecommended option: AirAsia X remains the best balance of price and schedule, but premium-economy alternatives become more attractive once baggage and change flexibility are priced in.`,
       },
-    ],
+    ]),
     finishReasons: trace.status === "error" ? [] : ["stop"],
     responseId: trace.status === "error" ? "" : `chatcmpl-generated-${index + 1}`,
     metadata: {
@@ -544,8 +645,6 @@ export const traceHandlers = [
       return HttpResponse.json({
         data: paged,
         hasNextPage,
-        page,
-        pageSize,
       });
     },
   ),
