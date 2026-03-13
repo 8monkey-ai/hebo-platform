@@ -5,7 +5,6 @@ import {
   parseAsStringLiteral,
   useQueryStates,
 } from "nuqs";
-import { useState } from "react";
 import { z } from "zod";
 
 export type TraceSearchParamsState = ReturnType<typeof useTraceSearchParams>;
@@ -16,7 +15,9 @@ const fixedQueryParsers = {
   from: parseAsIsoDateTime,
   metadata: parseAsJson(z.record(z.string(), z.string())).withDefault({}),
   page: parseAsInteger.withDefault(1),
-  preset: parseAsStringLiteral(traceTimePresets).withDefault("15m"),
+  preset: parseAsStringLiteral(traceTimePresets)
+    .withDefault("15m")
+    .withOptions({ clearOnDefault: false }),
   to: parseAsIsoDateTime,
 };
 
@@ -51,25 +52,21 @@ function getQueryRange(
   preset: (typeof traceTimePresets)[number],
   from: Date | null,
   to: Date | null,
-  rangeAnchorMs: number,
 ) {
-  if (preset !== "custom") {
-    return timeRangeToParams(preset, rangeAnchorMs);
+  if (preset === "custom") {
+    const fallbackRange = timeRangeToParams("15m");
+    return {
+      from: from?.toISOString() ?? fallbackRange.from,
+      to: to?.toISOString() ?? fallbackRange.to,
+    };
   }
 
-  const fallbackRange = timeRangeToParams("15m", rangeAnchorMs);
-  return {
-    from: from?.toISOString() ?? fallbackRange.from,
-    to: to?.toISOString() ?? fallbackRange.to,
-  };
+  return timeRangeToParams(preset);
 }
 
 export function useTraceSearchParams() {
-  const [rangeAnchorMs, setRangeAnchorMs] = useState(() => Date.now());
-
   const [{ preset, from, to, metadata, page }, setQueryStates] = useQueryStates(fixedQueryParsers);
-
-  const { from: effectiveFrom, to: effectiveTo } = getQueryRange(preset, from, to, rangeAnchorMs);
+  const { from: effectiveFrom, to: effectiveTo } = getQueryRange(preset, from, to);
 
   const listQuery = {
     metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : undefined,
@@ -79,27 +76,36 @@ export function useTraceSearchParams() {
   };
 
   function handlePresetChange(nextPreset: string) {
+    const resolvedPreset = nextPreset as (typeof traceTimePresets)[number];
+    const nextRange = timeRangeToParams(resolvedPreset);
+
     void setQueryStates({
-      from: null,
+      preset: resolvedPreset,
+      from: new Date(nextRange.from),
+      to: new Date(nextRange.to),
       page: null,
-      preset: nextPreset as (typeof traceTimePresets)[number],
-      to: null,
     });
-    setRangeAnchorMs(Date.now());
   }
 
   function handleApplyCustomRange(customFrom: string, customTo: string) {
     void setQueryStates({
-      from: new Date(customFrom),
-      page: null,
       preset: "custom",
+      from: new Date(customFrom),
       to: new Date(customTo),
+      page: null,
     });
   }
 
   function handleRefresh() {
+    if (preset !== "custom") {
+      const { from, to } = timeRangeToParams(preset);
+      void setQueryStates({
+        from: new Date(from),
+        to: new Date(to),
+      });
+    }
+
     void setQueryStates({ page: null });
-    setRangeAnchorMs(Date.now());
   }
 
   function handleLoadMore() {

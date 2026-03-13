@@ -211,8 +211,8 @@ function TimePresetControl({
         <ToggleGroup
           type="single"
           size="sm"
-          value={activePreset === "custom" ? undefined : activePreset}
-          onValueChange={(value) => value && onPresetChange(value)}
+          value={activePreset === "custom" ? "" : activePreset}
+          onValueChange={(value) => value && onPresetChange(value[0])}
         >
           {traceTimePresets
             .filter((preset) => preset !== "custom")
