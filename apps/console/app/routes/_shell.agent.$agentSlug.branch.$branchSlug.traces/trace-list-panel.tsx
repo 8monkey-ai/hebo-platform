@@ -1,5 +1,5 @@
 import { Filter, RefreshCw, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router";
 import { toast } from "sonner";
 
@@ -45,6 +45,19 @@ type TraceListPanelProps = {
   onSelectSpan: (spanId: string) => void;
 };
 
+function resolveTimeRange(activePreset: string, fromParam: string | null, toParam: string | null) {
+  if (activePreset !== "custom") {
+    return timeRangeToParams(activePreset);
+  }
+
+  const fallbackRange = timeRangeToParams("15m");
+
+  return {
+    from: fromParam ?? fallbackRange.from,
+    to: toParam ?? fallbackRange.to,
+  };
+}
+
 export function TraceListPanel({
   agentSlug,
   branchSlug,
@@ -57,20 +70,15 @@ export function TraceListPanel({
   const [hasNextPage, setHasNextPage] = useState(false);
   const [listLoading, setListLoading] = useState(true);
   const [metadataTags, setMetadataTags] = useState<TraceMetadataTags>({});
+  const [refreshNonce, setRefreshNonce] = useState(0);
 
   const activePreset = searchParams.get("preset") ?? "15m";
-  const rawPage = Number(searchParams.get("page") ?? 1);
-  const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
-  const pageSize = 50;
+  const page = Math.max(1, Math.floor(Number(searchParams.get("page")) || 1));
   const fromParam = searchParams.get("from");
   const toParam = searchParams.get("to");
-  const presetRange = useMemo(
-    () => (activePreset === "custom" ? null : timeRangeToParams(activePreset)),
-    [activePreset],
+  const [queryRange, setQueryRange] = useState(() =>
+    resolveTimeRange(activePreset, fromParam, toParam),
   );
-  const fallbackCustomRange = activePreset === "custom" ? timeRangeToParams("15m") : null;
-  const effectiveFrom = presetRange?.from ?? fromParam ?? fallbackCustomRange!.from;
-  const effectiveTo = presetRange?.to ?? toParam ?? fallbackCustomRange!.to;
 
   const metaFilters: Record<string, string> = {};
   for (const [key, value] of searchParams.entries()) {
@@ -83,16 +91,19 @@ export function TraceListPanel({
   const searchParamsKey = searchParams.toString();
 
   useEffect(() => {
+    setQueryRange(resolveTimeRange(activePreset, fromParam, toParam));
+  }, [activePreset, fromParam, refreshNonce, toParam]);
+
+  useEffect(() => {
     let cancelled = false;
 
     setListLoading(true);
     (async () => {
       try {
         const query = {
-          from: effectiveFrom,
-          to: effectiveTo,
+          from: queryRange.from,
+          to: queryRange.to,
           page: String(page),
-          pageSize: String(pageSize),
           ...Object.fromEntries(
             [...new URLSearchParams(searchParamsKey)].filter(([k]) => k.startsWith("meta.")),
           ),
@@ -127,7 +138,7 @@ export function TraceListPanel({
     return () => {
       cancelled = true;
     };
-  }, [agentSlug, branchSlug, effectiveFrom, effectiveTo, page, pageSize, searchParamsKey]);
+  }, [agentSlug, branchSlug, page, queryRange.from, queryRange.to, searchParamsKey]);
 
   useEffect(() => {
     (async () => {
@@ -137,7 +148,7 @@ export function TraceListPanel({
           .branches({ branchSlug })
           .traces.metadata.get({
             // @ts-expect-error this works in Eden
-            query: { from: effectiveFrom, to: effectiveTo },
+            query: { from: queryRange.from, to: queryRange.to },
           });
 
         if (!error) setMetadataTags(data?.tags ?? {});
@@ -145,7 +156,7 @@ export function TraceListPanel({
         // Tag suggestions are optional.
       }
     })();
-  }, [agentSlug, branchSlug, effectiveFrom, effectiveTo]);
+  }, [agentSlug, branchSlug, queryRange.from, queryRange.to]);
 
   function handlePresetChange(preset: string) {
     const nextParams = new URLSearchParams(searchParams);
@@ -169,6 +180,7 @@ export function TraceListPanel({
     const nextParams = new URLSearchParams(searchParams);
     nextParams.delete("page");
     setSearchParams(nextParams);
+    setRefreshNonce((current) => current + 1);
   }
 
   function handleLoadMore() {
@@ -200,8 +212,8 @@ export function TraceListPanel({
           <div className="flex flex-wrap items-center gap-2">
             <TimePresetControl
               activePreset={activePreset}
-              effectiveFrom={effectiveFrom}
-              effectiveTo={effectiveTo}
+              effectiveFrom={queryRange.from}
+              effectiveTo={queryRange.to}
               isCustomPresetActive={activePreset === "custom"}
               onApplyCustomRange={handleApplyCustomRange}
               onPresetChange={handlePresetChange}
@@ -221,7 +233,7 @@ export function TraceListPanel({
           </div>
 
           <p className="shrink-0 text-xs text-muted-foreground">
-            {formatDateRangeSummary(effectiveFrom, effectiveTo)}
+            {formatDateRangeSummary(queryRange.from, queryRange.to)}
             {activeFilterCount > 0 && (
               <>
                 {" · "}

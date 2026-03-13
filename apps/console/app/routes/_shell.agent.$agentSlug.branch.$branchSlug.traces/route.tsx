@@ -23,6 +23,7 @@ export default function TracesRoute() {
   useEffect(() => {
     if (!selectedSpanId) {
       setTraceDetail(null);
+      setDetailLoading(false);
       return;
     }
 
