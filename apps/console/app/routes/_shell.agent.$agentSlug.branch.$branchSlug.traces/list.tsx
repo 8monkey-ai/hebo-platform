@@ -91,19 +91,17 @@ export function TraceList({
           );
         })}
 
-        {(traces.length > 0 || hasNextPage) && (
-          <div className="flex items-center justify-between px-4 py-3">
-            <span className="text-xs text-muted-foreground">
-              Loaded {traces.length} trace{traces.length === 1 ? "" : "s"}
-            </span>
-            {hasNextPage ? (
-              <Button variant="outline" size="sm" disabled={loading} onClick={onLoadMore}>
-                Load more
-                <ChevronRight className="size-4" />
-              </Button>
-            ) : null}
-          </div>
-        )}
+        <div className="flex items-center justify-between px-4 py-3">
+          <span className="text-xs text-muted-foreground">
+            Loaded {traces.length} trace{traces.length === 1 ? "" : "s"}
+          </span>
+          {hasNextPage ? (
+            <Button variant="outline" size="sm" disabled={loading} onClick={onLoadMore}>
+              Load more
+              <ChevronRight className="size-4" />
+            </Button>
+          ) : null}
+        </div>
       </div>
     );
   }
