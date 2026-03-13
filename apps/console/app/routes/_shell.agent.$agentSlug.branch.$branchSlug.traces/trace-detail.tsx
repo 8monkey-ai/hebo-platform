@@ -1,5 +1,5 @@
 import { ChevronDown, ChevronRight, Loader2, Wrench } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
@@ -42,7 +42,6 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
     );
   }
 
-  const toolCallCount = countToolCalls(trace.outputMessages);
   const statusBadge = getTraceStatusBadgeProps(trace.status);
 
   return (
@@ -88,11 +87,6 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
                   {formatTokenCount(trace.outputTokens)} out
                 </Badge>
               )}
-              {toolCallCount > 0 && (
-                <Badge variant="secondary" className="bg-muted text-muted-foreground">
-                  tool call {toolCallCount}
-                </Badge>
-              )}
             </div>
           </div>
         </div>
@@ -124,17 +118,17 @@ function DetailShell({ children }: { children: React.ReactNode }) {
 // --- Formatted View ---
 
 function FormattedView({ trace }: { trace: TraceDetailData }) {
-  const inputMessages = normalizeMessages(trace.inputMessages);
-  const outputMessages = normalizeMessages(trace.outputMessages);
+  const inputMessages = trace.inputMessages;
+  const outputMessages = trace.outputMessages;
 
   return (
     <div className="flex min-h-0 flex-col divide-y">
-      {inputMessages.map((msg) => (
-        <MessageBlock key={getMessageKey("in", msg)} message={msg} />
+      {inputMessages.map((msg, index) => (
+        <MessageBlock key={`in:${index}`} message={msg} />
       ))}
 
-      {outputMessages.map((msg) => (
-        <MessageBlock key={getMessageKey("out", msg)} message={msg} />
+      {outputMessages.map((msg, index) => (
+        <MessageBlock key={`out:${index}`} message={msg} />
       ))}
 
       {inputMessages.length === 0 && outputMessages.length === 0 && (
@@ -144,69 +138,93 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
   );
 }
 
-type NormalizedMessage = {
-  role: string;
-  content: string;
-  toolCalls: NonNullable<TraceDetailData["inputMessages"][number]["toolCalls"]>;
-  toolName?: string;
-  reasoning?: string;
-};
+type TraceMessage = TraceDetailData["inputMessages"][number];
 
-function normalizeMessages(messages: TraceDetailData["inputMessages"]): NormalizedMessage[] {
-  return messages.map((message) => {
-    const toolCalls = message.toolCalls ?? [];
+function extractMessageParts(message: TraceMessage) {
+  const text: string[] = [];
+  const reasoning: string[] = [];
+  const toolCalls: Array<{ name: string; arguments: string }> = [];
 
-    return {
-      role: message.role,
-      content: typeof message.content === "string" ? message.content : "",
-      toolCalls,
-      toolName: message.role === "tool" ? (message.toolName ?? undefined) : undefined,
-      reasoning: message.reasoning,
-    };
-  });
+  for (const part of message.parts ?? []) {
+    switch (part.type) {
+      case "text":
+        if (typeof part.content === "string") text.push(part.content);
+        break;
+      case "reasoning":
+        if (typeof part.content === "string") reasoning.push(part.content);
+        break;
+      case "tool_call":
+        toolCalls.push({
+          name: part.name,
+          arguments:
+            typeof part.arguments === "string"
+              ? part.arguments
+              : JSON.stringify(part.arguments ?? null, null, 2),
+        });
+        break;
+      case "tool_call_response":
+        text.push(
+          typeof part.response === "string"
+            ? part.response
+            : JSON.stringify(part.response ?? null, null, 2),
+        );
+        break;
+    }
+  }
+
+  return {
+    content: text.join("\n").trim(),
+    reasoning: reasoning.join("\n").trim(),
+    toolCalls,
+  };
 }
 
-function MessageBlock({ message }: { message: NormalizedMessage }) {
-  const roleAccents: Record<string, string> = {
-    system: "border-l-amber-500",
-    user: "border-l-blue-500",
-    assistant: "border-l-green-500",
-    tool: "border-l-violet-500",
-  };
+const ROLE_ACCENTS: Record<string, string> = {
+  system: "border-l-amber-500",
+  user: "border-l-blue-500",
+  assistant: "border-l-green-500",
+  tool: "border-l-violet-500",
+};
+
+function MessageBlock({ message }: { message: TraceMessage }) {
+  const contentRef = useRef<HTMLElement>(null);
+
+  const { content, reasoning, toolCalls } = extractMessageParts(message);
+
   const roleLabel = message.role.charAt(0).toUpperCase() + message.role.slice(1);
-  const fullContent = buildFullContent(message);
 
   return (
     <section
+      ref={contentRef}
       className={cn(
         "space-y-3 border-l-2 py-4 pl-3 first:pt-0 last:pb-0",
-        roleAccents[message.role] ?? "border-l-border",
+        ROLE_ACCENTS[message.role] ?? "border-l-border",
       )}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-base font-semibold tracking-tight">{roleLabel}</span>
-          {message.toolName && (
+
+          {message.role === "tool" && message.name && (
             <Badge variant="outline">
               <Wrench className="size-3" />
-              {message.toolName}
+              {message.name}
             </Badge>
           )}
         </div>
-        {fullContent && <CopyButton value={fullContent} />}
+
+        <CopyButton value={() => contentRef.current?.innerText ?? ""} />
       </div>
 
-      {message.reasoning && (
+      {reasoning && (
         <ExpandableContent label="Reasoning">
-          <p className="text-sm whitespace-pre-wrap text-muted-foreground italic">
-            {message.reasoning}
-          </p>
+          <p className="text-sm whitespace-pre-wrap text-muted-foreground italic">{reasoning}</p>
         </ExpandableContent>
       )}
 
-      {message.content && <CollapsibleText text={message.content} maxLength={500} />}
+      {content && <CollapsibleText text={content} maxLength={500} />}
 
-      {message.toolCalls.map((tc) => (
+      {toolCalls.map((tc) => (
         <div key={`${tc.name}:${tc.arguments}`} className="space-y-2">
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             <Wrench className="size-3" />
@@ -217,31 +235,6 @@ function MessageBlock({ message }: { message: NormalizedMessage }) {
       ))}
     </section>
   );
-}
-
-function buildFullContent(message: NormalizedMessage): string {
-  const parts: string[] = [];
-  if (message.reasoning) parts.push(`[Reasoning]\n${message.reasoning}`);
-  if (message.content) parts.push(message.content);
-  for (const tc of message.toolCalls) {
-    parts.push(`[Tool Call: ${tc.name}]\n${tc.arguments}`);
-  }
-  return parts.join("\n\n");
-}
-
-function getMessageKey(prefix: string, message: NormalizedMessage) {
-  const toolKey = message.toolCalls
-    .map((toolCall) => `${toolCall.name}:${toolCall.arguments}`)
-    .join("|");
-
-  return [
-    prefix,
-    message.role,
-    message.toolName ?? "",
-    message.reasoning ?? "",
-    message.content,
-    toolKey,
-  ].join(":");
 }
 
 function CollapsibleText({ text, maxLength }: { text: string; maxLength: number }) {
@@ -379,12 +372,5 @@ function IdentifierRow({ label, value }: { label: string; value: string | null }
         </div>
       </td>
     </tr>
-  );
-}
-
-function countToolCalls(messages: TraceDetailData["outputMessages"]): number {
-  return normalizeMessages(messages).reduce(
-    (count, message) => count + message.toolCalls.length,
-    0,
   );
 }

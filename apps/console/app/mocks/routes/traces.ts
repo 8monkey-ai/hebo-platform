@@ -26,107 +26,6 @@ const longToolPayload = {
   })),
 };
 
-function extractMockText(message: unknown): string {
-  if (!message || typeof message !== "object") return "";
-
-  const textParts: string[] = [];
-  const { content, parts } = message as {
-    content?: unknown;
-    parts?: unknown;
-  };
-
-  if (typeof content === "string") textParts.push(content);
-
-  if (Array.isArray(content)) {
-    for (const part of content) {
-      if (!part || typeof part !== "object") continue;
-      const { type, text } = part as { type?: unknown; text?: unknown };
-      if ((type === "text" || type === "reasoning") && typeof text === "string") {
-        textParts.push(text);
-      }
-    }
-  }
-
-  if (Array.isArray(parts)) {
-    for (const part of parts) {
-      if (!part || typeof part !== "object") continue;
-      const { type, content: text } = part as { type?: unknown; content?: unknown };
-      if ((type === "text" || type === "reasoning") && typeof text === "string") {
-        textParts.push(text);
-      }
-    }
-  }
-
-  return textParts.join("\n").trim();
-}
-
-function toTraceMessages(messages: unknown[]) {
-  return messages.map((message) => {
-    const toolCalls: Array<{ name: string; arguments: string }> = [];
-    let reasoning: string | null = null;
-
-    if (message && typeof message === "object" && Array.isArray(message.parts)) {
-      for (const part of message.parts) {
-        if (!part || typeof part !== "object") continue;
-        const {
-          type,
-          content,
-          name,
-          arguments: args,
-        } = part as {
-          type?: unknown;
-          content?: unknown;
-          name?: unknown;
-          arguments?: unknown;
-        };
-
-        if (type === "reasoning" && typeof content === "string") {
-          reasoning = content;
-        } else if (type === "tool_call" && typeof name === "string" && typeof args === "string") {
-          toolCalls.push({ name, arguments: args });
-        }
-      }
-    }
-
-    if (message && typeof message === "object" && Array.isArray(message.tool_calls)) {
-      for (const toolCall of message.tool_calls) {
-        if (!toolCall || typeof toolCall !== "object") continue;
-        const fn =
-          "function" in toolCall && toolCall.function && typeof toolCall.function === "object"
-            ? toolCall.function
-            : null;
-
-        if (
-          fn &&
-          "name" in fn &&
-          typeof fn.name === "string" &&
-          "arguments" in fn &&
-          typeof fn.arguments === "string"
-        ) {
-          toolCalls.push({ name: fn.name, arguments: fn.arguments });
-        }
-      }
-    }
-
-    return {
-      role:
-        message && typeof message === "object" && typeof message.role === "string"
-          ? message.role
-          : "unknown",
-      content: extractMockText(message),
-      toolName:
-        message &&
-        typeof message === "object" &&
-        message.role === "tool" &&
-        typeof message.name === "string"
-          ? message.name
-          : null,
-      reasoning,
-      toolCalls,
-    };
-  });
-}
-
 const mockTraces = [
   {
     timestamp: new Date(now - 3 * min).toISOString(),
@@ -225,31 +124,40 @@ const mockSpanDetails: Record<string, object> = {
     outputTokens: 372,
     totalTokens: 1284,
     reasoningTokens: null,
-    inputMessages: toTraceMessages([
+    inputMessages: [
       {
         role: "system",
-        content:
-          "You are a helpful travel assistant. You help users find the cheapest flights and best travel options. Use the search_flights tool to look up available flights.",
+        parts: [
+          {
+            type: "text",
+            content:
+              "You are a helpful travel assistant. You help users find the cheapest flights and best travel options. Use the search_flights tool to look up available flights.",
+          },
+        ],
       },
       {
         role: "user",
-        content: "Find me the cheapest flight from Kuala Lumpur to Tokyo Narita for March 20th",
+        parts: [
+          {
+            type: "text",
+            content: "Find me the cheapest flight from Kuala Lumpur to Tokyo Narita for March 20th",
+          },
+        ],
       },
-    ]),
-    outputMessages: toTraceMessages([
+    ],
+    outputMessages: [
       {
         role: "assistant",
-        content: null,
-        tool_calls: [
+        parts: [
           {
-            function: {
-              name: "search_flights",
-              arguments: JSON.stringify({
-                from: "KUL",
-                to: "NRT",
-                date: "2026-03-20",
-                sort: "price_asc",
-              }),
+            type: "tool_call",
+            id: "search-flights-1",
+            name: "search_flights",
+            arguments: {
+              from: "KUL",
+              to: "NRT",
+              date: "2026-03-20",
+              sort: "price_asc",
             },
           },
         ],
@@ -257,38 +165,49 @@ const mockSpanDetails: Record<string, object> = {
       {
         role: "tool",
         name: "search_flights",
-        content: JSON.stringify({
-          flights: [
-            {
-              airline: "AirAsia",
-              price: 187,
-              departure: "06:30",
-              arrival: "14:45",
-              duration: "7h 15m",
+        parts: [
+          {
+            type: "tool_call_response",
+            id: "search-flights-1",
+            response: {
+              flights: [
+                {
+                  airline: "AirAsia",
+                  price: 187,
+                  departure: "06:30",
+                  arrival: "14:45",
+                  duration: "7h 15m",
+                },
+                {
+                  airline: "Malaysia Airlines",
+                  price: 312,
+                  departure: "09:00",
+                  arrival: "17:15",
+                  duration: "7h 15m",
+                },
+                {
+                  airline: "JAL",
+                  price: 445,
+                  departure: "11:30",
+                  arrival: "19:45",
+                  duration: "7h 15m",
+                },
+              ],
             },
-            {
-              airline: "Malaysia Airlines",
-              price: 312,
-              departure: "09:00",
-              arrival: "17:15",
-              duration: "7h 15m",
-            },
-            {
-              airline: "JAL",
-              price: 445,
-              departure: "11:30",
-              arrival: "19:45",
-              duration: "7h 15m",
-            },
-          ],
-        }),
+          },
+        ],
       },
       {
         role: "assistant",
-        content:
-          "The cheapest flight from Kuala Lumpur to Tokyo Narita is with AirAsia for $187 on March 20th. It departs at 06:30 and arrives at 14:45 (7h 15m flight). Other options include Malaysia Airlines at $312 and JAL at $445. Would you like me to help you book the AirAsia flight?",
+        parts: [
+          {
+            type: "text",
+            content:
+              "The cheapest flight from Kuala Lumpur to Tokyo Narita is with AirAsia for $187 on March 20th. It departs at 06:30 and arrives at 14:45 (7h 15m flight). Other options include Malaysia Airlines at $312 and JAL at $445. Would you like me to help you book the AirAsia flight?",
+          },
+        ],
       },
-    ]),
+    ],
     finishReasons: ["stop"],
     responseId: "chatcmpl-abc123def456",
     metadata: {
@@ -331,31 +250,33 @@ const mockSpanDetails: Record<string, object> = {
     outputTokens: 1536,
     totalTokens: 3584,
     reasoningTokens: 512,
-    inputMessages: toTraceMessages([
+    inputMessages: [
       {
         role: "system",
-        content: "You are a technical documentation assistant.",
+        parts: [{ type: "text", content: "You are a technical documentation assistant." }],
       },
       {
         role: "user",
-        content: "How do I deploy using the new CI/CD pipeline?",
+        parts: [{ type: "text", content: "How do I deploy using the new CI/CD pipeline?" }],
       },
-    ]),
-    outputMessages: toTraceMessages([
+    ],
+    outputMessages: [
       {
         role: "assistant",
-        content: [
+        parts: [
           {
             type: "reasoning",
-            text: "The user is asking about deployment with the CI/CD pipeline. I should refer to the deployment docs and provide step-by-step instructions.",
+            content:
+              "The user is asking about deployment with the CI/CD pipeline. I should refer to the deployment docs and provide step-by-step instructions.",
           },
           {
             type: "text",
-            text: "Based on the documentation, the deployment process involves three steps:\n\n1. **Push to main** - Merge your PR to the main branch\n2. **CI validates** - The pipeline runs tests, linting, and type checks\n3. **Auto-deploy** - SST deploys to staging, then promotes to production after approval\n\nYou can monitor the deployment status in the GitHub Actions tab.",
+            content:
+              "Based on the documentation, the deployment process involves three steps:\n\n1. **Push to main** - Merge your PR to the main branch\n2. **CI validates** - The pipeline runs tests, linting, and type checks\n3. **Auto-deploy** - SST deploys to staging, then promotes to production after approval\n\nYou can monitor the deployment status in the GitHub Actions tab.",
           },
         ],
       },
-    ]),
+    ],
     finishReasons: ["stop"],
     responseId: "chatcmpl-def789ghi012",
     metadata: {
@@ -396,13 +317,18 @@ const mockSpanDetails: Record<string, object> = {
     outputTokens: 0,
     totalTokens: 4096,
     reasoningTokens: null,
-    inputMessages: toTraceMessages([
+    inputMessages: [
       {
         role: "user",
-        content: "Analyze this dataset and provide recommendations for optimization.",
+        parts: [
+          {
+            type: "text",
+            content: "Analyze this dataset and provide recommendations for optimization.",
+          },
+        ],
       },
-    ]),
-    outputMessages: toTraceMessages([]),
+    ],
+    outputMessages: [],
     finishReasons: [],
     responseId: "",
     metadata: {
@@ -439,16 +365,16 @@ const mockSpanDetails: Record<string, object> = {
     outputTokens: 64,
     totalTokens: 192,
     reasoningTokens: null,
-    inputMessages: toTraceMessages([
-      { role: "system", content: "You are a friendly assistant." },
-      { role: "user", content: "Hello!" },
-    ]),
-    outputMessages: toTraceMessages([
+    inputMessages: [
+      { role: "system", parts: [{ type: "text", content: "You are a friendly assistant." }] },
+      { role: "user", parts: [{ type: "text", content: "Hello!" }] },
+    ],
+    outputMessages: [
       {
         role: "assistant",
-        content: "Hello! How can I help you today?",
+        parts: [{ type: "text", content: "Hello! How can I help you today?" }],
       },
-    ]),
+    ],
     finishReasons: ["stop"],
     responseId: "chatcmpl-jkl345mno678",
     metadata: {
@@ -482,8 +408,8 @@ const mockSpanDetails: Record<string, object> = {
     outputTokens: null,
     totalTokens: 256,
     reasoningTokens: null,
-    inputMessages: toTraceMessages([]),
-    outputMessages: toTraceMessages([]),
+    inputMessages: [],
+    outputMessages: [],
     finishReasons: [],
     responseId: "emb-pqr901stu234",
     metadata: {
@@ -519,47 +445,49 @@ for (const [index, trace] of generatedMockTraces.entries()) {
     outputTokens: trace.status === "error" ? 0 : 480 + index * 20,
     totalTokens: trace.status === "error" ? 1200 + index * 40 : 1680 + index * 60,
     reasoningTokens: index % 2 === 0 ? 220 + index * 10 : null,
-    inputMessages: toTraceMessages([
+    inputMessages: [
       {
         role: "system",
-        content:
-          "You are an operations copilot. Explain your recommendation clearly, cite tradeoffs, and preserve enough detail for audit review.",
+        parts: [
+          {
+            type: "text",
+            content:
+              "You are an operations copilot. Explain your recommendation clearly, cite tradeoffs, and preserve enough detail for audit review.",
+          },
+        ],
       },
       {
         role: "user",
-        content:
-          "Compare flight options for next Friday, explain the tradeoffs, and include any operational caveats that might change the recommendation.",
-      },
-    ]),
-    outputMessages: toTraceMessages([
-      {
-        role: "assistant",
-        content: [
-          {
-            type: "reasoning",
-            text: "I should compare direct and one-stop options, weigh refund/change restrictions, and make the explanation long enough to exercise the scroll area in the mock UI.",
-          },
+        parts: [
           {
             type: "text",
-            text: longFlightNarrative,
+            content:
+              "Compare flight options for next Friday, explain the tradeoffs, and include any operational caveats that might change the recommendation.",
           },
         ],
-        tool_calls: [
+      },
+    ],
+    outputMessages: [
+      {
+        role: "assistant",
+        parts: [
           {
-            function: {
-              name: "search_flights",
-              arguments: JSON.stringify(
-                {
-                  from: "KUL",
-                  to: "NRT",
-                  date: "2026-03-20",
-                  includeNearbyAirports: false,
-                  sort: "price_asc",
-                  maxResults: 12,
-                },
-                null,
-                2,
-              ),
+            type: "reasoning",
+            content:
+              "I should compare direct and one-stop options, weigh refund/change restrictions, and make the explanation long enough to exercise the scroll area in the mock UI.",
+          },
+          { type: "text", content: longFlightNarrative },
+          {
+            type: "tool_call",
+            id: `search-flights-generated-${index + 1}`,
+            name: "search_flights",
+            arguments: {
+              from: "KUL",
+              to: "NRT",
+              date: "2026-03-20",
+              includeNearbyAirports: false,
+              sort: "price_asc",
+              maxResults: 12,
             },
           },
         ],
@@ -567,16 +495,27 @@ for (const [index, trace] of generatedMockTraces.entries()) {
       {
         role: "tool",
         name: "search_flights",
-        content: JSON.stringify(longToolPayload, null, 2),
+        parts: [
+          {
+            type: "tool_call_response",
+            id: `search-flights-generated-${index + 1}`,
+            response: longToolPayload,
+          },
+        ],
       },
       {
         role: "assistant",
-        content:
+        parts:
           trace.status === "error"
-            ? ""
-            : `${longFlightNarrative}\n\nRecommended option: AirAsia X remains the best balance of price and schedule, but premium-economy alternatives become more attractive once baggage and change flexibility are priced in.`,
+            ? []
+            : [
+                {
+                  type: "text",
+                  content: `${longFlightNarrative}\n\nRecommended option: AirAsia X remains the best balance of price and schedule, but premium-economy alternatives become more attractive once baggage and change flexibility are priced in.`,
+                },
+              ],
       },
-    ]),
+    ],
     finishReasons: trace.status === "error" ? [] : ["stop"],
     responseId: trace.status === "error" ? "" : `chatcmpl-generated-${index + 1}`,
     metadata: {
