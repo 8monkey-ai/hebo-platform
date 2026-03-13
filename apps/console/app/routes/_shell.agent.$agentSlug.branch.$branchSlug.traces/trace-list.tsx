@@ -12,6 +12,7 @@ import {
   getTraceStatusBadgeProps,
   truncateText,
 } from "./utils";
+
 type TraceListProps = {
   traces: TraceListData;
   hasNextPage: boolean;
@@ -32,8 +33,8 @@ export function TraceList({
   onLoadMore,
 }: TraceListProps) {
   const loadingClassName = loading ? "pointer-events-none opacity-60" : "";
-  let content: React.ReactNode;
 
+  let content: React.ReactNode;
   if (loading && traces.length === 0) {
     content = <TraceListSkeleton />;
   } else if (traces.length === 0) {
