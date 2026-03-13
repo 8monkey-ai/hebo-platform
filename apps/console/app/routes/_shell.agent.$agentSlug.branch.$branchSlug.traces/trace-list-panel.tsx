@@ -9,19 +9,8 @@ import { Select } from "@hebo/shared-ui/components/Select";
 import { api } from "~console/lib/service";
 
 import { TraceList } from "./trace-list";
+import type { TraceListData, TraceMetadataTags } from "./types";
 import { formatDateRangeSummary, timeRangeToParams } from "./utils";
-
-type TraceListItem = {
-  timestamp: string;
-  traceId: string;
-  operationName: string;
-  model: string;
-  provider: string;
-  status: string;
-  durationMs: number;
-  summary: string;
-};
-
 const TIME_PRESETS = ["15m", "1h", "24h", "custom"] as const;
 
 const padDatePart = (part: number) => String(part).padStart(2, "0");
@@ -52,10 +41,10 @@ export function TraceListPanel({
 }: TraceListPanelProps) {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  const [traces, setTraces] = useState<TraceListItem[]>([]);
+  const [traces, setTraces] = useState<TraceListData>([]);
   const [hasNextPage, setHasNextPage] = useState(false);
   const [listLoading, setListLoading] = useState(true);
-  const [metadataTags, setMetadataTags] = useState<Record<string, string[]>>({});
+  const [metadataTags, setMetadataTags] = useState<TraceMetadataTags>({});
 
   const [showFilters, setShowFilters] = useState(false);
   const [filterKey, setFilterKey] = useState("");

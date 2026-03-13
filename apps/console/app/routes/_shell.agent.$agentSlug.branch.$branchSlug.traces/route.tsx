@@ -5,28 +5,7 @@ import { api } from "~console/lib/service";
 
 import { TraceDetail } from "./trace-detail";
 import { TraceListPanel } from "./trace-list-panel";
-
-type TraceDetailData = {
-  timestamp: string;
-  traceId: string;
-  operationName: string;
-  model: string;
-  responseModel: string;
-  provider: string;
-  status: string;
-  durationMs: number;
-  inputTokens: number | null;
-  outputTokens: number | null;
-  totalTokens: number | null;
-  reasoningTokens: number | null;
-  inputMessages: unknown;
-  outputMessages: unknown;
-  finishReasons: unknown;
-  responseId: string;
-  metadata: Record<string, string>;
-  spanAttributes: Record<string, unknown>;
-  resourceAttributes: Record<string, unknown>;
-};
+import type { TraceDetailData } from "./types";
 
 export default function TracesRoute() {
   const params = useParams();

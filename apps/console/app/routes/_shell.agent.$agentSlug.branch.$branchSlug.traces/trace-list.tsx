@@ -4,21 +4,10 @@ import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
 import { Skeleton } from "@hebo/shared-ui/components/Skeleton";
 
+import type { TraceListData } from "./types";
 import { formatDuration, formatTimestampShort, truncateText } from "./utils";
-
-type TraceListItem = {
-  timestamp: string;
-  traceId: string;
-  operationName: string;
-  model: string;
-  provider: string;
-  status: string;
-  durationMs: number;
-  summary: string;
-};
-
 type TraceListProps = {
-  traces: TraceListItem[];
+  traces: TraceListData;
   hasNextPage: boolean;
   pageSize: number;
   selectedTraceId: string | null;

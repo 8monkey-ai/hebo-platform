@@ -200,37 +200,58 @@ export async function getMetadataTags(
   from: Date,
   to: Date,
 ) {
-  const colRows = await greptimeDb.unsafe(
-    `SELECT column_name FROM information_schema.columns
+  const MAX_ROWS = 10_000;
+  const MAX_VALUES_PER_KEY = 100;
+
+  const colRows = (await greptimeDb.unsafe(
+    `SELECT column_name
+     FROM information_schema.columns
      WHERE table_name = 'opentelemetry_traces'
        AND column_name LIKE $1`,
     [`${METADATA_PREFIX}%`],
-  );
+  )) as Array<{ column_name: unknown }>;
 
-  const keys = (colRows as any[]).map((r) => String(r.column_name));
-  if (keys.length === 0) return { tags: {} };
+  const columns = colRows.map(({ column_name }) => {
+    const colName = String(column_name);
+    return {
+      colName,
+      keyName: colName.slice(METADATA_PREFIX.length),
+    };
+  });
 
-  const tags: Record<string, string[]> = {};
+  if (columns.length === 0) return { tags: {} };
 
-  await Promise.all(
-    keys.map(async (colName) => {
-      const keyName = colName.replace(METADATA_PREFIX, "");
-      const valRows = await greptimeDb.unsafe(
-        `SELECT DISTINCT "${colName}" AS val
-         FROM opentelemetry_traces
-         WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
-           AND "span_attributes.hebo.agent.slug" = $1
-           AND "span_attributes.hebo.branch.slug" = $2
-           AND "span_attributes.hebo.organization.id" = $3
-           AND "timestamp" >= $4
-           AND "timestamp" <= $5
-           AND "${colName}" IS NOT NULL
-         LIMIT 1000`,
-        [agentSlug, branchSlug, organizationId, toGreptimeDatetime(from), toGreptimeDatetime(to)],
-      );
-      tags[keyName] = (valRows as any[]).map((r) => String(r.val));
-    }),
-  );
+  const rows = (await greptimeDb.unsafe(
+    `SELECT ${columns.map(({ colName }) => `"${colName}"`).join(", ")}
+     FROM opentelemetry_traces
+     WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
+       AND "span_attributes.hebo.agent.slug" = $1
+       AND "span_attributes.hebo.branch.slug" = $2
+       AND "span_attributes.hebo.organization.id" = $3
+       AND "timestamp" >= $4
+       AND "timestamp" <= $5
+     ORDER BY "timestamp" DESC
+     LIMIT ${MAX_ROWS}`,
+    [agentSlug, branchSlug, organizationId, toGreptimeDatetime(from), toGreptimeDatetime(to)],
+  )) as Array<Record<string, unknown>>;
 
-  return { tags };
+  const tagSets = Object.fromEntries(
+    columns.map(({ keyName }) => [keyName, new Set<string>()]),
+  ) as Record<string, Set<string>>;
+
+  for (const row of rows) {
+    for (const { colName, keyName } of columns) {
+      const value = row[colName];
+      if (value != null) tagSets[keyName].add(String(value));
+    }
+  }
+
+  return {
+    tags: Object.fromEntries(
+      columns.map(({ keyName }) => [
+        keyName,
+        [...tagSets[keyName]].sort().slice(0, MAX_VALUES_PER_KEY),
+      ]),
+    ),
+  };
 }

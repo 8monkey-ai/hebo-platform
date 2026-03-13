@@ -5,34 +5,9 @@ import { Badge } from "@hebo/shared-ui/components/Badge";
 import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@hebo/shared-ui/components/Tabs";
 
+import type { TraceDetailData } from "./types";
 import { formatDuration, formatTimestampFull, formatTokenCount } from "./utils";
-
-type TraceDetailData = {
-  timestamp: string;
-  traceId: string;
-  operationName: string;
-  model: string;
-  responseModel: string;
-  provider: string;
-  status: string;
-  durationMs: number;
-  inputTokens: number | null;
-  outputTokens: number | null;
-  totalTokens: number | null;
-  reasoningTokens: number | null;
-  inputMessages: unknown;
-  outputMessages: unknown;
-  finishReasons: unknown;
-  responseId: string;
-  metadata: Record<string, string>;
-  spanAttributes: Record<string, unknown>;
-  resourceAttributes: Record<string, unknown>;
-};
-
-type TraceDetailProps = {
-  trace: TraceDetailData | null;
-  loading: boolean;
-};
+type TraceDetailProps = { trace: TraceDetailData | null; loading: boolean };
 
 export function TraceDetail({ trace, loading }: TraceDetailProps) {
   if (loading) {
