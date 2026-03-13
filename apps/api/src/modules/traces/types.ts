@@ -54,12 +54,57 @@ const SpanAttributes = t.Record(
   t.Union([t.String(), t.Number(), t.Boolean(), t.Null()]),
 );
 
+const GenericPart = t.Object(
+  {
+    type: t.String(),
+  },
+  { additionalProperties: true },
+);
+
+const TextPart = t.Object({
+  type: t.Literal("text"),
+  content: t.String(),
+});
+
+const ReasoningPart = t.Object({
+  type: t.Literal("reasoning"),
+  content: t.String(),
+});
+
+const ToolCallPart = t.Object({
+  type: t.Literal("tool_call"),
+  id: t.Optional(t.String()),
+  name: t.String(),
+  arguments: t.Any(),
+});
+
+const ToolCallResponsePart = t.Object({
+  type: t.Literal("tool_call_response"),
+  id: t.Optional(t.String()),
+  response: t.Any(),
+});
+
+const SpanMessagePart = t.Union([
+  TextPart,
+  ReasoningPart,
+  ToolCallPart,
+  ToolCallResponsePart,
+  GenericPart,
+]);
+
+const LegacyToolCall = t.Object({
+  function: t.Object({
+    name: t.String(),
+    arguments: t.Any(),
+  }),
+});
+
 const SpanMessage = t.Object({
   role: t.String(),
   name: t.Optional(t.String()),
-  content: t.Optional(t.Any()),
-  parts: t.Optional(t.Array(t.Any())),
-  tool_calls: t.Optional(t.Array(t.Any())),
+  content: t.Optional(t.Union([t.String(), t.Array(SpanMessagePart), t.Null()])),
+  parts: t.Optional(t.Array(SpanMessagePart)),
+  tool_calls: t.Optional(t.Array(LegacyToolCall)),
 });
 
 export const SpanDetail = t.Object({
