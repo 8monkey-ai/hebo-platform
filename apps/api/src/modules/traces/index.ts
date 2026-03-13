@@ -11,6 +11,9 @@ import {
   SpanMetadataQuery,
 } from "./types";
 
+const DEFAULT_FROM = () => new Date(Date.now() - 60 * 60 * 1000);
+const DEFAULT_TO = () => new Date();
+
 export const spansModule = new Elysia({
   prefix: "/:agentSlug/branches/:branchSlug/traces",
 })
@@ -18,6 +21,9 @@ export const spansModule = new Elysia({
   .get(
     "/",
     async ({ greptimeDb, organizationId, params, query }) => {
+      const from = query.from ?? DEFAULT_FROM();
+      const to = query.to ?? DEFAULT_TO();
+
       // Extract metadata filters from query params (meta.key=value)
       const metadataFilters: Record<string, string> = {};
       for (const [key, value] of Object.entries(query)) {
@@ -33,8 +39,8 @@ export const spansModule = new Elysia({
           organizationId,
           params.agentSlug,
           params.branchSlug,
-          query.from,
-          query.to,
+          from,
+          to,
           query.page,
           query.pageSize,
           metadataFilters,
@@ -49,6 +55,9 @@ export const spansModule = new Elysia({
   .get(
     "/metadata",
     async ({ greptimeDb, organizationId, params, query }) => {
+      const from = query.from ?? DEFAULT_FROM();
+      const to = query.to ?? DEFAULT_TO();
+
       return status(
         200,
         await getMetadataTags(
@@ -56,8 +65,8 @@ export const spansModule = new Elysia({
           organizationId,
           params.agentSlug,
           params.branchSlug,
-          query.from,
-          query.to,
+          from,
+          to,
         ),
       );
     },

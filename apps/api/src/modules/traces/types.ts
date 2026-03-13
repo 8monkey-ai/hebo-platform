@@ -1,20 +1,9 @@
 import { t } from "elysia";
 
-const DefaultFromDate = () => new Date(Date.now() - 60 * 60 * 1000);
-const DefaultToDate = () => new Date();
-
-const SpanDateQuery = (defaultValue: () => Date) =>
-  t.Date({
-    default: defaultValue(),
-  });
-
-const SpanFromQuery = SpanDateQuery(DefaultFromDate);
-const SpanToQuery = SpanDateQuery(DefaultToDate);
-
 export const SpanListQuery = t.Object(
   {
-    from: SpanFromQuery,
-    to: SpanToQuery,
+    from: t.Optional(t.Date()),
+    to: t.Optional(t.Date()),
     page: t.Number({ default: 1 }),
     pageSize: t.Number({ default: 50 }),
   },
@@ -27,8 +16,8 @@ export const SpanListQuery = t.Object(
 );
 
 export const SpanMetadataQuery = t.Object({
-  from: SpanFromQuery,
-  to: SpanToQuery,
+  from: t.Optional(t.Date()),
+  to: t.Optional(t.Date()),
 });
 
 const SpanStatus = t.Union([t.Literal("ok"), t.Literal("error"), t.Literal("unknown")]);
