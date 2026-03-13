@@ -1,6 +1,6 @@
 import { Elysia, status, t } from "elysia";
 
-import { authService } from "@hebo/shared-api/middlewares/auth";
+import { greptimeDb } from "~api/middleware/greptime";
 
 import { getMetadataTags, getTrace, listTraces } from "./service";
 import { MetadataTagsResponse, TraceDetail, TraceListResponse } from "./types";
@@ -8,10 +8,10 @@ import { MetadataTagsResponse, TraceDetail, TraceListResponse } from "./types";
 export const tracesModule = new Elysia({
   prefix: "/:agentSlug/branches/:branchSlug/traces",
 })
-  .use(authService)
+  .use(greptimeDb)
   .get(
     "/",
-    async ({ organizationId, params, query }) => {
+    async ({ greptimeDb, organizationId, params, query }) => {
       // Extract metadata filters from query params (meta.key=value)
       const metadataFilters: Record<string, string> = {};
       for (const [key, value] of Object.entries(query)) {
@@ -22,16 +22,17 @@ export const tracesModule = new Elysia({
 
       return status(
         200,
-        await listTraces({
-          organizationId: organizationId!,
-          agentSlug: params.agentSlug,
-          branchSlug: params.branchSlug,
-          from: new Date(query.from!),
-          to: new Date(query.to!),
-          page: query.page!,
-          pageSize: query.pageSize!,
+        await listTraces(
+          greptimeDb,
+          organizationId!,
+          params.agentSlug,
+          params.branchSlug,
+          new Date(query.from!),
+          new Date(query.to!),
+          query.page!,
+          query.pageSize!,
           metadataFilters,
-        }),
+        ),
       );
     },
     {
@@ -64,10 +65,11 @@ export const tracesModule = new Elysia({
   )
   .get(
     "/metadata",
-    async ({ organizationId, params, query }) => {
+    async ({ greptimeDb, organizationId, params, query }) => {
       return status(
         200,
         await getMetadataTags(
+          greptimeDb,
           organizationId!,
           params.agentSlug,
           params.branchSlug,
@@ -96,8 +98,9 @@ export const tracesModule = new Elysia({
   )
   .get(
     "/:traceId",
-    async ({ organizationId, params }) => {
+    async ({ greptimeDb, organizationId, params }) => {
       const trace = await getTrace(
+        greptimeDb,
         organizationId!,
         params.agentSlug,
         params.branchSlug,

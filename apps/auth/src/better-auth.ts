@@ -5,7 +5,7 @@ import { emailOTP, organization } from "better-auth/plugins";
 
 import { authSecret, authUrl, logLevel } from "@hebo/shared-api/env";
 import { betterAuthCookieOptions, cookieDomain } from "@hebo/shared-api/lib/cookie-options";
-import { createPrismaAdapter } from "@hebo/shared-api/lib/db/connection";
+import { createPrismaAdapter } from "@hebo/shared-api/lib/db/postgres";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import { PrismaClient } from "~auth/generated/prisma/client";

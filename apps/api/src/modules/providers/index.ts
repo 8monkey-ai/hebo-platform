@@ -1,6 +1,6 @@
 import { Elysia, status, t } from "elysia";
 
-import { dbClient } from "~api/middleware/db-client";
+import { prismaClient } from "~api/middleware/prisma";
 
 import { type Models } from "./types";
 import { Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./types";
@@ -8,7 +8,7 @@ import { Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./ty
 export const providersModule = new Elysia({
   prefix: "/providers",
 })
-  .use(dbClient)
+  .use(prismaClient)
   .get(
     "/",
     async ({ dbClient, query }) => {

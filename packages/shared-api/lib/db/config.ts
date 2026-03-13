@@ -1,0 +1,2 @@
+export const DEFAULT_DB_POOL_MAX = 25;
+export const DEFAULT_DB_IDLE_TIMEOUT_MS = 60_000;

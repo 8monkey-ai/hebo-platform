@@ -1,4 +1,4 @@
-import { SQL } from "bun";
+import type { GreptimeDb } from "~api/middleware/greptime";
 
 import {
   parseJson,
@@ -6,10 +6,6 @@ import {
   parseNullableNumber,
   toGreptimeDatetime,
 } from "./greptime";
-
-const greptimeDb = new SQL({
-  url: process.env.GREPTIME_PG_URL ?? "postgres://localhost:4003/public",
-});
 
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
@@ -29,19 +25,17 @@ function extractSummary(outputMessages: unknown): string {
   return content.slice(0, 200) + (content.length > 200 ? "..." : "");
 }
 
-export type ListTracesOpts = {
-  organizationId: string;
-  agentSlug: string;
-  branchSlug: string;
-  from: Date;
-  to: Date;
-  page: number;
-  pageSize: number;
-  metadataFilters: Record<string, string>;
-};
-
-export async function listTraces(opts: ListTracesOpts) {
-  const { organizationId, agentSlug, branchSlug, from, to, page, pageSize, metadataFilters } = opts;
+export async function listTraces(
+  greptimeDb: GreptimeDb,
+  organizationId: string,
+  agentSlug: string,
+  branchSlug: string,
+  from: Date,
+  to: Date,
+  page: number,
+  pageSize: number,
+  metadataFilters: Record<string, string>,
+) {
   const offset = (page - 1) * pageSize;
 
   // Build dynamic metadata filter clauses
@@ -123,6 +117,7 @@ export async function listTraces(opts: ListTracesOpts) {
 }
 
 export async function getTrace(
+  greptimeDb: GreptimeDb,
   organizationId: string,
   agentSlug: string,
   branchSlug: string,
@@ -207,6 +202,7 @@ export async function getTrace(
 }
 
 export async function getMetadataTags(
+  greptimeDb: GreptimeDb,
   organizationId: string,
   agentSlug: string,
   branchSlug: string,

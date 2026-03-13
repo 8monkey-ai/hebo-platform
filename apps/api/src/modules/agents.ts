@@ -10,7 +10,7 @@ import {
   agentsPlain,
   agentsRelations,
 } from "~api/generated/prismabox/agents";
-import { dbClient } from "~api/middleware/db-client";
+import { prismaClient } from "~api/middleware/prisma";
 
 export const agents = t.Composite([agentsPlain, t.Partial(agentsRelations)], {
   additionalProperties: false,
@@ -20,7 +20,7 @@ export const agentsModule = new Elysia({
   prefix: "/agents",
 })
   .use(authService)
-  .use(dbClient)
+  .use(prismaClient)
   .get(
     "/",
     async ({ dbClient, query }) => {

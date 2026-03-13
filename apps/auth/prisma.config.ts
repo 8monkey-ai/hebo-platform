@@ -1,5 +1,5 @@
 const lazyGetConnectionString = (schema: string) => {
-  return require("@hebo/shared-api/lib/db/connection").getConnectionString(schema);
+  return require("@hebo/shared-api/lib/db/postgres").getConnectionString(schema);
 };
 
 export default {

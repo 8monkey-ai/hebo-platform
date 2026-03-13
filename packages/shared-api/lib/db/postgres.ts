@@ -1,6 +1,8 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Resource } from "sst";
 
+import { DEFAULT_DB_IDLE_TIMEOUT_MS, DEFAULT_DB_POOL_MAX } from "./config";
+
 export const getConnectionString = (schema: string) => {
   try {
     // @ts-expect-error: HeboDatabase may not be defined
@@ -12,12 +14,15 @@ export const getConnectionString = (schema: string) => {
   }
 };
 
-export const createPrismaAdapter = (schema: string, max: number = 25): PrismaPg => {
+export const createPrismaAdapter = (
+  schema: string,
+  max: number = DEFAULT_DB_POOL_MAX,
+): PrismaPg => {
   return new PrismaPg(
     {
       connectionString: getConnectionString(schema),
       max,
-      idleTimeoutMillis: 60_000,
+      idleTimeoutMillis: DEFAULT_DB_IDLE_TIMEOUT_MS,
     },
     { schema: schema.toLowerCase() },
   );

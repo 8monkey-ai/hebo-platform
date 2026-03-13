@@ -1,4 +1,4 @@
-import { createPrismaAdapter } from "@hebo/shared-api/lib/db/connection";
+import { createPrismaAdapter } from "@hebo/shared-api/lib/db/postgres";
 
 import { Prisma, PrismaClient } from "~api/generated/prisma/client";
 import { redactProviderConfigValue } from "~api/lib/redact-provider";
@@ -10,7 +10,7 @@ export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("api"),
 });
 
-export const createDbClient = (organizationId: string, userId: string) => {
+export const createPrismaClient = (organizationId: string, userId: string) => {
   if (!organizationId || !userId) {
     throw new Error("Organization ID and User ID are required");
   }
