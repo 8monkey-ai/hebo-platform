@@ -1,43 +1,12 @@
-import { parseJson, parseJsonArray, parseNullableNumber } from "~api/lib/greptime";
 import type { GreptimeDb } from "~api/middleware/greptime";
 
-const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
-
-function formatStatus(statusCode: string | null): "ok" | "error" | "unknown" {
-  if (!statusCode) return "unknown";
-  if (statusCode === "STATUS_CODE_OK" || statusCode === "STATUS_CODE_UNSET") return "ok";
-  if (statusCode === "STATUS_CODE_ERROR") return "error";
-  return "unknown";
-}
-
-function truncateSummary(value: string): string {
-  return value.length > 200 ? `${value.slice(0, 200)}...` : value;
-}
-
-function extractSummary(message: unknown): string {
-  const parsed = parseJson(message);
-  if (!parsed) return "";
-
-  if (typeof parsed === "string") return truncateSummary(parsed.trim());
-  if (typeof parsed !== "object") return "";
-
-  const { content, parts } = parsed as any;
-  const texts: string[] = [];
-
-  if (typeof content === "string") texts.push(content);
-
-  for (const arr of [content, parts]) {
-    if (!Array.isArray(arr)) continue;
-    for (const p of arr) {
-      const v = p?.text ?? p?.content;
-      if ((p?.type === "text" || p?.type === "reasoning") && typeof v === "string") {
-        texts.push(v);
-      }
-    }
-  }
-
-  return truncateSummary(texts.join("\n").trim());
-}
+import {
+  extractSummary,
+  formatStatus,
+  METADATA_PREFIX,
+  parseJsonArray,
+  parseNullableNumber,
+} from "./utils";
 
 export async function listTraces(
   greptimeDb: GreptimeDb,
