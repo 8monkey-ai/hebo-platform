@@ -79,6 +79,7 @@ export function TraceListPanel({
   }
   const activeFilterCount = Object.keys(metaFilters).length;
   const selectedPresetValue = activePreset === "custom" ? undefined : activePreset;
+
   const searchParamsKey = searchParams.toString();
 
   useEffect(() => {

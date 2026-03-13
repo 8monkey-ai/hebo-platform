@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronRight, Wrench } from "lucide-react";
+import { ChevronRight, ChevronUp, Wrench } from "lucide-react";
 import { useRef, useState } from "react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
@@ -295,16 +295,22 @@ function MessageBlock({ message }: { message: TraceMessage }) {
 function CollapsibleText({ text, maxLength }: { text: string; maxLength: number }) {
   const [expanded, setExpanded] = useState(false);
   const needsTruncation = text.length > maxLength;
-  const displayText = needsTruncation && !expanded ? `${text.slice(0, maxLength)}...` : text;
 
   return (
     <Collapsible open={expanded} onOpenChange={setExpanded}>
-      <p className="text-xs leading-4 break-words whitespace-pre-wrap">{displayText}</p>
+      <p
+        className={cn(
+          "text-xs leading-4 break-words whitespace-pre-wrap",
+          !expanded && needsTruncation && "line-clamp-6",
+        )}
+      >
+        {text}
+      </p>
       {needsTruncation && (
         <CollapsibleTrigger
           render={
             <button type="button" className={COLLAPSE_TOGGLE_CLASS_NAME}>
-              {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+              {expanded ? <ChevronUp className="size-3" /> : <ChevronRight className="size-3" />}
               <span>{expanded ? "Less" : "More"}</span>
             </button>
           }
@@ -317,16 +323,22 @@ function CollapsibleText({ text, maxLength }: { text: string; maxLength: number 
 function CollapsibleCode({ code, maxLength }: { code: string; maxLength: number }) {
   const [expanded, setExpanded] = useState(false);
   const needsTruncation = code.length > maxLength;
-  const displayCode = needsTruncation && !expanded ? `${code.slice(0, maxLength)}...` : code;
 
   return (
     <Collapsible open={expanded} onOpenChange={setExpanded}>
-      <pre className={CODE_BLOCK_CLASS_NAME}>{displayCode}</pre>
+      <pre
+        className={cn(
+          CODE_BLOCK_CLASS_NAME,
+          !expanded && needsTruncation && "max-h-40 overflow-hidden",
+        )}
+      >
+        {code}
+      </pre>
       {needsTruncation && (
         <CollapsibleTrigger
           render={
             <button type="button" className={COLLAPSE_TOGGLE_CLASS_NAME}>
-              {expanded ? <ChevronDown className="size-3" /> : <ChevronRight className="size-3" />}
+              {expanded ? <ChevronUp className="size-3" /> : <ChevronRight className="size-3" />}
               <span>{expanded ? "Less" : "More"}</span>
             </button>
           }
