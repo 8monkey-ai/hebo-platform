@@ -231,9 +231,7 @@ export function TraceListPanel({
                 type="single"
                 size="sm"
                 value={selectedPresetValue}
-                onValueChange={(value) => {
-                  if (value) handlePresetChange(value);
-                }}
+                onValueChange={(value) => value && handlePresetChange(value)}
               >
                 {(["15m", "1h", "24h"] as const).map((preset) => (
                   <ToggleGroupItem
