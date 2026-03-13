@@ -203,9 +203,10 @@ function TimePresetControl({
 }) {
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
+  const [customOpen, setCustomOpen] = useState(false);
 
   return (
-    <Popover>
+    <Popover open={customOpen} onOpenChange={setCustomOpen}>
       <div className="inline-flex items-center overflow-hidden rounded-md border border-input bg-background shadow-xs">
         <ToggleGroup
           type="single"
@@ -239,6 +240,7 @@ function TimePresetControl({
               onClick={() => {
                 setCustomFrom(toDateTimeLocalValue(effectiveFrom));
                 setCustomTo(toDateTimeLocalValue(effectiveTo));
+                setCustomOpen(true);
               }}
             >
               Custom
@@ -282,6 +284,7 @@ function TimePresetControl({
               onClick={() => {
                 if (!customFrom || !customTo) return;
                 onApplyCustomRange(customFrom, customTo);
+                setCustomOpen(false);
               }}
             >
               Apply range
