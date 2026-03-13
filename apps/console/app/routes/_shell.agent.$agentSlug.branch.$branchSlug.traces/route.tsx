@@ -7,8 +7,8 @@ import { Button } from "@hebo/shared-ui/components/Button";
 
 import { api } from "~console/lib/service";
 
-import { TraceDetail } from "./trace-detail";
-import { TraceListPanel } from "./trace-list-panel";
+import { TraceDetail } from "./details";
+import { TraceListPanel } from "./list-panel";
 import type { TraceDetailData } from "./types";
 
 export default function TracesRoute() {
