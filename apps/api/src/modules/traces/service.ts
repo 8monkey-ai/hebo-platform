@@ -9,6 +9,9 @@ import {
   parseNullableNumber,
 } from "./utils";
 
+const MAX_ROWS = 10_000;
+const MAX_VALUES_PER_KEY = 100;
+
 export async function listSpans(
   greptimeDb: GreptimeDb,
   organizationId: string,
@@ -182,9 +185,6 @@ export async function getMetadataTags(
   from: Date,
   to: Date,
 ) {
-  const MAX_ROWS = 10_000;
-  const MAX_VALUES_PER_KEY = 100;
-
   const colRows = (await greptimeDb.unsafe(
     `SELECT column_name
     FROM information_schema.columns
