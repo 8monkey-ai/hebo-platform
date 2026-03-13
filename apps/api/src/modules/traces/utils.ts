@@ -29,6 +29,7 @@ export function parseJson(value: unknown): unknown {
   }
 }
 
+// FUTURE: remove once this is fixed https://github.com/GreptimeTeam/greptimedb/issues/7808
 export function parseJsonArray(value: unknown): unknown[] | null {
   const parsed = parseJson(value);
   if (!Array.isArray(parsed)) return null;
