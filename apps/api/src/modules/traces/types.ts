@@ -81,19 +81,11 @@ const SpanMessagePart = t.Union([
   GenericPart,
 ]);
 
-const LegacyToolCall = t.Object({
-  function: t.Object({
-    name: t.String(),
-    arguments: t.Any(),
-  }),
-});
-
 const SpanMessage = t.Object({
   role: t.String(),
   name: t.Optional(t.String()),
   content: t.Optional(t.Union([t.String(), t.Array(SpanMessagePart), t.Null()])),
   parts: t.Optional(t.Array(SpanMessagePart)),
-  tool_calls: t.Optional(t.Array(LegacyToolCall)),
 });
 
 export const SpanDetail = t.Object({

@@ -144,30 +144,43 @@ function extractMessageParts(message: TraceMessage) {
   const text: string[] = [];
   const reasoning: string[] = [];
   const toolCalls: Array<{ name: string; arguments: string }> = [];
+  const otherParts: Array<{ type: string; value: string }> = [];
 
-  for (const part of message.parts ?? []) {
+  if (typeof message.content === "string") {
+    text.push(message.content);
+  }
+
+  const parts = message.parts ?? (Array.isArray(message.content) ? message.content : []);
+
+  for (const part of parts) {
     switch (part.type) {
       case "text":
-        if (typeof part.content === "string") text.push(part.content);
+        text.push((part as { content: string }).content);
         break;
       case "reasoning":
-        if (typeof part.content === "string") reasoning.push(part.content);
+        reasoning.push((part as { content: string }).content);
         break;
       case "tool_call":
         toolCalls.push({
-          name: part.name,
+          name: (part as { name: string }).name,
           arguments:
-            typeof part.arguments === "string"
-              ? part.arguments
-              : JSON.stringify(part.arguments ?? null, null, 2),
+            typeof (part as { arguments: unknown }).arguments === "string"
+              ? (part as { arguments: string }).arguments
+              : JSON.stringify((part as { arguments: unknown }).arguments ?? null, null, 2),
         });
         break;
       case "tool_call_response":
         text.push(
-          typeof part.response === "string"
-            ? part.response
-            : JSON.stringify(part.response ?? null, null, 2),
+          typeof (part as { response: unknown }).response === "string"
+            ? (part as { response: string }).response
+            : JSON.stringify((part as { response: unknown }).response ?? null, null, 2),
         );
+        break;
+      default:
+        otherParts.push({
+          type: part.type,
+          value: JSON.stringify(part, null, 2),
+        });
         break;
     }
   }
@@ -176,6 +189,7 @@ function extractMessageParts(message: TraceMessage) {
     content: text.join("\n").trim(),
     reasoning: reasoning.join("\n").trim(),
     toolCalls,
+    otherParts,
   };
 }
 
@@ -189,7 +203,7 @@ const ROLE_ACCENTS: Record<string, string> = {
 function MessageBlock({ message }: { message: TraceMessage }) {
   const contentRef = useRef<HTMLElement>(null);
 
-  const { content, reasoning, toolCalls } = extractMessageParts(message);
+  const { content, reasoning, toolCalls, otherParts } = extractMessageParts(message);
 
   const roleLabel = message.role.charAt(0).toUpperCase() + message.role.slice(1);
 
@@ -231,6 +245,13 @@ function MessageBlock({ message }: { message: TraceMessage }) {
             <span className="font-medium">{tc.name}</span>
           </div>
           <CollapsibleCode code={tc.arguments} maxLength={300} />
+        </div>
+      ))}
+
+      {otherParts.map((part, index) => (
+        <div key={`${part.type}:${index}`} className="space-y-2">
+          <div className="text-xs font-medium text-muted-foreground uppercase">{part.type}</div>
+          <CollapsibleCode code={part.value} maxLength={300} />
         </div>
       ))}
     </section>
