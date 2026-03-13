@@ -16,7 +16,7 @@ export function CopyButton({
   className?: string;
   disabled?: boolean;
   tooltip?: string;
-} & React.ComponentProps<"button">) {
+} & Omit<React.ComponentProps<"button">, "value">) {
   const [hasCopied, setHasCopied] = React.useState(false);
 
   React.useEffect(() => {
