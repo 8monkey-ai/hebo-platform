@@ -35,7 +35,7 @@ const TraceStatus = t.Union([t.Literal("ok"), t.Literal("error"), t.Literal("unk
 
 export const TraceListItem = t.Object({
   timestamp: t.String(),
-  traceId: t.String(),
+  spanId: t.String(),
   operationName: t.String(),
   model: t.String(),
   provider: t.String(),
@@ -64,7 +64,7 @@ const TraceMessage = t.Object({
 
 export const TraceDetail = t.Object({
   timestamp: t.String(),
-  traceId: t.String(),
+  spanId: t.String(),
   operationName: t.String(),
   model: t.String(),
   responseModel: t.String(),

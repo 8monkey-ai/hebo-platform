@@ -15,12 +15,12 @@ export default function TracesRoute() {
   const agentSlug = params.agentSlug!;
   const branchSlug = params.branchSlug!;
 
-  const [selectedTraceId, setSelectedTraceId] = useState<string | null>(null);
+  const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null);
   const [traceDetail, setTraceDetail] = useState<TraceDetailData | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
 
   useEffect(() => {
-    if (!selectedTraceId) {
+    if (!selectedSpanId) {
       setTraceDetail(null);
       return;
     }
@@ -34,7 +34,7 @@ export default function TracesRoute() {
         const { data, error } = await api
           .agents({ agentSlug })
           .branches({ branchSlug })
-          .traces({ traceId: selectedTraceId })
+          .traces({ spanId: selectedSpanId })
           .get();
 
         if (!cancelled) setTraceDetail(error ? null : (data as any));
@@ -48,32 +48,32 @@ export default function TracesRoute() {
     return () => {
       cancelled = true;
     };
-  }, [selectedTraceId, agentSlug, branchSlug]);
+  }, [selectedSpanId, agentSlug, branchSlug]);
 
   return (
     <div className="h-full min-h-0 flex-1 overflow-y-hidden">
       <div className="@container grid h-full min-h-0 grid-cols-1 gap-3 overflow-y-hidden pb-4 @2xl:grid-cols-[5fr_7fr]">
         <div
           className={`relative z-10 flex h-full min-h-0 flex-col rounded-2xl border bg-card pt-4 pb-2 ${
-            selectedTraceId ? "hidden @2xl:flex" : ""
+            selectedSpanId ? "hidden @2xl:flex" : ""
           }`}
         >
           <TraceListPanel
             agentSlug={agentSlug}
             branchSlug={branchSlug}
-            selectedTraceId={selectedTraceId}
-            onSelectTrace={setSelectedTraceId}
+            selectedSpanId={selectedSpanId}
+            onSelectSpan={setSelectedSpanId}
           />
         </div>
 
         <div
           className={`h-full min-h-0 overflow-hidden @2xl:hidden ${
-            selectedTraceId ? "block" : "hidden"
+            selectedSpanId ? "block" : "hidden"
           }`}
         >
           <div className="flex h-full min-h-0 flex-col gap-3">
             <div className="shrink-0">
-              <Button variant="outline" size="sm" onClick={() => setSelectedTraceId(null)}>
+              <Button variant="outline" size="sm" onClick={() => setSelectedSpanId(null)}>
                 <ChevronLeft className="size-4" />
                 Back to traces
               </Button>

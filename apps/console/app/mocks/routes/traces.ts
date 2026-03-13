@@ -130,7 +130,7 @@ function toTraceMessages(messages: unknown[]) {
 const mockTraces = [
   {
     timestamp: new Date(now - 3 * min).toISOString(),
-    traceId: "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e",
+    spanId: "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e",
     operationName: "chat",
     model: "gpt-oss-120b",
     provider: "openai",
@@ -141,7 +141,7 @@ const mockTraces = [
   },
   {
     timestamp: new Date(now - 6 * min).toISOString(),
-    traceId: "7a2b3c4d-e5f6-7890-abcd-ef1234567890",
+    spanId: "7a2b3c4d-e5f6-7890-abcd-ef1234567890",
     operationName: "chat",
     model: "gpt-4.1",
     provider: "openai",
@@ -151,7 +151,7 @@ const mockTraces = [
   },
   {
     timestamp: new Date(now - 12 * min).toISOString(),
-    traceId: "3c4d5e6f-7890-abcd-ef12-345678901234",
+    spanId: "3c4d5e6f-7890-abcd-ef12-345678901234",
     operationName: "chat",
     model: "claude-sonnet-4-20250514",
     provider: "anthropic",
@@ -161,7 +161,7 @@ const mockTraces = [
   },
   {
     timestamp: new Date(now - 18 * min).toISOString(),
-    traceId: "4d5e6f70-8901-bcde-f123-456789012345",
+    spanId: "4d5e6f70-8901-bcde-f123-456789012345",
     operationName: "chat",
     model: "gpt-oss-20b",
     provider: "openai",
@@ -171,7 +171,7 @@ const mockTraces = [
   },
   {
     timestamp: new Date(now - 25 * min).toISOString(),
-    traceId: "5e6f7081-9012-cdef-0123-567890123456",
+    spanId: "5e6f7081-9012-cdef-0123-567890123456",
     operationName: "embeddings",
     model: "voyage-3.5",
     provider: "voyage",
@@ -183,7 +183,7 @@ const mockTraces = [
 
 const generatedMockTraces = Array.from({ length: 18 }).map((_, index) => {
   const timestamp = new Date(now - (30 + index * 4) * min).toISOString();
-  const traceId = `90000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
+  const spanId = `90000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
   const provider = index % 3 === 0 ? "openai" : index % 3 === 1 ? "anthropic" : "google";
   const model =
     provider === "openai"
@@ -196,7 +196,7 @@ const generatedMockTraces = Array.from({ length: 18 }).map((_, index) => {
 
   return {
     timestamp,
-    traceId,
+    spanId,
     operationName,
     model,
     provider,
@@ -211,10 +211,10 @@ const generatedMockTraces = Array.from({ length: 18 }).map((_, index) => {
 
 mockTraces.push(...generatedMockTraces);
 
-const mockTraceDetails: Record<string, object> = {
+const mockSpanDetails: Record<string, object> = {
   "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e": {
     timestamp: mockTraces[0]!.timestamp,
-    traceId: "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e",
+    spanId: "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e",
     operationName: "chat",
     model: "gpt-oss-120b",
     responseModel: "gpt-oss-120b-2026-03-01",
@@ -320,7 +320,7 @@ const mockTraceDetails: Record<string, object> = {
   },
   "7a2b3c4d-e5f6-7890-abcd-ef1234567890": {
     timestamp: mockTraces[1]!.timestamp,
-    traceId: "7a2b3c4d-e5f6-7890-abcd-ef1234567890",
+    spanId: "7a2b3c4d-e5f6-7890-abcd-ef1234567890",
     operationName: "chat",
     model: "gpt-4.1",
     responseModel: "gpt-4.1-2026-04-14",
@@ -385,7 +385,7 @@ const mockTraceDetails: Record<string, object> = {
   },
   "3c4d5e6f-7890-abcd-ef12-345678901234": {
     timestamp: mockTraces[2]!.timestamp,
-    traceId: "3c4d5e6f-7890-abcd-ef12-345678901234",
+    spanId: "3c4d5e6f-7890-abcd-ef12-345678901234",
     operationName: "chat",
     model: "claude-sonnet-4-20250514",
     responseModel: "claude-sonnet-4-20250514",
@@ -428,7 +428,7 @@ const mockTraceDetails: Record<string, object> = {
   },
   "4d5e6f70-8901-bcde-f123-456789012345": {
     timestamp: mockTraces[3]!.timestamp,
-    traceId: "4d5e6f70-8901-bcde-f123-456789012345",
+    spanId: "4d5e6f70-8901-bcde-f123-456789012345",
     operationName: "chat",
     model: "gpt-oss-20b",
     responseModel: "gpt-oss-20b",
@@ -471,7 +471,7 @@ const mockTraceDetails: Record<string, object> = {
   },
   "5e6f7081-9012-cdef-0123-567890123456": {
     timestamp: mockTraces[4]!.timestamp,
-    traceId: "5e6f7081-9012-cdef-0123-567890123456",
+    spanId: "5e6f7081-9012-cdef-0123-567890123456",
     operationName: "embeddings",
     model: "voyage-3.5",
     responseModel: "voyage-3.5",
@@ -506,9 +506,9 @@ const mockTraceDetails: Record<string, object> = {
 };
 
 for (const [index, trace] of generatedMockTraces.entries()) {
-  mockTraceDetails[trace.traceId] = {
+  mockSpanDetails[trace.spanId] = {
     timestamp: trace.timestamp,
-    traceId: trace.traceId,
+    spanId: trace.spanId,
     operationName: trace.operationName,
     model: trace.model,
     responseModel: `${trace.model}-2026-03-01`,
@@ -632,7 +632,7 @@ export const traceHandlers = [
         if (key.startsWith("meta.")) {
           const metaKey = key.slice(5);
           filtered = filtered.filter((t) => {
-            const detail = mockTraceDetails[t.traceId] as any;
+            const detail = mockSpanDetails[t.spanId] as any;
             return detail?.metadata?.[metaKey] === value;
           });
         }
@@ -663,13 +663,13 @@ export const traceHandlers = [
     },
   ),
 
-  // Get trace detail
-  http.get<{ agentSlug: string; branchSlug: string; traceId: string }>(
-    "/api/v1/agents/:agentSlug/branches/:branchSlug/traces/:traceId",
+  // Get span detail
+  http.get<{ agentSlug: string; branchSlug: string; spanId: string }>(
+    "/api/v1/agents/:agentSlug/branches/:branchSlug/traces/:spanId",
     async ({ params }) => {
-      const detail = mockTraceDetails[params.traceId];
+      const detail = mockSpanDetails[params.spanId];
       if (!detail) {
-        return new HttpResponse("Trace not found", { status: 404 });
+        return new HttpResponse("Span not found", { status: 404 });
       }
       return HttpResponse.json(detail);
     },

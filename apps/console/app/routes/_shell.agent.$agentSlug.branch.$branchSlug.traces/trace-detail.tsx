@@ -53,7 +53,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
                 {[
                   trace.operationName,
                   formatTimestampFull(trace.timestamp),
-                  `${trace.traceId.slice(0, 16)}`,
+                  `${trace.spanId.slice(0, 16)}`,
                 ]
                   .filter(Boolean)
                   .join(" · ")}
@@ -413,7 +413,7 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
         <div className="overflow-hidden rounded-lg border">
           <table className="w-full text-xs">
             <tbody>
-              <IdentifierRow label="Trace ID" value={trace.traceId} />
+              <IdentifierRow label="Span ID" value={trace.spanId} />
               <IdentifierRow label="Response ID" value={trace.responseId} />
               <IdentifierRow label="Model" value={trace.model} />
               <IdentifierRow label="Response Model" value={trace.responseModel} />

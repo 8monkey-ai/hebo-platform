@@ -15,9 +15,9 @@ type TraceListProps = {
   traces: TraceListData;
   hasNextPage: boolean;
   pageSize: number;
-  selectedTraceId: string | null;
+  selectedSpanId: string | null;
   loading: boolean;
-  onSelectTrace: (traceId: string) => void;
+  onSelectSpan: (spanId: string) => void;
   onLoadMore: () => void;
 };
 
@@ -25,9 +25,9 @@ export function TraceList({
   traces,
   hasNextPage,
   pageSize,
-  selectedTraceId,
+  selectedSpanId,
   loading,
-  onSelectTrace,
+  onSelectSpan,
   onLoadMore,
 }: TraceListProps) {
   let content: React.ReactNode;
@@ -44,17 +44,17 @@ export function TraceList({
     content = (
       <div className="flex flex-col divide-y">
         {traces.map((trace) => {
-          const isSelected = trace.traceId === selectedTraceId;
+          const isSelected = trace.spanId === selectedSpanId;
           const statusBadge = getTraceStatusBadgeProps(trace.status);
 
           return (
             <button
-              key={trace.traceId}
+              key={trace.spanId}
               type="button"
               className={`w-full px-4 py-4 text-left transition-colors hover:bg-accent/40 ${
                 isSelected ? "bg-accent/60" : ""
               }`}
-              onClick={() => onSelectTrace(trace.traceId)}
+              onClick={() => onSelectSpan(trace.spanId)}
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="truncate text-sm font-semibold">

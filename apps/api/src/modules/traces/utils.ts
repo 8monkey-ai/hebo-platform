@@ -1,5 +1,9 @@
 export const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
+export function escapeSqlIdentifier(value: string): string {
+  return value.replaceAll(`"`, `""`);
+}
+
 export function parseNullableNumber(value: unknown): number | null {
   if (value === null || value === undefined || value === "") return null;
   if (typeof value === "number") return Number.isFinite(value) ? value : null;

@@ -2,7 +2,7 @@ import { Elysia, status, t } from "elysia";
 
 import { greptimeDb as greptimeDbMiddleware } from "~api/middleware/greptime";
 
-import { getMetadataTags, getTrace, listTraces } from "./service";
+import { getMetadataTags, getSpan, listSpans } from "./service";
 import {
   MetadataTagsResponse,
   TraceDetail,
@@ -28,7 +28,7 @@ export const tracesModule = new Elysia({
 
       return status(
         200,
-        await listTraces(
+        await listSpans(
           greptimeDb,
           organizationId,
           params.agentSlug,
@@ -67,17 +67,17 @@ export const tracesModule = new Elysia({
     },
   )
   .get(
-    "/:traceId",
+    "/:spanId",
     async ({ greptimeDb, organizationId, params }) => {
-      const trace = await getTrace(
+      const trace = await getSpan(
         greptimeDb,
         organizationId,
         params.agentSlug,
         params.branchSlug,
-        params.traceId,
+        params.spanId,
       );
       if (!trace) {
-        return status(404, "Trace not found");
+        return status(404, "Span not found");
       }
       return status(200, trace);
     },

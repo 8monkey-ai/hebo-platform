@@ -1,6 +1,7 @@
 import type { GreptimeDb } from "~api/middleware/greptime";
 
 import {
+  escapeSqlIdentifier,
   extractSummary,
   formatStatus,
   METADATA_PREFIX,
@@ -8,7 +9,7 @@ import {
   parseNullableNumber,
 } from "./utils";
 
-export async function listTraces(
+export async function listSpans(
   greptimeDb: GreptimeDb,
   organizationId: string,
   agentSlug: string,
@@ -26,7 +27,8 @@ export async function listTraces(
   let metaFilterSql = "";
   const metaValues: string[] = [];
   for (const [key, value] of Object.entries(metadataFilters)) {
-    metaFilterSql += ` AND "${METADATA_PREFIX}${key}" = $${metaValues.length + 6}`;
+    const columnName = escapeSqlIdentifier(`${METADATA_PREFIX}${key}`);
+    metaFilterSql += ` AND "${columnName}" = $${metaValues.length + 6}`;
     metaValues.push(value!);
   }
 
@@ -34,7 +36,7 @@ export async function listTraces(
   const queryText = `
     SELECT
       "timestamp" AS timestamp,
-      "trace_id" AS trace_id,
+      "span_id" AS span_id,
       "span_status_code" AS span_status_code,
       "duration_nano" AS duration_nano,
       "span_attributes.gen_ai.operation.name" AS operation_name,
@@ -62,7 +64,7 @@ export async function listTraces(
   const data = pageRows.map((row) => {
     return {
       timestamp: String(row.timestamp),
-      traceId: String(row.trace_id ?? ""),
+      spanId: String(row.span_id ?? ""),
       operationName: String(row.operation_name ?? ""),
       model: String(row.response_model ?? ""),
       provider: String(row.provider_name ?? ""),
@@ -75,17 +77,29 @@ export async function listTraces(
   return { data, hasNextPage };
 }
 
-export async function getTrace(
+export async function getSpan(
   greptimeDb: GreptimeDb,
   organizationId: string,
   agentSlug: string,
   branchSlug: string,
-  traceId: string,
+  spanId: string,
 ) {
+  const metadataColumns = (await greptimeDb.unsafe(
+    `SELECT column_name
+     FROM information_schema.columns
+     WHERE table_name = 'opentelemetry_traces'
+       AND column_name LIKE $1`,
+    [`${METADATA_PREFIX}%`],
+  )) as Array<{ column_name: unknown }>;
+
+  const metadataSelectSql = metadataColumns
+    .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
+    .join(",\n      ");
+
   const queryText = `
     SELECT
       "timestamp" AS timestamp,
-      "trace_id" AS trace_id,
+      "span_id" AS span_id,
       "span_status_code" AS span_status_code,
       "duration_nano" AS duration_nano,
       "span_attributes.gen_ai.operation.name" AS operation_name,
@@ -103,8 +117,9 @@ export async function getTrace(
       "span_attributes.hebo.agent.slug",
       "span_attributes.hebo.branch.slug",
       "span_attributes.hebo.organization.id"
+      ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
-    WHERE "trace_id" = $1
+    WHERE "span_id" = $1
       AND "span_attributes.hebo.organization.id" = $2
       AND "span_attributes.hebo.agent.slug" = $3
       AND "span_attributes.hebo.branch.slug" = $4
@@ -112,7 +127,7 @@ export async function getTrace(
     LIMIT 1
   `;
 
-  const rows = await greptimeDb.unsafe(queryText, [traceId, organizationId, agentSlug, branchSlug]);
+  const rows = await greptimeDb.unsafe(queryText, [spanId, organizationId, agentSlug, branchSlug]);
   const row = (rows as any[])[0];
   if (!row) return null;
 
@@ -138,7 +153,7 @@ export async function getTrace(
 
   return {
     timestamp: String(row.timestamp),
-    traceId: String(row.trace_id ?? ""),
+    spanId: String(row.span_id ?? ""),
     operationName: String(row.operation_name ?? ""),
     model: String(row.request_model ?? ""),
     responseModel: String(row.response_model ?? ""),
@@ -188,7 +203,7 @@ export async function getMetadataTags(
   if (columns.length === 0) return { tags: {} };
 
   const rows = (await greptimeDb.unsafe(
-    `SELECT ${columns.map(({ colName }) => `"${colName}"`).join(", ")}
+    `SELECT ${columns.map(({ colName }) => `"${escapeSqlIdentifier(colName)}"`).join(", ")}
      FROM opentelemetry_traces
      WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
        AND "span_attributes.hebo.agent.slug" = $1

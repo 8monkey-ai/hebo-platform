@@ -29,15 +29,15 @@ function toDateTimeLocalValue(value: string) {
 type TraceListPanelProps = {
   agentSlug: string;
   branchSlug: string;
-  selectedTraceId: string | null;
-  onSelectTrace: (traceId: string) => void;
+  selectedSpanId: string | null;
+  onSelectSpan: (spanId: string) => void;
 };
 
 export function TraceListPanel({
   agentSlug,
   branchSlug,
-  selectedTraceId,
-  onSelectTrace,
+  selectedSpanId,
+  onSelectSpan,
 }: TraceListPanelProps) {
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -397,9 +397,9 @@ export function TraceListPanel({
           traces={traces}
           hasNextPage={hasNextPage}
           pageSize={pageSize}
-          selectedTraceId={selectedTraceId}
+          selectedSpanId={selectedSpanId}
           loading={listLoading}
-          onSelectTrace={onSelectTrace}
+          onSelectSpan={onSelectSpan}
           onLoadMore={handleLoadMore}
         />
       </div>
