@@ -12,18 +12,18 @@ import { timeRangeToParams } from "./utils";
 
 export type TraceSearchParamsState = ReturnType<typeof useTraceSearchParams>;
 
-const timePresets = ["15m", "1h", "24h", "custom"] as const;
+export const traceTimePresets = ["15m", "1h", "24h", "custom"] as const;
 
 const fixedQueryParsers = {
   from: parseAsIsoDateTime,
   metadata: parseAsJson(z.record(z.string(), z.string())).withDefault({}),
   page: parseAsInteger.withDefault(1),
-  preset: parseAsStringLiteral(timePresets).withDefault("15m"),
+  preset: parseAsStringLiteral(traceTimePresets).withDefault("15m"),
   to: parseAsIsoDateTime,
 };
 
 function getQueryRange(
-  preset: (typeof timePresets)[number],
+  preset: (typeof traceTimePresets)[number],
   from: Date | null,
   to: Date | null,
   rangeAnchorMs: number,
@@ -57,7 +57,7 @@ export function useTraceSearchParams() {
     void setQueryStates({
       from: null,
       page: null,
-      preset: nextPreset as (typeof timePresets)[number],
+      preset: nextPreset as (typeof traceTimePresets)[number],
       to: null,
     });
     setRangeAnchorMs(Date.now());
@@ -103,12 +103,12 @@ export function useTraceSearchParams() {
 
   return {
     actions: {
-      handleAddFilter,
-      handleApplyCustomRange,
-      handleLoadMore,
       handlePresetChange,
-      handleRefresh,
+      handleApplyCustomRange,
+      handleAddFilter,
       handleRemoveFilter,
+      handleRefresh,
+      handleLoadMore,
     },
     state: {
       queryKey: JSON.stringify(listQuery),

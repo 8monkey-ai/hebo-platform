@@ -22,7 +22,7 @@ import { api } from "~console/lib/service";
 
 import { TraceList } from "./list";
 import type { TraceListData, TraceMetadataTags } from "./types";
-import { useTraceSearchParams } from "./use-search-params";
+import { traceTimePresets, useTraceSearchParams } from "./use-search-params";
 import { formatDateRangeSummary } from "./utils";
 
 const padDatePart = (part: number) => String(part).padStart(2, "0");
@@ -213,16 +213,18 @@ function TimePresetControl({
           value={activePreset === "custom" ? undefined : activePreset}
           onValueChange={(value) => value && onPresetChange(value)}
         >
-          {(["15m", "1h", "24h"] as const).map((preset) => (
-            <ToggleGroupItem
-              key={preset}
-              value={preset}
-              size="sm"
-              className="rounded-none shadow-none"
-            >
-              {preset}
-            </ToggleGroupItem>
-          ))}
+          {traceTimePresets
+            .filter((preset) => preset !== "custom")
+            .map((preset) => (
+              <ToggleGroupItem
+                key={preset}
+                value={preset}
+                size="sm"
+                className="rounded-none shadow-none"
+              >
+                {preset}
+              </ToggleGroupItem>
+            ))}
         </ToggleGroup>
 
         <PopoverTrigger
