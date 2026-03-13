@@ -8,8 +8,6 @@ import {
 import { useState } from "react";
 import { z } from "zod";
 
-import { timeRangeToParams } from "./utils";
-
 export type TraceSearchParamsState = ReturnType<typeof useTraceSearchParams>;
 
 export const traceTimePresets = ["15m", "1h", "24h", "custom"] as const;
@@ -21,6 +19,33 @@ const fixedQueryParsers = {
   preset: parseAsStringLiteral(traceTimePresets).withDefault("15m"),
   to: parseAsIsoDateTime,
 };
+
+function timeRangeToParams(
+  range: string,
+  nowValue: number | Date = new Date(),
+): { from: string; to: string } {
+  const now = typeof nowValue === "number" ? new Date(nowValue) : nowValue;
+  let fromMs: number;
+
+  switch (range) {
+    case "15m":
+      fromMs = now.getTime() - 15 * 60 * 1000;
+      break;
+    case "1h":
+      fromMs = now.getTime() - 60 * 60 * 1000;
+      break;
+    case "24h":
+      fromMs = now.getTime() - 24 * 60 * 60 * 1000;
+      break;
+    default:
+      fromMs = now.getTime() - 60 * 60 * 1000;
+  }
+
+  return {
+    from: new Date(fromMs).toISOString(),
+    to: now.toISOString(),
+  };
+}
 
 function getQueryRange(
   preset: (typeof traceTimePresets)[number],
