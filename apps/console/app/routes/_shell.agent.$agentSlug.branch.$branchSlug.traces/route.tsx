@@ -69,13 +69,16 @@ export default function TracesRoute() {
             agentSlug={agentSlug}
             branchSlug={branchSlug}
             selectedSpanId={selectedSpanId}
-            onSelectSpan={setSelectedSpanId}
+            onSelectSpan={(spanId) => {
+              setSelectedSpanId(spanId);
+              setDetailLoading(true);
+            }}
           />
         </div>
 
-        <div className={`h-full min-h-0 @2xl:hidden ${selectedSpanId ? "block" : "hidden"}`}>
+        <div className={`h-full min-h-0 ${selectedSpanId ? "block" : "hidden @2xl:block"}`}>
           <div className="flex h-full min-h-0 flex-col gap-3">
-            <div className="shrink-0">
+            <div className="shrink-0 @2xl:hidden">
               <Button variant="outline" size="sm" onClick={() => setSelectedSpanId(null)}>
                 <ChevronLeft className="size-4" />
                 Back to traces
@@ -85,10 +88,6 @@ export default function TracesRoute() {
               <TraceDetail trace={traceDetail} loading={detailLoading} />
             </div>
           </div>
-        </div>
-
-        <div className="hidden h-full min-h-0 @2xl:block">
-          <TraceDetail trace={traceDetail} loading={detailLoading} />
         </div>
       </div>
     </div>
