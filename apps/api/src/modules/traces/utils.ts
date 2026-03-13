@@ -1,5 +1,3 @@
-export const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
-
 export function escapeSqlIdentifier(value: string): string {
   return value.replaceAll(`"`, `""`);
 }

@@ -4,13 +4,24 @@ import {
   escapeSqlIdentifier,
   extractSummary,
   formatStatus,
-  METADATA_PREFIX,
   parseJsonArray,
   parseNullableNumber,
 } from "./utils";
 
 const MAX_ROWS = 10_000;
 const MAX_VALUES_PER_KEY = 100;
+
+const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
+
+async function getMetadataColumnNames(greptimeDb: GreptimeDb) {
+  return (await greptimeDb.unsafe(
+    `SELECT column_name
+     FROM information_schema.columns
+     WHERE table_name = 'opentelemetry_traces'
+       AND column_name LIKE $1`,
+    [`${METADATA_PREFIX}%`],
+  )) as Array<{ column_name: unknown }>;
+}
 
 export async function listSpans(
   greptimeDb: GreptimeDb,
@@ -89,13 +100,7 @@ export async function getSpan(
   branchSlug: string,
   spanId: string,
 ) {
-  const metadataColumns = (await greptimeDb.unsafe(
-    `SELECT column_name
-     FROM information_schema.columns
-     WHERE table_name = 'opentelemetry_traces'
-       AND column_name LIKE $1`,
-    [`${METADATA_PREFIX}%`],
-  )) as Array<{ column_name: unknown }>;
+  const metadataColumns = await getMetadataColumnNames(greptimeDb);
 
   const metadataSelectSql = metadataColumns
     .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
@@ -181,15 +186,9 @@ export async function getMetadataTags(
   from: Date,
   to: Date,
 ) {
-  const colRows = (await greptimeDb.unsafe(
-    `SELECT column_name
-    FROM information_schema.columns
-    WHERE table_name = 'opentelemetry_traces'
-      AND column_name LIKE $1`,
-    [`${METADATA_PREFIX}%`],
-  )) as Array<{ column_name: unknown }>;
+  const metadataColumns = await getMetadataColumnNames(greptimeDb);
 
-  const columns = colRows.map(({ column_name }) => {
+  const columns = metadataColumns.map(({ column_name }) => {
     const colName = String(column_name);
     return {
       colName,
