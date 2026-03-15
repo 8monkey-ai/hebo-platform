@@ -1,4 +1,4 @@
-import { defineModelCatalog, gateway, type BeforeHookContext } from "@hebo-ai/gateway";
+import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
 import type { ChatCompletionsBody } from "@hebo-ai/gateway/endpoints/chat-completions";
 import { claudeOpus46 } from "@hebo-ai/gateway/models/anthropic";
 import { gemini } from "@hebo-ai/gateway/models/google";
@@ -21,21 +21,6 @@ const secrets = await loadProviderSecrets();
 const withFreeTokens = (freeTokens: number) => ({
   additionalProperties: { pricing: { monthly_free_tokens: freeTokens } },
 });
-
-function enablePromptCaching({ body, operation }: BeforeHookContext) {
-  if (operation !== "chat") return;
-
-  const { model, messages } = body as ChatCompletionsBody;
-  if (!model.includes("anthropic/claude")) return;
-
-  const last = messages.length - 1;
-  if (last < 1 || messages[last].role !== "user") return;
-
-  const target = messages[last - 1];
-  if (target.role !== "tool") {
-    target.cache_control = { type: "ephemeral" };
-  }
-}
 
 export const gw = gateway({
   basePath,
@@ -70,7 +55,11 @@ export const gw = gateway({
   ),
 
   hooks: {
-    before: enablePromptCaching,
+    before: ({ body, operation }) => {
+      if (operation === "chat") {
+        (body as ChatCompletionsBody).cache_control ??= { type: "ephemeral" };
+      }
+    },
     resolveModelId,
     resolveProvider,
   },
