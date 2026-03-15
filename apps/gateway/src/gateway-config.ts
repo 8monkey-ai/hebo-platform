@@ -1,4 +1,5 @@
-import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
+import { defineModelCatalog, gateway, type BeforeHookContext } from "@hebo-ai/gateway";
+import type { ChatCompletionsBody } from "@hebo-ai/gateway/endpoints/chat-completions";
 import { claudeOpus46 } from "@hebo-ai/gateway/models/anthropic";
 import { gemini } from "@hebo-ai/gateway/models/google";
 import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
@@ -9,7 +10,6 @@ import { trace } from "@opentelemetry/api";
 import { getOtelLogger } from "@hebo/shared-api/lib/otel";
 import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino-adapter";
 
-import "./middlewares/bedrock-auto-prompt-caching";
 import { resolveModelId, resolveProvider } from "./services/model-resolver";
 import { createProvider, loadProviderSecrets } from "./services/provider-factory";
 
@@ -21,6 +21,21 @@ const secrets = await loadProviderSecrets();
 const withFreeTokens = (freeTokens: number) => ({
   additionalProperties: { pricing: { monthly_free_tokens: freeTokens } },
 });
+
+function enablePromptCaching({ body, operation }: BeforeHookContext) {
+  if (operation !== "chat") return;
+
+  const { model, messages } = body as ChatCompletionsBody;
+  if (!model.includes("anthropic/claude")) return;
+
+  const last = messages.length - 1;
+  if (last < 1 || messages[last].role !== "user") return;
+
+  const target = messages[last - 1];
+  if (target.role !== "tool") {
+    target.cache_control = { type: "ephemeral" };
+  }
+}
 
 export const gw = gateway({
   basePath,
@@ -55,6 +70,7 @@ export const gw = gateway({
   ),
 
   hooks: {
+    before: enablePromptCaching,
     resolveModelId,
     resolveProvider,
   },
