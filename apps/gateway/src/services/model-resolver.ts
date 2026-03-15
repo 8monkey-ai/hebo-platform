@@ -108,7 +108,7 @@ async function resolveCustomProvider(
 }
 
 export async function resolveProvider(ctx: ResolveProviderHookContext) {
-  const { resolvedModelId: modelId, state } = ctx;
+  const { resolvedModelId: modelId, models, state } = ctx;
   const { dbClient, organizationId } = state as {
     dbClient: DbClient;
     organizationId: string;
@@ -123,6 +123,40 @@ export async function resolveProvider(ctx: ResolveProviderHookContext) {
   };
 
   if (customProviderSlug) {
-    return resolveCustomProvider(dbClient, organizationId, modelId, customProviderSlug);
+    const provider = await resolveCustomProvider(
+      dbClient,
+      organizationId,
+      modelId,
+      customProviderSlug,
+    );
+
+    if (!provider) {
+      const pricing = models[modelId]?.additionalProperties?.pricing as
+        | { monthly_free_tokens?: number }
+        | undefined;
+
+      if (pricing?.monthly_free_tokens === 0) {
+        throw new GatewayError(
+          "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
+          402,
+          "BYOK_REQUIRED",
+        );
+      }
+    }
+
+    return provider;
+  }
+
+  // No custom provider configured — enforce BYOK for non-free models
+  const pricing = models[modelId]?.additionalProperties?.pricing as
+    | { monthly_free_tokens?: number }
+    | undefined;
+
+  if (pricing?.monthly_free_tokens === 0) {
+    throw new GatewayError(
+      "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
+      402,
+      "BYOK_REQUIRED",
+    );
   }
 }
