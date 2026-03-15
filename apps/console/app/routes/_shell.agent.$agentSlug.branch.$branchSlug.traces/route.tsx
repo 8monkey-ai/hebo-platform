@@ -1,93 +1,93 @@
-import { ChevronLeft } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import { toast } from "sonner";
-
-import { Button } from "@hebo/shared-ui/components/Button";
+import { Outlet, useLocation, useNavigate, useNavigation, useParams } from "react-router";
+import type { ShouldRevalidateFunctionArgs } from "react-router";
 
 import { api } from "~console/lib/service";
 
-import { TraceDetail } from "./details";
-import { TraceListPanel } from "./list-panel";
-import type { TraceDetailData } from "./types";
+import type { Route } from "./+types/route";
+import { TraceListPanel } from "./list";
+import { parseTraceSearchParams } from "./search-params";
 
-export default function TracesRoute() {
-  const params = useParams();
-  const agentSlug = params.agentSlug!;
-  const branchSlug = params.branchSlug!;
+export function shouldRevalidate({
+  currentUrl,
+  nextUrl,
+  defaultShouldRevalidate,
+}: ShouldRevalidateFunctionArgs) {
+  if (currentUrl.pathname !== nextUrl.pathname && currentUrl.search === nextUrl.search) {
+    return false;
+  }
+  return defaultShouldRevalidate;
+}
 
-  const [selectedSpanId, setSelectedSpanId] = useState<string | null>(null);
-  const [traceDetail, setTraceDetail] = useState<TraceDetailData | null>(null);
-  const [detailLoading, setDetailLoading] = useState(false);
+export async function clientLoader({
+  params: { agentSlug, branchSlug },
+  request,
+}: Route.ClientLoaderArgs) {
+  const sp = new URL(request.url).searchParams;
+  const { effectiveFrom, effectiveTo, metadata } = parseTraceSearchParams(sp);
+  const page = Number(sp.get("page") ?? 1);
 
-  useEffect(() => {
-    if (!selectedSpanId) {
-      setTraceDetail(null);
-      setDetailLoading(false);
-      return;
-    }
+  const [listResult, metadataResult] = await Promise.all([
+    api
+      .agents({ agentSlug })
+      .branches({ branchSlug })
+      .traces.get({
+        query: {
+          page: page,
+          // @ts-expect-error this works in Eden
+          from: effectiveFrom,
+          // @ts-expect-error this works in Eden
+          to: effectiveTo,
+          metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : undefined,
+        },
+      }),
+    api
+      .agents({ agentSlug })
+      .branches({ branchSlug })
+      .traces.metadata.get({
+        // @ts-expect-error this works in Eden
+        query: { from: effectiveFrom, to: effectiveTo },
+      })
+      .catch(() => ({ data: { tags: {} }, error: null })),
+  ]);
 
-    let cancelled = false;
-    setDetailLoading(true);
+  return {
+    traces: listResult.data?.data ?? [],
+    hasNextPage: listResult.data?.hasNextPage ?? false,
+    metadataTags: metadataResult.data?.tags ?? {},
+    page,
+  };
+}
 
-    (async () => {
-      try {
-        const { data, error } = await api
-          .agents({ agentSlug })
-          .branches({ branchSlug })
-          .traces({ spanId: selectedSpanId })
-          .get();
+export default function TracesRoute({
+  loaderData: { traces, hasNextPage, metadataTags, page },
+}: Route.ComponentProps) {
+  const navigate = useNavigate();
+  const navigation = useNavigation();
+  const location = useLocation();
 
-        if (cancelled) return;
-        if (error) throw error;
-
-        setTraceDetail(data);
-      } catch (err) {
-        if (!cancelled) {
-          setTraceDetail(null);
-          toast.error(err instanceof Error ? err.message : "Failed to load trace details");
-        }
-      } finally {
-        if (!cancelled) setDetailLoading(false);
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedSpanId, agentSlug, branchSlug]);
+  const { spanId } = useParams();
 
   return (
     <div className="h-full min-h-0 flex-1 overflow-hidden">
       <div className="grid h-full min-h-0 grid-cols-1 gap-3 @2xl:grid-cols-[5fr_7fr]">
         <div
           className={`relative flex h-full min-h-0 flex-col rounded-lg border bg-card pt-4 pb-2 ${
-            selectedSpanId ? "hidden @2xl:flex" : ""
+            spanId ? "hidden @2xl:flex" : ""
           }`}
         >
           <TraceListPanel
-            agentSlug={agentSlug}
-            branchSlug={branchSlug}
-            selectedSpanId={selectedSpanId}
-            onSelectSpan={(spanId) => {
-              setSelectedSpanId(spanId);
-              setDetailLoading(true);
-            }}
+            traces={traces}
+            hasNextPage={hasNextPage}
+            page={page}
+            metadataTags={metadataTags}
+            loading={navigation.state !== "idle"}
+            selectedSpanId={spanId ?? null}
+            onSelectSpan={(id) => navigate({ pathname: id, search: location.search })}
           />
         </div>
 
-        <div className={`h-full min-h-0 ${selectedSpanId ? "block" : "hidden @2xl:block"}`}>
-          <div className="flex h-full min-h-0 flex-col gap-3">
-            <div className="shrink-0 @2xl:hidden">
-              <Button variant="outline" size="sm" onClick={() => setSelectedSpanId(null)}>
-                <ChevronLeft className="size-4" />
-                Back to traces
-              </Button>
-            </div>
-            <div className="min-h-0 flex-1">
-              <TraceDetail trace={traceDetail} loading={detailLoading} />
-            </div>
-          </div>
+        <div className={`h-full min-h-0 ${spanId ? "block" : "hidden @2xl:block"}`}>
+          <Outlet />
         </div>
       </div>
     </div>

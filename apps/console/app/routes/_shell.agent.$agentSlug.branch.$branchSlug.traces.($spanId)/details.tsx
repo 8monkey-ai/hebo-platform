@@ -15,13 +15,13 @@ import { Spinner } from "@hebo/shared-ui/components/Spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@hebo/shared-ui/components/Tabs";
 import { cn } from "@hebo/shared-ui/lib/utils";
 
-import type { TraceDetailData } from "./types";
+import type { TraceDetailData } from "../_shell.agent.$agentSlug.branch.$branchSlug.traces/types";
 import {
   formatDuration,
   formatTimestampFull,
   formatTokenCount,
   getTraceStatusBadgeProps,
-} from "./utils";
+} from "../_shell.agent.$agentSlug.branch.$branchSlug.traces/utils";
 
 const COLLAPSE_TOGGLE_CLASS_NAME =
   "mt-3 h-auto rounded-full bg-muted/60 px-2.5 py-1 text-xs font-medium uppercase text-muted-foreground hover:bg-muted hover:text-foreground";

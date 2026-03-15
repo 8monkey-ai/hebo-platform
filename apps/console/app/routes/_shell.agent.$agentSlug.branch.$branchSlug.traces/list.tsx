@@ -1,38 +1,405 @@
-import { ChevronRight } from "lucide-react";
+import { Filter, RefreshCw, X } from "lucide-react";
+import { useState } from "react";
+import { useLocation, useSearchParams } from "react-router";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@hebo/shared-ui/components/Empty";
+import { Input } from "@hebo/shared-ui/components/Input";
+import { Label } from "@hebo/shared-ui/components/Label";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@hebo/shared-ui/components/Pagination";
+import {
+  Popover,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@hebo/shared-ui/components/Popover";
 import { ScrollArea } from "@hebo/shared-ui/components/ScrollArea";
+import { Select } from "@hebo/shared-ui/components/Select";
 import { Skeleton } from "@hebo/shared-ui/components/Skeleton";
+import { Toggle } from "@hebo/shared-ui/components/Toggle";
+import { ToggleGroup, ToggleGroupItem } from "@hebo/shared-ui/components/ToggleGroup";
 import { cn } from "@hebo/shared-ui/lib/utils";
 
-import type { TraceListData } from "./types";
+import { timeRangeToParams, traceTimePresets, useTraceSearchParams } from "./search-params";
+import type { TraceListData, TraceMetadataTags } from "./types";
 import {
+  formatDateRangeSummary,
   formatDuration,
   formatTimestampShort,
   getTraceStatusBadgeProps,
+  toDateTimeLocalValue,
   truncateText,
 } from "./utils";
+
+type TraceListPanelProps = {
+  traces: TraceListData;
+  hasNextPage: boolean;
+  page: number;
+  metadataTags: TraceMetadataTags;
+  loading: boolean;
+  selectedSpanId: string | null;
+  onSelectSpan: (spanId: string) => void;
+};
+
+export function TraceListPanel({
+  traces,
+  hasNextPage,
+  page,
+  metadataTags,
+  loading,
+  selectedSpanId,
+  onSelectSpan,
+}: TraceListPanelProps) {
+  const { effectiveFrom, effectiveTo, metadata } = useTraceSearchParams();
+
+  return (
+    <div className="flex h-full min-h-0 flex-1 flex-col">
+      <div className="shrink-0 border-b px-4 pb-3.5">
+        <div className="flex flex-col gap-3">
+          <h2>GenAI executions</h2>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <TimePresetControl />
+
+            <FiltersControl metadataTags={metadataTags} />
+
+            <RefreshButton loading={loading} />
+          </div>
+
+          <p className="shrink-0 text-xs text-muted-foreground">
+            {formatDateRangeSummary(effectiveFrom, effectiveTo)}
+            {Object.keys(metadata).length > 0 && (
+              <>
+                {" · "}
+                {Object.entries(metadata)
+                  .map(([key, value]) => `${key}:${value}`)
+                  .join(", ")}
+              </>
+            )}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex h-0 min-h-0 flex-1 overflow-hidden">
+        <TraceList
+          traces={traces}
+          hasNextPage={hasNextPage}
+          page={page}
+          selectedSpanId={selectedSpanId}
+          loading={loading}
+          onSelectSpan={onSelectSpan}
+        />
+      </div>
+    </div>
+  );
+}
+
+function RefreshButton({ loading }: { loading: boolean }) {
+  const [, setSearchParams] = useSearchParams();
+  const { preset: activePreset } = useTraceSearchParams();
+
+  function handleRefresh() {
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      if (activePreset !== "custom") {
+        const { from, to } = timeRangeToParams(activePreset);
+        next.set("from", from);
+        next.set("to", to);
+      }
+      next.delete("page");
+      return next;
+    });
+  }
+
+  return (
+    <Button
+      variant="outline"
+      size="icon-sm"
+      onClick={handleRefresh}
+      aria-label="Refresh traces"
+      title="Refresh traces"
+    >
+      <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+    </Button>
+  );
+}
+
+function TimePresetControl() {
+  const [, setSearchParams] = useSearchParams();
+  const { preset: activePreset, effectiveFrom, effectiveTo } = useTraceSearchParams();
+
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
+  const [customOpen, setCustomOpen] = useState(false);
+
+  function applyRange(preset: (typeof traceTimePresets)[number], from?: string, to?: string) {
+    let range;
+
+    if (preset === "custom" && from && to) {
+      range = {
+        from: new Date(from).toISOString(),
+        to: new Date(to).toISOString(),
+      };
+    } else {
+      range = timeRangeToParams(preset);
+    }
+
+    setSearchParams((sp) => {
+      sp.set("preset", preset);
+      sp.set("from", range.from);
+      sp.set("to", range.to);
+      sp.delete("page");
+      return sp;
+    });
+  }
+
+  return (
+    <Popover open={customOpen} onOpenChange={setCustomOpen}>
+      <div className="inline-flex items-center overflow-hidden rounded-md border border-input bg-background shadow-xs">
+        <ToggleGroup
+          type="single"
+          size="sm"
+          value={activePreset === "custom" ? "" : activePreset}
+          onValueChange={(value) =>
+            value && applyRange(value[0] as (typeof traceTimePresets)[number])
+          }
+        >
+          {traceTimePresets
+            .filter((preset) => preset !== "custom")
+            .map((preset) => (
+              <ToggleGroupItem
+                key={preset}
+                value={preset}
+                size="sm"
+                className="rounded-none shadow-none"
+              >
+                {preset}
+              </ToggleGroupItem>
+            ))}
+        </ToggleGroup>
+
+        <PopoverTrigger
+          render={
+            <Toggle
+              size="sm"
+              aria-pressed={activePreset === "custom"}
+              className={cn(
+                "rounded-none border-l border-input shadow-none",
+                activePreset === "custom" && "bg-muted text-foreground",
+              )}
+              onClick={() => {
+                setCustomFrom(toDateTimeLocalValue(effectiveFrom));
+                setCustomTo(toDateTimeLocalValue(effectiveTo));
+                setCustomOpen(true);
+              }}
+            >
+              Custom
+            </Toggle>
+          }
+        />
+      </div>
+
+      <PopoverContent align="start" className="w-80">
+        <PopoverHeader>
+          <PopoverTitle>Custom range</PopoverTitle>
+        </PopoverHeader>
+        <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="custom-from" className="text-xs text-muted-foreground">
+              Start
+            </Label>
+            <Input
+              id="custom-from"
+              type="datetime-local"
+              className="text-xs"
+              value={customFrom}
+              onChange={(event) => setCustomFrom(event.target.value)}
+            />
+          </div>
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="custom-to" className="text-xs text-muted-foreground">
+              End
+            </Label>
+            <Input
+              id="custom-to"
+              type="datetime-local"
+              className="text-xs"
+              value={customTo}
+              onChange={(event) => setCustomTo(event.target.value)}
+            />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button
+              size="sm"
+              onClick={() => {
+                if (!customFrom || !customTo) return;
+                applyRange("custom", customFrom, customTo);
+                setCustomOpen(false);
+              }}
+            >
+              Apply range
+            </Button>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function FiltersControl({ metadataTags }: { metadataTags: TraceMetadataTags }) {
+  const [, setSearchParams] = useSearchParams();
+  const { metadata } = useTraceSearchParams();
+  const activeFilterCount = Object.keys(metadata).length;
+
+  const [filterKey, setFilterKey] = useState("");
+  const [filterValue, setFilterValue] = useState("");
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  function refreshFilter(key: string, value: string | null) {
+    setSearchParams((sp) => {
+      const meta = { ...metadata };
+
+      if (value === null) delete meta[key];
+      else meta[key] = value;
+
+      if (Object.keys(meta).length > 0) {
+        sp.set("metadata", JSON.stringify(meta));
+      } else {
+        sp.delete("metadata");
+      }
+
+      sp.delete("page");
+      return sp;
+    });
+  }
+
+  return (
+    <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
+      <PopoverTrigger
+        render={
+          <Button variant="outline" size="sm">
+            <Filter className="size-3" />
+            Filters
+            {activeFilterCount > 0 && <Badge variant="secondary">{activeFilterCount}</Badge>}
+          </Button>
+        }
+      />
+
+      <PopoverContent align="start" className="w-72">
+        <PopoverHeader>
+          <PopoverTitle>Edit filters</PopoverTitle>
+        </PopoverHeader>
+        <div className="-mx-4 border-t" />
+        <div className="flex flex-col gap-3">
+          {activeFilterCount > 0 && (
+            <div className="flex flex-col gap-1.5">
+              <p className="text-xs text-muted-foreground">Active filters</p>
+              <div className="flex flex-col gap-1">
+                {Object.entries(metadata).map(([key, value]) => (
+                  <div
+                    key={key}
+                    className="flex items-center justify-between rounded-md border px-2 py-1.5 text-xs"
+                  >
+                    <span>
+                      {key}: {value}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      aria-label={`Remove ${key} filter`}
+                      onClick={() => refreshFilter(key, null)}
+                    >
+                      <X className="size-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-1">
+            <p className="text-xs text-muted-foreground">Add filter</p>
+            <div className="flex items-end gap-2">
+              <div className="min-w-0 flex-1">
+                <Select
+                  value={filterKey}
+                  onValueChange={setFilterKey}
+                  items={Object.keys(metadataTags).map((key) => ({
+                    value: key,
+                    label: key,
+                  }))}
+                  placeholder="Key"
+                />
+              </div>
+              <div className="min-w-0 flex-1">
+                <Select
+                  value={filterValue}
+                  onValueChange={(value) => {
+                    setFilterKey(value);
+                    setFilterValue("");
+                  }}
+                  items={(metadataTags[filterKey] ?? []).map((value) => ({
+                    value,
+                    label: value,
+                  }))}
+                  placeholder="Value"
+                />
+              </div>
+              <Button
+                size="sm"
+                className="shrink-0"
+                onClick={() => {
+                  if (!filterKey || !filterValue) return;
+                  refreshFilter(filterKey, filterValue);
+                  setFilterKey("");
+                  setFilterValue("");
+                  setFiltersOpen(false);
+                }}
+                disabled={!filterKey || !filterValue}
+              >
+                Add
+              </Button>
+            </div>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
 
 type TraceListProps = {
   traces: TraceListData;
   hasNextPage: boolean;
+  page: number;
   selectedSpanId: string | null;
   loading: boolean;
   onSelectSpan: (spanId: string) => void;
-  onLoadMore: () => void;
 };
 
-export function TraceList({
+function TraceList({
   traces,
   hasNextPage,
+  page,
   selectedSpanId,
   loading,
   onSelectSpan,
-  onLoadMore,
 }: TraceListProps) {
-  const loadingClassName = loading ? "pointer-events-none opacity-60" : "";
+  const location = useLocation();
+
+  const pageHref = (p: number) => {
+    const sp = new URLSearchParams(location.search);
+    sp.set("page", String(p));
+    return `?${sp}`;
+  };
 
   let content: React.ReactNode;
   if (loading && traces.length === 0) {
@@ -90,25 +457,45 @@ export function TraceList({
             </button>
           );
         })}
-
-        <div className="flex items-center justify-between px-4 py-3">
-          <span className="text-xs text-muted-foreground">
-            Loaded {traces.length} trace{traces.length === 1 ? "" : "s"}
-          </span>
-          {hasNextPage ? (
-            <Button variant="outline" size="sm" disabled={loading} onClick={onLoadMore}>
-              Load more
-              <ChevronRight className="size-4" />
-            </Button>
-          ) : null}
-        </div>
       </div>
     );
   }
 
   return (
-    <div className={cn("flex h-full min-h-0 w-full flex-col", loadingClassName)}>
+    <div
+      className={cn(
+        "flex h-full min-h-0 w-full flex-col",
+        loading ? "pointer-events-none opacity-60" : "",
+      )}
+    >
       <ScrollArea className="h-0 min-h-0 flex-1">{content}</ScrollArea>
+      {(page > 1 || hasNextPage) && (
+        <div className="shrink-0 border-t px-2 py-1.5">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href={pageHref(page - 1)}
+                  aria-disabled={page <= 1}
+                  className={cn(page <= 1 && "pointer-events-none opacity-50")}
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink isActive href={pageHref(page)} size="sm">
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  href={pageHref(page + 1)}
+                  aria-disabled={!hasNextPage}
+                  className={cn(!hasNextPage && "pointer-events-none opacity-50")}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 }

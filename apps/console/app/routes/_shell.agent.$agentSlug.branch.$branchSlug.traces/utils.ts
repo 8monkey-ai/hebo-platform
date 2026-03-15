@@ -33,6 +33,12 @@ export function formatTokenCount(count: number | null): string {
   return count.toLocaleString();
 }
 
+export function toDateTimeLocalValue(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("sv").replace(" ", "T").slice(0, 16);
+}
+
 export function formatDateRangeSummary(from: string, to: string): string {
   try {
     const fromDate = new Date(from);
