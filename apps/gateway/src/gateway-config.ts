@@ -1,4 +1,5 @@
 import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
+import type { ChatCompletionsBody } from "@hebo-ai/gateway/endpoints/chat-completions";
 import { claudeOpus46 } from "@hebo-ai/gateway/models/anthropic";
 import { gemini } from "@hebo-ai/gateway/models/google";
 import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
@@ -54,6 +55,11 @@ export const gw = gateway({
   ),
 
   hooks: {
+    before: ({ body, operation }) => {
+      if (operation === "chat") {
+        (body as ChatCompletionsBody).cache_control ??= { type: "ephemeral" };
+      }
+    },
     resolveModelId,
     resolveProvider,
   },
