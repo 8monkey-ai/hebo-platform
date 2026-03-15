@@ -76,6 +76,7 @@ export const createGateway = () =>
             response: {
               200: ChatCompletionsSchema.or(ChatCompletionsChunkSchema),
               400: OpenAIErrorSchema,
+              402: OpenAIErrorSchema,
               500: OpenAIErrorSchema,
             },
           },
@@ -90,6 +91,7 @@ export const createGateway = () =>
             response: {
               200: EmbeddingsSchema,
               400: OpenAIErrorSchema,
+              402: OpenAIErrorSchema,
               500: OpenAIErrorSchema,
             },
           },

@@ -22,6 +22,8 @@ import { buildWifOptions } from "./aws-wif";
 
 export async function loadProviderSecrets() {
   const [
+    enforceByok,
+    freeModelIds,
     groqApiKey,
     bedrockRoleArn,
     bedrockRegion,
@@ -31,6 +33,8 @@ export async function loadProviderSecrets() {
     vertexLocation,
     vertexProject,
   ] = await Promise.all([
+    getSecret("EnforceByok"),
+    getSecret("FreeModelIds"),
     getSecret("GroqApiKey"),
     getSecret("BedrockRoleArn"),
     getSecret("BedrockRegion"),
@@ -42,6 +46,13 @@ export async function loadProviderSecrets() {
   ]);
 
   return {
+    enforceByok: enforceByok === "true",
+    freeModelIds: new Set(
+      (freeModelIds ?? "")
+        .split(",")
+        .map((s: string) => s.trim())
+        .filter(Boolean),
+    ),
     groqApiKey,
     bedrockRoleArn,
     bedrockRegion,

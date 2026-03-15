@@ -13,6 +13,7 @@ import type { createDbClient } from "~api/lib/db/client";
 import type { Models, ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "./aws-wif";
+import { gatewayFlags } from "../gateway-config";
 import { createProvider } from "./provider-factory";
 
 export type DbClient = ReturnType<typeof createDbClient>;
@@ -108,7 +109,7 @@ async function resolveCustomProvider(
 }
 
 export async function resolveProvider(ctx: ResolveProviderHookContext) {
-  const { resolvedModelId: modelId, state } = ctx;
+  const { resolvedModelId: modelId, models, state } = ctx;
   const { dbClient, organizationId } = state as {
     dbClient: DbClient;
     organizationId: string;
@@ -123,6 +124,21 @@ export async function resolveProvider(ctx: ResolveProviderHookContext) {
   };
 
   if (customProviderSlug) {
-    return resolveCustomProvider(dbClient, organizationId, modelId, customProviderSlug);
+    const provider = await resolveCustomProvider(dbClient, organizationId, modelId, customProviderSlug);
+    if (provider) return provider;
+  }
+
+  // Enforce BYOK for non-free models when enabled
+  if (gatewayFlags.enforceByok) {
+    const catalogModel = models[modelId as keyof typeof models];
+    const isFree = catalogModel?.additionalProperties?.free === true;
+
+    if (!isFree) {
+      throw new GatewayError(
+        "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
+        402,
+        "BYOK_REQUIRED",
+      );
+    }
   }
 }

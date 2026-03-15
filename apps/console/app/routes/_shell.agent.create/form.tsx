@@ -43,10 +43,9 @@ export function AgentCreateForm() {
     lastResult: navigation.state === "idle" ? lastResult : undefined,
     constraint: getZodConstraint(AgentCreateSchema),
     defaultValue: {
-      defaultModel: (function selectModelWithMostMonthlyFreeTokens() {
-        return Object.entries(models ?? {}).toSorted(
-          ([, a], [, b]) => b.monthlyFreeTokens - a.monthlyFreeTokens,
-        )[0]?.[0];
+      defaultModel: (function selectDefaultFreeModel() {
+        const entries = Object.entries(models ?? {});
+        return (entries.find(([, m]) => m.free) ?? entries[0])?.[0];
       })(),
     },
   });

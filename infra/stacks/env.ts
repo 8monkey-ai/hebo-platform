@@ -19,6 +19,10 @@ export const smtpUser = getSstSecret("SmtpUser");
 export const smtpPass = getSstSecret("SmtpPass");
 export const smtpFrom = getSstSecret("SmtpFrom");
 
+// Model tier & BYOK enforcement
+export const enforceByok = getSstSecret("EnforceByok");
+export const freeModelIds = getSstSecret("FreeModelIds");
+
 // LLMs
 export const bedrockRoleArn = getSstSecret("BedrockRoleArn");
 export const bedrockRegion = getSstSecret("BedrockRegion");
@@ -48,6 +52,8 @@ export const authSecrets = [
 ];
 
 export const llmSecrets = [
+  enforceByok,
+  freeModelIds,
   bedrockRoleArn,
   bedrockRegion,
   voyageApiKey,
