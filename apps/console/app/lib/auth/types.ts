@@ -12,6 +12,8 @@ export interface AuthService {
 export const DEFAULT_EXPIRATION_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
 export type User = {
+  userId: string;
+  organizationId: string;
   email: string;
   name: string;
   initials?: string;
