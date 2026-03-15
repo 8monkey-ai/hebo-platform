@@ -5,15 +5,12 @@ const TraceTimeRangeQuery = {
   to: t.Optional(t.Date()),
 };
 
-export const SpanListQuery = t.Object(
-  {
-    metadata: t.Optional(t.String()),
-    ...TraceTimeRangeQuery,
-    page: t.Number({ default: 1 }),
-    pageSize: t.Number({ default: 50 }),
-  },
-  { additionalProperties: false },
-);
+export const SpanListQuery = t.Object({
+  metadata: t.Optional(t.String()),
+  ...TraceTimeRangeQuery,
+  page: t.Number({ default: 1 }),
+  pageSize: t.Number({ default: 50 }),
+});
 
 const SpanStatus = t.Union([t.Literal("ok"), t.Literal("error"), t.Literal("unknown")]);
 
@@ -40,35 +37,36 @@ const SpanAttributes = t.Record(
   t.Union([t.String(), t.Number(), t.Boolean(), t.Null()]),
 );
 
-const GenericPart = t.Object(
+const GenericPart = t.Object({ type: t.String() }, { additionalProperties: true });
+
+const TextPart = t.Object(
+  { type: t.Literal("text"), content: t.String() },
+  { additionalProperties: true },
+);
+
+const ReasoningPart = t.Object(
+  { type: t.Literal("reasoning"), content: t.String() },
+  { additionalProperties: true },
+);
+
+const ToolCallPart = t.Object(
   {
-    type: t.String(),
+    type: t.Literal("tool_call"),
+    id: t.Optional(t.Nullable(t.String())),
+    name: t.String(),
+    arguments: t.Any(),
   },
   { additionalProperties: true },
 );
 
-const TextPart = t.Object({
-  type: t.Literal("text"),
-  content: t.String(),
-});
-
-const ReasoningPart = t.Object({
-  type: t.Literal("reasoning"),
-  content: t.String(),
-});
-
-const ToolCallPart = t.Object({
-  type: t.Literal("tool_call"),
-  id: t.Optional(t.String()),
-  name: t.String(),
-  arguments: t.Any(),
-});
-
-const ToolCallResponsePart = t.Object({
-  type: t.Literal("tool_call_response"),
-  id: t.Optional(t.String()),
-  response: t.Any(),
-});
+const ToolCallResponsePart = t.Object(
+  {
+    type: t.Literal("tool_call_response"),
+    id: t.Optional(t.Nullable(t.String())),
+    response: t.Any(),
+  },
+  { additionalProperties: true },
+);
 
 const SpanMessagePart = t.Union([
   TextPart,
@@ -78,14 +76,28 @@ const SpanMessagePart = t.Union([
   GenericPart,
 ]);
 
-const SpanMessage = t.Object({
-  role: t.String(),
-  name: t.Optional(t.String()),
-  content: t.Optional(t.Union([t.String(), t.Array(SpanMessagePart), t.Null()])),
-  parts: t.Optional(t.Array(SpanMessagePart)),
-});
+const SpanInputMessage = t.Object(
+  {
+    role: t.String(),
+    name: t.Optional(t.Nullable(t.String())),
+    content: t.Optional(t.Union([t.String(), t.Array(SpanMessagePart), t.Null()])),
+    parts: t.Optional(t.Array(SpanMessagePart)),
+  },
+  { additionalProperties: true },
+);
 
-const SpanMessages = t.Array(SpanMessage);
+const SpanOutputMessage = t.Object(
+  {
+    role: t.String(),
+    name: t.Optional(t.Nullable(t.String())),
+    parts: t.Array(SpanMessagePart),
+    finish_reason: t.Optional(t.String()),
+  },
+  { additionalProperties: true },
+);
+
+const SpanInputMessages = t.Array(SpanInputMessage);
+const SpanOutputMessages = t.Array(SpanOutputMessage);
 const SpanFinishReasons = t.Nullable(t.Array(t.String()));
 
 export const SpanDetail = t.Object({
@@ -101,13 +113,14 @@ export const SpanDetail = t.Object({
   outputTokens: t.Nullable(t.Number()),
   totalTokens: t.Nullable(t.Number()),
   reasoningTokens: t.Nullable(t.Number()),
-  inputMessages: SpanMessages,
-  outputMessages: SpanMessages,
+  inputMessages: SpanInputMessages,
+  outputMessages: SpanOutputMessages,
   finishReasons: SpanFinishReasons,
   responseId: t.String(),
   metadata: t.Record(t.String(), t.String()),
   spanAttributes: SpanAttributes,
 });
 
-export type SpanMessages = Static<typeof SpanMessages>;
+export type SpanInputMessages = Static<typeof SpanInputMessages>;
+export type SpanOutputMessages = Static<typeof SpanOutputMessages>;
 export type SpanFinishReasons = Static<typeof SpanFinishReasons>;

@@ -15,7 +15,11 @@ import { Spinner } from "@hebo/shared-ui/components/Spinner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@hebo/shared-ui/components/Tabs";
 import { cn } from "@hebo/shared-ui/lib/utils";
 
-import type { TraceDetailData } from "../_shell.agent.$agentSlug.branch.$branchSlug.traces/types";
+import type {
+  TraceDetailData,
+  TraceMessage,
+  MessagePart,
+} from "../_shell.agent.$agentSlug.branch.$branchSlug.traces/types";
 import {
   formatDuration,
   formatTimestampFull,
@@ -174,49 +178,49 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
   );
 }
 
-type TraceMessage = TraceDetailData["inputMessages"][number];
-
 function extractMessageParts(message: TraceMessage) {
   const text: string[] = [];
   const reasoning: string[] = [];
   const toolCalls: Array<{ name: string; arguments: string }> = [];
   const otherParts: Array<{ type: string; value: string }> = [];
 
-  if (typeof message.content === "string") {
-    text.push(message.content);
+  const content = "content" in message ? message.content : undefined;
+
+  if (typeof content === "string") {
+    text.push(content);
   }
 
-  const parts = message.parts ?? (Array.isArray(message.content) ? message.content : []);
+  const parts = (message.parts ?? (Array.isArray(content) ? content : [])) as MessagePart[];
 
   for (const part of parts) {
     switch (part.type) {
       case "text":
-        text.push((part as { content: string }).content);
+        text.push(part.content);
         break;
       case "reasoning":
-        reasoning.push((part as { content: string }).content);
+        reasoning.push(part.content);
         break;
       case "tool_call":
         toolCalls.push({
-          name: (part as { name: string }).name,
+          name: part.name,
           arguments:
-            typeof (part as { arguments: unknown }).arguments === "string"
-              ? (part as { arguments: string }).arguments
-              : JSON.stringify((part as { arguments: unknown }).arguments ?? null, null, 2),
+            typeof part.arguments === "string"
+              ? part.arguments
+              : JSON.stringify(part.arguments ?? null, null, 2),
         });
         break;
       case "tool_call_response":
         text.push(
-          typeof (part as { response: unknown }).response === "string"
-            ? (part as { response: string }).response
-            : JSON.stringify((part as { response: unknown }).response ?? null, null, 2),
+          typeof part.response === "string"
+            ? part.response
+            : JSON.stringify(part.response ?? null, null, 2),
         );
         break;
       default:
-        otherParts.push({
-          type: part.type,
-          value: JSON.stringify(part, null, 2),
-        });
+        {
+          const unknown = part as { type: string };
+          otherParts.push({ type: unknown.type, value: JSON.stringify(unknown, null, 2) });
+        }
         break;
     }
   }

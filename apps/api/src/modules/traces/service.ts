@@ -1,6 +1,6 @@
 import type { GreptimeDb } from "~api/middleware/greptime";
 
-import type { SpanFinishReasons, SpanMessages } from "./types";
+import type { SpanFinishReasons, SpanInputMessages, SpanOutputMessages } from "./types";
 import {
   escapeSqlIdentifier,
   extractSummary,
@@ -188,8 +188,8 @@ export async function getSpan(
     outputTokens: parseNullableNumber(row.output_tokens),
     totalTokens: parseNullableNumber(row.total_tokens),
     reasoningTokens: parseNullableNumber(row.reasoning_tokens),
-    inputMessages: (parseJsonArray(row.input_messages) ?? []) as SpanMessages,
-    outputMessages: (parseJsonArray(row.output_messages) ?? []) as SpanMessages,
+    inputMessages: (parseJsonArray(row.input_messages) ?? []) as SpanInputMessages[],
+    outputMessages: (parseJsonArray(row.output_messages) ?? []) as SpanOutputMessages[],
     finishReasons: (parseJsonArray(row.finish_reasons) ?? null) as SpanFinishReasons,
     responseId: String(row.response_id ?? ""),
     metadata,
