@@ -17,8 +17,19 @@ instrumentFetch("full");
 export const basePath = "/v1";
 const secrets = await loadProviderSecrets();
 
-const withFreeTokens = (freeTokens: number) => ({
-  additionalProperties: { pricing: { monthly_free_tokens: freeTokens } },
+const DEFAULT_FREE_MODEL_IDS = "openai/gpt-oss-20b,openai/gpt-oss-120b";
+
+export const freeModelIds = new Set(
+  (secrets.freeModelIds ?? DEFAULT_FREE_MODEL_IDS)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+);
+
+export const enforceByok = secrets.enforceByok === "true";
+
+const withTier = (modelId: string) => ({
+  additionalProperties: { free: freeModelIds.has(modelId) },
 });
 
 export const gw = gateway({
@@ -42,15 +53,15 @@ export const gw = gateway({
   models: defineModelCatalog(
     gptOss20b({
       providers: ["bedrock", "groq"],
-      ...withFreeTokens(12_000_000_000),
+      ...withTier("openai/gpt-oss-20b"),
     }),
     gptOss120b({
       providers: ["bedrock", "groq"],
-      ...withFreeTokens(6_000_000_000),
+      ...withTier("openai/gpt-oss-120b"),
     }),
-    gemini["v3.x"].map((preset) => preset({ providers: ["vertex"], ...withFreeTokens(0) })),
-    claudeOpus46({ providers: ["bedrock"], ...withFreeTokens(0) }),
-    voyage35({ providers: ["voyage"], ...withFreeTokens(0) }),
+    gemini["v3.x"].map((preset) => preset({ providers: ["vertex"], ...withTier("google/gemini") })),
+    claudeOpus46({ providers: ["bedrock"], ...withTier("anthropic/claude-opus-4-6") }),
+    voyage35({ providers: ["voyage"], ...withTier("voyage/voyage-3.5") }),
   ),
 
   hooks: {

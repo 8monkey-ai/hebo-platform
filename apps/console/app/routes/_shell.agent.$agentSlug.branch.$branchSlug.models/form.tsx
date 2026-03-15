@@ -163,8 +163,20 @@ function ModelCard(props: {
     supportedModels?.[model.getFieldset().type.value ?? ""]?.providers?.includes(p.slug),
   );
 
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [routingEnabled, setRoutingEnabled] = useState(Boolean(model.getFieldset().routing.value));
+  const selectedModelType = model.getFieldset().type.value ?? "";
+  const isNonFreeModel = supportedModels?.[selectedModelType]?.free === false;
+
+  const [advancedOpen, setAdvancedOpen] = useState(isNonFreeModel);
+  const [routingEnabled, setRoutingEnabled] = useState(
+    isNonFreeModel || Boolean(model.getFieldset().routing.value),
+  );
+
+  useEffect(() => {
+    if (isNonFreeModel) {
+      setAdvancedOpen(true);
+      setRoutingEnabled(true);
+    }
+  }, [isNonFreeModel]);
 
   const aliasPath = [agentSlug, branchSlug, model.getFieldset().alias.value || "alias"].join("/");
 
@@ -251,11 +263,14 @@ function ModelCard(props: {
                     id={`byo-${aliasPath}`}
                     checked={routingEnabled}
                     onCheckedChange={setRoutingEnabled}
+                    disabled={isNonFreeModel}
                   />
                   <FieldContent>
                     <FieldLabel htmlFor={`byo-${aliasPath}`}>Bring Your Own Provider</FieldLabel>
                     <FieldDescription>
-                      Setup your credentials first in providers settings
+                      {isNonFreeModel
+                        ? "This model requires your own provider key."
+                        : "Setup your credentials first in providers settings"}
                     </FieldDescription>
                   </FieldContent>
                   <Field

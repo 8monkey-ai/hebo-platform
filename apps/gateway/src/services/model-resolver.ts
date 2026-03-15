@@ -12,6 +12,7 @@ import { LRUCache } from "lru-cache";
 import type { createDbClient } from "~api/lib/db/client";
 import type { Models, ProviderSlug } from "~api/modules/providers/types";
 
+import * as gatewayConfig from "../gateway-config";
 import { injectMetadataCredentials } from "./aws-wif";
 import { createProvider } from "./provider-factory";
 
@@ -123,6 +124,24 @@ export async function resolveProvider(ctx: ResolveProviderHookContext) {
   };
 
   if (customProviderSlug) {
-    return resolveCustomProvider(dbClient, organizationId, modelId, customProviderSlug);
+    const provider = await resolveCustomProvider(dbClient, organizationId, modelId, customProviderSlug);
+
+    if (!provider && gatewayConfig.enforceByok && !gatewayConfig.freeModelIds.has(modelId)) {
+      throw new GatewayError(
+        "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
+        402,
+        "BYOK_REQUIRED",
+      );
+    }
+
+    return provider;
+  }
+
+  if (gatewayConfig.enforceByok && !gatewayConfig.freeModelIds.has(modelId)) {
+    throw new GatewayError(
+      "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
+      402,
+      "BYOK_REQUIRED",
+    );
   }
 }
