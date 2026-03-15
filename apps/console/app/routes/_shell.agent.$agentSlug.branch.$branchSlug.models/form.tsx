@@ -159,12 +159,25 @@ function ModelCard(props: {
   } = props;
 
   const { models: supportedModels } = useSnapshot(shellStore);
+  const selectedModelType = model.getFieldset().type.value ?? "";
+  const selectedModel = supportedModels?.[selectedModelType];
+  const isByokRequired = selectedModel?.free === false;
   const availableProviders = providers.filter((p) =>
-    supportedModels?.[model.getFieldset().type.value ?? ""]?.providers?.includes(p.slug),
+    selectedModel?.providers?.includes(p.slug),
   );
 
-  const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [routingEnabled, setRoutingEnabled] = useState(Boolean(model.getFieldset().routing.value));
+  const [advancedOpen, setAdvancedOpen] = useState(isByokRequired);
+  const [routingEnabled, setRoutingEnabled] = useState(
+    isByokRequired || Boolean(model.getFieldset().routing.value),
+  );
+
+  // Auto-expand advanced and enable BYOK when a non-free model is selected
+  useEffect(() => {
+    if (isByokRequired) {
+      setAdvancedOpen(true);
+      setRoutingEnabled(true);
+    }
+  }, [isByokRequired]);
 
   const aliasPath = [agentSlug, branchSlug, model.getFieldset().alias.value || "alias"].join("/");
 
@@ -250,12 +263,15 @@ function ModelCard(props: {
                   <Checkbox
                     id={`byo-${aliasPath}`}
                     checked={routingEnabled}
-                    onCheckedChange={setRoutingEnabled}
+                    onCheckedChange={isByokRequired ? undefined : setRoutingEnabled}
+                    disabled={isByokRequired}
                   />
                   <FieldContent>
                     <FieldLabel htmlFor={`byo-${aliasPath}`}>Bring Your Own Provider</FieldLabel>
                     <FieldDescription>
-                      Setup your credentials first in providers settings
+                      {isByokRequired
+                        ? "This model requires your own provider key."
+                        : "Setup your credentials first in providers settings"}
                     </FieldDescription>
                   </FieldContent>
                   <Field
