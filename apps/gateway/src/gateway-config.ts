@@ -9,6 +9,7 @@ import { trace } from "@opentelemetry/api";
 import { getOtelLogger } from "@hebo/shared-api/lib/otel";
 import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino-adapter";
 
+import "./middlewares/bedrock-auto-prompt-caching";
 import { resolveModelId, resolveProvider } from "./services/model-resolver";
 import { createProvider, loadProviderSecrets } from "./services/provider-factory";
 
