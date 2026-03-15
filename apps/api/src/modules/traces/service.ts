@@ -9,9 +9,6 @@ import {
   parseNullableNumber,
 } from "./utils";
 
-const MAX_ROWS = 10_000;
-const MAX_VALUES_PER_KEY = 100;
-
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
 async function getMetadataColumnNames(greptimeDb: GreptimeDb) {
@@ -38,6 +35,11 @@ export async function listSpans(
   const offset = (page - 1) * pageSize;
   const limit = pageSize + 1;
 
+  const metadataColumns = await getMetadataColumnNames(greptimeDb);
+  const metadataKeys = metadataColumns.map(({ column_name }) =>
+    String(column_name).slice(METADATA_PREFIX.length),
+  );
+
   const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
   function addParam(value: unknown) {
     params.push(value);
@@ -54,6 +56,10 @@ export async function listSpans(
   const limitParam = addParam(limit);
   const offsetParam = addParam(offset);
 
+  const metadataSelectSql = metadataColumns
+    .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
+    .join(",\n      ");
+
   const queryText = `
     SELECT
       "timestamp" AS timestamp,
@@ -64,6 +70,7 @@ export async function listSpans(
       "span_attributes.gen_ai.response.model" AS response_model,
       "span_attributes.gen_ai.provider.name" AS provider_name,
       json_get_string("span_attributes.gen_ai.output.messages", '$[last - 0]') AS output_message
+      ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
     WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
       AND "span_attributes.hebo.agent.slug" = $1
@@ -80,18 +87,29 @@ export async function listSpans(
   const hasNextPage = rows.length > pageSize;
   const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
 
-  const data = pageRows.map((row) => ({
-    timestamp: String(row.timestamp),
-    spanId: String(row.span_id ?? ""),
-    operationName: String(row.operation_name ?? ""),
-    model: String(row.response_model ?? ""),
-    provider: String(row.provider_name ?? ""),
-    status: formatStatus(row.span_status_code),
-    durationMs: Number(row.duration_nano ?? 0) / 1e6,
-    summary: extractSummary(row.output_message),
-  }));
+  const data = pageRows.map((row) => {
+    const metadata: Record<string, string> = {};
+    for (const { column_name } of metadataColumns) {
+      const colName = String(column_name);
+      const value = row[colName];
+      if (value !== null && value !== undefined) {
+        metadata[colName.slice(METADATA_PREFIX.length)] = String(value);
+      }
+    }
+    return {
+      timestamp: String(row.timestamp),
+      spanId: String(row.span_id ?? ""),
+      operationName: String(row.operation_name ?? ""),
+      model: String(row.response_model ?? ""),
+      provider: String(row.provider_name ?? ""),
+      status: formatStatus(row.span_status_code),
+      durationMs: Number(row.duration_nano ?? 0) / 1e6,
+      summary: extractSummary(row.output_message),
+      metadata,
+    };
+  });
 
-  return { data, hasNextPage };
+  return { data, hasNextPage, metadataKeys };
 }
 
 export async function getSpan(
@@ -176,62 +194,5 @@ export async function getSpan(
     responseId: String(row.response_id ?? ""),
     metadata,
     spanAttributes,
-  };
-}
-
-export async function getMetadataTags(
-  greptimeDb: GreptimeDb,
-  organizationId: string,
-  agentSlug: string,
-  branchSlug: string,
-  from: Date,
-  to: Date,
-) {
-  const metadataColumns = await getMetadataColumnNames(greptimeDb);
-
-  const columns = metadataColumns.map(({ column_name }) => {
-    const colName = String(column_name);
-    return {
-      colName,
-      keyName: colName.slice(METADATA_PREFIX.length),
-    };
-  });
-
-  if (columns.length === 0) return { tags: {} };
-
-  const rows = (await greptimeDb.unsafe(
-    `SELECT ${columns.map(({ colName }) => `"${escapeSqlIdentifier(colName)}"`).join(", ")}
-    FROM opentelemetry_traces
-    WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
-      AND "span_attributes.hebo.agent.slug" = $1
-      AND "span_attributes.hebo.branch.slug" = $2
-      AND "span_attributes.hebo.organization.id" = $3
-      AND "timestamp" >= $4
-      AND "timestamp" <= $5
-    ORDER BY "timestamp" DESC
-    LIMIT $6`,
-    [agentSlug, branchSlug, organizationId, from, to, MAX_ROWS],
-  )) as Array<Record<string, unknown>>;
-
-  const tagSets = Object.fromEntries(
-    columns.map(({ keyName }) => [keyName, new Set<string>()]),
-  ) as Record<string, Set<string>>;
-
-  for (const row of rows) {
-    for (const { colName, keyName } of columns) {
-      const value = row[colName];
-      if (value !== null && value !== undefined) {
-        tagSets[keyName].add(String(value));
-      }
-    }
-  }
-
-  return {
-    tags: Object.fromEntries(
-      columns.map(({ keyName }) => [
-        keyName,
-        [...tagSets[keyName]].sort().slice(0, MAX_VALUES_PER_KEY),
-      ]),
-    ),
   };
 }

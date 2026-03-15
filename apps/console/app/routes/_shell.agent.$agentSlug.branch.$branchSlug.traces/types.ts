@@ -5,10 +5,8 @@ type TracesRoute = ReturnType<ReturnType<Treaty.Create<Api>["v1"]["agents"]>["br
 type TraceDetailRoute = ReturnType<TracesRoute>;
 
 type TraceListResponse = Treaty.Data<TracesRoute["get"]>;
-type TraceMetadataResponse = Treaty.Data<TracesRoute["metadata"]["get"]>;
 
 export type TraceListData = TraceListResponse["data"];
 export type TraceListItem = TraceListData[number];
 export type TraceDetailData = Treaty.Data<TraceDetailRoute["get"]>;
-export type TraceMetadataTags = TraceMetadataResponse["tags"];
 export type TraceStatus = TraceListItem["status"];

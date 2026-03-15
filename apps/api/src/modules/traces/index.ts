@@ -4,14 +4,8 @@ import { BadRequestError } from "@hebo/shared-api/errors";
 
 import { greptimeDb as greptimeDbMiddleware } from "~api/middleware/greptime";
 
-import { getMetadataTags, getSpan, listSpans } from "./service";
-import {
-  MetadataTagsResponse,
-  SpanDetail,
-  SpanListQuery,
-  SpanListResponse,
-  SpanMetadataQuery,
-} from "./types";
+import { getSpan, listSpans } from "./service";
+import { SpanDetail, SpanListQuery, SpanListResponse } from "./types";
 
 const DEFAULT_FROM = () => new Date(Date.now() - 60 * 60 * 1000);
 const DEFAULT_TO = () => new Date();
@@ -58,29 +52,6 @@ export const spansModule = new Elysia({
     {
       query: SpanListQuery,
       response: { 200: SpanListResponse },
-    },
-  )
-  .get(
-    "/metadata",
-    async ({ greptimeDb, organizationId, params, query }) => {
-      const from = query.from ?? DEFAULT_FROM();
-      const to = query.to ?? DEFAULT_TO();
-
-      return status(
-        200,
-        await getMetadataTags(
-          greptimeDb,
-          organizationId,
-          params.agentSlug,
-          params.branchSlug,
-          from,
-          to,
-        ),
-      );
-    },
-    {
-      query: SpanMetadataQuery,
-      response: { 200: MetadataTagsResponse },
     },
   )
   .get(

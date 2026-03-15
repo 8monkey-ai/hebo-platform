@@ -545,24 +545,14 @@ for (const [index, trace] of generatedMockTraces.entries()) {
   };
 }
 
+const mockMetadataKeys = ["environment", "provider", "scenario", "session_id", "user_id"];
+
 export const traceHandlers = [
   // List traces
   http.get<{ agentSlug: string; branchSlug: string }>(
     "/api/v1/agents/:agentSlug/branches/:branchSlug/traces",
     ({ request }) => {
       const url = new URL(request.url);
-
-      // Handle metadata sub-route
-      if (url.pathname.endsWith("/metadata")) {
-        return HttpResponse.json({
-          tags: {
-            session_id: ["sess_abc123", "sess_def456", "sess_ghi789"],
-            environment: ["production", "staging"],
-            user_id: ["usr_456"],
-          },
-        });
-      }
-
       const page = Number(url.searchParams.get("page") ?? 1);
       const pageSize = Number(url.searchParams.get("pageSize") ?? 50);
 
@@ -591,22 +581,12 @@ export const traceHandlers = [
       const hasNextPage = start + pageSize < filtered.length;
 
       return HttpResponse.json({
-        data: paged,
+        data: paged.map((t) => ({
+          ...t,
+          metadata: (mockSpanDetails[t.spanId] as any)?.metadata ?? {},
+        })),
         hasNextPage,
-      });
-    },
-  ),
-
-  // Metadata tags
-  http.get<{ agentSlug: string; branchSlug: string }>(
-    "/api/v1/agents/:agentSlug/branches/:branchSlug/traces/metadata",
-    () => {
-      return HttpResponse.json({
-        tags: {
-          session_id: ["sess_abc123", "sess_def456", "sess_ghi789"],
-          environment: ["production", "staging"],
-          user_id: ["usr_456"],
-        },
+        metadataKeys: mockMetadataKeys,
       });
     },
   ),

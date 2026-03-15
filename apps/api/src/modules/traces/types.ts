@@ -15,8 +15,6 @@ export const SpanListQuery = t.Object(
   { additionalProperties: false },
 );
 
-export const SpanMetadataQuery = t.Object(TraceTimeRangeQuery);
-
 const SpanStatus = t.Union([t.Literal("ok"), t.Literal("error"), t.Literal("unknown")]);
 
 export const SpanListItem = t.Object({
@@ -28,11 +26,13 @@ export const SpanListItem = t.Object({
   status: SpanStatus,
   durationMs: t.Number(),
   summary: t.String(),
+  metadata: t.Record(t.String(), t.String()),
 });
 
 export const SpanListResponse = t.Object({
   data: t.Array(SpanListItem),
   hasNextPage: t.Boolean(),
+  metadataKeys: t.Array(t.String()),
 });
 
 const SpanAttributes = t.Record(
@@ -111,9 +111,3 @@ export const SpanDetail = t.Object({
 
 export type SpanMessages = Static<typeof SpanMessages>;
 export type SpanFinishReasons = Static<typeof SpanFinishReasons>;
-
-const StringArrayRecord = t.Record(t.String(), t.Array(t.String()));
-
-export const MetadataTagsResponse = t.Object({
-  tags: StringArrayRecord,
-});

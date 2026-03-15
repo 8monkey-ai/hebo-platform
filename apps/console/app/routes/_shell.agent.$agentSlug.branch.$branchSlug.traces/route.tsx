@@ -26,40 +26,30 @@ export async function clientLoader({
   const { effectiveFrom, effectiveTo, metadata } = parseTraceSearchParams(sp);
   const page = Number(sp.get("page") ?? 1);
 
-  const [listResult, metadataResult] = await Promise.all([
-    api
-      .agents({ agentSlug })
-      .branches({ branchSlug })
-      .traces.get({
-        query: {
-          page: page,
-          // @ts-expect-error this works in Eden
-          from: effectiveFrom,
-          // @ts-expect-error this works in Eden
-          to: effectiveTo,
-          metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : undefined,
-        },
-      }),
-    api
-      .agents({ agentSlug })
-      .branches({ branchSlug })
-      .traces.metadata.get({
+  const listResult = await api
+    .agents({ agentSlug })
+    .branches({ branchSlug })
+    .traces.get({
+      query: {
+        page: page,
         // @ts-expect-error this works in Eden
-        query: { from: effectiveFrom, to: effectiveTo },
-      })
-      .catch(() => ({ data: { tags: {} }, error: null })),
-  ]);
+        from: effectiveFrom,
+        // @ts-expect-error this works in Eden
+        to: effectiveTo,
+        metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : undefined,
+      },
+    });
 
   return {
     traces: listResult.data?.data ?? [],
     hasNextPage: listResult.data?.hasNextPage ?? false,
-    metadataTags: metadataResult.data?.tags ?? {},
+    metadataKeys: listResult.data?.metadataKeys ?? [],
     page,
   };
 }
 
 export default function TracesRoute({
-  loaderData: { traces, hasNextPage, metadataTags, page },
+  loaderData: { traces, hasNextPage, metadataKeys, page },
 }: Route.ComponentProps) {
   const navigate = useNavigate();
   const navigation = useNavigation();
@@ -69,7 +59,7 @@ export default function TracesRoute({
 
   return (
     <div className="h-full min-h-0 flex-1 overflow-hidden">
-      <div className="grid h-full min-h-0 grid-cols-1 gap-3 @2xl:grid-cols-[5fr_7fr]">
+      <div className="grid h-full min-h-0 grid-cols-1 gap-3 @2xl:grid-cols-[minmax(324px,4fr)_minmax(0,7fr)]">
         <div
           className={`relative flex h-full min-h-0 flex-col rounded-lg border bg-card pt-4 pb-2 ${
             spanId ? "hidden @2xl:flex" : ""
@@ -79,7 +69,7 @@ export default function TracesRoute({
             traces={traces}
             hasNextPage={hasNextPage}
             page={page}
-            metadataTags={metadataTags}
+            metadataKeys={metadataKeys}
             loading={navigation.state !== "idle"}
             selectedSpanId={spanId ?? null}
             onSelectSpan={(id) => navigate({ pathname: id, search: location.search })}

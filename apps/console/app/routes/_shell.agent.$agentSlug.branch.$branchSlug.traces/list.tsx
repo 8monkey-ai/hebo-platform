@@ -1,4 +1,4 @@
-import { Filter, RefreshCw, X } from "lucide-react";
+import { Calendar, Filter, RefreshCw, X } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useSearchParams } from "react-router";
 
@@ -30,12 +30,11 @@ import { ToggleGroup, ToggleGroupItem } from "@hebo/shared-ui/components/ToggleG
 import { cn } from "@hebo/shared-ui/lib/utils";
 
 import { timeRangeToParams, traceTimePresets, useTraceSearchParams } from "./search-params";
-import type { TraceListData, TraceMetadataTags } from "./types";
+import type { TraceListData } from "./types";
 import {
   formatDateRangeSummary,
   formatDuration,
   formatTimestampShort,
-  getTraceStatusBadgeProps,
   toDateTimeLocalValue,
   truncateText,
 } from "./utils";
@@ -44,7 +43,7 @@ type TraceListPanelProps = {
   traces: TraceListData;
   hasNextPage: boolean;
   page: number;
-  metadataTags: TraceMetadataTags;
+  metadataKeys: string[];
   loading: boolean;
   selectedSpanId: string | null;
   onSelectSpan: (spanId: string) => void;
@@ -54,7 +53,7 @@ export function TraceListPanel({
   traces,
   hasNextPage,
   page,
-  metadataTags,
+  metadataKeys,
   loading,
   selectedSpanId,
   onSelectSpan,
@@ -70,7 +69,7 @@ export function TraceListPanel({
           <div className="flex flex-wrap items-center gap-2">
             <TimePresetControl />
 
-            <FiltersControl metadataTags={metadataTags} />
+            <FiltersControl metadataKeys={metadataKeys} />
 
             <RefreshButton loading={loading} />
           </div>
@@ -202,7 +201,7 @@ function TimePresetControl() {
                 setCustomOpen(true);
               }}
             >
-              Custom
+              <Calendar className="size-3.5" />
             </Toggle>
           }
         />
@@ -255,7 +254,7 @@ function TimePresetControl() {
   );
 }
 
-function FiltersControl({ metadataTags }: { metadataTags: TraceMetadataTags }) {
+function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
   const [, setSearchParams] = useSearchParams();
   const { metadata } = useTraceSearchParams();
   const activeFilterCount = Object.keys(metadata).length;
@@ -294,7 +293,7 @@ function FiltersControl({ metadataTags }: { metadataTags: TraceMetadataTags }) {
         }
       />
 
-      <PopoverContent align="start" className="w-72">
+      <PopoverContent align="start" className="w-sm">
         <PopoverHeader>
           <PopoverTitle>Edit filters</PopoverTitle>
         </PopoverHeader>
@@ -326,50 +325,46 @@ function FiltersControl({ metadataTags }: { metadataTags: TraceMetadataTags }) {
             </div>
           )}
 
-          <div className="flex flex-col gap-1">
-            <p className="text-xs text-muted-foreground">Add filter</p>
-            <div className="flex items-end gap-2">
-              <div className="min-w-0 flex-1">
-                <Select
-                  value={filterKey}
-                  onValueChange={setFilterKey}
-                  items={Object.keys(metadataTags).map((key) => ({
-                    value: key,
-                    label: key,
-                  }))}
-                  placeholder="Key"
-                />
-              </div>
-              <div className="min-w-0 flex-1">
-                <Select
-                  value={filterValue}
-                  onValueChange={(value) => {
-                    setFilterKey(value);
+          {metadataKeys.length === 0 ? (
+            <p className="text-xs text-muted-foreground">
+              No metadata keys found in the selected time range.
+            </p>
+          ) : (
+            <div className="flex flex-col gap-1">
+              <p className="text-xs text-muted-foreground">Add filter</p>
+              <div className="flex items-end gap-2">
+                <div className="min-w-0 flex-1">
+                  <Select
+                    value={filterKey}
+                    onValueChange={setFilterKey}
+                    items={metadataKeys.map((key) => ({ value: key, label: key }))}
+                    placeholder="Key"
+                  />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <Input
+                    value={filterValue}
+                    onChange={(e) => setFilterValue(e.target.value)}
+                    placeholder="Value"
+                  />
+                </div>
+                <Button
+                  size="sm"
+                  className="shrink-0"
+                  onClick={() => {
+                    if (!filterKey || !filterValue) return;
+                    refreshFilter(filterKey, filterValue);
+                    setFilterKey("");
                     setFilterValue("");
+                    setFiltersOpen(false);
                   }}
-                  items={(metadataTags[filterKey] ?? []).map((value) => ({
-                    value,
-                    label: value,
-                  }))}
-                  placeholder="Value"
-                />
+                  disabled={!filterKey || !filterValue}
+                >
+                  Add
+                </Button>
               </div>
-              <Button
-                size="sm"
-                className="shrink-0"
-                onClick={() => {
-                  if (!filterKey || !filterValue) return;
-                  refreshFilter(filterKey, filterValue);
-                  setFilterKey("");
-                  setFilterValue("");
-                  setFiltersOpen(false);
-                }}
-                disabled={!filterKey || !filterValue}
-              >
-                Add
-              </Button>
             </div>
-          </div>
+          )}
         </div>
       </PopoverContent>
     </Popover>
@@ -418,25 +413,34 @@ function TraceList({
       <div className="flex flex-col divide-y">
         {traces.map((trace) => {
           const isSelected = trace.spanId === selectedSpanId;
-          const statusBadge = getTraceStatusBadgeProps(trace.status);
 
           return (
             <button
               key={trace.spanId}
               type="button"
               className={cn(
-                "flex w-full flex-col gap-3 px-4 py-4 text-left transition-colors hover:bg-accent/40",
+                "flex w-full flex-col gap-3 overflow-hidden px-4 py-4 text-left transition-colors hover:bg-accent/40",
                 isSelected && "bg-accent/60",
               )}
               onClick={() => onSelectSpan(trace.spanId)}
             >
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-start justify-between gap-2">
                 <span className="truncate text-sm font-semibold">
                   {trace.model || trace.provider || "unknown"}
                 </span>
-                <span className="shrink-0 text-[11px] text-muted-foreground">
-                  {formatTimestampShort(trace.timestamp)}
-                </span>
+                <div className="flex shrink-0 items-center gap-1.5 text-[11px]">
+                  <span className="text-muted-foreground">{formatDuration(trace.durationMs)}</span>
+                  <span className="text-muted-foreground">·</span>
+                  <span
+                    className={cn(
+                      trace.status === "ok" && "text-green-600 dark:text-green-500",
+                      trace.status === "error" && "text-destructive",
+                      trace.status === "unknown" && "text-muted-foreground",
+                    )}
+                  >
+                    {formatTimestampShort(trace.timestamp)}
+                  </span>
+                </div>
               </div>
 
               {trace.summary && (
@@ -445,15 +449,19 @@ function TraceList({
                 </p>
               )}
 
-              <div className="flex flex-wrap items-center gap-2">
-                <Badge variant="secondary" className="bg-muted text-muted-foreground">
-                  {trace.operationName}
-                </Badge>
-                <Badge variant="secondary">{formatDuration(trace.durationMs)}</Badge>
-                <Badge variant={statusBadge.variant} className={statusBadge.className}>
-                  {trace.status}
-                </Badge>
-              </div>
+              {Object.keys(trace.metadata).length > 0 && (
+                <div className="flex w-full items-center gap-1.5 overflow-x-auto">
+                  {Object.entries(trace.metadata).map(([key, value]) => (
+                    <Badge
+                      key={key}
+                      variant="secondary"
+                      className="shrink-0 bg-muted text-muted-foreground"
+                    >
+                      {key}: {value}
+                    </Badge>
+                  ))}
+                </div>
+              )}
             </button>
           );
         })}
