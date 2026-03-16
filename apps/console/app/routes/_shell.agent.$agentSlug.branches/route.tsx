@@ -70,7 +70,7 @@ export default function Branches() {
   const agent = useRoute("routes/_shell.agent.$agentSlug")!.loaderData!.agent!;
 
   return (
-    <>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <div>
         <h1>Branches</h1>
         <p className="text-sm text-muted-foreground">Manage branches for your agent.</p>
@@ -79,6 +79,6 @@ export default function Branches() {
       <BranchesTable agent={agent} />
 
       <CreateBranch branches={agent.branches!} />
-    </>
+    </div>
   );
 }

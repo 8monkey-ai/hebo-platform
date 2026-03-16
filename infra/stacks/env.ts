@@ -34,7 +34,7 @@ export const enforceByok = getSstSecret("EnforceByok");
 export const freeModelIds = getSstSecret("FreeModelIds");
 
 // OTEL Exporter
-export const greptimeEndpoint = getSstSecret("GreptimeEndpoint");
+export const greptimeHost = getSstSecret("GreptimeHost");
 
 export const authSecrets = [
   authSecret,

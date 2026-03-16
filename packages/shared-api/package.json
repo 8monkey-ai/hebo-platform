@@ -17,6 +17,7 @@
   },
   "scripts": {
     "clean": "git clean -fdx -e '.env*' .",
+    "db:migrate": "docker exec greptime curl -sS -X POST 'http://localhost:4000/v1/sql?db=information_schema' -d 'sql=CREATE DATABASE IF NOT EXISTS public'",
     "db:reset": "docker exec greptime curl -sS -X POST 'http://localhost:4000/v1/sql?db=information_schema' -d 'sql=DROP DATABASE IF EXISTS public'"
   },
   "dependencies": {

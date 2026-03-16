@@ -2,7 +2,7 @@ import { Elysia, status } from "elysia";
 
 import { HttpError } from "@hebo/shared-api/errors";
 
-import { identifyPrismaError } from "~api/lib/db/errors";
+import { identifyPrismaError } from "~api/lib/prisma/errors";
 
 export const errorHandler = new Elysia({ name: "error-handler" })
   .onError(function handleApiError({ error }) {

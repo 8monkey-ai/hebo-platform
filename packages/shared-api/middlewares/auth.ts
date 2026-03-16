@@ -4,6 +4,8 @@ import { organizationClient } from "better-auth/client/plugins";
 import { getCookieCache, getCookies } from "better-auth/cookies";
 import { type Cookie, Elysia } from "elysia";
 
+import type { VerifyApiKeyPlugin } from "~auth/lib/verify-api-key-plugin";
+
 import { authSecret, authUrl } from "../env";
 import { AuthError, BadRequestError } from "../errors";
 import { betterAuthCookieOptions } from "../lib/cookie-options";
@@ -12,15 +14,15 @@ import type { Logger } from "./logging";
 const cookieConfig = getCookies(betterAuthCookieOptions);
 
 const createAuthClient = (request: Request) => {
-  const headers = new Headers();
+  const headers: Record<string, string> = {};
   for (const name of ["cookie", "authorization", "origin"]) {
     const value = request.headers.get(name);
-    if (value) headers.set(name, value);
+    if (value) headers[name] = value;
   }
 
   // Inject OTEL trace context (traceparent, tracestate) for distributed tracing
   propagation.inject(context.active(), headers, {
-    set: (carrier, key, value) => carrier.set(key, value),
+    set: (carrier, key, value) => (carrier[key] = value),
   });
 
   return createBetterAuthClient({
@@ -38,6 +40,10 @@ const createAuthClient = (request: Request) => {
           },
         },
       }),
+      {
+        id: "verify-api-key-plugin" as const,
+        $InferServerPlugin: {} as ReturnType<VerifyApiKeyPlugin>,
+      },
     ],
     fetchOptions: {
       headers,
@@ -48,28 +54,51 @@ const createAuthClient = (request: Request) => {
 export const authService = new Elysia({ name: "auth-service" })
   .resolve(async function resolveAuthContext(ctx) {
     const logger = (ctx as unknown as { logger: Logger }).logger;
-    const authorization = ctx.request.headers.get("authorization");
-    const cookie = ctx.request.headers.get("cookie");
 
-    if (authorization && cookie) {
+    const cookie = ctx.request.headers.get("cookie");
+    const authorization = ctx.request.headers.get("authorization");
+
+    if (cookie && authorization) {
       throw new BadRequestError("Provide exactly one credential: Bearer API Key or JWT Header");
     }
 
     const authClient = createAuthClient(ctx.request);
 
-    let session, error;
+    let userId: string | undefined;
+    let organizationId: string | undefined;
 
     if (cookie) {
-      session = await getCookieCache(ctx.request, {
+      const session = await getCookieCache(ctx.request, {
         secret: authSecret,
         isSecure: betterAuthCookieOptions.advanced.useSecureCookies,
       });
-    } else {
-      ({ data: session, error } = await authClient.getSession());
+
+      if (session) {
+        userId = session.user.id;
+        organizationId = session.session.activeOrganizationId;
+      }
+    } else if (authorization) {
+      const { data: result } = await authClient.internal.verifyApiKey({
+        key: authorization.slice(7) || "invalid-key",
+        fetchOptions: {
+          headers: { "x-internal-secret": authSecret },
+        },
+      });
+
+      if (result?.valid && result.key) {
+        if (result.key.metadata?.createdByUserId) {
+          userId = result.key.metadata.createdByUserId;
+        } else {
+          logger.warn("API key missing createdByUserId in metadata");
+        }
+
+        // For org-owned keys, referenceId is the organization ID
+        organizationId = result.key.referenceId;
+      }
     }
 
-    if (error || !session) {
-      logger.info({ error }, "Authentication failed or no credentials provided");
+    if (!organizationId || !userId) {
+      logger.info("Authentication failed or no credentials provided");
 
       // Clear the session cookie when unauthorized
       const { attributes, name } = cookieConfig.sessionToken;
@@ -78,28 +107,12 @@ export const authService = new Elysia({ name: "auth-service" })
         maxAge: 0,
         ...attributes,
       } as Cookie<string>;
-
-      return {
-        organizationId: undefined,
-        userId: undefined,
-        authClient: undefined,
-      } as const;
-    }
-
-    // For API key sessions, activeOrganizationId is missing (mock session bypasses hooks).
-    // Fall back to fetching from organization list.
-    let organizationId = session.session.activeOrganizationId;
-    if (!organizationId) {
-      const { data: orgs } = await authClient.organization.list();
-      if (orgs && orgs.length > 0) {
-        organizationId = orgs[0].id;
-      }
     }
 
     return {
+      userId,
       organizationId,
-      userId: session.user.id,
-      authClient,
+      authClient: userId ? authClient : undefined,
     } as const;
   })
   .macro({

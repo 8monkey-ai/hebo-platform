@@ -5,13 +5,14 @@ import { emailOTP, organization } from "better-auth/plugins";
 
 import { authSecret, authUrl, logLevel } from "@hebo/shared-api/env";
 import { betterAuthCookieOptions, cookieDomain } from "@hebo/shared-api/lib/cookie-options";
-import { createPrismaAdapter } from "@hebo/shared-api/lib/db/connection";
+import { createPrismaAdapter } from "@hebo/shared-api/lib/db/postgres";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import { PrismaClient } from "~auth/generated/prisma/client";
 
 import { sendOrganizationInvitationEmail, sendVerificationOtpEmail } from "./lib/email";
 import { createOrganizationHook, createSessionHook } from "./lib/organization";
+import { verifyApiKeyPlugin, type AuthWithApiKeyPlugin } from "./lib/verify-api-key-plugin";
 
 export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
@@ -43,18 +44,17 @@ export const auth = betterAuth({
   experimental: { joins: true },
   plugins: [
     apiKey({
+      references: "organization",
       startingCharactersConfig: {
         shouldStore: true,
         charactersLength: 8,
       },
       defaultPrefix: "sk_",
       enableMetadata: true,
-      enableSessionForAPIKeys: true,
       rateLimit: {
         enabled: false,
       },
-      customAPIKeyGetter: (ctx) =>
-        ctx.request?.headers.get("authorization")?.replace("Bearer ", "") ?? null,
+      customAPIKeyGetter: (ctx) => ctx.request?.headers.get("authorization")?.slice(7) ?? null,
     }),
     emailOTP({
       async sendVerificationOTP({ email, otp }, ctx) {
@@ -89,6 +89,7 @@ export const auth = betterAuth({
         });
       },
     }),
+    verifyApiKeyPlugin((): AuthWithApiKeyPlugin => auth as unknown as AuthWithApiKeyPlugin),
   ],
   secret: authSecret,
   session: {

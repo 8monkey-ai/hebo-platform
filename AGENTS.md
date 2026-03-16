@@ -27,6 +27,71 @@ ElysiaJS powers `apps/api` and `apps/gateway`; call helpers from `packages/share
 
 Since we are using React Compiler, don't use useMemo, useCallback, and React.memo.
 
+## Console Frontend Patterns
+
+### Data Loading
+
+Use React Router `clientLoader` for data fetching — not `useEffect`. The route exports a `clientLoader` that calls the API and the component receives data via `loaderData`. This keeps loading states managed by the framework (`navigation.state`) and avoids manual `useState`/`useEffect` data-fetching boilerplate.
+
+```tsx
+// route.tsx
+export async function clientLoader({ params, request }: Route.ClientLoaderArgs) {
+  const sp = new URL(request.url).searchParams;
+  const { data } = await api.agents({ agentSlug }).branches({ branchSlug }).traces.get({ query: { ... } });
+  return { traces: data?.items ?? [] };
+}
+
+export default function MyRoute({ loaderData: { traces } }: Route.ComponentProps) {
+  const navigation = useNavigation();
+  const loading = navigation.state !== "idle";
+  return <MyList data={traces} loading={loading} />;
+}
+```
+
+### Search Params as State
+
+Use URL search params as the source of truth for filters, pagination, and presets — not component state. Create a dedicated `search-params.ts` module per feature with:
+- A `parse*SearchParams(searchParams)` function for use in `clientLoader`
+- A `use*SearchParams()` hook that wraps `useSearchParams` for use in components
+- An `updateParams` helper that mutates the `URLSearchParams` and resets page on filter changes
+
+### List/Detail with Nested Routes
+
+Use React Router nested routes for list/detail views. The parent route renders the list + `<Outlet/>`, and the child route (e.g. `($traceId)`) has its own `clientLoader`. Use `shouldRevalidate` to skip re-fetching the list when only the detail selection changes (pathname change, same search params).
+
+### Tailwind Classes
+
+Minimise Tailwind classes. Avoid duplicating utilities already present on a parent component. Prefer fewer, well-chosen classes over verbose class lists.
+
+### DOM Hierarchy
+
+Keep the DOM flat. Minimise nested `<div>` wrappers — flatten the hierarchy as much as possible to reduce complexity and improve readability.
+
+### ShadCN Components
+
+Use existing ShadCN components from `packages/shared-ui` where applicable. If a needed component doesn't exist yet, add it to the project using the `shadcn` CLI before building a custom one.
+
+## Technical Design Priorities
+
+1. Simple, clean, concise, and easy-to-read / maintain code.
+2. Modular and tree-shakable architecture with clear separation of concerns.
+3. Prefer clarity by default, but accept targeted complexity in hot paths when performance gains are measurable.
+4. Prefer Bun compiler/runtime optimizations over unnecessary manual micro-optimizations or boilerplate.
+5. Runtime-agnostic behavior across Bun, Deno, Node.js, Cloudflare Workers, Vercel, and AWS Lambda.
+
+If priorities conflict, apply this order:
+
+1. Public API compatibility
+2. Runtime portability
+3. Readability and style consistency
+4. Hot-path performance
+
+## Hot Path Rules
+
+- Minimize per-request allocations and repeated transformations in middleware/converter/handler paths.
+- Avoid extra abstraction layers in latency-sensitive code when they do not improve maintainability.
+- Keep branches and data-shape conversions explicit in hot paths for predictable performance.
+
 ## Testing Guidelines
 
 Each workspace wires its own harness (Vitest or Bun); use the scripts rather than calling binaries directly. Add tests beside the feature (`conversation.test.ts`) and keep mocks in `__mocks__/` or MSW (`apps/console/app/mocks`). Run `bun run test` before submitting and note deliberate omissions in the PR.
@@ -34,6 +99,12 @@ Each workspace wires its own harness (Vitest or Bun); use the scripts rather tha
 ## Commit & Pull Request Guidelines
 
 Commit messages stay short and imperative (`update console mock`, `improve naming`). Keep each commit focused. Pull requests should summarize the change, list tests (`bun run test` or manual steps), link Jira/GitHub issues, and attach UI screenshots or API curl snippets when relevant. Sync cross-package API changes with the owning teams before merging.
+
+## PR/Commit Checklist
+
+- [ ] Change is scoped to requested behavior.
+- [ ] Types compile (`bun run typecheck`).
+- [ ] Tests pass (`bun run test`) or failures are documented.
 
 ## Environment & Secrets
 

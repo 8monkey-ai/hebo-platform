@@ -1,6 +1,6 @@
 import { Elysia, status, t } from "elysia";
 
-import { dbClient } from "~api/middleware/db-client";
+import { prismaClient } from "~api/middleware/prisma";
 
 import { type Models } from "./types";
 import { Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./types";
@@ -8,11 +8,11 @@ import { Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./ty
 export const providersModule = new Elysia({
   prefix: "/providers",
 })
-  .use(dbClient)
+  .use(prismaClient)
   .get(
     "/",
-    async ({ dbClient, query }) => {
-      const providerConfigs = await dbClient.provider_configs.findMany();
+    async ({ prismaClient, query }) => {
+      const providerConfigs = await prismaClient.provider_configs.findMany();
 
       let providers = Object.entries(supportedProviders).map(
         ([slug, { name }]) =>
@@ -38,13 +38,13 @@ export const providersModule = new Elysia({
   )
   .put(
     "/:slug/config",
-    async ({ body, dbClient, params }) => {
-      const existing = await dbClient.provider_configs.findFirst({
+    async ({ body, prismaClient, params }) => {
+      const existing = await prismaClient.provider_configs.findFirst({
         where: { provider_slug: params.slug },
         select: { id: true },
       });
 
-      const providerConfig = await dbClient.provider_configs.create({
+      const providerConfig = await prismaClient.provider_configs.create({
         data: {
           provider_slug: params.slug,
           value: body,
@@ -52,7 +52,7 @@ export const providersModule = new Elysia({
       });
 
       if (existing) {
-        await dbClient.provider_configs.softDelete({ id: existing.id });
+        await prismaClient.provider_configs.softDelete({ id: existing.id });
       }
 
       return status(201, providerConfig.value);
@@ -65,13 +65,13 @@ export const providersModule = new Elysia({
   )
   .delete(
     "/:slug/config",
-    async ({ dbClient, params }) => {
-      const { id } = await dbClient.provider_configs.findFirstOrThrow({
+    async ({ prismaClient, params }) => {
+      const { id } = await prismaClient.provider_configs.findFirstOrThrow({
         where: { provider_slug: params.slug },
         select: { id: true },
       });
 
-      const branches = await dbClient.branches.findMany();
+      const branches = await prismaClient.branches.findMany();
 
       const affectedBranches = branches.filter((branch) => {
         const models = branch.models as Models;
@@ -79,10 +79,10 @@ export const providersModule = new Elysia({
       });
 
       // Batch update all affected branches + delete provider in a single transaction
-      await dbClient.$transaction([
+      await prismaClient.$transaction([
         ...affectedBranches.map((branch) => {
           const models = branch.models as Models;
-          return dbClient.branches.update({
+          return prismaClient.branches.update({
             where: { id: branch.id },
             data: {
               models: models.map((model) =>
@@ -93,7 +93,7 @@ export const providersModule = new Elysia({
             },
           });
         }),
-        dbClient.provider_configs.update({
+        prismaClient.provider_configs.update({
           where: { id },
           data: { deleted_at: new Date() },
         }),

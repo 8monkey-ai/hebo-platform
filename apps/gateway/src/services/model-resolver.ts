@@ -7,15 +7,16 @@ import {
   type ResolveModelHookContext,
   type ResolveProviderHookContext,
 } from "@hebo-ai/gateway";
+import { trace } from "@opentelemetry/api";
 import { LRUCache } from "lru-cache";
 
-import type { createDbClient } from "~api/lib/db/client";
+import type { createPrismaClient } from "~api/lib/prisma/client";
 import type { Models, ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "./aws-wif";
 import { createProvider } from "./provider-factory";
 
-export type DbClient = ReturnType<typeof createDbClient>;
+type PrismaClient = ReturnType<typeof createPrismaClient>;
 
 const canonicalModelIds = new Set<string>(CANONICAL_MODEL_IDS);
 
@@ -31,6 +32,15 @@ const providerCache = new LRUCache<string, ProviderV3>({
 export async function resolveModelId(ctx: ResolveModelHookContext) {
   const { modelId: aliasPath, models, state } = ctx;
 
+  const { prismaClient, organizationId } = state as {
+    prismaClient: PrismaClient;
+    organizationId: string;
+  };
+
+  trace.getActiveSpan()?.setAttributes({
+    "hebo.organization.id": organizationId,
+  });
+
   if (canonicalModelIds.has(aliasPath)) {
     const modelConfig = models[aliasPath as keyof typeof models];
     state.modelConfig = {
@@ -43,10 +53,14 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
     return aliasPath;
   }
 
-  const { dbClient } = state as { dbClient: DbClient };
-
   const [agentSlug, branchSlug, modelAlias] = aliasPath.split("/");
-  const branch = await dbClient.branches.findFirst({
+
+  trace.getActiveSpan()?.setAttributes({
+    "hebo.agent.slug": agentSlug,
+    "hebo.branch.slug": branchSlug,
+  });
+
+  const branch = await prismaClient.branches.findFirst({
     where: { agent_slug: agentSlug, slug: branchSlug },
     select: { models: true },
   });
@@ -74,7 +88,7 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
 }
 
 async function resolveCustomProvider(
-  dbClient: DbClient,
+  prismaClient: PrismaClient,
   organizationId: string,
   modelId: string,
   customProviderSlug: ProviderSlug,
@@ -90,7 +104,7 @@ async function resolveCustomProvider(
     if (cachedProvider) return cachedProvider;
   }
 
-  const config = await dbClient.provider_configs.getUnredacted(customProviderSlug);
+  const config = await prismaClient.provider_configs.getUnredacted(customProviderSlug);
 
   const configHash = config
     ? createHash("sha256").update(JSON.stringify(config.value)).digest("hex")
@@ -114,8 +128,9 @@ async function resolveCustomProvider(
 
 export async function resolveProvider(ctx: ResolveProviderHookContext) {
   const { resolvedModelId: modelId, state } = ctx;
-  const { dbClient, organizationId } = state as {
-    dbClient: DbClient;
+
+  const { prismaClient, organizationId } = state as {
+    prismaClient: PrismaClient;
     organizationId: string;
   };
 
@@ -131,7 +146,7 @@ export async function resolveProvider(ctx: ResolveProviderHookContext) {
 
   if (customProviderSlug) {
     const provider = await resolveCustomProvider(
-      dbClient,
+      prismaClient,
       organizationId,
       modelId,
       customProviderSlug,

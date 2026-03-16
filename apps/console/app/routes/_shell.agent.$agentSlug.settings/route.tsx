@@ -33,10 +33,10 @@ export default function Settings() {
   const agent = useRoute("routes/_shell.agent.$agentSlug")!.loaderData!.agent;
 
   return (
-    <>
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <h1>Agent Settings</h1>
       <GeneralSettings agent={agent} />
       <DangerSettings agent={agent} />
-    </>
+    </div>
   );
 }

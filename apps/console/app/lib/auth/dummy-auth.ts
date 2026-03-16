@@ -17,8 +17,10 @@ const apiKeys = new Collection({
 
 export const authService = {
   async ensureSignedIn() {
-    if (shellStore.user) return true;
+    if (shellStore.user?.organizationId) return true;
     shellStore.user = {
+      userId: "dummy-user-id",
+      organizationId: "dummy-org-id",
       name: "Dummy User",
       email: "dummy@user.com",
       initials: "DU",

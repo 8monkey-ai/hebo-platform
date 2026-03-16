@@ -47,7 +47,10 @@ export const authService: AuthService = {
     const hasSessionDataCookie = getSessionCookie(headers, {
       cookieName: "session_data",
     });
-    if (shellStore.user && hasSessionDataCookie) {
+
+    // FUTURE: This early return caches organizationId and will go stale on org switches.
+    // Revisit when organisation invitations are enabled (re-fetch session or listen for org-switch events).
+    if (shellStore.user?.organizationId && hasSessionDataCookie) {
       return true;
     }
 
@@ -59,12 +62,17 @@ export const authService: AuthService = {
     if (!session?.data?.user) {
       return redirectToSignIn();
     }
-    const user = session.data.user as User;
-    const initialsSource = user?.name || user.email;
-    const initialsSeparator = user?.name ? " " : "@";
-    user.initials = initialsSource
-      .split(initialsSeparator)
-      .map((part) => part[0])
+
+    const user: User = {
+      name: session.data.user.name,
+      email: session.data.user.email,
+      userId: session.data.user.id,
+      organizationId: session.data.session.activeOrganizationId!,
+    };
+
+    user.initials = (user?.name ?? user.email)
+      .split(user?.name ? " " : "@")
+      .map((p) => p[0])
       .join("");
 
     shellStore.user = user;
@@ -74,18 +82,29 @@ export const authService: AuthService = {
   async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
     // Better Auth expects seconds.
     const expiresIn = Math.max(1, Math.floor(expiresInMs / 1000));
-    const { data, error } = await authClient.apiKey.create({ name, expiresIn });
+    const { data, error } = await authClient.apiKey.create({
+      name,
+      expiresIn,
+      organizationId: shellStore.user?.organizationId,
+      metadata: { createdByUserId: shellStore.user?.userId },
+    });
     if (error) throw new Error(error.message);
     return data as ApiKey;
   },
 
   async revokeApiKey(apiKeyId) {
-    const { error } = await authClient.apiKey.delete({ keyId: apiKeyId });
+    const { error } = await authClient.apiKey.delete({
+      keyId: apiKeyId,
+    });
     if (error) throw new Error(error.message);
   },
 
   async listApiKeys() {
-    const { data, error } = await authClient.apiKey.list();
+    const { data, error } = await authClient.apiKey.list({
+      query: {
+        organizationId: shellStore.user?.organizationId,
+      },
+    });
     if (error) throw new Error(error.message);
     const keys = data.apiKeys.map((key) => ({
       ...key,
