@@ -4,6 +4,17 @@ import { Mail, Trash2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useFetcher } from "react-router";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@hebo/shared-ui/components/AlertDialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@hebo/shared-ui/components/Avatar";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -110,7 +121,9 @@ export function MembersSettings({ members, invitations, isOwner }: MembersSettin
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="capitalize">{inv.role}</Badge>
+                    <Badge variant="secondary" className="capitalize">
+                      {inv.role}
+                    </Badge>
                     <Badge variant="outline">Invited</Badge>
                   </div>
                 </TableCell>
@@ -159,7 +172,7 @@ export function MembersSettings({ members, invitations, isOwner }: MembersSettin
               />
             </Field>
             <Button type="submit" isLoading={fetcher.state !== "idle"}>
-              <Mail size={14} />
+              <Mail data-icon="inline-start" />
               Invite
             </Button>
           </FormControl>
@@ -171,48 +184,81 @@ export function MembersSettings({ members, invitations, isOwner }: MembersSettin
 
 function RemoveMemberButton({ email }: { email: string }) {
   const fetcher = useFetcher();
-  const handleSubmit = (e: React.FormEvent) => {
-    if (!window.confirm(`Remove ${email} from the organization?`)) {
-      e.preventDefault();
-    }
-  };
+  const [open, setOpen] = useState(false);
   return (
-    <fetcher.Form method="post" action="members" onSubmit={handleSubmit}>
-      <input type="hidden" name="intent" value="remove" />
-      <input type="hidden" name="email" value={email} />
-      <Button
-        type="submit"
-        variant="ghost"
-        size="icon"
-        isLoading={fetcher.state !== "idle"}
-        aria-label="Remove member"
-      >
-        <Trash2 size={14} />
-      </Button>
-    </fetcher.Form>
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            isLoading={fetcher.state !== "idle"}
+            aria-label="Remove member"
+          >
+            <Trash2 />
+          </Button>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Remove member</AlertDialogTitle>
+          <AlertDialogDescription>Remove {email} from the organization?</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            onClick={() => {
+              setOpen(false);
+              fetcher.submit({ intent: "remove", email }, { method: "post", action: "members" });
+            }}
+          >
+            Remove
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 
 function RevokeInvitationButton({ invitationId }: { invitationId: string }) {
   const fetcher = useFetcher();
-  const handleSubmit = (e: React.FormEvent) => {
-    if (!window.confirm("Revoke this invitation?")) {
-      e.preventDefault();
-    }
-  };
+  const [open, setOpen] = useState(false);
   return (
-    <fetcher.Form method="post" action="members" onSubmit={handleSubmit}>
-      <input type="hidden" name="intent" value="revoke" />
-      <input type="hidden" name="invitationId" value={invitationId} />
-      <Button
-        type="submit"
-        variant="ghost"
-        size="icon"
-        isLoading={fetcher.state !== "idle"}
-        aria-label="Revoke invitation"
-      >
-        <Trash2 size={14} />
-      </Button>
-    </fetcher.Form>
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon"
+            isLoading={fetcher.state !== "idle"}
+            aria-label="Revoke invitation"
+          >
+            <Trash2 />
+          </Button>
+        }
+      />
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Revoke invitation</AlertDialogTitle>
+          <AlertDialogDescription>This invitation will be cancelled.</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            variant="destructive"
+            onClick={() => {
+              setOpen(false);
+              fetcher.submit(
+                { intent: "revoke", invitationId },
+                { method: "post", action: "members" },
+              );
+            }}
+          >
+            Revoke
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

@@ -42,7 +42,7 @@ export default function AcceptInvitation({
 
       {data.status === "success" && (
         <Alert>
-          <CheckCircle2 size={16} />
+          <CheckCircle2 />
           <AlertTitle>Invitation accepted! Redirecting…</AlertTitle>
         </Alert>
       )}
@@ -50,7 +50,7 @@ export default function AcceptInvitation({
       {(data.status === "error" || data.status === "no-id") && (
         <div className="flex flex-col items-center gap-4">
           <Alert variant="destructive">
-            <AlertCircle size={16} />
+            <AlertCircle />
             <AlertTitle>
               {data.status === "error"
                 ? data.message || "This invitation is expired or invalid."

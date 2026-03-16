@@ -93,13 +93,13 @@ export function UserMenu({ user, organizations }: { user?: User; organizations: 
             {organizations.length > 1 && (
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Building2 size={12} />
+                  <Building2 />
                   Organization
                 </DropdownMenuLabel>
                 {activeOrg && (
                   <DropdownMenuItem className="gap-2 p-2" disabled>
                     <span className="truncate">{activeOrg.name}</span>
-                    <Check size={12} className="ml-auto" aria-hidden="true" />
+                    <Check className="ml-auto" aria-hidden="true" />
                   </DropdownMenuItem>
                 )}
                 {otherOrgs.map((org) => (
