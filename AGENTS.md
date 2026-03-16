@@ -109,32 +109,29 @@ function RemoveButton({ id }: { id: string }) {
 }
 ```
 
-### Section Loaders/Actions (same-URL code splitting)
+### Resource Routes for Section Actions
 
-For pages with multiple independent sections (e.g. settings), keep the same URL but split loader and action logic into section files. Each section file exports its own loader and action functions; `route.tsx` is a thin composer that calls them.
+For pages with multiple independent sections (e.g. settings), give each section its own resource route for actions while the page route keeps a single `clientLoader`. Resource routes are child routes with only a `clientAction` export and no default component.
 
-Section functions accept `FormData` (not `Request`) so the caller can read formData once and route by intent without consuming the body twice.
+Section components use `useFetcher` with an explicit relative `action` so submissions go to the resource route without navigating away. Fetcher data is used for `lastResult` instead of `useActionData`. A redirect returned from a resource route action still navigates the page.
 
-```ts
-// members.tsx
-export async function membersLoader() { ... }
-export async function membersAction(formData: FormData) { ... }
+```
+routes/
+  _shell.agent.$agentSlug.settings/route.tsx          ← clientLoader + page component
+  _shell.agent.$agentSlug.settings.members/route.tsx  ← clientAction only (invite/remove/revoke)
+  _shell.agent.$agentSlug.settings.danger/route.tsx   ← clientAction only (agent delete)
+```
 
-// danger-zone.tsx
-export async function dangerAction(formData: FormData, params: { agentSlug: string }) { ... }
+```tsx
+// resource route — no default export
+export async function clientAction({ request, params }) { ... }
 
-// route.tsx
-export async function clientLoader() {
-  return membersLoader();
-}
-export async function clientAction({ request, params }: Route.ClientActionArgs) {
-  const formData = await request.formData();
-  const intent = formData.get("intent");
-  if (intent === "invite" || intent === "remove" || intent === "revoke") {
-    return membersAction(formData);
-  }
-  return dangerAction(formData, params);
-}
+// section component
+const fetcher = useFetcher<{ intent: string; submission: any }>();
+const [form, fields] = useForm({
+  lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
+});
+<FormControl form={form} as={fetcher.Form} action="members">...</FormControl>
 ```
 
 ### ShadCN Components

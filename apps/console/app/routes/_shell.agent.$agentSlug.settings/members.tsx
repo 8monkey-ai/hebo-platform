@@ -26,21 +26,13 @@ import {
   TableCell,
 } from "@hebo/shared-ui/components/Table";
 
-import { authService } from "~console/lib/auth";
 import type { OrgInvitation, OrgMember } from "~console/lib/auth/types";
 import { useFormErrorToast } from "~console/lib/errors";
-import { shellStore } from "~console/lib/shell";
 
 export const inviteSchema = z.object({
   email: z.email("Enter a valid email address"),
   role: z.enum(["member", "admin"]),
 });
-
-export async function membersLoader() {
-  const { members, invitations } = await authService.getOrganization();
-  const isOwner = members.find((m) => m.userId === shellStore.user?.userId)?.role === "owner";
-  return { members, invitations, isOwner };
-}
 
 type MembersSettingsProps = {
   members: OrgMember[];

@@ -1,12 +1,17 @@
 import { unstable_useRoute as useRoute } from "react-router";
 
+import { authService } from "~console/lib/auth";
+import { shellStore } from "~console/lib/shell";
+
 import type { Route } from "./+types/route";
 import { DangerSettings } from "./danger-zone";
 import { GeneralSettings } from "./general";
-import { MembersSettings, membersLoader } from "./members";
+import { MembersSettings } from "./members";
 
 export async function clientLoader() {
-  return membersLoader();
+  const { members, invitations } = await authService.getOrganization();
+  const isOwner = members.find((m) => m.userId === shellStore.user?.userId)?.role === "owner";
+  return { members, invitations, isOwner };
 }
 
 export default function Settings({ loaderData }: Route.ComponentProps) {
