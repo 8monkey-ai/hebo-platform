@@ -178,13 +178,14 @@ export const authService = {
       throw new Error("Invitation has expired.");
     }
     invitations.delete((q) => q.where({ id: invitationId }));
+    const user = shellStore.user;
     members.create({
       organizationId: invite.organizationId,
-      userId: `accepted-${invitationId}`,
+      userId: user?.userId ?? `accepted-${invitationId}`,
       role: invite.role,
       createdAt: new Date().toISOString(),
-      userName: invite.email.split("@")[0],
-      userEmail: invite.email,
+      userName: user?.name ?? invite.email.split("@")[0],
+      userEmail: user?.email ?? invite.email,
     });
   },
 } satisfies AuthService;

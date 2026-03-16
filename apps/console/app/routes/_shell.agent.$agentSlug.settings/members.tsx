@@ -45,9 +45,10 @@ type MembersSettingsProps = {
   members: OrgMember[];
   invitations: OrgInvitation[];
   isOwner: boolean;
+  canManage: boolean;
 };
 
-export function MembersSettings({ members, invitations, isOwner }: MembersSettingsProps) {
+export function MembersSettings({ members, invitations, isOwner, canManage }: MembersSettingsProps) {
   const fetcher = useFetcher<{ intent: string; submission: any }>();
   const [role, setRole] = useState("member");
 
@@ -67,7 +68,7 @@ export function MembersSettings({ members, invitations, isOwner }: MembersSettin
             <TableHead>Member</TableHead>
             <TableHead>Role</TableHead>
             <TableHead>Joined</TableHead>
-            {isOwner && <TableHead className="w-10" />}
+            {canManage && <TableHead className="w-10" />}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -99,9 +100,11 @@ export function MembersSettings({ members, invitations, isOwner }: MembersSettin
                   </Badge>
                 </TableCell>
                 <TableCell>{new Date(member.createdAt).toLocaleDateString()}</TableCell>
-                {isOwner && (
+                {canManage && (
                   <TableCell>
-                    {member.role !== "owner" && <RemoveMemberButton email={member.user.email} />}
+                    {isOwner && member.role !== "owner" && (
+                      <RemoveMemberButton email={member.user.email} />
+                    )}
                   </TableCell>
                 )}
               </TableRow>
@@ -128,7 +131,7 @@ export function MembersSettings({ members, invitations, isOwner }: MembersSettin
                   </div>
                 </TableCell>
                 <TableCell>expires {new Date(inv.expiresAt).toLocaleDateString()}</TableCell>
-                {isOwner && (
+                {canManage && (
                   <TableCell>
                     <RevokeInvitationButton invitationId={inv.id} />
                   </TableCell>
@@ -139,7 +142,7 @@ export function MembersSettings({ members, invitations, isOwner }: MembersSettin
         </TableBody>
       </Table>
 
-      {isOwner && (
+      {canManage && (
         <>
           <h3 className="flex items-center gap-2">
             <UserPlus size={16} />
