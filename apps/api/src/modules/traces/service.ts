@@ -35,24 +35,27 @@ export async function listTraces(
   const offset = (page - 1) * pageSize;
   const limit = pageSize + 1;
 
-  const metadataKeys = await getMetadataColumnNames(greptimeDb);
+  const metadataColumns = await getMetadataColumnNames(greptimeDb);
+  const metadataKeys = metadataColumns.map(({ column_name }) =>
+    String(column_name).slice(METADATA_PREFIX.length),
+  );
 
-  const params = [agentSlug, branchSlug, organizationId, from, to] as unknown[];
-  const addParam = (value: unknown) => `$${params.push(value)}`;
+  const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
+  function addParam(value: unknown) {
+    params.push(value);
+    return `$${params.length}`;
+  }
 
   let metaFilterSql = "";
   for (const [key, value] of Object.entries(metadataFilters)) {
-    const col = metadataKeys.find(
-      (c) => String(c.column_name).slice(METADATA_PREFIX.length) === key,
-    );
-    if (!col) continue;
-    metaFilterSql += ` AND "${escapeSqlIdentifier(String(col.column_name))}" = ${addParam(value)}`;
+    if (!metadataKeys.includes(key)) continue;
+    metaFilterSql += ` AND "${escapeSqlIdentifier(`${METADATA_PREFIX}${key}`)}" = ${addParam(value)}`;
   }
 
   const limitParam = addParam(limit);
   const offsetParam = addParam(offset);
 
-  const metadataSelectSql = metadataKeys
+  const metadataSelectSql = metadataColumns
     .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
     .join(",\n      ");
 
@@ -86,7 +89,7 @@ export async function listTraces(
   const data = [];
   for (const row of pageRows) {
     const metadata: Record<string, string> = {};
-    for (const { column_name } of metadataKeys) {
+    for (const { column_name } of metadataColumns) {
       const colName = String(column_name);
       const value = row[colName];
       if (value !== null && value !== undefined) {
@@ -106,7 +109,11 @@ export async function listTraces(
     });
   }
 
-  return { data, hasNextPage, metadataKeys };
+  return {
+    data,
+    hasNextPage,
+    metadataKeys,
+  };
 }
 
 export async function getSpans(
