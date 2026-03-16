@@ -10,7 +10,7 @@ import { trace } from "@opentelemetry/api";
 import { getOtelLogger } from "@hebo/shared-api/lib/otel";
 import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino-adapter";
 
-import { resolveModelId, resolveProvider } from "./services/model-resolver";
+import { resolveModelId, createResolveProvider } from "./services/model-resolver";
 import { createProvider, loadProviderSecrets } from "./services/provider-factory";
 
 instrumentFetch("full");
@@ -18,8 +18,8 @@ instrumentFetch("full");
 export const basePath = "/v1";
 const secrets = await loadProviderSecrets();
 
-const withFreeTokens = (freeTokens: number) => ({
-  additionalProperties: { pricing: { monthly_free_tokens: freeTokens } },
+const withTier = (modelId: string) => ({
+  additionalProperties: { free: secrets.freeModelIds.has(modelId) },
 });
 
 export const gw = gateway({
@@ -43,15 +43,17 @@ export const gw = gateway({
   models: defineModelCatalog(
     gptOss20b({
       providers: ["bedrock", "groq"],
-      ...withFreeTokens(12_000_000_000),
+      ...withTier("openai/gpt-oss-20b"),
     }),
     gptOss120b({
       providers: ["bedrock", "groq"],
-      ...withFreeTokens(6_000_000_000),
+      ...withTier("openai/gpt-oss-120b"),
     }),
-    gemini["v3.x"].map((preset) => preset({ providers: ["vertex"], ...withFreeTokens(0) })),
-    claudeOpus46({ providers: ["bedrock"], ...withFreeTokens(0) }),
-    voyage35({ providers: ["voyage"], ...withFreeTokens(0) }),
+    gemini["v3.x"].map((preset) =>
+      preset({ providers: ["vertex"], ...withTier("google/gemini-2.5-pro") }),
+    ),
+    claudeOpus46({ providers: ["bedrock"], ...withTier("anthropic/claude-opus-4-6") }),
+    voyage35({ providers: ["voyage"], ...withTier("voyage/voyage-3.5") }),
   ),
 
   hooks: {
@@ -61,7 +63,7 @@ export const gw = gateway({
       }
     },
     resolveModelId,
-    resolveProvider,
+    resolveProvider: createResolveProvider({ enforceByok: secrets.enforceByok }),
   },
   logger: createPinoOtelAdapter(getOtelLogger("hebo-gateway", 1)), // trace severity
   telemetry: {

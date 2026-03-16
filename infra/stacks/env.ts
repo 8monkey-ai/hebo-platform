@@ -29,6 +29,10 @@ export const vertexAwsProviderAudience = getSstSecret("VertexAwsProviderAudience
 export const vertexProject = getSstSecret("VertexProject");
 export const vertexLocation = getSstSecret("VertexLocation");
 
+// BYOK
+export const enforceByok = getSstSecret("EnforceByok");
+export const freeModelIds = getSstSecret("FreeModelIds");
+
 // OTEL Exporter
 export const greptimeEndpoint = getSstSecret("GreptimeEndpoint");
 
@@ -56,6 +60,8 @@ export const llmSecrets = [
   vertexAwsProviderAudience,
   vertexProject,
   vertexLocation,
+  enforceByok,
+  freeModelIds,
 ];
 
 export const normalizedStage = $app.stage

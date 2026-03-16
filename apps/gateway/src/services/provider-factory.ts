@@ -30,6 +30,8 @@ export async function loadProviderSecrets() {
     vertexAudience,
     vertexLocation,
     vertexProject,
+    enforceByokRaw,
+    freeModelIdsRaw,
   ] = await Promise.all([
     getSecret("GroqApiKey"),
     getSecret("BedrockRoleArn"),
@@ -39,7 +41,16 @@ export async function loadProviderSecrets() {
     getSecret("VertexAwsProviderAudience"),
     getSecret("VertexLocation"),
     getSecret("VertexProject"),
+    getSecret("EnforceByok"),
+    getSecret("FreeModelIds"),
   ]);
+
+  const freeModelIds = new Set(
+    (freeModelIdsRaw && freeModelIdsRaw !== "undefined" ? freeModelIdsRaw : "")
+      .split(",")
+      .map((s: string) => s.trim())
+      .filter(Boolean),
+  );
 
   return {
     groqApiKey,
@@ -50,6 +61,8 @@ export async function loadProviderSecrets() {
     vertexAudience,
     vertexLocation,
     vertexProject,
+    enforceByok: enforceByokRaw === "true",
+    freeModelIds,
   };
 }
 

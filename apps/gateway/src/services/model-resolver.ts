@@ -37,6 +37,7 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
       type: aliasPath,
       // Currently, we only support routing to the first provider.
       customProviderSlug: modelConfig?.providers[0] as ProviderSlug,
+      free: modelConfig?.additionalProperties?.free as boolean | undefined,
     };
     return aliasPath;
   }
@@ -59,10 +60,12 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
     throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
   }
 
+  const catalogModel = models[model.type as keyof typeof models];
   state.modelConfig = {
     type: model.type,
     // Currently, we only support routing to the first provider.
     customProviderSlug: model.routing?.only?.[0] as ProviderSlug | undefined,
+    free: catalogModel?.additionalProperties?.free as boolean | undefined,
   };
 
   return model.type;
@@ -107,22 +110,56 @@ async function resolveCustomProvider(
   return provider;
 }
 
-export async function resolveProvider(ctx: ResolveProviderHookContext) {
-  const { resolvedModelId: modelId, state } = ctx;
-  const { dbClient, organizationId } = state as {
-    dbClient: DbClient;
-    organizationId: string;
+type ResolveProviderOptions = {
+  enforceByok: boolean;
+};
+
+export function createResolveProvider(options: ResolveProviderOptions) {
+  return async function resolveProvider(ctx: ResolveProviderHookContext) {
+    const { resolvedModelId: modelId, state } = ctx;
+    const { dbClient, organizationId } = state as {
+      dbClient: DbClient;
+      organizationId: string;
+    };
+
+    if (modelId.startsWith("google/")) {
+      await injectMetadataCredentials();
+    }
+
+    const { customProviderSlug, free } = state.modelConfig as {
+      customProviderSlug?: ProviderSlug;
+      free?: boolean;
+    };
+
+    if (customProviderSlug) {
+      const provider = await resolveCustomProvider(
+        dbClient,
+        organizationId,
+        modelId,
+        customProviderSlug,
+      );
+
+      if (provider) return provider;
+
+      // Org configured a custom provider slug, but no credentials found
+      if (options.enforceByok && free === false) {
+        throw new GatewayError(
+          "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
+          402,
+          "BYOK_REQUIRED",
+        );
+      }
+
+      return;
+    }
+
+    // No custom provider configured — block non-free models when enforcement is on
+    if (options.enforceByok && free === false) {
+      throw new GatewayError(
+        "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
+        402,
+        "BYOK_REQUIRED",
+      );
+    }
   };
-
-  if (modelId.startsWith("google/")) {
-    await injectMetadataCredentials();
-  }
-
-  const { customProviderSlug } = state.modelConfig as {
-    customProviderSlug?: ProviderSlug;
-  };
-
-  if (customProviderSlug) {
-    return resolveCustomProvider(dbClient, organizationId, modelId, customProviderSlug);
-  }
 }

@@ -51,7 +51,7 @@ export async function clientLoader() {
           name: m.name,
           modality: m.architecture.output_modalities[0],
           providers: m.endpoints?.map((e) => e.tag) ?? [],
-          monthlyFreeTokens: m.pricing?.monthly_free_tokens ?? 0,
+          free: m.free === true,
         },
       ]),
     );
