@@ -7,6 +7,10 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
     pre: CodeBlock,
     CodeGroup: CodeGroupMdx,
     ...components,
-    wrapper: ({ children }) => <div className="mdx">{children}</div>,
+    wrapper: ({ children }) => (
+      <div className="mx-auto flex w-full max-w-2xl min-w-0 flex-col gap-6">
+        <div className="mdx">{children}</div>
+      </div>
+    ),
   };
 }

@@ -99,7 +99,7 @@ bun run clean
 
 ## Secrets (local and remote)
 
-We use Bun secrets for local development and SST secrets for remote deployments. Code reads values via `getSecret(name)` (see `packages/shared-api/utils/get-secret.ts`), which resolves from SST first and falls back to Bun secrets locally.
+We use Bun secrets for local development and SST secrets for remote deployments. Code reads values via `getSecret(name)` (see `packages/shared-api/utils/secrets.ts`), which resolves from SST first and falls back to Bun secrets locally.
 
 Local development secrets are optional. Only configure the ones needed for the features you're working with (e.g., configure LLM provider secrets to test AI features).
 
@@ -116,6 +116,9 @@ Secret names:
   - Bedrock: `BedrockRoleArn`, `BedrockRegion`
   - Vertex: `VertexServiceAccountEmail`, `VertexAwsProviderAudience`, `VertexProject`, `VertexLocation`
   - Others: `VoyageApiKey`, `GroqApiKey`
+
+- Observability / traces
+  - Greptime: `GreptimeHost` (hostname only, e.g. `my-greptimedb.example.com`)
 
 Note for local development: if SMTP secrets are not configured, the email OTP is logged to the console (look for `>>> OTP:`) so you can sign in without setting up an email provider.
 

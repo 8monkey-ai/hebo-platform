@@ -153,12 +153,12 @@
   }
 
   /* Underline links by default */
-  a:not([href^="/"]):not(:has(*)) {
+  a:not([href^="/"]):not([href^="?"]):not(:has(*)) {
     @apply text-indigo-700 underline decoration-dotted;
   }
 
   /* Add square arrow next to every link */
-  main a:not([href^="/"])::after {
+  main a:not([href^="/"]):not([href^="?"])::after {
     content: "";
     display: inline-block;
     width: 0.75em;

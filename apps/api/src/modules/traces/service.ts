@@ -1,0 +1,205 @@
+import type { GreptimeDb } from "~api/middleware/greptime";
+
+import type { GenAIFinishReasons, GenAIInputMessages, GenAIOutputMessages } from "./types";
+import {
+  escapeSqlIdentifier,
+  extractSummary,
+  formatStatus,
+  parseJsonArray,
+  parseNullableNumber,
+} from "./utils";
+
+const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
+
+async function getMetadataColumnNames(greptimeDb: GreptimeDb) {
+  return (await greptimeDb.unsafe(
+    `SELECT column_name
+     FROM information_schema.columns
+     WHERE table_name = 'opentelemetry_traces'
+       AND column_name LIKE $1`,
+    [`${METADATA_PREFIX}%`],
+  )) as Array<{ column_name: unknown }>;
+}
+
+export async function listTraces(
+  greptimeDb: GreptimeDb,
+  organizationId: string,
+  agentSlug: string,
+  branchSlug: string,
+  from: Date,
+  to: Date,
+  page: number,
+  pageSize: number,
+  metadataFilters: Record<string, string>,
+) {
+  const offset = (page - 1) * pageSize;
+  const limit = pageSize + 1;
+
+  const metadataColumns = await getMetadataColumnNames(greptimeDb);
+  const metadataKeys = metadataColumns.map(({ column_name }) =>
+    String(column_name).slice(METADATA_PREFIX.length),
+  );
+
+  const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
+  function addParam(value: unknown) {
+    params.push(value);
+    return `$${params.length}`;
+  }
+
+  // Build dynamic metadata filter clauses
+  let metaFilterSql = "";
+  for (const [key, value] of Object.entries(metadataFilters)) {
+    const columnName = escapeSqlIdentifier(`${METADATA_PREFIX}${key}`);
+    metaFilterSql += ` AND "${columnName}" = ${addParam(value)}`;
+  }
+
+  const limitParam = addParam(limit);
+  const offsetParam = addParam(offset);
+
+  const metadataSelectSql = metadataColumns
+    .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
+    .join(",\n      ");
+
+  const queryText = `
+    SELECT
+      "timestamp" AS timestamp,
+      "trace_id" AS trace_id,
+      "span_status_code" AS span_status_code,
+      "duration_nano" AS duration_nano,
+      "span_attributes.gen_ai.operation.name" AS operation_name,
+      "span_attributes.gen_ai.response.model" AS response_model,
+      "span_attributes.gen_ai.provider.name" AS provider_name,
+      json_get_string("span_attributes.gen_ai.output.messages", '$[last - 0]') AS output_message
+      ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
+    FROM opentelemetry_traces
+    WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
+      AND "span_attributes.hebo.agent.slug" = $1
+      AND "span_attributes.hebo.branch.slug" = $2
+      AND "span_attributes.hebo.organization.id" = $3
+      AND "timestamp" >= $4
+      AND "timestamp" <= $5
+      ${metaFilterSql}
+    ORDER BY "timestamp" DESC
+    LIMIT ${limitParam} OFFSET ${offsetParam}
+  `;
+
+  const rows = (await greptimeDb.unsafe(queryText, params)) as any[];
+  const hasNextPage = rows.length > pageSize;
+  const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
+
+  const data = [];
+  for (const row of pageRows) {
+    const metadata: Record<string, string> = {};
+    for (const { column_name } of metadataColumns) {
+      const colName = String(column_name);
+      const value = row[colName];
+      if (value !== null && value !== undefined) {
+        metadata[colName.slice(METADATA_PREFIX.length)] = String(value);
+      }
+    }
+    data.push({
+      timestamp: String(row.timestamp),
+      traceId: String(row.trace_id ?? ""),
+      operationName: String(row.operation_name ?? ""),
+      model: String(row.response_model ?? ""),
+      provider: String(row.provider_name ?? ""),
+      status: formatStatus(row.span_status_code),
+      durationMs: Number(row.duration_nano ?? 0) / 1e6,
+      summary: extractSummary(row.output_message),
+      metadata,
+    });
+  }
+
+  return { data, hasNextPage, metadataKeys };
+}
+
+export async function getSpans(
+  greptimeDb: GreptimeDb,
+  organizationId: string,
+  agentSlug: string,
+  branchSlug: string,
+  traceId: string,
+) {
+  const metadataColumns = await getMetadataColumnNames(greptimeDb);
+
+  const metadataSelectSql = metadataColumns
+    .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
+    .join(",\n      ");
+
+  const queryText = `
+    SELECT
+      "timestamp" AS timestamp,
+      "span_id" AS span_id,
+      "span_status_code" AS span_status_code,
+      "duration_nano" AS duration_nano,
+      "span_attributes.gen_ai.operation.name" AS operation_name,
+      "span_attributes.gen_ai.request.model" AS request_model,
+      "span_attributes.gen_ai.response.model" AS response_model,
+      "span_attributes.gen_ai.provider.name" AS provider_name,
+      json_to_string("span_attributes.gen_ai.input.messages") AS input_messages,
+      json_to_string("span_attributes.gen_ai.output.messages") AS output_messages,
+      json_to_string("span_attributes.gen_ai.response.finish_reasons") AS finish_reasons,
+      "span_attributes.gen_ai.response.id" AS response_id,
+      "span_attributes.gen_ai.usage.input_tokens" AS input_tokens,
+      "span_attributes.gen_ai.usage.output_tokens" AS output_tokens,
+      "span_attributes.gen_ai.usage.total_tokens" AS total_tokens,
+      "span_attributes.gen_ai.usage.reasoning.output_tokens" AS reasoning_tokens,
+      "span_attributes.hebo.agent.slug",
+      "span_attributes.hebo.branch.slug",
+      "span_attributes.hebo.organization.id"
+      ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
+    FROM opentelemetry_traces
+    WHERE "trace_id" = $1
+      AND "span_attributes.hebo.organization.id" = $2
+      AND "span_attributes.hebo.agent.slug" = $3
+      AND "span_attributes.hebo.branch.slug" = $4
+      AND "span_attributes.gen_ai.operation.name" IS NOT NULL
+  `;
+
+  const rows = (await greptimeDb.unsafe(queryText, [
+    traceId,
+    organizationId,
+    agentSlug,
+    branchSlug,
+  ])) as any[];
+
+  const result = [];
+  for (const row of rows) {
+    const spanAttributes: Record<string, string | number | boolean | null> = {};
+    const metadata: Record<string, string> = {};
+
+    for (const [key, value] of Object.entries(row)) {
+      if (value === null || value === undefined) continue;
+      if (key.startsWith("span_attributes.")) {
+        if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+          spanAttributes[key.replace("span_attributes.", "")] = value;
+        }
+        if (key.startsWith(METADATA_PREFIX)) {
+          metadata[key.replace(METADATA_PREFIX, "")] = String(value);
+        }
+      }
+    }
+
+    result.push({
+      timestamp: String(row.timestamp),
+      spanId: String(row.span_id ?? ""),
+      operationName: String(row.operation_name ?? ""),
+      model: String(row.request_model ?? ""),
+      responseModel: String(row.response_model ?? ""),
+      provider: String(row.provider_name ?? ""),
+      status: formatStatus(row.span_status_code),
+      durationMs: Number(row.duration_nano ?? 0) / 1e6,
+      inputTokens: parseNullableNumber(row.input_tokens),
+      outputTokens: parseNullableNumber(row.output_tokens),
+      totalTokens: parseNullableNumber(row.total_tokens),
+      reasoningTokens: parseNullableNumber(row.reasoning_tokens),
+      inputMessages: (parseJsonArray(row.input_messages) ?? []) as GenAIInputMessages,
+      outputMessages: (parseJsonArray(row.output_messages) ?? []) as GenAIOutputMessages,
+      finishReasons: (parseJsonArray(row.finish_reasons) ?? null) as GenAIFinishReasons,
+      responseId: String(row.response_id ?? ""),
+      metadata,
+      spanAttributes,
+    });
+  }
+  return result;
+}
