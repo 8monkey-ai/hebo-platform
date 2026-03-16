@@ -164,18 +164,8 @@ function ModelCard(props: {
   const isByokRequired = selectedModel?.requiresByok === true;
   const availableProviders = providers.filter((p) => selectedModel?.providers?.includes(p.slug));
 
-  const [advancedOpen, setAdvancedOpen] = useState(isByokRequired);
-  const [routingEnabled, setRoutingEnabled] = useState(
-    isByokRequired || Boolean(model.getFieldset().routing.value),
-  );
-
-  // Auto-expand advanced and enable BYOK when a non-free model is selected
-  useEffect(() => {
-    if (isByokRequired) {
-      setAdvancedOpen(true);
-      setRoutingEnabled(true);
-    }
-  }, [isByokRequired]);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [routingEnabled, setRoutingEnabled] = useState(Boolean(model.getFieldset().routing.value));
 
   const aliasPath = [agentSlug, branchSlug, model.getFieldset().alias.value || "alias"].join("/");
 
@@ -285,7 +275,7 @@ function ModelCard(props: {
                         placeholder={
                           availableProviders.length > 0
                             ? "Select provider"
-                            : "No supported providers configured"
+                            : "No providers configured"
                         }
                         aria-label="Select Provider"
                       />
