@@ -195,7 +195,7 @@ export const authService: AuthService = {
     if (error) throw new Error(error.message);
     // Refresh the session_data cookie cache so subsequent API requests use the new org.
     await authClient.getSession({ query: { disableCookieCache: true } });
-    globalThis.location.reload();
+    globalThis.location.replace("/");
   },
 
   async inviteMember(email, role) {

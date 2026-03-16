@@ -106,7 +106,7 @@ export function UserMenu({ user, organizations }: { user?: User; organizations: 
                   <DropdownMenuItem
                     key={org.id}
                     className="gap-2 p-2"
-                    onSelect={() => authService.setActiveOrganization(org.id)}
+                    onClick={() => authService.setActiveOrganization(org.id)}
                   >
                     <span className="truncate">{org.name}</span>
                   </DropdownMenuItem>

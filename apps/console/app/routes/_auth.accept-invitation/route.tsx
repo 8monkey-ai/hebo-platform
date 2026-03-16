@@ -37,7 +37,7 @@ export default function AcceptInvitation({
   }, [data.status, navigate]);
 
   return (
-    <div className="flex min-h-dvh w-xs flex-col items-center justify-center gap-6 self-center">
+    <div className="mx-auto flex min-h-dvh w-xs flex-col items-center justify-center gap-6">
       <Logo />
 
       {data.status === "success" && (

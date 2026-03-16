@@ -148,7 +148,7 @@ export const authService = {
   async setActiveOrganization(orgId) {
     if (shellStore.user) shellStore.user.organizationId = orgId;
     globalThis.localStorage?.setItem("hebo:dummy-org-id", orgId);
-    globalThis.location.reload();
+    globalThis.location.replace("/");
   },
 
   async inviteMember(email, role) {

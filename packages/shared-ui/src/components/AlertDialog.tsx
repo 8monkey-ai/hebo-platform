@@ -1,6 +1,9 @@
+import { cn } from "#/lib/utils";
+
+import { Button } from "./Button";
+
 export {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -12,3 +15,7 @@ export {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "#/_shadcn/ui/alert-dialog";
+
+export function AlertDialogAction({ className, ...props }: React.ComponentProps<typeof Button>) {
+  return <Button data-slot="alert-dialog-action" className={cn(className)} {...props} />;
+}

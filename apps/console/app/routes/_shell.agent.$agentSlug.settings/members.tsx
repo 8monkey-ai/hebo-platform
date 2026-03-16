@@ -184,38 +184,34 @@ export function MembersSettings({ members, invitations, isOwner }: MembersSettin
 
 function RemoveMemberButton({ email }: { email: string }) {
   const fetcher = useFetcher();
-  const [open, setOpen] = useState(false);
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog>
       <AlertDialogTrigger
         render={
-          <Button
-            variant="ghost"
-            size="icon"
-            isLoading={fetcher.state !== "idle"}
-            aria-label="Remove member"
-          >
+          <Button variant="ghost" size="icon" aria-label="Remove member">
             <Trash2 />
           </Button>
         }
       />
       <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Remove member</AlertDialogTitle>
-          <AlertDialogDescription>Remove {email} from the organization?</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={() => {
-              setOpen(false);
-              fetcher.submit({ intent: "remove", email }, { method: "post", action: "members" });
-            }}
-          >
-            Remove
-          </AlertDialogAction>
-        </AlertDialogFooter>
+        <fetcher.Form method="post" action="members">
+          <input type="hidden" name="intent" value="remove" />
+          <input type="hidden" name="email" value={email} />
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove member</AlertDialogTitle>
+            <AlertDialogDescription>Remove {email} from the organization?</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              type="submit"
+              isLoading={fetcher.state !== "idle"}
+            >
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </fetcher.Form>
       </AlertDialogContent>
     </AlertDialog>
   );
@@ -223,41 +219,34 @@ function RemoveMemberButton({ email }: { email: string }) {
 
 function RevokeInvitationButton({ invitationId }: { invitationId: string }) {
   const fetcher = useFetcher();
-  const [open, setOpen] = useState(false);
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog>
       <AlertDialogTrigger
         render={
-          <Button
-            variant="ghost"
-            size="icon"
-            isLoading={fetcher.state !== "idle"}
-            aria-label="Revoke invitation"
-          >
+          <Button variant="ghost" size="icon" aria-label="Revoke invitation">
             <Trash2 />
           </Button>
         }
       />
       <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Revoke invitation</AlertDialogTitle>
-          <AlertDialogDescription>This invitation will be cancelled.</AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={() => {
-              setOpen(false);
-              fetcher.submit(
-                { intent: "revoke", invitationId },
-                { method: "post", action: "members" },
-              );
-            }}
-          >
-            Revoke
-          </AlertDialogAction>
-        </AlertDialogFooter>
+        <fetcher.Form method="post" action="members">
+          <input type="hidden" name="intent" value="revoke" />
+          <input type="hidden" name="invitationId" value={invitationId} />
+          <AlertDialogHeader>
+            <AlertDialogTitle>Revoke invitation</AlertDialogTitle>
+            <AlertDialogDescription>This invitation will be cancelled.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              type="submit"
+              isLoading={fetcher.state !== "idle"}
+            >
+              Revoke
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </fetcher.Form>
       </AlertDialogContent>
     </AlertDialog>
   );
