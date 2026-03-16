@@ -6,8 +6,12 @@ import { type Cookie, Elysia } from "elysia";
 
 import type { VerifyApiKeyPlugin } from "~auth/lib/verify-api-key-plugin";
 
-import { authSecret, authUrl } from "../env";
+import { authUrl, isProduction } from "../env";
 import { AuthError, BadRequestError } from "../errors";
+import { getSecret } from "../utils/secrets";
+
+const authSecret =
+  (await getSecret("AuthSecret")) ?? (isProduction ? undefined : "dev-placeholder-secret");
 import { betterAuthCookieOptions } from "../lib/cookie-options";
 import type { Logger } from "./logging";
 
