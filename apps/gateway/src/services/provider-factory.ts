@@ -46,7 +46,7 @@ export async function loadProviderSecrets() {
   ]);
 
   const freeModelIds = new Set(
-    (freeModelIdsRaw ?? "")
+    (freeModelIdsRaw && freeModelIdsRaw !== "undefined" ? freeModelIdsRaw : "")
       .split(",")
       .map((s: string) => s.trim())
       .filter(Boolean),
