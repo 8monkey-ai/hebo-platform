@@ -14,6 +14,7 @@ const SUPPORTED_MODELS = [
     ],
     modality: "chat",
     free: true,
+    enforceByok: false,
   },
   {
     type: "voyage/voyage-3.5",
@@ -27,6 +28,7 @@ const SUPPORTED_MODELS = [
     ],
     modality: "embeddings",
     free: false,
+    enforceByok: false,
   },
 ] as const;
 
@@ -46,6 +48,7 @@ export const modelHandlers = [
             owned_by: model.owner,
             architecture: { output_modalities: [model.modality] },
             free: model.free,
+            enforceByok: model.enforceByok,
           },
           includeEndpoints && {
             endpoints: Object.keys(model.providers[0]).map((tag) => ({ tag })),
