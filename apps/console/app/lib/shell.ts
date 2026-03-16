@@ -9,7 +9,6 @@ export type Models = Record<
     modality: string;
     providers: readonly string[];
     free: boolean;
-    enforceByok: boolean;
   }
 >;
 

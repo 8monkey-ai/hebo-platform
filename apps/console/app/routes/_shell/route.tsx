@@ -52,7 +52,6 @@ export async function clientLoader() {
           modality: m.architecture.output_modalities[0],
           providers: m.endpoints?.map((e) => e.tag) ?? [],
           free: m.free === true,
-          enforceByok: m.enforceByok === true,
         },
       ]),
     );
