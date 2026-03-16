@@ -42,7 +42,7 @@ export const Provider = t.Object({
 
 export const Models = t.Array(
   t.Object({
-    alias: t.String({ minLength: 1 }),
+    alias: t.String({ minLength: 1, pattern: "^[a-zA-Z0-9][a-zA-Z0-9_-]*$" }),
     // FUTURE: Add a validation for the model type
     type: t.String({ minLength: 1 }),
     // Inspired from Vercel Provider Options: https://vercel.com/docs/ai-gateway/provider-options
