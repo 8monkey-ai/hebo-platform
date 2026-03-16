@@ -40,7 +40,7 @@ const SUPPORTED_MODELS = [
     created: 1_764_888_221,
     providers: [{ bedrock: "amazon.nova-2-multimodal-embeddings-v1:0" }],
     modality: "embeddings",
-    free: false,
+    free: true,
   },
   {
     type: "voyage/voyage-3.5",
