@@ -8,7 +8,7 @@ import {
   LogOut,
 } from "lucide-react";
 import { useState } from "react";
-import { Link, useRevalidator } from "react-router";
+import { Link } from "react-router";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@hebo/shared-ui/components/Avatar";
 import {
@@ -38,12 +38,6 @@ export function UserMenu({ user, organizations }: { user?: User; organizations: 
 
   const activeOrg = organizations.find((o) => o.id === user?.organizationId);
   const otherOrgs = organizations.filter((o) => o.id !== user?.organizationId);
-
-  const revalidator = useRevalidator();
-  async function switchOrg(orgId: string) {
-    await authService.setActiveOrganization(orgId);
-    revalidator.revalidate();
-  }
 
   return (
     <SidebarMenu>
@@ -112,7 +106,7 @@ export function UserMenu({ user, organizations }: { user?: User; organizations: 
                   <DropdownMenuItem
                     key={org.id}
                     className="gap-2 p-2"
-                    onSelect={() => switchOrg(org.id)}
+                    onSelect={() => authService.setActiveOrganization(org.id)}
                   >
                     <span className="truncate">{org.name}</span>
                   </DropdownMenuItem>

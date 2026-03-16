@@ -201,7 +201,7 @@ export const authService: AuthService = {
     if (error) throw new Error(error.message);
     // Refresh the session_data cookie cache so subsequent API requests use the new org.
     await authClient.getSession({ query: { disableCookieCache: true } });
-    if (shellStore.user) shellStore.user.organizationId = orgId;
+    globalThis.location.reload();
   },
 
   async refreshSession() {

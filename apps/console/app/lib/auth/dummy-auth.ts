@@ -141,6 +141,7 @@ export const authService = {
 
   async setActiveOrganization(orgId) {
     if (shellStore.user) shellStore.user.organizationId = orgId;
+    globalThis.location.reload();
   },
 
   async refreshSession() {},
