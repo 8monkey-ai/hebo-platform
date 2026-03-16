@@ -7,6 +7,7 @@ import { api } from "~console/lib/service";
 import type { Route } from "./+types/route";
 import { DangerSettings, createAgentDeleteSchema } from "./danger-zone";
 import { GeneralSettings } from "./general";
+import { MembersSettings } from "./members";
 
 export async function clientAction({ request, params }: Route.ClientActionArgs) {
   const formData = await request.formData();
@@ -36,6 +37,7 @@ export default function Settings() {
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <h1>Agent Settings</h1>
       <GeneralSettings agent={agent} />
+      <MembersSettings />
       <DangerSettings agent={agent} />
     </div>
   );

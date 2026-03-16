@@ -1,6 +1,7 @@
-import { Check, ChevronsUpDown, Plus, Settings } from "lucide-react";
+import { Building2, Check, ChevronsUpDown, Plus, Settings } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useRevalidator } from "react-router";
+import { useSnapshot } from "valtio";
 
 import {
   DropdownMenu,
@@ -18,6 +19,8 @@ import {
 } from "@hebo/shared-ui/components/Sidebar";
 
 import { AgentLogo } from "~console/components/ui/AgentLogo";
+import { authClient } from "~console/lib/auth";
+import { shellStore, type Organization } from "~console/lib/shell";
 
 type Agent = {
   name: string;
@@ -27,11 +30,27 @@ type Agent = {
 export function AgentSelect({
   activeAgent,
   agents,
+  organizations,
 }: {
   activeAgent: Agent | undefined;
   agents: Agent[];
+  organizations: Organization[];
 }) {
   const [selectorOpen, setSelectorOpen] = useState(false);
+  const { activeOrg } = useSnapshot(shellStore);
+  const revalidator = useRevalidator();
+
+  const otherOrgs = organizations.filter((o) => o.id !== activeOrg?.id);
+
+  async function switchOrg(orgId: string) {
+    if (!authClient) return;
+    await authClient.organization.setActive({ organizationId: orgId });
+    const org = organizations.find((o) => o.id === orgId);
+    if (org) shellStore.activeOrg = org;
+    if (shellStore.user) shellStore.user.organizationId = orgId;
+    setSelectorOpen(false);
+    revalidator.revalidate();
+  }
 
   return (
     <SidebarMenu>
@@ -49,6 +68,30 @@ export function AgentSelect({
             }
           />
           <DropdownMenuContent className="min-w-52" align="start" side="bottom" sideOffset={4}>
+            {organizations.length > 1 && (
+              <DropdownMenuGroup>
+                <DropdownMenuLabel className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Building2 size={14} />
+                  Organization
+                </DropdownMenuLabel>
+                {activeOrg && (
+                  <DropdownMenuItem className="gap-2 p-2" disabled>
+                    <span className="truncate font-medium">{activeOrg.name}</span>
+                    <Check size={12} className="ml-auto" aria-hidden="true" />
+                  </DropdownMenuItem>
+                )}
+                {otherOrgs.map((org) => (
+                  <DropdownMenuItem
+                    key={org.id}
+                    className="gap-2 p-2"
+                    onSelect={() => switchOrg(org.id)}
+                  >
+                    <span className="truncate">{org.name}</span>
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+              </DropdownMenuGroup>
+            )}
             <DropdownMenuGroup>
               <div className="flex items-center justify-between py-1">
                 <DropdownMenuLabel className="flex items-center gap-2 text-foreground">

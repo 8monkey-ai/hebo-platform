@@ -37,6 +37,8 @@ const redirectToSignIn = (): false => {
   return false;
 };
 
+export { authClient };
+
 export const authService: AuthService = {
   async ensureSignedIn() {
     const headers = new Headers({ cookie: document.cookie });
@@ -48,8 +50,6 @@ export const authService: AuthService = {
       cookieName: "session_data",
     });
 
-    // FUTURE: This early return caches organizationId and will go stale on org switches.
-    // Revisit when organisation invitations are enabled (re-fetch session or listen for org-switch events).
     if (shellStore.user?.organizationId && hasSessionDataCookie) {
       return true;
     }
@@ -76,6 +76,15 @@ export const authService: AuthService = {
       .join("");
 
     shellStore.user = user;
+
+    // Resume pending invitation acceptance after sign-in redirect
+    const pendingInvitation = sessionStorage.getItem("hebo:pending-invitation");
+    if (pendingInvitation) {
+      sessionStorage.removeItem("hebo:pending-invitation");
+      globalThis.location.replace(`/accept-invitation?id=${encodeURIComponent(pendingInvitation)}`);
+      return false;
+    }
+
     return true;
   },
 
