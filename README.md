@@ -118,7 +118,7 @@ Secret names:
   - Others: `VoyageApiKey`, `GroqApiKey`
 
 - Observability / traces
-  - Greptime: `GreptimeEndpoint`
+  - Greptime: `GreptimeHost` (hostname only, e.g. `my-greptimedb.example.com`)
 
 Note for local development: if SMTP secrets are not configured, the email OTP is logged to the console (look for `>>> OTP:`) so you can sign in without setting up an email provider.
 

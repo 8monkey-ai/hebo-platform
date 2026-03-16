@@ -4,7 +4,7 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
-import { authSecret, isProduction, greptimeEndpoint, normalizedStage } from "./env";
+import { authSecret, isProduction, greptimeHost, normalizedStage } from "./env";
 
 const apiDomain = isProduction ? "api.hebo.ai" : `api.${normalizedStage}.hebo.ai`;
 const apiPort = "3001";
@@ -14,7 +14,7 @@ const heboApi = new sst.aws.Service("HeboApi", {
   architecture: "arm64",
   cpu: isProduction ? "1 vCPU" : "0.25 vCPU",
   memory: isProduction ? "2 GB" : "0.5 GB",
-  link: [heboDatabase, authSecret, greptimeEndpoint],
+  link: [heboDatabase, authSecret, greptimeHost],
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile.api",
