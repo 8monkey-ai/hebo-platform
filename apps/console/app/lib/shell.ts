@@ -12,18 +12,10 @@ export type Models = Record<
   }
 >;
 
-export type Organization = {
-  id: string;
-  name: string;
-  slug: string;
-};
-
 export const shellStore = proxy<{
   user: User | undefined;
   models: Models | undefined;
-  activeOrg: Organization | undefined;
 }>({
   user: undefined,
   models: undefined,
-  activeOrg: undefined,
 });

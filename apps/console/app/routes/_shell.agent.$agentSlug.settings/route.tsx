@@ -1,43 +1,26 @@
-import { parseWithZod } from "@conform-to/zod/v4";
-import { redirect, unstable_useRoute as useRoute } from "react-router";
-
-import { parseError } from "~console/lib/errors";
-import { api } from "~console/lib/service";
+import { unstable_useRoute as useRoute } from "react-router";
 
 import type { Route } from "./+types/route";
-import { DangerSettings, createAgentDeleteSchema } from "./danger-zone";
+import { DangerSettings } from "./danger-zone";
 import { GeneralSettings } from "./general";
-import { MembersSettings } from "./members";
+import { MembersSettings, membersLoader } from "./members";
 
-export async function clientAction({ request, params }: Route.ClientActionArgs) {
-  const formData = await request.formData();
-
-  const submission = parseWithZod(formData, {
-    schema: createAgentDeleteSchema(params.agentSlug),
-  });
-
-  if (submission.status !== "success") return submission.reply();
-
-  let result;
-  try {
-    result = await api.agents({ agentSlug: params.agentSlug }).delete();
-  } catch (error) {
-    return submission.reply({ formErrors: [parseError(error).message] });
-  }
-
-  if (result.error) return submission.reply({ formErrors: [String(result.error?.value)] });
-
-  return redirect("/");
+export async function clientLoader() {
+  return membersLoader();
 }
 
-export default function Settings() {
+export default function Settings({ loaderData }: Route.ComponentProps) {
   const agent = useRoute("routes/_shell.agent.$agentSlug")!.loaderData!.agent;
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <h1>Agent Settings</h1>
       <GeneralSettings agent={agent} />
-      <MembersSettings />
+      <MembersSettings
+        members={loaderData.members}
+        invitations={loaderData.invitations}
+        isOwner={loaderData.isOwner}
+      />
       <DangerSettings agent={agent} />
     </div>
   );

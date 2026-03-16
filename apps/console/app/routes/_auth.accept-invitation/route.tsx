@@ -6,15 +6,7 @@ import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
 
 import { Logo } from "~console/components/ui/Logo";
-import { authClient } from "~console/lib/auth";
-
-const PENDING_INVITATION_KEY = "hebo:pending-invitation";
-
-export function getPendingInvitationId(): string | null {
-  const id = sessionStorage.getItem(PENDING_INVITATION_KEY);
-  if (id) sessionStorage.removeItem(PENDING_INVITATION_KEY);
-  return id;
-}
+import { authService } from "~console/lib/auth";
 
 type Status = "loading" | "success" | "error" | "no-id";
 
@@ -27,28 +19,17 @@ export default function AcceptInvitation() {
   useEffect(() => {
     if (!invitationId) return;
 
-    if (!authClient) {
-      setStatus("error");
-      setErrorMessage("Auth not available.");
-      return;
-    }
-
-    authClient.organization
-      .acceptInvitation({ invitationId })
-      .then(({ error }) => {
-        if (error) {
-          setStatus("error");
-          setErrorMessage(error.message ?? "Failed to accept invitation.");
-        } else {
-          setStatus("success");
-          setTimeout(() => {
-            globalThis.location.replace("/");
-          }, 1500);
-        }
+    authService
+      .acceptInvitation(invitationId)
+      .then(() => {
+        setStatus("success");
+        setTimeout(() => {
+          globalThis.location.replace("/");
+        }, 1500);
       })
-      .catch(() => {
-        sessionStorage.setItem(PENDING_INVITATION_KEY, invitationId);
-        globalThis.location.replace("/signin");
+      .catch((err: Error) => {
+        setStatus("error");
+        setErrorMessage(err.message);
       });
   }, [invitationId]);
 

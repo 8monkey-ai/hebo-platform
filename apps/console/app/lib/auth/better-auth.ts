@@ -6,7 +6,14 @@ import { getSessionCookie } from "better-auth/cookies";
 import { authUrl } from "~console/lib/env";
 import { shellStore } from "~console/lib/shell";
 
-import { DEFAULT_EXPIRATION_MS, type ApiKey, type AuthService, type User } from "./types";
+import {
+  DEFAULT_EXPIRATION_MS,
+  type ApiKey,
+  type AuthService,
+  type OrgInvitation,
+  type OrgMember,
+  type User,
+} from "./types";
 
 const appRedirectPath = "/?after-signin";
 const appRedirectURL = `${globalThis.location.origin}${appRedirectPath}`;
@@ -36,8 +43,6 @@ const redirectToSignIn = (): false => {
   globalThis.location.replace("/signin");
   return false;
 };
-
-export { authClient };
 
 export const authService: AuthService = {
   async ensureSignedIn() {
@@ -157,5 +162,72 @@ export const authService: AuthService = {
   async signOut() {
     await authClient.signOut();
     shellStore.user = undefined;
+  },
+
+  async listOrganizations() {
+    const { data, error } = await authClient.organization.list();
+    if (error) throw new Error(error.message);
+    return (data ?? []).map((o) => ({ id: o.id, name: o.name, slug: o.slug }));
+  },
+
+  async getOrganization() {
+    const { data, error } = await authClient.organization.getFullOrganization();
+    if (error) throw new Error(error.message);
+    if (!data) return { members: [], invitations: [] };
+
+    const seen = new Set<string>();
+    const members = (data.members as unknown as OrgMember[]).filter((m) => {
+      if (seen.has(m.userId)) return false;
+      seen.add(m.userId);
+      return true;
+    });
+
+    const invitations = ((data.invitations ?? []) as unknown as OrgInvitation[]).filter(
+      (i) => i.status === "pending",
+    );
+
+    return { members, invitations };
+  },
+
+  async setActiveOrganization(orgId) {
+    const { error } = await authClient.organization.setActive({ organizationId: orgId });
+    if (error) throw new Error(error.message);
+    // Refresh the session_data cookie cache so subsequent API requests use the new org.
+    await authClient.getSession({ query: { disableCookieCache: true } });
+    if (shellStore.user) shellStore.user.organizationId = orgId;
+  },
+
+  async refreshSession() {
+    await authClient.getSession({ query: { disableCookieCache: true } });
+  },
+
+  async inviteMember(email, role) {
+    const { error } = await authClient.organization.inviteMember({
+      email,
+      role: role as "member" | "admin" | "owner",
+    });
+    if (error) throw new Error(error.message);
+  },
+
+  async removeMember(memberIdOrEmail) {
+    const { error } = await authClient.organization.removeMember({ memberIdOrEmail });
+    if (error) throw new Error(error.message);
+  },
+
+  async cancelInvitation(invitationId) {
+    const { error } = await authClient.organization.cancelInvitation({ invitationId });
+    if (error) throw new Error(error.message);
+  },
+
+  async acceptInvitation(invitationId) {
+    const { error } = await authClient.organization.acceptInvitation({ invitationId });
+    if (error) {
+      if (error.status === 401) {
+        sessionStorage.setItem("hebo:pending-invitation", invitationId);
+        globalThis.location.replace("/signin");
+        return;
+      }
+      throw new Error(error.message ?? "Failed to accept invitation.");
+    }
   },
 };

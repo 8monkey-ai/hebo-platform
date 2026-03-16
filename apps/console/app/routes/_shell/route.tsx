@@ -18,7 +18,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@hebo/shared-ui/components/Tooltip";
 
 import { PageLoader } from "~console/components/ui/PageLoader";
-import { authClient, authService } from "~console/lib/auth";
+import { authService } from "~console/lib/auth";
 import { dontRevalidateOnFormErrors } from "~console/lib/errors";
 import { api, gateway } from "~console/lib/service";
 import { shellStore } from "~console/lib/shell";
@@ -39,21 +39,10 @@ async function authMiddleware() {
 export const clientMiddleware = [authMiddleware];
 
 export async function clientLoader() {
-  const [agents, orgsResult] = await Promise.all([
+  const [agents, organizations] = await Promise.all([
     api.agents.get(),
-    authClient?.organization.list().catch(() => ({ data: [] })),
+    authService.listOrganizations().catch(() => []),
   ]);
-
-  const organizations = (orgsResult?.data ?? []).map((o: { id: string; name: string; slug: string }) => ({
-    id: o.id,
-    name: o.name,
-    slug: o.slug,
-  }));
-
-  const activeOrg = organizations.find(
-    (o: { id: string }) => o.id === shellStore.user?.organizationId,
-  );
-  if (activeOrg) shellStore.activeOrg = activeOrg;
 
   if (!shellStore.models) {
     const models = await gateway.models.get({ query: { endpoints: true } });
@@ -78,7 +67,9 @@ export async function clientLoader() {
 
 export { dontRevalidateOnFormErrors as shouldRevalidate };
 
-export default function ShellLayout({ loaderData: { agents, organizations } }: Route.ComponentProps) {
+export default function ShellLayout({
+  loaderData: { agents, organizations },
+}: Route.ComponentProps) {
   const { user } = useSnapshot(shellStore);
 
   const { agent: activeAgent, branch: activeBranch } =
@@ -110,7 +101,7 @@ export default function ShellLayout({ loaderData: { agents, organizations } }: R
       <Sidebar collapsible="icon">
         <div className="flex h-full flex-col transition-[padding] group-data-[state=collapsed]:px-2">
           <SidebarHeader>
-            <AgentSelect agents={agents} activeAgent={activeAgent} organizations={organizations} />
+            <AgentSelect agents={agents} activeAgent={activeAgent} />
             {activeAgent && <BranchSelect activeAgent={activeAgent} activeBranch={activeBranch} />}
           </SidebarHeader>
           <SidebarContent>
@@ -128,7 +119,7 @@ export default function ShellLayout({ loaderData: { agents, organizations } }: R
               </>
             )}
             <SidebarSeparator className="mx-0" />
-            <UserMenu user={user} />
+            <UserMenu user={user} organizations={organizations} />
           </SidebarFooter>
         </div>
       </Sidebar>

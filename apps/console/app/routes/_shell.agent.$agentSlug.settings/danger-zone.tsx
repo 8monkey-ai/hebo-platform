@@ -1,6 +1,6 @@
 import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
-import { Form, useActionData, useNavigation } from "react-router";
+import { useFetcher } from "react-router";
 import { z } from "zod";
 
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
@@ -42,11 +42,10 @@ export function createAgentDeleteSchema(agentSlug: string) {
 export type AgentDeleteFormValues = z.infer<ReturnType<typeof createAgentDeleteSchema>>;
 
 export function DangerSettings({ agent }: { agent: { slug: string } }) {
-  const navigation = useNavigation();
+  const fetcher = useFetcher();
 
-  const lastResult = useActionData();
   const [form, fields] = useForm<AgentDeleteFormValues>({
-    lastResult: navigation.state === "idle" ? lastResult : undefined,
+    lastResult: fetcher.state === "idle" ? fetcher.data : undefined,
     constraint: getZodConstraint(createAgentDeleteSchema(agent.slug)),
   });
   useFormErrorToast(form.allErrors);
@@ -67,7 +66,7 @@ export function DangerSettings({ agent }: { agent: { slug: string } }) {
             <DialogTrigger render={<Button variant="destructive">Delete agent</Button>} />
 
             <DialogContent>
-              <FormControl form={form} as={Form}>
+              <FormControl form={form} as={fetcher.Form} action="danger">
                 <DialogHeader>
                   <DialogTitle>Delete Agent</DialogTitle>
                   <DialogDescription>This will delete your agent irreversibly.</DialogDescription>
@@ -100,7 +99,7 @@ export function DangerSettings({ agent }: { agent: { slug: string } }) {
                     }
                   />
                   <Button
-                    isLoading={navigation.state !== "idle" && navigation.formData != null}
+                    isLoading={fetcher.state !== "idle" && fetcher.formData != null}
                     type="submit"
                   >
                     Delete

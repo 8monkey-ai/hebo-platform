@@ -67,6 +67,76 @@ Minimise Tailwind classes. Avoid duplicating utilities already present on a pare
 
 Keep the DOM flat. Minimise nested `<div>` wrappers — flatten the hierarchy as much as possible to reduce complexity and improve readability.
 
+### Forms with Conform
+
+Always wrap Conform-powered forms in `FormControl` (from `@hebo/shared-ui/components/Field`) rather than a plain `<form>`. `FormControl` provides the required `FormProvider` context that `Field`, `FieldLabel`, `FieldControl`, and `FieldError` depend on. Use `as={Form}` for React Router actions or `as={fetcher.Form}` for fetcher-based submissions.
+
+```tsx
+<FormControl form={form} as={Form}>
+  <input type="hidden" name="intent" value="create" />
+  <Field name={fields.email.name}>
+    <FieldLabel>Email</FieldLabel>
+    <FieldControl><Input /></FieldControl>
+    <FieldError />
+  </Field>
+  <Button type="submit" isLoading={navigation.state !== "idle"}>Submit</Button>
+</FormControl>
+```
+
+### Multiple Actions in One Route
+
+Use an `intent` hidden input to route multiple form submissions through a single `clientAction`. For primary forms (invite, create) use `Form` + `useNavigation`; for inline row actions (delete, revoke) use `useFetcher` so they don't affect the page navigation state.
+
+```tsx
+// clientAction
+const intent = formData.get("intent");
+if (intent === "invite") { ... return { intent, submission: submission.reply() }; }
+if (intent === "remove") { ... return null; }
+// fall through to default action
+```
+
+```tsx
+// Inline fetcher button
+function RemoveButton({ id }: { id: string }) {
+  const fetcher = useFetcher();
+  return (
+    <fetcher.Form method="post">
+      <input type="hidden" name="intent" value="remove" />
+      <input type="hidden" name="id" value={id} />
+      <Button type="submit" isLoading={fetcher.state !== "idle"}>Remove</Button>
+    </fetcher.Form>
+  );
+}
+```
+
+### Section Loaders/Actions (same-URL code splitting)
+
+For pages with multiple independent sections (e.g. settings), keep the same URL but split loader and action logic into section files. Each section file exports its own loader and action functions; `route.tsx` is a thin composer that calls them.
+
+Section functions accept `FormData` (not `Request`) so the caller can read formData once and route by intent without consuming the body twice.
+
+```ts
+// members.tsx
+export async function membersLoader() { ... }
+export async function membersAction(formData: FormData) { ... }
+
+// danger-zone.tsx
+export async function dangerAction(formData: FormData, params: { agentSlug: string }) { ... }
+
+// route.tsx
+export async function clientLoader() {
+  return membersLoader();
+}
+export async function clientAction({ request, params }: Route.ClientActionArgs) {
+  const formData = await request.formData();
+  const intent = formData.get("intent");
+  if (intent === "invite" || intent === "remove" || intent === "revoke") {
+    return membersAction(formData);
+  }
+  return dangerAction(formData, params);
+}
+```
+
 ### ShadCN Components
 
 Use existing ShadCN components from `packages/shared-ui` where applicable. If a needed component doesn't exist yet, add it to the project using the `shadcn` CLI before building a custom one.
@@ -95,6 +165,10 @@ If priorities conflict, apply this order:
 ## Testing Guidelines
 
 Each workspace wires its own harness (Vitest or Bun); use the scripts rather than calling binaries directly. Add tests beside the feature (`conversation.test.ts`) and keep mocks in `__mocks__/` or MSW (`apps/console/app/mocks`). Run `bun run test` before submitting and note deliberate omissions in the PR.
+
+## Keeping These Guidelines Current
+
+After implementing any feature or fixing a non-trivial bug, update this file if the work produced a reusable architectural pattern, a technical design decision, or a coding guideline others should follow. Add it under the most relevant section, or create a new section if needed. Keep entries concise and include a minimal code example where it aids clarity.
 
 ## Commit & Pull Request Guidelines
 

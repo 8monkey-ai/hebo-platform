@@ -15,6 +15,51 @@ const apiKeys = new Collection({
   }),
 });
 
+const members = new Collection({
+  schema: z.object({
+    id: z.string().default(crypto.randomUUID()),
+    userId: z.string(),
+    role: z.string(),
+    createdAt: z.string(),
+    userName: z.string(),
+    userEmail: z.string(),
+  }),
+});
+
+const invitations = new Collection({
+  schema: z.object({
+    id: z.string().default(crypto.randomUUID()),
+    email: z.string(),
+    role: z.string(),
+    expiresAt: z.string(),
+    status: z.string(),
+  }),
+});
+
+members.create({
+  id: "member-1",
+  userId: "dummy-user-id",
+  role: "owner",
+  createdAt: new Date().toISOString(),
+  userName: "Dummy User",
+  userEmail: "dummy@user.com",
+});
+members.create({
+  id: "member-2",
+  userId: "dummy-user-id-2",
+  role: "member",
+  createdAt: new Date().toISOString(),
+  userName: "Jane Smith",
+  userEmail: "jane@example.com",
+});
+invitations.create({
+  id: "invite-1",
+  email: "pending@example.com",
+  role: "member",
+  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  status: "pending",
+});
+
 export const authService = {
   async ensureSignedIn() {
     if (shellStore.user?.organizationId) return true;
@@ -62,4 +107,55 @@ export const authService = {
   async signOut() {
     shellStore.user = undefined;
   },
+
+  async listOrganizations() {
+    return [
+      { id: "dummy-org-id", name: "Dummy Org", slug: "dummy-org" },
+      { id: "dummy-org-id-2", name: "Second Org", slug: "second-org" },
+    ];
+  },
+
+  async getOrganization() {
+    return {
+      members: members.findMany().map((m) => ({
+        id: m.id,
+        userId: m.userId,
+        role: m.role,
+        createdAt: m.createdAt,
+        user: { name: m.userName, email: m.userEmail },
+      })),
+      invitations: invitations.findMany().map((i) => ({
+        id: i.id,
+        email: i.email,
+        role: i.role,
+        expiresAt: i.expiresAt,
+        status: i.status,
+      })),
+    };
+  },
+
+  async setActiveOrganization(orgId) {
+    if (shellStore.user) shellStore.user.organizationId = orgId;
+  },
+
+  async refreshSession() {},
+
+  async inviteMember(email, role) {
+    invitations.create({
+      email,
+      role,
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      status: "pending",
+    });
+  },
+
+  async removeMember(memberIdOrEmail) {
+    members.delete((q) => q.where({ userEmail: memberIdOrEmail }));
+  },
+
+  async cancelInvitation(invitationId) {
+    invitations.delete((q) => q.where({ id: invitationId }));
+  },
+
+  async acceptInvitation() {},
 } satisfies AuthService;
