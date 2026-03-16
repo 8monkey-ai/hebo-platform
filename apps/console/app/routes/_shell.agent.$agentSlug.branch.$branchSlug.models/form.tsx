@@ -75,9 +75,7 @@ export default function ModelsConfigForm({
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
   useEffect(() => {
     if (fetcher.state === "idle" && form.status === "success") {
-      if (!form.dirty) {
-        setExpandedCardId(null);
-      }
+      setExpandedCardId(null);
     }
     // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);

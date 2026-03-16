@@ -21,7 +21,7 @@ const secrets = await loadProviderSecrets();
 const withTier = (modelId: string) => ({
   additionalProperties: {
     free: secrets.freeModelIds.has(modelId),
-    requiresByok: secrets.enforceByok,
+    requiresByok: secrets.enforceByok && !secrets.freeModelIds.has(modelId),
   },
 });
 
