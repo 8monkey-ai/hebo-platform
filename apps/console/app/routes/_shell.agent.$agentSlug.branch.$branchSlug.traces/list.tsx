@@ -1,6 +1,6 @@
 import { Calendar, Filter, RefreshCw, X } from "lucide-react";
 import { useState } from "react";
-import { useLocation, useSearchParams } from "react-router";
+import { useLocation } from "react-router";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -207,19 +207,15 @@ export function TraceList({
 }
 
 function RefreshButton({ loading }: { loading: boolean }) {
-  const [, setSearchParams] = useSearchParams();
-  const { preset: activePreset } = useTraceSearchParams();
+  const { preset: activePreset, updateParams } = useTraceSearchParams();
 
   function handleRefresh() {
-    setSearchParams((prev) => {
-      const next = new URLSearchParams(prev);
+    updateParams((sp) => {
       if (activePreset !== "custom") {
         const { from, to } = timeRangeToParams(activePreset);
-        next.set("from", from);
-        next.set("to", to);
+        sp.set("from", from);
+        sp.set("to", to);
       }
-      next.delete("page");
-      return next;
     });
   }
 
@@ -237,31 +233,22 @@ function RefreshButton({ loading }: { loading: boolean }) {
 }
 
 function TimePresetControl() {
-  const [, setSearchParams] = useSearchParams();
-  const { preset: activePreset, effectiveFrom, effectiveTo } = useTraceSearchParams();
+  const { preset: activePreset, effectiveFrom, effectiveTo, updateParams } = useTraceSearchParams();
 
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
   const [customOpen, setCustomOpen] = useState(false);
 
   function applyRange(preset: (typeof traceTimePresets)[number], from?: string, to?: string) {
-    let range;
+    const range =
+      preset === "custom" && from && to
+        ? { from: new Date(from).toISOString(), to: new Date(to).toISOString() }
+        : timeRangeToParams(preset);
 
-    if (preset === "custom" && from && to) {
-      range = {
-        from: new Date(from).toISOString(),
-        to: new Date(to).toISOString(),
-      };
-    } else {
-      range = timeRangeToParams(preset);
-    }
-
-    setSearchParams((sp) => {
+    updateParams((sp) => {
       sp.set("preset", preset);
       sp.set("from", range.from);
       sp.set("to", range.to);
-      sp.delete("page");
-      return sp;
     });
   }
 
@@ -359,8 +346,7 @@ function TimePresetControl() {
 }
 
 function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
-  const [, setSearchParams] = useSearchParams();
-  const { metadata } = useTraceSearchParams();
+  const { metadata, updateParams } = useTraceSearchParams();
   const activeFilterCount = Object.keys(metadata).length;
 
   const [filterKey, setFilterKey] = useState("");
@@ -368,20 +354,12 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   function refreshFilter(key: string, value: string | null) {
-    setSearchParams((sp) => {
+    updateParams((sp) => {
       const meta = { ...metadata };
-
       if (value === null) delete meta[key];
       else meta[key] = value;
-
-      if (Object.keys(meta).length > 0) {
-        sp.set("metadata", JSON.stringify(meta));
-      } else {
-        sp.delete("metadata");
-      }
-
-      sp.delete("page");
-      return sp;
+      if (Object.keys(meta).length > 0) sp.set("metadata", JSON.stringify(meta));
+      else sp.delete("metadata");
     });
   }
 

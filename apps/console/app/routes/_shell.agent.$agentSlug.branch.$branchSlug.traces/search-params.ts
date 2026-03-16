@@ -43,6 +43,15 @@ export function parseTraceSearchParams(searchParams: URLSearchParams) {
 }
 
 export function useTraceSearchParams() {
-  const [searchParams] = useSearchParams();
-  return parseTraceSearchParams(searchParams);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  function updateParams(updater: (sp: URLSearchParams) => void) {
+    setSearchParams((sp) => {
+      updater(sp);
+      sp.delete("page");
+      return sp;
+    });
+  }
+
+  return { ...parseTraceSearchParams(searchParams), updateParams };
 }
