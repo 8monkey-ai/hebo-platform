@@ -255,8 +255,8 @@ function TimePresetControl() {
           type="single"
           size="sm"
           value={activePreset === "custom" ? "" : activePreset}
-          onValueChange={(value) =>
-            value && applyRange(value[0] as (typeof traceTimePresets)[number])
+          onValueChange={(value: string) =>
+            value && applyRange(value as (typeof traceTimePresets)[number])
           }
         >
           {traceTimePresets

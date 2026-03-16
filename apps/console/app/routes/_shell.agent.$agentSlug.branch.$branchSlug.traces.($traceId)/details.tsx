@@ -24,7 +24,6 @@ import {
   formatDuration,
   formatTimestampFull,
   formatTokenCount,
-  getTraceStatusBadgeProps,
 } from "../_shell.agent.$agentSlug.branch.$branchSlug.traces/utils";
 
 const COLLAPSE_TOGGLE_CLASS_NAME =
@@ -62,7 +61,6 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
     (count, message) => count + extractMessageParts(message).toolCalls.length,
     0,
   );
-  const statusBadge = getTraceStatusBadgeProps(trace.status);
 
   return (
     <DetailShell>
@@ -83,9 +81,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
             </div>
             <div className="flex shrink-0 items-center gap-2">
               <Badge variant="secondary">{formatDuration(trace.durationMs)}</Badge>
-              <Badge variant={statusBadge.variant} className={statusBadge.className}>
-                {trace.status}
-              </Badge>
+              <TraceStatusBadge status={trace.status} />
             </div>
           </div>
 
@@ -136,6 +132,20 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
       </Tabs>
     </DetailShell>
   );
+}
+
+function TraceStatusBadge({ status }: { status: TraceDetailData["status"] }) {
+  if (status === "ok")
+    return (
+      <Badge
+        variant="secondary"
+        className="border-transparent bg-green-600 text-white dark:bg-green-500 [&_a:hover]:bg-green-700 dark:[&_a:hover]:bg-green-400"
+      >
+        {status}
+      </Badge>
+    );
+  if (status === "error") return <Badge variant="destructive">{status}</Badge>;
+  return <Badge variant="outline">{status}</Badge>;
 }
 
 function DetailShell({ children, className }: { children: React.ReactNode; className?: string }) {

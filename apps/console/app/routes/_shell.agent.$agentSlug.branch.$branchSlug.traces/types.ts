@@ -8,7 +8,7 @@ type TraceListResponse = Treaty.Data<TracesRoute["get"]>;
 
 export type TraceListData = TraceListResponse["data"];
 export type TraceListItem = TraceListData[number];
-export type TraceDetailData = Treaty.Data<TraceDetailRoute["get"]>;
+export type TraceDetailData = Treaty.Data<TraceDetailRoute["get"]>[number];
 export type TraceStatus = TraceListItem["status"];
 
 export type TraceMessage =
