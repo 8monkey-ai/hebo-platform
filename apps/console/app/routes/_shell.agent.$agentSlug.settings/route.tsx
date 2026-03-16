@@ -10,8 +10,10 @@ import { MembersSettings } from "./members";
 
 export async function clientLoader() {
   const { members, invitations } = await authService.getOrganization();
-  const isOwner = members.find((m) => m.userId === shellStore.user?.userId)?.role === "owner";
-  return { members, invitations, isOwner };
+  const currentRole = members.find((m) => m.userId === shellStore.user?.userId)?.role;
+  const isOwner = currentRole === "owner";
+  const canManage = isOwner || currentRole === "admin";
+  return { members, invitations, isOwner, canManage };
 }
 
 export default function Settings({ loaderData }: Route.ComponentProps) {
@@ -25,6 +27,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
         members={loaderData.members}
         invitations={loaderData.invitations}
         isOwner={loaderData.isOwner}
+        canManage={loaderData.canManage}
       />
       <DangerSettings agent={agent} />
     </div>

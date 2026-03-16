@@ -1,6 +1,5 @@
 import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { useEffect } from "react";
-import { useNavigate } from "react-router";
 
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -25,8 +24,6 @@ export default function AcceptInvitation({
 }: {
   loaderData: Awaited<ReturnType<typeof clientLoader>>;
 }) {
-  const navigate = useNavigate();
-
   useEffect(() => {
     if (data.status === "success") {
       const timer = setTimeout(() => {
@@ -34,7 +31,7 @@ export default function AcceptInvitation({
       }, 1500);
       return () => clearTimeout(timer);
     }
-  }, [data.status, navigate]);
+  }, [data.status]);
 
   return (
     <div className="mx-auto flex min-h-dvh w-xs flex-col items-center justify-center gap-6">
