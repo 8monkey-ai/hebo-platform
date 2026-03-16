@@ -164,18 +164,21 @@ function ModelCard(props: {
   const isByokRequired = selectedModel?.requiresByok === true;
   const availableProviders = providers.filter((p) => selectedModel?.providers?.includes(p.slug));
 
-  const [advancedOpen, setAdvancedOpen] = useState(isByokRequired);
+  // BUG: auto-setting state for BYOK models renders a phantom routing input via
+  // keepMounted, causing a Conform form.dirty false positive that triggers the
+  // reset → submit → auto-close cascade when opening any card.
+  // const [advancedOpen, setAdvancedOpen] = useState(isByokRequired);
+  const [advancedOpen, setAdvancedOpen] = useState(false);
   const [routingEnabled, setRoutingEnabled] = useState(
-    isByokRequired || Boolean(model.getFieldset().routing.value),
+    // isByokRequired || Boolean(model.getFieldset().routing.value),
+    Boolean(model.getFieldset().routing.value),
   );
-
-  // Auto-expand advanced and enable BYOK when a non-free model is selected
-  useEffect(() => {
-    if (isByokRequired) {
-      setAdvancedOpen(true);
-      setRoutingEnabled(true);
-    }
-  }, [isByokRequired]);
+  // useEffect(() => {
+  //   if (isByokRequired) {
+  //     setAdvancedOpen(true);
+  //     setRoutingEnabled(true);
+  //   }
+  // }, [isByokRequired]);
 
   const aliasPath = [agentSlug, branchSlug, model.getFieldset().alias.value || "alias"].join("/");
 
@@ -285,7 +288,7 @@ function ModelCard(props: {
                         placeholder={
                           availableProviders.length > 0
                             ? "Select provider"
-                            : "No supported providers configured"
+                            : "No providers configured"
                         }
                         aria-label="Select Provider"
                       />
