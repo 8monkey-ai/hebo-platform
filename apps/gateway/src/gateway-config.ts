@@ -1,6 +1,7 @@
 import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
 import type { ChatCompletionsBody } from "@hebo-ai/gateway/endpoints/chat-completions";
-import { claudeOpus46 } from "@hebo-ai/gateway/models/anthropic";
+import { nova2MultimodalEmbeddings } from "@hebo-ai/gateway/models/amazon";
+import { claudeHaiku45, claudeOpus46, claudeSonnet46 } from "@hebo-ai/gateway/models/anthropic";
 import { gemini } from "@hebo-ai/gateway/models/google";
 import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
 import { voyage35 } from "@hebo-ai/gateway/models/voyage";
@@ -56,6 +57,9 @@ export const gw = gateway({
       preset({ providers: ["vertex"], ...withTier("google/gemini-2.5-pro") }),
     ),
     claudeOpus46({ providers: ["bedrock"], ...withTier("anthropic/claude-opus-4-6") }),
+    claudeSonnet46({ providers: ["bedrock"], ...withTier("anthropic/claude-sonnet-4.6") }),
+    claudeHaiku45({ providers: ["bedrock"], ...withTier("anthropic/claude-haiku-4.5") }),
+    nova2MultimodalEmbeddings({ providers: ["bedrock"], ...withTier("amazon/nova-2-multimodal-embeddings") }),
     voyage35({ providers: ["voyage"], ...withTier("voyage/voyage-3.5") }),
   ),
 
