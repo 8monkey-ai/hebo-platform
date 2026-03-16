@@ -11,6 +11,7 @@ import {
 
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
+// FUTURE: cache this
 async function getMetadataColumnNames(greptimeDb: GreptimeDb) {
   return (await greptimeDb.unsafe(
     `SELECT column_name
