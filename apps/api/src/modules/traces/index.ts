@@ -64,9 +64,10 @@ export const spansModule = new Elysia({
         params.branchSlug,
         params.traceId,
       );
+      if (spans.length === 0) return status(404, null);
       return status(200, spans);
     },
     {
-      response: { 200: t.Array(SpanDetail) },
+      response: { 200: t.Array(SpanDetail), 404: t.Null() },
     },
   );
