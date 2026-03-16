@@ -68,16 +68,18 @@ export function MembersSettings({ members, invitations, isOwner }: MembersSettin
               .toUpperCase();
             return (
               <TableRow key={member.id}>
-                <TableCell className="flex items-center gap-3">
-                  <Avatar className="size-7">
-                    <AvatarImage alt={member.user.name || member.user.email} />
-                    <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-col leading-tight">
-                    <span className="font-medium">{member.user.name || member.user.email}</span>
-                    {member.user.name && (
-                      <span className="text-xs text-muted-foreground">{member.user.email}</span>
-                    )}
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="size-7">
+                      <AvatarImage alt={member.user.name || member.user.email} />
+                      <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col leading-tight">
+                      <span className="font-medium">{member.user.name || member.user.email}</span>
+                      {member.user.name && (
+                        <span className="text-xs text-muted-foreground">{member.user.email}</span>
+                      )}
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -98,17 +100,19 @@ export function MembersSettings({ members, invitations, isOwner }: MembersSettin
             const initials = inv.email[0].toUpperCase();
             return (
               <TableRow key={inv.id} className="text-muted-foreground">
-                <TableCell className="flex items-center gap-3">
-                  <Avatar className="size-7">
-                    <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-                  </Avatar>
-                  <span>{inv.email}</span>
+                <TableCell>
+                  <div className="flex items-center gap-3">
+                    <Avatar className="size-7">
+                      <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+                    </Avatar>
+                    <span>{inv.email}</span>
+                  </div>
                 </TableCell>
-                <TableCell className="flex items-center gap-2">
-                  <Badge variant="secondary" className="capitalize">
-                    {inv.role}
-                  </Badge>
-                  <Badge variant="outline">Invited</Badge>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="capitalize">{inv.role}</Badge>
+                    <Badge variant="outline">Invited</Badge>
+                  </div>
                 </TableCell>
                 <TableCell>expires {new Date(inv.expiresAt).toLocaleDateString()}</TableCell>
                 {isOwner && (
