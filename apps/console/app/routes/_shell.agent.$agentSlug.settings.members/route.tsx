@@ -2,7 +2,7 @@ import { parseWithZod } from "@conform-to/zod/v4";
 
 import { authService } from "~console/lib/auth";
 import { parseError } from "~console/lib/errors";
-import { inviteSchema } from "~console/routes/_shell.agent.$agentSlug.settings/invite-schema";
+import { inviteSchema } from "./invite-schema";
 
 export async function clientAction({ request }: { request: Request }) {
   const formData = await request.formData();
@@ -25,7 +25,7 @@ export async function clientAction({ request }: { request: Request }) {
     try {
       await authService.removeMember(email);
     } catch (error) {
-      return { error: error instanceof Error ? error.message : "Failed to remove member" };
+      return { error: parseError(error).message };
     }
     return null;
   }
@@ -36,7 +36,7 @@ export async function clientAction({ request }: { request: Request }) {
     try {
       await authService.cancelInvitation(invitationId);
     } catch (error) {
-      return { error: error instanceof Error ? error.message : "Failed to revoke invitation" };
+      return { error: parseError(error).message };
     }
     return null;
   }

@@ -7,6 +7,8 @@ import { Button } from "@hebo/shared-ui/components/Button";
 import { Logo } from "~console/components/ui/Logo";
 import { authService } from "~console/lib/auth";
 
+import type { Route } from "./+types/route";
+
 export async function clientLoader({ request }: { request: Request }) {
   const invitationId = new URL(request.url).searchParams.get("id");
   if (!invitationId) return { status: "no-id" as const };
@@ -19,11 +21,7 @@ export async function clientLoader({ request }: { request: Request }) {
   }
 }
 
-export default function AcceptInvitation({
-  loaderData: data,
-}: {
-  loaderData: Awaited<ReturnType<typeof clientLoader>>;
-}) {
+export default function AcceptInvitation({ loaderData: data }: Route.ComponentProps) {
   useEffect(() => {
     if (data.status === "success") {
       const timer = setTimeout(() => {

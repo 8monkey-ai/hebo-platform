@@ -1,3 +1,4 @@
+import { HTTPError } from "ky";
 import { XCircle, SquareChevronRight } from "lucide-react";
 import { useRef, useEffect } from "react";
 import { Outlet, unstable_useRoute as useRoute, useLocation } from "react-router";
@@ -39,7 +40,23 @@ async function authMiddleware() {
 export const clientMiddleware = [authMiddleware];
 
 export async function clientLoader() {
-  const agents = await api.agents.get();
+  let agents;
+  try {
+    agents = await api.agents.get();
+  } catch (error) {
+    // When a user is removed from an org, the cached session still references it.
+    // After token expiry the API returns a 403 "not member" error. Recover by
+    // clearing the stale session and re-running ensureSignedIn so the user gets
+    // fresh org data or is redirected to sign-in.
+    if (error instanceof HTTPError && error.response.status === 403) {
+      shellStore.user = undefined;
+      const signedIn = await authService.ensureSignedIn();
+      if (!signedIn) return { agents: [] };
+      agents = await api.agents.get();
+    } else {
+      throw error;
+    }
+  }
 
   if (!shellStore.models) {
     const models = await gateway.models.get({ query: { endpoints: true } });

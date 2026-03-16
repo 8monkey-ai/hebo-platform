@@ -39,7 +39,7 @@ import {
 import type { OrgInvitation, OrgMember } from "~console/lib/auth/types";
 import { useFormErrorToast } from "~console/lib/errors";
 
-import { inviteSchema } from "./invite-schema";
+import { inviteSchema } from "~console/routes/_shell.agent.$agentSlug.settings.members/invite-schema";
 
 type MembersSettingsProps = {
   members: OrgMember[];
