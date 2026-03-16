@@ -8,7 +8,7 @@ export type Models = Record<
     name: string;
     modality: string;
     providers: readonly string[];
-    free?: boolean;
+    free: boolean;
   }
 >;
 
