@@ -114,13 +114,6 @@ export const authService = {
     shellStore.organizations = [];
   },
 
-  async listOrganizations() {
-    return [
-      { id: "dummy-org-id", name: "Dummy Org", slug: "dummy-org" },
-      { id: "dummy-org-id-2", name: "Second Org", slug: "second-org" },
-    ];
-  },
-
   async getOrganization() {
     return {
       members: members.findMany().map((m) => ({
@@ -145,8 +138,6 @@ export const authService = {
     globalThis.localStorage?.setItem("hebo:dummy-org-id", orgId);
     globalThis.location.reload();
   },
-
-  async refreshSession() {},
 
   async inviteMember(email, role) {
     invitations.create({

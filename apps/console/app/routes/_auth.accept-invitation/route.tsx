@@ -1,6 +1,6 @@
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { useLoaderData, useNavigate } from "react-router";
+import { AlertCircle, CheckCircle2 } from "lucide-react";
 import { useEffect } from "react";
+import { useLoaderData, useNavigate } from "react-router";
 
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -8,22 +8,20 @@ import { Button } from "@hebo/shared-ui/components/Button";
 import { Logo } from "~console/components/ui/Logo";
 import { authService } from "~console/lib/auth";
 
-type LoaderResult = { status: "success" } | { status: "error"; message: string } | { status: "no-id" };
-
 export async function clientLoader({ request }: { request: Request }) {
   const invitationId = new URL(request.url).searchParams.get("id");
-  if (!invitationId) return { status: "no-id" } satisfies LoaderResult;
+  if (!invitationId) return { status: "no-id" as const };
 
   try {
     await authService.acceptInvitation(invitationId);
-    return { status: "success" } satisfies LoaderResult;
+    return { status: "success" as const };
   } catch (err) {
-    return { status: "error", message: (err as Error).message } satisfies LoaderResult;
+    return { status: "error" as const, message: (err as Error).message };
   }
 }
 
 export default function AcceptInvitation() {
-  const data = useLoaderData<LoaderResult>();
+  const data = useLoaderData<typeof clientLoader>();
   const navigate = useNavigate();
 
   useEffect(() => {

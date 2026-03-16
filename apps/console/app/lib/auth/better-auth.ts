@@ -171,12 +171,6 @@ export const authService: AuthService = {
     shellStore.organizations = [];
   },
 
-  async listOrganizations() {
-    const { data, error } = await authClient.organization.list();
-    if (error) throw new Error(error.message);
-    return (data ?? []).map((o) => ({ id: o.id, name: o.name, slug: o.slug }));
-  },
-
   async getOrganization() {
     const { data, error } = await authClient.organization.getFullOrganization();
     if (error) throw new Error(error.message);
@@ -202,10 +196,6 @@ export const authService: AuthService = {
     // Refresh the session_data cookie cache so subsequent API requests use the new org.
     await authClient.getSession({ query: { disableCookieCache: true } });
     globalThis.location.reload();
-  },
-
-  async refreshSession() {
-    await authClient.getSession({ query: { disableCookieCache: true } });
   },
 
   async inviteMember(email, role) {

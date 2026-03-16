@@ -8,10 +8,8 @@ export interface AuthService {
   signInWithMagicLink(code: string, email: string): Promise<void>;
   signOut(): Promise<void>;
   // Organization
-  listOrganizations(): Promise<Organization[]>;
   getOrganization(): Promise<{ members: OrgMember[]; invitations: OrgInvitation[] }>;
   setActiveOrganization(orgId: string): Promise<void>;
-  refreshSession(): Promise<void>;
   inviteMember(email: string, role: string): Promise<void>;
   removeMember(memberIdOrEmail: string): Promise<void>;
   cancelInvitation(invitationId: string): Promise<void>;
