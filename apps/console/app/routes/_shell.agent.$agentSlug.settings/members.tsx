@@ -173,8 +173,13 @@ export function MembersSettings({ members, invitations, isOwner }: MembersSettin
 
 function RemoveMemberButton({ email }: { email: string }) {
   const fetcher = useFetcher();
+  const handleSubmit = (e: React.FormEvent) => {
+    if (!window.confirm(`Remove ${email} from the organization?`)) {
+      e.preventDefault();
+    }
+  };
   return (
-    <fetcher.Form method="post" action="members">
+    <fetcher.Form method="post" action="members" onSubmit={handleSubmit}>
       <input type="hidden" name="intent" value="remove" />
       <input type="hidden" name="email" value={email} />
       <Button
@@ -192,8 +197,13 @@ function RemoveMemberButton({ email }: { email: string }) {
 
 function RevokeInvitationButton({ invitationId }: { invitationId: string }) {
   const fetcher = useFetcher();
+  const handleSubmit = (e: React.FormEvent) => {
+    if (!window.confirm("Revoke this invitation?")) {
+      e.preventDefault();
+    }
+  };
   return (
-    <fetcher.Form method="post" action="members">
+    <fetcher.Form method="post" action="members" onSubmit={handleSubmit}>
       <input type="hidden" name="intent" value="revoke" />
       <input type="hidden" name="invitationId" value={invitationId} />
       <Button
