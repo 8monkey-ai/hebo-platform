@@ -15,6 +15,14 @@ const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
 // FUTURE: cache this
 async function getMetadataColumnNames(greptimeDb: GreptimeDb) {
+  // Workaround: values inlined instead of using $1 params due to GreptimeDB cluster-mode bug.
+  // See: https://github.com/GreptimeTeam/greptimedb/issues/7819
+  // Parametrized version to restore once fixed upstream:
+  //   greptimeDb.unsafe(
+  //     `SELECT column_name FROM information_schema.columns
+  //      WHERE table_name = 'opentelemetry_traces' AND column_name LIKE $1`,
+  //     [`${METADATA_PREFIX}%`],
+  //   )
   return (await greptimeDb.unsafe(
     `SELECT column_name
      FROM information_schema.columns
@@ -48,6 +56,17 @@ export async function listTraces(
   const metadataSelectSql = metadataColumns
     .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
     .join(",\n      ");
+
+  // Parametrized version to restore once https://github.com/GreptimeTeam/greptimedb/issues/7819 is fixed:
+  //   const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
+  //   function addParam(value: unknown) { params.push(value); return `$${params.length}`; }
+  //   metaFilterSql: ... `= ${addParam(value)}`
+  //   WHERE ... "span_attributes.hebo.agent.slug" = $1
+  //     AND "span_attributes.hebo.branch.slug" = $2
+  //     AND "span_attributes.hebo.organization.id" = $3
+  //     AND "timestamp" >= $4 AND "timestamp" <= $5
+  //   LIMIT ${addParam(pageSize + 1)} OFFSET ${addParam((page - 1) * pageSize)}
+  //   greptimeDb.unsafe(queryText, params)
 
   const queryText = `
     SELECT
@@ -118,6 +137,14 @@ export async function getSpans(
   const metadataSelectSql = metadataColumns
     .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
     .join(",\n      ");
+
+  // Parametrized version to restore once https://github.com/GreptimeTeam/greptimedb/issues/7819 is fixed:
+  //   const params = [traceId, organizationId, agentSlug, branchSlug];
+  //   WHERE "trace_id" = $1
+  //     AND "span_attributes.hebo.organization.id" = $2
+  //     AND "span_attributes.hebo.agent.slug" = $3
+  //     AND "span_attributes.hebo.branch.slug" = $4
+  //   greptimeDb.unsafe(queryText, params)
 
   const queryText = `
     SELECT
