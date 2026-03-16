@@ -13,7 +13,7 @@ const SUPPORTED_MODELS = [
       },
     ],
     modality: "chat",
-    monthlyFreeTokens: 100_000_000,
+    free: true,
   },
   {
     type: "voyage/voyage-3.5",
@@ -26,7 +26,7 @@ const SUPPORTED_MODELS = [
       },
     ],
     modality: "embeddings",
-    monthlyFreeTokens: 0,
+    free: false,
   },
 ] as const;
 
@@ -45,7 +45,7 @@ export const modelHandlers = [
             created: model.created,
             owned_by: model.owner,
             architecture: { output_modalities: [model.modality] },
-            pricing: { monthly_free_tokens: model.monthlyFreeTokens ?? 0 },
+            free: model.free,
           },
           includeEndpoints && {
             endpoints: Object.keys(model.providers[0]).map((tag) => ({ tag })),
