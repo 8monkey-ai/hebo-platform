@@ -161,10 +161,8 @@ function ModelCard(props: {
   const { models: supportedModels } = useSnapshot(shellStore);
   const selectedModelType = model.getFieldset().type.value ?? "";
   const selectedModel = supportedModels?.[selectedModelType];
-  const isByokRequired = selectedModel?.free === false;
-  const availableProviders = providers.filter((p) =>
-    selectedModel?.providers?.includes(p.slug),
-  );
+  const isByokRequired = selectedModel?.requiresByok === true;
+  const availableProviders = providers.filter((p) => selectedModel?.providers?.includes(p.slug));
 
   const [advancedOpen, setAdvancedOpen] = useState(isByokRequired);
   const [routingEnabled, setRoutingEnabled] = useState(

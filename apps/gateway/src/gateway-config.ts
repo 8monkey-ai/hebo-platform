@@ -9,7 +9,7 @@ import { trace } from "@opentelemetry/api";
 import { getOtelLogger } from "@hebo/shared-api/lib/otel";
 import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino-adapter";
 
-import { resolveModelId, createResolveProvider } from "./services/model-resolver";
+import { resolveModelId, resolveProvider } from "./services/model-resolver";
 import { createProvider, loadProviderSecrets } from "./services/provider-factory";
 
 instrumentFetch("full");
@@ -18,7 +18,10 @@ export const basePath = "/v1";
 const secrets = await loadProviderSecrets();
 
 const withTier = (modelId: string) => ({
-  additionalProperties: { free: secrets.freeModelIds.has(modelId) },
+  additionalProperties: {
+    free: secrets.freeModelIds.has(modelId),
+    requiresByok: secrets.enforceByok,
+  },
 });
 
 export const gw = gateway({
@@ -57,7 +60,7 @@ export const gw = gateway({
 
   hooks: {
     resolveModelId,
-    resolveProvider: createResolveProvider({ enforceByok: secrets.enforceByok }),
+    resolveProvider,
   },
   logger: createPinoOtelAdapter(getOtelLogger("hebo-gateway", 1)), // trace severity
   telemetry: {

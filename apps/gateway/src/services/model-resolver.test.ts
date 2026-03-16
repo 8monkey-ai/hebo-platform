@@ -2,12 +2,13 @@ import { describe, expect, it } from "bun:test";
 
 import { GatewayError } from "@hebo-ai/gateway";
 
-import { createResolveProvider } from "./model-resolver";
+import { resolveProvider } from "./model-resolver";
 
 // Minimal mock for ResolveProviderHookContext
 function makeCtx(overrides: {
   modelId: string;
   free?: boolean;
+  requiresByok?: boolean;
   customProviderSlug?: string;
   organizationId?: string;
 }) {
@@ -16,7 +17,7 @@ function makeCtx(overrides: {
     state: {
       dbClient: {
         provider_configs: {
-          getUnredacted: async () => undefined,
+          getUnredacted: async () => {},
         },
       },
       organizationId: overrides.organizationId ?? "org-1",
@@ -24,17 +25,16 @@ function makeCtx(overrides: {
         type: overrides.modelId,
         customProviderSlug: overrides.customProviderSlug,
         free: overrides.free,
+        requiresByok: overrides.requiresByok,
       },
     },
-  } as unknown as Parameters<ReturnType<typeof createResolveProvider>>[0];
+  } as unknown as Parameters<typeof resolveProvider>[0];
 }
 
-describe("createResolveProvider", () => {
-  describe("enforceByok: true", () => {
-    const resolveProvider = createResolveProvider({ enforceByok: true });
-
+describe("resolveProvider", () => {
+  describe("requiresByok: true", () => {
     it("throws 402 BYOK_REQUIRED for non-free model without custom provider", async () => {
-      const ctx = makeCtx({ modelId: "anthropic/claude-opus-4-6", free: false });
+      const ctx = makeCtx({ modelId: "anthropic/claude-opus-4-6", free: false, requiresByok: true });
       try {
         await resolveProvider(ctx);
         expect.unreachable("should have thrown");
@@ -49,6 +49,7 @@ describe("createResolveProvider", () => {
       const ctx = makeCtx({
         modelId: "anthropic/claude-opus-4-6",
         free: false,
+        requiresByok: true,
         customProviderSlug: "bedrock",
       });
       try {
@@ -62,17 +63,15 @@ describe("createResolveProvider", () => {
     });
 
     it("does not throw for free model without custom provider", async () => {
-      const ctx = makeCtx({ modelId: "openai/gpt-oss-20b", free: true });
+      const ctx = makeCtx({ modelId: "openai/gpt-oss-20b", free: true, requiresByok: true });
       const result = await resolveProvider(ctx);
       expect(result).toBeUndefined();
     });
   });
 
-  describe("enforceByok: false", () => {
-    const resolveProvider = createResolveProvider({ enforceByok: false });
-
+  describe("requiresByok: false", () => {
     it("does not throw for non-free model without custom provider", async () => {
-      const ctx = makeCtx({ modelId: "anthropic/claude-opus-4-6", free: false });
+      const ctx = makeCtx({ modelId: "anthropic/claude-opus-4-6", free: false, requiresByok: false });
       const result = await resolveProvider(ctx);
       expect(result).toBeUndefined();
     });
