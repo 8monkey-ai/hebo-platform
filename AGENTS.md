@@ -29,25 +29,6 @@ Since we are using React Compiler, don't use useMemo, useCallback, and React.mem
 
 ## Console Frontend Patterns
 
-### Data Loading
-
-Use React Router `clientLoader` for data fetching — not `useEffect`. The route exports a `clientLoader` that calls the API and the component receives data via `loaderData`. This keeps loading states managed by the framework (`navigation.state`) and avoids manual `useState`/`useEffect` data-fetching boilerplate.
-
-```tsx
-// route.tsx
-export async function clientLoader({ params, request }: Route.ClientLoaderArgs) {
-  const sp = new URL(request.url).searchParams;
-  const { data } = await api.agents({ agentSlug }).branches({ branchSlug }).traces.get({ query: { ... } });
-  return { traces: data?.items ?? [] };
-}
-
-export default function MyRoute({ loaderData: { traces } }: Route.ComponentProps) {
-  const navigation = useNavigation();
-  const loading = navigation.state !== "idle";
-  return <MyList data={traces} loading={loading} />;
-}
-```
-
 ### Search Params as State
 
 Use URL search params as the source of truth for filters, pagination, and presets — not component state. Create a dedicated `search-params.ts` module per feature with:
@@ -85,28 +66,23 @@ Always wrap Conform-powered forms in `FormControl` (from `@hebo/shared-ui/compon
 
 ### Multiple Actions in One Route
 
-Use an `intent` hidden input to route multiple form submissions through a single `clientAction`. For primary forms (invite, create) use `Form` + `useNavigation`; for inline row actions (delete, revoke) use `useFetcher` so they don't affect the page navigation state.
+Use an `intent` hidden input to distinguish submissions. Return `{ intent, submission: submission.reply() }` from Conform-based actions so the component can filter `lastResult` by intent.
 
 ```tsx
 // clientAction
-const intent = formData.get("intent");
-if (intent === "invite") { ... return { intent, submission: submission.reply() }; }
-if (intent === "remove") { ... return null; }
-// fall through to default action
-```
-
-```tsx
-// Inline fetcher button
-function RemoveButton({ id }: { id: string }) {
-  const fetcher = useFetcher();
-  return (
-    <fetcher.Form method="post">
-      <input type="hidden" name="intent" value="remove" />
-      <input type="hidden" name="id" value={id} />
-      <Button type="submit" isLoading={fetcher.state !== "idle"}>Remove</Button>
-    </fetcher.Form>
-  );
+if (intent === "invite") {
+  const submission = parseWithZod(formData, { schema: inviteSchema });
+  if (submission.status !== "success") return { intent, submission: submission.reply() };
+  await authService.inviteMember(...);
+  return { intent, submission: submission.reply({ resetForm: true }) };
 }
+
+// component — filter lastResult to the relevant intent only
+const [form] = useForm({
+  lastResult: navigation.state === "idle" && actionData?.intent === "invite"
+    ? actionData.submission
+    : undefined,
+});
 ```
 
 ### Resource Routes for Section Actions
