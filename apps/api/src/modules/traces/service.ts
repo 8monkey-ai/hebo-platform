@@ -32,19 +32,16 @@ export async function listTraces(
   pageSize: number,
   metadataFilters: Record<string, string>,
 ) {
-  const offset = (page - 1) * pageSize;
-  const limit = pageSize + 1;
-
-  const metadataColumns = await getMetadataColumnNames(greptimeDb);
-  const metadataKeys = metadataColumns.map(({ column_name }) =>
-    String(column_name).slice(METADATA_PREFIX.length),
-  );
-
   const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
   function addParam(value: unknown) {
     params.push(value);
     return `$${params.length}`;
   }
+
+  const metadataColumns = await getMetadataColumnNames(greptimeDb);
+  const metadataKeys = metadataColumns.map(({ column_name }) =>
+    String(column_name).slice(METADATA_PREFIX.length),
+  );
 
   let metaFilterSql = "";
   for (const [key, value] of Object.entries(metadataFilters)) {
@@ -52,8 +49,8 @@ export async function listTraces(
     metaFilterSql += ` AND "${escapeSqlIdentifier(`${METADATA_PREFIX}${key}`)}" = ${addParam(value)}`;
   }
 
-  const limitParam = addParam(limit);
-  const offsetParam = addParam(offset);
+  const limitParam = addParam(pageSize + 1);
+  const offsetParam = addParam((page - 1) * pageSize);
 
   const metadataSelectSql = metadataColumns
     .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
