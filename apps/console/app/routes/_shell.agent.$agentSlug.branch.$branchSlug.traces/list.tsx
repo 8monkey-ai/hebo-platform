@@ -39,7 +39,7 @@ import {
   truncateText,
 } from "./utils";
 
-type TraceListPanelProps = {
+type TraceListProps = {
   traces: TraceListData;
   hasNextPage: boolean;
   page: number;
@@ -49,7 +49,7 @@ type TraceListPanelProps = {
   onSelectSpan: (spanId: string) => void;
 };
 
-export function TraceListPanel({
+export function TraceList({
   traces,
   hasNextPage,
   page,
@@ -57,8 +57,15 @@ export function TraceListPanel({
   loading,
   selectedSpanId,
   onSelectSpan,
-}: TraceListPanelProps) {
+}: TraceListProps) {
   const { effectiveFrom, effectiveTo, metadata } = useTraceSearchParams();
+
+  const location = useLocation();
+  const pageHref = (p: number) => {
+    const sp = new URLSearchParams(location.search);
+    sp.set("page", String(p));
+    return `?${sp}`;
+  };
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
@@ -88,15 +95,112 @@ export function TraceListPanel({
         </div>
       </div>
 
-      <div className="flex h-0 min-h-0 flex-1 overflow-hidden">
-        <TraceList
-          traces={traces}
-          hasNextPage={hasNextPage}
-          page={page}
-          selectedSpanId={selectedSpanId}
-          loading={loading}
-          onSelectSpan={onSelectSpan}
-        />
+      <div
+        className={cn(
+          "flex h-0 min-h-0 flex-1 flex-col overflow-hidden",
+          loading ? "pointer-events-none opacity-60" : "",
+        )}
+      >
+        <ScrollArea className="h-0 min-h-0 flex-1">
+          {(() => {
+            if (loading && traces.length === 0) return <TraceListSkeleton />;
+            if (traces.length === 0)
+              return (
+                <Empty className="min-h-full justify-center">
+                  <EmptyHeader>
+                    <EmptyTitle>No traces found</EmptyTitle>
+                    <EmptyDescription>No traces found in the selected time range.</EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              );
+            return (
+              <div className="flex flex-col divide-y">
+                {traces.map((trace) => {
+                  const isSelected = trace.spanId === selectedSpanId;
+                  return (
+                    <button
+                      key={trace.spanId}
+                      type="button"
+                      className={cn(
+                        "flex w-full flex-col gap-3 overflow-hidden px-4 py-4 text-left transition-colors hover:bg-accent/40",
+                        isSelected && "bg-accent/60",
+                      )}
+                      onClick={() => onSelectSpan(trace.spanId)}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="truncate text-sm font-semibold">
+                          {trace.model || trace.provider || "unknown"}
+                        </span>
+                        <div className="flex shrink-0 items-center gap-1.5 text-[11px]">
+                          <span className="text-muted-foreground">
+                            {formatDuration(trace.durationMs)}
+                          </span>
+                          <span className="text-muted-foreground">·</span>
+                          <span
+                            className={cn(
+                              trace.status === "ok" && "text-green-600 dark:text-green-500",
+                              trace.status === "error" && "text-destructive",
+                              trace.status === "unknown" && "text-muted-foreground",
+                            )}
+                          >
+                            {formatTimestampShort(trace.timestamp)}
+                          </span>
+                        </div>
+                      </div>
+
+                      {trace.summary && (
+                        <p className="line-clamp-2 text-xs text-muted-foreground">
+                          {truncateText(trace.summary, 120)}
+                        </p>
+                      )}
+
+                      {Object.keys(trace.metadata).length > 0 && (
+                        <div className="flex w-full items-center gap-1.5 overflow-x-auto">
+                          {Object.entries(trace.metadata).map(([key, value]) => (
+                            <Badge
+                              key={key}
+                              variant="secondary"
+                              className="shrink-0 bg-muted text-muted-foreground"
+                            >
+                              {key}: {value}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            );
+          })()}
+        </ScrollArea>
+        {(page > 1 || hasNextPage) && (
+          <div className="shrink-0 border-t px-2 py-1.5">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href={pageHref(page - 1)}
+                    aria-disabled={page <= 1}
+                    className={cn(page <= 1 && "pointer-events-none opacity-50")}
+                  />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink isActive href={pageHref(page)} size="sm">
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationNext
+                    href={pageHref(page + 1)}
+                    aria-disabled={!hasNextPage}
+                    className={cn(!hasNextPage && "pointer-events-none opacity-50")}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -368,143 +472,6 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
         </div>
       </PopoverContent>
     </Popover>
-  );
-}
-
-type TraceListProps = {
-  traces: TraceListData;
-  hasNextPage: boolean;
-  page: number;
-  selectedSpanId: string | null;
-  loading: boolean;
-  onSelectSpan: (spanId: string) => void;
-};
-
-function TraceList({
-  traces,
-  hasNextPage,
-  page,
-  selectedSpanId,
-  loading,
-  onSelectSpan,
-}: TraceListProps) {
-  const location = useLocation();
-
-  const pageHref = (p: number) => {
-    const sp = new URLSearchParams(location.search);
-    sp.set("page", String(p));
-    return `?${sp}`;
-  };
-
-  let content: React.ReactNode;
-  if (loading && traces.length === 0) {
-    content = <TraceListSkeleton />;
-  } else if (traces.length === 0) {
-    content = (
-      <Empty className="min-h-full justify-center">
-        <EmptyHeader>
-          <EmptyTitle>No traces found</EmptyTitle>
-          <EmptyDescription>No traces found in the selected time range.</EmptyDescription>
-        </EmptyHeader>
-      </Empty>
-    );
-  } else {
-    content = (
-      <div className="flex flex-col divide-y">
-        {traces.map((trace) => {
-          const isSelected = trace.spanId === selectedSpanId;
-
-          return (
-            <button
-              key={trace.spanId}
-              type="button"
-              className={cn(
-                "flex w-full flex-col gap-3 overflow-hidden px-4 py-4 text-left transition-colors hover:bg-accent/40",
-                isSelected && "bg-accent/60",
-              )}
-              onClick={() => onSelectSpan(trace.spanId)}
-            >
-              <div className="flex items-start justify-between gap-2">
-                <span className="truncate text-sm font-semibold">
-                  {trace.model || trace.provider || "unknown"}
-                </span>
-                <div className="flex shrink-0 items-center gap-1.5 text-[11px]">
-                  <span className="text-muted-foreground">{formatDuration(trace.durationMs)}</span>
-                  <span className="text-muted-foreground">·</span>
-                  <span
-                    className={cn(
-                      trace.status === "ok" && "text-green-600 dark:text-green-500",
-                      trace.status === "error" && "text-destructive",
-                      trace.status === "unknown" && "text-muted-foreground",
-                    )}
-                  >
-                    {formatTimestampShort(trace.timestamp)}
-                  </span>
-                </div>
-              </div>
-
-              {trace.summary && (
-                <p className="line-clamp-2 text-xs text-muted-foreground">
-                  {truncateText(trace.summary, 120)}
-                </p>
-              )}
-
-              {Object.keys(trace.metadata).length > 0 && (
-                <div className="flex w-full items-center gap-1.5 overflow-x-auto">
-                  {Object.entries(trace.metadata).map(([key, value]) => (
-                    <Badge
-                      key={key}
-                      variant="secondary"
-                      className="shrink-0 bg-muted text-muted-foreground"
-                    >
-                      {key}: {value}
-                    </Badge>
-                  ))}
-                </div>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        "flex h-full min-h-0 w-full flex-col",
-        loading ? "pointer-events-none opacity-60" : "",
-      )}
-    >
-      <ScrollArea className="h-0 min-h-0 flex-1">{content}</ScrollArea>
-      {(page > 1 || hasNextPage) && (
-        <div className="shrink-0 border-t px-2 py-1.5">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  href={pageHref(page - 1)}
-                  aria-disabled={page <= 1}
-                  className={cn(page <= 1 && "pointer-events-none opacity-50")}
-                />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink isActive href={pageHref(page)} size="sm">
-                  {page}
-                </PaginationLink>
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationNext
-                  href={pageHref(page + 1)}
-                  aria-disabled={!hasNextPage}
-                  className={cn(!hasNextPage && "pointer-events-none opacity-50")}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
-    </div>
   );
 }
 

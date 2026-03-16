@@ -4,7 +4,7 @@ import type { ShouldRevalidateFunctionArgs } from "react-router";
 import { api } from "~console/lib/service";
 
 import type { Route } from "./+types/route";
-import { TraceListPanel } from "./list";
+import { TraceList } from "./list";
 import { parseTraceSearchParams } from "./search-params";
 
 export function shouldRevalidate({
@@ -65,7 +65,7 @@ export default function TracesRoute({
             spanId ? "hidden @2xl:flex" : ""
           }`}
         >
-          <TraceListPanel
+          <TraceList
             traces={traces}
             hasNextPage={hasNextPage}
             page={page}
