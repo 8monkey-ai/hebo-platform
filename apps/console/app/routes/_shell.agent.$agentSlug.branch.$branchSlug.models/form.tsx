@@ -74,8 +74,10 @@ export default function ModelsConfigForm({
   // Close the active card on successful submit
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
   useEffect(() => {
-    if (fetcher.state === "idle" && fetcher.data && form.status !== "error") {
-      setExpandedCardId(null);
+    if (fetcher.state === "idle" && form.status !== "error") {
+      if (!form.dirty) {
+        setExpandedCardId(null);
+      }
     }
     // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
