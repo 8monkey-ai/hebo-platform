@@ -30,8 +30,7 @@ const SensitiveSpanAttributes = [
   "http.request.cookie",
 ];
 
-export const greptimeOtlpEndpoint =
-  (await getSecret("GreptimeEndpoint")) ?? "http://localhost:4000/v1/otlp";
+export const greptimeOtlpEndpoint = `http://${(await getSecret("GreptimeHost")) ?? "localhost"}:4000/v1/otlp`;
 
 export const getOtelLogger = (serviceName: string, minimumSeverity: SeverityNumber) => {
   const loggerProvider = new LoggerProvider({

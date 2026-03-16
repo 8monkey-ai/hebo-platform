@@ -30,7 +30,7 @@ export const vertexProject = getSstSecret("VertexProject");
 export const vertexLocation = getSstSecret("VertexLocation");
 
 // OTEL Exporter
-export const greptimeEndpoint = getSstSecret("GreptimeEndpoint");
+export const greptimeHost = getSstSecret("GreptimeHost");
 
 export const authSecrets = [
   authSecret,

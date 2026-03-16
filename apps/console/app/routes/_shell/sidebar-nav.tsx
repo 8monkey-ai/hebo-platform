@@ -1,4 +1,4 @@
-import { BrainCog, Home } from "lucide-react";
+import { Activity, BrainCog, Home } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
 import {
@@ -17,6 +17,11 @@ const navItems = [
     label: "Models",
     icon: BrainCog,
     postfix: "/models",
+  },
+  {
+    label: "Traces",
+    icon: Activity,
+    postfix: "/traces",
   },
 ] as const;
 

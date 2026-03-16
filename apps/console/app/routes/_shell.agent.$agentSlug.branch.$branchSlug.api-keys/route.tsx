@@ -70,7 +70,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 
 export default function ApiKeysRoute({ loaderData }: Route.ComponentProps) {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">
       <div>
         <h1>API Keys</h1>
         <p className="text-sm text-muted-foreground">

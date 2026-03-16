@@ -81,7 +81,7 @@ export function CodeGroup({ className, ...props }: CodeGroupProps) {
         globalThis.dispatchEvent(new CustomEvent(EVT, { detail: next }));
       }}
       className={cn(
-        "relative flex h-full min-h-0 w-full min-w-0 gap-0",
+        "relative flex min-h-0 w-full min-w-0 gap-0",
         "overflow-hidden rounded-lg bg-accent",
         "**:data-[slot=tabs-list]:py-1",
         "**:data-[slot=tabs-list]:bg-accent",
