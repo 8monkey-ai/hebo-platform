@@ -27,6 +27,42 @@ ElysiaJS powers `apps/api` and `apps/gateway`; call helpers from `packages/share
 
 Since we are using React Compiler, don't use useMemo, useCallback, and React.memo.
 
+## Console Frontend Patterns
+
+### Data Loading
+
+Use React Router `clientLoader` for data fetching — not `useEffect`. The route exports a `clientLoader` that calls the API and the component receives data via `loaderData`. This keeps loading states managed by the framework (`navigation.state`) and avoids manual `useState`/`useEffect` data-fetching boilerplate.
+
+```tsx
+// route.tsx
+export async function clientLoader({ params, request }: Route.ClientLoaderArgs) {
+  const sp = new URL(request.url).searchParams;
+  const { data } = await api.agents({ agentSlug }).branches({ branchSlug }).traces.get({ query: { ... } });
+  return { traces: data?.items ?? [] };
+}
+
+export default function MyRoute({ loaderData: { traces } }: Route.ComponentProps) {
+  const navigation = useNavigation();
+  const loading = navigation.state !== "idle";
+  return <MyList data={traces} loading={loading} />;
+}
+```
+
+### Search Params as State
+
+Use URL search params as the source of truth for filters, pagination, and presets — not component state. Create a dedicated `search-params.ts` module per feature with:
+- A `parse*SearchParams(searchParams)` function for use in `clientLoader`
+- A `use*SearchParams()` hook that wraps `useSearchParams` for use in components
+- An `updateParams` helper that mutates the `URLSearchParams` and resets page on filter changes
+
+### List/Detail with Nested Routes
+
+Use React Router nested routes for list/detail views. The parent route renders the list + `<Outlet/>`, and the child route (e.g. `($traceId)`) has its own `clientLoader`. Use `shouldRevalidate` to skip re-fetching the list when only the detail selection changes (pathname change, same search params).
+
+### Eden Type Workarounds
+
+When Eden's treaty types don't match runtime behavior (e.g. `Date` vs ISO string serialization), use `// @ts-expect-error this works in Eden` to suppress the error. Keep these minimal and always include the explanatory comment.
+
 ## Testing Guidelines
 
 Each workspace wires its own harness (Vitest or Bun); use the scripts rather than calling binaries directly. Add tests beside the feature (`conversation.test.ts`) and keep mocks in `__mocks__/` or MSW (`apps/console/app/mocks`). Run `bun run test` before submitting and note deliberate omissions in the PR.
