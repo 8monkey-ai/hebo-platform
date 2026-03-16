@@ -46,7 +46,7 @@ export function AgentCreateForm() {
       defaultModel: (function selectDefaultModel() {
         return Object.entries(models ?? {}).toSorted(
           ([, a], [, b]) =>
-            Number(b.free) - Number(a.free) || a.name.localeCompare(b.name),
+            Number(b.free ?? 0) - Number(a.free ?? 0) || a.name.localeCompare(b.name),
         )[0]?.[0];
       })(),
     },

@@ -17,9 +17,10 @@ function ModelSelector({ models, ...props }: ModelSelectorProps) {
         label: (
           <>
             {m.name}{" "}
-            {m.free ? (
+            {m.free === true && (
               <Badge className="bg-green-600 text-white!">Free Tier</Badge>
-            ) : (
+            )}
+            {m.free === false && (
               <Badge className="bg-amber-600 text-white!">BYOK Required</Badge>
             )}
             {m.modality === "embeddings" && (
