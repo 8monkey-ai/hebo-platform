@@ -69,30 +69,28 @@ export function TraceList({
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col">
-      <div className="shrink-0 border-b px-4 pb-3.5">
-        <div className="flex flex-col gap-3">
-          <h2>GenAI executions</h2>
+      <div className="flex shrink-0 flex-col gap-3 border-b px-4 pb-3.5">
+        <h2>GenAI executions</h2>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <TimePresetControl />
+        <div className="flex flex-wrap items-center gap-2">
+          <TimePresetControl />
 
-            <FiltersControl metadataKeys={metadataKeys} />
+          <FiltersControl metadataKeys={metadataKeys} />
 
-            <RefreshButton loading={loading} />
-          </div>
-
-          <p className="shrink-0 text-xs text-muted-foreground">
-            {formatDateRangeSummary(effectiveFrom, effectiveTo)}
-            {Object.keys(metadata).length > 0 && (
-              <>
-                {" · "}
-                {Object.entries(metadata)
-                  .map(([key, value]) => `${key}:${value}`)
-                  .join(", ")}
-              </>
-            )}
-          </p>
+          <RefreshButton loading={loading} />
         </div>
+
+        <p className="shrink-0 text-xs text-muted-foreground">
+          {formatDateRangeSummary(effectiveFrom, effectiveTo)}
+          {Object.keys(metadata).length > 0 && (
+            <>
+              {" · "}
+              {Object.entries(metadata)
+                .map(([key, value]) => `${key}:${value}`)
+                .join(", ")}
+            </>
+          )}
+        </p>
       </div>
 
       <div
@@ -160,7 +158,7 @@ export function TraceList({
                             <Badge
                               key={key}
                               variant="secondary"
-                              className="shrink-0 bg-muted text-muted-foreground"
+                              className="bg-muted text-muted-foreground"
                             >
                               {key}: {value}
                             </Badge>
@@ -175,31 +173,29 @@ export function TraceList({
           })()}
         </ScrollArea>
         {(page > 1 || hasNextPage) && (
-          <div className="shrink-0 border-t px-2 py-1.5">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href={pageHref(page - 1)}
-                    aria-disabled={page <= 1}
-                    className={cn(page <= 1 && "pointer-events-none opacity-50")}
-                  />
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationLink isActive href={pageHref(page)} size="sm">
-                    {page}
-                  </PaginationLink>
-                </PaginationItem>
-                <PaginationItem>
-                  <PaginationNext
-                    href={pageHref(page + 1)}
-                    aria-disabled={!hasNextPage}
-                    className={cn(!hasNextPage && "pointer-events-none opacity-50")}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
+          <Pagination className="shrink-0 border-t px-2 py-1.5">
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href={pageHref(page - 1)}
+                  aria-disabled={page <= 1}
+                  className={cn(page <= 1 && "pointer-events-none opacity-50")}
+                />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink isActive href={pageHref(page)} size="sm">
+                  {page}
+                </PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext
+                  href={pageHref(page + 1)}
+                  aria-disabled={!hasNextPage}
+                  className={cn(!hasNextPage && "pointer-events-none opacity-50")}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
         )}
       </div>
     </div>
@@ -266,12 +262,7 @@ function TimePresetControl() {
           {traceTimePresets
             .filter((preset) => preset !== "custom")
             .map((preset) => (
-              <ToggleGroupItem
-                key={preset}
-                value={preset}
-                size="sm"
-                className="rounded-none shadow-none"
-              >
+              <ToggleGroupItem key={preset} value={preset} size="sm">
                 {preset}
               </ToggleGroupItem>
             ))}
@@ -327,18 +318,17 @@ function TimePresetControl() {
               onChange={(event) => setCustomTo(event.target.value)}
             />
           </div>
-          <div className="flex justify-end gap-2">
-            <Button
-              size="sm"
-              onClick={() => {
-                if (!customFrom || !customTo) return;
-                applyRange("custom", customFrom, customTo);
-                setCustomOpen(false);
-              }}
-            >
-              Apply range
-            </Button>
-          </div>
+          <Button
+            size="sm"
+            className="ml-auto"
+            onClick={() => {
+              if (!customFrom || !customTo) return;
+              applyRange("custom", customFrom, customTo);
+              setCustomOpen(false);
+            }}
+          >
+            Apply range
+          </Button>
         </div>
       </PopoverContent>
     </Popover>

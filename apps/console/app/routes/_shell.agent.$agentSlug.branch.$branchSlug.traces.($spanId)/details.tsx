@@ -39,12 +39,8 @@ type TraceDetailProps = { trace: TraceDetailData | null; loading: boolean };
 export function TraceDetail({ trace, loading }: TraceDetailProps) {
   if (loading) {
     return (
-      <DetailShell>
-        <div className="flex min-h-0 flex-1 items-center justify-center px-4 py-4">
-          <div className="-translate-y-6">
-            <Spinner className="size-6 text-muted-foreground" />
-          </div>
-        </div>
+      <DetailShell className="items-center justify-center">
+        <Spinner className="size-6 -translate-y-6 text-muted-foreground" />
       </DetailShell>
     );
   }
@@ -52,7 +48,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
   if (!trace) {
     return (
       <DetailShell>
-        <Empty className="min-h-0 flex-1 justify-center px-4 py-4">
+        <Empty>
           <EmptyHeader>
             <EmptyTitle>Select a trace</EmptyTitle>
             <EmptyDescription>Select a trace to view details.</EmptyDescription>
@@ -70,7 +66,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
 
   return (
     <DetailShell>
-      <Tabs defaultValue="formatted" className="flex min-h-0 flex-1 flex-col">
+      <Tabs defaultValue="formatted" className="min-h-0 flex-1">
         <div className="shrink-0 border-b px-4 py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
@@ -120,19 +116,19 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
           </div>
         </div>
 
-        <TabsContent value="formatted" className="mt-0 h-0 min-h-0 flex-1">
+        <TabsContent value="formatted" className="h-0 min-h-0">
           <ScrollArea className="h-full px-4 py-4">
             <FormattedView trace={trace} />
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="raw" className="mt-0 h-0 min-h-0 flex-1">
+        <TabsContent value="raw" className="h-0 min-h-0">
           <ScrollArea className="h-full px-4 py-4">
             <RawJsonView trace={trace} />
           </ScrollArea>
         </TabsContent>
 
-        <TabsContent value="metadata" className="mt-0 h-0 min-h-0 flex-1">
+        <TabsContent value="metadata" className="h-0 min-h-0">
           <ScrollArea className="h-full px-4 py-4">
             <MetadataView trace={trace} />
           </ScrollArea>
@@ -142,9 +138,14 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
   );
 }
 
-function DetailShell({ children }: { children: React.ReactNode }) {
+function DetailShell({ children, className }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border bg-card">
+    <div
+      className={cn(
+        "flex h-full min-h-0 flex-col overflow-hidden rounded-lg border bg-card",
+        className,
+      )}
+    >
       {children}
     </div>
   );
@@ -157,7 +158,7 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
   const outputMessages = trace.outputMessages;
 
   return (
-    <div className="flex min-h-0 flex-col divide-y">
+    <div className="flex flex-col divide-y">
       {inputMessages.map((msg, index) => (
         <MessageBlock key={`${trace.spanId}:in:${index}`} message={msg} />
       ))}
@@ -167,7 +168,7 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
       ))}
 
       {inputMessages.length === 0 && outputMessages.length === 0 && (
-        <Empty className="min-h-0 py-8">
+        <Empty className="py-8">
           <EmptyHeader>
             <EmptyTitle>No message content</EmptyTitle>
             <EmptyDescription>No message content available.</EmptyDescription>
@@ -246,55 +247,54 @@ function MessageBlock({ message }: { message: TraceMessage }) {
   const contentRef = useRef<HTMLDivElement>(null);
 
   return (
-    <section className="py-4 first:pt-0 last:pb-0">
-      <div
-        className={cn("space-y-3 border-l-2 pl-3", ROLE_ACCENTS[message.role] ?? "border-l-border")}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-base font-semibold tracking-tight">
-              {message.role.charAt(0).toUpperCase() + message.role.slice(1)}
-            </span>
+    <section
+      className={cn(
+        "space-y-3 border-l-2 py-4 pl-3 first:pt-0 last:pb-0",
+        ROLE_ACCENTS[message.role] ?? "border-l-border",
+      )}
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-base font-semibold tracking-tight">
+            {message.role.charAt(0).toUpperCase() + message.role.slice(1)}
+          </span>
 
-            {message.role === "tool" && message.name && (
-              <Badge variant="outline">
-                <Wrench className="size-3" />
-                {message.name}
-              </Badge>
-            )}
-          </div>
-
-          <CopyButton value={() => contentRef.current?.innerText ?? ""} />
-        </div>
-
-        <div ref={contentRef} className="space-y-3">
-          {reasoning && (
-            <ExpandableContent label="Reasoning">
-              <p className="text-sm whitespace-pre-wrap text-muted-foreground italic">
-                {reasoning}
-              </p>
-            </ExpandableContent>
+          {message.role === "tool" && message.name && (
+            <Badge variant="outline">
+              <Wrench className="size-3" />
+              {message.name}
+            </Badge>
           )}
-
-          {content && <CollapsibleText text={content} maxLength={500} />}
-
-          {toolCalls.map((tc, index) => (
-            <div key={`tool-call:${index}`} className="space-y-2">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Wrench className="size-3" />
-                <span className="font-medium">{tc.name}</span>
-              </div>
-              <CollapsibleCode code={tc.arguments} maxLength={300} />
-            </div>
-          ))}
-
-          {otherParts.map((part, index) => (
-            <div key={`${part.type}:${index}`} className="space-y-2">
-              <div className="text-xs font-medium text-muted-foreground uppercase">{part.type}</div>
-              <CollapsibleCode code={part.value} maxLength={300} />
-            </div>
-          ))}
         </div>
+
+        <CopyButton value={() => contentRef.current?.innerText ?? ""} />
+      </div>
+
+      <div ref={contentRef} className="space-y-3">
+        {reasoning && (
+          <ExpandableContent label="Reasoning">
+            <p className="text-sm whitespace-pre-wrap text-muted-foreground italic">{reasoning}</p>
+          </ExpandableContent>
+        )}
+
+        {content && <CollapsibleText text={content} maxLength={500} />}
+
+        {toolCalls.map((tc, index) => (
+          <div key={`tool-call:${index}`} className="space-y-2">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Wrench className="size-3" />
+              <span className="font-medium">{tc.name}</span>
+            </div>
+            <CollapsibleCode code={tc.arguments} maxLength={300} />
+          </div>
+        ))}
+
+        {otherParts.map((part, index) => (
+          <div key={`${part.type}:${index}`} className="space-y-2">
+            <div className="text-xs font-medium text-muted-foreground uppercase">{part.type}</div>
+            <CollapsibleCode code={part.value} maxLength={300} />
+          </div>
+        ))}
       </div>
     </section>
   );
@@ -308,7 +308,7 @@ function CollapsibleText({ text, maxLength }: { text: string; maxLength: number 
     <Collapsible open={expanded} onOpenChange={setExpanded}>
       <p
         className={cn(
-          "text-xs leading-4 wrap-break-word whitespace-pre-wrap",
+          "text-xs wrap-break-word whitespace-pre-wrap",
           !expanded && needsTruncation && "line-clamp-6",
         )}
       >
@@ -367,9 +367,7 @@ function ExpandableContent({ label, children }: { label: string; children: React
           </Button>
         }
       />
-      <CollapsibleContent>
-        <div className="pt-1">{children}</div>
-      </CollapsibleContent>
+      <CollapsibleContent className="pt-1">{children}</CollapsibleContent>
     </Collapsible>
   );
 }
@@ -444,8 +442,8 @@ function IdentifierRow({ label, value }: { label: string; value: string | null }
   if (!value) return null;
   return (
     <tr className="border-b last:border-b-0">
-      <td className="w-1/3 px-3 py-2 align-middle font-medium text-muted-foreground">{label}</td>
-      <td className="px-3 py-2 align-middle font-mono text-xs break-all">
+      <td className="w-1/3 px-3 py-2 font-medium text-muted-foreground">{label}</td>
+      <td className="px-3 py-2 font-mono text-xs break-all">
         <div className="flex items-center gap-1">
           <span className="min-w-0 flex-1 truncate">{value}</span>
           <CopyButton value={value} className="size-5 shrink-0 p-0" />
