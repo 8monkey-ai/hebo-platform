@@ -218,33 +218,24 @@ export const authService: AuthService = {
 
   async acceptInvitation(invitationId: string) {
     const KEY = "hebo:pending-invitation";
-    const ATTEMPT = `${KEY}-attempted`;
-
-    const clear = () => {
-      sessionStorage.removeItem(KEY);
-      sessionStorage.removeItem(ATTEMPT);
-    };
 
     const { error } = await authClient.organization.acceptInvitation({ invitationId });
 
-    if (!error) {
-      clear();
-      return;
-    }
-
-    if (error.status === 401) {
-      if (sessionStorage.getItem(ATTEMPT) === invitationId) {
-        clear();
+    if (error?.status === 401) {
+      if (sessionStorage.getItem(KEY) === invitationId) {
+        sessionStorage.removeItem(KEY);
         throw new Error("Please sign in and try the invitation link again.");
       }
 
       sessionStorage.setItem(KEY, invitationId);
-      sessionStorage.setItem(ATTEMPT, invitationId);
-      globalThis.location.replace("/signin");
+      location.replace("/signin");
       throw new Error("Redirecting to sign in…");
     }
 
-    clear();
-    throw new Error(error.message ?? "Failed to accept invitation.");
+    sessionStorage.removeItem(KEY);
+
+    if (error) {
+      throw new Error(error.message ?? "Failed to accept invitation.");
+    }
   },
 };
