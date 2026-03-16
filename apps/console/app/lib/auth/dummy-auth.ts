@@ -18,6 +18,7 @@ const apiKeys = new Collection({
 const members = new Collection({
   schema: z.object({
     id: z.string().default(() => crypto.randomUUID()),
+    organizationId: z.string(),
     userId: z.string(),
     role: z.string(),
     createdAt: z.string(),
@@ -29,6 +30,7 @@ const members = new Collection({
 const invitations = new Collection({
   schema: z.object({
     id: z.string().default(() => crypto.randomUUID()),
+    organizationId: z.string(),
     email: z.string(),
     role: z.string(),
     expiresAt: z.string(),
@@ -38,6 +40,7 @@ const invitations = new Collection({
 
 members.create({
   id: "member-1",
+  organizationId: "dummy-org-id",
   userId: "dummy-user-id",
   role: "owner",
   createdAt: new Date().toISOString(),
@@ -46,6 +49,7 @@ members.create({
 });
 members.create({
   id: "member-2",
+  organizationId: "dummy-org-id",
   userId: "dummy-user-id-2",
   role: "member",
   createdAt: new Date().toISOString(),
@@ -54,6 +58,7 @@ members.create({
 });
 invitations.create({
   id: "invite-1",
+  organizationId: "dummy-org-id",
   email: "pending@example.com",
   role: "member",
   expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
@@ -115,21 +120,28 @@ export const authService = {
   },
 
   async getOrganization() {
+    const organizationId = shellStore.user?.organizationId;
     return {
-      members: members.findMany().map((m) => ({
-        id: m.id,
-        userId: m.userId,
-        role: m.role,
-        createdAt: m.createdAt,
-        user: { name: m.userName, email: m.userEmail },
-      })),
-      invitations: invitations.findMany().map((i) => ({
-        id: i.id,
-        email: i.email,
-        role: i.role,
-        expiresAt: i.expiresAt,
-        status: i.status,
-      })),
+      members: members
+        .findMany()
+        .filter((m) => m.organizationId === organizationId)
+        .map((m) => ({
+          id: m.id,
+          userId: m.userId,
+          role: m.role,
+          createdAt: m.createdAt,
+          user: { name: m.userName, email: m.userEmail },
+        })),
+      invitations: invitations
+        .findMany()
+        .filter((i) => i.organizationId === organizationId)
+        .map((i) => ({
+          id: i.id,
+          email: i.email,
+          role: i.role,
+          expiresAt: i.expiresAt,
+          status: i.status,
+        })),
     };
   },
 
@@ -140,7 +152,10 @@ export const authService = {
   },
 
   async inviteMember(email, role) {
+    const organizationId = shellStore.user?.organizationId;
+    if (!organizationId) throw new Error("No active organization");
     invitations.create({
+      organizationId,
       email,
       role,
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
@@ -159,8 +174,12 @@ export const authService = {
   async acceptInvitation(invitationId) {
     const invite = invitations.findFirst((q) => q.where({ id: invitationId, status: "pending" }));
     if (!invite) throw new Error("Invitation not found or already accepted.");
+    if (Date.parse(invite.expiresAt) <= Date.now()) {
+      throw new Error("Invitation has expired.");
+    }
     invitations.delete((q) => q.where({ id: invitationId }));
     members.create({
+      organizationId: invite.organizationId,
       userId: `accepted-${invitationId}`,
       role: invite.role,
       createdAt: new Date().toISOString(),
