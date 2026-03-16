@@ -164,8 +164,21 @@ function ModelCard(props: {
   const isByokRequired = selectedModel?.requiresByok === true;
   const availableProviders = providers.filter((p) => selectedModel?.providers?.includes(p.slug));
 
+  // BUG: auto-setting state for BYOK models renders a phantom routing input via
+  // keepMounted, causing a Conform form.dirty false positive that triggers the
+  // reset → submit → auto-close cascade when opening any card.
+  // const [advancedOpen, setAdvancedOpen] = useState(isByokRequired);
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  const [routingEnabled, setRoutingEnabled] = useState(Boolean(model.getFieldset().routing.value));
+  const [routingEnabled, setRoutingEnabled] = useState(
+    // isByokRequired || Boolean(model.getFieldset().routing.value),
+    Boolean(model.getFieldset().routing.value),
+  );
+  // useEffect(() => {
+  //   if (isByokRequired) {
+  //     setAdvancedOpen(true);
+  //     setRoutingEnabled(true);
+  //   }
+  // }, [isByokRequired]);
 
   const aliasPath = [agentSlug, branchSlug, model.getFieldset().alias.value || "alias"].join("/");
 
