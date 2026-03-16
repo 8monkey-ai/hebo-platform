@@ -117,6 +117,10 @@ Secret names:
   - Vertex: `VertexServiceAccountEmail`, `VertexAwsProviderAudience`, `VertexProject`, `VertexLocation`
   - Others: `VoyageApiKey`, `GroqApiKey`
 
+- BYOK (Bring Your Own Key)
+  - `EnforceByok`: when set, non-free models require org-level provider credentials
+  - `FreeModelIds`: comma-separated list of model IDs that are free (bypass BYOK enforcement)
+
 - Observability / traces
   - Greptime: `GreptimeHost` (hostname only, e.g. `my-greptimedb.example.com`)
 

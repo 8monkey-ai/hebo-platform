@@ -59,4 +59,6 @@ jobs:
           printf '%s' "${{ secrets.GOOGLE_VERTEX_PROJECT }}" | bun run sst secret set VertexProject --stage production
           printf '%s' "${{ secrets.GOOGLE_VERTEX_LOCATION }}" | bun run sst secret set VertexLocation --stage production
           printf '%s' "${{ secrets.GREPTIMEDB_HOST }}" | bun run sst secret set GreptimeHost --stage production
+          printf '%s' "${{ secrets.ENFORCE_BYOK }}" | bun run sst secret set EnforceByok --stage production
+          printf '%s' "${{ secrets.FREE_MODEL_IDS }}" | bun run sst secret set FreeModelIds --stage production
           bun run sst deploy --stage production
