@@ -55,14 +55,14 @@ export default function TracesRoute({
   const navigation = useNavigation();
   const location = useLocation();
 
-  const { spanId } = useParams();
+  const { traceId } = useParams();
 
   return (
     <div className="h-full min-h-0 flex-1 overflow-hidden">
       <div className="grid h-full min-h-0 grid-cols-1 gap-3 @2xl:grid-cols-[minmax(324px,4fr)_minmax(0,7fr)]">
         <div
           className={`relative flex h-full min-h-0 flex-col rounded-lg border bg-card pt-4 pb-2 ${
-            spanId ? "hidden @2xl:flex" : ""
+            traceId ? "hidden @2xl:flex" : ""
           }`}
         >
           <TraceList
@@ -71,12 +71,12 @@ export default function TracesRoute({
             page={page}
             metadataKeys={metadataKeys}
             loading={navigation.state !== "idle"}
-            selectedSpanId={spanId ?? null}
-            onSelectSpan={(id) => navigate({ pathname: id, search: location.search })}
+            selectedTraceId={traceId ?? null}
+            onSelectTrace={(id) => navigate({ pathname: id, search: location.search })}
           />
         </div>
 
-        <div className={`h-full min-h-0 ${spanId ? "block" : "hidden @2xl:block"}`}>
+        <div className={`h-full min-h-0 ${traceId ? "block" : "hidden @2xl:block"}`}>
           <Outlet />
         </div>
       </div>

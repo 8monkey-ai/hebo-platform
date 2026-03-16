@@ -4,8 +4,8 @@ import { BadRequestError } from "@hebo/shared-api/errors";
 
 import { greptimeDb as greptimeDbMiddleware } from "~api/middleware/greptime";
 
-import { getSpan, listSpans } from "./service";
-import { SpanDetail, SpanListQuery, SpanListResponse } from "./types";
+import { getSpans, listTraces } from "./service";
+import { SpanDetail, TraceListQuery, TraceListResponse } from "./types";
 
 const DEFAULT_FROM = () => new Date(Date.now() - 60 * 60 * 1000);
 const DEFAULT_TO = () => new Date();
@@ -36,7 +36,7 @@ export const spansModule = new Elysia({
 
       return status(
         200,
-        await listSpans(
+        await listTraces(
           greptimeDb,
           organizationId,
           params.agentSlug,
@@ -50,26 +50,23 @@ export const spansModule = new Elysia({
       );
     },
     {
-      query: SpanListQuery,
-      response: { 200: SpanListResponse },
+      query: TraceListQuery,
+      response: { 200: TraceListResponse },
     },
   )
   .get(
-    "/:spanId",
+    "/:traceId",
     async ({ greptimeDb, organizationId, params }) => {
-      const span = await getSpan(
+      const spans = await getSpans(
         greptimeDb,
         organizationId,
         params.agentSlug,
         params.branchSlug,
-        params.spanId,
+        params.traceId,
       );
-      if (!span) {
-        return status(404, "Span not found");
-      }
-      return status(200, span);
+      return status(200, spans);
     },
     {
-      response: { 200: SpanDetail, 404: t.String() },
+      response: { 200: t.Array(SpanDetail) },
     },
   );

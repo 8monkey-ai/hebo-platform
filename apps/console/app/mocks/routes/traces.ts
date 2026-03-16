@@ -30,7 +30,7 @@ const longToolPayload = {
 const mockTraces = [
   {
     timestamp: new Date(now - 3 * min).toISOString(),
-    spanId: "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e",
+    traceId: "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e",
     operationName: "chat",
     model: "gpt-oss-120b",
     provider: "openai",
@@ -41,7 +41,7 @@ const mockTraces = [
   },
   {
     timestamp: new Date(now - 6 * min).toISOString(),
-    spanId: "7a2b3c4d-e5f6-7890-abcd-ef1234567890",
+    traceId: "7a2b3c4d-e5f6-7890-abcd-ef1234567890",
     operationName: "chat",
     model: "gpt-4.1",
     provider: "openai",
@@ -51,7 +51,7 @@ const mockTraces = [
   },
   {
     timestamp: new Date(now - 12 * min).toISOString(),
-    spanId: "3c4d5e6f-7890-abcd-ef12-345678901234",
+    traceId: "3c4d5e6f-7890-abcd-ef12-345678901234",
     operationName: "chat",
     model: "claude-sonnet-4-20250514",
     provider: "anthropic",
@@ -61,7 +61,7 @@ const mockTraces = [
   },
   {
     timestamp: new Date(now - 18 * min).toISOString(),
-    spanId: "4d5e6f70-8901-bcde-f123-456789012345",
+    traceId: "4d5e6f70-8901-bcde-f123-456789012345",
     operationName: "chat",
     model: "gpt-oss-20b",
     provider: "openai",
@@ -71,7 +71,7 @@ const mockTraces = [
   },
   {
     timestamp: new Date(now - 25 * min).toISOString(),
-    spanId: "5e6f7081-9012-cdef-0123-567890123456",
+    traceId: "5e6f7081-9012-cdef-0123-567890123456",
     operationName: "embeddings",
     model: "voyage-3.5",
     provider: "voyage",
@@ -83,7 +83,7 @@ const mockTraces = [
 
 const generatedMockTraces = Array.from({ length: 18 }).map((_, index) => {
   const timestamp = new Date(now - (30 + index * 4) * min).toISOString();
-  const spanId = `90000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
+  const traceId = `90000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
   const provider = index % 3 === 0 ? "openai" : index % 3 === 1 ? "anthropic" : "google";
   const model =
     provider === "openai"
@@ -96,7 +96,7 @@ const generatedMockTraces = Array.from({ length: 18 }).map((_, index) => {
 
   return {
     timestamp,
-    spanId,
+    traceId,
     operationName,
     model,
     provider,
@@ -433,9 +433,9 @@ const mockSpanDetails: Record<string, object> = {
 };
 
 for (const [index, trace] of generatedMockTraces.entries()) {
-  mockSpanDetails[trace.spanId] = {
+  mockSpanDetails[trace.traceId] = {
     timestamp: trace.timestamp,
-    spanId: trace.spanId,
+    spanId: trace.traceId,
     operationName: trace.operationName,
     model: trace.model,
     responseModel: `${trace.model}-2026-03-01`,
@@ -571,7 +571,7 @@ export const traceHandlers = [
       let filtered = [...mockTraces];
       for (const [metaKey, value] of Object.entries(metadataFilters)) {
         filtered = filtered.filter((t) => {
-          const detail = mockSpanDetails[t.spanId] as any;
+          const detail = mockSpanDetails[t.traceId] as any;
           return detail?.metadata?.[metaKey] === value;
         });
       }
@@ -583,7 +583,7 @@ export const traceHandlers = [
       return HttpResponse.json({
         data: paged.map((t) => ({
           ...t,
-          metadata: (mockSpanDetails[t.spanId] as any)?.metadata ?? {},
+          metadata: (mockSpanDetails[t.traceId] as any)?.metadata ?? {},
         })),
         hasNextPage,
         metadataKeys: mockMetadataKeys,
@@ -591,15 +591,12 @@ export const traceHandlers = [
     },
   ),
 
-  // Get span detail
-  http.get<{ agentSlug: string; branchSlug: string; spanId: string }>(
-    "/api/v1/agents/:agentSlug/branches/:branchSlug/traces/:spanId",
+  // Get trace detail
+  http.get<{ agentSlug: string; branchSlug: string; traceId: string }>(
+    "/api/v1/agents/:agentSlug/branches/:branchSlug/traces/:traceId",
     ({ params }) => {
-      const detail = mockSpanDetails[params.spanId];
-      if (!detail) {
-        return new HttpResponse("Span not found", { status: 404 });
-      }
-      return HttpResponse.json(detail);
+      const detail = mockSpanDetails[params.traceId];
+      return HttpResponse.json(detail ? [detail] : []);
     },
   ),
 ];

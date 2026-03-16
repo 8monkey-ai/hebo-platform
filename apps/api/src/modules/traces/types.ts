@@ -5,7 +5,7 @@ const TraceTimeRangeQuery = {
   to: t.Optional(t.Date()),
 };
 
-export const SpanListQuery = t.Object({
+export const TraceListQuery = t.Object({
   metadata: t.Optional(t.String()),
   ...TraceTimeRangeQuery,
   page: t.Number({ default: 1 }),
@@ -14,9 +14,9 @@ export const SpanListQuery = t.Object({
 
 const SpanStatus = t.Union([t.Literal("ok"), t.Literal("error"), t.Literal("unknown")]);
 
-export const SpanListItem = t.Object({
+export const TraceListItem = t.Object({
   timestamp: t.String(),
-  spanId: t.String(),
+  traceId: t.String(),
   operationName: t.String(),
   model: t.String(),
   provider: t.String(),
@@ -26,8 +26,8 @@ export const SpanListItem = t.Object({
   metadata: t.Record(t.String(), t.String()),
 });
 
-export const SpanListResponse = t.Object({
-  data: t.Array(SpanListItem),
+export const TraceListResponse = t.Object({
+  data: t.Array(TraceListItem),
   hasNextPage: t.Boolean(),
   metadataKeys: t.Array(t.String()),
 });
@@ -68,7 +68,7 @@ const ToolCallResponsePart = t.Object(
   { additionalProperties: true },
 );
 
-const SpanMessagePart = t.Union([
+const GenAIMessagePart = t.Union([
   TextPart,
   ReasoningPart,
   ToolCallPart,
@@ -76,29 +76,29 @@ const SpanMessagePart = t.Union([
   GenericPart,
 ]);
 
-const SpanInputMessage = t.Object(
+const GenAIInputMessage = t.Object(
   {
     role: t.String(),
     name: t.Optional(t.Nullable(t.String())),
-    content: t.Optional(t.Union([t.String(), t.Array(SpanMessagePart), t.Null()])),
-    parts: t.Optional(t.Array(SpanMessagePart)),
+    content: t.Optional(t.Union([t.String(), t.Array(GenAIMessagePart), t.Null()])),
+    parts: t.Optional(t.Array(GenAIMessagePart)),
   },
   { additionalProperties: true },
 );
 
-const SpanOutputMessage = t.Object(
+const GenAIOutputMessage = t.Object(
   {
     role: t.String(),
     name: t.Optional(t.Nullable(t.String())),
-    parts: t.Array(SpanMessagePart),
+    parts: t.Array(GenAIMessagePart),
     finish_reason: t.Optional(t.String()),
   },
   { additionalProperties: true },
 );
 
-const SpanInputMessages = t.Array(SpanInputMessage);
-const SpanOutputMessages = t.Array(SpanOutputMessage);
-const SpanFinishReasons = t.Nullable(t.Array(t.String()));
+const GenAIInputMessages = t.Array(GenAIInputMessage);
+const GenAIOutputMessages = t.Array(GenAIOutputMessage);
+const GenAIFinishReasons = t.Nullable(t.Array(t.String()));
 
 export const SpanDetail = t.Object({
   timestamp: t.String(),
@@ -113,14 +113,14 @@ export const SpanDetail = t.Object({
   outputTokens: t.Nullable(t.Number()),
   totalTokens: t.Nullable(t.Number()),
   reasoningTokens: t.Nullable(t.Number()),
-  inputMessages: SpanInputMessages,
-  outputMessages: SpanOutputMessages,
-  finishReasons: SpanFinishReasons,
+  inputMessages: GenAIInputMessages,
+  outputMessages: GenAIOutputMessages,
+  finishReasons: GenAIFinishReasons,
   responseId: t.String(),
   metadata: t.Record(t.String(), t.String()),
   spanAttributes: SpanAttributes,
 });
 
-export type SpanInputMessages = Static<typeof SpanInputMessages>;
-export type SpanOutputMessages = Static<typeof SpanOutputMessages>;
-export type SpanFinishReasons = Static<typeof SpanFinishReasons>;
+export type GenAIInputMessages = Static<typeof GenAIInputMessages>;
+export type GenAIOutputMessages = Static<typeof GenAIOutputMessages>;
+export type GenAIFinishReasons = Static<typeof GenAIFinishReasons>;

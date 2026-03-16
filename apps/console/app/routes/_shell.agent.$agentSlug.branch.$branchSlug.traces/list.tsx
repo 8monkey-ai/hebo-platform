@@ -45,8 +45,8 @@ type TraceListProps = {
   page: number;
   metadataKeys: string[];
   loading: boolean;
-  selectedSpanId: string | null;
-  onSelectSpan: (spanId: string) => void;
+  selectedTraceId: string | null;
+  onSelectTrace: (traceId: string) => void;
 };
 
 export function TraceList({
@@ -55,8 +55,8 @@ export function TraceList({
   page,
   metadataKeys,
   loading,
-  selectedSpanId,
-  onSelectSpan,
+  selectedTraceId,
+  onSelectTrace: onSelectSpan,
 }: TraceListProps) {
   const { effectiveFrom, effectiveTo, metadata } = useTraceSearchParams();
 
@@ -114,16 +114,16 @@ export function TraceList({
             return (
               <div className="flex flex-col divide-y">
                 {traces.map((trace) => {
-                  const isSelected = trace.spanId === selectedSpanId;
+                  const isSelected = trace.traceId === selectedTraceId;
                   return (
                     <button
-                      key={trace.spanId}
+                      key={trace.traceId}
                       type="button"
                       className={cn(
                         "flex w-full flex-col gap-3 overflow-hidden px-4 py-4 text-left transition-colors hover:bg-accent/40",
                         isSelected && "bg-accent/60",
                       )}
-                      onClick={() => onSelectSpan(trace.spanId)}
+                      onClick={() => onSelectSpan(trace.traceId)}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <span className="truncate text-sm font-semibold">

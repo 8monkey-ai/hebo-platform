@@ -9,25 +9,25 @@ import type { Route } from "./+types/route";
 import { TraceDetail } from "./details";
 
 export async function clientLoader({
-  params: { agentSlug, branchSlug, spanId },
+  params: { agentSlug, branchSlug, traceId },
 }: Route.ClientLoaderArgs) {
-  if (!spanId) return null;
+  if (!traceId) return null;
   const { data } = await api
     .agents({ agentSlug })
     .branches({ branchSlug })
-    .traces({ spanId })
+    .traces({ traceId })
     .get();
-  return data;
+  return data?.[0] ?? null;
 }
 
 export default function TraceDetailRoute({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const navigation = useNavigation();
-  const { spanId } = useParams();
+  const { traceId } = useParams();
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
-      {spanId && (
+      {traceId && (
         <div className="shrink-0 @2xl:hidden">
           <Button variant="outline" size="sm" onClick={() => navigate("..")}>
             <ChevronLeft className="size-4" />

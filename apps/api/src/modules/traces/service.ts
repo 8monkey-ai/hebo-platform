@@ -1,6 +1,6 @@
 import type { GreptimeDb } from "~api/middleware/greptime";
 
-import type { SpanFinishReasons, SpanInputMessages, SpanOutputMessages } from "./types";
+import type { GenAIFinishReasons, GenAIInputMessages, GenAIOutputMessages } from "./types";
 import {
   escapeSqlIdentifier,
   extractSummary,
@@ -21,7 +21,7 @@ async function getMetadataColumnNames(greptimeDb: GreptimeDb) {
   )) as Array<{ column_name: unknown }>;
 }
 
-export async function listSpans(
+export async function listTraces(
   greptimeDb: GreptimeDb,
   organizationId: string,
   agentSlug: string,
@@ -63,7 +63,7 @@ export async function listSpans(
   const queryText = `
     SELECT
       "timestamp" AS timestamp,
-      "span_id" AS span_id,
+      "trace_id" AS trace_id,
       "span_status_code" AS span_status_code,
       "duration_nano" AS duration_nano,
       "span_attributes.gen_ai.operation.name" AS operation_name,
@@ -87,7 +87,8 @@ export async function listSpans(
   const hasNextPage = rows.length > pageSize;
   const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
 
-  const data = pageRows.map((row) => {
+  const data = [];
+  for (const row of pageRows) {
     const metadata: Record<string, string> = {};
     for (const { column_name } of metadataColumns) {
       const colName = String(column_name);
@@ -96,9 +97,9 @@ export async function listSpans(
         metadata[colName.slice(METADATA_PREFIX.length)] = String(value);
       }
     }
-    return {
+    data.push({
       timestamp: String(row.timestamp),
-      spanId: String(row.span_id ?? ""),
+      traceId: String(row.trace_id ?? ""),
       operationName: String(row.operation_name ?? ""),
       model: String(row.response_model ?? ""),
       provider: String(row.provider_name ?? ""),
@@ -106,18 +107,18 @@ export async function listSpans(
       durationMs: Number(row.duration_nano ?? 0) / 1e6,
       summary: extractSummary(row.output_message),
       metadata,
-    };
-  });
+    });
+  }
 
   return { data, hasNextPage, metadataKeys };
 }
 
-export async function getSpan(
+export async function getSpans(
   greptimeDb: GreptimeDb,
   organizationId: string,
   agentSlug: string,
   branchSlug: string,
-  spanId: string,
+  traceId: string,
 ) {
   const metadataColumns = await getMetadataColumnNames(greptimeDb);
 
@@ -148,51 +149,57 @@ export async function getSpan(
       "span_attributes.hebo.organization.id"
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
-    WHERE "span_id" = $1
+    WHERE "trace_id" = $1
       AND "span_attributes.hebo.organization.id" = $2
       AND "span_attributes.hebo.agent.slug" = $3
       AND "span_attributes.hebo.branch.slug" = $4
       AND "span_attributes.gen_ai.operation.name" IS NOT NULL
-    LIMIT 1
   `;
 
-  const rows = await greptimeDb.unsafe(queryText, [spanId, organizationId, agentSlug, branchSlug]);
-  const row = (rows as any[])[0];
-  if (!row) return null;
+  const rows = (await greptimeDb.unsafe(queryText, [
+    traceId,
+    organizationId,
+    agentSlug,
+    branchSlug,
+  ])) as any[];
 
-  const spanAttributes: Record<string, string | number | boolean | null> = {};
-  const metadata: Record<string, string> = {};
+  const result = [];
+  for (const row of rows) {
+    const spanAttributes: Record<string, string | number | boolean | null> = {};
+    const metadata: Record<string, string> = {};
 
-  for (const [key, value] of Object.entries(row)) {
-    if (value === null || value === undefined) continue;
-    if (key.startsWith("span_attributes.")) {
-      if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-        spanAttributes[key.replace("span_attributes.", "")] = value;
-      }
-      if (key.startsWith(METADATA_PREFIX)) {
-        metadata[key.replace(METADATA_PREFIX, "")] = String(value);
+    for (const [key, value] of Object.entries(row)) {
+      if (value === null || value === undefined) continue;
+      if (key.startsWith("span_attributes.")) {
+        if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+          spanAttributes[key.replace("span_attributes.", "")] = value;
+        }
+        if (key.startsWith(METADATA_PREFIX)) {
+          metadata[key.replace(METADATA_PREFIX, "")] = String(value);
+        }
       }
     }
-  }
 
-  return {
-    timestamp: String(row.timestamp),
-    spanId: String(row.span_id ?? ""),
-    operationName: String(row.operation_name ?? ""),
-    model: String(row.request_model ?? ""),
-    responseModel: String(row.response_model ?? ""),
-    provider: String(row.provider_name ?? ""),
-    status: formatStatus(row.span_status_code),
-    durationMs: Number(row.duration_nano ?? 0) / 1e6,
-    inputTokens: parseNullableNumber(row.input_tokens),
-    outputTokens: parseNullableNumber(row.output_tokens),
-    totalTokens: parseNullableNumber(row.total_tokens),
-    reasoningTokens: parseNullableNumber(row.reasoning_tokens),
-    inputMessages: (parseJsonArray(row.input_messages) ?? []) as SpanInputMessages[],
-    outputMessages: (parseJsonArray(row.output_messages) ?? []) as SpanOutputMessages[],
-    finishReasons: (parseJsonArray(row.finish_reasons) ?? null) as SpanFinishReasons,
-    responseId: String(row.response_id ?? ""),
-    metadata,
-    spanAttributes,
-  };
+    result.push({
+      timestamp: String(row.timestamp),
+      spanId: String(row.span_id ?? ""),
+      operationName: String(row.operation_name ?? ""),
+      model: String(row.request_model ?? ""),
+      responseModel: String(row.response_model ?? ""),
+      provider: String(row.provider_name ?? ""),
+      status: formatStatus(row.span_status_code),
+      durationMs: Number(row.duration_nano ?? 0) / 1e6,
+      inputTokens: parseNullableNumber(row.input_tokens),
+      outputTokens: parseNullableNumber(row.output_tokens),
+      totalTokens: parseNullableNumber(row.total_tokens),
+      reasoningTokens: parseNullableNumber(row.reasoning_tokens),
+      inputMessages: (parseJsonArray(row.input_messages) ?? []) as GenAIInputMessages,
+      outputMessages: (parseJsonArray(row.output_messages) ?? []) as GenAIOutputMessages,
+      finishReasons: (parseJsonArray(row.finish_reasons) ?? null) as GenAIFinishReasons,
+      responseId: String(row.response_id ?? ""),
+      metadata,
+      spanAttributes,
+    });
+  }
+  return result;
 }
