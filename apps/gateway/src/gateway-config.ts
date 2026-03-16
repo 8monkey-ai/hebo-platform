@@ -18,7 +18,9 @@ export const basePath = "/v1";
 const secrets = await loadProviderSecrets();
 
 const withTier = (modelId: string) => ({
-  additionalProperties: { free: secrets.freeModelIds.has(modelId) },
+  additionalProperties: {
+    free: secrets.freeModelIds.size === 0 || secrets.freeModelIds.has(modelId),
+  },
 });
 
 export const gw = gateway({
