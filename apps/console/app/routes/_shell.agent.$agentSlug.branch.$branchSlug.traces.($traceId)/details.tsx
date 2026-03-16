@@ -283,7 +283,7 @@ function MessageBlock({ message }: { message: TraceMessage }) {
       <div ref={contentRef} className="space-y-3">
         {reasoning && (
           <ExpandableContent label="Reasoning">
-            <p className="text-sm whitespace-pre-wrap text-muted-foreground italic">{reasoning}</p>
+            <p className="text-xs whitespace-pre-wrap text-muted-foreground italic">{reasoning}</p>
           </ExpandableContent>
         )}
 

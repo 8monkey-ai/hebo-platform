@@ -261,8 +261,13 @@ function TimePresetControl() {
         >
           {traceTimePresets
             .filter((preset) => preset !== "custom")
-            .map((preset) => (
-              <ToggleGroupItem key={preset} value={preset} size="sm">
+            .map((preset, i, arr) => (
+              <ToggleGroupItem
+                key={preset}
+                value={preset}
+                size="sm"
+                className={i === arr.length - 1 ? "rounded-r-none!" : undefined}
+              >
                 {preset}
               </ToggleGroupItem>
             ))}

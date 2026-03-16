@@ -576,7 +576,10 @@ export const traceHandlers = [
     "/api/v1/agents/:agentSlug/branches/:branchSlug/traces/:traceId",
     ({ params }) => {
       const detail = mockSpanDetails[params.traceId];
-      return HttpResponse.json(detail ? [detail] : []);
+      if (!detail) {
+        return new HttpResponse(null, { status: 404 });
+      }
+      return HttpResponse.json([detail]);
     },
   ),
 ];

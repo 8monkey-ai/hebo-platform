@@ -35,28 +35,24 @@ export async function listTraces(
   const offset = (page - 1) * pageSize;
   const limit = pageSize + 1;
 
-  const metadataColumns = await getMetadataColumnNames(greptimeDb);
-  const metadataKeys = metadataColumns.map(({ column_name }) =>
-    String(column_name).slice(METADATA_PREFIX.length),
-  );
+  const metadataKeys = await getMetadataColumnNames(greptimeDb);
 
-  const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
-  function addParam(value: unknown) {
-    params.push(value);
-    return `$${params.length}`;
-  }
+  const params = [agentSlug, branchSlug, organizationId, from, to] as unknown[];
+  const addParam = (value: unknown) => `$${params.push(value)}`;
 
-  // Build dynamic metadata filter clauses
   let metaFilterSql = "";
   for (const [key, value] of Object.entries(metadataFilters)) {
-    const columnName = escapeSqlIdentifier(`${METADATA_PREFIX}${key}`);
-    metaFilterSql += ` AND "${columnName}" = ${addParam(value)}`;
+    const col = metadataKeys.find(
+      (c) => String(c.column_name).slice(METADATA_PREFIX.length) === key,
+    );
+    if (!col) continue;
+    metaFilterSql += ` AND "${escapeSqlIdentifier(String(col.column_name))}" = ${addParam(value)}`;
   }
 
   const limitParam = addParam(limit);
   const offsetParam = addParam(offset);
 
-  const metadataSelectSql = metadataColumns
+  const metadataSelectSql = metadataKeys
     .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
     .join(",\n      ");
 
@@ -90,7 +86,7 @@ export async function listTraces(
   const data = [];
   for (const row of pageRows) {
     const metadata: Record<string, string> = {};
-    for (const { column_name } of metadataColumns) {
+    for (const { column_name } of metadataKeys) {
       const colName = String(column_name);
       const value = row[colName];
       if (value !== null && value !== undefined) {
