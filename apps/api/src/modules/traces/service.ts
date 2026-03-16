@@ -3,22 +3,31 @@ import type { GreptimeDb } from "~api/middleware/greptime";
 import type { GenAIFinishReasons, GenAIInputMessages, GenAIOutputMessages } from "./types";
 import {
   escapeSqlIdentifier,
+  escapeSqlString,
   extractSummary,
   formatStatus,
   parseJsonArray,
   parseNullableNumber,
+  toTimestampLiteral,
 } from "./utils";
 
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
 // FUTURE: cache this
 async function getMetadataColumnNames(greptimeDb: GreptimeDb) {
+  // Workaround: values inlined instead of using $1 params due to GreptimeDB cluster-mode bug.
+  // See: https://github.com/GreptimeTeam/greptimedb/issues/7819
+  // Parametrized version to restore once fixed upstream:
+  //   greptimeDb.unsafe(
+  //     `SELECT column_name FROM information_schema.columns
+  //      WHERE table_name = 'opentelemetry_traces' AND column_name LIKE $1`,
+  //     [`${METADATA_PREFIX}%`],
+  //   )
   return (await greptimeDb.unsafe(
     `SELECT column_name
      FROM information_schema.columns
      WHERE table_name = 'opentelemetry_traces'
-       AND column_name LIKE $1`,
-    [`${METADATA_PREFIX}%`],
+       AND column_name LIKE '${METADATA_PREFIX}%'`,
   )) as Array<{ column_name: unknown }>;
 }
 
@@ -33,12 +42,6 @@ export async function listTraces(
   pageSize: number,
   metadataFilters: Record<string, string>,
 ) {
-  const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
-  function addParam(value: unknown) {
-    params.push(value);
-    return `$${params.length}`;
-  }
-
   const metadataColumns = await getMetadataColumnNames(greptimeDb);
   const metadataKeys = metadataColumns.map(({ column_name }) =>
     String(column_name).slice(METADATA_PREFIX.length),
@@ -47,15 +50,23 @@ export async function listTraces(
   let metaFilterSql = "";
   for (const [key, value] of Object.entries(metadataFilters)) {
     if (!metadataKeys.includes(key)) continue;
-    metaFilterSql += ` AND "${escapeSqlIdentifier(`${METADATA_PREFIX}${key}`)}" = ${addParam(value)}`;
+    metaFilterSql += ` AND "${escapeSqlIdentifier(`${METADATA_PREFIX}${key}`)}" = ${escapeSqlString(value)}`;
   }
-
-  const limitParam = addParam(pageSize + 1);
-  const offsetParam = addParam((page - 1) * pageSize);
 
   const metadataSelectSql = metadataColumns
     .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
     .join(",\n      ");
+
+  // Parametrized version to restore once https://github.com/GreptimeTeam/greptimedb/issues/7819 is fixed:
+  //   const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
+  //   function addParam(value: unknown) { params.push(value); return `$${params.length}`; }
+  //   metaFilterSql: ... `= ${addParam(value)}`
+  //   WHERE ... "span_attributes.hebo.agent.slug" = $1
+  //     AND "span_attributes.hebo.branch.slug" = $2
+  //     AND "span_attributes.hebo.organization.id" = $3
+  //     AND "timestamp" >= $4 AND "timestamp" <= $5
+  //   LIMIT ${addParam(pageSize + 1)} OFFSET ${addParam((page - 1) * pageSize)}
+  //   greptimeDb.unsafe(queryText, params)
 
   const queryText = `
     SELECT
@@ -70,17 +81,17 @@ export async function listTraces(
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
     WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
-      AND "span_attributes.hebo.agent.slug" = $1
-      AND "span_attributes.hebo.branch.slug" = $2
-      AND "span_attributes.hebo.organization.id" = $3
-      AND "timestamp" >= $4
-      AND "timestamp" <= $5
+      AND "span_attributes.hebo.agent.slug" = ${escapeSqlString(agentSlug)}
+      AND "span_attributes.hebo.branch.slug" = ${escapeSqlString(branchSlug)}
+      AND "span_attributes.hebo.organization.id" = ${escapeSqlString(organizationId)}
+      AND "timestamp" >= ${toTimestampLiteral(from)}
+      AND "timestamp" <= ${toTimestampLiteral(to)}
       ${metaFilterSql}
     ORDER BY "timestamp" DESC
-    LIMIT ${limitParam} OFFSET ${offsetParam}
+    LIMIT ${pageSize + 1} OFFSET ${(page - 1) * pageSize}
   `;
 
-  const rows = (await greptimeDb.unsafe(queryText, params)) as any[];
+  const rows = (await greptimeDb.unsafe(queryText)) as any[];
   const hasNextPage = rows.length > pageSize;
   const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
 
@@ -127,6 +138,14 @@ export async function getSpans(
     .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
     .join(",\n      ");
 
+  // Parametrized version to restore once https://github.com/GreptimeTeam/greptimedb/issues/7819 is fixed:
+  //   const params = [traceId, organizationId, agentSlug, branchSlug];
+  //   WHERE "trace_id" = $1
+  //     AND "span_attributes.hebo.organization.id" = $2
+  //     AND "span_attributes.hebo.agent.slug" = $3
+  //     AND "span_attributes.hebo.branch.slug" = $4
+  //   greptimeDb.unsafe(queryText, params)
+
   const queryText = `
     SELECT
       "timestamp" AS timestamp,
@@ -150,20 +169,15 @@ export async function getSpans(
       "span_attributes.hebo.organization.id"
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
-    WHERE "trace_id" = $1
-      AND "span_attributes.hebo.organization.id" = $2
-      AND "span_attributes.hebo.agent.slug" = $3
-      AND "span_attributes.hebo.branch.slug" = $4
+    WHERE "trace_id" = ${escapeSqlString(traceId)}
+      AND "span_attributes.hebo.organization.id" = ${escapeSqlString(organizationId)}
+      AND "span_attributes.hebo.agent.slug" = ${escapeSqlString(agentSlug)}
+      AND "span_attributes.hebo.branch.slug" = ${escapeSqlString(branchSlug)}
       AND "span_attributes.gen_ai.operation.name" IS NOT NULL
     ORDER BY "timestamp" ASC
   `;
 
-  const rows = (await greptimeDb.unsafe(queryText, [
-    traceId,
-    organizationId,
-    agentSlug,
-    branchSlug,
-  ])) as any[];
+  const rows = (await greptimeDb.unsafe(queryText)) as any[];
 
   const result = [];
   for (const row of rows) {
