@@ -30,7 +30,7 @@ export async function loadProviderSecrets() {
     vertexAudience,
     vertexLocation,
     vertexProject,
-    enforceByokRaw,
+    enforceByok,
     freeModelIdsRaw,
   ] = await Promise.all([
     getSecret("GroqApiKey"),
@@ -41,7 +41,7 @@ export async function loadProviderSecrets() {
     getSecret("VertexAwsProviderAudience"),
     getSecret("VertexLocation"),
     getSecret("VertexProject"),
-    getSecret("EnforceByok"),
+    getSecret("EnforceByok").then((v) => v === "true"),
     getSecret("FreeModelIds"),
   ]);
 
@@ -61,7 +61,7 @@ export async function loadProviderSecrets() {
     vertexAudience,
     vertexLocation,
     vertexProject,
-    enforceByok: enforceByokRaw === "true",
+    enforceByok,
     freeModelIds,
   };
 }
