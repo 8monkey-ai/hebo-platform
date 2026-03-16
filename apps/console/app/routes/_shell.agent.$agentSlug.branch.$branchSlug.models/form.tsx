@@ -232,7 +232,7 @@ function ModelCard(props: {
               </Field>
             </FieldGroup>
 
-            {isByokRequired && !routingEnabled && (
+            {isByokRequired && (
               <Alert>
                 <Info className="size-4" />
                 <AlertDescription>
@@ -287,7 +287,7 @@ function ModelCard(props: {
                     name={`${model.getFieldset().routing.getFieldset().only.name}[0]`}
                     className="max-w-44"
                   >
-                    <FieldControl>
+                    <FieldControl disabled={!routingEnabled}>
                       <Select
                         items={
                           availableProviders.length > 0
