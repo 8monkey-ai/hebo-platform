@@ -3,7 +3,7 @@ import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { betterAuth } from "better-auth/minimal";
 import { emailOTP, organization } from "better-auth/plugins";
 
-import { authUrl, isProduction, logLevel } from "@hebo/shared-api/env";
+import { authSecret, authUrl, logLevel } from "@hebo/shared-api/env";
 import { betterAuthCookieOptions, cookieDomain } from "@hebo/shared-api/lib/cookie-options";
 import { createPrismaAdapter } from "@hebo/shared-api/lib/db/postgres";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
@@ -13,9 +13,6 @@ import { PrismaClient } from "~auth/generated/prisma/client";
 import { sendOrganizationInvitationEmail, sendVerificationOtpEmail } from "./lib/email";
 import { createOrganizationHook, createSessionHook } from "./lib/organization";
 import { verifyApiKeyPlugin, type AuthWithApiKeyPlugin } from "./lib/verify-api-key-plugin";
-
-const authSecret =
-  (await getSecret("AuthSecret")) ?? (isProduction ? undefined : "dev-placeholder-secret");
 
 export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
