@@ -30,15 +30,30 @@ export function timeRangeToParams(
 }
 
 export function parseTraceSearchParams(searchParams: URLSearchParams) {
-  const preset = (searchParams.get("preset") ?? "15m") as (typeof traceTimePresets)[number];
+  const fallback = timeRangeToParams("15m");
+
+  const preset = ((p) =>
+    p && (traceTimePresets as readonly string[]).includes(p)
+      ? (p as (typeof traceTimePresets)[number])
+      : "15m")(searchParams.get("preset"));
+
   const { from: effectiveFrom, to: effectiveTo } =
     preset === "custom"
       ? {
-          from: searchParams.get("from") ?? timeRangeToParams("15m").from,
-          to: searchParams.get("to") ?? timeRangeToParams("15m").to,
+          from: searchParams.get("from") ?? fallback.from,
+          to: searchParams.get("to") ?? fallback.to,
         }
       : timeRangeToParams(preset);
-  const metadata = JSON.parse(searchParams.get("metadata") ?? "{}") as Record<string, string>;
+
+  const metadata = (() => {
+    try {
+      const v = JSON.parse(searchParams.get("metadata") ?? "{}");
+      return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, string>) : {};
+    } catch {
+      return {};
+    }
+  })();
+
   return { preset, effectiveFrom, effectiveTo, metadata };
 }
 

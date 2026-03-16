@@ -24,7 +24,7 @@ export async function clientLoader({
 }: Route.ClientLoaderArgs) {
   const sp = new URL(request.url).searchParams;
   const { effectiveFrom, effectiveTo, metadata } = parseTraceSearchParams(sp);
-  const page = Number(sp.get("page") ?? 1);
+  const page = ((p) => (Number.isInteger(p) && p > 0 ? p : 1))(Number(sp.get("page")));
 
   const listResult = await api
     .agents({ agentSlug })

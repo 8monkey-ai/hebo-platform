@@ -154,6 +154,7 @@ export async function getSpans(
       AND "span_attributes.hebo.agent.slug" = $3
       AND "span_attributes.hebo.branch.slug" = $4
       AND "span_attributes.gen_ai.operation.name" IS NOT NULL
+    ORDER BY "timestamp" ASC
   `;
 
   const rows = (await greptimeDb.unsafe(queryText, [

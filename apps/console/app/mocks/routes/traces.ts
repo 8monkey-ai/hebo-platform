@@ -232,11 +232,6 @@ const mockSpanDetails: Record<string, object> = {
       "hebo.agent.slug": "my-agent",
       "hebo.branch.slug": "main",
     },
-    resourceAttributes: {
-      "service.name": "hebo-gateway",
-      "telemetry.sdk.language": "nodejs",
-      "telemetry.sdk.name": "opentelemetry",
-    },
   },
   "7a2b3c4d-e5f6-7890-abcd-ef1234567890": {
     timestamp: mockTraces[1]!.timestamp,
@@ -300,10 +295,6 @@ const mockSpanDetails: Record<string, object> = {
       "hebo.agent.slug": "my-agent",
       "hebo.branch.slug": "main",
     },
-    resourceAttributes: {
-      "service.name": "hebo-gateway",
-      "telemetry.sdk.language": "nodejs",
-    },
   },
   "3c4d5e6f-7890-abcd-ef12-345678901234": {
     timestamp: mockTraces[2]!.timestamp,
@@ -349,9 +340,6 @@ const mockSpanDetails: Record<string, object> = {
       "hebo.agent.slug": "my-agent",
       "hebo.branch.slug": "main",
     },
-    resourceAttributes: {
-      "service.name": "hebo-gateway",
-    },
   },
   "4d5e6f70-8901-bcde-f123-456789012345": {
     timestamp: mockTraces[3]!.timestamp,
@@ -392,9 +380,6 @@ const mockSpanDetails: Record<string, object> = {
       "hebo.agent.slug": "my-agent",
       "hebo.branch.slug": "main",
     },
-    resourceAttributes: {
-      "service.name": "hebo-gateway",
-    },
   },
   "5e6f7081-9012-cdef-0123-567890123456": {
     timestamp: mockTraces[4]!.timestamp,
@@ -425,9 +410,6 @@ const mockSpanDetails: Record<string, object> = {
       "gen_ai.request.metadata.environment": "production",
       "hebo.agent.slug": "my-agent",
       "hebo.branch.slug": "main",
-    },
-    resourceAttributes: {
-      "service.name": "hebo-gateway",
     },
   },
 };
@@ -538,10 +520,6 @@ for (const [index, trace] of generatedMockTraces.entries()) {
       "hebo.agent.slug": "my-agent",
       "hebo.branch.slug": "main",
     },
-    resourceAttributes: {
-      "service.name": "hebo-gateway",
-      "telemetry.sdk.language": "nodejs",
-    },
   };
 }
 
@@ -553,8 +531,10 @@ export const traceHandlers = [
     "/api/v1/agents/:agentSlug/branches/:branchSlug/traces",
     ({ request }) => {
       const url = new URL(request.url);
-      const page = Number(url.searchParams.get("page") ?? 1);
-      const pageSize = Number(url.searchParams.get("pageSize") ?? 50);
+      const pageParam = Number(url.searchParams.get("page"));
+      const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+      const pageSizeParam = Number(url.searchParams.get("pageSize"));
+      const pageSize = Number.isInteger(pageSizeParam) && pageSizeParam > 0 ? pageSizeParam : 50;
 
       const metadataParam = url.searchParams.get("metadata");
       let metadataFilters: Record<string, string> | null = null;
