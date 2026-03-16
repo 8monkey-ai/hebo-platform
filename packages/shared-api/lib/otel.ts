@@ -30,11 +30,7 @@ const SensitiveSpanAttributes = [
   "http.request.cookie",
 ];
 
-const greptimeHost = await getSecret("GreptimeHost");
-if (isProduction && !greptimeHost) {
-  throw new Error("Missing required secret: GreptimeHost");
-}
-export const greptimeOtlpEndpoint = `http://${greptimeHost ?? "localhost"}:4000/v1/otlp`;
+export const greptimeOtlpEndpoint = `http://${(await getSecret("GreptimeHost")) ?? "localhost"}:4000/v1/otlp`;
 
 export const getOtelLogger = (serviceName: string, minimumSeverity: SeverityNumber) => {
   const loggerProvider = new LoggerProvider({

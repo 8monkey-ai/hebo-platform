@@ -1,15 +1,10 @@
 import { SQL } from "bun";
 
-import { isProduction } from "../../env";
 import { getSecret } from "../../utils/secrets";
 import { DEFAULT_DB_IDLE_TIMEOUT_MS, DEFAULT_DB_POOL_MAX } from "./config";
 
 export const getGreptimeConnectionString = async () => {
-  const greptimeHost = await getSecret("GreptimeHost");
-  if (isProduction && !greptimeHost) {
-    throw new Error("Missing required secret: GreptimeHost");
-  }
-  return `postgres://${greptimeHost ?? "localhost"}:4003/public`;
+  return `postgres://${(await getSecret("GreptimeHost")) ?? "localhost"}:4003/public`;
 };
 
 export const createBunSqlClient = (url: string) =>
