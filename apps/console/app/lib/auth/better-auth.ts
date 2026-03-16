@@ -220,23 +220,27 @@ export const authService: AuthService = {
     const { error } = await authClient.organization.acceptInvitation({ invitationId });
     if (error) {
       if (error.status === 401) {
-        // Use a separate marker to detect retries — ensureSignedIn clears
-        // "hebo:pending-invitation" so it can't double as a retry guard.
-        const alreadyAttempted = sessionStorage.getItem("hebo:pending-invitation-attempted");
-        if (alreadyAttempted) {
+        // Use a separate marker scoped to this invitation to detect retries —
+        // ensureSignedIn clears "hebo:pending-invitation" so it can't double as a retry guard.
+        const attemptedForInvitation = sessionStorage.getItem("hebo:pending-invitation-attempted");
+        if (attemptedForInvitation === invitationId) {
           sessionStorage.removeItem("hebo:pending-invitation");
           sessionStorage.removeItem("hebo:pending-invitation-attempted");
           throw new Error("Please sign in and try the invitation link again.");
         }
         sessionStorage.setItem("hebo:pending-invitation", invitationId);
-        sessionStorage.setItem("hebo:pending-invitation-attempted", "true");
+        sessionStorage.setItem("hebo:pending-invitation-attempted", invitationId);
         globalThis.location.replace("/signin");
         // Throw so the caller does not treat this as a successful acceptance
         throw new Error("Redirecting to sign in…");
       }
+      // Clear markers on non-401 failures so they don't block future invites
+      sessionStorage.removeItem("hebo:pending-invitation");
+      sessionStorage.removeItem("hebo:pending-invitation-attempted");
       throw new Error(error.message ?? "Failed to accept invitation.");
     }
-    // Clear the retry marker on successful acceptance
+    // Clear markers on successful acceptance
+    sessionStorage.removeItem("hebo:pending-invitation");
     sessionStorage.removeItem("hebo:pending-invitation-attempted");
   },
 };
