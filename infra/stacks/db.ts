@@ -47,7 +47,6 @@ export function createMigrator(schema: string) {
       NPM_CONFIG_CACHE: "/tmp/.npm",
     },
     timeout: "300 seconds",
-    storage: "1 GB",
   });
 
   new aws.lambda.Invocation(`${schema}DatabaseMigratorInvocation`, {
