@@ -2,9 +2,10 @@ import { useForm, type FieldMetadata } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 import { Brain, ChevronsUpDown, Edit, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useFetcher } from "react-router";
+import { Link, useFetcher } from "react-router";
 import { useSnapshot } from "valtio";
 
+import { Alert, AlertDescription } from "@hebo/shared-ui/components/Alert";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
 import { Card, CardContent, CardFooter, CardHeader } from "@hebo/shared-ui/components/Card";
@@ -35,7 +36,6 @@ import {
   FieldDescription,
   FormControl,
 } from "@hebo/shared-ui/components/Field";
-import { Alert, AlertDescription } from "@hebo/shared-ui/components/Alert";
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Select } from "@hebo/shared-ui/components/Select";
 import { Separator } from "@hebo/shared-ui/components/Separator";
@@ -165,10 +165,8 @@ function ModelCard(props: {
   const isByokRequired = selectedModel?.requiresByok === true;
   const availableProviders = providers.filter((p) => selectedModel?.providers?.includes(p.slug));
 
-  const [advancedOpen, setAdvancedOpen] = useState(isByokRequired);
-  const [routingEnabled, setRoutingEnabled] = useState(
-    Boolean(model.getFieldset().routing.value),
-  );
+  const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [routingEnabled, setRoutingEnabled] = useState(Boolean(model.getFieldset().routing.value));
 
   const aliasPath = [agentSlug, branchSlug, model.getFieldset().alias.value || "alias"].join("/");
 
@@ -238,8 +236,14 @@ function ModelCard(props: {
               <Alert>
                 <Info className="size-4" />
                 <AlertDescription>
-                  This model requires your own provider key. Enable "Bring Your Own Provider" below
-                  and select a configured provider.
+                  This model requires your own provider key. Configure one on the{" "}
+                  <Link
+                    to={`/agent/${agentSlug}/branch/${branchSlug}/providers`}
+                    className="underline"
+                  >
+                    Providers page
+                  </Link>
+                  , then slect it in "Advanced options" -&gt; "Bring Your Own Provider".
                 </AlertDescription>
               </Alert>
             )}
@@ -269,31 +273,41 @@ function ModelCard(props: {
                   <FieldContent>
                     <FieldLabel htmlFor={`byo-${aliasPath}`}>Bring Your Own Provider</FieldLabel>
                     <FieldDescription>
-                      Route requests through your own provider credentials.
-                      {isByokRequired && " Required for this model."}
+                      Route requests through your own{" "}
+                      <Link
+                        to={`/agent/${agentSlug}/branch/${branchSlug}/providers`}
+                        className="underline"
+                      >
+                        provider credentials
+                      </Link>
+                      .
                     </FieldDescription>
                   </FieldContent>
-                  {routingEnabled && (
-                    <Field
-                      name={`${model.getFieldset().routing.getFieldset().only.name}[0]`}
-                      className="max-w-44"
-                    >
-                      <FieldControl>
-                        <Select
-                          items={availableProviders.map((provider) => ({
-                            value: provider.slug,
-                            label: provider.name,
-                          }))}
-                          placeholder={
-                            availableProviders.length > 0
-                              ? "Select provider"
-                              : "No providers configured"
-                          }
-                          aria-label="Select Provider"
-                        />
-                      </FieldControl>
-                    </Field>
-                  )}
+                  <Field
+                    name={`${model.getFieldset().routing.getFieldset().only.name}[0]`}
+                    className="max-w-44"
+                  >
+                    <FieldControl>
+                      <Select
+                        items={
+                          availableProviders.length > 0
+                            ? availableProviders.map((provider) => ({
+                                value: provider.slug,
+                                label: provider.name,
+                              }))
+                            : [
+                                {
+                                  value: "__none__",
+                                  label: "No providers configured",
+                                  disabled: true,
+                                },
+                              ]
+                        }
+                        placeholder="Select provider"
+                        aria-label="Select Provider"
+                      />
+                    </FieldControl>
+                  </Field>
                 </Field>
               </CollapsibleContent>
             </Collapsible>

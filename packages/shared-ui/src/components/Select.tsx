@@ -7,7 +7,7 @@ import {
 } from "#/_shadcn/ui/select";
 
 type SelectProps = React.ComponentProps<typeof ShadCnSelect> & {
-  items: Array<{ value: string; label: React.ReactNode }>;
+  items: Array<{ value: string; label: React.ReactNode; disabled?: boolean }>;
   placeholder?: string;
 };
 
@@ -26,7 +26,7 @@ function Select({ items, placeholder, ...props }: SelectProps) {
       <SelectContent>
         {items.map((item) => {
           return (
-            <SelectItem key={item.value} value={item.value}>
+            <SelectItem key={item.value} value={item.value} disabled={item.disabled}>
               {item.label}
             </SelectItem>
           );
