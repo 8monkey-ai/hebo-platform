@@ -61,9 +61,10 @@ export const authService: AuthService = {
 
     // Disable cookie cache only after fresh sign-in to ensure we get the latest session
     const isComingFromSignIn = new URL(globalThis.location.href).searchParams.has("after-signin");
-    const session = await authClient.getSession({
-      query: { disableCookieCache: isComingFromSignIn },
-    });
+    const [session, orgsResult] = await Promise.all([
+      authClient.getSession({ query: { disableCookieCache: isComingFromSignIn } }),
+      authClient.organization.list(),
+    ]);
     if (!session?.data?.user) {
       return redirectToSignIn();
     }
@@ -81,6 +82,11 @@ export const authService: AuthService = {
       .join("");
 
     shellStore.user = user;
+    shellStore.organizations = (orgsResult.data ?? []).map((o) => ({
+      id: o.id,
+      name: o.name,
+      slug: o.slug,
+    }));
 
     // Resume pending invitation acceptance after sign-in redirect
     const pendingInvitation = sessionStorage.getItem("hebo:pending-invitation");
@@ -162,6 +168,7 @@ export const authService: AuthService = {
   async signOut() {
     await authClient.signOut();
     shellStore.user = undefined;
+    shellStore.organizations = [];
   },
 
   async listOrganizations() {

@@ -1,6 +1,6 @@
 import { proxy } from "valtio";
 
-import type { User } from "~console/lib/auth/types";
+import type { Organization, User } from "~console/lib/auth/types";
 
 export type Models = Record<
   string,
@@ -14,8 +14,10 @@ export type Models = Record<
 
 export const shellStore = proxy<{
   user: User | undefined;
+  organizations: Organization[];
   models: Models | undefined;
 }>({
   user: undefined,
+  organizations: [],
   models: undefined,
 });

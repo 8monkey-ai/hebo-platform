@@ -39,10 +39,7 @@ async function authMiddleware() {
 export const clientMiddleware = [authMiddleware];
 
 export async function clientLoader() {
-  const [agents, organizations] = await Promise.all([
-    api.agents.get(),
-    authService.listOrganizations().catch(() => []),
-  ]);
+  const agents = await api.agents.get();
 
   if (!shellStore.models) {
     const models = await gateway.models.get({ query: { endpoints: true } });
@@ -62,15 +59,13 @@ export async function clientLoader() {
     shellStore.models = supportedModels;
   }
 
-  return { agents: agents?.data ?? [], organizations };
+  return { agents: agents?.data ?? [] };
 }
 
 export { dontRevalidateOnFormErrors as shouldRevalidate };
 
-export default function ShellLayout({
-  loaderData: { agents, organizations },
-}: Route.ComponentProps) {
-  const { user } = useSnapshot(shellStore);
+export default function ShellLayout({ loaderData: { agents } }: Route.ComponentProps) {
+  const { user, organizations } = useSnapshot(shellStore);
 
   const { agent: activeAgent, branch: activeBranch } =
     useRoute("routes/_shell.agent.$agentSlug")?.loaderData ?? {};

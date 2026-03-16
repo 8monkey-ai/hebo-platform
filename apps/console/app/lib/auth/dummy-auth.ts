@@ -71,6 +71,10 @@ export const authService = {
       initials: "DU",
       image: "",
     };
+    shellStore.organizations = [
+      { id: "dummy-org-id", name: "Dummy Org", slug: "dummy-org" },
+      { id: "dummy-org-id-2", name: "Second Org", slug: "second-org" },
+    ];
     return true;
   },
 
@@ -106,6 +110,7 @@ export const authService = {
 
   async signOut() {
     shellStore.user = undefined;
+    shellStore.organizations = [];
   },
 
   async listOrganizations() {
