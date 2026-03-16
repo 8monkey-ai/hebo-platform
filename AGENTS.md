@@ -59,9 +59,17 @@ Use URL search params as the source of truth for filters, pagination, and preset
 
 Use React Router nested routes for list/detail views. The parent route renders the list + `<Outlet/>`, and the child route (e.g. `($traceId)`) has its own `clientLoader`. Use `shouldRevalidate` to skip re-fetching the list when only the detail selection changes (pathname change, same search params).
 
-### Eden Type Workarounds
+### Tailwind Classes
 
-When Eden's treaty types don't match runtime behavior (e.g. `Date` vs ISO string serialization), use `// @ts-expect-error this works in Eden` to suppress the error. Keep these minimal and always include the explanatory comment.
+Minimise Tailwind classes. Avoid duplicating utilities already present on a parent component. Prefer fewer, well-chosen classes over verbose class lists.
+
+### DOM Hierarchy
+
+Keep the DOM flat. Minimise nested `<div>` wrappers — flatten the hierarchy as much as possible to reduce complexity and improve readability.
+
+### ShadCN Components
+
+Use existing ShadCN components from `packages/shared-ui` where applicable. If a needed component doesn't exist yet, add it to the project using the `shadcn` CLI before building a custom one.
 
 ## Testing Guidelines
 
