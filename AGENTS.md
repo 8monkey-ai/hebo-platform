@@ -115,7 +115,7 @@ For pages with multiple independent sections (e.g. settings), give each section 
 
 Section components use `useFetcher` with an explicit relative `action` so submissions go to the resource route without navigating away. Fetcher data is used for `lastResult` instead of `useActionData`. A redirect returned from a resource route action still navigates the page.
 
-```
+```text
 routes/
   _shell.agent.$agentSlug.settings/route.tsx          ← clientLoader + page component
   _shell.agent.$agentSlug.settings.members/route.tsx  ← clientAction only (invite/remove/revoke)

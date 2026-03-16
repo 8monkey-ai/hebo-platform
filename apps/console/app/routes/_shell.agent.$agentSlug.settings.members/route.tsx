@@ -1,13 +1,8 @@
 import { parseWithZod } from "@conform-to/zod/v4";
-import { z } from "zod";
 
 import { authService } from "~console/lib/auth";
 import { parseError } from "~console/lib/errors";
-
-const inviteSchema = z.object({
-  email: z.email("Enter a valid email address"),
-  role: z.enum(["member", "admin"]),
-});
+import { inviteSchema } from "~console/routes/_shell.agent.$agentSlug.settings/invite-schema";
 
 export async function clientAction({ request }: { request: Request }) {
   const formData = await request.formData();
@@ -25,12 +20,24 @@ export async function clientAction({ request }: { request: Request }) {
   }
 
   if (intent === "remove") {
-    await authService.removeMember(String(formData.get("email")));
+    const email = formData.get("email");
+    if (!email || typeof email !== "string") return { error: "Missing email" };
+    try {
+      await authService.removeMember(email);
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Failed to remove member" };
+    }
     return null;
   }
 
   if (intent === "revoke") {
-    await authService.cancelInvitation(String(formData.get("invitationId")));
+    const invitationId = formData.get("invitationId");
+    if (!invitationId || typeof invitationId !== "string") return { error: "Missing invitation ID" };
+    try {
+      await authService.cancelInvitation(invitationId);
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Failed to revoke invitation" };
+    }
     return null;
   }
 

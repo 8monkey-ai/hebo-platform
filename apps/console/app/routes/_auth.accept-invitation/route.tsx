@@ -1,6 +1,6 @@
 import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
+import { useEffect } from "react";
 
 import { Alert, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -8,55 +8,50 @@ import { Button } from "@hebo/shared-ui/components/Button";
 import { Logo } from "~console/components/ui/Logo";
 import { authService } from "~console/lib/auth";
 
-type Status = "loading" | "success" | "error" | "no-id";
+type LoaderResult = { status: "success" } | { status: "error"; message: string } | { status: "no-id" };
+
+export async function clientLoader({ request }: { request: Request }) {
+  const invitationId = new URL(request.url).searchParams.get("id");
+  if (!invitationId) return { status: "no-id" } satisfies LoaderResult;
+
+  try {
+    await authService.acceptInvitation(invitationId);
+    return { status: "success" } satisfies LoaderResult;
+  } catch (err) {
+    return { status: "error", message: (err as Error).message } satisfies LoaderResult;
+  }
+}
 
 export default function AcceptInvitation() {
-  const [searchParams] = useSearchParams();
-  const invitationId = searchParams.get("id");
-  const [status, setStatus] = useState<Status>(invitationId ? "loading" : "no-id");
-  const [errorMessage, setErrorMessage] = useState("");
+  const data = useLoaderData<LoaderResult>();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!invitationId) return;
-
-    authService
-      .acceptInvitation(invitationId)
-      .then(() => {
-        setStatus("success");
-        setTimeout(() => {
-          globalThis.location.replace("/");
-        }, 1500);
-      })
-      .catch((err: Error) => {
-        setStatus("error");
-        setErrorMessage(err.message);
-      });
-  }, [invitationId]);
+    if (data.status === "success") {
+      const timer = setTimeout(() => {
+        globalThis.location.replace("/");
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [data.status, navigate]);
 
   return (
     <div className="flex min-h-dvh items-center justify-center">
       <div className="flex w-xs flex-col items-center gap-6">
         <Logo />
 
-        {status === "loading" && (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 className="animate-spin" size={16} />
-            Accepting invitation…
-          </div>
-        )}
-
-        {status === "success" && (
+        {data.status === "success" && (
           <Alert>
             <CheckCircle2 size={16} />
             <AlertTitle>Invitation accepted! Redirecting…</AlertTitle>
           </Alert>
         )}
 
-        {status === "error" && (
+        {data.status === "error" && (
           <div className="flex flex-col items-center gap-4">
             <Alert variant="destructive">
               <AlertCircle size={16} />
-              <AlertTitle>{errorMessage || "This invitation is expired or invalid."}</AlertTitle>
+              <AlertTitle>{data.message || "This invitation is expired or invalid."}</AlertTitle>
             </Alert>
             <Button
               variant="outline"
@@ -66,7 +61,7 @@ export default function AcceptInvitation() {
           </div>
         )}
 
-        {status === "no-id" && (
+        {data.status === "no-id" && (
           <div className="flex flex-col items-center gap-4">
             <Alert variant="destructive">
               <AlertCircle size={16} />

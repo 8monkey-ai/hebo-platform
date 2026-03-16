@@ -94,7 +94,7 @@ export function UserMenu({ user, organizations }: { user?: User; organizations: 
               <DropdownMenuGroup>
                 <DropdownMenuLabel className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Building2 size={12} />
-                  Oganization
+                  Organization
                 </DropdownMenuLabel>
                 {activeOrg && (
                   <DropdownMenuItem className="gap-2 p-2" disabled>

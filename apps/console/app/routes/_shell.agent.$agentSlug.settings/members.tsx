@@ -3,7 +3,6 @@ import { getZodConstraint } from "@conform-to/zod/v4";
 import { Mail, Trash2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useFetcher } from "react-router";
-import { z } from "zod";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@hebo/shared-ui/components/Avatar";
 import { Badge } from "@hebo/shared-ui/components/Badge";
@@ -29,10 +28,7 @@ import {
 import type { OrgInvitation, OrgMember } from "~console/lib/auth/types";
 import { useFormErrorToast } from "~console/lib/errors";
 
-export const inviteSchema = z.object({
-  email: z.email("Enter a valid email address"),
-  role: z.enum(["member", "admin"]),
-});
+import { inviteSchema } from "./invite-schema";
 
 type MembersSettingsProps = {
   members: OrgMember[];

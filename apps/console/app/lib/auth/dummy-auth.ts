@@ -7,7 +7,7 @@ import { DEFAULT_EXPIRATION_MS, type AuthService } from "./types";
 
 const apiKeys = new Collection({
   schema: z.object({
-    id: z.string().default(crypto.randomUUID()),
+    id: z.string().default(() => crypto.randomUUID()),
     name: z.string(),
     key: z.string(),
     createdAt: z.date(),
@@ -17,7 +17,7 @@ const apiKeys = new Collection({
 
 const members = new Collection({
   schema: z.object({
-    id: z.string().default(crypto.randomUUID()),
+    id: z.string().default(() => crypto.randomUUID()),
     userId: z.string(),
     role: z.string(),
     createdAt: z.string(),
@@ -28,7 +28,7 @@ const members = new Collection({
 
 const invitations = new Collection({
   schema: z.object({
-    id: z.string().default(crypto.randomUUID()),
+    id: z.string().default(() => crypto.randomUUID()),
     email: z.string(),
     role: z.string(),
     expiresAt: z.string(),
@@ -63,9 +63,10 @@ invitations.create({
 export const authService = {
   async ensureSignedIn() {
     if (shellStore.user?.organizationId) return true;
+    const persistedOrgId = globalThis.localStorage?.getItem("hebo:dummy-org-id") ?? "dummy-org-id";
     shellStore.user = {
       userId: "dummy-user-id",
-      organizationId: "dummy-org-id",
+      organizationId: persistedOrgId,
       name: "Dummy User",
       email: "dummy@user.com",
       initials: "DU",
@@ -141,6 +142,7 @@ export const authService = {
 
   async setActiveOrganization(orgId) {
     if (shellStore.user) shellStore.user.organizationId = orgId;
+    globalThis.localStorage?.setItem("hebo:dummy-org-id", orgId);
     globalThis.location.reload();
   },
 
@@ -163,5 +165,16 @@ export const authService = {
     invitations.delete((q) => q.where({ id: invitationId }));
   },
 
-  async acceptInvitation() {},
+  async acceptInvitation(invitationId) {
+    const invite = invitations.findFirst((q) => q.where({ id: invitationId, status: "pending" }));
+    if (!invite) throw new Error("Invitation not found or already accepted.");
+    invitations.delete((q) => q.where({ id: invitationId }));
+    members.create({
+      userId: `accepted-${invitationId}`,
+      role: invite.role,
+      createdAt: new Date().toISOString(),
+      userName: invite.email.split("@")[0],
+      userEmail: invite.email,
+    });
+  },
 } satisfies AuthService;

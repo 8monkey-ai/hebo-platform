@@ -230,6 +230,12 @@ export const authService: AuthService = {
     const { error } = await authClient.organization.acceptInvitation({ invitationId });
     if (error) {
       if (error.status === 401) {
+        // Only auto-redirect to sign-in once to avoid infinite loops
+        const alreadyAttempted = sessionStorage.getItem("hebo:pending-invitation");
+        if (alreadyAttempted) {
+          sessionStorage.removeItem("hebo:pending-invitation");
+          throw new Error("Please sign in and try the invitation link again.");
+        }
         sessionStorage.setItem("hebo:pending-invitation", invitationId);
         globalThis.location.replace("/signin");
         return;
