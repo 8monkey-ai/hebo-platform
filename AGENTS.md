@@ -29,28 +29,10 @@ Since we are using React Compiler, don't use useMemo, useCallback, and React.mem
 
 ## Console Frontend Patterns
 
-### Data Loading
-
-Use React Router `clientLoader` for data fetching — not `useEffect`. The route exports a `clientLoader` that calls the API and the component receives data via `loaderData`. This keeps loading states managed by the framework (`navigation.state`) and avoids manual `useState`/`useEffect` data-fetching boilerplate.
-
-```tsx
-// route.tsx
-export async function clientLoader({ params, request }: Route.ClientLoaderArgs) {
-  const sp = new URL(request.url).searchParams;
-  const { data } = await api.agents({ agentSlug }).branches({ branchSlug }).traces.get({ query: { ... } });
-  return { traces: data?.items ?? [] };
-}
-
-export default function MyRoute({ loaderData: { traces } }: Route.ComponentProps) {
-  const navigation = useNavigation();
-  const loading = navigation.state !== "idle";
-  return <MyList data={traces} loading={loading} />;
-}
-```
-
 ### Search Params as State
 
 Use URL search params as the source of truth for filters, pagination, and presets — not component state. Create a dedicated `search-params.ts` module per feature with:
+
 - A `parse*SearchParams(searchParams)` function for use in `clientLoader`
 - A `use*SearchParams()` hook that wraps `useSearchParams` for use in components
 - An `updateParams` helper that mutates the `URLSearchParams` and resets page on filter changes
@@ -66,6 +48,72 @@ Minimise Tailwind classes. Avoid duplicating utilities already present on a pare
 ### DOM Hierarchy
 
 Keep the DOM flat. Minimise nested `<div>` wrappers — flatten the hierarchy as much as possible to reduce complexity and improve readability.
+
+### Forms with Conform
+
+Always wrap Conform-powered forms in `FormControl` (from `@hebo/shared-ui/components/Field`) rather than a plain `<form>`. `FormControl` provides the required `FormProvider` context that `Field`, `FieldLabel`, `FieldControl`, and `FieldError` depend on. Use `as={Form}` for React Router actions or `as={fetcher.Form}` for fetcher-based submissions.
+
+```tsx
+<FormControl form={form} as={Form}>
+  <input type="hidden" name="intent" value="create" />
+  <Field name={fields.email.name}>
+    <FieldLabel>Email</FieldLabel>
+    <FieldControl>
+      <Input />
+    </FieldControl>
+    <FieldError />
+  </Field>
+  <Button type="submit" isLoading={navigation.state !== "idle"}>
+    Submit
+  </Button>
+</FormControl>
+```
+
+### Multiple Actions in One Route
+
+Use an `intent` hidden input to distinguish submissions. Return `{ intent, submission: submission.reply() }` from Conform-based actions so the component can filter `lastResult` by intent.
+
+```tsx
+// clientAction
+if (intent === "invite") {
+  const submission = parseWithZod(formData, { schema: inviteSchema });
+  if (submission.status !== "success") return { intent, submission: submission.reply() };
+  await authService.inviteMember(...);
+  return { intent, submission: submission.reply({ resetForm: true }) };
+}
+
+// component — filter lastResult to the relevant intent only
+const [form] = useForm({
+  lastResult: navigation.state === "idle" && actionData?.intent === "invite"
+    ? actionData.submission
+    : undefined,
+});
+```
+
+### Resource Routes for Section Actions
+
+For pages with multiple independent sections (e.g. settings), give each section its own resource route for actions while the page route keeps a single `clientLoader`. Resource routes are child routes with only a `clientAction` export and no default component.
+
+Section components use `useFetcher` with an explicit relative `action` so submissions go to the resource route without navigating away. Fetcher data is used for `lastResult` instead of `useActionData`. A redirect returned from a resource route action still navigates the page.
+
+```text
+routes/
+  _shell.agent.$agentSlug.settings/route.tsx          ← clientLoader + page component
+  _shell.agent.$agentSlug.settings.members/route.tsx  ← clientAction only (invite/remove/revoke)
+  _shell.agent.$agentSlug.settings.danger/route.tsx   ← clientAction only (agent delete)
+```
+
+```tsx
+// resource route — no default export
+export async function clientAction({ request, params }) { ... }
+
+// section component
+const fetcher = useFetcher<{ intent: string; submission: any }>();
+const [form, fields] = useForm({
+  lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
+});
+<FormControl form={form} as={fetcher.Form} action="members">...</FormControl>
+```
 
 ### ShadCN Components
 
@@ -95,6 +143,10 @@ If priorities conflict, apply this order:
 ## Testing Guidelines
 
 Each workspace wires its own harness (Vitest or Bun); use the scripts rather than calling binaries directly. Add tests beside the feature (`conversation.test.ts`) and keep mocks in `__mocks__/` or MSW (`apps/console/app/mocks`). Run `bun run test` before submitting and note deliberate omissions in the PR.
+
+## Keeping These Guidelines Current
+
+After implementing any feature or fixing a non-trivial bug, update this file if the work produced a reusable architectural pattern, a technical design decision, or a coding guideline others should follow. Add it under the most relevant section, or create a new section if needed. Keep entries concise and include a minimal code example where it aids clarity.
 
 ## Commit & Pull Request Guidelines
 

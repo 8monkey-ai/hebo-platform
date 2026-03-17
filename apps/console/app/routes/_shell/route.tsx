@@ -17,6 +17,7 @@ import {
 } from "@hebo/shared-ui/components/Sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@hebo/shared-ui/components/Tooltip";
 
+import { ErrorView } from "~console/components/ui/ErrorView";
 import { PageLoader } from "~console/components/ui/PageLoader";
 import { authService } from "~console/lib/auth";
 import { dontRevalidateOnFormErrors } from "~console/lib/errors";
@@ -42,22 +43,26 @@ export async function clientLoader() {
   const agents = await api.agents.get();
 
   if (!shellStore.models) {
-    const models = await gateway.models.get({ query: { endpoints: true } });
+    try {
+      const models = await gateway.models.get({ query: { endpoints: true } });
 
-    const supportedModels = Object.fromEntries(
-      (models.data?.data ?? []).map((m) => [
-        m.id,
-        {
-          name: m.name,
-          modality: m.architecture.output_modalities[0],
-          providers: m.endpoints?.map((e) => e.tag) ?? [],
-          free: m.free === true,
-          requiresByok: m.requiresByok === true,
-        },
-      ]),
-    );
+      const supportedModels = Object.fromEntries(
+        (models.data?.data ?? []).map((m) => [
+          m.id,
+          {
+            name: m.name,
+            modality: m.architecture.output_modalities[0],
+            providers: m.endpoints?.map((e) => e.tag) ?? [],
+            free: m.free === true,
+            requiresByok: m.requiresByok === true,
+          },
+        ]),
+      );
 
-    shellStore.models = supportedModels;
+      shellStore.models = supportedModels;
+    } catch {
+      // Non-fatal — models will be fetched on next navigation
+    }
   }
 
   return { agents: agents?.data ?? [] };
@@ -66,7 +71,7 @@ export async function clientLoader() {
 export { dontRevalidateOnFormErrors as shouldRevalidate };
 
 export default function ShellLayout({ loaderData: { agents } }: Route.ComponentProps) {
-  const { user } = useSnapshot(shellStore);
+  const { user, organizations } = useSnapshot(shellStore);
 
   const { agent: activeAgent, branch: activeBranch } =
     useRoute("routes/_shell.agent.$agentSlug")?.loaderData ?? {};
@@ -115,7 +120,7 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
               </>
             )}
             <SidebarSeparator className="mx-0" />
-            <UserMenu user={user} />
+            <UserMenu user={user} organizations={organizations} />
           </SidebarFooter>
         </div>
       </Sidebar>
@@ -171,4 +176,8 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
       </SidebarProvider>
     </SidebarProvider>
   );
+}
+
+export function ErrorBoundary() {
+  return <ErrorView />;
 }

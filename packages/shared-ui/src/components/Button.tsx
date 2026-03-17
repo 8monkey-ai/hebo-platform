@@ -33,7 +33,7 @@ export function Button({
       {...props}
     >
       {isLoading && showSpinner && (
-        <Loader2Icon className="h-4 w-4 animate-spin" aria-hidden="true" />
+        <Loader2Icon className="size-4 animate-spin" aria-hidden="true" />
       )}
       {/* FUTURE: Gerundify title, e.g. "Create" -> "Creating...." */}
       {children}

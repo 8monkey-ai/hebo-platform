@@ -6,7 +6,14 @@ import { getSessionCookie } from "better-auth/cookies";
 import { authUrl } from "~console/lib/env";
 import { shellStore } from "~console/lib/shell";
 
-import { DEFAULT_EXPIRATION_MS, type ApiKey, type AuthService, type User } from "./types";
+import {
+  DEFAULT_EXPIRATION_MS,
+  type ApiKey,
+  type AuthService,
+  type OrgInvitation,
+  type OrgMember,
+  type User,
+} from "./types";
 
 const appRedirectPath = "/?after-signin";
 const appRedirectURL = `${globalThis.location.origin}${appRedirectPath}`;
@@ -48,14 +55,13 @@ export const authService: AuthService = {
       cookieName: "session_data",
     });
 
-    // FUTURE: This early return caches organizationId and will go stale on org switches.
-    // Revisit when organisation invitations are enabled (re-fetch session or listen for org-switch events).
     if (shellStore.user?.organizationId && hasSessionDataCookie) {
       return true;
     }
 
     // Disable cookie cache only after fresh sign-in to ensure we get the latest session
     const isComingFromSignIn = new URL(globalThis.location.href).searchParams.has("after-signin");
+
     const session = await authClient.getSession({
       query: { disableCookieCache: isComingFromSignIn },
     });
@@ -75,7 +81,23 @@ export const authService: AuthService = {
       .map((p) => p[0])
       .join("");
 
+    const orgsResult = await authClient.organization.list();
+    shellStore.organizations = (orgsResult.data ?? []).map((o) => ({
+      id: o.id,
+      name: o.name,
+      slug: o.slug,
+    }));
+
     shellStore.user = user;
+
+    // Resume pending invitation acceptance after sign-in redirect
+    const pendingInvitation = sessionStorage.getItem("hebo:pending-invitation");
+    if (pendingInvitation) {
+      sessionStorage.removeItem("hebo:pending-invitation");
+      globalThis.location.replace(`/accept-invitation?id=${encodeURIComponent(pendingInvitation)}`);
+      return false;
+    }
+
     return true;
   },
 
@@ -148,5 +170,76 @@ export const authService: AuthService = {
   async signOut() {
     await authClient.signOut();
     shellStore.user = undefined;
+    shellStore.organizations = [];
+  },
+
+  async getOrganization() {
+    const { data, error } = await authClient.organization.getFullOrganization();
+    if (error) throw new Error(error.message);
+    if (!data) return { members: [], invitations: [] };
+
+    const seen = new Set<string>();
+    const members: OrgMember[] = [];
+    for (const m of data.members as unknown as OrgMember[]) {
+      if (!seen.has(m.userId)) {
+        seen.add(m.userId);
+        members.push(m);
+      }
+    }
+
+    const invitations = ((data.invitations ?? []) as unknown as OrgInvitation[]).filter(
+      (i) => i.status === "pending",
+    );
+
+    return { members, invitations };
+  },
+
+  async setActiveOrganization(orgId) {
+    const { error } = await authClient.organization.setActive({ organizationId: orgId });
+    if (error) throw new Error(error.message);
+    // Refresh the session_data cookie cache so subsequent API requests use the new org.
+    await authClient.getSession({ query: { disableCookieCache: true } });
+    globalThis.location.replace("/");
+  },
+
+  async inviteMember(email, role) {
+    const { error } = await authClient.organization.inviteMember({
+      email,
+      role: role as "member" | "admin" | "owner",
+    });
+    if (error) throw new Error(error.message);
+  },
+
+  async removeMember(memberIdOrEmail) {
+    const { error } = await authClient.organization.removeMember({ memberIdOrEmail });
+    if (error) throw new Error(error.message);
+  },
+
+  async cancelInvitation(invitationId) {
+    const { error } = await authClient.organization.cancelInvitation({ invitationId });
+    if (error) throw new Error(error.message);
+  },
+
+  async acceptInvitation(invitationId: string) {
+    const KEY = "hebo:pending-invitation";
+
+    const { error } = await authClient.organization.acceptInvitation({ invitationId });
+
+    if (error?.status === 401) {
+      if (sessionStorage.getItem(KEY) === invitationId) {
+        sessionStorage.removeItem(KEY);
+        throw new Error("Please sign in and try the invitation link again.");
+      }
+
+      sessionStorage.setItem(KEY, invitationId);
+      location.replace("/signin");
+      throw new Error("Redirecting to sign in…");
+    }
+
+    sessionStorage.removeItem(KEY);
+
+    if (error) {
+      throw new Error(error.message ?? "Failed to accept invitation.");
+    }
   },
 };
