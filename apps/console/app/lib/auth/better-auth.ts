@@ -74,6 +74,7 @@ export const authService: AuthService = {
       email: session.data.user.email,
       userId: session.data.user.id,
       organizationId: session.data.session.activeOrganizationId!,
+      image: session.data.user.image ?? undefined,
     };
 
     user.initials = (user?.name ?? user.email)
