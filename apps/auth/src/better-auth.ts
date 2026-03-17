@@ -40,7 +40,6 @@ export const auth = betterAuth({
   databaseHooks: {
     user: { create: { after: createOrganizationHook(prisma) } },
     session: { create: { before: createSessionHook(prisma) } },
-    member: { delete: { after: removeMemberHook(prisma) } },
   },
   experimental: { joins: true },
   plugins: [
@@ -77,6 +76,13 @@ export const auth = betterAuth({
               required: true,
             },
           },
+        },
+      },
+      // FUTURE: consider using after hook on database.member.delete
+      // https://github.com/better-auth/better-auth/issues/8653
+      organizationHooks: {
+        afterRemoveMember: async ({ member }) => {
+          await removeMemberHook(prisma)(member);
         },
       },
       async sendInvitationEmail(data, ctx) {
