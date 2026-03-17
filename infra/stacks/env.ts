@@ -20,16 +20,16 @@ export const smtpPass = getSstSecret("SmtpPass");
 export const smtpFrom = getSstSecret("SmtpFrom");
 
 // LLMs
-export const bedrockRoleArn = getSstSecret("BedrockRoleArn");
-export const bedrockRegion = getSstSecret("BedrockRegion");
-export const voyageApiKey = getSstSecret("VoyageApiKey");
-export const groqApiKey = getSstSecret("GroqApiKey");
-export const vertexServiceAccountEmail = getSstSecret("VertexServiceAccountEmail");
-export const vertexAwsProviderAudience = getSstSecret("VertexAwsProviderAudience");
-export const vertexProject = getSstSecret("VertexProject");
-export const vertexLocation = getSstSecret("VertexLocation");
 export const anthropicApiKey = getSstSecret("AnthropicApiKey");
+export const bedrockRegion = getSstSecret("BedrockRegion");
+export const bedrockRoleArn = getSstSecret("BedrockRoleArn");
+export const groqApiKey = getSstSecret("GroqApiKey");
 export const openAiApiKey = getSstSecret("OpenAiApiKey");
+export const vertexAwsProviderAudience = getSstSecret("VertexAwsProviderAudience");
+export const vertexLocation = getSstSecret("VertexLocation");
+export const vertexProject = getSstSecret("VertexProject");
+export const vertexServiceAccountEmail = getSstSecret("VertexServiceAccountEmail");
+export const voyageApiKey = getSstSecret("VoyageApiKey");
 
 // BYOK
 export const enforceByok = getSstSecret("EnforceByok");
