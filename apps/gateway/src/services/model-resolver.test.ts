@@ -35,7 +35,7 @@ describe("resolveProvider", () => {
   describe("requiresByok: true", () => {
     it("throws 402 BYOK_REQUIRED for non-free model without custom provider", async () => {
       const ctx = makeCtx({
-        modelId: "anthropic/claude-opus-4-6",
+        modelId: "anthropic/claude-opus-4.6",
         free: false,
         requiresByok: true,
       });
@@ -51,7 +51,7 @@ describe("resolveProvider", () => {
 
     it("throws 402 BYOK_REQUIRED for non-free model with custom provider slug but no credentials", async () => {
       const ctx = makeCtx({
-        modelId: "anthropic/claude-opus-4-6",
+        modelId: "anthropic/claude-opus-4.6",
         free: false,
         requiresByok: true,
         customProviderSlug: "bedrock",
@@ -76,7 +76,7 @@ describe("resolveProvider", () => {
   describe("requiresByok: false", () => {
     it("does not throw for non-free model without custom provider", async () => {
       const ctx = makeCtx({
-        modelId: "anthropic/claude-opus-4-6",
+        modelId: "anthropic/claude-opus-4.6",
         free: false,
         requiresByok: false,
       });

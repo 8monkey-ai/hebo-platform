@@ -58,7 +58,7 @@ export const gw = gateway({
     gemini["v3.x"].map((preset) =>
       preset({ providers: ["vertex"], ...withTier("google/gemini-2.5-pro") }),
     ),
-    claudeOpus46({ providers: ["bedrock", "anthropic"], ...withTier("anthropic/claude-opus-4-6") }),
+    claudeOpus46({ providers: ["bedrock", "anthropic"], ...withTier("anthropic/claude-opus-4.6") }),
     claudeSonnet46({ providers: ["bedrock", "anthropic"], ...withTier("anthropic/claude-sonnet-4.6") }),
     claudeHaiku45({ providers: ["bedrock", "anthropic"], ...withTier("anthropic/claude-haiku-4.5") }),
     nova2MultimodalEmbeddings({ providers: ["bedrock"], ...withTier("amazon/nova-2-multimodal-embeddings") }),
