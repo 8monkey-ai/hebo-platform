@@ -68,7 +68,6 @@ export const authService = new Elysia({ name: "auth-service" })
     let organizationId: string | undefined;
 
     if (cookie) {
-      // Fast path: decrypt the session_data cookie locally (no server call)
       const session = await getCookieCache(ctx.request, {
         secret: authSecret,
         isSecure: betterAuthCookieOptions.advanced.useSecureCookies,
@@ -77,15 +76,6 @@ export const authService = new Elysia({ name: "auth-service" })
       if (session) {
         userId = session.user.id;
         organizationId = session.session.activeOrganizationId;
-      } else {
-        // Cookie cache miss (stale, expired, or absent session_data cookie).
-        // Fall back to validating the session token via the auth server so
-        // that a missing/stale cache cookie doesn't lock the user out.
-        const { data } = await authClient.getSession();
-        if (data?.session) {
-          userId = data.user.id;
-          organizationId = data.session.activeOrganizationId;
-        }
       }
     } else if (authorization) {
       const { data: result } = await authClient.internal.verifyApiKey({
