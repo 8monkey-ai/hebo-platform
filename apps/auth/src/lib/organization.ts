@@ -1,6 +1,16 @@
 import { slugFromName } from "@hebo/shared-api/utils/create-slug";
 
-import type { PrismaClient } from "~auth/generated/prisma/client";
+import type { Prisma, PrismaClient } from "~auth/generated/prisma/client";
+
+const updateOrganizationInSession = async (
+  tx: Prisma.TransactionClient,
+  userId: string,
+  orgId: string | null,
+) =>
+  tx.sessions.updateMany({
+    where: { userId },
+    data: { activeOrganizationId: orgId },
+  });
 
 export const createOrganizationHook = (prisma: PrismaClient) => {
   return async (user: { id: string; name?: string | null; email: string }) => {
@@ -22,45 +32,18 @@ export const createOrganizationHook = (prisma: PrismaClient) => {
           createdAt: new Date(),
         },
       });
-      await tx.sessions.updateMany({
-        where: { userId: user.id, activeOrganizationId: null },
-        data: { activeOrganizationId: org.id },
-      });
+      await updateOrganizationInSession(tx, user.id, org.id);
     });
   };
 };
 
-export const removeMemberHook = (prisma: PrismaClient) => {
-  return async (member: { userId: string; organizationId: string }) => {
+export const syncActiveOrganizationHook = (prisma: PrismaClient) => {
+  return async (session: { userId: string; activeOrganizationId?: string | null }) => {
+    if (session.activeOrganizationId != null) return;
     await prisma.$transaction(async (tx) => {
-      const nextMembership = await tx.members.findFirst({
-        where: {
-          userId: member.userId,
-          organizationId: { not: member.organizationId },
-        },
-      });
-
-      await tx.sessions.updateMany({
-        where: {
-          userId: member.userId,
-          activeOrganizationId: member.organizationId,
-        },
-        data: {
-          activeOrganizationId: nextMembership?.organizationId ?? null,
-        },
-      });
+      const orgId = (await tx.members.findFirst({ where: { userId: session.userId } }))
+        ?.organizationId;
+      await updateOrganizationInSession(tx, session.userId, orgId ?? null);
     });
-  };
-};
-
-export const createSessionHook = (prisma: PrismaClient) => {
-  return async (session: { userId: string }) => {
-    // FUTURE: Define ordering of organizations
-    const membership = await prisma.members.findFirst({
-      where: { userId: session.userId },
-    });
-    return {
-      data: { ...session, activeOrganizationId: membership?.organizationId },
-    };
   };
 };

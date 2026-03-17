@@ -11,7 +11,7 @@ import { getSecret } from "@hebo/shared-api/utils/secrets";
 import { PrismaClient } from "~auth/generated/prisma/client";
 
 import { sendOrganizationInvitationEmail, sendVerificationOtpEmail } from "./lib/email";
-import { createOrganizationHook, createSessionHook, removeMemberHook } from "./lib/organization";
+import { createOrganizationHook, syncActiveOrganizationHook } from "./lib/organization";
 import { verifyApiKeyPlugin, type AuthWithApiKeyPlugin } from "./lib/verify-api-key-plugin";
 
 export const prisma = new PrismaClient({
@@ -39,7 +39,10 @@ export const auth = betterAuth({
   }),
   databaseHooks: {
     user: { create: { after: createOrganizationHook(prisma) } },
-    session: { create: { before: createSessionHook(prisma) } },
+    session: {
+      create: { after: syncActiveOrganizationHook(prisma) },
+      update: { after: syncActiveOrganizationHook(prisma) },
+    },
   },
   experimental: { joins: true },
   plugins: [
@@ -78,11 +81,11 @@ export const auth = betterAuth({
           },
         },
       },
-      // FUTURE: consider using after hook on database.member.delete
-      // https://github.com/better-auth/better-auth/issues/8653
       organizationHooks: {
+        // FUTURE: consider using after hook on database.member.delete
+        // https://github.com/better-auth/better-auth/issues/8653
         afterRemoveMember: async ({ member }) => {
-          await removeMemberHook(prisma)(member);
+          await syncActiveOrganizationHook(prisma)({ userId: member.userId });
         },
       },
       async sendInvitationEmail(data, ctx) {
