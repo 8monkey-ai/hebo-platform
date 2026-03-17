@@ -62,49 +62,45 @@ export const authService: AuthService = {
     // Disable cookie cache only after fresh sign-in to ensure we get the latest session
     const isComingFromSignIn = new URL(globalThis.location.href).searchParams.has("after-signin");
 
-    try {
-      const [session, orgsResult] = await Promise.all([
-        authClient.getSession({ query: { disableCookieCache: isComingFromSignIn } }),
-        authClient.organization.list(),
-      ]);
-      if (!session?.data?.user) {
-        return redirectToSignIn();
-      }
-
-      const user: User = {
-        name: session.data.user.name,
-        email: session.data.user.email,
-        userId: session.data.user.id,
-        organizationId: session.data.session.activeOrganizationId!,
-      };
-
-      user.initials = (user?.name ?? user.email)
-        .split(user?.name ? " " : "@")
-        .map((p) => p[0])
-        .join("");
-
-      shellStore.organizations = (orgsResult.data ?? []).map((o) => ({
-        id: o.id,
-        name: o.name,
-        slug: o.slug,
-      }));
-
-      shellStore.user = user;
-
-      // Resume pending invitation acceptance after sign-in redirect
-      const pendingInvitation = sessionStorage.getItem("hebo:pending-invitation");
-      if (pendingInvitation) {
-        sessionStorage.removeItem("hebo:pending-invitation");
-        globalThis.location.replace(
-          `/accept-invitation?id=${encodeURIComponent(pendingInvitation)}`,
-        );
-        return false;
-      }
-
-      return true;
-    } catch {
+    const session = await authClient.getSession({
+      query: { disableCookieCache: isComingFromSignIn },
+    });
+    if (!session?.data?.user) {
       return redirectToSignIn();
     }
+
+    const user: User = {
+      name: session.data.user.name,
+      email: session.data.user.email,
+      userId: session.data.user.id,
+      organizationId: session.data.session.activeOrganizationId!,
+    };
+
+    user.initials = (user?.name ?? user.email)
+      .split(user?.name ? " " : "@")
+      .map((p) => p[0])
+      .join("");
+
+    const orgsResult = await authClient.organization.list();
+    shellStore.organizations = (orgsResult.data ?? []).map((o) => ({
+      id: o.id,
+      name: o.name,
+      slug: o.slug,
+    }));
+
+    shellStore.user = user;
+
+    // Resume pending invitation acceptance after sign-in redirect
+    const pendingInvitation = sessionStorage.getItem("hebo:pending-invitation");
+    if (pendingInvitation) {
+      sessionStorage.removeItem("hebo:pending-invitation");
+      globalThis.location.replace(
+        `/accept-invitation?id=${encodeURIComponent(pendingInvitation)}`,
+      );
+      return false;
+    }
+
+    return true;
   },
 
   async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
