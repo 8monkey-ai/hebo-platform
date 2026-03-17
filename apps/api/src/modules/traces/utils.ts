@@ -2,6 +2,17 @@ export function escapeSqlIdentifier(value: string): string {
   return value.replaceAll(`"`, `""`);
 }
 
+// Workaround for GreptimeDB cluster-mode bug where binary-encoded parameters
+// in the Postgres extended query protocol hang indefinitely.
+// See: https://github.com/GreptimeTeam/greptimedb/issues/7819
+export function escapeSqlString(value: string): string {
+  return `'${value.replaceAll("'", "''")}'`;
+}
+
+export function toTimestampLiteral(value: Date): string {
+  return `'${value.toISOString()}'`;
+}
+
 export function parseNullableNumber(value: unknown): number | null {
   if (value === null || value === undefined || value === "") return null;
   if (typeof value === "number") return Number.isFinite(value) ? value : null;

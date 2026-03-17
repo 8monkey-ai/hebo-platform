@@ -47,6 +47,8 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
       type: aliasPath,
       // Currently, we only support routing to the first provider.
       customProviderSlug: modelConfig?.providers[0] as ProviderSlug,
+      free: modelConfig?.additionalProperties?.free as boolean | undefined,
+      requiresByok: modelConfig?.additionalProperties?.requiresByok as boolean | undefined,
     };
     return aliasPath;
   }
@@ -73,10 +75,13 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
     throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
   }
 
+  const catalogModel = models[model.type as keyof typeof models];
   state.modelConfig = {
     type: model.type,
     // Currently, we only support routing to the first provider.
     customProviderSlug: model.routing?.only?.[0] as ProviderSlug | undefined,
+    free: catalogModel?.additionalProperties?.free as boolean | undefined,
+    requiresByok: catalogModel?.additionalProperties?.requiresByok as boolean | undefined,
   };
 
   return model.type;
@@ -133,11 +138,40 @@ export async function resolveProvider(ctx: ResolveProviderHookContext) {
     await injectMetadataCredentials();
   }
 
-  const { customProviderSlug } = state.modelConfig as {
+  const { customProviderSlug, free, requiresByok } = state.modelConfig as {
     customProviderSlug?: ProviderSlug;
+    free?: boolean;
+    requiresByok?: boolean;
   };
 
   if (customProviderSlug) {
-    return resolveCustomProvider(prismaClient, organizationId, modelId, customProviderSlug);
+    const provider = await resolveCustomProvider(
+      prismaClient,
+      organizationId,
+      modelId,
+      customProviderSlug,
+    );
+
+    if (provider) return provider;
+
+    // Org configured a custom provider slug, but no credentials found
+    if (requiresByok && free === false) {
+      throw new GatewayError(
+        "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
+        402,
+        "BYOK_REQUIRED",
+      );
+    }
+
+    return;
+  }
+
+  // No custom provider configured — block non-free models when enforcement is on
+  if (requiresByok && free === false) {
+    throw new GatewayError(
+      "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
+      402,
+      "BYOK_REQUIRED",
+    );
   }
 }

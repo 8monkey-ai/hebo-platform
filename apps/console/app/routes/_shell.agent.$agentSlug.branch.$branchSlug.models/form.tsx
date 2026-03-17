@@ -1,10 +1,11 @@
 import { useForm, type FieldMetadata } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
-import { Brain, ChevronsUpDown, Edit } from "lucide-react";
+import { Brain, ChevronsUpDown, Edit, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { useFetcher } from "react-router";
+import { Link, useFetcher } from "react-router";
 import { useSnapshot } from "valtio";
 
+import { Alert, AlertDescription } from "@hebo/shared-ui/components/Alert";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
 import { Card, CardContent, CardFooter, CardHeader } from "@hebo/shared-ui/components/Card";
@@ -159,9 +160,10 @@ function ModelCard(props: {
   } = props;
 
   const { models: supportedModels } = useSnapshot(shellStore);
-  const availableProviders = providers.filter((p) =>
-    supportedModels?.[model.getFieldset().type.value ?? ""]?.providers?.includes(p.slug),
-  );
+  const selectedModelType = model.getFieldset().type.value ?? "";
+  const selectedModel = supportedModels?.[selectedModelType];
+  const isByokRequired = selectedModel?.requiresByok === true;
+  const availableProviders = providers.filter((p) => selectedModel?.providers?.includes(p.slug));
 
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [routingEnabled, setRoutingEnabled] = useState(Boolean(model.getFieldset().routing.value));
@@ -230,6 +232,22 @@ function ModelCard(props: {
               </Field>
             </FieldGroup>
 
+            {isByokRequired && (
+              <Alert>
+                <Info className="size-4" />
+                <AlertDescription>
+                  This model requires your own provider key. Configure one on the{" "}
+                  <Link
+                    to={`/agent/${agentSlug}/branch/${branchSlug}/providers`}
+                    className="underline"
+                  >
+                    Providers page
+                  </Link>
+                  , then select it in "Advanced options" → "Bring Your Own Provider".
+                </AlertDescription>
+              </Alert>
+            )}
+
             <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
               <div className="flex items-center gap-1">
                 <h4 className="text-sm font-medium">Advanced options</h4>
@@ -255,7 +273,14 @@ function ModelCard(props: {
                   <FieldContent>
                     <FieldLabel htmlFor={`byo-${aliasPath}`}>Bring Your Own Provider</FieldLabel>
                     <FieldDescription>
-                      Setup your credentials first in providers settings
+                      Route requests through your own{" "}
+                      <Link
+                        to={`/agent/${agentSlug}/branch/${branchSlug}/providers`}
+                        className="underline"
+                      >
+                        provider credentials
+                      </Link>
+                      .
                     </FieldDescription>
                   </FieldContent>
                   <Field
@@ -264,15 +289,21 @@ function ModelCard(props: {
                   >
                     <FieldControl disabled={!routingEnabled}>
                       <Select
-                        items={availableProviders.map((provider) => ({
-                          value: provider.slug,
-                          label: provider.name,
-                        }))}
-                        placeholder={
+                        items={
                           availableProviders.length > 0
-                            ? "Select provider"
-                            : "No supported providers configured"
+                            ? availableProviders.map((provider) => ({
+                                value: provider.slug,
+                                label: provider.name,
+                              }))
+                            : [
+                                {
+                                  value: "__none__",
+                                  label: "No providers configured",
+                                  disabled: true,
+                                },
+                              ]
                         }
+                        placeholder="Select provider"
                         aria-label="Select Provider"
                       />
                     </FieldControl>
