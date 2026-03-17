@@ -19,6 +19,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@hebo/shared-ui/components/DropdownMenu";
 import {
@@ -92,25 +95,29 @@ export function UserMenu({ user, organizations }: { user?: User; organizations: 
 
             {organizations.length > 1 && (
               <DropdownMenuGroup>
-                <DropdownMenuLabel className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Building2 />
-                  Organization
-                </DropdownMenuLabel>
-                {activeOrg && (
-                  <DropdownMenuItem className="gap-2 p-2" disabled>
-                    <span className="truncate">{activeOrg.name}</span>
-                    <Check className="ml-auto" aria-hidden="true" />
-                  </DropdownMenuItem>
-                )}
-                {otherOrgs.map((org) => (
-                  <DropdownMenuItem
-                    key={org.id}
-                    className="gap-2 p-2"
-                    onClick={() => authService.setActiveOrganization(org.id)}
-                  >
-                    <span className="truncate">{org.name}</span>
-                  </DropdownMenuItem>
-                ))}
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger className="gap-2 p-2">
+                    <Building2 />
+                    <span className="truncate">{activeOrg?.name ?? "Organization"}</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    {activeOrg && (
+                      <DropdownMenuItem className="gap-2 p-2" disabled>
+                        <span className="truncate">{activeOrg.name}</span>
+                        <Check className="ml-auto" aria-hidden="true" />
+                      </DropdownMenuItem>
+                    )}
+                    {otherOrgs.map((org) => (
+                      <DropdownMenuItem
+                        key={org.id}
+                        className="gap-2 p-2"
+                        onClick={() => authService.setActiveOrganization(org.id)}
+                      >
+                        <span className="truncate">{org.name}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
                 <DropdownMenuSeparator />
               </DropdownMenuGroup>
             )}
