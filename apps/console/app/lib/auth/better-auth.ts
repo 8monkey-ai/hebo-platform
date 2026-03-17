@@ -59,10 +59,12 @@ export const authService: AuthService = {
       return true;
     }
 
-    // Disable cookie cache only after fresh sign-in to ensure we get the latest session
-    const isComingFromSignIn = new URL(globalThis.location.href).searchParams.has("after-signin");
+    // Always bypass the cookie cache so we get the authoritative session from
+    // the server.  This avoids stale activeOrganizationId after a user is
+    // removed from an org (the server-side removeMemberHook already corrects
+    // the session, but the cookie cache would still hold the old value).
     const [session, orgsResult] = await Promise.all([
-      authClient.getSession({ query: { disableCookieCache: isComingFromSignIn } }),
+      authClient.getSession({ query: { disableCookieCache: true } }),
       authClient.organization.list(),
     ]);
     if (!session?.data?.user) {
@@ -86,25 +88,6 @@ export const authService: AuthService = {
       name: o.name,
       slug: o.slug,
     }));
-
-    // Validate the active org — the user may have been removed from it while
-    // their session was cached.  If stale, switch to a valid org.
-    const activeOrgValid =
-      user.organizationId && shellStore.organizations.some((o) => o.id === user.organizationId);
-
-    if (!activeOrgValid) {
-      if (shellStore.organizations.length > 0) {
-        const fallbackOrg = shellStore.organizations[0];
-        const { error: setActiveError } = await authClient.organization.setActive({
-          organizationId: fallbackOrg.id,
-        });
-        if (!setActiveError) {
-          user.organizationId = fallbackOrg.id;
-        }
-      } else {
-        return redirectToSignIn();
-      }
-    }
 
     shellStore.user = user;
 
