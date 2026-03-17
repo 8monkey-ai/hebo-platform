@@ -59,17 +59,12 @@ export const authService: AuthService = {
       return true;
     }
 
-    // Always bypass the cookie cache so we get the authoritative session from
-    // the server.  This avoids stale activeOrganizationId after a user is
-    // removed from an org (the server-side removeMemberHook already corrects
-    // the session, but the cookie cache would still hold the old value).
-    //
-    // The entire slow path is wrapped in try/catch so that a transient auth
-    // server error (or the Better Auth client throwing instead of returning
-    // { error }) never crashes the shell route with an unhandled rejection.
+    // Disable cookie cache only after fresh sign-in to ensure we get the latest session
+    const isComingFromSignIn = new URL(globalThis.location.href).searchParams.has("after-signin");
+
     try {
       const [session, orgsResult] = await Promise.all([
-        authClient.getSession({ query: { disableCookieCache: true } }),
+        authClient.getSession({ query: { disableCookieCache: isComingFromSignIn } }),
         authClient.organization.list(),
       ]);
       if (!session?.data?.user) {
