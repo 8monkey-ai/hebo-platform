@@ -179,11 +179,13 @@ export const authService: AuthService = {
     if (!data) return { members: [], invitations: [] };
 
     const seen = new Set<string>();
-    const members = (data.members as unknown as OrgMember[]).filter((m) => {
-      if (seen.has(m.userId)) return false;
-      seen.add(m.userId);
-      return true;
-    });
+    const members: OrgMember[] = [];
+    for (const m of data.members as unknown as OrgMember[]) {
+      if (!seen.has(m.userId)) {
+        seen.add(m.userId);
+        members.push(m);
+      }
+    }
 
     const invitations = ((data.invitations ?? []) as unknown as OrgInvitation[]).filter(
       (i) => i.status === "pending",
