@@ -24,12 +24,12 @@ import { ClearCredentialsDialog } from "./clear";
 import { ConfigureProviderDialog } from "./configure";
 
 const ProviderIcons = {
-  bedrock: Bedrock,
-  voyage: Voyage,
-  vertex: Vertex,
-  groq: Groq,
   anthropic: Anthropic,
+  bedrock: Bedrock,
+  groq: Groq,
   openai: OpenAI,
+  vertex: Vertex,
+  voyage: Voyage,
 } as const;
 
 type Provider = {
@@ -52,7 +52,7 @@ export function ProvidersList({ providers }: { providers: Provider[] }) {
 
   return (
     <div className="flex flex-col gap-2">
-      {providers.map((provider) => {
+      {[...providers].sort((a, b) => a.name.localeCompare(b.name)).map((provider) => {
         return (
           <Item key={provider.slug} variant="outline" className="bg-background">
             <ItemMedia>

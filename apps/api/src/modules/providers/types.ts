@@ -1,12 +1,12 @@
 import { t, type Static } from "elysia";
 
 export const supportedProviders = {
-  bedrock: { name: "Amazon Bedrock" },
-  vertex: { name: "Google Vertex AI" },
-  groq: { name: "Groq" },
-  voyage: { name: "Voyage AI" },
   anthropic: { name: "Anthropic" },
+  bedrock: { name: "Amazon Bedrock" },
+  groq: { name: "Groq" },
   openai: { name: "OpenAI" },
+  vertex: { name: "Google Vertex AI" },
+  voyage: { name: "Voyage AI" },
 } as const;
 
 export const ProviderSlug = t.Enum(
