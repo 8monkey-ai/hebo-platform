@@ -63,71 +63,78 @@ export const authService: AuthService = {
     // the server.  This avoids stale activeOrganizationId after a user is
     // removed from an org (the server-side removeMemberHook already corrects
     // the session, but the cookie cache would still hold the old value).
-    const [session, orgsResult] = await Promise.all([
-      authClient.getSession({ query: { disableCookieCache: true } }),
-      authClient.organization.list(),
-    ]);
-    if (!session?.data?.user) {
-      return redirectToSignIn();
-    }
-
-    const user: User = {
-      name: session.data.user.name,
-      email: session.data.user.email,
-      userId: session.data.user.id,
-      organizationId: session.data.session.activeOrganizationId!,
-    };
-
-    user.initials = (user?.name ?? user.email)
-      .split(user?.name ? " " : "@")
-      .map((p) => p[0])
-      .join("");
-
-    shellStore.organizations = (orgsResult.data ?? []).map((o) => ({
-      id: o.id,
-      name: o.name,
-      slug: o.slug,
-    }));
-
-    // Validate the active org — the user may have been removed from it while
-    // their session was cached.  If stale, switch to a valid org.
-    const activeOrgValid =
-      user.organizationId && shellStore.organizations.some((o) => o.id === user.organizationId);
-
-    if (!activeOrgValid) {
-      if (shellStore.organizations.length > 0) {
-        user.organizationId = shellStore.organizations[0].id;
-      } else {
+    //
+    // The entire slow path is wrapped in try/catch so that a transient auth
+    // server error (or the Better Auth client throwing instead of returning
+    // { error }) never crashes the shell route with an unhandled rejection.
+    try {
+      const [session, orgsResult] = await Promise.all([
+        authClient.getSession({ query: { disableCookieCache: true } }),
+        authClient.organization.list(),
+      ]);
+      if (!session?.data?.user) {
         return redirectToSignIn();
       }
-    }
 
-    // Always call setActive on the slow path to refresh the session_data
-    // cookie.  getSession (even with disableCookieCache) is read-only and does
-    // not update the cookie.  Without this, the API middleware
-    // (getCookieCache) would still read a stale cookie and reject the request
-    // — e.g. after a user is removed from an org and the removeMemberHook
-    // updated the DB session but the browser cookie was never refreshed.
-    const { error: refreshError } = await authClient.organization.setActive({
-      organizationId: user.organizationId,
-    });
-    if (refreshError) {
-      // setActive failed — the org may be invalid.  Redirect to sign-in as a
-      // safe fallback rather than proceeding with a stale cookie.
+      const user: User = {
+        name: session.data.user.name,
+        email: session.data.user.email,
+        userId: session.data.user.id,
+        organizationId: session.data.session.activeOrganizationId!,
+      };
+
+      user.initials = (user?.name ?? user.email)
+        .split(user?.name ? " " : "@")
+        .map((p) => p[0])
+        .join("");
+
+      shellStore.organizations = (orgsResult.data ?? []).map((o) => ({
+        id: o.id,
+        name: o.name,
+        slug: o.slug,
+      }));
+
+      // Validate the active org — the user may have been removed from it while
+      // their session was cached.  If stale, switch to a valid org.
+      const activeOrgValid =
+        user.organizationId && shellStore.organizations.some((o) => o.id === user.organizationId);
+
+      if (!activeOrgValid) {
+        if (shellStore.organizations.length > 0) {
+          user.organizationId = shellStore.organizations[0].id;
+        } else {
+          return redirectToSignIn();
+        }
+      }
+
+      // Always call setActive on the slow path to refresh the session_data
+      // cookie.  Without this, the API middleware (getCookieCache) would still
+      // read a stale cookie and reject the request — e.g. after a user is
+      // removed from an org and the removeMemberHook updated the DB session
+      // but the browser cookie was never refreshed.
+      const { error: refreshError } = await authClient.organization.setActive({
+        organizationId: user.organizationId,
+      });
+      if (refreshError) {
+        return redirectToSignIn();
+      }
+
+      shellStore.user = user;
+
+      // Resume pending invitation acceptance after sign-in redirect
+      const pendingInvitation = sessionStorage.getItem("hebo:pending-invitation");
+      if (pendingInvitation) {
+        sessionStorage.removeItem("hebo:pending-invitation");
+        globalThis.location.replace(
+          `/accept-invitation?id=${encodeURIComponent(pendingInvitation)}`,
+        );
+        return false;
+      }
+
+      return true;
+    } catch {
       return redirectToSignIn();
     }
-
-    shellStore.user = user;
-
-    // Resume pending invitation acceptance after sign-in redirect
-    const pendingInvitation = sessionStorage.getItem("hebo:pending-invitation");
-    if (pendingInvitation) {
-      sessionStorage.removeItem("hebo:pending-invitation");
-      globalThis.location.replace(`/accept-invitation?id=${encodeURIComponent(pendingInvitation)}`);
-      return false;
-    }
-
-    return true;
   },
 
   async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {

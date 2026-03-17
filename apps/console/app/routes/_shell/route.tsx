@@ -19,6 +19,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from "@hebo/shared-ui/components/Tooltip";
 
 import { PageLoader } from "~console/components/ui/PageLoader";
+import { ErrorView } from "~console/components/ui/ErrorView";
 import { authService } from "~console/lib/auth";
 import { dontRevalidateOnFormErrors } from "~console/lib/errors";
 import { api, gateway } from "~console/lib/service";
@@ -63,21 +64,25 @@ export async function clientLoader() {
   }
 
   if (!shellStore.models) {
-    const models = await gateway.models.get({ query: { endpoints: true } });
+    try {
+      const models = await gateway.models.get({ query: { endpoints: true } });
 
-    const supportedModels = Object.fromEntries(
-      (models.data?.data ?? []).map((m) => [
-        m.id,
-        {
-          name: m.name,
-          modality: m.architecture.output_modalities[0],
-          providers: m.endpoints?.map((e) => e.tag) ?? [],
-          monthlyFreeTokens: m.pricing?.monthly_free_tokens ?? 0,
-        },
-      ]),
-    );
+      const supportedModels = Object.fromEntries(
+        (models.data?.data ?? []).map((m) => [
+          m.id,
+          {
+            name: m.name,
+            modality: m.architecture.output_modalities[0],
+            providers: m.endpoints?.map((e) => e.tag) ?? [],
+            monthlyFreeTokens: m.pricing?.monthly_free_tokens ?? 0,
+          },
+        ]),
+      );
 
-    shellStore.models = supportedModels;
+      shellStore.models = supportedModels;
+    } catch {
+      // Non-fatal — models will be fetched on next navigation
+    }
   }
 
   return { agents: agents?.data ?? [] };
@@ -191,4 +196,8 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
       </SidebarProvider>
     </SidebarProvider>
   );
+}
+
+export function ErrorBoundary() {
+  return <ErrorView />;
 }
