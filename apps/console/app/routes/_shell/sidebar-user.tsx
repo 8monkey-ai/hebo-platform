@@ -1,4 +1,12 @@
-import { BookOpen, ChevronsUpDown, ExternalLink, Keyboard, LogOut } from "lucide-react";
+import {
+  BookOpen,
+  Building2,
+  Check,
+  ChevronsUpDown,
+  ExternalLink,
+  Keyboard,
+  LogOut,
+} from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 
@@ -11,6 +19,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@hebo/shared-ui/components/DropdownMenu";
 import {
@@ -19,13 +30,17 @@ import {
   SidebarMenuItem,
 } from "@hebo/shared-ui/components/Sidebar";
 
-import type { User } from "~console/lib/auth/types";
+import { authService } from "~console/lib/auth";
+import type { Organization, User } from "~console/lib/auth/types";
 import { kbs } from "~console/lib/utils";
 
 import { KeyboardShortcuts } from "./shortcuts";
 
-export function UserMenu({ user }: { user?: User }) {
+export function UserMenu({ user, organizations }: { user?: User; organizations: Organization[] }) {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
+  const activeOrg = organizations.find((o) => o.id === user?.organizationId);
+  const otherOrgs = organizations.filter((o) => o.id !== user?.organizationId);
 
   return (
     <SidebarMenu>
@@ -76,6 +91,38 @@ export function UserMenu({ user }: { user?: User }) {
                 <DropdownMenuShortcut>{kbs("mod+/")}</DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+            </DropdownMenuGroup>
+
+            {organizations.length > 1 && (
+              <DropdownMenuGroup>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger className="gap-2 p-2">
+                    <Building2 />
+                    <span className="truncate">{activeOrg?.name ?? "Organization"}</span>
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent>
+                    {activeOrg && (
+                      <DropdownMenuItem className="gap-2 p-2" disabled>
+                        <span className="truncate">{activeOrg.name}</span>
+                        <Check className="ml-auto" aria-hidden="true" />
+                      </DropdownMenuItem>
+                    )}
+                    {otherOrgs.map((org) => (
+                      <DropdownMenuItem
+                        key={org.id}
+                        className="gap-2 p-2"
+                        onClick={() => authService.setActiveOrganization(org.id)}
+                      >
+                        <span className="truncate">{org.name}</span>
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator />
+              </DropdownMenuGroup>
+            )}
+
+            <DropdownMenuGroup>
               <DropdownMenuItem
                 render={
                   <Link to="/signout" viewTransition>

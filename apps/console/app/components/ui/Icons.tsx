@@ -135,6 +135,7 @@ export function OpenAI({ size = DEFAULT_SIZE }: { size?: number }) {
   );
 }
 
+
 export function Voyage({ size = DEFAULT_SIZE }: { size?: number }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="-6 -6 36 36">
