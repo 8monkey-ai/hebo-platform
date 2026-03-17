@@ -59,7 +59,10 @@ export const gw = gateway({
     claudeOpus46({ providers: ["bedrock"], ...withTier("anthropic/claude-opus-4-6") }),
     claudeSonnet46({ providers: ["bedrock"], ...withTier("anthropic/claude-sonnet-4.6") }),
     claudeHaiku45({ providers: ["bedrock"], ...withTier("anthropic/claude-haiku-4.5") }),
-    nova2MultimodalEmbeddings({ providers: ["bedrock"], ...withTier("amazon/nova-2-multimodal-embeddings") }),
+    nova2MultimodalEmbeddings({
+      providers: ["bedrock"],
+      ...withTier("amazon/nova-2-multimodal-embeddings"),
+    }),
     voyage35({ providers: ["voyage"], ...withTier("voyage/voyage-3.5") }),
   ),
 

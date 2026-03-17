@@ -34,7 +34,11 @@ function makeCtx(overrides: {
 describe("resolveProvider", () => {
   describe("requiresByok: true", () => {
     it("throws 402 BYOK_REQUIRED for non-free model without custom provider", async () => {
-      const ctx = makeCtx({ modelId: "anthropic/claude-opus-4-6", free: false, requiresByok: true });
+      const ctx = makeCtx({
+        modelId: "anthropic/claude-opus-4-6",
+        free: false,
+        requiresByok: true,
+      });
       try {
         await resolveProvider(ctx);
         expect.unreachable("should have thrown");
@@ -71,7 +75,11 @@ describe("resolveProvider", () => {
 
   describe("requiresByok: false", () => {
     it("does not throw for non-free model without custom provider", async () => {
-      const ctx = makeCtx({ modelId: "anthropic/claude-opus-4-6", free: false, requiresByok: false });
+      const ctx = makeCtx({
+        modelId: "anthropic/claude-opus-4-6",
+        free: false,
+        requiresByok: false,
+      });
       const result = await resolveProvider(ctx);
       expect(result).toBeUndefined();
     });

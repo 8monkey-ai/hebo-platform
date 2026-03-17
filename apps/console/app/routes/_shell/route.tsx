@@ -17,8 +17,8 @@ import {
 } from "@hebo/shared-ui/components/Sidebar";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@hebo/shared-ui/components/Tooltip";
 
-import { PageLoader } from "~console/components/ui/PageLoader";
 import { ErrorView } from "~console/components/ui/ErrorView";
+import { PageLoader } from "~console/components/ui/PageLoader";
 import { authService } from "~console/lib/auth";
 import { dontRevalidateOnFormErrors } from "~console/lib/errors";
 import { api, gateway } from "~console/lib/service";

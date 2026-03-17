@@ -32,6 +32,7 @@ Since we are using React Compiler, don't use useMemo, useCallback, and React.mem
 ### Search Params as State
 
 Use URL search params as the source of truth for filters, pagination, and presets — not component state. Create a dedicated `search-params.ts` module per feature with:
+
 - A `parse*SearchParams(searchParams)` function for use in `clientLoader`
 - A `use*SearchParams()` hook that wraps `useSearchParams` for use in components
 - An `updateParams` helper that mutates the `URLSearchParams` and resets page on filter changes
@@ -57,10 +58,14 @@ Always wrap Conform-powered forms in `FormControl` (from `@hebo/shared-ui/compon
   <input type="hidden" name="intent" value="create" />
   <Field name={fields.email.name}>
     <FieldLabel>Email</FieldLabel>
-    <FieldControl><Input /></FieldControl>
+    <FieldControl>
+      <Input />
+    </FieldControl>
     <FieldError />
   </Field>
-  <Button type="submit" isLoading={navigation.state !== "idle"}>Submit</Button>
+  <Button type="submit" isLoading={navigation.state !== "idle"}>
+    Submit
+  </Button>
 </FormControl>
 ```
 

@@ -8,8 +8,10 @@ export const modelConfigSchema = z.object({
       .string(msg)
       .trim()
       .min(1, msg)
-      .regex(aliasPattern, "Alias must start with a letter or number and contain only letters, numbers, hyphens, and underscores")
-  )("Please enter a unique alias name"),
+      .regex(
+        aliasPattern,
+        "Alias must start with a letter or number and contain only letters, numbers, hyphens, and underscores",
+      ))("Please enter a unique alias name"),
   type: ((msg) => z.string(msg).trim().min(1, msg))("Select one of the supported models"),
   routing: z
     .object({

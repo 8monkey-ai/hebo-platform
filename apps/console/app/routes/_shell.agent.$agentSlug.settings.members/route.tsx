@@ -2,6 +2,7 @@ import { parseWithZod } from "@conform-to/zod/v4";
 
 import { authService } from "~console/lib/auth";
 import { parseError } from "~console/lib/errors";
+
 import { inviteSchema } from "./invite-schema";
 
 export async function clientAction({ request }: { request: Request }) {
@@ -32,7 +33,8 @@ export async function clientAction({ request }: { request: Request }) {
 
   if (intent === "revoke") {
     const invitationId = formData.get("invitationId");
-    if (!invitationId || typeof invitationId !== "string") return { error: "Missing invitation ID" };
+    if (!invitationId || typeof invitationId !== "string")
+      return { error: "Missing invitation ID" };
     try {
       await authService.cancelInvitation(invitationId);
     } catch (error) {
