@@ -11,7 +11,7 @@ import { getSecret } from "@hebo/shared-api/utils/secrets";
 import { PrismaClient } from "~auth/generated/prisma/client";
 
 import { sendOrganizationInvitationEmail, sendVerificationOtpEmail } from "./lib/email";
-import { createOrganizationHook, createSessionHook } from "./lib/organization";
+import { createOrganizationHook, createSessionHook, removeMemberHook } from "./lib/organization";
 import { verifyApiKeyPlugin, type AuthWithApiKeyPlugin } from "./lib/verify-api-key-plugin";
 
 export const prisma = new PrismaClient({
@@ -40,6 +40,7 @@ export const auth = betterAuth({
   databaseHooks: {
     user: { create: { after: createOrganizationHook(prisma) } },
     session: { create: { before: createSessionHook(prisma) } },
+    member: { delete: { after: removeMemberHook(prisma) } },
   },
   experimental: { joins: true },
   plugins: [

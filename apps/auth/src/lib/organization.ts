@@ -30,6 +30,27 @@ export const createOrganizationHook = (prisma: PrismaClient) => {
   };
 };
 
+export const removeMemberHook = (prisma: PrismaClient) => {
+  return async (member: { userId: string; organizationId: string }) => {
+    const nextMembership = await prisma.members.findFirst({
+      where: {
+        userId: member.userId,
+        organizationId: { not: member.organizationId },
+      },
+    });
+
+    await prisma.sessions.updateMany({
+      where: {
+        userId: member.userId,
+        activeOrganizationId: member.organizationId,
+      },
+      data: {
+        activeOrganizationId: nextMembership?.organizationId ?? null,
+      },
+    });
+  };
+};
+
 export const createSessionHook = (prisma: PrismaClient) => {
   return async (session: { userId: string }) => {
     // FUTURE: Define ordering of organizations
