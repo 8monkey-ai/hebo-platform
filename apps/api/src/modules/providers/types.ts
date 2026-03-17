@@ -5,6 +5,8 @@ export const supportedProviders = {
   vertex: { name: "Google Vertex AI" },
   groq: { name: "Groq" },
   voyage: { name: "Voyage AI" },
+  anthropic: { name: "Anthropic" },
+  openai: { name: "OpenAI" },
 } as const;
 
 export const ProviderSlug = t.Enum(

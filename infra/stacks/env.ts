@@ -28,6 +28,8 @@ export const vertexServiceAccountEmail = getSstSecret("VertexServiceAccountEmail
 export const vertexAwsProviderAudience = getSstSecret("VertexAwsProviderAudience");
 export const vertexProject = getSstSecret("VertexProject");
 export const vertexLocation = getSstSecret("VertexLocation");
+export const anthropicApiKey = getSstSecret("AnthropicApiKey");
+export const openAiApiKey = getSstSecret("OpenAiApiKey");
 
 // BYOK
 export const enforceByok = getSstSecret("EnforceByok");
@@ -60,6 +62,8 @@ export const llmSecrets = [
   vertexAwsProviderAudience,
   vertexProject,
   vertexLocation,
+  anthropicApiKey,
+  openAiApiKey,
   enforceByok,
   freeModelIds,
 ];

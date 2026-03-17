@@ -42,23 +42,25 @@ export const gw = gateway({
       project: secrets.vertexProject,
     }),
     voyage: createProvider("voyage", { apiKey: secrets.voyageApiKey }),
+    anthropic: createProvider("anthropic", { apiKey: secrets.anthropicApiKey }),
+    openai: createProvider("openai", { apiKey: secrets.openAiApiKey }),
   },
 
   models: defineModelCatalog(
     gptOss20b({
-      providers: ["bedrock", "groq"],
+      providers: ["bedrock", "groq", "openai"],
       ...withTier("openai/gpt-oss-20b"),
     }),
     gptOss120b({
-      providers: ["bedrock", "groq"],
+      providers: ["bedrock", "groq", "openai"],
       ...withTier("openai/gpt-oss-120b"),
     }),
     gemini["v3.x"].map((preset) =>
       preset({ providers: ["vertex"], ...withTier("google/gemini-2.5-pro") }),
     ),
-    claudeOpus46({ providers: ["bedrock"], ...withTier("anthropic/claude-opus-4-6") }),
-    claudeSonnet46({ providers: ["bedrock"], ...withTier("anthropic/claude-sonnet-4.6") }),
-    claudeHaiku45({ providers: ["bedrock"], ...withTier("anthropic/claude-haiku-4.5") }),
+    claudeOpus46({ providers: ["bedrock", "anthropic"], ...withTier("anthropic/claude-opus-4-6") }),
+    claudeSonnet46({ providers: ["bedrock", "anthropic"], ...withTier("anthropic/claude-sonnet-4.6") }),
+    claudeHaiku45({ providers: ["bedrock", "anthropic"], ...withTier("anthropic/claude-haiku-4.5") }),
     nova2MultimodalEmbeddings({ providers: ["bedrock"], ...withTier("amazon/nova-2-multimodal-embeddings") }),
     voyage35({ providers: ["voyage"], ...withTier("voyage/voyage-3.5") }),
   ),

@@ -7,6 +7,8 @@ const SUPPORTED_PROVIDERS: Record<string, { name: string }> = {
   vertex: { name: "Google Vertex AI" },
   groq: { name: "Groq" },
   voyage: { name: "Voyage AI" },
+  anthropic: { name: "Anthropic" },
+  openai: { name: "OpenAI" },
 };
 
 export const providerHandlers = [

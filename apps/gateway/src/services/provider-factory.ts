@@ -1,10 +1,14 @@
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
+import { createAnthropic } from "@ai-sdk/anthropic";
 import { createVertex } from "@ai-sdk/google-vertex";
 import { createGroq } from "@ai-sdk/groq";
+import { createOpenAI } from "@ai-sdk/openai";
 import type { ProviderV3 } from "@ai-sdk/provider";
 import { fromContainerMetadata, fromTemporaryCredentials } from "@aws-sdk/credential-providers";
+import { withCanonicalIdsForAnthropic } from "@hebo-ai/gateway/providers/anthropic";
 import { withCanonicalIdsForBedrock } from "@hebo-ai/gateway/providers/bedrock";
 import { withCanonicalIdsForGroq } from "@hebo-ai/gateway/providers/groq";
+import { withCanonicalIdsForOpenAI } from "@hebo-ai/gateway/providers/openai";
 import { withCanonicalIdsForVertex } from "@hebo-ai/gateway/providers/vertex";
 import { withCanonicalIdsForVoyage } from "@hebo-ai/gateway/providers/voyage";
 import { createVoyage } from "voyage-ai-provider";
@@ -30,6 +34,8 @@ export async function loadProviderSecrets() {
     vertexAudience,
     vertexLocation,
     vertexProject,
+    anthropicApiKey,
+    openAiApiKey,
     enforceByok,
     freeModelIdsRaw,
   ] = await Promise.all([
@@ -41,6 +47,8 @@ export async function loadProviderSecrets() {
     getSecret("VertexAwsProviderAudience"),
     getSecret("VertexLocation"),
     getSecret("VertexProject"),
+    getSecret("AnthropicApiKey"),
+    getSecret("OpenAiApiKey"),
     getSecret("EnforceByok").then((v) => v === "true"),
     getSecret("FreeModelIds"),
   ]);
@@ -61,6 +69,8 @@ export async function loadProviderSecrets() {
     vertexAudience,
     vertexLocation,
     vertexProject,
+    anthropicApiKey,
+    openAiApiKey,
     enforceByok,
     freeModelIds,
   };
@@ -110,6 +120,16 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       const { apiKey } = config as ApiKeyProviderConfig;
       if (!apiKey) return;
       return withCanonicalIdsForVoyage(createVoyage({ apiKey }));
+    }
+    case "anthropic": {
+      const { apiKey } = config as ApiKeyProviderConfig;
+      if (!apiKey) return;
+      return withCanonicalIdsForAnthropic(createAnthropic({ apiKey }));
+    }
+    case "openai": {
+      const { apiKey } = config as ApiKeyProviderConfig;
+      if (!apiKey) return;
+      return withCanonicalIdsForOpenAI(createOpenAI({ apiKey }));
     }
     default: {
       throw new Error(`Unsupported provider: ${slug}`);

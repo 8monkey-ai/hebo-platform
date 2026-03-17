@@ -17,7 +17,7 @@ import {
   ItemTitle,
 } from "@hebo/shared-ui/components/Item";
 
-import { Bedrock, Voyage, Groq, Vertex } from "~console/components/ui/Icons";
+import { Anthropic, Bedrock, Groq, OpenAI, Vertex, Voyage } from "~console/components/ui/Icons";
 import { formatDateTime } from "~console/lib/utils";
 
 import { ClearCredentialsDialog } from "./clear";
@@ -28,6 +28,8 @@ const ProviderIcons = {
   voyage: Voyage,
   vertex: Vertex,
   groq: Groq,
+  anthropic: Anthropic,
+  openai: OpenAI,
 } as const;
 
 type Provider = {
