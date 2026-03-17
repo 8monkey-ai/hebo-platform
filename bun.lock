@@ -236,6 +236,7 @@
         "lucide-react": "catalog:",
         "react": "catalog:",
         "react-dom": "catalog:",
+        "react-router": "^7.12.0",
         "tailwind-merge": "catalog:",
         "tailwindcss": "catalog:",
       },
