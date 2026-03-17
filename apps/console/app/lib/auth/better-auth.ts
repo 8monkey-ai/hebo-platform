@@ -94,9 +94,7 @@ export const authService: AuthService = {
     const pendingInvitation = sessionStorage.getItem("hebo:pending-invitation");
     if (pendingInvitation) {
       sessionStorage.removeItem("hebo:pending-invitation");
-      globalThis.location.replace(
-        `/accept-invitation?id=${encodeURIComponent(pendingInvitation)}`,
-      );
+      globalThis.location.replace(`/accept-invitation?id=${encodeURIComponent(pendingInvitation)}`);
       return false;
     }
 
