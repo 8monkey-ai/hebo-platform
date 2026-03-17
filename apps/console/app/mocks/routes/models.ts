@@ -35,11 +35,11 @@ const SUPPORTED_MODELS = [
   },
   {
     type: "amazon/nova-2-multimodal-embeddings",
-    displayName: "Amazon Nova 2 Multimodal Embeddings",
+    displayName: "Nova 2 Embeddings",
     owner: "amazon",
     created: 1_764_888_221,
     providers: [{ bedrock: "amazon.nova-2-multimodal-embeddings-v1:0" }],
-    modality: "embeddings",
+    modality: "embedding",
     free: true,
   },
   {
@@ -52,7 +52,7 @@ const SUPPORTED_MODELS = [
         voyage: "voyage-3.5",
       },
     ],
-    modality: "embeddings",
+    modality: "embedding",
     free: false,
   },
 ] as const;
