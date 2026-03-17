@@ -1,6 +1,7 @@
 import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
 import type { ChatCompletionsBody } from "@hebo-ai/gateway/endpoints/chat-completions";
-import { claudeOpus46 } from "@hebo-ai/gateway/models/anthropic";
+import { nova2MultimodalEmbeddings } from "@hebo-ai/gateway/models/amazon";
+import { claudeHaiku45, claudeOpus46, claudeSonnet46 } from "@hebo-ai/gateway/models/anthropic";
 import { gemini } from "@hebo-ai/gateway/models/google";
 import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
 import { voyage35 } from "@hebo-ai/gateway/models/voyage";
@@ -18,8 +19,11 @@ instrumentFetch("full");
 export const basePath = "/v1";
 const secrets = await loadProviderSecrets();
 
-const withFreeTokens = (freeTokens: number) => ({
-  additionalProperties: { pricing: { monthly_free_tokens: freeTokens } },
+const withTier = (modelId: string) => ({
+  additionalProperties: {
+    free: secrets.freeModelIds.has(modelId),
+    requiresByok: secrets.enforceByok && !secrets.freeModelIds.has(modelId),
+  },
 });
 
 export const gw = gateway({
@@ -43,15 +47,20 @@ export const gw = gateway({
   models: defineModelCatalog(
     gptOss20b({
       providers: ["bedrock", "groq"],
-      ...withFreeTokens(12_000_000_000),
+      ...withTier("openai/gpt-oss-20b"),
     }),
     gptOss120b({
       providers: ["bedrock", "groq"],
-      ...withFreeTokens(6_000_000_000),
+      ...withTier("openai/gpt-oss-120b"),
     }),
-    gemini["v3.x"].map((preset) => preset({ providers: ["vertex"], ...withFreeTokens(0) })),
-    claudeOpus46({ providers: ["bedrock"], ...withFreeTokens(0) }),
-    voyage35({ providers: ["voyage"], ...withFreeTokens(0) }),
+    gemini["v3.x"].map((preset) =>
+      preset({ providers: ["vertex"], ...withTier("google/gemini-2.5-pro") }),
+    ),
+    claudeOpus46({ providers: ["bedrock"], ...withTier("anthropic/claude-opus-4-6") }),
+    claudeSonnet46({ providers: ["bedrock"], ...withTier("anthropic/claude-sonnet-4.6") }),
+    claudeHaiku45({ providers: ["bedrock"], ...withTier("anthropic/claude-haiku-4.5") }),
+    nova2MultimodalEmbeddings({ providers: ["bedrock"], ...withTier("amazon/nova-2-multimodal-embeddings") }),
+    voyage35({ providers: ["voyage"], ...withTier("voyage/voyage-3.5") }),
   ),
 
   hooks: {
