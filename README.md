@@ -115,6 +115,8 @@ Secret names:
 - LLMs
   - Bedrock: `BedrockRoleArn`, `BedrockRegion`
   - Vertex: `VertexServiceAccountEmail`, `VertexAwsProviderAudience`, `VertexProject`, `VertexLocation`
+  - Anthropic: `AnthropicApiKey`
+  - OpenAI: `OpenAiApiKey`
   - Others: `VoyageApiKey`, `GroqApiKey`
 
 - BYOK (Bring Your Own Key)

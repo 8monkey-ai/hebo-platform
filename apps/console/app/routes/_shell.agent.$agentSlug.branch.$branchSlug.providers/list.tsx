@@ -17,17 +17,19 @@ import {
   ItemTitle,
 } from "@hebo/shared-ui/components/Item";
 
-import { Bedrock, Voyage, Groq, Vertex } from "~console/components/ui/Icons";
+import { Anthropic, Bedrock, Groq, OpenAI, Vertex, Voyage } from "~console/components/ui/Icons";
 import { formatDateTime } from "~console/lib/utils";
 
 import { ClearCredentialsDialog } from "./clear";
 import { ConfigureProviderDialog } from "./configure";
 
 const ProviderIcons = {
+  anthropic: Anthropic,
   bedrock: Bedrock,
-  voyage: Voyage,
-  vertex: Vertex,
   groq: Groq,
+  openai: OpenAI,
+  vertex: Vertex,
+  voyage: Voyage,
 } as const;
 
 type Provider = {
@@ -50,7 +52,7 @@ export function ProvidersList({ providers }: { providers: Provider[] }) {
 
   return (
     <div className="flex flex-col gap-2">
-      {providers.map((provider) => {
+      {[...providers].sort((a, b) => a.name.localeCompare(b.name)).map((provider) => {
         return (
           <Item key={provider.slug} variant="outline" className="bg-background">
             <ItemMedia>

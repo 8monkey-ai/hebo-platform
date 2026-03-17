@@ -1,9 +1,11 @@
 import { t, type Static } from "elysia";
 
 export const supportedProviders = {
+  anthropic: { name: "Anthropic" },
   bedrock: { name: "Amazon Bedrock" },
-  vertex: { name: "Google Vertex AI" },
   groq: { name: "Groq" },
+  openai: { name: "OpenAI" },
+  vertex: { name: "Google Vertex AI" },
   voyage: { name: "Voyage AI" },
 } as const;
 

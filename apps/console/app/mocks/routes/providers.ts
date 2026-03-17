@@ -3,9 +3,11 @@ import { http, HttpResponse } from "msw";
 import { db } from "~console/mocks/db";
 
 const SUPPORTED_PROVIDERS: Record<string, { name: string }> = {
+  anthropic: { name: "Anthropic" },
   bedrock: { name: "Amazon Bedrock" },
-  vertex: { name: "Google Vertex AI" },
   groq: { name: "Groq" },
+  openai: { name: "OpenAI" },
+  vertex: { name: "Google Vertex AI" },
   voyage: { name: "Voyage AI" },
 };
 
