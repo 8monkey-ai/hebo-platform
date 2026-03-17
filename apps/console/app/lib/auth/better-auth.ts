@@ -96,16 +96,25 @@ export const authService: AuthService = {
 
     if (!activeOrgValid) {
       if (shellStore.organizations.length > 0) {
-        const fallbackOrg = shellStore.organizations[0];
-        const { error: setActiveError } = await authClient.organization.setActive({
-          organizationId: fallbackOrg.id,
-        });
-        if (!setActiveError) {
-          user.organizationId = fallbackOrg.id;
-        }
+        user.organizationId = shellStore.organizations[0].id;
       } else {
         return redirectToSignIn();
       }
+    }
+
+    // Always call setActive on the slow path to refresh the session_data
+    // cookie.  getSession (even with disableCookieCache) is read-only and does
+    // not update the cookie.  Without this, the API middleware
+    // (getCookieCache) would still read a stale cookie and reject the request
+    // — e.g. after a user is removed from an org and the removeMemberHook
+    // updated the DB session but the browser cookie was never refreshed.
+    const { error: refreshError } = await authClient.organization.setActive({
+      organizationId: user.organizationId,
+    });
+    if (refreshError) {
+      // setActive failed — the org may be invalid.  Redirect to sign-in as a
+      // safe fallback rather than proceeding with a stale cookie.
+      return redirectToSignIn();
     }
 
     shellStore.user = user;
