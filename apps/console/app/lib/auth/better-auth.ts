@@ -89,6 +89,25 @@ export const authService: AuthService = {
       slug: o.slug,
     }));
 
+    // Validate the active org — the user may have been removed from it while
+    // their session was cached.  If stale, switch to a valid org.
+    const activeOrgValid =
+      user.organizationId && shellStore.organizations.some((o) => o.id === user.organizationId);
+
+    if (!activeOrgValid) {
+      if (shellStore.organizations.length > 0) {
+        const fallbackOrg = shellStore.organizations[0];
+        const { error: setActiveError } = await authClient.organization.setActive({
+          organizationId: fallbackOrg.id,
+        });
+        if (!setActiveError) {
+          user.organizationId = fallbackOrg.id;
+        }
+      } else {
+        return redirectToSignIn();
+      }
+    }
+
     shellStore.user = user;
 
     // Resume pending invitation acceptance after sign-in redirect

@@ -1,3 +1,4 @@
+import { HTTPError } from "ky";
 import { XCircle, SquareChevronRight } from "lucide-react";
 import { useRef, useEffect } from "react";
 import { Outlet, unstable_useRoute as useRoute, useLocation } from "react-router";
@@ -39,7 +40,27 @@ async function authMiddleware() {
 export const clientMiddleware = [authMiddleware];
 
 export async function clientLoader() {
-  const agents = await api.agents.get();
+  let agents;
+  try {
+    agents = await api.agents.get();
+  } catch (error) {
+    // When a user is removed from an org, the cached session may still
+    // reference the old org.  Recover by clearing client-side user state and
+    // re-running ensureSignedIn which fetches fresh data and auto-switches
+    // to a valid org if needed.
+    if (error instanceof HTTPError && [401, 403].includes(error.response.status)) {
+      shellStore.user = undefined;
+      const signedIn = await authService.ensureSignedIn();
+      if (!signedIn) return { agents: [] };
+      try {
+        agents = await api.agents.get();
+      } catch {
+        return { agents: [] };
+      }
+    } else {
+      throw error;
+    }
+  }
 
   if (!shellStore.models) {
     const models = await gateway.models.get({ query: { endpoints: true } });
