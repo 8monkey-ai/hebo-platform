@@ -5,6 +5,7 @@ import { useLocation } from "react-router";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@hebo/shared-ui/components/Empty";
+import { HoverCard, HoverCardContent, HoverCardTrigger } from "@hebo/shared-ui/components/HoverCard";
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Label } from "@hebo/shared-ui/components/Label";
 import {
@@ -153,17 +154,7 @@ export function TraceList({
                       )}
 
                       {Object.keys(trace.metadata).length > 0 && (
-                        <div className="flex w-full items-center gap-1.5 overflow-x-auto">
-                          {Object.entries(trace.metadata).map(([key, value]) => (
-                            <Badge
-                              key={key}
-                              variant="secondary"
-                              className="bg-muted text-muted-foreground"
-                            >
-                              {key}: {value}
-                            </Badge>
-                          ))}
-                        </div>
+                        <TagStrip metadata={trace.metadata} />
                       )}
                     </button>
                   );
@@ -199,6 +190,46 @@ export function TraceList({
         )}
       </div>
     </div>
+  );
+}
+
+const VISIBLE_TAG_COUNT = 3;
+
+function TagStrip({ metadata }: { metadata: Record<string, string> }) {
+  const entries = Object.entries(metadata);
+  const visible = entries.slice(0, VISIBLE_TAG_COUNT);
+  const overflowCount = entries.length - visible.length;
+
+  const visibleTags = visible.map(([key, value]) => (
+    <Badge key={key} variant="secondary" className="shrink-0 bg-muted text-muted-foreground">
+      {key}: {value}
+    </Badge>
+  ));
+
+  if (overflowCount <= 0) {
+    return <div className="flex items-center gap-1.5 overflow-hidden">{visibleTags}</div>;
+  }
+
+  return (
+    <HoverCard delay={150} closeDelay={100}>
+      <HoverCardTrigger
+        render={
+          <div className="flex items-center gap-1.5 overflow-hidden">
+            {visibleTags}
+            <span className="shrink-0 text-xs text-muted-foreground">+{overflowCount}</span>
+          </div>
+        }
+      />
+      <HoverCardContent align="start" className="w-auto max-w-xs">
+        <div className="flex flex-wrap gap-1.5">
+          {entries.map(([key, value]) => (
+            <Badge key={key} variant="secondary" className="bg-muted text-muted-foreground">
+              {key}: {value}
+            </Badge>
+          ))}
+        </div>
+      </HoverCardContent>
+    </HoverCard>
   );
 }
 
