@@ -94,31 +94,6 @@ export const authService: AuthService = {
         slug: o.slug,
       }));
 
-      // Validate the active org — the user may have been removed from it while
-      // their session was cached.  If stale, switch to a valid org.
-      const activeOrgValid =
-        user.organizationId && shellStore.organizations.some((o) => o.id === user.organizationId);
-
-      if (!activeOrgValid) {
-        if (shellStore.organizations.length > 0) {
-          user.organizationId = shellStore.organizations[0].id;
-        } else {
-          return redirectToSignIn();
-        }
-      }
-
-      // Always call setActive on the slow path to refresh the session_data
-      // cookie.  Without this, the API middleware (getCookieCache) would still
-      // read a stale cookie and reject the request — e.g. after a user is
-      // removed from an org and the removeMemberHook updated the DB session
-      // but the browser cookie was never refreshed.
-      const { error: refreshError } = await authClient.organization.setActive({
-        organizationId: user.organizationId,
-      });
-      if (refreshError) {
-        return redirectToSignIn();
-      }
-
       shellStore.user = user;
 
       // Resume pending invitation acceptance after sign-in redirect
