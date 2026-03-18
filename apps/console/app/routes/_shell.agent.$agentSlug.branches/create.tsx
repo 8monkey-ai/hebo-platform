@@ -45,7 +45,7 @@ type CreateBranchProps = {
 export default function CreateBranch({ branches }: CreateBranchProps) {
   const fetcher = useFetcher();
   const [form, fields] = useForm<BranchCreateFormValues>({
-    lastResult: fetcher.state === "idle" ? fetcher.data : undefined,
+    lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
     constraint: getZodConstraint(BranchCreateSchema),
     defaultValue: {
       sourceBranchSlug: branches[0].slug,
