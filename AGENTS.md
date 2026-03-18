@@ -4,6 +4,10 @@
 
 Deployable apps live in `apps/` (`auth`, `api`, `console`, `gateway`, `mcp`) while shared libraries sit in `packages/` (database, UI kits, shared data). Infrastructure code is under `infra/`. Colocate feature tests beside the implementation (`*.test.ts` / `*.spec.ts`) to keep ownership clear.
 
+## Workspace Dependencies
+
+When a dependency is used in more than one app or package, promote it to a workspace dependency by adding it to the `catalog` in the root `package.json` and referencing it as `catalog:` in each consumer. This includes all related dependencies that follow the same versioning (e.g., `react-router` and `@react-router/*`, or `better-auth` and `@better-auth/*`). Run `bun run lint:deps` to verify version consistency across the workspace.
+
 ## Build, Test, and Development Commands
 
 Install dependencies with `bun install`. Use the root scripts:
