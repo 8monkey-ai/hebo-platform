@@ -1,3 +1,5 @@
+import { LRUCache } from "lru-cache";
+
 import type { GreptimeDb } from "~api/middleware/greptime";
 
 import type { GenAIFinishReasons, GenAIInputMessages, GenAIOutputMessages } from "./types";
@@ -13,8 +15,14 @@ import {
 
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
-// FUTURE: cache this
+const metadataColumnsCache = new LRUCache<string, Array<{ column_name: unknown }>>({
+  max: 1,
+  ttl: 2_000,
+});
+
 async function getMetadataColumnNames(greptimeDb: GreptimeDb) {
+  const cached = metadataColumnsCache.get("metadata_columns");
+  if (cached) return cached;
   // Workaround: values inlined instead of using $1 params due to GreptimeDB cluster-mode bug.
   // See: https://github.com/GreptimeTeam/greptimedb/issues/7819
   // Parametrized version to restore once fixed upstream:
@@ -23,12 +31,14 @@ async function getMetadataColumnNames(greptimeDb: GreptimeDb) {
   //      WHERE table_name = 'opentelemetry_traces' AND column_name LIKE $1`,
   //     [`${METADATA_PREFIX}%`],
   //   )
-  return (await greptimeDb.unsafe(
+  const result = (await greptimeDb.unsafe(
     `SELECT column_name
      FROM information_schema.columns
      WHERE table_name = 'opentelemetry_traces'
        AND column_name LIKE '${METADATA_PREFIX}%'`,
   )) as Array<{ column_name: unknown }>;
+  metadataColumnsCache.set("metadata_columns", result);
+  return result;
 }
 
 export async function listTraces(
