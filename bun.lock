@@ -25,6 +25,7 @@
         "@hebo/shared-api": "workspace:*",
         "@prisma/client": "catalog:",
         "elysia": "catalog:",
+        "lru-cache": "catalog:",
       },
       "devDependencies": {
         "@hebo/typescript-config": "workspace:*",
@@ -132,7 +133,7 @@
         "@hebo/shared-api": "workspace:*",
         "@opentelemetry/api": "catalog:",
         "elysia": "catalog:",
-        "lru-cache": "^11.2.5",
+        "lru-cache": "catalog:",
         "voyage-ai-provider": "^3.0.0",
       },
       "devDependencies": {
@@ -277,6 +278,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "elysia": "^1.4.27",
+    "lru-cache": "^11.2.5",
     "lucide-react": "^0.576.0",
     "prisma": "^7.4.2",
     "react": "^19.2.4",

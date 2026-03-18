@@ -25,7 +25,8 @@
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",
     "@prisma/client": "catalog:",
-    "elysia": "catalog:"
+    "elysia": "catalog:",
+    "lru-cache": "catalog:"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
