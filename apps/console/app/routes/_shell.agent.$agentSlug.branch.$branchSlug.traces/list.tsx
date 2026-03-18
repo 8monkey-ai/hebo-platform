@@ -207,7 +207,7 @@ function TagStrip({ metadata }: { metadata: Record<string, string> }) {
   return (
     <HoverCard>
       <HoverCardTrigger
-        delay={150}
+        delay={250}
         closeDelay={100}
         render={
           <div className="flex items-center gap-1.5 overflow-hidden">
@@ -228,15 +228,17 @@ function TagStrip({ metadata }: { metadata: Record<string, string> }) {
           </div>
         }
       />
-      <HoverCardContent align="start" className="w-auto">
-        <div className="flex flex-col gap-1.5">
-          {entries.map(([key, value]) => (
-            <Badge key={key} variant="secondary" className="w-fit bg-muted text-muted-foreground">
-              {key}: {value}
-            </Badge>
-          ))}
-        </div>
-      </HoverCardContent>
+      {entries.length >= VISIBLE_TAG_COUNT && (
+        <HoverCardContent align="start" className="w-auto">
+          <div className="flex flex-col gap-1.5">
+            {entries.map(([key, value]) => (
+              <Badge key={key} variant="secondary" className="w-fit bg-muted text-muted-foreground">
+                {key}: {value}
+              </Badge>
+            ))}
+          </div>
+        </HoverCardContent>
+      )}
     </HoverCard>
   );
 }
