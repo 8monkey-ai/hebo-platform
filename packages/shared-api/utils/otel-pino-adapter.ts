@@ -36,16 +36,14 @@ const serializeError = (err: unknown, _seen?: WeakSet<object>) => {
 
     let val;
     try {
-      // FUTURE: this cast is not safe and might lead to errors in the otel logger SDK
-      val = (err as unknown as AnyValueMap)[k];
+      val = (err as unknown as Record<string, unknown>)[k];
     } catch {
       val = "[Unreadable]";
     }
 
-    // FUTURE: restore once above type error is fixed
-    // if (typeof val === "bigint") val = `${val}n`;
+    if (typeof val === "bigint") val = `${val}n`;
 
-    out[k] = val instanceof Error ? serializeError(val, seen) : val;
+    out[k] = val instanceof Error ? serializeError(val, seen) : safeString(val);
   }
 
   return out;
@@ -65,8 +63,8 @@ const buildLogRecord = (args: unknown[]): LogRecord => {
   } else if (isRecord(first)) {
     if (first["err"] instanceof Error) {
       err = first["err"];
-      obj = { ...first };
-      delete obj.err;
+      const { err: _err, ...rest } = first;
+      obj = rest;
     } else {
       obj = first;
     }
