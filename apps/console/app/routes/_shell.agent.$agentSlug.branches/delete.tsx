@@ -87,7 +87,11 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
             </Field>
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => props.onOpenChange?.(false, {} as never)}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => props.onOpenChange?.(false, {} as never)}
+            >
               Cancel
             </Button>
             <Button

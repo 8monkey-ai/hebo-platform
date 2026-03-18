@@ -59,7 +59,7 @@ export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
 type ProviderConfigureFormValues = z.infer<typeof ProviderConfigureSchema>;
 
 type ConfigureProviderDialogProps = {
-  provider?: { name: string; slug: string; config: Record<string, unknown> };
+  provider?: { name: string; slug: string; config?: Record<string, unknown> };
 } & React.ComponentProps<typeof Dialog>;
 
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
@@ -133,7 +133,11 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
           <DialogFooter>
             <DialogClose
               render={
-                <Button type="button" variant="ghost" onClick={() => props.onOpenChange?.(false, {} as never)}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => props.onOpenChange?.(false, {} as never)}
+                >
                   Cancel
                 </Button>
               }

@@ -71,7 +71,11 @@ export function ClearCredentialsDialog({ provider, ...props }: ClearCredentialsD
           </Field>
 
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => props.onOpenChange?.(false, {} as never)}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => props.onOpenChange?.(false, {} as never)}
+            >
               Cancel
             </Button>
             <Button

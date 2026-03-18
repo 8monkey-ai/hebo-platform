@@ -6,7 +6,7 @@ import {
   SelectItem,
 } from "../_shadcn/ui/select";
 
-type SelectProps = React.ComponentProps<typeof ShadCnSelect> & {
+type SelectProps = Omit<React.ComponentProps<typeof ShadCnSelect>, "items"> & {
   items: Array<{ value: string; label: React.ReactNode; disabled?: boolean }>;
   placeholder?: string;
 };
