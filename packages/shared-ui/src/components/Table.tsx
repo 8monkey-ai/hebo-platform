@@ -2,8 +2,8 @@ import {
   Table as ShadCnTable,
   TableBody as ShadCnTableBody,
   TableHeader as ShadCnTableHeader,
-} from "#/_shadcn/ui/table";
-import { cn } from "#/lib/utils";
+} from "../_shadcn/ui/table";
+import { cn } from "../lib/utils";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
@@ -24,4 +24,4 @@ function TableBody({ className, ...props }: React.ComponentProps<"tbody">) {
 
 export { Table, TableHeader, TableBody };
 
-export { TableFooter, TableHead, TableRow, TableCell, TableCaption } from "#/_shadcn/ui/table";
+export { TableFooter, TableHead, TableRow, TableCell, TableCaption } from "../_shadcn/ui/table";

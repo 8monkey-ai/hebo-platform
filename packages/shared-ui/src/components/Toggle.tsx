@@ -1,1 +1,1 @@
-export { Toggle, toggleVariants } from "#/_shadcn/ui/toggle";
+export { Toggle, toggleVariants } from "../_shadcn/ui/toggle";

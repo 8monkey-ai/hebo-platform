@@ -171,7 +171,7 @@ export function MembersSettings({
               <input type="hidden" name={fields.role.name} value={role} />
               <Select
                 value={role}
-                onValueChange={setRole}
+                onValueChange={(value) => setRole(value as string)}
                 items={[
                   { value: "member", label: "Member" },
                   { value: "admin", label: "Admin" },

@@ -1,1 +1,1 @@
-export { Collapsible, CollapsibleContent, CollapsibleTrigger } from "#/_shadcn/ui/collapsible";
+export { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../_shadcn/ui/collapsible";

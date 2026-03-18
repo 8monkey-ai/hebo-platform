@@ -1,8 +1,3 @@
 {
-  "extends": "@hebo/typescript-config/base.json",
-  "compilerOptions": {
-    "paths": {
-      "#/*": ["./src/*"]
-    }
-  }
+  "extends": "@hebo/typescript-config/base.json"
 }
