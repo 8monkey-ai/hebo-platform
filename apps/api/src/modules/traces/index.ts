@@ -38,13 +38,15 @@ export const spansModule = new Elysia({
         200,
         await listTraces(
           greptimeDb,
-          organizationId,
+          organizationId!,
           params.agentSlug,
           params.branchSlug,
           query.from ?? DEFAULT_FROM(),
           query.to ?? DEFAULT_TO(),
-          query.page,
-          query.pageSize,
+          // FUTURE: remove '!' on page & pageSize
+          // https://github.com/elysiajs/elysia/issues/817
+          query.page!,
+          query.pageSize!,
           metadata,
         ),
       );
@@ -59,7 +61,7 @@ export const spansModule = new Elysia({
     async ({ greptimeDb, organizationId, params }) => {
       const spans = await getSpans(
         greptimeDb,
-        organizationId,
+        organizationId!,
         params.agentSlug,
         params.branchSlug,
         params.traceId,

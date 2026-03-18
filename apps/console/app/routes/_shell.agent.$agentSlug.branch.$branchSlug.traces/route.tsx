@@ -34,9 +34,7 @@ export async function clientLoader({
     .traces.get({
       query: {
         page: page,
-        // @ts-expect-error this works in Eden
         from: effectiveFrom,
-        // @ts-expect-error this works in Eden
         to: effectiveTo,
         metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : undefined,
       },
