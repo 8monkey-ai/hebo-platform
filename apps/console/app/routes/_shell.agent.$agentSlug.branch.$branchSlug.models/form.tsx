@@ -178,7 +178,7 @@ function ModelCard(props: {
   return (
     <Collapsible open={isExpanded} onOpenChange={onOpenChange}>
       <Card size="sm">
-        <CardHeader className="grid min-w-0 gap-4 focus:ring-2 focus:ring-ring/40 focus:ring-offset-2 focus:ring-offset-background focus:outline-none @md:grid-cols-[minmax(0,1fr)_auto_auto] @md:items-center">
+        <CardHeader className="grid min-w-0 gap-4 focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:outline-hidden @md:grid-cols-[minmax(0,1fr)_auto_auto] @md:items-center">
           <div className="flex min-w-0 flex-col gap-2">
             <span className="text-xs text-muted-foreground uppercase">Alias path</span>
             <div className="inline-flex items-center gap-1">
