@@ -12,6 +12,9 @@ export function parseError(error: unknown) {
     const msg = typeof error.data === "string" ? error.data : error.data?.message;
     message = `${error.statusText}: ${msg}`;
     status = error.status;
+  } else if (typeof error === "object" && error !== null && "summary" in error) {
+    const e = error as { summary?: string; message?: string };
+    message = e.summary ?? e.message ?? "Unknown Error";
   } else if (error instanceof TimeoutError) {
     message = `${error.message}`;
   } else if (isNetworkError(error)) {
@@ -21,6 +24,8 @@ export function parseError(error: unknown) {
     status = error.response.status;
   } else if (error instanceof Error) {
     message = `${error.message}`;
+  } else if (typeof error === "string") {
+    message = error;
   } else {
     message = "Unknown Error";
   }

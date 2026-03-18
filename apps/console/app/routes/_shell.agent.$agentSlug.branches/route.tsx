@@ -37,7 +37,9 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
       }
 
       if (result.error?.status === 409 || result.error?.status === 404)
-        return submission.reply({ fieldErrors: { branchName: [String(result.error.value)] } });
+        return submission.reply({
+          fieldErrors: { branchName: [parseError(result.error.value).message] },
+        });
 
       return submission.reply({ resetForm: true });
     }
@@ -59,7 +61,11 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
       }
 
       if (result.error)
-        return submission.reply({ fieldErrors: { slugConfirm: [String(result.error.value)] } });
+        return submission.reply({
+          fieldErrors: {
+            slugConfirm: [parseError(result.error.value).message],
+          },
+        });
 
       return submission.reply();
     }
