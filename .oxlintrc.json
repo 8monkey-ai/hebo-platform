@@ -2,10 +2,10 @@
   "$schema": "./node_modules/oxlint/configuration_schema.json",
   "plugins": ["eslint", "unicorn", "typescript", "oxc", "react", "promise", "jsx-a11y", "import"],
   "categories": {
-    "correctness": "error"
-    // "suspicious": "warn",
-    // "pedantic": "warn",
-    // "perf": "warn"
+    "correctness": "error",
+    "suspicious": "warn",
+    "pedantic": "warn",
+    "perf": "warn"
   },
   "rules": {
     "react-in-jsx-scope": "off",
