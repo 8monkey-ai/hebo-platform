@@ -26,7 +26,7 @@ export function PlaygroundSidebar({
     alias: `${activeBranch?.agent_slug}/${activeBranch?.slug}/${model.alias}`,
     endpoint: {
       baseUrl: new URL("v1", gatewayUrl).toString(),
-      fetch: kyFetch,
+      fetch: kyFetch as unknown as typeof fetch,
       credentials: "include" as const,
     },
   }));

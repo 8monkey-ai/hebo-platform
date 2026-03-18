@@ -64,10 +64,10 @@ export const kyFetch = ky.extend({
 
 export const api = treaty<Api>(apiUrl, {
   // Automatic auth header, retries, timeouts & error throwing
-  fetcher: kyFetch,
+  fetcher: kyFetch as unknown as typeof fetch,
 }).v1;
 
 export const gateway = treaty<Gateway>(gatewayUrl, {
   // Automatic auth header, retries, timeouts & error throwing
-  fetcher: kyFetch,
+  fetcher: kyFetch as unknown as typeof fetch,
 }).v1;
