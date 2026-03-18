@@ -41,7 +41,7 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
   const fetcher = useFetcher();
   const [form, fields] = useForm<BranchDeleteFormValues>({
     id: branchSlug,
-    lastResult: fetcher.state === "idle" ? fetcher.data : undefined,
+    lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
     constraint: getZodConstraint(createBranchDeleteSchema(branchSlug)),
     defaultValue: { branchSlug },
   });
