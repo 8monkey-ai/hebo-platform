@@ -200,8 +200,8 @@ export async function getSpans(
         if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
           spanAttributes[key.replace("span_attributes.", "")] = value;
         }
-        if (key.startsWith(METADATA_PREFIX)) {
-          metadata[key.replace(METADATA_PREFIX, "")] = String(value);
+        if (key.startsWith(METADATA_PREFIX) && typeof value === "string") {
+          metadata[key.replace(METADATA_PREFIX, "")] = value;
         }
       }
     }
