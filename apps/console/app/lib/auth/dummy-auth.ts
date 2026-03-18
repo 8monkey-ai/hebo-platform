@@ -122,26 +122,32 @@ export const authService = {
   async getOrganization() {
     const organizationId = shellStore.user?.organizationId;
     return {
-      members: members
-        .findMany()
-        .filter((m) => m.organizationId === organizationId)
-        .map((m) => ({
-          id: m.id,
-          userId: m.userId,
-          role: m.role,
-          createdAt: m.createdAt,
-          user: { name: m.userName, email: m.userEmail },
-        })),
-      invitations: invitations
-        .findMany()
-        .filter((i) => i.organizationId === organizationId)
-        .map((i) => ({
-          id: i.id,
-          email: i.email,
-          role: i.role,
-          expiresAt: i.expiresAt,
-          status: i.status,
-        })),
+      members: members.findMany().flatMap((m) =>
+        m.organizationId === organizationId
+          ? [
+              {
+                id: m.id,
+                userId: m.userId,
+                role: m.role,
+                createdAt: m.createdAt,
+                user: { name: m.userName, email: m.userEmail },
+              },
+            ]
+          : [],
+      ),
+      invitations: invitations.findMany().flatMap((i) =>
+        i.organizationId === organizationId
+          ? [
+              {
+                id: i.id,
+                email: i.email,
+                role: i.role,
+                expiresAt: i.expiresAt,
+                status: i.status,
+              },
+            ]
+          : [],
+      ),
     };
   },
 
