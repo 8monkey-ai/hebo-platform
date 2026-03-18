@@ -40,30 +40,30 @@ async function authMiddleware() {
 export const clientMiddleware = [authMiddleware];
 
 export async function clientLoader() {
-  const agents = await api.agents.get();
-
-  if (!shellStore.models) {
-    try {
-      const models = await gateway.models.get({ query: { endpoints: true } });
-
-      const supportedModels = Object.fromEntries(
-        (models.data?.data ?? []).map((m) => [
-          m.id,
-          {
-            name: m.name,
-            modality: m.architecture.output_modalities[0],
-            providers: m.endpoints?.map((e) => e.tag) ?? [],
-            free: m.free === true,
-            requiresByok: m.requiresByok === true,
-          },
-        ]),
-      );
-
-      shellStore.models = supportedModels;
-    } catch {
-      // Non-fatal — models will be fetched on next navigation
-    }
-  }
+  const [agents] = await Promise.all([
+    api.agents.get(),
+    shellStore.models
+      ? Promise.resolve()
+      : gateway.models
+          .get({ query: { endpoints: true } })
+          .then((models) => {
+            shellStore.models = Object.fromEntries(
+              (models.data?.data ?? []).map((m) => [
+                m.id,
+                {
+                  name: m.name,
+                  modality: m.architecture.output_modalities[0],
+                  providers: m.endpoints?.map((e) => e.tag) ?? [],
+                  free: m.free === true,
+                  requiresByok: m.requiresByok === true,
+                },
+              ]),
+            );
+          })
+          .catch(() => {
+            // Non-fatal — models will be fetched on next navigation
+          }),
+  ]);
 
   return { agents: agents?.data ?? [] };
 }
