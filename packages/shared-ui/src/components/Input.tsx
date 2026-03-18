@@ -2,7 +2,6 @@ import type { LucideIcon } from "lucide-react";
 
 import { Input as ShadCnInput } from "../_shadcn/ui/input";
 import { cn } from "../lib/utils";
-
 import { CopyButton } from "./CopyButton";
 
 interface InputProps extends React.ComponentProps<"input"> {

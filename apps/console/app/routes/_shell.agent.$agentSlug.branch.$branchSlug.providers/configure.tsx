@@ -77,7 +77,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
 
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
-      props.onOpenChange?.(false);
+      props.onOpenChange?.(false, {} as never);
     }
     // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
@@ -133,7 +133,11 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
           <DialogFooter>
             <DialogClose
               render={
-                <Button type="button" variant="ghost" onClick={() => props.onOpenChange?.(false)}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => props.onOpenChange?.(false, {} as never)}
+                >
                   Cancel
                 </Button>
               }
