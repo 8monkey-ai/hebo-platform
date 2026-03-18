@@ -21,7 +21,8 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
         schema: BranchCreateSchema,
       });
 
-      if (submission!.status !== "success") return submission!.reply();
+      if (submission!.status !== "success")
+        return { intent, submission: submission!.reply() };
 
       try {
         result = await api
@@ -33,15 +34,21 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
             sourceBranchSlug: submission.value.sourceBranchSlug,
           });
       } catch (error) {
-        return submission.reply({ formErrors: [parseError(error).message] });
+        return {
+          intent,
+          submission: submission.reply({ formErrors: [parseError(error).message] }),
+        };
       }
 
       if (result.error?.status === 409 || result.error?.status === 404)
-        return submission.reply({
-          fieldErrors: { branchName: [parseError(result.error.value).message] },
-        });
+        return {
+          intent,
+          submission: submission.reply({
+            fieldErrors: { branchName: [String(result.error.value)] },
+          }),
+        };
 
-      return submission.reply({ resetForm: true });
+      return { intent, submission: submission.reply({ resetForm: true }) };
     }
 
     case "delete": {
@@ -49,7 +56,8 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
         schema: createBranchDeleteSchema(formData.get("branchSlug") as string),
       });
 
-      if (submission!.status !== "success") return submission!.reply();
+      if (submission!.status !== "success")
+        return { intent, submission: submission!.reply() };
 
       try {
         result = await api
@@ -57,17 +65,21 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
           .branches({ branchSlug: submission.value.branchSlug })
           .delete();
       } catch (error) {
-        return submission.reply({ formErrors: [parseError(error).message] });
+        return {
+          intent,
+          submission: submission.reply({ formErrors: [parseError(error).message] }),
+        };
       }
 
       if (result.error)
-        return submission.reply({
-          fieldErrors: {
-            slugConfirm: [parseError(result.error.value).message],
-          },
-        });
+        return {
+          intent,
+          submission: submission.reply({
+            fieldErrors: { slugConfirm: [String(result.error.value)] },
+          }),
+        };
 
-      return submission.reply();
+      return { intent, submission: submission.reply() };
     }
   }
 }

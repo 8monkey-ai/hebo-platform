@@ -178,6 +178,7 @@ function ApiKeyRevealDialog({ apiKey, ...props }: ApiKeyRevealDialogProps) {
             <Label htmlFor="acknowledge">
               <Checkbox
                 id="acknowledge"
+                type="checkbox"
                 className="size-4 accent-foreground"
                 checked={acknowledged}
                 onCheckedChange={setAcknowledged}

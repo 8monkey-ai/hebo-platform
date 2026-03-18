@@ -34,7 +34,7 @@ export function KeyboardShortcuts(props: React.ComponentProps<typeof Dialog>) {
   useHotkeys(
     "mod+slash",
     () => {
-      props.onOpenChange?.(true, {} as never);
+      props.onOpenChange(true);
     },
     { preventDefault: true, enableOnFormTags: true },
     [],

@@ -37,7 +37,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
   }
 
   if (result.error) {
-    return submission.reply({ formErrors: [parseError(result.error.value).message] });
+    return submission.reply({ formErrors: [String(result.error?.value)] });
   }
 
   return submission.reply({ resetForm: true });
