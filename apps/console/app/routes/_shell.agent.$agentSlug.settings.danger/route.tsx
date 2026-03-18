@@ -27,7 +27,8 @@ export async function clientAction({
     return submission.reply({ formErrors: [parseError(error).message] });
   }
 
-  if (result.error) return submission.reply({ formErrors: [String(result.error?.value)] });
+  if (result.error)
+    return submission.reply({ formErrors: [parseError(result.error.value).message] });
 
   return redirect("/");
 }

@@ -22,7 +22,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
         schema: ProviderConfigureSchema,
       });
 
-      if (submission.status !== "success") return { intent, submission: submission.reply() };
+      if (submission.status !== "success") return { submission: submission.reply() };
 
       let provider;
       try {
@@ -31,14 +31,13 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
         });
       } catch (error) {
         return {
-          intent,
           submission: submission.reply({
             formErrors: [parseError(error).message],
           }),
         };
       }
 
-      return { intent, submission: submission.reply(), provider };
+      return { submission: submission.reply(), provider };
     }
 
     case "clear": {
@@ -46,20 +45,19 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
         schema: CredentialsClearSchema,
       });
 
-      if (submission.status !== "success") return { intent, submission: submission.reply() };
+      if (submission.status !== "success") return { submission: submission.reply() };
 
       try {
         await api.providers({ slug: submission.value.providerSlug }).config.delete();
       } catch (error) {
         return {
-          intent,
           submission: submission.reply({
             formErrors: [parseError(error).message],
           }),
         };
       }
 
-      return { intent, submission: submission.reply() };
+      return { submission: submission.reply() };
     }
   }
 }

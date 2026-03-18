@@ -2,8 +2,8 @@
 
 import type { ComponentProps } from "react";
 
-import { Button } from "#/_shadcn/ui/button";
-import { cn } from "#/lib/utils";
+import { Button } from "../_shadcn/ui/button";
+import { cn } from "../lib/utils";
 import { ArrowDownIcon, DownloadIcon } from "lucide-react";
 import { useCallback } from "react";
 import { StickToBottom, useStickToBottomContext } from "use-stick-to-bottom";

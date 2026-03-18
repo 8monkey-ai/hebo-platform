@@ -1,8 +1,8 @@
 import { Loader2Icon } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { Button as ShadCnButton } from "#/_shadcn/ui/button";
-import { cn } from "#/lib/utils";
+import { Button as ShadCnButton } from "../_shadcn/ui/button";
+import { cn } from "../lib/utils";
 
 type ExtendedButtonProps = React.ComponentProps<typeof ShadCnButton> & {
   isLoading?: boolean;

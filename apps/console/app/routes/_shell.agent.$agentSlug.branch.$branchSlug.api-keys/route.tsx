@@ -26,7 +26,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
         schema: ApiKeyCreateSchema,
       });
 
-      if (submission.status !== "success") return { intent, submission: submission.reply() };
+      if (submission.status !== "success") return { submission: submission.reply() };
 
       let apiKey;
       try {
@@ -37,14 +37,13 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
         );
       } catch (error) {
         return {
-          intent,
           submission: submission.reply({
             formErrors: [parseError(error).message],
           }),
         };
       }
 
-      return { intent, submission: submission.reply({ resetForm: true }), apiKey };
+      return { submission: submission.reply({ resetForm: true }), apiKey };
     }
 
     case "revoke": {
@@ -52,20 +51,19 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
         schema: ApiKeyRevokeSchema,
       });
 
-      if (submission.status !== "success") return { intent, submission: submission.reply() };
+      if (submission.status !== "success") return { submission: submission.reply() };
 
       try {
         await authService.revokeApiKey(submission.value.apiKeyId);
       } catch (error) {
         return {
-          intent,
           submission: submission.reply({
             formErrors: [parseError(error).message],
           }),
         };
       }
 
-      return { intent, submission: submission.reply() };
+      return { submission: submission.reply() };
     }
   }
 }

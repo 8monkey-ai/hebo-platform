@@ -10,13 +10,13 @@ import {
   AttachmentPreview,
   AttachmentRemove,
   Attachments,
-} from "#/_ai-elements/attachments";
+} from "../_ai-elements/attachments";
 import {
   Conversation,
   ConversationContent,
   ConversationScrollButton,
-} from "#/_ai-elements/conversation";
-import { Message, MessageContent, MessageResponse } from "#/_ai-elements/message";
+} from "../_ai-elements/conversation";
+import { Message, MessageContent, MessageResponse } from "../_ai-elements/message";
 import {
   PromptInput,
   // FUTURE: PromptInputActionAddAttachments
@@ -34,12 +34,12 @@ import {
   PromptInputFooter,
   PromptInputTools,
   usePromptInputAttachments,
-} from "#/_ai-elements/prompt-input";
-import { Reasoning, ReasoningContent, ReasoningTrigger } from "#/_ai-elements/reasoning";
-import { Alert, AlertDescription, AlertTitle } from "#/_shadcn/ui/alert";
-import { Avatar, AvatarFallback } from "#/_shadcn/ui/avatar";
-import { Button } from "#/_shadcn/ui/button";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "#/_shadcn/ui/empty"; // FUTURE: replace with ConversationEmptyState
+} from "../_ai-elements/prompt-input";
+import { Reasoning, ReasoningContent, ReasoningTrigger } from "../_ai-elements/reasoning";
+import { Alert, AlertDescription, AlertTitle } from "../_shadcn/ui/alert";
+import { Avatar, AvatarFallback } from "../_shadcn/ui/avatar";
+import { Button } from "../_shadcn/ui/button";
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "../_shadcn/ui/empty"; // FUTURE: replace with ConversationEmptyState
 import {
   Item,
   ItemActions,
@@ -47,11 +47,11 @@ import {
   ItemDescription,
   ItemMedia,
   ItemTitle,
-} from "#/_shadcn/ui/item";
-import { Spinner } from "#/_shadcn/ui/spinner";
-import { Tooltip, TooltipContent, TooltipTrigger } from "#/_shadcn/ui/tooltip";
-import { OpenAIHttpChatTransport } from "#/lib/openai-transport";
-import { cn } from "#/lib/utils";
+} from "../_shadcn/ui/item";
+import { Spinner } from "../_shadcn/ui/spinner";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../_shadcn/ui/tooltip";
+import { OpenAIHttpChatTransport } from "../lib/openai-transport";
+import { cn } from "../lib/utils";
 
 // Types based on models.schema.json
 export type ModelsConfig = Array<{
@@ -151,10 +151,10 @@ export function Chat({
   }, []);
 
   const handleSubmit = async (message: PromptInputMessage) => {
-    if (status === "streaming") stop();
+    if (status === "streaming") void stop();
     if (!message.text && !message.files) return;
 
-    sendMessage(
+    void sendMessage(
       {
         text: message.text,
         files: message.files,

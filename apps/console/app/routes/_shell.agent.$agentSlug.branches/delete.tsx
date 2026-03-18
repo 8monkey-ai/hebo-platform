@@ -41,7 +41,7 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
   const fetcher = useFetcher();
   const [form, fields] = useForm<BranchDeleteFormValues>({
     id: branchSlug,
-    lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
+    lastResult: fetcher.state === "idle" ? fetcher.data : undefined,
     constraint: getZodConstraint(createBranchDeleteSchema(branchSlug)),
     defaultValue: { branchSlug },
   });
@@ -49,7 +49,7 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
 
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
-      props.onOpenChange(false);
+      props.onOpenChange?.(false, {} as never);
     }
     // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
@@ -87,7 +87,11 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
             </Field>
           </div>
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => props.onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => props.onOpenChange?.(false, {} as never)}
+            >
               Cancel
             </Button>
             <Button

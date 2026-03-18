@@ -1,7 +1,6 @@
 {
   "extends": "@hebo/typescript-config/base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "~auth/*": ["./src/*"]
     },

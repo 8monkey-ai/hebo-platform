@@ -1,1 +1,1 @@
-export { ScrollArea, ScrollBar } from "#/_shadcn/ui/scroll-area";
+export { ScrollArea, ScrollBar } from "../_shadcn/ui/scroll-area";

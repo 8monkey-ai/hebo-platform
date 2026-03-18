@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { cn } from "#/lib/utils";
+import { cn } from "../lib/utils";
 
 import { Button } from "./Button";
 
@@ -16,7 +16,7 @@ export {
   AlertDialogPortal,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "#/_shadcn/ui/alert-dialog";
+} from "../_shadcn/ui/alert-dialog";
 
 export function AlertDialogAction({ className, ...props }: React.ComponentProps<typeof Button>) {
   return <Button data-slot="alert-dialog-action" className={cn(className)} {...props} />;
