@@ -32,6 +32,7 @@
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "react-router": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:"
   }
