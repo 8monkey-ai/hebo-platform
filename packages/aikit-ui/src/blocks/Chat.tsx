@@ -151,10 +151,10 @@ export function Chat({
   }, []);
 
   const handleSubmit = async (message: PromptInputMessage) => {
-    if (status === "streaming") stop();
+    if (status === "streaming") void stop();
     if (!message.text && !message.files) return;
 
-    sendMessage(
+    void sendMessage(
       {
         text: message.text,
         files: message.files,
