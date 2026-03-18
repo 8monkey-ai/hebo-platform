@@ -548,13 +548,13 @@ export const traceHandlers = [
       }
 
       // Apply metadata filters
-      let filtered = [...mockTraces];
-      for (const [metaKey, value] of Object.entries(metadataFilters)) {
-        filtered = filtered.filter((t) => {
-          const detail = mockSpanDetails[t.traceId] as any;
-          return detail?.metadata?.[metaKey] === value;
-        });
-      }
+      const filterEntries = Object.entries(metadataFilters);
+      const filtered = filterEntries.length
+        ? mockTraces.filter((t) => {
+            const detail = mockSpanDetails[t.traceId] as any;
+            return filterEntries.every(([metaKey, value]) => detail?.metadata?.[metaKey] === value);
+          })
+        : [...mockTraces];
 
       const start = (page - 1) * pageSize;
       const paged = filtered.slice(start, start + pageSize);
