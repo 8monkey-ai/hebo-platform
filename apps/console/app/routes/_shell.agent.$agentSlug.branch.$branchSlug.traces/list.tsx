@@ -99,7 +99,7 @@ export function TraceList({
           loading ? "pointer-events-none opacity-60" : "",
         )}
       >
-        <ScrollArea className="h-0 min-h-0 flex-1">
+        <ScrollArea key={page} className="h-0 min-h-0 flex-1">
           {(() => {
             if (loading && traces.length === 0) return <TraceListSkeleton />;
             if (traces.length === 0)
