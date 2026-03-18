@@ -1,7 +1,6 @@
 {
   "extends": "@hebo/typescript-config/base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
       "~console/*": ["./app/*"],
       "~api": ["../api/src/index.ts"],

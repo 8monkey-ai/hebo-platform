@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { cn } from "#/lib/utils";
+import { cn } from "../lib/utils";
 
 import { CopyButton } from "./CopyButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./Tabs";

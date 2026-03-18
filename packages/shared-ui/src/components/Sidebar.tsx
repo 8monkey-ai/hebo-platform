@@ -1,8 +1,8 @@
 import { PanelLeftIcon } from "lucide-react";
 
-import { Button } from "#/_shadcn/ui/button";
-import { useSidebar, Sidebar as ShadCnSidebar } from "#/_shadcn/ui/sidebar";
-import { cn } from "#/lib/utils";
+import { Button } from "../_shadcn/ui/button";
+import { useSidebar, Sidebar as ShadCnSidebar } from "../_shadcn/ui/sidebar";
+import { cn } from "../lib/utils";
 
 export function Sidebar({
   side = "left",
@@ -84,4 +84,4 @@ export {
   SidebarRail,
   SidebarSeparator,
   useSidebar,
-} from "#/_shadcn/ui/sidebar";
+} from "../_shadcn/ui/sidebar";
