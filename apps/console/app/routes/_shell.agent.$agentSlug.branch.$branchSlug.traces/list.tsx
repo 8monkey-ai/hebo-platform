@@ -5,6 +5,11 @@ import { useLocation } from "react-router";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@hebo/shared-ui/components/Empty";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@hebo/shared-ui/components/HoverCard";
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Label } from "@hebo/shared-ui/components/Label";
 import {
@@ -153,17 +158,7 @@ export function TraceList({
                       )}
 
                       {Object.keys(trace.metadata).length > 0 && (
-                        <div className="flex w-full items-center gap-1.5 overflow-x-auto">
-                          {Object.entries(trace.metadata).map(([key, value]) => (
-                            <Badge
-                              key={key}
-                              variant="secondary"
-                              className="bg-muted text-muted-foreground"
-                            >
-                              {key}: {value}
-                            </Badge>
-                          ))}
-                        </div>
+                        <TagStrip metadata={trace.metadata} />
                       )}
                     </button>
                   );
@@ -199,6 +194,52 @@ export function TraceList({
         )}
       </div>
     </div>
+  );
+}
+
+const VISIBLE_TAG_COUNT = 3;
+
+function TagStrip({ metadata }: { metadata: Record<string, string> }) {
+  const entries = Object.entries(metadata);
+  const visible = entries.slice(0, VISIBLE_TAG_COUNT);
+  const overflowCount = entries.length - visible.length;
+
+  return (
+    <HoverCard>
+      <HoverCardTrigger
+        delay={250}
+        closeDelay={100}
+        render={
+          <div className="flex items-center gap-1.5 overflow-hidden">
+            <div className="flex min-w-0 flex-1 items-center gap-1.5 mask-[linear-gradient(to_right,black_calc(100%-3rem),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-3rem),transparent)]">
+              {visible.map(([key, value]) => (
+                <Badge
+                  key={key}
+                  variant="secondary"
+                  className="shrink-0 bg-muted text-muted-foreground"
+                >
+                  {key}: {value}
+                </Badge>
+              ))}
+            </div>
+            {overflowCount > 0 && (
+              <span className="shrink-0 text-xs text-muted-foreground">+{overflowCount}</span>
+            )}
+          </div>
+        }
+      />
+      {entries.length >= VISIBLE_TAG_COUNT && (
+        <HoverCardContent align="start" className="w-auto">
+          <div className="flex flex-col gap-1.5">
+            {entries.map(([key, value]) => (
+              <Badge key={key} variant="secondary" className="w-fit bg-muted text-muted-foreground">
+                {key}: {value}
+              </Badge>
+            ))}
+          </div>
+        </HoverCardContent>
+      )}
+    </HoverCard>
   );
 }
 

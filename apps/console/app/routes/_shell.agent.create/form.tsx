@@ -44,9 +44,13 @@ export function AgentCreateForm() {
     constraint: getZodConstraint(AgentCreateSchema),
     defaultValue: {
       defaultModel: (function selectDefaultModel() {
-        return Object.entries(models ?? {}).toSorted(
-          ([, a], [, b]) => Number(b.free) - Number(a.free) || a.name.localeCompare(b.name),
-        )[0]?.[0];
+        return Object.entries(models ?? {})
+          .filter(([, m]) => m.modality !== "embedding")
+          .toSorted(
+            ([, a], [, b]) =>
+              Number(b.free) - Number(a.free) ||
+              a.name.localeCompare(b.name, undefined, { numeric: true }),
+          )[0]?.[0];
       })(),
     },
   });
