@@ -44,7 +44,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
         return {
           intent,
           submission: submission.reply({
-            fieldErrors: { branchName: [String(result.error.value)] },
+            fieldErrors: { branchName: [parseError(result.error.value).message] },
           }),
         };
 
@@ -75,7 +75,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
         return {
           intent,
           submission: submission.reply({
-            fieldErrors: { slugConfirm: [String(result.error.value)] },
+            fieldErrors: { slugConfirm: [parseError(result.error.value).message] },
           }),
         };
 

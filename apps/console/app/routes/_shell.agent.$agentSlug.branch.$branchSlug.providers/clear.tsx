@@ -44,7 +44,7 @@ export function ClearCredentialsDialog({ provider, ...props }: ClearCredentialsD
 
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
-      props.onOpenChange(false);
+      props.onOpenChange?.(false);
     }
     // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
@@ -71,7 +71,7 @@ export function ClearCredentialsDialog({ provider, ...props }: ClearCredentialsD
           </Field>
 
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => props.onOpenChange(false)}>
+            <Button type="button" variant="ghost" onClick={() => props.onOpenChange?.(false)}>
               Cancel
             </Button>
             <Button
