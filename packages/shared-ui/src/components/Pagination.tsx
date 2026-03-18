@@ -27,7 +27,7 @@ function PaginationLink({
     <Button
       variant={isActive ? "outline" : "ghost"}
       size={size}
-      className={cn(className)}
+      className={className}
       nativeButton={false}
       render={
         <Link
