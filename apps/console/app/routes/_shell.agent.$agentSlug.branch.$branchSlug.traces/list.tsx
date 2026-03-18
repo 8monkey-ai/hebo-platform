@@ -223,7 +223,7 @@ function RefreshButton({ loading }: { loading: boolean }) {
       aria-label="Refresh traces"
       title="Refresh traces"
     >
-      <RefreshCw className={`size-3.5 ${loading ? "animate-spin" : ""}`} />
+      <RefreshCw className={cn("size-3.5", loading && "animate-spin")} />
     </Button>
   );
 }
