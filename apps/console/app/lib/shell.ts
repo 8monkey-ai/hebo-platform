@@ -6,7 +6,7 @@ export type Models = Record<
   string,
   {
     name: string;
-    modality: "chat" | "embedding";
+    modality: string;
     providers: readonly string[];
     free: boolean;
     requiresByok: boolean;
