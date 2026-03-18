@@ -14,8 +14,16 @@ type LogRecord = Parameters<Logger["emit"]>[0];
 const isRecord = (value: unknown): value is AnyValueMap =>
   typeof value === "object" && value !== null && !(value instanceof Error);
 
+const safeString = (value: unknown) => {
+  try {
+    return String(value);
+  } catch {
+    return "[unserializable value]";
+  }
+};
+
 const serializeError = (err: unknown, _seen?: WeakSet<object>) => {
-  if (!(err instanceof Error)) return { message: String(err) };
+  if (!(err instanceof Error)) return { message: safeString(err) };
 
   const seen = _seen ?? new WeakSet();
   if (seen.has(err)) return { name: err.name, message: err.message, circular: true };
@@ -28,12 +36,14 @@ const serializeError = (err: unknown, _seen?: WeakSet<object>) => {
 
     let val;
     try {
+      // FUTURE: this cast is not safe and might lead to errors in the otel logger SDK
       val = (err as unknown as AnyValueMap)[k];
     } catch {
       val = "[Unreadable]";
     }
 
-    if (typeof val === "bigint") val = `${val}n`;
+    // FUTURE: restore once above type error is fixed
+    // if (typeof val === "bigint") val = `${val}n`;
 
     out[k] = val instanceof Error ? serializeError(val, seen) : val;
   }
@@ -61,11 +71,11 @@ const buildLogRecord = (args: unknown[]): LogRecord => {
       obj = first;
     }
   } else {
-    msg = String(first);
+    msg = safeString(first);
   }
 
   if (second !== undefined) {
-    msg = String(second);
+    msg = safeString(second);
   }
 
   if (err && msg === undefined) {
