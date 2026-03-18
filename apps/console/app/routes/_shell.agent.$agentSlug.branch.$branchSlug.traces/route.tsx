@@ -1,6 +1,8 @@
 import { Outlet, useLocation, useNavigate, useNavigation, useParams } from "react-router";
 import type { ShouldRevalidateFunctionArgs } from "react-router";
 
+import { cn } from "@hebo/shared-ui/lib/utils";
+
 import { api } from "~console/lib/service";
 
 import type { Route } from "./+types/route";
@@ -61,9 +63,10 @@ export default function TracesRoute({
     <div className="h-full min-h-0 flex-1 overflow-hidden">
       <div className="grid h-full min-h-0 grid-cols-1 gap-3 @2xl:grid-cols-[minmax(324px,4fr)_minmax(0,7fr)]">
         <div
-          className={`relative flex h-full min-h-0 flex-col rounded-lg border bg-card pt-4 pb-2 ${
-            traceId ? "hidden @2xl:flex" : ""
-          }`}
+          className={cn(
+            "relative flex h-full min-h-0 flex-col rounded-lg border bg-card pt-4 pb-2",
+            traceId && "hidden @2xl:flex",
+          )}
         >
           <TraceList
             traces={traces}
@@ -76,7 +79,7 @@ export default function TracesRoute({
           />
         </div>
 
-        <div className={`h-full min-h-0 ${traceId ? "block" : "hidden @2xl:block"}`}>
+        <div className={cn("h-full min-h-0", traceId ? "block" : "hidden @2xl:block")}>
           <Outlet />
         </div>
       </div>
