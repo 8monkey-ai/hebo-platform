@@ -35,7 +35,11 @@ async function getMetadataColumnNames(greptimeDb: GreptimeDb) {
     `SELECT column_name
      FROM information_schema.columns
      WHERE table_name = 'opentelemetry_traces'
-       AND column_name LIKE '${METADATA_PREFIX}%'`,
+       AND (column_name LIKE '${METADATA_PREFIX}%'
+         OR column_name IN (
+           'span_attributes.gen_ai.usage.cache_read.input_tokens',
+           'span_attributes.gen_ai.usage.reasoning.output_tokens'
+         ))`,
   )) as Array<{ column_name: unknown }>;
   metadataColumnsCache.set("metadata_columns", result);
   return result;
@@ -54,7 +58,9 @@ export async function listTraces(
   statusFilter?: "ok" | "error",
   operationFilter?: "chat" | "embeddings",
 ) {
-  const metadataColumns = await getMetadataColumnNames(greptimeDb);
+  const metadataColumns = (await getMetadataColumnNames(greptimeDb)).filter(({ column_name }) =>
+    String(column_name).startsWith(METADATA_PREFIX),
+  );
   const metadataKeys = metadataColumns.map(({ column_name }) =>
     String(column_name).slice(METADATA_PREFIX.length),
   );
@@ -158,11 +164,17 @@ export async function getSpans(
   branchSlug: string,
   traceId: string,
 ) {
-  const metadataColumns = await getMetadataColumnNames(greptimeDb);
+  const columnNames = await getMetadataColumnNames(greptimeDb);
 
-  const metadataSelectSql = metadataColumns
+  const metadataSelectSql = columnNames
+    .filter(({ column_name }) => String(column_name).startsWith(METADATA_PREFIX))
     .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
     .join(",\n      ");
+
+  const optionalCol = (col: string, alias: string) =>
+    columnNames.some(({ column_name }) => String(column_name) === col)
+      ? `"${col}" AS ${alias}`
+      : `NULL AS ${alias}`;
 
   // Parametrized version to restore once https://github.com/GreptimeTeam/greptimedb/issues/7819 is fixed:
   //   const params = [traceId, organizationId, agentSlug, branchSlug];
@@ -189,8 +201,8 @@ export async function getSpans(
       "span_attributes.gen_ai.usage.input_tokens" AS input_tokens,
       "span_attributes.gen_ai.usage.output_tokens" AS output_tokens,
       "span_attributes.gen_ai.usage.total_tokens" AS total_tokens,
-      "span_attributes.gen_ai.usage.cache_read.input_tokens" AS cache_read_input_tokens,
-      "span_attributes.gen_ai.usage.reasoning.output_tokens" AS reasoning_tokens,
+      ${optionalCol("span_attributes.gen_ai.usage.cache_read.input_tokens", "cache_read_input_tokens")},
+      ${optionalCol("span_attributes.gen_ai.usage.reasoning.output_tokens", "reasoning_tokens")},
       "span_attributes.hebo.agent.slug",
       "span_attributes.hebo.branch.slug",
       "span_attributes.hebo.organization.id"
