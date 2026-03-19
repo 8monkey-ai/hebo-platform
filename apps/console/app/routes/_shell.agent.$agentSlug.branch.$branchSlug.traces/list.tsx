@@ -293,12 +293,12 @@ function TimePresetControl() {
     <Popover open={customOpen} onOpenChange={setCustomOpen}>
       <div className="inline-flex items-center overflow-hidden rounded-md border border-input bg-background shadow-xs">
         <ToggleGroup
-          type="single"
           size="sm"
-          value={activePreset === "custom" ? "" : activePreset}
-          onValueChange={(value: string) =>
-            value && applyRange(value as (typeof traceTimePresets)[number])
-          }
+          value={activePreset === "custom" ? [] : [activePreset]}
+          onValueChange={(value) => {
+            const preset = value[0];
+            if (preset) applyRange(preset as (typeof traceTimePresets)[number]);
+          }}
         >
           {traceTimePresets
             .filter((preset) => preset !== "custom")
@@ -454,7 +454,7 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                 <div className="min-w-0 flex-1">
                   <Select
                     value={filterKey}
-                    onValueChange={setFilterKey}
+                    onValueChange={(value) => setFilterKey(value as string)}
                     items={metadataKeys.map((key) => ({ value: key, label: key }))}
                     placeholder="Key"
                   />

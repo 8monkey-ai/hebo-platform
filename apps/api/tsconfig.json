@@ -1,9 +1,9 @@
 {
   "extends": "@hebo/typescript-config/base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "paths": {
-      "~api/*": ["./src/*"]
+      "~api/*": ["./src/*"],
+      "~auth/*": ["../auth/src/*"]
     },
     "types": ["@types/bun"],
     "verbatimModuleSyntax": true

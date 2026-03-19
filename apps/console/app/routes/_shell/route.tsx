@@ -51,8 +51,8 @@ export async function clientLoader() {
               (models.data?.data ?? []).map((m) => [
                 m.id,
                 {
-                  name: m.name,
-                  modality: m.architecture.output_modalities[0],
+                  name: m.name ?? "n/a",
+                  modality: m.architecture?.output_modalities?.[0] ?? "n/a",
                   providers: m.endpoints?.map((e) => e.tag) ?? [],
                   free: m.free === true,
                   requiresByok: m.requiresByok === true,

@@ -38,7 +38,7 @@ const invitations = new Collection({
   }),
 });
 
-members.create({
+void members.create({
   id: "member-1",
   organizationId: "dummy-org-id",
   userId: "dummy-user-id",
@@ -47,7 +47,7 @@ members.create({
   userName: "Dummy User",
   userEmail: "dummy@user.com",
 });
-members.create({
+void members.create({
   id: "member-2",
   organizationId: "dummy-org-id",
   userId: "dummy-user-id-2",
@@ -56,7 +56,7 @@ members.create({
   userName: "Jane Smith",
   userEmail: "jane@example.com",
 });
-invitations.create({
+void invitations.create({
   id: "invite-1",
   organizationId: "dummy-org-id",
   email: "pending@example.com",
@@ -160,7 +160,7 @@ export const authService = {
   async inviteMember(email, role) {
     const organizationId = shellStore.user?.organizationId;
     if (!organizationId) throw new Error("No active organization");
-    invitations.create({
+    void invitations.create({
       organizationId,
       email,
       role,
@@ -185,7 +185,7 @@ export const authService = {
     }
     invitations.delete((q) => q.where({ id: invitationId }));
     const user = shellStore.user;
-    members.create({
+    void members.create({
       organizationId: invite.organizationId,
       userId: user?.userId ?? `accepted-${invitationId}`,
       role: invite.role,

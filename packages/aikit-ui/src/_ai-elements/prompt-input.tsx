@@ -23,38 +23,38 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from "#/_shadcn/ui/command";
+} from "../_shadcn/ui/command";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "#/_shadcn/ui/dropdown-menu";
+} from "../_shadcn/ui/dropdown-menu";
 import {
   HoverCard,
   HoverCardContent,
   HoverCardTrigger,
-} from "#/_shadcn/ui/hover-card";
+} from "../_shadcn/ui/hover-card";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupTextarea,
-} from "#/_shadcn/ui/input-group";
+} from "../_shadcn/ui/input-group";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "#/_shadcn/ui/select";
-import { Spinner } from "#/_shadcn/ui/spinner";
+} from "../_shadcn/ui/select";
+import { Spinner } from "../_shadcn/ui/spinner";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "#/_shadcn/ui/tooltip";
-import { cn } from "#/lib/utils";
+} from "../_shadcn/ui/tooltip";
+import { cn } from "../lib/utils";
 import {
   CornerDownLeftIcon,
   ImageIcon,
@@ -344,15 +344,14 @@ export const PromptInputActionAddAttachments = ({
   const attachments = usePromptInputAttachments();
 
   const handleSelect = useCallback(
-    (e: Event) => {
-      e.preventDefault();
+    () => {
       attachments.openFileDialog();
     },
     [attachments]
   );
 
   return (
-    <DropdownMenuItem {...props} onSelect={handleSelect}>
+    <DropdownMenuItem {...props} onClick={handleSelect}>
       <ImageIcon className="mr-2 size-4" /> {label}
     </DropdownMenuItem>
   );
@@ -1093,7 +1092,6 @@ export const PromptInputSubmit = ({
   size = "icon-sm",
   status,
   onStop,
-  onClick,
   children,
   ...props
 }: PromptInputSubmitProps) => {
@@ -1110,15 +1108,13 @@ export const PromptInputSubmit = ({
   }
 
   const handleClick = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement>) => {
+    () => {
       if (isGenerating && onStop) {
-        e.preventDefault();
         onStop();
         return;
       }
-      onClick?.(e);
     },
-    [isGenerating, onStop, onClick]
+    [isGenerating, onStop]
   );
 
   return (
@@ -1192,11 +1188,9 @@ export const PromptInputSelectValue = ({
 export type PromptInputHoverCardProps = ComponentProps<typeof HoverCard>;
 
 export const PromptInputHoverCard = ({
-  openDelay = 0,
-  closeDelay = 0,
   ...props
 }: PromptInputHoverCardProps) => (
-  <HoverCard closeDelay={closeDelay} openDelay={openDelay} {...props} />
+  <HoverCard {...props} />
 );
 
 export type PromptInputHoverCardTriggerProps = ComponentProps<

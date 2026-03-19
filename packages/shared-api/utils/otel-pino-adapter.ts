@@ -14,8 +14,16 @@ type LogRecord = Parameters<Logger["emit"]>[0];
 const isRecord = (value: unknown): value is AnyValueMap =>
   typeof value === "object" && value !== null && !(value instanceof Error);
 
+const safeString = (value: unknown) => {
+  try {
+    return String(value);
+  } catch {
+    return "[unserializable value]";
+  }
+};
+
 const serializeError = (err: unknown, _seen?: WeakSet<object>) => {
-  if (!(err instanceof Error)) return { message: String(err) };
+  if (!(err instanceof Error)) return { message: safeString(err) };
 
   const seen = _seen ?? new WeakSet();
   if (seen.has(err)) return { name: err.name, message: err.message, circular: true };
@@ -28,14 +36,14 @@ const serializeError = (err: unknown, _seen?: WeakSet<object>) => {
 
     let val;
     try {
-      val = (err as unknown as AnyValueMap)[k];
+      val = (err as unknown as Record<string, unknown>)[k];
     } catch {
       val = "[Unreadable]";
     }
 
     if (typeof val === "bigint") val = `${val}n`;
 
-    out[k] = val instanceof Error ? serializeError(val, seen) : val;
+    out[k] = val instanceof Error ? serializeError(val, seen) : safeString(val);
   }
 
   return out;
@@ -55,17 +63,17 @@ const buildLogRecord = (args: unknown[]): LogRecord => {
   } else if (isRecord(first)) {
     if (first["err"] instanceof Error) {
       err = first["err"];
-      obj = { ...first };
-      delete obj.err;
+      const { err: _err, ...rest } = first;
+      obj = rest;
     } else {
       obj = first;
     }
   } else {
-    msg = String(first);
+    msg = safeString(first);
   }
 
   if (second !== undefined) {
-    msg = String(second);
+    msg = safeString(second);
   }
 
   if (err && msg === undefined) {

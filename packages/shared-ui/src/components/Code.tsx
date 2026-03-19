@@ -1,12 +1,11 @@
 import * as React from "react";
 
-import { cn } from "#/lib/utils";
-
+import { cn } from "../lib/utils";
 import { CopyButton } from "./CopyButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./Tabs";
 
 const getNodeText = (node: React.ReactNode): string => {
-  if (["string", "number"].includes(typeof node)) {
+  if (typeof node === "string" || typeof node === "number") {
     return String(node);
   }
   if (Array.isArray(node)) {

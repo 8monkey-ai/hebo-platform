@@ -21,8 +21,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
         schema: BranchCreateSchema,
       });
 
-      if (submission!.status !== "success")
-        return { intent, submission: submission!.reply() };
+      if (submission!.status !== "success") return { intent, submission: submission!.reply() };
 
       try {
         result = await api
@@ -44,7 +43,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
         return {
           intent,
           submission: submission.reply({
-            fieldErrors: { branchName: [String(result.error.value)] },
+            fieldErrors: { branchName: [parseError(result.error.value).message] },
           }),
         };
 
@@ -56,8 +55,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
         schema: createBranchDeleteSchema(formData.get("branchSlug") as string),
       });
 
-      if (submission!.status !== "success")
-        return { intent, submission: submission!.reply() };
+      if (submission!.status !== "success") return { intent, submission: submission!.reply() };
 
       try {
         result = await api
@@ -75,7 +73,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
         return {
           intent,
           submission: submission.reply({
-            fieldErrors: { slugConfirm: [String(result.error.value)] },
+            fieldErrors: { slugConfirm: [parseError(result.error.value).message] },
           }),
         };
 

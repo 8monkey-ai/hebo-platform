@@ -1,8 +1,7 @@
 import { Check, Copy } from "lucide-react";
 import * as React from "react";
 
-import { cn } from "#/lib/utils";
-
+import { cn } from "../lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
 
 export function CopyButton({
@@ -25,9 +24,9 @@ export function CopyButton({
     return () => clearTimeout(timeout);
   }, [hasCopied]);
 
-  const copy = () => {
+  const copy = async () => {
     try {
-      navigator.clipboard.writeText(typeof value === "function" ? value() : value);
+      await navigator.clipboard.writeText(typeof value === "function" ? value() : value);
       setHasCopied(true);
     } catch (error) {
       console.error("Failed to copy to clipboard:", error);
@@ -37,7 +36,7 @@ export function CopyButton({
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     props.onClick?.(event);
     if (event.defaultPrevented) return;
-    copy();
+    void copy();
   };
 
   return (

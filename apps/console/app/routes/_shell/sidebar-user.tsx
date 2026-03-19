@@ -36,7 +36,13 @@ import { kbs } from "~console/lib/utils";
 
 import { KeyboardShortcuts } from "./shortcuts";
 
-export function UserMenu({ user, organizations }: { user?: User; organizations: Organization[] }) {
+export function UserMenu({
+  user,
+  organizations,
+}: {
+  user?: User;
+  organizations: readonly Organization[];
+}) {
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
   const activeOrg = organizations.find((o) => o.id === user?.organizationId);

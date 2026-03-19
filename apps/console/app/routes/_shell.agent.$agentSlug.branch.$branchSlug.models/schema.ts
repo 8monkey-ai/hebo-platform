@@ -17,7 +17,7 @@ export const modelConfigSchema = z.object({
     .object({
       only: z
         .array(z.string().optional())
-        .transform((value) => (value[0] === undefined ? [] : value)),
+        .transform((value) => value.filter((v): v is string => v !== undefined)),
     })
     .optional(),
 });

@@ -42,7 +42,7 @@ export function RevokeApiKeyDialog({ apiKey, ...props }: RevokeApiKeyDialogProps
 
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
-      props.onOpenChange(false);
+      props.onOpenChange?.(false, {} as never);
     }
     // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
@@ -70,7 +70,11 @@ export function RevokeApiKeyDialog({ apiKey, ...props }: RevokeApiKeyDialogProps
           </Field>
 
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => props.onOpenChange(false)}>
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => props.onOpenChange?.(false, {} as never)}
+            >
               Cancel
             </Button>
             <Button

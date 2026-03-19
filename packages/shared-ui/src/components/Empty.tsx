@@ -5,4 +5,4 @@ export {
   EmptyDescription,
   EmptyContent,
   EmptyMedia,
-} from "#/_shadcn/ui/empty";
+} from "../_shadcn/ui/empty";
