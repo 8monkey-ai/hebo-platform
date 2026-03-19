@@ -344,7 +344,8 @@ function TimePresetControl() {
         </PopoverHeader>
         <form
           className="flex flex-col gap-2.5"
-          onSubmit={() => {
+          onSubmit={(e) => {
+            e.preventDefault();
             if (!customFrom || !customTo) return;
             applyRange("custom", customFrom, customTo);
             setCustomOpen(false);
