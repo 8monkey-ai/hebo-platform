@@ -57,6 +57,9 @@ export default function TracesRoute({
 
   const { traceId } = useParams();
 
+  const isListLoading =
+    navigation.state !== "idle" && navigation.location?.pathname === location.pathname;
+
   return (
     <div className="h-full min-h-0 flex-1 overflow-hidden">
       <div className="grid h-full min-h-0 grid-cols-1 gap-3 @2xl:grid-cols-[minmax(324px,4fr)_minmax(0,7fr)]">
@@ -71,7 +74,7 @@ export default function TracesRoute({
             hasNextPage={hasNextPage}
             page={page}
             metadataKeys={metadataKeys}
-            loading={navigation.state !== "idle"}
+            loading={isListLoading}
             selectedTraceId={traceId ?? null}
             onSelectTrace={(id) => navigate({ pathname: id, search: location.search })}
           />

@@ -20,7 +20,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@hebo/shared-ui/compone
 import { ErrorView } from "~console/components/ui/ErrorView";
 import { PageLoader } from "~console/components/ui/PageLoader";
 import { authService } from "~console/lib/auth";
-import { dontRevalidateOnFormErrors } from "~console/lib/errors";
+import { revalidateOnSuccessfulAction } from "~console/lib/errors";
 import { api, gateway } from "~console/lib/service";
 import { shellStore } from "~console/lib/shell";
 import { getCookie, kbs } from "~console/lib/utils";
@@ -68,7 +68,7 @@ export async function clientLoader() {
   return { agents: agents?.data ?? [] };
 }
 
-export { dontRevalidateOnFormErrors as shouldRevalidate };
+export { revalidateOnSuccessfulAction as shouldRevalidate };
 
 export default function ShellLayout({ loaderData: { agents } }: Route.ComponentProps) {
   const { user, organizations } = useSnapshot(shellStore);
