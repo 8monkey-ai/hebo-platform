@@ -408,7 +408,6 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
           <Button variant="outline" size="sm">
             <Filter className="size-3" />
             Filters
-            {activeFilterCount > 0 && <Badge variant="secondary">{activeFilterCount}</Badge>}
           </Button>
         }
       />
