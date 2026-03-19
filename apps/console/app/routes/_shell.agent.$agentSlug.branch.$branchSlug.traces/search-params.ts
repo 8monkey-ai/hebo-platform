@@ -46,7 +46,7 @@ export type TraceURLSearchParams = URLSearchParams & {
   toggleValue(param: string, key: string, value: string): void;
 };
 
-function augmentSP(sp: URLSearchParams): TraceURLSearchParams {
+function withObjectParams(sp: URLSearchParams): TraceURLSearchParams {
   const aug = sp as TraceURLSearchParams;
   aug.addValue = (param, key, value) => {
     const obj = parseObjectParam(sp, param);
@@ -103,7 +103,7 @@ export function useTraceSearchParams() {
 
   function updateParams(updater: (sp: TraceURLSearchParams) => void) {
     setSearchParams((sp) => {
-      updater(augmentSP(sp));
+      updater(withObjectParams(sp));
       sp.delete("page");
       return sp;
     });
