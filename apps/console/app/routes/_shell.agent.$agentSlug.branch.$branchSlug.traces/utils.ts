@@ -28,7 +28,7 @@ export function truncateText(text: string, maxLength: number): string {
 
 export function formatTokenCount(count: number | null): string {
   if (count === null || count === undefined) return "-";
-  return count.toLocaleString();
+  return count.toLocaleString("en-US");
 }
 
 export function toDateTimeLocalValue(value: string): string {
