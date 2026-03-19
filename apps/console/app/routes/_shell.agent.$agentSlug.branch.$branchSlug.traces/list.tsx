@@ -174,7 +174,11 @@ export function TraceList({
                       </p>
 
                       {Object.keys(trace.metadata).length > 0 && (
-                        <TagStrip metadata={trace.metadata} activeMetadata={metadata} allKeys={metadataKeys} />
+                        <TagStrip
+                          metadata={trace.metadata}
+                          activeMetadata={metadata}
+                          allKeys={metadataKeys}
+                        />
                       )}
                     </Link>
                   );
@@ -230,18 +234,21 @@ function TagStrip({
   activeMetadata: Record<string, string>;
   allKeys: string[];
 }) {
+  const [open, setOpen] = useState(false);
+
   const { updateParams } = useTraceSearchParams();
+
   const entries = Object.entries(metadata).sort(([a], [b]) => a.localeCompare(b));
   const visible = entries.slice(0, VISIBLE_TAG_COUNT);
   const overflowCount = entries.length - visible.length;
-
   function toggleMetadataFilter(key: string, value: string, event: React.MouseEvent) {
-    event.stopPropagation();
+    event.preventDefault();
     updateParams((sp) => sp.toggleValue("metadata", key, value));
+    setOpen(false);
   }
 
   return (
-    <HoverCard>
+    <HoverCard open={open} onOpenChange={setOpen}>
       <HoverCardTrigger
         delay={250}
         closeDelay={100}
@@ -327,6 +334,9 @@ function TagBadge({
       variant="secondary"
       className="group/tag shrink-0 gap-1 pr-1"
       style={style}
+      onClick={(e) => {
+        e.preventDefault();
+      }}
     >
       {badgeKey}: {value}
       <button
