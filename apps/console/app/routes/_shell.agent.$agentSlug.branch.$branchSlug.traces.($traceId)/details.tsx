@@ -96,6 +96,8 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
               {trace.inputTokens !== null && (
                 <Badge variant="secondary" className="bg-muted text-muted-foreground">
                   {formatTokenCount(trace.inputTokens)} in
+                  {trace.cacheReadInputTokens !== null &&
+                    ` (${formatTokenCount(trace.cacheReadInputTokens)} cached)`}
                 </Badge>
               )}
               {trace.outputTokens !== null && (
