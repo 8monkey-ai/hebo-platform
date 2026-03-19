@@ -1,8 +1,18 @@
 import { format } from "date-fns";
 import prettyMs from "pretty-ms";
 
+function getDecimalSeparator(): string {
+  return (
+    new Intl.NumberFormat(undefined)
+      .formatToParts(1.1)
+      .find((p) => p.type === "decimal")?.value ?? "."
+  );
+}
+
 export function formatDuration(durationMs: number): string {
-  return prettyMs(durationMs);
+  const result = prettyMs(durationMs);
+  const sep = getDecimalSeparator();
+  return sep === "." ? result : result.replace(".", sep);
 }
 
 export function formatTimestampShort(ts: string): string {
