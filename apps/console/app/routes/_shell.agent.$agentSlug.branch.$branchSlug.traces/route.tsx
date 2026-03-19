@@ -14,7 +14,7 @@ export async function clientLoader({
   request,
 }: Route.ClientLoaderArgs) {
   const sp = new URL(request.url).searchParams;
-  const { effectiveFrom, effectiveTo, metadata } = parseTraceSearchParams(sp);
+  const { effectiveFrom, effectiveTo, metadata, status, operation } = parseTraceSearchParams(sp);
   const page = ((p) => (Number.isInteger(p) && p > 0 ? p : 1))(Number(sp.get("page")));
 
   const listResult = await api
@@ -26,6 +26,8 @@ export async function clientLoader({
         from: effectiveFrom,
         to: effectiveTo,
         metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : undefined,
+        status,
+        operation,
       },
     });
 

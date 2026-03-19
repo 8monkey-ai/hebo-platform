@@ -48,6 +48,8 @@ export const spansModule = new Elysia({
           query.page!,
           query.pageSize!,
           metadata,
+          query.status,
+          query.operation,
         ),
       );
     },

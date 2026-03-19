@@ -1,6 +1,8 @@
 import { useSearchParams } from "react-router";
 
 export const traceTimePresets = ["15m", "1h", "24h", "custom"] as const;
+export const traceStatuses = ["ok", "error"] as const;
+export const traceOperations = ["chat", "embeddings"] as const;
 
 export function timeRangeToParams(
   range: string,
@@ -54,7 +56,17 @@ export function parseTraceSearchParams(searchParams: URLSearchParams) {
     }
   })();
 
-  return { preset, effectiveFrom, effectiveTo, metadata };
+  const status = ((s) =>
+    s && (traceStatuses as readonly string[]).includes(s)
+      ? (s as (typeof traceStatuses)[number])
+      : undefined)(searchParams.get("status"));
+
+  const operation = ((o) =>
+    o && (traceOperations as readonly string[]).includes(o)
+      ? (o as (typeof traceOperations)[number])
+      : undefined)(searchParams.get("operation"));
+
+  return { preset, effectiveFrom, effectiveTo, metadata, status, operation };
 }
 
 export function useTraceSearchParams() {
