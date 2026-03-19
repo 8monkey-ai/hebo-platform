@@ -174,7 +174,11 @@ export function TraceList({
                       </p>
 
                       {Object.keys(trace.metadata).length > 0 && (
-                        <TagStrip metadata={trace.metadata} activeMetadata={metadata} allKeys={metadataKeys} />
+                        <TagStrip
+                          metadata={trace.metadata}
+                          activeMetadata={metadata}
+                          allKeys={metadataKeys}
+                        />
                       )}
                     </Link>
                   );
@@ -230,18 +234,21 @@ function TagStrip({
   activeMetadata: Record<string, string>;
   allKeys: string[];
 }) {
+  const [open, setOpen] = useState(false);
+
   const { updateParams } = useTraceSearchParams();
+
   const entries = Object.entries(metadata).sort(([a], [b]) => a.localeCompare(b));
   const visible = entries.slice(0, VISIBLE_TAG_COUNT);
   const overflowCount = entries.length - visible.length;
-
   function toggleMetadataFilter(key: string, value: string, event: React.MouseEvent) {
-    event.stopPropagation();
+    event.preventDefault();
     updateParams((sp) => sp.toggleValue("metadata", key, value));
+    setOpen(false);
   }
 
   return (
-    <HoverCard>
+    <HoverCard open={open} onOpenChange={setOpen}>
       <HoverCardTrigger
         delay={250}
         closeDelay={100}
@@ -266,7 +273,13 @@ function TagStrip({
         }
       />
       {entries.length >= VISIBLE_TAG_COUNT && (
-        <HoverCardContent align="start" className="w-auto">
+        <HoverCardContent
+          align="start"
+          className="w-auto"
+          onClick={(e) => {
+            e.preventDefault();
+          }}
+        >
           <div className="flex flex-col gap-1.5">
             {entries.map(([key, value]) => (
               <TagBadge
@@ -323,11 +336,7 @@ function TagBadge({
   style?: React.CSSProperties;
 }) {
   return (
-    <Badge
-      variant="secondary"
-      className="group/tag shrink-0 gap-1 pr-1"
-      style={style}
-    >
+    <Badge variant="secondary" className="group/tag shrink-0 gap-1 pr-1" style={style}>
       {badgeKey}: {value}
       <button
         type="button"
