@@ -407,7 +407,7 @@ function RawJsonView({ trace }: { trace: TraceDetailData }) {
 // --- Metadata View ---
 
 function MetadataView({ trace }: { trace: TraceDetailData }) {
-  const metadataEntries = Object.entries(trace.metadata);
+  const metadataEntries = Object.entries(trace.metadata).sort(([a], [b]) => a.localeCompare(b));
 
   return (
     <div className="flex flex-col gap-5">

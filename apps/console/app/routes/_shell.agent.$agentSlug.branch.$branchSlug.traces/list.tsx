@@ -91,6 +91,7 @@ export function TraceList({
             <>
               {" · "}
               {Object.entries(metadata)
+                .sort(([a], [b]) => a.localeCompare(b))
                 .map(([key, value]) => `${key}:${value}`)
                 .join(", ")}
             </>
@@ -202,7 +203,7 @@ export function TraceList({
 const VISIBLE_TAG_COUNT = 3;
 
 function TagStrip({ metadata }: { metadata: Record<string, string> }) {
-  const entries = Object.entries(metadata);
+  const entries = Object.entries(metadata).sort(([a], [b]) => a.localeCompare(b));
   const visible = entries.slice(0, VISIBLE_TAG_COUNT);
   const overflowCount = entries.length - visible.length;
 
@@ -422,24 +423,26 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-muted-foreground">Active filters</p>
               <div className="flex flex-col gap-1">
-                {Object.entries(metadata).map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between rounded-md border px-2 py-1.5 text-xs"
-                  >
-                    <span>
-                      {key}: {value}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      aria-label={`Remove ${key} filter`}
-                      onClick={() => refreshFilter(key, null)}
+                {Object.entries(metadata)
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between rounded-md border px-2 py-1.5 text-xs"
                     >
-                      <X className="size-3" />
-                    </Button>
-                  </div>
-                ))}
+                      <span>
+                        {key}: {value}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label={`Remove ${key} filter`}
+                        onClick={() => refreshFilter(key, null)}
+                      >
+                        <X className="size-3" />
+                      </Button>
+                    </div>
+                  ))}
               </div>
             </div>
           )}
@@ -456,7 +459,9 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                   <Select
                     value={filterKey}
                     onValueChange={(value) => setFilterKey(value as string)}
-                    items={metadataKeys.map((key) => ({ value: key, label: key }))}
+                    items={[...metadataKeys]
+                      .sort((a, b) => a.localeCompare(b))
+                      .map((key) => ({ value: key, label: key }))}
                     placeholder="Key"
                   />
                 </div>
