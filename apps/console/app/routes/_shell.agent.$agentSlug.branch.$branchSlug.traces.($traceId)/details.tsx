@@ -193,6 +193,7 @@ function FormattedViewPanel({ trace }: { trace: TraceDetailData }) {
           "absolute top-3 right-3 flex size-7 items-center justify-center rounded-full border bg-background shadow-sm transition-opacity hover:bg-muted",
           showTop ? "opacity-100" : "pointer-events-none opacity-0",
         )}
+        tabIndex={showTop ? 0 : -1}
       >
         <ChevronUp className="size-3.5" />
       </button>
@@ -206,6 +207,7 @@ function FormattedViewPanel({ trace }: { trace: TraceDetailData }) {
           "absolute right-3 bottom-4.5 flex size-7 items-center justify-center rounded-full border bg-background shadow-sm transition-opacity hover:bg-muted",
           showBottom ? "opacity-100" : "pointer-events-none opacity-0",
         )}
+        tabIndex={showBottom ? 0 : -1}
       >
         <ChevronDown className="size-3.5" />
       </button>
