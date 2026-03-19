@@ -123,6 +123,7 @@ const mockSpanDetails: Record<string, object> = {
     inputTokens: 912,
     outputTokens: 372,
     totalTokens: 1284,
+    cacheReadInputTokens: null,
     reasoningTokens: null,
     inputMessages: [
       {
@@ -250,6 +251,7 @@ const mockSpanDetails: Record<string, object> = {
     inputTokens: 2048,
     outputTokens: 1536,
     totalTokens: 3584,
+    cacheReadInputTokens: 1024,
     reasoningTokens: 512,
     inputMessages: [
       {
@@ -313,6 +315,7 @@ const mockSpanDetails: Record<string, object> = {
     inputTokens: 4096,
     outputTokens: 0,
     totalTokens: 4096,
+    cacheReadInputTokens: null,
     reasoningTokens: null,
     inputMessages: [
       {
@@ -358,6 +361,7 @@ const mockSpanDetails: Record<string, object> = {
     inputTokens: 128,
     outputTokens: 64,
     totalTokens: 192,
+    cacheReadInputTokens: null,
     reasoningTokens: null,
     inputMessages: [
       { role: "system", parts: [{ type: "text", content: "You are a friendly assistant." }] },
@@ -398,6 +402,7 @@ const mockSpanDetails: Record<string, object> = {
     inputTokens: 256,
     outputTokens: null,
     totalTokens: 256,
+    cacheReadInputTokens: null,
     reasoningTokens: null,
     inputMessages: [{ role: "user", parts: [] }],
     outputMessages: [],
@@ -432,6 +437,7 @@ for (const [index, trace] of generatedMockTraces.entries()) {
     inputTokens: 1200 + index * 40,
     outputTokens: trace.status === "error" ? 0 : 480 + index * 20,
     totalTokens: trace.status === "error" ? 1200 + index * 40 : 1680 + index * 60,
+    cacheReadInputTokens: index % 3 === 0 ? 800 + index * 30 : null,
     reasoningTokens: index % 2 === 0 ? 220 + index * 10 : null,
     inputMessages: [
       {

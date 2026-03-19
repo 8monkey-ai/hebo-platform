@@ -16,6 +16,10 @@ export function toTimestampLiteral(value: Date): string {
 export function parseNullableNumber(value: unknown): number | null {
   if (value === null || value === undefined || value === "") return null;
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
+  if (typeof value === "string") {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
   return null;
 }
 
