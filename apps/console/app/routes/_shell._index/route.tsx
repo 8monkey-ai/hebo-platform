@@ -7,7 +7,7 @@ async function defaultAgentMiddleware() {
 
   // FUTURE fade-in the next page
   // FUTURE remember last agent and branch in session storage
-  if (agents?.length) {
+  if (agents?.length > 0) {
     throw redirect(`/agent/${agents[0].slug}/branch/main`);
   }
   throw redirect("/agent/create");
@@ -16,5 +16,5 @@ async function defaultAgentMiddleware() {
 export const clientMiddleware = [defaultAgentMiddleware];
 
 export default function EmptyRoute() {
-  return <></>;
+  return null;
 }

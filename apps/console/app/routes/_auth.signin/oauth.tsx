@@ -29,8 +29,8 @@ function SignInButton({ provider, icon: Icon }: { provider: string; icon?: React
           try {
             setIsLoading(true);
             await authService.signInWithOAuth(provider);
-          } catch (error) {
-            if (error instanceof Error) setError(error.message);
+          } catch (err) {
+            if (err instanceof Error) setError(err.message);
           } finally {
             setIsLoading(false);
           }

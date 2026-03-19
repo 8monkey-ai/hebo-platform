@@ -156,7 +156,6 @@ async function toFileContent(part: {
     const data = toBase64(arrayBuffer);
     return { type: "file", file: { data, media_type: mediaType, filename } };
   } catch {
-    return;
   }
 }
 

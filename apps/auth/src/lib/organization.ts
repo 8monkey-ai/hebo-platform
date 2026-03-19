@@ -2,7 +2,7 @@ import { slugFromName } from "@hebo/shared-api/utils/create-slug";
 
 import type { Prisma, PrismaClient } from "~auth/generated/prisma/client";
 
-const updateOrganizationInSession = async (
+const updateOrganizationInSession = (
   tx: Prisma.TransactionClient,
   userId: string,
   orgId: string | null,
@@ -39,10 +39,9 @@ export const createOrganizationHook = (prisma: PrismaClient) => {
 
 export const syncActiveOrganizationHook = (prisma: PrismaClient) => {
   return async (session: { userId: string; activeOrganizationId?: string | null }) => {
-    if (session.activeOrganizationId != null) return;
+    if (session.activeOrganizationId !== undefined && session.activeOrganizationId !== null) return;
     await prisma.$transaction(async (tx) => {
-      const orgId = (await tx.members.findFirst({ where: { userId: session.userId } }))
-        ?.organizationId;
+      const orgId = (await tx.members.findFirst({ where: { userId: session.userId } }))?.organizationId;
       await updateOrganizationInSession(tx, session.userId, orgId ?? null);
     });
   };

@@ -66,7 +66,7 @@ void invitations.create({
 });
 
 export const authService = {
-  async ensureSignedIn() {
+  ensureSignedIn() {
     if (shellStore.user?.organizationId) return true;
     const persistedOrgId = globalThis.localStorage?.getItem("hebo:dummy-org-id") ?? "dummy-org-id";
     shellStore.user = {
@@ -94,40 +94,40 @@ export const authService = {
     });
   },
 
-  async revokeApiKey(apiKeyId: string) {
+  revokeApiKey(apiKeyId: string) {
     apiKeys.delete((q) => q.where({ id: apiKeyId }));
   },
 
-  async listApiKeys() {
+  listApiKeys() {
     return apiKeys.findMany();
   },
 
-  async signInWithOAuth() {
+  signInWithOAuth() {
     globalThis.location.href = "/";
   },
 
-  async sendMagicLinkEmail() {
+  sendMagicLinkEmail() {
     return "dummy nonce";
   },
 
-  async signInWithMagicLink() {
+  signInWithMagicLink() {
     throw new Error("Magic Link not implemented");
   },
 
-  async signInWithPassword() {
+  signInWithPassword() {
     globalThis.location.href = "/";
   },
 
-  async signUpWithPassword() {
+  signUpWithPassword() {
     globalThis.location.href = "/";
   },
 
-  async signOut() {
+  signOut() {
     shellStore.user = undefined;
     shellStore.organizations = [];
   },
 
-  async getOrganization() {
+  getOrganization() {
     const organizationId = shellStore.user?.organizationId;
     return {
       members: members.findMany().flatMap((m) =>
@@ -159,13 +159,13 @@ export const authService = {
     };
   },
 
-  async setActiveOrganization(orgId) {
+  setActiveOrganization(orgId) {
     if (shellStore.user) shellStore.user.organizationId = orgId;
     globalThis.localStorage?.setItem("hebo:dummy-org-id", orgId);
     globalThis.location.replace("/");
   },
 
-  async inviteMember(email, role, _teamId) {
+  inviteMember(email, role, _teamId) {
     const organizationId = shellStore.user?.organizationId;
     if (!organizationId) throw new Error("No active organization");
     void invitations.create({
@@ -177,15 +177,15 @@ export const authService = {
     });
   },
 
-  async removeMember(memberIdOrEmail) {
+  removeMember(memberIdOrEmail) {
     members.delete((q) => q.where({ userEmail: memberIdOrEmail }));
   },
 
-  async cancelInvitation(invitationId) {
+  cancelInvitation(invitationId) {
     invitations.delete((q) => q.where({ id: invitationId }));
   },
 
-  async acceptInvitation(invitationId) {
+  acceptInvitation(invitationId) {
     const invite = invitations.findFirst((q) => q.where({ id: invitationId, status: "pending" }));
     if (!invite) throw new Error("Invitation not found or already accepted.");
     if (Date.parse(invite.expiresAt) <= Date.now()) {

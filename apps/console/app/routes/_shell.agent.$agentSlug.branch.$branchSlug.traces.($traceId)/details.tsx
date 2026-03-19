@@ -224,10 +224,12 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
   return (
     <div className="flex flex-col divide-y">
       {inputMessages.map((msg, index) => (
+        // oxlint-disable-next-line no-array-index-key
         <MessageBlock key={`${trace.spanId}:in:${index}`} message={msg} />
       ))}
 
       {outputMessages.map((msg, index) => (
+        // oxlint-disable-next-line no-array-index-key
         <MessageBlock key={`${trace.spanId}:out:${index}`} message={msg} />
       ))}
 
@@ -374,6 +376,27 @@ function MessageBlock({ message }: { message: TraceMessage }) {
             ))}
           </div>
         )}
+
+        {content && <CollapsibleText text={content} maxLength={500} />}
+
+        {toolCalls.map((tc, index) => (
+          // oxlint-disable-next-line no-array-index-key
+          <div key={`tool-call:${index}`} className="space-y-2">
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Wrench className="size-3" />
+              <span className="font-medium">{tc.name}</span>
+            </div>
+            <CollapsibleCode code={tc.arguments} maxLength={300} />
+          </div>
+        ))}
+
+        {otherParts.map((part, index) => (
+          // oxlint-disable-next-line no-array-index-key
+          <div key={`${part.type}:${index}`} className="space-y-2">
+            <div className="text-xs font-medium text-muted-foreground uppercase">{part.type}</div>
+            <CollapsibleCode code={part.value} maxLength={300} />
+          </div>
+        ))}
       </div>
     </section>
   );

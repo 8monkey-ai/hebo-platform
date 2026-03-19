@@ -43,7 +43,7 @@ export const branchHandlers = [
     },
   ),
 
-  http.get<{ agentSlug: string }>("/api/v1/agents/:agentSlug/branches", async ({ params }) => {
+  http.get<{ agentSlug: string }>("/api/v1/agents/:agentSlug/branches", ({ params }) => {
     const agent = db.agents.findFirst((q) => q.where({ slug: params.agentSlug }));
     if (!agent)
       return new HttpResponse("Agent with the slug not found", {
@@ -78,7 +78,7 @@ export const branchHandlers = [
 
   http.delete<{ agentSlug: string; branchSlug: string }>(
     "/api/v1/agents/:agentSlug/branches/:branchSlug",
-    async ({ params }) => {
+    ({ params }) => {
       const branches = db.branches.findMany((q) =>
         q.where({
           agent_slug: params.agentSlug,

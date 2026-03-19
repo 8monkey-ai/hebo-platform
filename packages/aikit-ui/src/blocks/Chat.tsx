@@ -150,7 +150,7 @@ export function Chat({
     return () => globalThis.removeEventListener("keydown", onKeyDown);
   }, []);
 
-  const handleSubmit = async (message: PromptInputMessage) => {
+  const handleSubmit = (message: PromptInputMessage) => {
     if (status === "streaming") void stop();
     if (!message.text && !message.files) return;
 
@@ -212,6 +212,7 @@ export function Chat({
           <ConversationContent className="gap-5 px-2" aria-label="Chat conversation" tabIndex={-1}>
             {messages.map((message) => (
               <div key={message.id} className="flex flex-col gap-1">
+                {/* oxlint-disable no-array-index-key -- index is the only key for message parts */}
                 {message.parts.map((part, i) => {
                   switch (part.type) {
                     case "text": {
@@ -281,10 +282,10 @@ export function Chat({
                     }
                     default: {
                       // FUTURE: add tool support
-                      return;
                     }
                   }
                 })}
+                {/* oxlint-enable no-array-index-key */}
               </div>
             ))}
             {status === "submitted" && <Spinner role="status" />}

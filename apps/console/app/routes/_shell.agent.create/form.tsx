@@ -99,7 +99,7 @@ export function AgentCreateForm() {
         <CardFooter className="flex justify-end">
           <Button
             type="submit"
-            isLoading={navigation.state !== "idle" && navigation.formData != null}
+            isLoading={navigation.state !== "idle" && navigation.formData !== null}
           >
             Create
           </Button>

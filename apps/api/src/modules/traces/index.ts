@@ -27,7 +27,7 @@ export const spansModule = new Elysia({
             Array.isArray(parsed) ||
             Object.values(parsed).some((value) => typeof value !== "string")
           )
-            throw 0;
+            throw new Error("Invalid metadata");
           metadata = parsed as Record<string, string>;
         } catch {
           throw new BadRequestError(`Invalid metadata filter: ${query.metadata}`);
