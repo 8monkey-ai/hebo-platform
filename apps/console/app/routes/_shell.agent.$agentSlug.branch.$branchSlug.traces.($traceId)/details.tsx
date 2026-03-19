@@ -68,7 +68,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
         <div className="shrink-0 border-b px-4 py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
-              <h2>{trace.responseModel}</h2>
+              <h2 className="text-ellipsis-start truncate">{trace.responseModel}</h2>
               <p className="truncate text-xs text-muted-foreground">
                 {[
                   trace.operationName,
