@@ -7,6 +7,6 @@ export const getSecret = async (name: string) => {
     const value = Resource[name].value;
     return value === "undefined" ? undefined : value;
   } catch {
-    return await secrets.get({ service: "hebo", name });
+    return secrets.get({ service: "hebo", name });
   }
 };

@@ -23,7 +23,7 @@ export const verifyApiKeyPlugin = (getAuth: () => AuthWithApiKeyPlugin) => {
             throw new APIError("FORBIDDEN");
           }
 
-          return await getAuth().api.verifyApiKey({
+          return getAuth().api.verifyApiKey({
             body: ctx.body,
             asResponse: false,
           });

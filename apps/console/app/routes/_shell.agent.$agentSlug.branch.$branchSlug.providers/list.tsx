@@ -93,13 +93,17 @@ export function ProvidersList({ providers }: { providers: Provider[] }) {
                       />
                       <DropdownMenuContent className="min-w-44" align="end">
                         <DropdownMenuItem
-                          onClick={() => setConfigureDialog({ open: true, provider })}
+                          onClick={() => {
+                            setConfigureDialog({ open: true, provider });
+                          }}
                         >
                           <FileSliders />
                           Configure
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => setClearDialog({ open: true, provider })}
+                          onClick={() => {
+                            setClearDialog({ open: true, provider });
+                          }}
                           className="text-destructive"
                         >
                           <Eraser />
@@ -112,7 +116,9 @@ export function ProvidersList({ providers }: { providers: Provider[] }) {
                   <Button
                     size="sm"
                     variant="outline"
-                    onClick={() => setConfigureDialog({ open: true, provider })}
+                    onClick={() => {
+                      setConfigureDialog({ open: true, provider });
+                    }}
                   >
                     Configure
                   </Button>

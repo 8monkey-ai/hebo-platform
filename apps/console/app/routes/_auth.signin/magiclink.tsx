@@ -22,7 +22,7 @@ export function MagicLinkSignIn() {
         e.preventDefault();
         setLoading(true);
         try {
-          await authService.sendMagicLinkEmail(email!);
+          await authService.sendMagicLinkEmail(email);
           setLinkSent(true);
         } catch (error) {
           if (error instanceof Error) setError(error.message);
@@ -37,7 +37,9 @@ export function MagicLinkSignIn() {
         type="email"
         autoComplete="email"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => {
+          setEmail(e.target.value);
+        }}
         disabled={loading}
         required
       />
@@ -69,7 +71,9 @@ export function MagicLinkSignIn() {
           maxLength={6}
           pattern={"^[a-zA-Z0-9]+$"}
           value={otp}
-          onChange={(value) => setOtp(value.toUpperCase())}
+          onChange={(value) => {
+            setOtp(value.toUpperCase());
+          }}
           disabled={loading}
         >
           <InputOTPGroup>

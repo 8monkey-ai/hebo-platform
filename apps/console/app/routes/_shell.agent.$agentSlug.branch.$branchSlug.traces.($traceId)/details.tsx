@@ -73,7 +73,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
                 {[
                   trace.operationName,
                   formatTimestampFull(trace.timestamp),
-                  `${trace.spanId.slice(0, 16)}`,
+                  trace.spanId.slice(0, 16),
                 ]
                   .filter(Boolean)
                   .join(" · ")}

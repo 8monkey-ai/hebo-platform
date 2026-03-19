@@ -68,7 +68,9 @@ export function CodeGroup({ className, ...props }: CodeGroupProps) {
     };
 
     globalThis.addEventListener(EVT, onChange);
-    return () => globalThis.removeEventListener(EVT, onChange);
+    return () => {
+      globalThis.removeEventListener(EVT, onChange);
+    };
   }, [id]);
 
   return (

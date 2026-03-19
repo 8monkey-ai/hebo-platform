@@ -17,7 +17,7 @@ export const providersModule = new Elysia({
       let providers = Object.entries(supportedProviders).map(
         ([slug, { name }]) =>
           ({
-            slug: slug as ProviderSlug,
+            slug,
             name,
             config: providerConfigs.find((p) => p.provider_slug === slug)?.value,
           }) as Provider,
