@@ -9,17 +9,6 @@ import type { Route } from "./+types/route";
 import { TraceList } from "./list";
 import { parseTraceSearchParams } from "./search-params";
 
-export function shouldRevalidate({
-  currentUrl,
-  nextUrl,
-  defaultShouldRevalidate,
-}: ShouldRevalidateFunctionArgs) {
-  if (currentUrl.pathname !== nextUrl.pathname && currentUrl.search === nextUrl.search) {
-    return false;
-  }
-  return defaultShouldRevalidate;
-}
-
 export async function clientLoader({
   params: { agentSlug, branchSlug },
   request,
@@ -46,6 +35,17 @@ export async function clientLoader({
     metadataKeys: listResult.data?.metadataKeys ?? [],
     page,
   };
+}
+
+export function shouldRevalidate({
+  currentUrl,
+  nextUrl,
+  defaultShouldRevalidate,
+}: ShouldRevalidateFunctionArgs) {
+  if (currentUrl.pathname !== nextUrl.pathname && currentUrl.search === nextUrl.search) {
+    return false;
+  }
+  return defaultShouldRevalidate;
 }
 
 export default function TracesRoute({
