@@ -7,6 +7,8 @@ const TraceTimeRangeQuery = {
 
 export const TraceListQuery = t.Object({
   metadata: t.Optional(t.String()),
+  status: t.Optional(t.Union([t.Literal("ok"), t.Literal("error")])),
+  operation: t.Optional(t.Union([t.Literal("chat"), t.Literal("embeddings")])),
   ...TraceTimeRangeQuery,
   page: t.Optional(t.Number({ default: 1 })),
   pageSize: t.Optional(t.Number({ default: 50 })),

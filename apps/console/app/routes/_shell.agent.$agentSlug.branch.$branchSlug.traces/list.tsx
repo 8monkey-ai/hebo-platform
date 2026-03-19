@@ -1,6 +1,6 @@
 import { Calendar, Filter, RefreshCw, X } from "lucide-react";
 import { useState } from "react";
-import { useLocation } from "react-router";
+import { Link, useLocation } from "react-router";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -34,7 +34,13 @@ import { Toggle } from "@hebo/shared-ui/components/Toggle";
 import { ToggleGroup, ToggleGroupItem } from "@hebo/shared-ui/components/ToggleGroup";
 import { cn } from "@hebo/shared-ui/lib/utils";
 
-import { timeRangeToParams, traceTimePresets, useTraceSearchParams } from "./search-params";
+import {
+  timeRangeToParams,
+  traceOperations,
+  traceStatuses,
+  traceTimePresets,
+  useTraceSearchParams,
+} from "./search-params";
 import type { TraceListData } from "./types";
 import {
   formatDateRangeSummary,
@@ -51,7 +57,6 @@ type TraceListProps = {
   metadataKeys: string[];
   loading: boolean;
   selectedTraceId: string | null;
-  onSelectTrace: (traceId: string) => void;
 };
 
 export function TraceList({
@@ -61,9 +66,8 @@ export function TraceList({
   metadataKeys,
   loading,
   selectedTraceId,
-  onSelectTrace: onSelectSpan,
 }: TraceListProps) {
-  const { effectiveFrom, effectiveTo, metadata } = useTraceSearchParams();
+  const { effectiveFrom, effectiveTo, metadata, status, operation } = useTraceSearchParams();
 
   const location = useLocation();
   const pageHref = (p: number) => {
@@ -87,6 +91,16 @@ export function TraceList({
 
         <p className="shrink-0 text-xs text-muted-foreground">
           {formatDateRangeSummary(effectiveFrom, effectiveTo)}
+          {status && (
+            <>
+              {" · "}status: {status}
+            </>
+          )}
+          {operation && (
+            <>
+              {" · "}operation: {operation}
+            </>
+          )}
           {Object.keys(metadata).length > 0 && (
             <>
               {" · "}
@@ -122,14 +136,13 @@ export function TraceList({
                 {traces.map((trace) => {
                   const isSelected = trace.traceId === selectedTraceId;
                   return (
-                    <button
+                    <Link
                       key={trace.traceId}
-                      type="button"
+                      to={{ pathname: trace.traceId, search: location.search }}
                       className={cn(
                         "flex w-full flex-col gap-2.5 overflow-hidden px-4 py-4 text-left transition-colors hover:bg-accent/40",
                         isSelected && "bg-accent/60",
                       )}
-                      onClick={() => onSelectSpan(trace.traceId)}
                     >
                       <div className="flex items-start justify-between gap-2">
                         <span className="truncate text-sm font-semibold">
@@ -161,9 +174,9 @@ export function TraceList({
                       </p>
 
                       {Object.keys(trace.metadata).length > 0 && (
-                        <TagStrip metadata={trace.metadata} allKeys={metadataKeys} />
+                        <TagStrip metadata={trace.metadata} activeMetadata={metadata} allKeys={metadataKeys} />
                       )}
-                    </button>
+                    </Link>
                   );
                 })}
               </div>
@@ -208,10 +221,24 @@ function tagStyle(key: string, allKeys: string[]) {
   return { backgroundColor: `hsl(${hue} 55% 95%)`, color: `hsl(${hue} 40% 35%)` };
 }
 
-function TagStrip({ metadata, allKeys }: { metadata: Record<string, string>; allKeys: string[] }) {
+function TagStrip({
+  metadata,
+  activeMetadata,
+  allKeys,
+}: {
+  metadata: Record<string, string>;
+  activeMetadata: Record<string, string>;
+  allKeys: string[];
+}) {
+  const { updateParams } = useTraceSearchParams();
   const entries = Object.entries(metadata).sort(([a], [b]) => a.localeCompare(b));
   const visible = entries.slice(0, VISIBLE_TAG_COUNT);
   const overflowCount = entries.length - visible.length;
+
+  function toggleMetadataFilter(key: string, value: string, event: React.MouseEvent) {
+    event.stopPropagation();
+    updateParams((sp) => sp.toggleValue("metadata", key, value));
+  }
 
   return (
     <HoverCard>
@@ -222,14 +249,14 @@ function TagStrip({ metadata, allKeys }: { metadata: Record<string, string>; all
           <div className="flex items-center gap-1.5 overflow-hidden">
             <div className="flex min-w-0 flex-1 items-center gap-1.5 mask-[linear-gradient(to_right,black_calc(100%-3rem),transparent)] [-webkit-mask-image:linear-gradient(to_right,black_calc(100%-3rem),transparent)]">
               {visible.map(([key, value]) => (
-                <Badge
+                <TagBadge
                   key={key}
-                  variant="secondary"
-                  className="shrink-0"
+                  badgeKey={key}
+                  value={value}
+                  isActive={activeMetadata[key] === value}
+                  onToggle={toggleMetadataFilter}
                   style={tagStyle(key, allKeys)}
-                >
-                  {key}: {value}
-                </Badge>
+                />
               ))}
             </div>
             {overflowCount > 0 && (
@@ -242,14 +269,75 @@ function TagStrip({ metadata, allKeys }: { metadata: Record<string, string>; all
         <HoverCardContent align="start" className="w-auto">
           <div className="flex flex-col gap-1.5">
             {entries.map(([key, value]) => (
-              <Badge key={key} variant="secondary" className="w-fit" style={tagStyle(key, allKeys)}>
-                {key}: {value}
-              </Badge>
+              <TagBadge
+                key={key}
+                badgeKey={key}
+                value={value}
+                isActive={activeMetadata[key] === value}
+                onToggle={toggleMetadataFilter}
+                style={tagStyle(key, allKeys)}
+              />
             ))}
           </div>
         </HoverCardContent>
       )}
     </HoverCard>
+  );
+}
+
+function RemovableBadge({
+  children,
+  onRemove,
+  label,
+}: {
+  children: React.ReactNode;
+  onRemove: () => void;
+  label: string;
+}) {
+  return (
+    <Badge variant="secondary" className="gap-1 bg-muted pr-1 text-muted-foreground">
+      {children}
+      <button
+        type="button"
+        className="inline-flex size-3.5 items-center justify-center rounded-sm hover:bg-accent"
+        aria-label={label}
+        onClick={onRemove}
+      >
+        <X className="size-2.5" />
+      </button>
+    </Badge>
+  );
+}
+
+function TagBadge({
+  badgeKey,
+  value,
+  isActive,
+  onToggle,
+  style,
+}: {
+  badgeKey: string;
+  value: string;
+  isActive: boolean;
+  onToggle: (key: string, value: string, event: React.MouseEvent) => void;
+  style?: React.CSSProperties;
+}) {
+  return (
+    <Badge
+      variant="secondary"
+      className="group/tag shrink-0 gap-1 pr-1"
+      style={style}
+    >
+      {badgeKey}: {value}
+      <button
+        type="button"
+        className="inline-flex size-3.5 items-center justify-center rounded-sm hover:bg-accent"
+        onClick={(e) => onToggle(badgeKey, value, e)}
+        aria-label={isActive ? `Remove ${badgeKey} filter` : `Filter by ${badgeKey}:${value}`}
+      >
+        {isActive ? <X className="size-2.5" /> : <Filter className="size-2.5" />}
+      </button>
+    </Badge>
   );
 }
 
@@ -392,22 +480,10 @@ function TimePresetControl() {
 }
 
 function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
-  const { metadata, updateParams } = useTraceSearchParams();
-
-
+  const { metadata, status, operation, updateParams } = useTraceSearchParams();
   const [filterKey, setFilterKey] = useState("");
   const [filterValue, setFilterValue] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
-
-  function refreshFilter(key: string, value: string | null) {
-    updateParams((sp) => {
-      const meta = { ...metadata };
-      if (value === null) delete meta[key];
-      else meta[key] = value;
-      if (Object.keys(meta).length > 0) sp.set("metadata", JSON.stringify(meta));
-      else sp.delete("metadata");
-    });
-  }
 
   return (
     <Popover open={filtersOpen} onOpenChange={setFiltersOpen}>
@@ -426,33 +502,71 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
         </PopoverHeader>
         <div className="-mx-4 border-t" />
         <div className="flex flex-col gap-3">
-          {Object.keys(metadata).length > 0 && (
+          {(Object.keys(metadata).length > 0 || status || operation) && (
             <div className="flex flex-col gap-1.5">
-              <p className="text-xs text-muted-foreground">Active filters</p>
-              <div className="flex flex-col gap-1">
-                {Object.entries(metadata)
-                  .sort(([a], [b]) => a.localeCompare(b))
-                  .map(([key, value]) => (
-                    <div
-                      key={key}
-                      className="flex items-center justify-between rounded-md border px-2 py-1.5 text-xs"
-                    >
-                      <span>
-                        {key}: {value}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        aria-label={`Remove ${key} filter`}
-                        onClick={() => refreshFilter(key, null)}
-                      >
-                        <X className="size-3" />
-                      </Button>
-                    </div>
-                  ))}
+              <p className="text-xs font-semibold text-muted-foreground">Active filters</p>
+              <div className="flex flex-wrap gap-1">
+                {status && (
+                  <RemovableBadge
+                    label="Remove status filter"
+                    onRemove={() => updateParams((sp) => sp.delete("status"))}
+                  >
+                    status: {status}
+                  </RemovableBadge>
+                )}
+                {operation && (
+                  <RemovableBadge
+                    label="Remove operation filter"
+                    onRemove={() => updateParams((sp) => sp.delete("operation"))}
+                  >
+                    operation: {operation}
+                  </RemovableBadge>
+                )}
+                {Object.entries(metadata).map(([key, value]) => (
+                  <RemovableBadge
+                    key={key}
+                    label={`Remove ${key} filter`}
+                    onRemove={() => updateParams((sp) => sp.removeValue("metadata", key))}
+                  >
+                    {key}: {value}
+                  </RemovableBadge>
+                ))}
               </div>
             </div>
           )}
+
+          <div className="flex flex-col gap-1">
+            <p className="text-xs font-semibold text-muted-foreground">Status</p>
+            <Select
+              value={status ?? ""}
+              onValueChange={(value) =>
+                updateParams((sp) => {
+                  if (value) sp.set("status", value as string);
+                  else sp.delete("status");
+                })
+              }
+              items={traceStatuses.map((s) => ({ value: s, label: s === "ok" ? "OK" : "Error" }))}
+              placeholder="Any status"
+            />
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <p className="text-xs font-semibold text-muted-foreground">Operation</p>
+            <Select
+              value={operation ?? ""}
+              onValueChange={(value) =>
+                updateParams((sp) => {
+                  if (value) sp.set("operation", value as string);
+                  else sp.delete("operation");
+                })
+              }
+              items={traceOperations.map((o) => ({
+                value: o,
+                label: o.charAt(0).toUpperCase() + o.slice(1),
+              }))}
+              placeholder="Any operation"
+            />
+          </div>
 
           {metadataKeys.length === 0 ? (
             <p className="text-xs text-muted-foreground">
@@ -460,7 +574,7 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
             </p>
           ) : (
             <div className="flex flex-col gap-1">
-              <p className="text-xs text-muted-foreground">Add filter</p>
+              <p className="text-xs font-semibold text-muted-foreground">Metadata</p>
               <div className="flex items-end gap-2">
                 <div className="min-w-0 flex-1">
                   <Select
@@ -484,7 +598,7 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                   className="shrink-0"
                   onClick={() => {
                     if (!filterKey || !filterValue) return;
-                    refreshFilter(filterKey, filterValue);
+                    updateParams((sp) => sp.addValue("metadata", filterKey, filterValue));
                     setFilterKey("");
                     setFilterValue("");
                     setFiltersOpen(false);

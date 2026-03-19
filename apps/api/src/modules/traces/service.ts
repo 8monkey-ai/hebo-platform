@@ -51,6 +51,8 @@ export async function listTraces(
   page: number,
   pageSize: number,
   metadataFilters: Record<string, string>,
+  statusFilter?: "ok" | "error",
+  operationFilter?: "chat" | "embeddings",
 ) {
   const metadataColumns = await getMetadataColumnNames(greptimeDb);
   const metadataKeys = metadataColumns.map(({ column_name }) =>
@@ -61,6 +63,18 @@ export async function listTraces(
   for (const [key, value] of Object.entries(metadataFilters)) {
     if (!metadataKeys.includes(key)) continue;
     metaFilterSql += ` AND "${escapeSqlIdentifier(`${METADATA_PREFIX}${key}`)}" = ${escapeSqlString(value)}`;
+  }
+
+  let statusFilterSql = "";
+  if (statusFilter === "ok") {
+    statusFilterSql = ` AND "span_status_code" IN ('STATUS_CODE_OK', 'STATUS_CODE_UNSET')`;
+  } else if (statusFilter === "error") {
+    statusFilterSql = ` AND "span_status_code" = 'STATUS_CODE_ERROR'`;
+  }
+
+  let operationFilterSql = "";
+  if (operationFilter) {
+    operationFilterSql = ` AND "span_attributes.gen_ai.operation.name" = ${escapeSqlString(operationFilter)}`;
   }
 
   const metadataSelectSql = metadataColumns
@@ -97,6 +111,8 @@ export async function listTraces(
       AND "timestamp" >= ${toTimestampLiteral(from)}
       AND "timestamp" <= ${toTimestampLiteral(to)}
       ${metaFilterSql}
+      ${statusFilterSql}
+      ${operationFilterSql}
     ORDER BY "timestamp" DESC
     LIMIT ${pageSize + 1} OFFSET ${(page - 1) * pageSize}
   `;

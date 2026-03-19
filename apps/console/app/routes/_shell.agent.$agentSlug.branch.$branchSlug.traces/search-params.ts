@@ -1,6 +1,8 @@
 import { useSearchParams } from "react-router";
 
 export const traceTimePresets = ["15m", "1h", "24h", "custom"] as const;
+export const traceStatuses = ["ok", "error"] as const;
+export const traceOperations = ["chat", "embeddings"] as const;
 
 export function timeRangeToParams(
   range: string,
@@ -29,6 +31,43 @@ export function timeRangeToParams(
   };
 }
 
+function parseObjectParam(sp: URLSearchParams, param: string): Record<string, string> {
+  try {
+    const v = JSON.parse(sp.get(param) ?? "{}");
+    if (!v || typeof v !== "object" || Array.isArray(v)) return {};
+    return Object.fromEntries(Object.entries(v).map(([k, val]) => [k, String(val)]));
+  } catch {
+    return {};
+  }
+}
+
+export type TraceURLSearchParams = URLSearchParams & {
+  addValue(param: string, key: string, value: string): void;
+  removeValue(param: string, key: string): void;
+  toggleValue(param: string, key: string, value: string): void;
+};
+
+function withObjectParams(sp: URLSearchParams): TraceURLSearchParams {
+  const aug = sp as TraceURLSearchParams;
+  aug.addValue = (param, key, value) => {
+    const obj = parseObjectParam(sp, param);
+    obj[key] = value;
+    sp.set(param, JSON.stringify(obj));
+  };
+  aug.removeValue = (param, key) => {
+    const obj = parseObjectParam(sp, param);
+    delete obj[key];
+    if (Object.keys(obj).length > 0) sp.set(param, JSON.stringify(obj));
+    else sp.delete(param);
+  };
+  aug.toggleValue = (param, key, value) => {
+    const obj = parseObjectParam(sp, param);
+    if (obj[key] === value) aug.removeValue(param, key);
+    else aug.addValue(param, key, value);
+  };
+  return aug;
+}
+
 export function parseTraceSearchParams(searchParams: URLSearchParams) {
   const fallback = timeRangeToParams("15m");
 
@@ -45,24 +84,27 @@ export function parseTraceSearchParams(searchParams: URLSearchParams) {
         }
       : timeRangeToParams(preset);
 
-  const metadata = (() => {
-    try {
-      const v = JSON.parse(searchParams.get("metadata") ?? "{}");
-      return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, string>) : {};
-    } catch {
-      return {};
-    }
-  })();
+  const metadata = parseObjectParam(searchParams, "metadata");
 
-  return { preset, effectiveFrom, effectiveTo, metadata };
+  const status = ((s) =>
+    s && (traceStatuses as readonly string[]).includes(s)
+      ? (s as (typeof traceStatuses)[number])
+      : undefined)(searchParams.get("status"));
+
+  const operation = ((o) =>
+    o && (traceOperations as readonly string[]).includes(o)
+      ? (o as (typeof traceOperations)[number])
+      : undefined)(searchParams.get("operation"));
+
+  return { preset, effectiveFrom, effectiveTo, metadata, status, operation };
 }
 
 export function useTraceSearchParams() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  function updateParams(updater: (sp: URLSearchParams) => void) {
+  function updateParams(updater: (sp: TraceURLSearchParams) => void) {
     setSearchParams((sp) => {
-      updater(sp);
+      updater(withObjectParams(sp));
       sp.delete("page");
       return sp;
     });

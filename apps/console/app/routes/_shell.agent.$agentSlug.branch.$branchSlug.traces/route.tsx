@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate, useNavigation, useParams } from "react-router";
+import { Outlet, useNavigation, useParams } from "react-router";
 import type { ShouldRevalidateFunctionArgs } from "react-router";
 
 import { cn } from "@hebo/shared-ui/lib/utils";
@@ -14,7 +14,7 @@ export async function clientLoader({
   request,
 }: Route.ClientLoaderArgs) {
   const sp = new URL(request.url).searchParams;
-  const { effectiveFrom, effectiveTo, metadata } = parseTraceSearchParams(sp);
+  const { effectiveFrom, effectiveTo, metadata, status, operation } = parseTraceSearchParams(sp);
   const page = ((p) => (Number.isInteger(p) && p > 0 ? p : 1))(Number(sp.get("page")));
 
   const listResult = await api
@@ -26,6 +26,8 @@ export async function clientLoader({
         from: effectiveFrom,
         to: effectiveTo,
         metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : undefined,
+        status,
+        operation,
       },
     });
 
@@ -51,10 +53,7 @@ export function shouldRevalidate({
 export default function TracesRoute({
   loaderData: { traces, hasNextPage, metadataKeys, page },
 }: Route.ComponentProps) {
-  const navigate = useNavigate();
   const navigation = useNavigation();
-  const location = useLocation();
-
   const { traceId } = useParams();
 
   const isListLoading =
@@ -76,7 +75,6 @@ export default function TracesRoute({
             metadataKeys={metadataKeys}
             loading={isListLoading}
             selectedTraceId={traceId ?? null}
-            onSelectTrace={(id) => navigate({ pathname: id, search: location.search })}
           />
         </div>
 
