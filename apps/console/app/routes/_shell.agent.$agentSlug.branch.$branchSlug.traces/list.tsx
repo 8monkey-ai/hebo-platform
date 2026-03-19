@@ -275,6 +275,7 @@ function TagStrip({
                 value={value}
                 isActive={activeMetadata[key] === value}
                 onToggle={toggleMetadataFilter}
+                style={tagStyle(key, allKeys)}
               />
             ))}
           </div>
@@ -480,8 +481,6 @@ function TimePresetControl() {
 
 function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
   const { metadata, status, operation, updateParams } = useTraceSearchParams();
-  const activeFilterCount = Object.keys(metadata).length + (status ? 1 : 0) + (operation ? 1 : 0);
-
   const [filterKey, setFilterKey] = useState("");
   const [filterValue, setFilterValue] = useState("");
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -503,7 +502,7 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
         </PopoverHeader>
         <div className="-mx-4 border-t" />
         <div className="flex flex-col gap-3">
-          {Object.keys(metadata).length > 0 && (
+          {(Object.keys(metadata).length > 0 || status || operation) && (
             <div className="flex flex-col gap-1.5">
               <p className="text-xs font-semibold text-muted-foreground">Active filters</p>
               <div className="flex flex-wrap gap-1">
