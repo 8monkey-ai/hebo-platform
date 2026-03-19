@@ -279,32 +279,40 @@ function MessageBlock({ message }: { message: TraceMessage }) {
         </div>
 
         <div ref={contentRef} className="space-y-3">
-          {reasoning && (
-            <ExpandableContent label="Reasoning">
-              <p className="text-xs whitespace-pre-wrap text-muted-foreground italic">
-                {reasoning}
-              </p>
-            </ExpandableContent>
+          {!reasoning && !content && toolCalls.length === 0 && otherParts.length === 0 ? (
+            <p className="text-xs text-muted-foreground opacity-50">(no message)</p>
+          ) : (
+            <>
+              {reasoning && (
+                <ExpandableContent label="Reasoning">
+                  <p className="text-xs whitespace-pre-wrap text-muted-foreground italic">
+                    {reasoning}
+                  </p>
+                </ExpandableContent>
+              )}
+
+              {content && <CollapsibleText text={content} maxLength={500} />}
+
+              {toolCalls.map((tc, index) => (
+                <div key={`tool-call:${index}`} className="space-y-2">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <Wrench className="size-3" />
+                    <span className="font-medium">{tc.name}</span>
+                  </div>
+                  <CollapsibleCode code={tc.arguments} maxLength={300} />
+                </div>
+              ))}
+
+              {otherParts.map((part, index) => (
+                <div key={`${part.type}:${index}`} className="space-y-2">
+                  <div className="text-xs font-medium text-muted-foreground uppercase">
+                    {part.type}
+                  </div>
+                  <CollapsibleCode code={part.value} maxLength={300} />
+                </div>
+              ))}
+            </>
           )}
-
-          {content && <CollapsibleText text={content} maxLength={500} />}
-
-          {toolCalls.map((tc, index) => (
-            <div key={`tool-call:${index}`} className="space-y-2">
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Wrench className="size-3" />
-                <span className="font-medium">{tc.name}</span>
-              </div>
-              <CollapsibleCode code={tc.arguments} maxLength={300} />
-            </div>
-          ))}
-
-          {otherParts.map((part, index) => (
-            <div key={`${part.type}:${index}`} className="space-y-2">
-              <div className="text-xs font-medium text-muted-foreground uppercase">{part.type}</div>
-              <CollapsibleCode code={part.value} maxLength={300} />
-            </div>
-          ))}
         </div>
       </div>
     </section>

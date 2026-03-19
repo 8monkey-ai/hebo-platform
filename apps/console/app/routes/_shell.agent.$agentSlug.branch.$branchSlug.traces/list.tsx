@@ -151,11 +151,13 @@ export function TraceList({
                         </div>
                       </div>
 
-                      {trace.summary && (
-                        <p className="line-clamp-2 text-xs text-muted-foreground">
-                          {truncateText(trace.summary, 120)}
-                        </p>
-                      )}
+                      <p className="line-clamp-2 text-xs text-muted-foreground">
+                        {trace.summary ? (
+                          truncateText(trace.summary, 120)
+                        ) : (
+                          <span className="opacity-50">(no user message)</span>
+                        )}
+                      </p>
 
                       {Object.keys(trace.metadata).length > 0 && (
                         <TagStrip metadata={trace.metadata} />
