@@ -339,7 +339,14 @@ function TimePresetControl() {
         <PopoverHeader>
           <PopoverTitle>Custom range</PopoverTitle>
         </PopoverHeader>
-        <div className="flex flex-col gap-2.5">
+        <form
+          className="flex flex-col gap-2.5"
+          onSubmit={() => {
+            if (!customFrom || !customTo) return;
+            applyRange("custom", customFrom, customTo);
+            setCustomOpen(false);
+          }}
+        >
           <div className="flex flex-col gap-1">
             <Label htmlFor="custom-from" className="text-xs text-muted-foreground">
               Start
@@ -364,18 +371,10 @@ function TimePresetControl() {
               onChange={(event) => setCustomTo(event.target.value)}
             />
           </div>
-          <Button
-            size="sm"
-            className="ml-auto"
-            onClick={() => {
-              if (!customFrom || !customTo) return;
-              applyRange("custom", customFrom, customTo);
-              setCustomOpen(false);
-            }}
-          >
+          <Button type="submit" size="sm" className="ml-auto">
             Apply range
           </Button>
-        </div>
+        </form>
       </PopoverContent>
     </Popover>
   );
