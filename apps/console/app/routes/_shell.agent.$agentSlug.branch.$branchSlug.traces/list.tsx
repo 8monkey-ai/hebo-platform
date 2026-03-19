@@ -273,7 +273,13 @@ function TagStrip({
         }
       />
       {entries.length >= VISIBLE_TAG_COUNT && (
-        <HoverCardContent align="start" className="w-auto">
+        <HoverCardContent
+          align="start"
+          className="w-auto"
+          onClick={(e) => {
+            e.preventDefault();
+          }}
+        >
           <div className="flex flex-col gap-1.5">
             {entries.map(([key, value]) => (
               <TagBadge
@@ -330,14 +336,7 @@ function TagBadge({
   style?: React.CSSProperties;
 }) {
   return (
-    <Badge
-      variant="secondary"
-      className="group/tag shrink-0 gap-1 pr-1"
-      style={style}
-      onClick={(e) => {
-        e.preventDefault();
-      }}
-    >
+    <Badge variant="secondary" className="group/tag shrink-0 gap-1 pr-1" style={style}>
       {badgeKey}: {value}
       <button
         type="button"
