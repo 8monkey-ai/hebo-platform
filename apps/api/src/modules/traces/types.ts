@@ -9,7 +9,7 @@ export const TraceListQuery = t.Object({
   metadata: t.Optional(t.String()),
   ...TraceTimeRangeQuery,
   page: t.Optional(t.Number({ default: 1 })),
-  pageSize: t.Optional(t.Number({ default: 20 })),
+  pageSize: t.Optional(t.Number({ default: 50 })),
 });
 
 const SpanStatus = t.Union([t.Literal("ok"), t.Literal("error"), t.Literal("unknown")]);
