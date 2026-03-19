@@ -126,7 +126,7 @@ export function TraceList({
                       key={trace.traceId}
                       type="button"
                       className={cn(
-                        "flex w-full flex-col gap-3 overflow-hidden px-4 py-4 text-left transition-colors hover:bg-accent/40",
+                        "flex w-full flex-col gap-2.5 overflow-hidden px-4 py-4 text-left transition-colors hover:bg-accent/40",
                         isSelected && "bg-accent/60",
                       )}
                       onClick={() => onSelectSpan(trace.traceId)}
