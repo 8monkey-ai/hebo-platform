@@ -418,15 +418,7 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
             <table className="w-full text-xs">
               <tbody>
                 {metadataEntries.map(([key, value]) => (
-                  <tr key={key} className="border-b last:border-b-0">
-                    <td className="w-1/3 px-3 py-2 font-medium text-muted-foreground">{key}</td>
-                    <td className="px-3 py-2 break-all">
-                      <div className="flex items-center gap-1">
-                        <span className="min-w-0 flex-1">{value}</span>
-                        <CopyButton value={value} className="size-5 shrink-0 p-0" />
-                      </div>
-                    </td>
-                  </tr>
+                  <IdentifierRow key={key} label={key} value={value} />
                 ))}
               </tbody>
             </table>
@@ -462,9 +454,9 @@ function IdentifierRow({ label, value }: { label: string; value: string | null }
   return (
     <tr className="border-b last:border-b-0">
       <td className="w-1/3 px-3 py-2 font-medium text-muted-foreground">{label}</td>
-      <td className="px-3 py-2 font-mono text-xs break-all">
+      <td className="px-3 py-2 break-all">
         <div className="flex items-center gap-1">
-          <span className="min-w-0 flex-1 truncate">{value}</span>
+          <span className="min-w-0 flex-1">{value}</span>
           <CopyButton value={value} className="size-5 shrink-0 p-0" />
         </div>
       </td>
