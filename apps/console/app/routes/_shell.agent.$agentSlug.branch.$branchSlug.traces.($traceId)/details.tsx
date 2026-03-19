@@ -1,5 +1,5 @@
-import { ChevronRight, ChevronUp, Wrench } from "lucide-react";
-import { useRef, useState } from "react";
+import { ChevronDown, ChevronRight, ChevronUp, Wrench } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -113,9 +113,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
         </div>
 
         <TabsContent value="formatted" className="h-0 min-h-0">
-          <ScrollArea className="h-full px-4 py-4">
-            <FormattedView trace={trace} />
-          </ScrollArea>
+          <FormattedViewPanel trace={trace} />
         </TabsContent>
 
         <TabsContent value="raw" className="h-0 min-h-0">
@@ -162,6 +160,58 @@ function DetailShell({ children, className }: { children: React.ReactNode; class
 }
 
 // --- Formatted View ---
+
+const SCROLL_THRESHOLD = 120;
+
+function FormattedViewPanel({ trace }: { trace: TraceDetailData }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showTop, setShowTop] = useState(false);
+  const [showBottom, setShowBottom] = useState(false);
+
+  const updateButtons = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    setShowTop(scrollTop > SCROLL_THRESHOLD);
+    setShowBottom(scrollHeight - scrollTop - clientHeight > SCROLL_THRESHOLD);
+  };
+
+  useEffect(() => {
+    updateButtons();
+  }, [trace]);
+
+  return (
+    <div className="relative h-full min-h-0">
+      <div ref={scrollRef} onScroll={updateButtons} className="h-full overflow-y-auto px-4 py-4">
+        <FormattedView trace={trace} />
+      </div>
+
+      <button
+        aria-label="Jump to top"
+        onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+        className={cn(
+          "absolute top-3 right-3 flex size-7 items-center justify-center rounded-full border bg-background shadow-sm transition-opacity hover:bg-muted",
+          showTop ? "opacity-100" : "pointer-events-none opacity-0",
+        )}
+      >
+        <ChevronUp className="size-3.5" />
+      </button>
+
+      <button
+        aria-label="Jump to bottom"
+        onClick={() =>
+          scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })
+        }
+        className={cn(
+          "absolute right-3 bottom-4.5 flex size-7 items-center justify-center rounded-full border bg-background shadow-sm transition-opacity hover:bg-muted",
+          showBottom ? "opacity-100" : "pointer-events-none opacity-0",
+        )}
+      >
+        <ChevronDown className="size-3.5" />
+      </button>
+    </div>
+  );
+}
 
 function FormattedView({ trace }: { trace: TraceDetailData }) {
   const inputMessages = trace.inputMessages;
