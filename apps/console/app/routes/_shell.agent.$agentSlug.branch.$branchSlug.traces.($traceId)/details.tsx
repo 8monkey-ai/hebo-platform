@@ -257,54 +257,55 @@ function MessageBlock({ message }: { message: TraceMessage }) {
   const contentRef = useRef<HTMLDivElement>(null);
 
   return (
-    <section
-      className={cn(
-        "space-y-3 border-l-2 py-4 pl-3 first:pt-0 last:pb-0",
-        ROLE_ACCENTS[message.role] ?? "border-l-border",
-      )}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-base font-semibold tracking-tight">
-            {message.role.charAt(0).toUpperCase() + message.role.slice(1)}
-          </span>
+    <section className="py-4 first:pt-0 last:pb-0">
+      <div
+        className={cn("space-y-3 border-l-2 pl-3", ROLE_ACCENTS[message.role] ?? "border-l-border")}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-base font-semibold tracking-tight">
+              {message.role.charAt(0).toUpperCase() + message.role.slice(1)}
+            </span>
 
-          {message.role === "tool" && message.name && (
-            <Badge variant="outline">
-              <Wrench className="size-3" />
-              {message.name}
-            </Badge>
-          )}
+            {message.role === "tool" && message.name && (
+              <Badge variant="outline">
+                <Wrench className="size-3" />
+                {message.name}
+              </Badge>
+            )}
+          </div>
+
+          <CopyButton value={() => contentRef.current?.innerText ?? ""} />
         </div>
 
-        <CopyButton value={() => contentRef.current?.innerText ?? ""} />
-      </div>
+        <div ref={contentRef} className="space-y-3">
+          {reasoning && (
+            <ExpandableContent label="Reasoning">
+              <p className="text-xs whitespace-pre-wrap text-muted-foreground italic">
+                {reasoning}
+              </p>
+            </ExpandableContent>
+          )}
 
-      <div ref={contentRef} className="space-y-3">
-        {reasoning && (
-          <ExpandableContent label="Reasoning">
-            <p className="text-xs whitespace-pre-wrap text-muted-foreground italic">{reasoning}</p>
-          </ExpandableContent>
-        )}
+          {content && <CollapsibleText text={content} maxLength={500} />}
 
-        {content && <CollapsibleText text={content} maxLength={500} />}
-
-        {toolCalls.map((tc, index) => (
-          <div key={`tool-call:${index}`} className="space-y-2">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Wrench className="size-3" />
-              <span className="font-medium">{tc.name}</span>
+          {toolCalls.map((tc, index) => (
+            <div key={`tool-call:${index}`} className="space-y-2">
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Wrench className="size-3" />
+                <span className="font-medium">{tc.name}</span>
+              </div>
+              <CollapsibleCode code={tc.arguments} maxLength={300} />
             </div>
-            <CollapsibleCode code={tc.arguments} maxLength={300} />
-          </div>
-        ))}
+          ))}
 
-        {otherParts.map((part, index) => (
-          <div key={`${part.type}:${index}`} className="space-y-2">
-            <div className="text-xs font-medium text-muted-foreground uppercase">{part.type}</div>
-            <CollapsibleCode code={part.value} maxLength={300} />
-          </div>
-        ))}
+          {otherParts.map((part, index) => (
+            <div key={`${part.type}:${index}`} className="space-y-2">
+              <div className="text-xs font-medium text-muted-foreground uppercase">{part.type}</div>
+              <CollapsibleCode code={part.value} maxLength={300} />
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
