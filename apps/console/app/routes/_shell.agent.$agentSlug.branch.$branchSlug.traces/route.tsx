@@ -9,17 +9,6 @@ import type { Route } from "./+types/route";
 import { TraceList } from "./list";
 import { parseTraceSearchParams } from "./search-params";
 
-export function shouldRevalidate({
-  currentUrl,
-  nextUrl,
-  defaultShouldRevalidate,
-}: ShouldRevalidateFunctionArgs) {
-  if (currentUrl.pathname !== nextUrl.pathname && currentUrl.search === nextUrl.search) {
-    return false;
-  }
-  return defaultShouldRevalidate;
-}
-
 export async function clientLoader({
   params: { agentSlug, branchSlug },
   request,
@@ -48,6 +37,17 @@ export async function clientLoader({
   };
 }
 
+export function shouldRevalidate({
+  currentUrl,
+  nextUrl,
+  defaultShouldRevalidate,
+}: ShouldRevalidateFunctionArgs) {
+  if (currentUrl.pathname !== nextUrl.pathname && currentUrl.search === nextUrl.search) {
+    return false;
+  }
+  return defaultShouldRevalidate;
+}
+
 export default function TracesRoute({
   loaderData: { traces, hasNextPage, metadataKeys, page },
 }: Route.ComponentProps) {
@@ -56,6 +56,9 @@ export default function TracesRoute({
   const location = useLocation();
 
   const { traceId } = useParams();
+
+  const isListLoading =
+    navigation.state !== "idle" && navigation.location?.pathname === location.pathname;
 
   return (
     <div className="h-full min-h-0 flex-1 overflow-hidden">
@@ -71,7 +74,7 @@ export default function TracesRoute({
             hasNextPage={hasNextPage}
             page={page}
             metadataKeys={metadataKeys}
-            loading={navigation.state !== "idle"}
+            loading={isListLoading}
             selectedTraceId={traceId ?? null}
             onSelectTrace={(id) => navigate({ pathname: id, search: location.search })}
           />

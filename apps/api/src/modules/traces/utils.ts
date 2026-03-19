@@ -26,7 +26,7 @@ function normalizeJsonUnicodeEscapes(value: string): string {
   });
 }
 
-export function parseJson(value: unknown): unknown {
+function parseJson(value: unknown): unknown {
   if (value === null || value === undefined) return null;
   if (typeof value === "object") return value;
   if (typeof value === "string") {
@@ -56,7 +56,17 @@ function truncateSummary(value: string): string {
   return value.length > 200 ? `${value.slice(0, 200)}...` : value;
 }
 
-export function extractSummary(message: unknown): string {
+export function extractLastUserSummary(messages: unknown): string {
+  const parsed = parseJsonArray(messages);
+  if (!parsed) return "";
+  for (let i = parsed.length - 1; i >= 0; i--) {
+    const msg = parsed[i] as any;
+    if (msg?.role === "user") return extractSummary(msg);
+  }
+  return "";
+}
+
+function extractSummary(message: unknown): string {
   const parsed = parseJson(message);
   if (!parsed) return "";
 

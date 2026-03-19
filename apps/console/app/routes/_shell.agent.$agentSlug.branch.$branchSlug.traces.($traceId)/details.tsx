@@ -1,5 +1,5 @@
-import { ChevronRight, ChevronUp, Wrench } from "lucide-react";
-import { useRef, useState } from "react";
+import { ChevronDown, ChevronRight, ChevronUp, Wrench } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
@@ -27,11 +27,11 @@ import {
 } from "../_shell.agent.$agentSlug.branch.$branchSlug.traces/utils";
 
 const COLLAPSE_TOGGLE_CLASS_NAME =
-  "mt-3 h-auto rounded-full bg-muted/60 px-2.5 py-1 text-xs font-medium uppercase text-muted-foreground hover:bg-muted hover:text-foreground";
+  "mt-3 h-auto rounded-full border border-border/60 px-2 py-1 text-xs font-medium text-foreground hover:bg-muted data-[panel-open]:bg-transparent data-[panel-open]:hover:bg-muted";
 const INLINE_DISCLOSURE_CLASS_NAME =
-  "h-auto gap-1 px-0 py-0 text-sm text-muted-foreground hover:text-foreground";
+  "h-auto gap-1 bg-transparent px-0 py-0 text-xs text-muted-foreground hover:bg-transparent hover:text-foreground active:bg-transparent data-[panel-open]:bg-transparent";
 const CODE_BLOCK_CLASS_NAME =
-  "overflow-x-auto rounded-md border bg-muted/30 p-3 text-xs break-words whitespace-pre-wrap text-foreground";
+  "overflow-x-auto rounded-sm bg-muted/30 p-3 text-xs break-words whitespace-pre-wrap text-foreground";
 
 type TraceDetailProps = { trace: TraceDetailData | null; loading: boolean };
 
@@ -68,7 +68,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
         <div className="shrink-0 border-b px-4 py-4">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 space-y-1">
-              <h2>{trace.responseModel}</h2>
+              <h2 className="text-ellipsis-start truncate">{trace.responseModel}</h2>
               <p className="truncate text-xs text-muted-foreground">
                 {[
                   trace.operationName,
@@ -113,9 +113,7 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
         </div>
 
         <TabsContent value="formatted" className="h-0 min-h-0">
-          <ScrollArea className="h-full px-4 py-4">
-            <FormattedView trace={trace} />
-          </ScrollArea>
+          <FormattedViewPanel trace={trace} />
         </TabsContent>
 
         <TabsContent value="raw" className="h-0 min-h-0">
@@ -162,6 +160,60 @@ function DetailShell({ children, className }: { children: React.ReactNode; class
 }
 
 // --- Formatted View ---
+
+const SCROLL_THRESHOLD = 120;
+
+function FormattedViewPanel({ trace }: { trace: TraceDetailData }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [showTop, setShowTop] = useState(false);
+  const [showBottom, setShowBottom] = useState(false);
+
+  const updateButtons = () => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    setShowTop(scrollTop > SCROLL_THRESHOLD);
+    setShowBottom(scrollHeight - scrollTop - clientHeight > SCROLL_THRESHOLD);
+  };
+
+  useEffect(() => {
+    updateButtons();
+  }, [trace]);
+
+  return (
+    <div className="relative h-full min-h-0">
+      <div ref={scrollRef} onScroll={updateButtons} className="h-full overflow-y-auto px-4 py-4">
+        <FormattedView trace={trace} />
+      </div>
+
+      <button
+        aria-label="Jump to top"
+        onClick={() => scrollRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+        className={cn(
+          "absolute top-3 right-3 flex size-7 items-center justify-center rounded-full border bg-background shadow-sm transition-opacity hover:bg-muted",
+          showTop ? "opacity-100" : "pointer-events-none opacity-0",
+        )}
+        tabIndex={showTop ? 0 : -1}
+      >
+        <ChevronUp className="size-3.5" />
+      </button>
+
+      <button
+        aria-label="Jump to bottom"
+        onClick={() =>
+          scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" })
+        }
+        className={cn(
+          "absolute right-3 bottom-4.5 flex size-7 items-center justify-center rounded-full border bg-background shadow-sm transition-opacity hover:bg-muted",
+          showBottom ? "opacity-100" : "pointer-events-none opacity-0",
+        )}
+        tabIndex={showBottom ? 0 : -1}
+      >
+        <ChevronDown className="size-3.5" />
+      </button>
+    </div>
+  );
+}
 
 function FormattedView({ trace }: { trace: TraceDetailData }) {
   const inputMessages = trace.inputMessages;
@@ -237,7 +289,7 @@ function extractMessageParts(message: TraceMessage) {
   }
 
   return {
-    content: text.join("\n").trim(),
+    texts: text.map((t) => t.trim()).filter(Boolean),
     reasoning: reasoning.join("\n").trim(),
     toolCalls,
     otherParts,
@@ -252,59 +304,74 @@ const ROLE_ACCENTS: Record<string, string> = {
 };
 
 function MessageBlock({ message }: { message: TraceMessage }) {
-  const { content, reasoning, toolCalls, otherParts } = extractMessageParts(message);
+  const { texts, reasoning, toolCalls, otherParts } = extractMessageParts(message);
 
   const contentRef = useRef<HTMLDivElement>(null);
 
   return (
-    <section
-      className={cn(
-        "space-y-3 border-l-2 py-4 pl-3 first:pt-0 last:pb-0",
-        ROLE_ACCENTS[message.role] ?? "border-l-border",
-      )}
-    >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-base font-semibold tracking-tight">
-            {message.role.charAt(0).toUpperCase() + message.role.slice(1)}
-          </span>
+    <section className="py-4 first:pt-0 last:pb-0">
+      <div
+        className={cn("space-y-2 border-l-2 pl-3", ROLE_ACCENTS[message.role] ?? "border-l-border")}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-base font-semibold tracking-tight">
+              {message.role.charAt(0).toUpperCase() + message.role.slice(1)}
+            </span>
 
-          {message.role === "tool" && message.name && (
-            <Badge variant="outline">
-              <Wrench className="size-3" />
-              {message.name}
-            </Badge>
-          )}
+            {message.role === "tool" && message.name && (
+              <Badge variant="outline">
+                <Wrench className="size-3" />
+                {message.name}
+              </Badge>
+            )}
+          </div>
+
+          <CopyButton value={() => contentRef.current?.innerText ?? ""} />
         </div>
 
-        <CopyButton value={() => contentRef.current?.innerText ?? ""} />
-      </div>
+        {!reasoning && texts.length === 0 && toolCalls.length === 0 && otherParts.length === 0 ? (
+          <p className="text-xs text-muted-foreground opacity-50">(no message)</p>
+        ) : (
+          <div ref={contentRef} className="space-y-3">
+            {reasoning && (
+              <ExpandableContent label="Reasoning">
+                <p className="text-xs whitespace-pre-wrap text-muted-foreground italic">
+                  {reasoning}
+                </p>
+              </ExpandableContent>
+            )}
 
-      <div ref={contentRef} className="space-y-3">
-        {reasoning && (
-          <ExpandableContent label="Reasoning">
-            <p className="text-xs whitespace-pre-wrap text-muted-foreground italic">{reasoning}</p>
-          </ExpandableContent>
+            {texts.map((text, index) =>
+              texts.length > 1 ? (
+                <div key={index} className="rounded-sm bg-muted/30 px-2 py-1.5">
+                  <CollapsibleText text={text} maxLength={500} />
+                </div>
+              ) : (
+                <CollapsibleText key={index} text={text} maxLength={500} />
+              ),
+            )}
+
+            {toolCalls.map((tc, index) => (
+              <div key={`tool-call:${index}`} className="space-y-2">
+                <Badge variant="outline">
+                  <Wrench className="size-3" />
+                  {tc.name}
+                </Badge>
+                <CollapsibleCode code={tc.arguments} maxLength={300} />
+              </div>
+            ))}
+
+            {otherParts.map((part, index) => (
+              <div key={`${part.type}:${index}`} className="space-y-2">
+                <div className="text-xs font-medium text-muted-foreground uppercase">
+                  {part.type}
+                </div>
+                <CollapsibleCode code={part.value} maxLength={300} />
+              </div>
+            ))}
+          </div>
         )}
-
-        {content && <CollapsibleText text={content} maxLength={500} />}
-
-        {toolCalls.map((tc, index) => (
-          <div key={`tool-call:${index}`} className="space-y-2">
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Wrench className="size-3" />
-              <span className="font-medium">{tc.name}</span>
-            </div>
-            <CollapsibleCode code={tc.arguments} maxLength={300} />
-          </div>
-        ))}
-
-        {otherParts.map((part, index) => (
-          <div key={`${part.type}:${index}`} className="space-y-2">
-            <div className="text-xs font-medium text-muted-foreground uppercase">{part.type}</div>
-            <CollapsibleCode code={part.value} maxLength={300} />
-          </div>
-        ))}
       </div>
     </section>
   );
@@ -398,7 +465,7 @@ function RawJsonView({ trace }: { trace: TraceDetailData }) {
 // --- Metadata View ---
 
 function MetadataView({ trace }: { trace: TraceDetailData }) {
-  const metadataEntries = Object.entries(trace.metadata);
+  const metadataEntries = Object.entries(trace.metadata).sort(([a], [b]) => a.localeCompare(b));
 
   return (
     <div className="flex flex-col gap-5">
@@ -409,15 +476,7 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
             <table className="w-full text-xs">
               <tbody>
                 {metadataEntries.map(([key, value]) => (
-                  <tr key={key} className="border-b last:border-b-0">
-                    <td className="w-1/3 px-3 py-2 font-medium text-muted-foreground">{key}</td>
-                    <td className="px-3 py-2 break-all">
-                      <div className="flex items-center gap-1">
-                        <span className="min-w-0 flex-1">{value}</span>
-                        <CopyButton value={value} className="size-5 shrink-0 p-0" />
-                      </div>
-                    </td>
-                  </tr>
+                  <IdentifierRow key={key} label={key} value={value} />
                 ))}
               </tbody>
             </table>
@@ -453,9 +512,9 @@ function IdentifierRow({ label, value }: { label: string; value: string | null }
   return (
     <tr className="border-b last:border-b-0">
       <td className="w-1/3 px-3 py-2 font-medium text-muted-foreground">{label}</td>
-      <td className="px-3 py-2 font-mono text-xs break-all">
+      <td className="px-3 py-2 break-all">
         <div className="flex items-center gap-1">
-          <span className="min-w-0 flex-1 truncate">{value}</span>
+          <span className="min-w-0 flex-1">{value}</span>
           <CopyButton value={value} className="size-5 shrink-0 p-0" />
         </div>
       </td>

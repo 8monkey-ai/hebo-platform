@@ -1,7 +1,7 @@
 import { Outlet, type ShouldRevalidateFunctionArgs } from "react-router";
 
 import { ErrorView } from "~console/components/ui/ErrorView";
-import { dontRevalidateOnFormErrors } from "~console/lib/errors";
+import { revalidateOnSuccessfulAction } from "~console/lib/errors";
 import { api } from "~console/lib/service";
 
 import type { Route } from "./+types/route";
@@ -40,7 +40,7 @@ export function shouldRevalidate(args: ShouldRevalidateFunctionArgs) {
   ) {
     return true;
   }
-  return dontRevalidateOnFormErrors(args);
+  return revalidateOnSuccessfulAction(args);
 }
 
 export default function AgentLayout() {

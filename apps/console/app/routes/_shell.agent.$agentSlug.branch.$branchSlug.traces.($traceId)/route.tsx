@@ -1,5 +1,6 @@
 import { ChevronLeft } from "lucide-react";
-import { useNavigate, useNavigation, useParams } from "react-router";
+import { useLocation, useNavigate, useNavigation, useParams } from "react-router";
+import type { ShouldRevalidateFunctionArgs } from "react-router";
 
 import { Button } from "@hebo/shared-ui/components/Button";
 
@@ -20,10 +21,19 @@ export async function clientLoader({
   return data?.[0] ?? null;
 }
 
+export function shouldRevalidate({ currentParams, nextParams }: ShouldRevalidateFunctionArgs) {
+  return currentParams.traceId !== nextParams.traceId;
+}
+
 export default function TraceDetailRoute({ loaderData }: Route.ComponentProps) {
   const navigate = useNavigate();
   const navigation = useNavigation();
+  const location = useLocation();
+
   const { traceId } = useParams();
+
+  const loading =
+    navigation.state === "loading" && navigation.location?.pathname !== location.pathname;
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3">
@@ -36,7 +46,7 @@ export default function TraceDetailRoute({ loaderData }: Route.ComponentProps) {
         </div>
       )}
       <div className="min-h-0 flex-1">
-        <TraceDetail trace={loaderData} loading={navigation.state === "loading"} />
+        <TraceDetail trace={loaderData} loading={loading} />
       </div>
     </div>
   );

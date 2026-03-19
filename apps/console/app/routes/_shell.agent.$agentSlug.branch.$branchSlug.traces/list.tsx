@@ -91,6 +91,7 @@ export function TraceList({
             <>
               {" · "}
               {Object.entries(metadata)
+                .sort(([a], [b]) => a.localeCompare(b))
                 .map(([key, value]) => `${key}:${value}`)
                 .join(", ")}
             </>
@@ -125,7 +126,7 @@ export function TraceList({
                       key={trace.traceId}
                       type="button"
                       className={cn(
-                        "flex w-full flex-col gap-3 overflow-hidden px-4 py-4 text-left transition-colors hover:bg-accent/40",
+                        "flex w-full flex-col gap-2.5 overflow-hidden px-4 py-4 text-left transition-colors hover:bg-accent/40",
                         isSelected && "bg-accent/60",
                       )}
                       onClick={() => onSelectSpan(trace.traceId)}
@@ -151,14 +152,16 @@ export function TraceList({
                         </div>
                       </div>
 
-                      {trace.summary && (
-                        <p className="line-clamp-2 text-xs text-muted-foreground">
-                          {truncateText(trace.summary, 120)}
-                        </p>
-                      )}
+                      <p className="line-clamp-2 text-xs text-muted-foreground">
+                        {trace.summary ? (
+                          truncateText(trace.summary, 120)
+                        ) : (
+                          <span className="opacity-50">(no user message)</span>
+                        )}
+                      </p>
 
                       {Object.keys(trace.metadata).length > 0 && (
-                        <TagStrip metadata={trace.metadata} />
+                        <TagStrip metadata={trace.metadata} allKeys={metadataKeys} />
                       )}
                     </button>
                   );
@@ -199,8 +202,14 @@ export function TraceList({
 
 const VISIBLE_TAG_COUNT = 3;
 
-function TagStrip({ metadata }: { metadata: Record<string, string> }) {
-  const entries = Object.entries(metadata);
+function tagStyle(key: string, allKeys: string[]) {
+  const sorted = [...allKeys].sort((a, b) => a.localeCompare(b));
+  const hue = Math.round((Math.max(0, sorted.indexOf(key)) * 137.508) % 360);
+  return { backgroundColor: `hsl(${hue} 55% 95%)`, color: `hsl(${hue} 40% 35%)` };
+}
+
+function TagStrip({ metadata, allKeys }: { metadata: Record<string, string>; allKeys: string[] }) {
+  const entries = Object.entries(metadata).sort(([a], [b]) => a.localeCompare(b));
   const visible = entries.slice(0, VISIBLE_TAG_COUNT);
   const overflowCount = entries.length - visible.length;
 
@@ -216,7 +225,8 @@ function TagStrip({ metadata }: { metadata: Record<string, string> }) {
                 <Badge
                   key={key}
                   variant="secondary"
-                  className="shrink-0 bg-muted text-muted-foreground"
+                  className="shrink-0"
+                  style={tagStyle(key, allKeys)}
                 >
                   {key}: {value}
                 </Badge>
@@ -232,7 +242,7 @@ function TagStrip({ metadata }: { metadata: Record<string, string> }) {
         <HoverCardContent align="start" className="w-auto">
           <div className="flex flex-col gap-1.5">
             {entries.map(([key, value]) => (
-              <Badge key={key} variant="secondary" className="w-fit bg-muted text-muted-foreground">
+              <Badge key={key} variant="secondary" className="w-fit" style={tagStyle(key, allKeys)}>
                 {key}: {value}
               </Badge>
             ))}
@@ -339,7 +349,15 @@ function TimePresetControl() {
         <PopoverHeader>
           <PopoverTitle>Custom range</PopoverTitle>
         </PopoverHeader>
-        <div className="flex flex-col gap-2.5">
+        <form
+          className="flex flex-col gap-2.5"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!customFrom || !customTo) return;
+            applyRange("custom", customFrom, customTo);
+            setCustomOpen(false);
+          }}
+        >
           <div className="flex flex-col gap-1">
             <Label htmlFor="custom-from" className="text-xs text-muted-foreground">
               Start
@@ -364,18 +382,10 @@ function TimePresetControl() {
               onChange={(event) => setCustomTo(event.target.value)}
             />
           </div>
-          <Button
-            size="sm"
-            className="ml-auto"
-            onClick={() => {
-              if (!customFrom || !customTo) return;
-              applyRange("custom", customFrom, customTo);
-              setCustomOpen(false);
-            }}
-          >
+          <Button type="submit" size="sm" className="ml-auto">
             Apply range
           </Button>
-        </div>
+        </form>
       </PopoverContent>
     </Popover>
   );
@@ -383,7 +393,7 @@ function TimePresetControl() {
 
 function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
   const { metadata, updateParams } = useTraceSearchParams();
-  const activeFilterCount = Object.keys(metadata).length;
+
 
   const [filterKey, setFilterKey] = useState("");
   const [filterValue, setFilterValue] = useState("");
@@ -406,7 +416,6 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
           <Button variant="outline" size="sm">
             <Filter className="size-3" />
             Filters
-            {activeFilterCount > 0 && <Badge variant="secondary">{activeFilterCount}</Badge>}
           </Button>
         }
       />
@@ -417,28 +426,30 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
         </PopoverHeader>
         <div className="-mx-4 border-t" />
         <div className="flex flex-col gap-3">
-          {activeFilterCount > 0 && (
+          {Object.keys(metadata).length > 0 && (
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-muted-foreground">Active filters</p>
               <div className="flex flex-col gap-1">
-                {Object.entries(metadata).map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between rounded-md border px-2 py-1.5 text-xs"
-                  >
-                    <span>
-                      {key}: {value}
-                    </span>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      aria-label={`Remove ${key} filter`}
-                      onClick={() => refreshFilter(key, null)}
+                {Object.entries(metadata)
+                  .sort(([a], [b]) => a.localeCompare(b))
+                  .map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="flex items-center justify-between rounded-md border px-2 py-1.5 text-xs"
                     >
-                      <X className="size-3" />
-                    </Button>
-                  </div>
-                ))}
+                      <span>
+                        {key}: {value}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        aria-label={`Remove ${key} filter`}
+                        onClick={() => refreshFilter(key, null)}
+                      >
+                        <X className="size-3" />
+                      </Button>
+                    </div>
+                  ))}
               </div>
             </div>
           )}
@@ -455,7 +466,9 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                   <Select
                     value={filterKey}
                     onValueChange={(value) => setFilterKey(value as string)}
-                    items={metadataKeys.map((key) => ({ value: key, label: key }))}
+                    items={[...metadataKeys]
+                      .sort((a, b) => a.localeCompare(b))
+                      .map((key) => ({ value: key, label: key }))}
                     placeholder="Key"
                   />
                 </div>

@@ -6,7 +6,7 @@ import type { GenAIFinishReasons, GenAIInputMessages, GenAIOutputMessages } from
 import {
   escapeSqlIdentifier,
   escapeSqlString,
-  extractSummary,
+  extractLastUserSummary,
   formatStatus,
   parseJsonArray,
   parseNullableNumber,
@@ -87,7 +87,7 @@ export async function listTraces(
       "span_attributes.gen_ai.operation.name" AS operation_name,
       "span_attributes.gen_ai.response.model" AS response_model,
       "span_attributes.gen_ai.provider.name" AS provider_name,
-      json_get_string("span_attributes.gen_ai.output.messages", '$[last - 0]') AS output_message
+      json_to_string("span_attributes.gen_ai.input.messages") AS input_messages
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
     WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
@@ -123,7 +123,7 @@ export async function listTraces(
       provider: String(row.provider_name ?? ""),
       status: formatStatus(row.span_status_code),
       durationMs: Number(row.duration_nano ?? 0) / 1e6,
-      summary: extractSummary(row.output_message),
+      summary: extractLastUserSummary(row.input_messages),
       metadata,
     });
   }
