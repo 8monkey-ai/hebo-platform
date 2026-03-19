@@ -36,8 +36,7 @@ const mockTraces = [
     provider: "openai",
     status: "ok",
     durationMs: 842,
-    summary:
-      "The cheapest flight from Kuala Lumpur to Tokyo Narita is with AirAsia for $187 on March 20th.",
+    summary: "Find me the cheapest flight from Kuala Lumpur to Tokyo Narita for March 20th.",
   },
   {
     timestamp: new Date(now - 6 * min).toISOString(),
@@ -47,7 +46,7 @@ const mockTraces = [
     provider: "openai",
     status: "ok",
     durationMs: 1234,
-    summary: "Based on the documentation, the deployment process involves three steps...",
+    summary: "How do I deploy using the new CI/CD pipeline?",
   },
   {
     timestamp: new Date(now - 12 * min).toISOString(),
@@ -57,7 +56,7 @@ const mockTraces = [
     provider: "anthropic",
     status: "error",
     durationMs: 2834,
-    summary: "",
+    summary: "Analyze this dataset and provide recommendations for optimization.",
   },
   {
     timestamp: new Date(now - 18 * min).toISOString(),
@@ -67,7 +66,7 @@ const mockTraces = [
     provider: "openai",
     status: "ok",
     durationMs: 456,
-    summary: "Hello! How can I help you today?",
+    summary: "Hello!",
   },
   {
     timestamp: new Date(now - 25 * min).toISOString(),
@@ -141,7 +140,12 @@ const mockSpanDetails: Record<string, object> = {
         parts: [
           {
             type: "text",
-            content: "Find me the cheapest flight from Kuala Lumpur to Tokyo Narita for March 20th",
+            content: "Find me the cheapest flight from Kuala Lumpur to Tokyo Narita for March 20th.",
+          },
+          {
+            type: "text",
+            content:
+              "I'm flexible by one day either side if the price difference is significant. Direct flights preferred but not required.",
           },
         ],
       },
@@ -394,7 +398,7 @@ const mockSpanDetails: Record<string, object> = {
     outputTokens: null,
     totalTokens: 256,
     reasoningTokens: null,
-    inputMessages: [],
+    inputMessages: [{ role: "user", parts: [] }],
     outputMessages: [],
     finishReasons: [],
     responseId: "emb-pqr901stu234",
@@ -549,7 +553,7 @@ export const traceHandlers = [
 
       // Apply metadata filters
       const filterEntries = Object.entries(metadataFilters);
-      const filtered = filterEntries.length
+      const filtered = filterEntries.length > 0
         ? mockTraces.filter((t) => {
             const detail = mockSpanDetails[t.traceId] as any;
             return filterEntries.every(([metaKey, value]) => detail?.metadata?.[metaKey] === value);
