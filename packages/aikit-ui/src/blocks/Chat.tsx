@@ -117,7 +117,9 @@ export function Chat({
     };
 
     document.addEventListener("keydown", handleGlobalKeyDown);
-    return () => document.removeEventListener("keydown", handleGlobalKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleGlobalKeyDown);
+    };
   }, []);
 
   // Shortcut: attachment button
@@ -131,7 +133,9 @@ export function Chat({
     };
 
     document.addEventListener("keydown", handleGlobalKeyDown);
-    return () => document.removeEventListener("keydown", handleGlobalKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleGlobalKeyDown);
+    };
   }, []);
 
   // Shortcut: clear chat
@@ -147,7 +151,9 @@ export function Chat({
     }
 
     globalThis.addEventListener("keydown", onKeyDown);
-    return () => globalThis.removeEventListener("keydown", onKeyDown);
+    return () => {
+      globalThis.removeEventListener("keydown", onKeyDown);
+    };
   }, []);
 
   const handleSubmit = (message: PromptInputMessage) => {
@@ -183,7 +189,9 @@ export function Chat({
                 variant="ghost"
                 size="icon"
                 className="size-7 hover:bg-sidebar-accent"
-                onClick={() => setMessages([])}
+                onClick={() => {
+                  setMessages([]);
+                }}
               >
                 <Edit />
               </Button>
@@ -319,7 +327,9 @@ export function Chat({
           <PromptInputTextarea
             ref={chatInputRef}
             disabled={!currentModelAlias}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              setInput(e.target.value);
+            }}
             value={input}
             placeholder="Ask anything …"
             aria-label="Chat message input"
@@ -342,7 +352,9 @@ export function Chat({
             {modelsConfig.length > 1 && (
               <PromptInputSelect
                 id="chat-model-select"
-                onValueChange={(alias: unknown) => setSelectedModelAlias(alias as string)}
+                onValueChange={(alias: unknown) => {
+                  setSelectedModelAlias(alias as string);
+                }}
                 value={currentModelAlias}
                 disabled={status === "submitted" || modelsConfig.length === 0}
                 aria-label="Select model"
@@ -405,7 +417,9 @@ function PromptInputAttachmentsDisplay() {
         <Attachment
           key={attachment.id}
           data={attachment}
-          onRemove={() => attachments.remove(attachment.id)}
+          onRemove={() => {
+            attachments.remove(attachment.id);
+          }}
         >
           <div className="relative size-5 shrink-0">
             <div className="absolute inset-0 transition-opacity group-hover:opacity-0">

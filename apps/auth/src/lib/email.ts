@@ -53,7 +53,10 @@ export async function sendVerificationOtpEmail({
   consoleUrl?: string;
 }) {
   if (!hasSmtpConfig()) return;
-  if (!consoleUrl) return console.warn("Missing origin header, cannot send verification email");
+  if (!consoleUrl) {
+    console.warn("Missing origin header, cannot send verification email");
+    return;
+  }
 
   const magicLinkUrl = new URL("/signin/magic-link", consoleUrl);
   magicLinkUrl.searchParams.set("email", email);
@@ -96,7 +99,10 @@ export async function sendOrganizationInvitationEmail({
   consoleUrl?: string;
 }) {
   if (!hasSmtpConfig()) return;
-  if (!consoleUrl) return console.warn("Missing origin header, cannot send invitation email");
+  if (!consoleUrl) {
+    console.warn("Missing origin header, cannot send invitation email");
+    return;
+  }
 
   const acceptUrl = new URL("/accept-invitation", consoleUrl);
 

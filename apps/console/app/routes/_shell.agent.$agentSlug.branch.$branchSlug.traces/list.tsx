@@ -464,7 +464,9 @@ function TimePresetControl() {
               type="datetime-local"
               className="text-xs"
               value={customFrom}
-              onChange={(event) => setCustomFrom(event.target.value)}
+              onChange={(event) => {
+                setCustomFrom(event.target.value);
+              }}
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -476,7 +478,9 @@ function TimePresetControl() {
               type="datetime-local"
               className="text-xs"
               value={customTo}
-              onChange={(event) => setCustomTo(event.target.value)}
+              onChange={(event) => {
+                setCustomTo(event.target.value);
+              }}
             />
           </div>
           <Button type="submit" size="sm" className="ml-auto">
@@ -588,7 +592,9 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                 <div className="min-w-0 flex-1">
                   <Select
                     value={filterKey}
-                    onValueChange={(value) => setFilterKey(value as string)}
+                    onValueChange={(value) => {
+                      setFilterKey(value as string);
+                    }}
                     items={[...metadataKeys]
                       .sort((a, b) => a.localeCompare(b))
                       .map((key) => ({ value: key, label: key }))}
@@ -598,7 +604,9 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                 <div className="min-w-0 flex-1">
                   <Input
                     value={filterValue}
-                    onChange={(e) => setFilterValue(e.target.value)}
+                    onChange={(e) => {
+                      setFilterValue(e.target.value);
+                    }}
                     placeholder="Value"
                   />
                 </div>

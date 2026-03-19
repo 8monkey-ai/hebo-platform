@@ -86,7 +86,7 @@ export const authService = {
 
   async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
     const now = new Date();
-    return await apiKeys.create({
+    return apiKeys.create({
       name,
       key: crypto.randomUUID(),
       createdAt: now,

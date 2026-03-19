@@ -92,7 +92,11 @@ export function UserMenu({
                   </a>
                 }
               />
-              <DropdownMenuItem onClick={() => setShortcutsOpen(true)}>
+              <DropdownMenuItem
+                onClick={() => {
+                  setShortcutsOpen(true);
+                }}
+              >
                 <Keyboard />
                 <span>Shortcuts</span>
                 <DropdownMenuShortcut>{kbs("mod+/")}</DropdownMenuShortcut>

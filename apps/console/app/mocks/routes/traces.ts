@@ -118,7 +118,7 @@ mockTraces.push(...generatedMockTraces);
 
 const mockSpanDetails: Record<string, object> = {
   "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e": {
-    timestamp: mockTraces[0]!.timestamp,
+    timestamp: mockTraces[0].timestamp,
     spanId: "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e",
     operationName: "chat",
     model: "gpt-oss-120b",
@@ -246,7 +246,7 @@ const mockSpanDetails: Record<string, object> = {
     },
   },
   "7a2b3c4d-e5f6-7890-abcd-ef1234567890": {
-    timestamp: mockTraces[1]!.timestamp,
+    timestamp: mockTraces[1].timestamp,
     spanId: "7a2b3c4d-e5f6-7890-abcd-ef1234567890",
     operationName: "chat",
     model: "gpt-4.1",
@@ -310,7 +310,7 @@ const mockSpanDetails: Record<string, object> = {
     },
   },
   "3c4d5e6f-7890-abcd-ef12-345678901234": {
-    timestamp: mockTraces[2]!.timestamp,
+    timestamp: mockTraces[2].timestamp,
     spanId: "3c4d5e6f-7890-abcd-ef12-345678901234",
     operationName: "chat",
     model: "claude-sonnet-4-20250514",
@@ -356,7 +356,7 @@ const mockSpanDetails: Record<string, object> = {
     },
   },
   "4d5e6f70-8901-bcde-f123-456789012345": {
-    timestamp: mockTraces[3]!.timestamp,
+    timestamp: mockTraces[3].timestamp,
     spanId: "4d5e6f70-8901-bcde-f123-456789012345",
     operationName: "chat",
     model: "gpt-oss-20b",
@@ -397,7 +397,7 @@ const mockSpanDetails: Record<string, object> = {
     },
   },
   "5e6f7081-9012-cdef-0123-567890123456": {
-    timestamp: mockTraces[4]!.timestamp,
+    timestamp: mockTraces[4].timestamp,
     spanId: "5e6f7081-9012-cdef-0123-567890123456",
     operationName: "embeddings",
     model: "voyage-3.5",

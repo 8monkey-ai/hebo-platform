@@ -18,7 +18,12 @@ export function Button({
   const [showSpinner, setShowSpinner] = useState(false);
 
   useEffect(() => {
-    const timeout = setTimeout(() => setShowSpinner(isLoading), isLoading ? 250 : 0);
+    const timeout = setTimeout(
+      () => {
+        setShowSpinner(isLoading);
+      },
+      isLoading ? 250 : 0,
+    );
 
     return () => {
       clearTimeout(timeout);

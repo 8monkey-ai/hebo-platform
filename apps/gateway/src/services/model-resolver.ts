@@ -46,7 +46,7 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
     state.modelConfig = {
       type: aliasPath,
       // Currently, we only support routing to the first provider.
-      customProviderSlug: modelConfig?.providers[0] as ProviderSlug,
+      customProviderSlug: modelConfig?.providers[0],
       free: modelConfig?.additionalProperties?.free as boolean | undefined,
       requiresByok: modelConfig?.additionalProperties?.requiresByok as boolean | undefined,
     };
@@ -79,7 +79,7 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
   state.modelConfig = {
     type: model.type,
     // Currently, we only support routing to the first provider.
-    customProviderSlug: model.routing?.only?.[0] as ProviderSlug | undefined,
+    customProviderSlug: model.routing?.only?.[0],
     free: catalogModel?.additionalProperties?.free as boolean | undefined,
     requiresByok: catalogModel?.additionalProperties?.requiresByok as boolean | undefined,
   };
@@ -120,7 +120,7 @@ async function resolveCustomProvider(
 
   if (!provider) {
     provider = createProvider(customProviderSlug, config.value);
-    providerCache.set(providerCacheKey, provider!);
+    providerCache.set(providerCacheKey, provider);
   }
 
   return provider;

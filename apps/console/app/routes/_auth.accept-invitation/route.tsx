@@ -27,7 +27,9 @@ export default function AcceptInvitation({ loaderData: data }: Route.ComponentPr
       const timer = setTimeout(() => {
         globalThis.location.replace("/");
       }, 1500);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+      };
     }
   }, [data.status]);
 

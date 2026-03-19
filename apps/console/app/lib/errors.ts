@@ -16,14 +16,14 @@ export function parseError(error: unknown) {
     const e = error as { summary?: string; message?: string };
     message = e.summary || e.message || "Unknown Error";
   } else if (error instanceof TimeoutError) {
-    message = `${error.message}`;
+    message = error.message;
   } else if (isNetworkError(error)) {
     message = `Network error: ${error.message}`;
   } else if (error instanceof HTTPError) {
     message = `${error.response.statusText}: ${error.message}`;
     status = error.response.status;
   } else if (error instanceof Error) {
-    message = `${error.message}`;
+    message = error.message;
   } else if (typeof error === "string") {
     message = error;
   } else {

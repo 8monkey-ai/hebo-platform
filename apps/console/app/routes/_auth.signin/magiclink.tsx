@@ -36,7 +36,9 @@ export function MagicLinkSignIn() {
           maxLength={6}
           pattern={"^[a-zA-Z0-9]+$"}
           value={otp}
-          onChange={(value) => setOtp(value.toUpperCase())}
+          onChange={(value) => {
+            setOtp(value.toUpperCase());
+          }}
           disabled={loading}
         >
           <InputOTPGroup>
@@ -89,7 +91,9 @@ export function MagicLinkSignIn() {
         type="email"
         autoComplete="email"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => {
+          setEmail(e.target.value);
+        }}
         disabled={loading}
         required
       />
