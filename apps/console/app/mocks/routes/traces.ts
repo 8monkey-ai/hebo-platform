@@ -140,7 +140,8 @@ const mockSpanDetails: Record<string, object> = {
         parts: [
           {
             type: "text",
-            content: "Find me the cheapest flight from Kuala Lumpur to Tokyo Narita for March 20th.",
+            content:
+              "Find me the cheapest flight from Kuala Lumpur to Tokyo Narita for March 20th.",
           },
           {
             type: "text",
@@ -538,7 +539,7 @@ export const traceHandlers = [
       const pageParam = Number(url.searchParams.get("page"));
       const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
       const pageSizeParam = Number(url.searchParams.get("pageSize"));
-      const pageSize = Number.isInteger(pageSizeParam) && pageSizeParam > 0 ? pageSizeParam : 50;
+      const pageSize = Number.isInteger(pageSizeParam) && pageSizeParam > 0 ? pageSizeParam : 10;
 
       const metadataParam = url.searchParams.get("metadata");
       let metadataFilters: Record<string, string> | null = null;
@@ -553,12 +554,15 @@ export const traceHandlers = [
 
       // Apply metadata filters
       const filterEntries = Object.entries(metadataFilters);
-      const filtered = filterEntries.length > 0
-        ? mockTraces.filter((t) => {
-            const detail = mockSpanDetails[t.traceId] as any;
-            return filterEntries.every(([metaKey, value]) => detail?.metadata?.[metaKey] === value);
-          })
-        : [...mockTraces];
+      const filtered =
+        filterEntries.length > 0
+          ? mockTraces.filter((t) => {
+              const detail = mockSpanDetails[t.traceId] as any;
+              return filterEntries.every(
+                ([metaKey, value]) => detail?.metadata?.[metaKey] === value,
+              );
+            })
+          : [...mockTraces];
 
       const start = (page - 1) * pageSize;
       const paged = filtered.slice(start, start + pageSize);
