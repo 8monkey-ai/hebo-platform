@@ -161,7 +161,7 @@ export function TraceList({
                       </p>
 
                       {Object.keys(trace.metadata).length > 0 && (
-                        <TagStrip metadata={trace.metadata} />
+                        <TagStrip metadata={trace.metadata} allKeys={metadataKeys} />
                       )}
                     </button>
                   );
@@ -202,7 +202,13 @@ export function TraceList({
 
 const VISIBLE_TAG_COUNT = 3;
 
-function TagStrip({ metadata }: { metadata: Record<string, string> }) {
+function tagStyle(key: string, allKeys: string[]) {
+  const sorted = [...allKeys].sort((a, b) => a.localeCompare(b));
+  const hue = Math.round((Math.max(0, sorted.indexOf(key)) * 137.508) % 360);
+  return { backgroundColor: `hsl(${hue} 55% 95%)`, color: `hsl(${hue} 40% 35%)` };
+}
+
+function TagStrip({ metadata, allKeys }: { metadata: Record<string, string>; allKeys: string[] }) {
   const entries = Object.entries(metadata).sort(([a], [b]) => a.localeCompare(b));
   const visible = entries.slice(0, VISIBLE_TAG_COUNT);
   const overflowCount = entries.length - visible.length;
@@ -219,7 +225,8 @@ function TagStrip({ metadata }: { metadata: Record<string, string> }) {
                 <Badge
                   key={key}
                   variant="secondary"
-                  className="shrink-0 bg-muted text-muted-foreground"
+                  className="shrink-0"
+                  style={tagStyle(key, allKeys)}
                 >
                   {key}: {value}
                 </Badge>
@@ -235,7 +242,7 @@ function TagStrip({ metadata }: { metadata: Record<string, string> }) {
         <HoverCardContent align="start" className="w-auto">
           <div className="flex flex-col gap-1.5">
             {entries.map(([key, value]) => (
-              <Badge key={key} variant="secondary" className="w-fit bg-muted text-muted-foreground">
+              <Badge key={key} variant="secondary" className="w-fit" style={tagStyle(key, allKeys)}>
                 {key}: {value}
               </Badge>
             ))}
