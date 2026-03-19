@@ -393,7 +393,7 @@ function TimePresetControl() {
 
 function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
   const { metadata, updateParams } = useTraceSearchParams();
-  const activeFilterCount = Object.keys(metadata).length;
+
 
   const [filterKey, setFilterKey] = useState("");
   const [filterValue, setFilterValue] = useState("");
@@ -426,7 +426,7 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
         </PopoverHeader>
         <div className="-mx-4 border-t" />
         <div className="flex flex-col gap-3">
-          {activeFilterCount > 0 && (
+          {Object.keys(metadata).length > 0 && (
             <div className="flex flex-col gap-1.5">
               <p className="text-xs text-muted-foreground">Active filters</p>
               <div className="flex flex-col gap-1">
