@@ -1,4 +1,4 @@
-import { Outlet, useLocation, useNavigate, useNavigation, useParams } from "react-router";
+import { Outlet, useNavigation, useParams } from "react-router";
 import type { ShouldRevalidateFunctionArgs } from "react-router";
 
 import { cn } from "@hebo/shared-ui/lib/utils";
@@ -53,10 +53,7 @@ export function shouldRevalidate({
 export default function TracesRoute({
   loaderData: { traces, hasNextPage, metadataKeys, page },
 }: Route.ComponentProps) {
-  const navigate = useNavigate();
   const navigation = useNavigation();
-  const location = useLocation();
-
   const { traceId } = useParams();
 
   const isListLoading =
@@ -78,7 +75,6 @@ export default function TracesRoute({
             metadataKeys={metadataKeys}
             loading={isListLoading}
             selectedTraceId={traceId ?? null}
-            onSelectTrace={(id) => navigate({ pathname: id, search: location.search })}
           />
         </div>
 
