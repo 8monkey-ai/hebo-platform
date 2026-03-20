@@ -28,7 +28,7 @@ export default function Settings({ loaderData }: Route.ComponentProps) {
         invitations={loaderData.invitations}
         isOwner={loaderData.isOwner}
         canManage={loaderData.canManage}
-        teamId={agent.team_id}
+        agent={agent}
       />
       <DangerSettings agent={agent} />
     </div>

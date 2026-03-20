@@ -45,15 +45,14 @@ type MembersSettingsProps = {
   invitations: OrgInvitation[];
   isOwner: boolean;
   canManage: boolean;
-  teamId?: string | null;
+  agent: { team_id: string };
 };
-
 export function MembersSettings({
   members,
   invitations,
   isOwner,
   canManage,
-  teamId,
+  agent,
 }: MembersSettingsProps) {
   const fetcher = useFetcher<{ intent: string; submission: any }>();
   const [role, setRole] = useState("member");
@@ -161,7 +160,7 @@ export function MembersSettings({
             className="flex items-end gap-3"
           >
             <input type="hidden" name="intent" value="invite" />
-            {teamId && <input type="hidden" name="teamId" value={teamId} />}
+            <input type="hidden" name="teamId" value={agent.team_id} />
             <Field name={fields.email.name} className="flex-1">
               <FieldLabel>Email</FieldLabel>
               <FieldControl>
