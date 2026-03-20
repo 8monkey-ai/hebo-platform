@@ -42,7 +42,6 @@ export function PasswordSignIn() {
       onSubmit={async (e) => {
         e.preventDefault();
         setLoading(true);
-        setError(undefined);
         try {
           await authService.signInWithPassword(email, password);
         } catch (err) {
@@ -70,18 +69,22 @@ export function PasswordSignIn() {
         </Button>
       </div>
 
-      {error && (
-        <div role="alert" className="text-sm text-destructive">
+      {error ? (
+        <div role="alert" className="py-2 text-center text-sm text-destructive">
           {error}
+          {"! "}
+          <Link to="/signup" viewTransition className="font-medium text-foreground underline">
+            Sign up instead?
+          </Link>
         </div>
+      ) : (
+        <p className="py-2 text-center text-sm">
+          Don't have an account?{" "}
+          <Link to="/signup" viewTransition className="font-medium underline">
+            Sign up
+          </Link>
+        </p>
       )}
-
-      <p className="py-2 text-center text-sm">
-        Don't have an account?{" "}
-        <Link to="/signup" viewTransition className="font-medium underline">
-          Sign up
-        </Link>
-      </p>
     </form>
   );
 }
