@@ -188,16 +188,9 @@ export const authService: AuthService = {
       }
     }
 
-    const invitations = ((data.invitations ?? []) as unknown as (OrgInvitation & Record<string, unknown>)[])
-      .filter((i) => i.status === "pending")
-      .map(({ id, email, role, expiresAt, status, teamId }) => ({
-        id,
-        email,
-        role,
-        expiresAt,
-        status,
-        teamId: typeof teamId === "string" ? teamId : undefined,
-      }));
+    const invitations = ((data.invitations ?? []) as unknown as OrgInvitation[]).filter(
+      (i) => i.status === "pending",
+    );
 
     return { members, invitations };
   },

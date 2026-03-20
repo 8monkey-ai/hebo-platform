@@ -49,12 +49,11 @@ type MembersSettingsProps = {
 };
 export function MembersSettings({
   members,
-  invitations: allInvitations,
+  invitations,
   isOwner,
   canManage,
   agent,
 }: MembersSettingsProps) {
-  const invitations = allInvitations.filter((i) => i.teamId === agent.team_id);
   const fetcher = useFetcher<{ intent: string; submission: any }>();
   const [role, setRole] = useState("member");
 
