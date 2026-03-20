@@ -1,6 +1,6 @@
 import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
-import { Mail, Trash2, UserPlus } from "lucide-react";
+import { Check, Link2, Mail, Trash2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useFetcher } from "react-router";
 
@@ -137,7 +137,10 @@ export function MembersSettings({
                 <TableCell>expires {new Date(inv.expiresAt).toLocaleDateString()}</TableCell>
                 {canManage && (
                   <TableCell>
-                    <RevokeInvitationButton invitationId={inv.id} />
+                    <div className="flex items-center">
+                      <CopyInvitationLinkButton invitationId={inv.id} />
+                      <RevokeInvitationButton invitationId={inv.id} />
+                    </div>
                   </TableCell>
                 )}
               </TableRow>
@@ -221,6 +224,24 @@ function RemoveMemberButton({ email }: { email: string }) {
         </fetcher.Form>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+function CopyInvitationLinkButton({ invitationId }: { invitationId: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    const url = `${window.location.origin}/accept-invitation?id=${encodeURIComponent(invitationId)}`;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <Button variant="ghost" size="icon" aria-label="Copy invitation link" onClick={handleCopy}>
+      {copied ? <Check className="text-green-500" /> : <Link2 />}
+    </Button>
   );
 }
 
