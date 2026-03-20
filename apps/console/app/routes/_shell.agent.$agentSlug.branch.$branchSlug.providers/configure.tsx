@@ -29,6 +29,7 @@ import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
 
 const requiredString = (msg: string) => z.string(msg).trim().min(1, msg);
+const textareaString = (msg: string) => Object.assign(requiredString(msg), { textarea: true as const });
 
 const BedrockIamRoleSchema = z.object({
   authMode: z.literal("iam-role"),
@@ -54,7 +55,7 @@ const VertexIdentityFederationSchema = z.object({
 const VertexServiceAccountSchema = z.object({
   authMode: z.literal("service-account"),
   clientEmail: z.email("Please enter a valid service account email").trim().min(1),
-  privateKey: requiredString("Please enter the private key"),
+  privateKey: textareaString("Please enter the private key"),
   location: requiredString("Please enter a valid location"),
   project: requiredString("Please enter a valid project"),
 });
@@ -63,7 +64,6 @@ const AzureSchema = z.object({
   authMode: z.literal("azure-api-key"),
   apiKey: requiredString("Please enter a valid API key"),
   resourceName: requiredString("Please enter a valid resource name"),
-  apiVersion: z.string().optional(),
 });
 
 const ApiKeySchema = z.object({
@@ -115,6 +115,11 @@ function getProviderModes(slug: string) {
 
 function getConfigFields(schema: z.ZodObject<z.ZodRawShape>): string[] {
   return Object.keys(schema.shape).filter((k) => k !== "authMode");
+}
+
+function isTextarea(schema: z.ZodObject<z.ZodRawShape>, key: string): boolean {
+  const field = schema.shape[key];
+  return field != null && "textarea" in field && field.textarea === true;
 }
 
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
@@ -173,7 +178,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
           <Field key={key} name={field.name}>
             <FieldLabel>{labelize(key)}</FieldLabel>
             <FieldControl>
-              {key === "privateKey" ? (
+              {activeMode && isTextarea(activeMode.schema, key) ? (
                 <textarea
                   placeholder={`Set ${labelize(key).toLowerCase()}`}
                   autoComplete="off"

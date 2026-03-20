@@ -95,15 +95,6 @@ describe("createProvider", () => {
       expect(provider).toBeDefined();
     });
 
-    it("returns a provider with optional apiVersion", () => {
-      const provider = createProvider("azure", {
-        authMode: "azure-api-key",
-        apiKey: "key123",
-        resourceName: "my-resource",
-        apiVersion: "2024-02-01",
-      });
-      expect(provider).toBeDefined();
-    });
   });
 
   describe("api key providers", () => {
