@@ -77,15 +77,16 @@ describe("createProvider", () => {
 
   describe("azure", () => {
     it("returns undefined when apiKey is missing", () => {
-      expect(createProvider("azure", { apiKey: "", resourceName: "my-resource" })).toBeUndefined();
+      expect(createProvider("azure", { authMode: "api-key", apiKey: "", resourceName: "my-resource" })).toBeUndefined();
     });
 
     it("returns undefined when resourceName is missing", () => {
-      expect(createProvider("azure", { apiKey: "key123", resourceName: "" })).toBeUndefined();
+      expect(createProvider("azure", { authMode: "api-key", apiKey: "key123", resourceName: "" })).toBeUndefined();
     });
 
     it("returns a provider for valid Azure config", () => {
       const provider = createProvider("azure", {
+        authMode: "api-key",
         apiKey: "key123",
         resourceName: "my-resource",
       });
@@ -94,6 +95,7 @@ describe("createProvider", () => {
 
     it("returns a provider with optional apiVersion", () => {
       const provider = createProvider("azure", {
+        authMode: "api-key",
         apiKey: "key123",
         resourceName: "my-resource",
         apiVersion: "2024-02-01",
@@ -105,11 +107,11 @@ describe("createProvider", () => {
   describe("api key providers", () => {
     for (const slug of ["anthropic", "openai", "groq", "voyage"] as const) {
       it(`returns undefined for ${slug} when apiKey is missing`, () => {
-        expect(createProvider(slug, { apiKey: "" })).toBeUndefined();
+        expect(createProvider(slug, { authMode: "api-key", apiKey: "" })).toBeUndefined();
       });
 
       it(`returns a provider for ${slug} with valid apiKey`, () => {
-        const provider = createProvider(slug, { apiKey: "test-key-123" });
+        const provider = createProvider(slug, { authMode: "api-key", apiKey: "test-key-123" });
         expect(provider).toBeDefined();
       });
     }

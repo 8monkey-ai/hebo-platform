@@ -59,12 +59,14 @@ const VertexServiceAccountSchema = z.object({
 });
 
 const AzureSchema = z.object({
+  authMode: z.literal("api-key"),
   apiKey: requiredString("Please enter a valid API key"),
   resourceName: requiredString("Please enter a valid resource name"),
   apiVersion: z.string().optional(),
 });
 
 const ApiKeySchema = z.object({
+  authMode: z.literal("api-key"),
   apiKey: requiredString("Please enter a valid API key"),
 });
 
@@ -79,11 +81,11 @@ export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
   }),
   z.object({
     slug: z.enum(["azure"]),
-    config: AzureSchema,
+    config: z.discriminatedUnion("authMode", [AzureSchema]),
   }),
   z.object({
     slug: z.enum(["voyage", "groq", "anthropic", "openai"]),
-    config: ApiKeySchema,
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]),
   }),
 ]);
 
@@ -103,14 +105,11 @@ function getProviderModes(slug: string) {
   });
   if (!entry) return [];
 
-  const configSchema = entry.shape.config;
-  if (configSchema instanceof z.ZodDiscriminatedUnion) {
-    return [...configSchema.options].map((opt) => {
-      const value = (opt.shape.authMode as z.ZodLiteral<string>).value;
-      return { value, label: labelize(value), schema: opt as z.ZodObject<z.ZodRawShape> };
-    });
-  }
-  return [{ value: "default", label: "Default", schema: configSchema as z.ZodObject<z.ZodRawShape> }];
+  const configSchema = entry.shape.config as z.ZodDiscriminatedUnion<string, z.ZodObject<z.ZodRawShape>[]>;
+  return [...configSchema.options].map((opt) => {
+    const value = (opt.shape.authMode as z.ZodLiteral<string>).value;
+    return { value, label: labelize(value), schema: opt as z.ZodObject<z.ZodRawShape> };
+  });
 }
 
 function getConfigFields(schema: z.ZodObject<z.ZodRawShape>): string[] {
@@ -158,7 +157,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
         </FieldControl>
       </Field>
 
-      {hasTabs && "authMode" in configFieldset && (
+      {"authMode" in configFieldset && (
         <Field name={configFieldset.authMode.name} className="hidden">
           <FieldControl>
             <input type="hidden" value={activeAuthMode} />

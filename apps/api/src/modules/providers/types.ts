@@ -48,10 +48,12 @@ const VertexServiceAccountConfig = t.Object({
 const VertexProviderConfig = t.Union([VertexIdentityFederationConfig, VertexServiceAccountConfig]);
 
 const ApiKeyProviderConfig = t.Object({
+  authMode: t.Literal("api-key"),
   apiKey: t.String({ "x-redact": true }),
 });
 
 const AzureProviderConfig = t.Object({
+  authMode: t.Literal("api-key"),
   apiKey: t.String({ "x-redact": true }),
   resourceName: t.String(),
   apiVersion: t.Optional(t.String()),

@@ -30,21 +30,24 @@ export const gw = gateway({
   basePath,
 
   providers: {
-    groq: createProvider("groq", { apiKey: secrets.groqApiKey }),
+    groq: createProvider("groq", { authMode: "api-key", apiKey: secrets.groqApiKey }),
     bedrock: createProvider("bedrock", {
+      authMode: "iam-role",
       bedrockRoleArn: secrets.bedrockRoleArn,
       region: secrets.bedrockRegion,
     }),
     vertex: createProvider("vertex", {
+      authMode: "identity-federation",
       serviceAccountEmail: secrets.vertexServiceAccountEmail,
       audience: secrets.vertexAudience,
       location: secrets.vertexLocation,
       project: secrets.vertexProject,
     }),
-    voyage: createProvider("voyage", { apiKey: secrets.voyageApiKey }),
-    anthropic: createProvider("anthropic", { apiKey: secrets.anthropicApiKey }),
-    openai: createProvider("openai", { apiKey: secrets.openAiApiKey }),
+    voyage: createProvider("voyage", { authMode: "api-key", apiKey: secrets.voyageApiKey }),
+    anthropic: createProvider("anthropic", { authMode: "api-key", apiKey: secrets.anthropicApiKey }),
+    openai: createProvider("openai", { authMode: "api-key", apiKey: secrets.openAiApiKey }),
     azure: createProvider("azure", {
+      authMode: "api-key",
       apiKey: secrets.azureApiKey,
       resourceName: secrets.azureResourceName,
     }),
