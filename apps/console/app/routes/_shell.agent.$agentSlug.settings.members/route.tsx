@@ -12,12 +12,11 @@ export async function clientAction({ request }: { request: Request }) {
   if (intent === "invite") {
     const submission = parseWithZod(formData, { schema: inviteSchema });
     if (submission.status !== "success") return { intent, submission: submission.reply() };
-    const teamId = formData.get("teamId");
     try {
       await authService.inviteMember(
         submission.value.email,
         submission.value.role,
-        typeof teamId === "string" ? teamId : undefined,
+        submission.value.teamId,
       );
     } catch (error) {
       return { intent, submission: submission.reply({ formErrors: [parseError(error).message] }) };

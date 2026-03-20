@@ -47,6 +47,7 @@ export type OrgInvitation = {
   role: string;
   expiresAt: string;
   status: string;
+  teamId?: string;
 };
 
 export type ApiKey = {
