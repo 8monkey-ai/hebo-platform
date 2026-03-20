@@ -17,3 +17,5 @@ export const authUrl = import.meta.env.VITE_AUTH_URL || "http://localhost:3000";
 export const gatewayUrl = useMocks
   ? "http://localhost:5173/gateway"
   : import.meta.env.VITE_GATEWAY_URL || "http://localhost:3002";
+
+export const magicLinkAuth = import.meta.env.VITE_MAGICLINK_AUTH === "true";

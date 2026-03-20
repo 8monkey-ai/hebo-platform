@@ -4,9 +4,11 @@ import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
 
 import { Logo } from "~console/components/ui/Logo";
+import { magicLinkAuth } from "~console/lib/env";
 
 import { MagicLinkSignIn } from "./magiclink";
 import { OAuthSignIn } from "./oauth";
+import { PasswordSignIn } from "./password";
 
 export default function SignIn() {
   return (
@@ -59,7 +61,7 @@ export default function SignIn() {
               <span className="text-sm whitespace-nowrap">or</span>
               <div className="h-px flex-1 bg-gray-300" />
             </div>
-            <MagicLinkSignIn />
+            {magicLinkAuth ? <MagicLinkSignIn /> : <PasswordSignIn />}
           </div>
 
           <div className="flex items-center gap-2">

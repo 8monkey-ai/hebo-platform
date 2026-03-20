@@ -114,6 +114,14 @@ export const authService = {
     throw new Error("Magic Link not implemented");
   },
 
+  async signInWithPassword() {
+    globalThis.location.href = "/";
+  },
+
+  async signUpWithPassword() {
+    globalThis.location.href = "/";
+  },
+
   async signOut() {
     shellStore.user = undefined;
     shellStore.organizations = [];

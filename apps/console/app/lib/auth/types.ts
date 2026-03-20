@@ -6,6 +6,8 @@ export interface AuthService {
   signInWithOAuth(provider: string): Promise<void>;
   sendMagicLinkEmail(email: string): Promise<string>;
   signInWithMagicLink(code: string, email: string): Promise<void>;
+  signInWithPassword(email: string, password: string): Promise<void>;
+  signUpWithPassword(name: string, email: string, password: string): Promise<void>;
   signOut(): Promise<void>;
   // Organization
   getOrganization(): Promise<{ members: OrgMember[]; invitations: OrgInvitation[] }>;
