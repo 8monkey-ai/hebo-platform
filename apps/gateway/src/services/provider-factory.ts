@@ -179,7 +179,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       const { apiKey, resourceName, apiVersion } = config as AzureProviderConfig;
       if (!apiKey || !resourceName) return;
       return withCanonicalIdsForOpenAI(
-        createAzure({ apiKey, resourceName, apiVersion }),
+        createAzure({ apiKey, resourceName, apiVersion: apiVersion?.trim() || undefined }),
       );
     }
     default: {
