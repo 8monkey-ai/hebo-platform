@@ -91,7 +91,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       const region = bedrockConfig.region;
       if (!region) return;
 
-      if ("authMode" in bedrockConfig && bedrockConfig.authMode === "static") {
+      if ("authMode" in bedrockConfig && bedrockConfig.authMode === "access-key") {
         const { accessKeyId, secretAccessKey } = bedrockConfig;
         if (!accessKeyId || !secretAccessKey) return;
         return withCanonicalIdsForBedrock(
@@ -145,7 +145,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
         );
       }
 
-      // Default: WIF path (cloud deployments)
+      // Default: Identity federation path (cloud deployments)
       const serviceAccountEmail =
         "serviceAccountEmail" in vertexConfig ? vertexConfig.serviceAccountEmail : undefined;
       const audience = "audience" in vertexConfig ? vertexConfig.audience : undefined;

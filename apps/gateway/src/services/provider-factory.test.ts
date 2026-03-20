@@ -22,12 +22,12 @@ describe("createProvider", () => {
     });
 
     it("returns undefined when static credentials are incomplete", () => {
-      expect(createProvider("bedrock", { authMode: "static", accessKeyId: "AKIA1234", secretAccessKey: "", region: "us-east-1" })).toBeUndefined();
+      expect(createProvider("bedrock", { authMode: "access-key", accessKeyId: "AKIA1234", secretAccessKey: "", region: "us-east-1" })).toBeUndefined();
     });
 
-    it("returns a provider for valid static credentials", () => {
+    it("returns a provider for valid access-key credentials", () => {
       const provider = createProvider("bedrock", {
-        authMode: "static",
+        authMode: "access-key",
         accessKeyId: "AKIA1234567890ABCDEF",
         secretAccessKey: "secretkey123",
         region: "us-east-1",
@@ -46,12 +46,12 @@ describe("createProvider", () => {
 
   describe("vertex", () => {
     it("returns undefined when location is missing", () => {
-      expect(createProvider("vertex", { authMode: "wif", serviceAccountEmail: "sa@proj.iam.gserviceaccount.com", audience: "aud", location: "", project: "proj" })).toBeUndefined();
+      expect(createProvider("vertex", { authMode: "identity-federation", serviceAccountEmail: "sa@proj.iam.gserviceaccount.com", audience: "aud", location: "", project: "proj" })).toBeUndefined();
     });
 
-    it("returns a provider for valid WIF config", () => {
+    it("returns a provider for valid identity-federation config", () => {
       const provider = createProvider("vertex", {
-        authMode: "wif",
+        authMode: "identity-federation",
         serviceAccountEmail: "sa@proj.iam.gserviceaccount.com",
         audience: "//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/aws",
         location: "us-central1",

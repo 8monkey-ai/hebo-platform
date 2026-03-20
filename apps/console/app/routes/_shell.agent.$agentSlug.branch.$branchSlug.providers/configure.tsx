@@ -36,15 +36,15 @@ const BedrockIamRoleSchema = z.object({
   region: requiredString("Please enter a valid AWS region"),
 });
 
-const BedrockStaticSchema = z.object({
-  authMode: z.literal("static"),
+const BedrockAccessKeySchema = z.object({
+  authMode: z.literal("access-key"),
   accessKeyId: requiredString("Please enter a valid access key ID"),
   secretAccessKey: requiredString("Please enter a valid secret access key"),
   region: requiredString("Please enter a valid AWS region"),
 });
 
-const VertexWifSchema = z.object({
-  authMode: z.literal("wif"),
+const VertexIdentityFederationSchema = z.object({
+  authMode: z.literal("identity-federation"),
   serviceAccountEmail: z.email("Please enter a valid service account email").trim().min(1),
   audience: requiredString("Please enter a valid audience"),
   location: requiredString("Please enter a valid location"),
@@ -71,11 +71,11 @@ const ApiKeySchema = z.object({
 export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
   z.object({
     slug: z.enum(["bedrock"]),
-    config: z.discriminatedUnion("authMode", [BedrockIamRoleSchema, BedrockStaticSchema]),
+    config: z.discriminatedUnion("authMode", [BedrockIamRoleSchema, BedrockAccessKeySchema]),
   }),
   z.object({
     slug: z.enum(["vertex"]),
-    config: z.discriminatedUnion("authMode", [VertexWifSchema, VertexServiceAccountSchema]),
+    config: z.discriminatedUnion("authMode", [VertexIdentityFederationSchema, VertexServiceAccountSchema]),
   }),
   z.object({
     slug: z.enum(["azure"]),

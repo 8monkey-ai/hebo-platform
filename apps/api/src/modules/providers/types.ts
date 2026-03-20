@@ -21,17 +21,17 @@ const BedrockIamRoleConfig = t.Object({
   region: t.String(),
 });
 
-const BedrockStaticConfig = t.Object({
-  authMode: t.Literal("static"),
+const BedrockAccessKeyConfig = t.Object({
+  authMode: t.Literal("access-key"),
   accessKeyId: t.String({ "x-redact": true }),
   secretAccessKey: t.String({ "x-redact": true }),
   region: t.String(),
 });
 
-const BedrockProviderConfig = t.Union([BedrockIamRoleConfig, BedrockStaticConfig]);
+const BedrockProviderConfig = t.Union([BedrockIamRoleConfig, BedrockAccessKeyConfig]);
 
-const VertexWifConfig = t.Object({
-  authMode: t.Literal("wif"),
+const VertexIdentityFederationConfig = t.Object({
+  authMode: t.Literal("identity-federation"),
   serviceAccountEmail: t.String(),
   audience: t.String(),
   location: t.String(),
@@ -45,7 +45,7 @@ const VertexServiceAccountConfig = t.Object({
   project: t.String(),
 });
 
-const VertexProviderConfig = t.Union([VertexWifConfig, VertexServiceAccountConfig]);
+const VertexProviderConfig = t.Union([VertexIdentityFederationConfig, VertexServiceAccountConfig]);
 
 const ApiKeyProviderConfig = t.Object({
   apiKey: t.String({ "x-redact": true }),
@@ -82,9 +82,9 @@ export const Models = t.Array(
 
 export type Models = Static<typeof Models>;
 export type BedrockIamRoleConfig = Static<typeof BedrockIamRoleConfig>;
-export type BedrockStaticConfig = Static<typeof BedrockStaticConfig>;
+export type BedrockAccessKeyConfig = Static<typeof BedrockAccessKeyConfig>;
 export type BedrockProviderConfig = Static<typeof BedrockProviderConfig>;
-export type VertexWifConfig = Static<typeof VertexWifConfig>;
+export type VertexIdentityFederationConfig = Static<typeof VertexIdentityFederationConfig>;
 export type VertexServiceAccountConfig = Static<typeof VertexServiceAccountConfig>;
 export type VertexProviderConfig = Static<typeof VertexProviderConfig>;
 export type ApiKeyProviderConfig = Static<typeof ApiKeyProviderConfig>;
