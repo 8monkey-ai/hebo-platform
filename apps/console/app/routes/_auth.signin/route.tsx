@@ -24,7 +24,7 @@ export default function SignIn() {
       </div>
 
       <div className="flex items-center gap-2">
-        <span className="relative">
+        <span className="relative" aria-hidden="true">
           <Ban className="h-4 w-4" />
           <CreditCard className="absolute top-1 left-1 h-2 w-2" />
         </span>
