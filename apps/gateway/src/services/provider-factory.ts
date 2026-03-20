@@ -1,5 +1,6 @@
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock";
 import { createAnthropic } from "@ai-sdk/anthropic";
+import { createAzure } from "@ai-sdk/azure";
 import { createVertex } from "@ai-sdk/google-vertex";
 import { createGroq } from "@ai-sdk/groq";
 import { createOpenAI } from "@ai-sdk/openai";
@@ -17,6 +18,7 @@ import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import type {
   ApiKeyProviderConfig,
+  AzureProviderConfig,
   BedrockProviderConfig,
   ProviderSlug,
   VertexProviderConfig,
@@ -36,6 +38,8 @@ export async function loadProviderSecrets() {
     vertexProject,
     anthropicApiKey,
     openAiApiKey,
+    azureApiKey,
+    azureResourceName,
     enforceByok,
     freeModelIdsRaw,
   ] = await Promise.all([
@@ -49,6 +53,8 @@ export async function loadProviderSecrets() {
     getSecret("VertexProject"),
     getSecret("AnthropicApiKey"),
     getSecret("OpenAiApiKey"),
+    getSecret("AzureOpenAiApiKey"),
+    getSecret("AzureOpenAiResourceName"),
     getSecret("EnforceByok").then((v) => v === "true"),
     getSecret("FreeModelIds"),
   ]);
@@ -71,6 +77,8 @@ export async function loadProviderSecrets() {
     vertexProject,
     anthropicApiKey,
     openAiApiKey,
+    azureApiKey,
+    azureResourceName,
     enforceByok,
     freeModelIds,
   };
@@ -79,8 +87,22 @@ export async function loadProviderSecrets() {
 export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 | undefined {
   switch (slug) {
     case "bedrock": {
-      const { bedrockRoleArn, region } = config as BedrockProviderConfig;
-      if (!bedrockRoleArn || !region) return;
+      const bedrockConfig = config as BedrockProviderConfig;
+      const region = bedrockConfig.region;
+      if (!region) return;
+
+      if ("authMode" in bedrockConfig && bedrockConfig.authMode === "static") {
+        const { accessKeyId, secretAccessKey } = bedrockConfig;
+        if (!accessKeyId || !secretAccessKey) return;
+        return withCanonicalIdsForBedrock(
+          createAmazonBedrock({ region, accessKeyId, secretAccessKey }),
+        );
+      }
+
+      // Default: IAM role path (cloud deployments)
+      const bedrockRoleArn =
+        "bedrockRoleArn" in bedrockConfig ? bedrockConfig.bedrockRoleArn : undefined;
+      if (!bedrockRoleArn) return;
       return withCanonicalIdsForBedrock(
         createAmazonBedrock({
           region,
@@ -103,8 +125,31 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       return withCanonicalIdsForGroq(createGroq({ apiKey }));
     }
     case "vertex": {
-      const { serviceAccountEmail, audience, location, project } = config as VertexProviderConfig;
-      if (!serviceAccountEmail || !audience || !location || !project) return;
+      const vertexConfig = config as VertexProviderConfig;
+      const { location, project } = vertexConfig;
+      if (!location || !project) return;
+
+      if ("authMode" in vertexConfig && vertexConfig.authMode === "service-account") {
+        const { serviceAccountKey } = vertexConfig;
+        if (!serviceAccountKey) return;
+        const credentials = JSON.parse(serviceAccountKey);
+        return withCanonicalIdsForVertex(
+          createVertex({
+            googleAuthOptions: {
+              credentials,
+              scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+            },
+            location,
+            project,
+          }),
+        );
+      }
+
+      // Default: WIF path (cloud deployments)
+      const serviceAccountEmail =
+        "serviceAccountEmail" in vertexConfig ? vertexConfig.serviceAccountEmail : undefined;
+      const audience = "audience" in vertexConfig ? vertexConfig.audience : undefined;
+      if (!serviceAccountEmail || !audience) return;
       return withCanonicalIdsForVertex(
         createVertex({
           googleAuthOptions: {
@@ -130,6 +175,13 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       const { apiKey } = config as ApiKeyProviderConfig;
       if (!apiKey) return;
       return withCanonicalIdsForOpenAI(createOpenAI({ apiKey }));
+    }
+    case "azure": {
+      const { apiKey, resourceName, apiVersion } = config as AzureProviderConfig;
+      if (!apiKey || !resourceName) return;
+      return withCanonicalIdsForOpenAI(
+        createAzure({ apiKey, resourceName, apiVersion }),
+      );
     }
     default: {
       throw new Error(`Unsupported provider: ${slug}`);

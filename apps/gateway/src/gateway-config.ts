@@ -44,6 +44,10 @@ export const gw = gateway({
     voyage: createProvider("voyage", { apiKey: secrets.voyageApiKey }),
     anthropic: createProvider("anthropic", { apiKey: secrets.anthropicApiKey }),
     openai: createProvider("openai", { apiKey: secrets.openAiApiKey }),
+    azure: createProvider("azure", {
+      apiKey: secrets.azureApiKey,
+      resourceName: secrets.azureResourceName,
+    }),
   },
 
   models: defineModelCatalog(

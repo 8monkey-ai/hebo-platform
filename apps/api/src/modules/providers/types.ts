@@ -2,6 +2,7 @@ import { t, type Static } from "elysia";
 
 export const supportedProviders = {
   anthropic: { name: "Anthropic" },
+  azure: { name: "Azure OpenAI" },
   bedrock: { name: "Amazon Bedrock" },
   groq: { name: "Groq" },
   openai: { name: "OpenAI" },
@@ -14,26 +15,53 @@ export const ProviderSlug = t.Enum(
   { error: "Invalid provider slug" },
 );
 
-const BedrockProviderConfig = t.Object({
+const BedrockIamRoleConfig = t.Object({
+  authMode: t.Literal("iam-role"),
   bedrockRoleArn: t.String(),
   region: t.String(),
 });
 
-const VertexProviderConfig = t.Object({
+const BedrockStaticConfig = t.Object({
+  authMode: t.Literal("static"),
+  accessKeyId: t.String({ "x-redact": true }),
+  secretAccessKey: t.String({ "x-redact": true }),
+  region: t.String(),
+});
+
+const BedrockProviderConfig = t.Union([BedrockIamRoleConfig, BedrockStaticConfig]);
+
+const VertexWifConfig = t.Object({
+  authMode: t.Literal("wif"),
   serviceAccountEmail: t.String(),
   audience: t.String(),
   location: t.String(),
   project: t.String(),
 });
 
+const VertexServiceAccountConfig = t.Object({
+  authMode: t.Literal("service-account"),
+  serviceAccountKey: t.String({ "x-redact": true }),
+  location: t.String(),
+  project: t.String(),
+});
+
+const VertexProviderConfig = t.Union([VertexWifConfig, VertexServiceAccountConfig]);
+
 const ApiKeyProviderConfig = t.Object({
   apiKey: t.String({ "x-redact": true }),
+});
+
+const AzureProviderConfig = t.Object({
+  apiKey: t.String({ "x-redact": true }),
+  resourceName: t.String(),
+  apiVersion: t.Optional(t.String()),
 });
 
 export const ProviderConfig = t.Union([
   BedrockProviderConfig,
   VertexProviderConfig,
   ApiKeyProviderConfig,
+  AzureProviderConfig,
 ]);
 
 export const Provider = t.Object({
@@ -53,9 +81,14 @@ export const Models = t.Array(
 );
 
 export type Models = Static<typeof Models>;
+export type BedrockIamRoleConfig = Static<typeof BedrockIamRoleConfig>;
+export type BedrockStaticConfig = Static<typeof BedrockStaticConfig>;
 export type BedrockProviderConfig = Static<typeof BedrockProviderConfig>;
+export type VertexWifConfig = Static<typeof VertexWifConfig>;
+export type VertexServiceAccountConfig = Static<typeof VertexServiceAccountConfig>;
 export type VertexProviderConfig = Static<typeof VertexProviderConfig>;
 export type ApiKeyProviderConfig = Static<typeof ApiKeyProviderConfig>;
+export type AzureProviderConfig = Static<typeof AzureProviderConfig>;
 export type Provider = Static<typeof Provider>;
 export type ProviderConfig = Static<typeof ProviderConfig>;
 export type ProviderSlug = Static<typeof ProviderSlug>;
