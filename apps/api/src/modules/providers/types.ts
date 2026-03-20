@@ -54,7 +54,7 @@ const ApiKeyProviderConfig = t.Object({
 });
 
 const AzureProviderConfig = t.Object({
-  authMode: t.Literal("api-key"),
+  authMode: t.Literal("azure-api-key"),
   apiKey: t.String({ "x-redact": true }),
   resourceName: t.String(),
   apiVersion: t.Optional(t.String()),

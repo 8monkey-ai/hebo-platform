@@ -60,7 +60,7 @@ const VertexServiceAccountSchema = z.object({
 });
 
 const AzureSchema = z.object({
-  authMode: z.literal("api-key"),
+  authMode: z.literal("azure-api-key"),
   apiKey: requiredString("Please enter a valid API key"),
   resourceName: requiredString("Please enter a valid resource name"),
   apiVersion: z.string().optional(),

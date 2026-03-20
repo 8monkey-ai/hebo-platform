@@ -79,16 +79,16 @@ describe("createProvider", () => {
 
   describe("azure", () => {
     it("returns undefined when apiKey is missing", () => {
-      expect(createProvider("azure", { authMode: "api-key", apiKey: "", resourceName: "my-resource" })).toBeUndefined();
+      expect(createProvider("azure", { authMode: "azure-api-key", apiKey: "", resourceName: "my-resource" })).toBeUndefined();
     });
 
     it("returns undefined when resourceName is missing", () => {
-      expect(createProvider("azure", { authMode: "api-key", apiKey: "key123", resourceName: "" })).toBeUndefined();
+      expect(createProvider("azure", { authMode: "azure-api-key", apiKey: "key123", resourceName: "" })).toBeUndefined();
     });
 
     it("returns a provider for valid Azure config", () => {
       const provider = createProvider("azure", {
-        authMode: "api-key",
+        authMode: "azure-api-key",
         apiKey: "key123",
         resourceName: "my-resource",
       });
@@ -97,7 +97,7 @@ describe("createProvider", () => {
 
     it("returns a provider with optional apiVersion", () => {
       const provider = createProvider("azure", {
-        authMode: "api-key",
+        authMode: "azure-api-key",
         apiKey: "key123",
         resourceName: "my-resource",
         apiVersion: "2024-02-01",
