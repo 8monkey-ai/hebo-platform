@@ -53,7 +53,8 @@ const VertexIdentityFederationSchema = z.object({
 
 const VertexServiceAccountSchema = z.object({
   authMode: z.literal("service-account"),
-  serviceAccountKey: requiredString("Please enter the service account JSON key"),
+  clientEmail: z.email("Please enter a valid service account email").trim().min(1),
+  privateKey: requiredString("Please enter the private key"),
   location: requiredString("Please enter a valid location"),
   project: requiredString("Please enter a valid project"),
 });
@@ -121,12 +122,12 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
   const slug = provider?.slug ?? "";
   const modes = getProviderModes(slug);
   const hasTabs = modes.length > 1;
-  const initialAuthMode = (provider?.config?.authMode as string) ?? modes[0].value;
-  const [activeAuthMode, setActiveAuthMode] = useState(initialAuthMode);
+  const defaultAuthMode = (provider?.config?.authMode as string | undefined) ?? modes[0]?.value ?? "";
+  const [activeAuthMode, setActiveAuthMode] = useState(defaultAuthMode);
 
   useEffect(() => {
-    setActiveAuthMode((provider?.config?.authMode as string) ?? modes[0].value);
-  }, [provider?.slug, provider?.config?.authMode, modes]);
+    setActiveAuthMode(defaultAuthMode);
+  }, [slug, defaultAuthMode]);
 
   const [form, fields] = useForm<ProviderConfigureFormValues>({
     id: `${slug}-${activeAuthMode ?? "default"}`,
@@ -147,7 +148,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
 
   const configFieldset = fields.config.getFieldset();
   const activeMode = modes.find((m) => m.value === activeAuthMode) ?? modes[0];
-  const activeKeys = provider ? getConfigFields(activeMode.schema) : [];
+  const activeKeys = provider && activeMode ? getConfigFields(activeMode.schema) : [];
 
   const renderFields = () => (
     <FieldGroup>

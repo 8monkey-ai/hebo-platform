@@ -60,14 +60,16 @@ describe("createProvider", () => {
       expect(provider).toBeDefined();
     });
 
-    it("returns undefined when service account key is missing", () => {
-      expect(createProvider("vertex", { authMode: "service-account", serviceAccountKey: "", location: "us-central1", project: "proj" })).toBeUndefined();
+    it("returns undefined when service account credentials are missing", () => {
+      expect(createProvider("vertex", { authMode: "service-account", clientEmail: "", privateKey: "key", location: "us-central1", project: "proj" })).toBeUndefined();
+      expect(createProvider("vertex", { authMode: "service-account", clientEmail: "sa@test.iam.gserviceaccount.com", privateKey: "", location: "us-central1", project: "proj" })).toBeUndefined();
     });
 
     it("returns a provider for valid service account config", () => {
       const provider = createProvider("vertex", {
         authMode: "service-account",
-        serviceAccountKey: JSON.stringify({ type: "service_account", project_id: "test", private_key_id: "key1", private_key: "-----BEGIN RSA PRIVATE KEY-----\ntest\n-----END RSA PRIVATE KEY-----\n", client_email: "sa@test.iam.gserviceaccount.com", client_id: "123" }),
+        clientEmail: "sa@test.iam.gserviceaccount.com",
+        privateKey: "-----BEGIN RSA PRIVATE KEY-----\ntest\n-----END RSA PRIVATE KEY-----\n",
         location: "us-central1",
         project: "my-project",
       });

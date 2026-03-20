@@ -130,13 +130,12 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       if (!location || !project) return;
 
       if ("authMode" in vertexConfig && vertexConfig.authMode === "service-account") {
-        const { serviceAccountKey } = vertexConfig;
-        if (!serviceAccountKey) return;
-        const credentials = JSON.parse(serviceAccountKey);
+        const { clientEmail, privateKey } = vertexConfig;
+        if (!clientEmail || !privateKey) return;
         return withCanonicalIdsForVertex(
           createVertex({
             googleAuthOptions: {
-              credentials,
+              credentials: { client_email: clientEmail, private_key: privateKey },
               scopes: ["https://www.googleapis.com/auth/cloud-platform"],
             },
             location,
