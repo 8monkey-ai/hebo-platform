@@ -1,6 +1,6 @@
 import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
-import { Mail, Trash2, UserPlus } from "lucide-react";
+import { Link, Mail, Trash2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useFetcher } from "react-router";
 
@@ -142,6 +142,7 @@ export function MembersSettings({
                       <CopyButton
                         value={`${window.location.origin}/accept-invitation?id=${encodeURIComponent(inv.id)}`}
                         tooltip="Copy invitation link"
+                        icon={<Link />}
                       />
                       <RevokeInvitationButton invitationId={inv.id} />
                     </div>

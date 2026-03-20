@@ -9,12 +9,14 @@ export function CopyButton({
   className,
   disabled = false,
   tooltip = "Copy to Clipboard",
+  icon = <Copy />,
   ...props
 }: {
   value: string | (() => string);
   className?: string;
   disabled?: boolean;
   tooltip?: string;
+  icon?: React.ReactNode;
 } & Omit<React.ComponentProps<"button">, "value">) {
   const [hasCopied, setHasCopied] = React.useState(false);
 
@@ -57,7 +59,7 @@ export function CopyButton({
             {...props}
           >
             <span className="sr-only">Copy</span>
-            {hasCopied ? <Check className="text-green-800" /> : <Copy />}
+            {hasCopied ? <Check className="text-green-800" /> : icon}
           </button>
         }
       />
