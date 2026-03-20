@@ -93,24 +93,25 @@ type ConfigureProviderDialogProps = {
   provider?: { name: string; slug: string; config?: Record<string, unknown> };
 } & React.ComponentProps<typeof Dialog>;
 
-const providerAuthModes: Record<
-  string,
-  { value: string; label: string; schema: z.ZodObject<z.ZodRawShape> }[]
-> = {
-  bedrock: [
-    { value: "iam-role", label: "IAM Role", schema: BedrockIamRoleSchema },
-    { value: "static", label: "Static Credentials", schema: BedrockStaticSchema },
-  ],
-  vertex: [
-    { value: "wif", label: "Workload Identity", schema: VertexWifSchema },
-    { value: "service-account", label: "Service Account", schema: VertexServiceAccountSchema },
-  ],
-  azure: [{ value: "default", label: "API Key", schema: AzureSchema }],
-  anthropic: [{ value: "default", label: "API Key", schema: ApiKeySchema }],
-  openai: [{ value: "default", label: "API Key", schema: ApiKeySchema }],
-  groq: [{ value: "default", label: "API Key", schema: ApiKeySchema }],
-  voyage: [{ value: "default", label: "API Key", schema: ApiKeySchema }],
-};
+function getProviderModes(slug: string) {
+  const entry = ProviderConfigureSchema.options.find((o) => {
+    const s = o.shape.slug;
+    // z.enum exposes .options, z.literal exposes .value at runtime
+    return "options" in s
+      ? (s.options as string[]).includes(slug)
+      : (s as unknown as { value: string }).value === slug;
+  });
+  if (!entry) return [];
+
+  const configSchema = entry.shape.config;
+  if (configSchema instanceof z.ZodDiscriminatedUnion) {
+    return [...configSchema.options].map((opt) => {
+      const value = (opt.shape.authMode as z.ZodLiteral<string>).value;
+      return { value, label: labelize(value), schema: opt as z.ZodObject<z.ZodRawShape> };
+    });
+  }
+  return [{ value: "default", label: "Default", schema: configSchema as z.ZodObject<z.ZodRawShape> }];
+}
 
 function getConfigFields(schema: z.ZodObject<z.ZodRawShape>): string[] {
   return Object.keys(schema.shape).filter((k) => k !== "authMode");
@@ -119,7 +120,7 @@ function getConfigFields(schema: z.ZodObject<z.ZodRawShape>): string[] {
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
   const fetcher = useFetcher();
   const slug = provider?.slug ?? "";
-  const modes = providerAuthModes[slug] ?? [];
+  const modes = getProviderModes(slug);
   const hasTabs = modes.length > 1;
   const initialAuthMode = (provider?.config?.authMode as string) ?? modes[0].value;
   const [activeAuthMode, setActiveAuthMode] = useState(initialAuthMode);
