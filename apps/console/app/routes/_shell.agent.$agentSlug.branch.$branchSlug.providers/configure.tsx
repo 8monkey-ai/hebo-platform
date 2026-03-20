@@ -29,7 +29,7 @@ import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
 
 const requiredString = (msg: string) => z.string(msg).trim().min(1, msg);
-const textareaString = (msg: string) => Object.assign(requiredString(msg), { textarea: true as const });
+const textareaString = (msg: string) => requiredString(msg).meta({ textarea: true });
 
 const BedrockIamRoleSchema = z.object({
   authMode: z.literal("iam-role"),
@@ -119,7 +119,9 @@ function getConfigFields(schema: z.ZodObject<z.ZodRawShape>): string[] {
 
 function isTextarea(schema: z.ZodObject<z.ZodRawShape>, key: string): boolean {
   const field = schema.shape[key];
-  return field != null && "textarea" in field && field.textarea === true;
+  if (!field) return false;
+  const meta = z.globalRegistry.get(field);
+  return meta?.textarea === true;
 }
 
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
@@ -127,7 +129,9 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
   const slug = provider?.slug ?? "";
   const modes = getProviderModes(slug);
   const hasTabs = modes.length > 1;
-  const defaultAuthMode = (provider?.config?.authMode as string | undefined) ?? modes[0]?.value ?? "";
+  const rawAuthMode = provider?.config?.authMode as string | undefined;
+  const defaultAuthMode =
+    rawAuthMode && modes.some((m) => m.value === rawAuthMode) ? rawAuthMode : (modes[0]?.value ?? "");
   const [activeAuthMode, setActiveAuthMode] = useState(defaultAuthMode);
 
   useEffect(() => {
