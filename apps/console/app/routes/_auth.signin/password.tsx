@@ -1,4 +1,3 @@
-import { Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 
@@ -10,11 +9,34 @@ import { authService } from "~console/lib/auth";
 
 export function PasswordSignIn() {
   const [email, setEmail] = useState("");
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
-  return (
+  return !emailSubmitted ? (
+    <form
+      className="flex flex-col gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        setError(undefined);
+        setEmailSubmitted(true);
+      }}
+    >
+      <Label htmlFor="email">Email</Label>
+      <Input
+        id="email"
+        type="email"
+        autoComplete="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={loading}
+        required
+      />
+
+      <Button type="submit">Continue</Button>
+    </form>
+  ) : (
     <form
       className="flex flex-col gap-2"
       onSubmit={async (e) => {
@@ -30,37 +52,33 @@ export function PasswordSignIn() {
         }
       }}
     >
-      <Label htmlFor="email">Email</Label>
-      <Input
-        id="email"
-        type="email"
-        autoComplete="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        disabled={loading}
-        required
-      />
-
       <Label htmlFor="password">Password</Label>
-      <Input
-        id="password"
-        type="password"
-        autoComplete="current-password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        disabled={loading}
-        required
-      />
+      <div className="flex gap-2">
+        <Input
+          id="password"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          disabled={loading}
+          required
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus
+        />
+        <Button type="submit" isLoading={loading}>
+          Sign In
+        </Button>
+      </div>
 
-      <Button type="submit" disabled={loading}>
-        {loading ? <Loader2Icon className="animate-spin" /> : "Sign In"}
-      </Button>
+      {error && (
+        <div role="alert" className="text-sm text-destructive">
+          {error}
+        </div>
+      )}
 
-      {error && <div role="alert" className="text-sm text-destructive">{error}</div>}
-
-      <p className="text-center text-sm">
+      <p className="py-2 text-center text-sm">
         Don't have an account?{" "}
-        <Link to="/signup" className="font-medium underline">
+        <Link to="/signup" viewTransition className="font-medium underline">
           Sign up
         </Link>
       </p>

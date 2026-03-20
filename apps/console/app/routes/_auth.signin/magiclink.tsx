@@ -82,7 +82,11 @@ export function MagicLinkSignIn() {
           Verify
         </Button>
       </div>
-      {error && <div className="text-sm text-destructive">{error}</div>}
+      {error && (
+        <div role="alert" className="text-sm text-destructive">
+          {error}
+        </div>
+      )}
       <Button
         type="button"
         variant="link"

@@ -32,7 +32,7 @@ export default function AcceptInvitation({ loaderData: data }: Route.ComponentPr
   }, [data.status]);
 
   return (
-    <div className="mx-auto flex min-h-dvh w-xs flex-col items-center justify-center gap-6">
+    <div className="flex w-xs flex-col items-center gap-6">
       <Logo />
 
       {data.status === "success" && (
