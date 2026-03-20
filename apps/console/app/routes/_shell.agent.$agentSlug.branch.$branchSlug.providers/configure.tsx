@@ -29,6 +29,7 @@ import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
 
 const requiredString = (msg: string) => z.string(msg).trim().min(1, msg);
+const requiredEmail = (msg: string) => z.string(msg).trim().min(1, msg).email(msg);
 const textareaString = (msg: string) => requiredString(msg).meta({ textarea: true });
 
 const BedrockIamRoleSchema = z.object({
@@ -46,7 +47,7 @@ const BedrockAccessKeySchema = z.object({
 
 const VertexIdentityFederationSchema = z.object({
   authMode: z.literal("identity-federation"),
-  serviceAccountEmail: z.email("Please enter a valid service account email").trim().min(1),
+  serviceAccountEmail: requiredEmail("Please enter a valid service account email"),
   audience: requiredString("Please enter a valid audience"),
   location: requiredString("Please enter a valid location"),
   project: requiredString("Please enter a valid project"),
@@ -54,7 +55,7 @@ const VertexIdentityFederationSchema = z.object({
 
 const VertexServiceAccountSchema = z.object({
   authMode: z.literal("service-account"),
-  clientEmail: z.email("Please enter a valid service account email").trim().min(1),
+  clientEmail: requiredEmail("Please enter a valid service account email"),
   privateKey: textareaString("Please enter the private key"),
   location: requiredString("Please enter a valid location"),
   project: requiredString("Please enter a valid project"),
