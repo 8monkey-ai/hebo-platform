@@ -58,6 +58,16 @@ const VertexServiceAccountSchema = z.object({
   project: requiredString("Please enter a valid project"),
 });
 
+const AzureSchema = z.object({
+  apiKey: requiredString("Please enter a valid API key"),
+  resourceName: requiredString("Please enter a valid resource name"),
+  apiVersion: z.string().optional(),
+});
+
+const ApiKeySchema = z.object({
+  apiKey: requiredString("Please enter a valid API key"),
+});
+
 export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
   z.object({
     slug: z.enum(["bedrock"]),
@@ -69,17 +79,11 @@ export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
   }),
   z.object({
     slug: z.enum(["azure"]),
-    config: z.object({
-      apiKey: requiredString("Please enter a valid API key"),
-      resourceName: requiredString("Please enter a valid resource name"),
-      apiVersion: z.string().optional(),
-    }),
+    config: AzureSchema,
   }),
   z.object({
     slug: z.enum(["voyage", "groq", "anthropic", "openai"]),
-    config: z.object({
-      apiKey: requiredString("Please enter a valid API key"),
-    }),
+    config: ApiKeySchema,
   }),
 ]);
 
@@ -89,51 +93,41 @@ type ConfigureProviderDialogProps = {
   provider?: { name: string; slug: string; config?: Record<string, unknown> };
 } & React.ComponentProps<typeof Dialog>;
 
-const authModes: Record<string, { modes: { value: string; label: string }[] }> = {
-  bedrock: {
-    modes: [
-      { value: "iam-role", label: "IAM Role" },
-      { value: "static", label: "Static Credentials" },
-    ],
-  },
-  vertex: {
-    modes: [
-      { value: "wif", label: "Workload Identity" },
-      { value: "service-account", label: "Service Account" },
-    ],
-  },
+type AuthModeEntry = { value: string; label: string; schema: z.ZodObject<z.ZodRawShape> };
+
+const providerAuthModes: Record<string, AuthModeEntry[]> = {
+  bedrock: [
+    { value: "iam-role", label: "IAM Role", schema: BedrockIamRoleSchema },
+    { value: "static", label: "Static Credentials", schema: BedrockStaticSchema },
+  ],
+  vertex: [
+    { value: "wif", label: "Workload Identity", schema: VertexWifSchema },
+    { value: "service-account", label: "Service Account", schema: VertexServiceAccountSchema },
+  ],
+  azure: [{ value: "default", label: "API Key", schema: AzureSchema }],
 };
 
-function getConfigFields(slug: string, authMode?: string): string[] {
-  switch (slug) {
-    case "bedrock":
-      return authMode === "static"
-        ? ["accessKeyId", "secretAccessKey", "region"]
-        : ["bedrockRoleArn", "region"];
-    case "vertex":
-      return authMode === "service-account"
-        ? ["serviceAccountKey", "location", "project"]
-        : ["serviceAccountEmail", "audience", "location", "project"];
-    case "azure":
-      return ["apiKey", "resourceName", "apiVersion"];
-    default:
-      return ["apiKey"];
-  }
+const defaultAuthModes: AuthModeEntry[] = [{ value: "default", label: "Default", schema: ApiKeySchema }];
+
+function getAuthModes(slug: string): AuthModeEntry[] {
+  return providerAuthModes[slug] ?? defaultAuthModes;
+}
+
+function getConfigFields(schema: z.ZodObject<z.ZodRawShape>): string[] {
+  return Object.keys(schema.shape).filter((k) => k !== "authMode");
 }
 
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
   const fetcher = useFetcher();
   const slug = provider?.slug ?? "";
-  const providerAuthModes = authModes[slug];
-  const defaultAuthMode =
-    (provider?.config?.authMode as string) ?? providerAuthModes?.modes[0]?.value;
-  const [activeAuthMode, setActiveAuthMode] = useState(defaultAuthMode);
+  const modes = getAuthModes(slug);
+  const hasTabs = modes.length > 1;
+  const initialAuthMode = (provider?.config?.authMode as string) ?? modes[0].value;
+  const [activeAuthMode, setActiveAuthMode] = useState(initialAuthMode);
 
   useEffect(() => {
-    setActiveAuthMode(
-      (provider?.config?.authMode as string) ?? providerAuthModes?.modes[0]?.value,
-    );
-  }, [provider?.slug, provider?.config?.authMode, providerAuthModes]);
+    setActiveAuthMode((provider?.config?.authMode as string) ?? modes[0].value);
+  }, [provider?.slug, provider?.config?.authMode, modes]);
 
   const [form, fields] = useForm<ProviderConfigureFormValues>({
     id: `${slug}-${activeAuthMode ?? "default"}`,
@@ -153,7 +147,8 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
   }, [fetcher.state, form.status]);
 
   const configFieldset = fields.config.getFieldset();
-  const activeKeys = provider ? getConfigFields(slug, activeAuthMode) : [];
+  const activeMode = modes.find((m) => m.value === activeAuthMode) ?? modes[0];
+  const activeKeys = provider ? getConfigFields(activeMode.schema) : [];
 
   const renderFields = () => (
     <FieldGroup>
@@ -163,7 +158,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
         </FieldControl>
       </Field>
 
-      {providerAuthModes && "authMode" in configFieldset && (
+      {hasTabs && "authMode" in configFieldset && (
         <Field name={configFieldset.authMode.name} className="hidden">
           <FieldControl>
             <input type="hidden" value={activeAuthMode} />
@@ -198,16 +193,16 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
             </DialogDescription>
           </DialogHeader>
 
-          {providerAuthModes ? (
+          {hasTabs ? (
             <Tabs value={activeAuthMode} onValueChange={setActiveAuthMode}>
               <TabsList>
-                {providerAuthModes.modes.map((mode) => (
+                {modes.map((mode) => (
                   <TabsTrigger key={mode.value} value={mode.value}>
                     {mode.label}
                   </TabsTrigger>
                 ))}
               </TabsList>
-              {providerAuthModes.modes.map((mode) => (
+              {modes.map((mode) => (
                 <TabsContent key={mode.value} value={mode.value}>
                   {activeAuthMode === mode.value && renderFields()}
                 </TabsContent>
