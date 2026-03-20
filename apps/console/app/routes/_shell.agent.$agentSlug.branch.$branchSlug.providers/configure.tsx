@@ -93,9 +93,10 @@ type ConfigureProviderDialogProps = {
   provider?: { name: string; slug: string; config?: Record<string, unknown> };
 } & React.ComponentProps<typeof Dialog>;
 
-type AuthModeEntry = { value: string; label: string; schema: z.ZodObject<z.ZodRawShape> };
-
-const providerAuthModes: Record<string, AuthModeEntry[]> = {
+const providerAuthModes: Record<
+  string,
+  { value: string; label: string; schema: z.ZodObject<z.ZodRawShape> }[]
+> = {
   bedrock: [
     { value: "iam-role", label: "IAM Role", schema: BedrockIamRoleSchema },
     { value: "static", label: "Static Credentials", schema: BedrockStaticSchema },
@@ -105,13 +106,11 @@ const providerAuthModes: Record<string, AuthModeEntry[]> = {
     { value: "service-account", label: "Service Account", schema: VertexServiceAccountSchema },
   ],
   azure: [{ value: "default", label: "API Key", schema: AzureSchema }],
+  anthropic: [{ value: "default", label: "API Key", schema: ApiKeySchema }],
+  openai: [{ value: "default", label: "API Key", schema: ApiKeySchema }],
+  groq: [{ value: "default", label: "API Key", schema: ApiKeySchema }],
+  voyage: [{ value: "default", label: "API Key", schema: ApiKeySchema }],
 };
-
-const defaultAuthModes: AuthModeEntry[] = [{ value: "default", label: "Default", schema: ApiKeySchema }];
-
-function getAuthModes(slug: string): AuthModeEntry[] {
-  return providerAuthModes[slug] ?? defaultAuthModes;
-}
 
 function getConfigFields(schema: z.ZodObject<z.ZodRawShape>): string[] {
   return Object.keys(schema.shape).filter((k) => k !== "authMode");
@@ -120,7 +119,7 @@ function getConfigFields(schema: z.ZodObject<z.ZodRawShape>): string[] {
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
   const fetcher = useFetcher();
   const slug = provider?.slug ?? "";
-  const modes = getAuthModes(slug);
+  const modes = providerAuthModes[slug] ?? [];
   const hasTabs = modes.length > 1;
   const initialAuthMode = (provider?.config?.authMode as string) ?? modes[0].value;
   const [activeAuthMode, setActiveAuthMode] = useState(initialAuthMode);
