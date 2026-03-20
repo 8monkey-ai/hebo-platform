@@ -203,10 +203,11 @@ export const authService: AuthService = {
     globalThis.location.replace("/");
   },
 
-  async inviteMember(email, role) {
+  async inviteMember(email, role, teamId) {
     const { error } = await authClient.organization.inviteMember({
       email,
       role: role as "member" | "admin" | "owner",
+      ...(teamId && { teamId }),
     });
     if (error) throw new Error(error.message);
   },

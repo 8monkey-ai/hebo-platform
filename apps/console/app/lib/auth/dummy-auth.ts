@@ -157,7 +157,7 @@ export const authService = {
     globalThis.location.replace("/");
   },
 
-  async inviteMember(email, role) {
+  async inviteMember(email, role, _teamId) {
     const organizationId = shellStore.user?.organizationId;
     if (!organizationId) throw new Error("No active organization");
     void invitations.create({
