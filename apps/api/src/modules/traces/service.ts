@@ -15,13 +15,23 @@ import {
 
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
-const metadataColumnsCache = new LRUCache<string, Array<{ column_name: unknown }>>({
+const OPTIONAL_SPAN_COLUMNS = [
+  { column: "span_attributes.gen_ai.usage.cache_read.input_tokens", alias: "cache_read_input_tokens" },
+  { column: "span_attributes.gen_ai.usage.reasoning.output_tokens", alias: "reasoning_tokens" },
+] as const;
+
+interface TraceColumns {
+  metadataColumns: Array<{ column_name: string }>;
+  optionalColumns: Array<{ column: string; alias: string }>;
+}
+
+const traceColumnsCache = new LRUCache<string, TraceColumns>({
   max: 1,
   ttl: 2_000,
 });
 
-async function getMetadataColumnNames(greptimeDb: GreptimeDb) {
-  const cached = metadataColumnsCache.get("metadata_columns");
+async function getTraceColumnNames(greptimeDb: GreptimeDb): Promise<TraceColumns> {
+  const cached = traceColumnsCache.get("trace_columns");
   if (cached) return cached;
   // Workaround: values inlined instead of using $1 params due to GreptimeDB cluster-mode bug.
   // See: https://github.com/GreptimeTeam/greptimedb/issues/7819
@@ -31,17 +41,23 @@ async function getMetadataColumnNames(greptimeDb: GreptimeDb) {
   //      WHERE table_name = 'opentelemetry_traces' AND column_name LIKE $1`,
   //     [`${METADATA_PREFIX}%`],
   //   )
-  const result = (await greptimeDb.unsafe(
+  const optionalColumnsIn = OPTIONAL_SPAN_COLUMNS.map(({ column }) => `'${escapeSqlIdentifier(column)}'`).join(", ");
+  const rows = (await greptimeDb.unsafe(
     `SELECT column_name
      FROM information_schema.columns
      WHERE table_name = 'opentelemetry_traces'
        AND (column_name LIKE '${METADATA_PREFIX}%'
-         OR column_name IN (
-           'span_attributes.gen_ai.usage.cache_read.input_tokens',
-           'span_attributes.gen_ai.usage.reasoning.output_tokens'
-         ))`,
+         OR column_name IN (${optionalColumnsIn}))`,
   )) as Array<{ column_name: unknown }>;
-  metadataColumnsCache.set("metadata_columns", result);
+
+  const columnNameSet = new Set(rows.map(({ column_name }) => String(column_name)));
+  const result: TraceColumns = {
+    metadataColumns: rows
+      .filter(({ column_name }) => String(column_name).startsWith(METADATA_PREFIX))
+      .map(({ column_name }) => ({ column_name: String(column_name) })),
+    optionalColumns: OPTIONAL_SPAN_COLUMNS.filter(({ column }) => columnNameSet.has(column)).map(({ column, alias }) => ({ column, alias })),
+  };
+  traceColumnsCache.set("trace_columns", result);
   return result;
 }
 
@@ -58,11 +74,9 @@ export async function listTraces(
   statusFilter?: "ok" | "error",
   operationFilter?: "chat" | "embeddings",
 ) {
-  const metadataColumns = (await getMetadataColumnNames(greptimeDb)).filter(({ column_name }) =>
-    String(column_name).startsWith(METADATA_PREFIX),
-  );
+  const { metadataColumns } = await getTraceColumnNames(greptimeDb);
   const metadataKeys = metadataColumns.map(({ column_name }) =>
-    String(column_name).slice(METADATA_PREFIX.length),
+    column_name.slice(METADATA_PREFIX.length),
   );
 
   let metaFilterSql = "";
@@ -84,7 +98,7 @@ export async function listTraces(
   }
 
   const metadataSelectSql = metadataColumns
-    .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
+    .map(({ column_name }) => `"${escapeSqlIdentifier(column_name)}"`)
     .join(",\n      ");
 
   // Parametrized version to restore once https://github.com/GreptimeTeam/greptimedb/issues/7819 is fixed:
@@ -131,10 +145,9 @@ export async function listTraces(
   for (const row of pageRows) {
     const metadata: Record<string, string> = {};
     for (const { column_name } of metadataColumns) {
-      const colName = String(column_name);
-      const value = row[colName];
+      const value = row[column_name];
       if (value !== null && value !== undefined) {
-        metadata[colName.slice(METADATA_PREFIX.length)] = String(value);
+        metadata[column_name.slice(METADATA_PREFIX.length)] = String(value);
       }
     }
     data.push({
@@ -164,17 +177,17 @@ export async function getSpans(
   branchSlug: string,
   traceId: string,
 ) {
-  const columnNames = await getMetadataColumnNames(greptimeDb);
+  const { metadataColumns, optionalColumns } = await getTraceColumnNames(greptimeDb);
 
-  const metadataSelectSql = columnNames
-    .filter(({ column_name }) => String(column_name).startsWith(METADATA_PREFIX))
-    .map(({ column_name }) => `"${escapeSqlIdentifier(String(column_name))}"`)
+  const metadataSelectSql = metadataColumns
+    .map(({ column_name }) => `"${escapeSqlIdentifier(column_name)}"`)
     .join(",\n      ");
 
-  const optionalCol = (col: string, alias: string) =>
-    columnNames.some(({ column_name }) => String(column_name) === col)
-      ? `"${col}" AS ${alias}`
-      : `NULL AS ${alias}`;
+  const optionalColumnsSql = OPTIONAL_SPAN_COLUMNS.map(({ column, alias }) =>
+    optionalColumns.some((opt) => opt.column === column)
+      ? `"${escapeSqlIdentifier(column)}" AS "${escapeSqlIdentifier(alias)}"`
+      : `NULL AS "${escapeSqlIdentifier(alias)}"`,
+  ).join(",\n      ");
 
   // Parametrized version to restore once https://github.com/GreptimeTeam/greptimedb/issues/7819 is fixed:
   //   const params = [traceId, organizationId, agentSlug, branchSlug];
@@ -201,8 +214,7 @@ export async function getSpans(
       "span_attributes.gen_ai.usage.input_tokens" AS input_tokens,
       "span_attributes.gen_ai.usage.output_tokens" AS output_tokens,
       "span_attributes.gen_ai.usage.total_tokens" AS total_tokens,
-      ${optionalCol("span_attributes.gen_ai.usage.cache_read.input_tokens", "cache_read_input_tokens")},
-      ${optionalCol("span_attributes.gen_ai.usage.reasoning.output_tokens", "reasoning_tokens")},
+      ${optionalColumnsSql},
       "span_attributes.hebo.agent.slug",
       "span_attributes.hebo.branch.slug",
       "span_attributes.hebo.organization.id"
