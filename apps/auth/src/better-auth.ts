@@ -21,7 +21,7 @@ export const prisma = new PrismaClient({
 export const auth = betterAuth({
   accountLinking: {
     enabled: true,
-    trustedProviders: ["google", "github", "microsoft", "credential"],
+    trustedProviders: ["google", "github", "microsoft", "email-password"],
   },
   emailAndPassword: {
     enabled: !hasSmtpConfig(),

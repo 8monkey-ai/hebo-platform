@@ -56,7 +56,7 @@ export function PasswordSignIn() {
         {loading ? <Loader2Icon className="animate-spin" /> : "Sign In"}
       </Button>
 
-      {error && <div className="text-sm text-destructive">{error}</div>}
+      {error && <div role="alert" className="text-sm text-destructive">{error}</div>}
 
       <p className="text-center text-sm">
         Don't have an account?{" "}

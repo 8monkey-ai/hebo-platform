@@ -75,7 +75,7 @@ export default function SignUp() {
             {loading ? <Loader2Icon className="animate-spin" /> : "Sign Up"}
           </Button>
 
-          {error && <div className="text-sm text-destructive">{error}</div>}
+          {error && <div role="alert" className="text-sm text-destructive">{error}</div>}
 
           <p className="text-center text-sm">
             Already have an account?{" "}

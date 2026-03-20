@@ -95,9 +95,10 @@ export async function sendOrganizationInvitationEmail({
   inviterEmail: string;
   consoleUrl?: string;
 }) {
-  const acceptUrl = new URL("/accept-invitation", consoleUrl);
   if (!hasSmtpConfig()) return;
   if (!consoleUrl) return console.warn("Missing origin header, cannot send invitation email");
+
+  const acceptUrl = new URL("/accept-invitation", consoleUrl);
 
   acceptUrl.searchParams.set("id", invitationId);
   const inviter = inviterName || inviterEmail;
