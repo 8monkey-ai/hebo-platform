@@ -20,17 +20,12 @@ const OPTIONAL_SPAN_COLUMNS = [
   { column: "span_attributes.gen_ai.usage.reasoning.output_tokens", alias: "reasoning_tokens" },
 ] as const;
 
-interface TraceColumns {
-  metadataColumns: Array<{ column_name: string }>;
-  optionalColumns: Array<{ column: string; alias: string }>;
-}
-
-const traceColumnsCache = new LRUCache<string, TraceColumns>({
+const traceColumnsCache = new LRUCache<string, { metadataColumns: string[]; optionalColumns: Set<string> }>({
   max: 1,
   ttl: 2_000,
 });
 
-async function getTraceColumnNames(greptimeDb: GreptimeDb): Promise<TraceColumns> {
+async function getTraceColumnNames(greptimeDb: GreptimeDb) {
   const cached = traceColumnsCache.get("trace_columns");
   if (cached) return cached;
   // Workaround: values inlined instead of using $1 params due to GreptimeDB cluster-mode bug.
@@ -41,22 +36,22 @@ async function getTraceColumnNames(greptimeDb: GreptimeDb): Promise<TraceColumns
   //      WHERE table_name = 'opentelemetry_traces' AND column_name LIKE $1`,
   //     [`${METADATA_PREFIX}%`],
   //   )
-  const optionalColumnsIn = OPTIONAL_SPAN_COLUMNS.map(({ column }) => `'${escapeSqlIdentifier(column)}'`).join(", ");
   const rows = (await greptimeDb.unsafe(
     `SELECT column_name
      FROM information_schema.columns
      WHERE table_name = 'opentelemetry_traces'
        AND (column_name LIKE '${METADATA_PREFIX}%'
-         OR column_name IN (${optionalColumnsIn}))`,
+         OR column_name IN (${OPTIONAL_SPAN_COLUMNS.map(({ column }) => `'${escapeSqlIdentifier(column)}'`).join(", ")}))`,
   )) as Array<{ column_name: unknown }>;
 
-  const columnNameSet = new Set(rows.map(({ column_name }) => String(column_name)));
-  const result: TraceColumns = {
-    metadataColumns: rows
-      .filter(({ column_name }) => String(column_name).startsWith(METADATA_PREFIX))
-      .map(({ column_name }) => ({ column_name: String(column_name) })),
-    optionalColumns: OPTIONAL_SPAN_COLUMNS.filter(({ column }) => columnNameSet.has(column)).map(({ column, alias }) => ({ column, alias })),
-  };
+  const metadataColumns: string[] = [];
+  const optionalColumns = new Set<string>();
+  for (const { column_name } of rows) {
+    const name = String(column_name);
+    if (name.startsWith(METADATA_PREFIX)) metadataColumns.push(name);
+    else optionalColumns.add(name);
+  }
+  const result = { metadataColumns, optionalColumns };
   traceColumnsCache.set("trace_columns", result);
   return result;
 }
@@ -75,9 +70,7 @@ export async function listTraces(
   operationFilter?: "chat" | "embeddings",
 ) {
   const { metadataColumns } = await getTraceColumnNames(greptimeDb);
-  const metadataKeys = metadataColumns.map(({ column_name }) =>
-    column_name.slice(METADATA_PREFIX.length),
-  );
+  const metadataKeys = metadataColumns.map((col) => col.slice(METADATA_PREFIX.length));
 
   let metaFilterSql = "";
   for (const [key, value] of Object.entries(metadataFilters)) {
@@ -98,7 +91,7 @@ export async function listTraces(
   }
 
   const metadataSelectSql = metadataColumns
-    .map(({ column_name }) => `"${escapeSqlIdentifier(column_name)}"`)
+    .map((col) => `"${escapeSqlIdentifier(col)}"`)
     .join(",\n      ");
 
   // Parametrized version to restore once https://github.com/GreptimeTeam/greptimedb/issues/7819 is fixed:
@@ -144,10 +137,10 @@ export async function listTraces(
   const data = [];
   for (const row of pageRows) {
     const metadata: Record<string, string> = {};
-    for (const { column_name } of metadataColumns) {
-      const value = row[column_name];
+    for (const col of metadataColumns) {
+      const value = row[col];
       if (value !== null && value !== undefined) {
-        metadata[column_name.slice(METADATA_PREFIX.length)] = String(value);
+        metadata[col.slice(METADATA_PREFIX.length)] = String(value);
       }
     }
     data.push({
@@ -180,11 +173,11 @@ export async function getSpans(
   const { metadataColumns, optionalColumns } = await getTraceColumnNames(greptimeDb);
 
   const metadataSelectSql = metadataColumns
-    .map(({ column_name }) => `"${escapeSqlIdentifier(column_name)}"`)
+    .map((col) => `"${escapeSqlIdentifier(col)}"`)
     .join(",\n      ");
 
   const optionalColumnsSql = OPTIONAL_SPAN_COLUMNS.map(({ column, alias }) =>
-    optionalColumns.some((opt) => opt.column === column)
+    optionalColumns.has(column)
       ? `"${escapeSqlIdentifier(column)}" AS "${escapeSqlIdentifier(alias)}"`
       : `NULL AS "${escapeSqlIdentifier(alias)}"`,
   ).join(",\n      ");
