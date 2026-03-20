@@ -1,6 +1,6 @@
 import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
-import { Check, Link2, Mail, Trash2, UserPlus } from "lucide-react";
+import { Mail, Trash2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useFetcher } from "react-router";
 
@@ -18,6 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@hebo/shared-ui/components/Avatar";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
+import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import {
   FieldControl,
   Field,
@@ -138,7 +139,10 @@ export function MembersSettings({
                 {canManage && (
                   <TableCell>
                     <div className="flex items-center">
-                      <CopyInvitationLinkButton invitationId={inv.id} />
+                      <CopyButton
+                        value={`${window.location.origin}/accept-invitation?id=${encodeURIComponent(inv.id)}`}
+                        tooltip="Copy invitation link"
+                      />
                       <RevokeInvitationButton invitationId={inv.id} />
                     </div>
                   </TableCell>
@@ -224,24 +228,6 @@ function RemoveMemberButton({ email }: { email: string }) {
         </fetcher.Form>
       </AlertDialogContent>
     </AlertDialog>
-  );
-}
-
-function CopyInvitationLinkButton({ invitationId }: { invitationId: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    const url = `${window.location.origin}/accept-invitation?id=${encodeURIComponent(invitationId)}`;
-    navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
-
-  return (
-    <Button variant="ghost" size="icon" aria-label="Copy invitation link" onClick={handleCopy}>
-      {copied ? <Check className="text-green-500" /> : <Link2 />}
-    </Button>
   );
 }
 
