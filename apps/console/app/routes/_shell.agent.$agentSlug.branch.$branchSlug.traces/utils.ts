@@ -3,9 +3,8 @@ import prettyMs from "pretty-ms";
 
 function getDecimalSeparator(): string {
   return (
-    new Intl.NumberFormat(undefined)
-      .formatToParts(1.1)
-      .find((p) => p.type === "decimal")?.value ?? "."
+    new Intl.NumberFormat(undefined).formatToParts(1.1).find((p) => p.type === "decimal")?.value ??
+    "."
   );
 }
 

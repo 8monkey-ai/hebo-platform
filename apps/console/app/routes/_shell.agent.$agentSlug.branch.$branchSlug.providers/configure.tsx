@@ -1,6 +1,6 @@
 import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
 import { z } from "zod";
 
@@ -23,36 +23,75 @@ import {
   FieldGroup,
 } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@hebo/shared-ui/components/Tabs";
+import { Textarea } from "@hebo/shared-ui/components/Textarea";
 
 import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
 
+const requiredString = (msg: string) => z.string(msg).trim().min(1, msg);
+const requiredEmail = (msg: string) => z.string(msg).trim().min(1, msg).email(msg);
+const textareaString = (msg: string) => requiredString(msg).meta({ textarea: true });
+
+const BedrockIamRoleSchema = z.object({
+  authMode: z.literal("iam-role"),
+  bedrockRoleArn: requiredString("Please enter a valid Bedrock ARN role"),
+  region: requiredString("Please enter a valid AWS region"),
+});
+
+const BedrockAccessKeySchema = z.object({
+  authMode: z.literal("access-key"),
+  accessKeyId: requiredString("Please enter a valid access key ID"),
+  secretAccessKey: requiredString("Please enter a valid secret access key"),
+  region: requiredString("Please enter a valid AWS region"),
+});
+
+const VertexIdentityFederationSchema = z.object({
+  authMode: z.literal("identity-federation"),
+  serviceAccountEmail: requiredEmail("Please enter a valid service account email"),
+  audience: requiredString("Please enter a valid audience"),
+  location: requiredString("Please enter a valid location"),
+  project: requiredString("Please enter a valid project"),
+});
+
+const VertexServiceAccountSchema = z.object({
+  authMode: z.literal("service-account"),
+  clientEmail: requiredEmail("Please enter a valid service account email"),
+  privateKey: textareaString("Please enter the private key"),
+  location: requiredString("Please enter a valid location"),
+  project: requiredString("Please enter a valid project"),
+});
+
+const AzureSchema = z.object({
+  authMode: z.literal("resource-api-key"),
+  resourceName: requiredString("Please enter a valid resource name"),
+  apiKey: requiredString("Please enter a valid API key"),
+});
+
+const ApiKeySchema = z.object({
+  authMode: z.literal("api-key"),
+  apiKey: requiredString("Please enter a valid API key"),
+});
+
 export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
   z.object({
     slug: z.enum(["bedrock"]),
-    config: z.object({
-      bedrockRoleArn: ((msg) => z.string(msg).trim().min(1, msg))(
-        "Please enter a valid Bedrock ARN role",
-      ),
-      region: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a valid AWS region"),
-    }),
+    config: z.discriminatedUnion("authMode", [BedrockIamRoleSchema, BedrockAccessKeySchema]),
   }),
   z.object({
     slug: z.enum(["vertex"]),
-    config: z.object({
-      serviceAccountEmail: ((msg) => z.email(msg).trim().min(1, msg))(
-        "Please enter a valid service account email",
-      ),
-      audience: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a valid audience"),
-      location: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a valid location"),
-      project: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a valid project"),
-    }),
+    config: z.discriminatedUnion("authMode", [
+      VertexIdentityFederationSchema,
+      VertexServiceAccountSchema,
+    ]),
+  }),
+  z.object({
+    slug: z.enum(["azure"]),
+    config: z.discriminatedUnion("authMode", [AzureSchema]),
   }),
   z.object({
     slug: z.enum(["voyage", "groq", "anthropic", "openai"]),
-    config: z.object({
-      apiKey: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a valid API key"),
-    }),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]),
   }),
 ]);
 
@@ -62,11 +101,43 @@ type ConfigureProviderDialogProps = {
   provider?: { name: string; slug: string; config?: Record<string, unknown> };
 } & React.ComponentProps<typeof Dialog>;
 
+function getProviderModes(slug: string) {
+  const entry = ProviderConfigureSchema.options.find((o) =>
+    (o.shape.slug.options as string[]).includes(slug),
+  );
+  if (!entry) return [];
+
+  return entry.shape.config.options.map((opt) => {
+    const value = opt.shape.authMode.value;
+    return { value, label: labelize(value), schema: opt };
+  });
+}
+
+function getConfigFields(schema: z.ZodObject): string[] {
+  return Object.keys(schema.shape).filter((k) => k !== "authMode");
+}
+
+function isTextarea(schema: z.ZodObject, key: string): boolean {
+  const field = schema.shape[key as keyof typeof schema.shape];
+  return field.meta()?.textarea === true;
+}
+
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
   const fetcher = useFetcher();
 
+  const modes = getProviderModes(provider?.slug ?? "");
+
+  const defaultAuthMode =
+    modes.find((m) => m.value === provider?.config?.authMode)?.value ?? modes[0]?.value ?? "";
+
+  const [activeAuthMode, setActiveAuthMode] = useState(defaultAuthMode);
+
+  useEffect(() => {
+    setActiveAuthMode(defaultAuthMode);
+  }, [defaultAuthMode]);
+
   const [form, fields] = useForm<ProviderConfigureFormValues>({
-    id: provider?.slug,
+    id: `${provider?.slug}-${activeAuthMode ?? "default"}`,
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
     constraint: getZodConstraint(ProviderConfigureSchema),
     defaultValue: {
@@ -82,16 +153,46 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
     // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
 
-  const providerFields = Object.fromEntries(
-    ProviderConfigureSchema.options.flatMap((opt) => {
-      const slugEnum = opt.shape.slug;
-      const configKeys = Object.keys(opt.shape.config.shape);
-      return slugEnum.options.map((slug) => [slug, configKeys]);
-    }),
-  );
-
   const configFieldset = fields.config.getFieldset();
-  const activeKeys = provider ? (providerFields[provider.slug] ?? []) : [];
+  const activeMode = modes.find((m) => m.value === activeAuthMode) ?? modes[0];
+  const activeKeys = provider && activeMode ? getConfigFields(activeMode.schema) : [];
+
+  const renderFields = () => (
+    <FieldGroup>
+      <Field name={fields.slug.name} className="hidden">
+        <FieldControl>
+          <input type="hidden" />
+        </FieldControl>
+      </Field>
+
+      <Field name={configFieldset.authMode.name} className="hidden">
+        <FieldControl>
+          <input type="hidden" value={activeAuthMode} />
+        </FieldControl>
+      </Field>
+
+      {(activeKeys as (keyof typeof configFieldset)[]).map((key) => {
+        const field = configFieldset[key];
+        return (
+          <Field key={key} name={field.name}>
+            <FieldLabel>{labelize(key)}</FieldLabel>
+            <FieldControl>
+              {isTextarea(activeMode.schema, key) ? (
+                <Textarea
+                  placeholder={`Set ${labelize(key).toLowerCase()}`}
+                  autoComplete="off"
+                  rows={4}
+                />
+              ) : (
+                <Input placeholder={`Set ${labelize(key).toLowerCase()}`} autoComplete="off" />
+              )}
+            </FieldControl>
+            <FieldError />
+          </Field>
+        );
+      })}
+    </FieldGroup>
+  );
 
   return (
     <Dialog {...props}>
@@ -104,26 +205,24 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
             </DialogDescription>
           </DialogHeader>
 
-          <FieldGroup>
-            <Field name={fields.slug.name} className="hidden">
-              <FieldControl>
-                <input type="hidden" />
-              </FieldControl>
-            </Field>
-
-            {(activeKeys as (keyof typeof configFieldset)[]).map((key) => {
-              const field = configFieldset[key];
-              return (
-                <Field key={key} name={field.name}>
-                  <FieldLabel>{labelize(key)}</FieldLabel>
-                  <FieldControl>
-                    <Input placeholder={`Set ${labelize(key).toLowerCase()}`} autoComplete="off" />
-                  </FieldControl>
-                  <FieldError />
-                </Field>
-              );
-            })}
-          </FieldGroup>
+          {modes.length > 1 ? (
+            <Tabs value={activeAuthMode} onValueChange={setActiveAuthMode}>
+              <TabsList>
+                {modes.map((mode) => (
+                  <TabsTrigger key={mode.value} value={mode.value}>
+                    {mode.label}
+                  </TabsTrigger>
+                ))}
+              </TabsList>
+              {modes.map((mode) => (
+                <TabsContent key={mode.value} value={mode.value}>
+                  {activeAuthMode === mode.value && renderFields()}
+                </TabsContent>
+              ))}
+            </Tabs>
+          ) : (
+            renderFields()
+          )}
 
           <div className="text-sm">
             The configured provider will only handle requests after you enable it for a specific

@@ -127,7 +127,7 @@ async function resolveCustomProvider(
 }
 
 export async function resolveProvider(ctx: ResolveProviderHookContext) {
-  const { resolvedModelId: modelId, state } = ctx;
+  const { resolvedModelId: modelId, models, providers, state } = ctx;
 
   const { prismaClient, organizationId } = state as {
     prismaClient: PrismaClient;
@@ -153,25 +153,18 @@ export async function resolveProvider(ctx: ResolveProviderHookContext) {
     );
 
     if (provider) return provider;
-
-    // Org configured a custom provider slug, but no credentials found
-    if (requiresByok && free === false) {
-      throw new GatewayError(
-        "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
-        402,
-        "BYOK_REQUIRED",
-      );
-    }
-
-    return;
   }
 
-  // No custom provider configured — block non-free models when enforcement is on
   if (requiresByok && free === false) {
     throw new GatewayError(
       "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
       402,
       "BYOK_REQUIRED",
     );
+  }
+
+  // Default to bedrock if supported & available
+  if (!customProviderSlug && providers.bedrock && models[modelId]?.providers.includes("bedrock")) {
+    return providers.bedrock;
   }
 }

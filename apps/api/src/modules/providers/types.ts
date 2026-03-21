@@ -2,6 +2,7 @@ import { t, type Static } from "elysia";
 
 export const supportedProviders = {
   anthropic: { name: "Anthropic" },
+  azure: { name: "Microsoft Azure" },
   bedrock: { name: "Amazon Bedrock" },
   groq: { name: "Groq" },
   openai: { name: "OpenAI" },
@@ -14,19 +15,50 @@ export const ProviderSlug = t.Enum(
   { error: "Invalid provider slug" },
 );
 
-const BedrockProviderConfig = t.Object({
+const BedrockIamRoleConfig = t.Object({
+  authMode: t.Literal("iam-role"),
   bedrockRoleArn: t.String(),
   region: t.String(),
 });
 
-const VertexProviderConfig = t.Object({
+const BedrockAccessKeyConfig = t.Object({
+  authMode: t.Literal("access-key"),
+  accessKeyId: t.String({ "x-redact": true }),
+  secretAccessKey: t.String({ "x-redact": true }),
+  region: t.String(),
+});
+
+const BedrockProviderConfig = t.Union([BedrockIamRoleConfig, BedrockAccessKeyConfig]);
+
+const VertexIdentityFederationConfig = t.Object({
+  authMode: t.Literal("identity-federation"),
   serviceAccountEmail: t.String(),
   audience: t.String(),
   location: t.String(),
   project: t.String(),
 });
 
+const VertexServiceAccountConfig = t.Object({
+  authMode: t.Literal("service-account"),
+  clientEmail: t.String(),
+  privateKey: t
+    .Transform(t.String({ "x-redact": true }))
+    .Decode((v) => v.replace(/\\n/g, "\n"))
+    .Encode((v) => v),
+  location: t.String(),
+  project: t.String(),
+});
+
+const VertexProviderConfig = t.Union([VertexIdentityFederationConfig, VertexServiceAccountConfig]);
+
 const ApiKeyProviderConfig = t.Object({
+  authMode: t.Literal("api-key"),
+  apiKey: t.String({ "x-redact": true }),
+});
+
+const AzureProviderConfig = t.Object({
+  authMode: t.Literal("resource-api-key"),
+  resourceName: t.String(),
   apiKey: t.String({ "x-redact": true }),
 });
 
@@ -34,6 +66,7 @@ export const ProviderConfig = t.Union([
   BedrockProviderConfig,
   VertexProviderConfig,
   ApiKeyProviderConfig,
+  AzureProviderConfig,
 ]);
 
 export const Provider = t.Object({
@@ -53,9 +86,14 @@ export const Models = t.Array(
 );
 
 export type Models = Static<typeof Models>;
+export type BedrockIamRoleConfig = Static<typeof BedrockIamRoleConfig>;
+export type BedrockAccessKeyConfig = Static<typeof BedrockAccessKeyConfig>;
 export type BedrockProviderConfig = Static<typeof BedrockProviderConfig>;
+export type VertexIdentityFederationConfig = Static<typeof VertexIdentityFederationConfig>;
+export type VertexServiceAccountConfig = Static<typeof VertexServiceAccountConfig>;
 export type VertexProviderConfig = Static<typeof VertexProviderConfig>;
 export type ApiKeyProviderConfig = Static<typeof ApiKeyProviderConfig>;
+export type AzureProviderConfig = Static<typeof AzureProviderConfig>;
 export type Provider = Static<typeof Provider>;
 export type ProviderConfig = Static<typeof ProviderConfig>;
 export type ProviderSlug = Static<typeof ProviderSlug>;

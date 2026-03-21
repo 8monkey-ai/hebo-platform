@@ -30,7 +30,10 @@ export const formatDateTime = (date: Date) => {
   });
 };
 
-// Create human readable labels, e.g. "serviceAccount" => "Service Account"
+// Create human readable labels, e.g. "serviceAccount" => "Service Account", "iam-role" => "Iam Role"
 export function labelize(value: string) {
-  return value.replaceAll(/([a-z\d])([A-Z])/g, "$1 $2").replace(/^\w/, (c) => c.toUpperCase());
+  return value
+    .replaceAll(/([a-z\d])([A-Z])/g, "$1 $2")
+    .replaceAll("-", " ")
+    .replaceAll(/\b\w/g, (c) => c.toUpperCase());
 }

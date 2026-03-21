@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
+import type { ProviderV3 } from "@ai-sdk/provider";
 import { GatewayError } from "@hebo-ai/gateway";
 
 import { resolveProvider } from "./model-resolver";
@@ -7,22 +8,46 @@ import { resolveProvider } from "./model-resolver";
 // Minimal mock for ResolveProviderHookContext
 function makeCtx(overrides: {
   modelId: string;
+  resolvedModelId?: string;
   free?: boolean;
   requiresByok?: boolean;
   customProviderSlug?: string;
   organizationId?: string;
+  modelProviders?: string[];
+  providerConfigsResult?: unknown;
+  bedrockProvider?: ProviderV3 | undefined;
 }) {
+  const bedrockProvider =
+    "bedrockProvider" in overrides
+      ? overrides.bedrockProvider
+      : ({ id: "bedrock" } as unknown as ProviderV3);
+
   return {
-    resolvedModelId: overrides.modelId,
+    modelId: overrides.modelId,
+    resolvedModelId: overrides.resolvedModelId ?? overrides.modelId,
+    operation: "chat",
+    request: new Request("https://example.com/v1/chat/completions", {
+      method: "POST",
+      body: JSON.stringify({ model: overrides.modelId, messages: [] }),
+    }),
+    body: { model: overrides.modelId, messages: [] },
+    models: {
+      [overrides.resolvedModelId ?? overrides.modelId]: {
+        providers: overrides.modelProviders ?? ["anthropic", "bedrock", "vertex"],
+      },
+    },
+    providers: {
+      bedrock: bedrockProvider,
+    },
     state: {
-      dbClient: {
+      prismaClient: {
         provider_configs: {
-          getUnredacted: async () => {},
+          getUnredacted: async () => overrides.providerConfigsResult,
         },
       },
       organizationId: overrides.organizationId ?? "org-1",
       modelConfig: {
-        type: overrides.modelId,
+        type: overrides.resolvedModelId ?? overrides.modelId,
         customProviderSlug: overrides.customProviderSlug,
         free: overrides.free,
         requiresByok: overrides.requiresByok,
@@ -69,7 +94,7 @@ describe("resolveProvider", () => {
     it("does not throw for free model without custom provider", async () => {
       const ctx = makeCtx({ modelId: "openai/gpt-oss-20b", free: true, requiresByok: true });
       const result = await resolveProvider(ctx);
-      expect(result).toBeUndefined();
+      expect(result).toBe(ctx.providers.bedrock);
     });
   });
 
@@ -79,6 +104,40 @@ describe("resolveProvider", () => {
         modelId: "anthropic/claude-opus-4.6",
         free: false,
         requiresByok: false,
+      });
+      const result = await resolveProvider(ctx);
+      expect(result).toBe(ctx.providers.bedrock);
+    });
+
+    it("returns undefined when bedrock is not supported by the model", async () => {
+      const ctx = makeCtx({
+        modelId: "google/gemini-3.1-pro-preview",
+        free: false,
+        requiresByok: false,
+        modelProviders: ["vertex"],
+      });
+      const result = await resolveProvider(ctx);
+      expect(result).toBeUndefined();
+    });
+
+    it("returns undefined when bedrock is not configured", async () => {
+      const ctx = makeCtx({
+        modelId: "anthropic/claude-opus-4.6",
+        free: false,
+        requiresByok: false,
+        bedrockProvider: undefined,
+      });
+      const result = await resolveProvider(ctx);
+      expect(result).toBeUndefined();
+    });
+
+    it("returns undefined when a custom provider slug is set but unresolved", async () => {
+      const ctx = makeCtx({
+        modelId: "agent/main/copilot",
+        resolvedModelId: "anthropic/claude-opus-4.6",
+        free: false,
+        requiresByok: false,
+        customProviderSlug: "anthropic",
       });
       const result = await resolveProvider(ctx);
       expect(result).toBeUndefined();

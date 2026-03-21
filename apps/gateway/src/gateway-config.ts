@@ -30,51 +30,41 @@ export const gw = gateway({
   basePath,
 
   providers: {
-    groq: createProvider("groq", { apiKey: secrets.groqApiKey }),
+    groq: createProvider("groq", { authMode: "api-key", apiKey: secrets.groqApiKey }),
     bedrock: createProvider("bedrock", {
+      authMode: "iam-role",
       bedrockRoleArn: secrets.bedrockRoleArn,
       region: secrets.bedrockRegion,
     }),
     vertex: createProvider("vertex", {
+      authMode: "identity-federation",
       serviceAccountEmail: secrets.vertexServiceAccountEmail,
       audience: secrets.vertexAudience,
       location: secrets.vertexLocation,
       project: secrets.vertexProject,
     }),
-    voyage: createProvider("voyage", { apiKey: secrets.voyageApiKey }),
-    anthropic: createProvider("anthropic", { apiKey: secrets.anthropicApiKey }),
-    openai: createProvider("openai", { apiKey: secrets.openAiApiKey }),
+    voyage: createProvider("voyage", { authMode: "api-key", apiKey: secrets.voyageApiKey }),
+    anthropic: createProvider("anthropic", {
+      authMode: "api-key",
+      apiKey: secrets.anthropicApiKey,
+    }),
+    openai: createProvider("openai", { authMode: "api-key", apiKey: secrets.openAiApiKey }),
+    azure: createProvider("azure", {
+      authMode: "resource-api-key",
+      resourceName: secrets.azureResourceName,
+      apiKey: secrets.azureApiKey,
+    }),
   },
 
   models: defineModelCatalog(
-    gptOss20b({
-      providers: ["bedrock", "groq", "openai"],
-      ...withTier("openai/gpt-oss-20b"),
-    }),
-    gptOss120b({
-      providers: ["bedrock", "groq", "openai"],
-      ...withTier("openai/gpt-oss-120b"),
-    }),
-    gemini["v3.x"].map((preset) =>
-      preset({ providers: ["vertex"], ...withTier("google/gemini-2.5-pro") }),
-    ),
-    claudeOpus46({
-      providers: ["bedrock", "vertex", "anthropic"],
-      ...withTier("anthropic/claude-opus-4.6"),
-    }),
-    claudeSonnet46({
-      providers: ["bedrock", "vertex", "anthropic"],
-      ...withTier("anthropic/claude-sonnet-4.6"),
-    }),
-    claudeHaiku45({
-      providers: ["bedrock", "vertex", "anthropic"],
-      ...withTier("anthropic/claude-haiku-4.5"),
-    }),
-    nova2MultimodalEmbeddings({
-      providers: ["bedrock"],
-      ...withTier("amazon/nova-2-multimodal-embeddings"),
-    }),
-    voyage35({ providers: ["voyage"], ...withTier("voyage/voyage-3.5") }),
+    gptOss20b(withTier("openai/gpt-oss-20b")),
+    gptOss120b(withTier("openai/gpt-oss-120b")),
+    gemini["v3.x"].map((preset) => preset(withTier("google/gemini-2.5-pro"))),
+    claudeOpus46(withTier("anthropic/claude-opus-4.6")),
+    claudeSonnet46(withTier("anthropic/claude-sonnet-4.6")),
+    claudeHaiku45(withTier("anthropic/claude-haiku-4.5")),
+    nova2MultimodalEmbeddings(withTier("amazon/nova-2-multimodal-embeddings")),
+    voyage35(withTier("voyage/voyage-3.5")),
   ),
 
   hooks: {
