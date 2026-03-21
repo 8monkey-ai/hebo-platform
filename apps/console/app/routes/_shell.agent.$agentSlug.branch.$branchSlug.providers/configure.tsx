@@ -169,13 +169,11 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
         </FieldControl>
       </Field>
 
-      {"authMode" in configFieldset && (
-        <Field name={configFieldset.authMode.name} className="hidden">
-          <FieldControl>
-            <input type="hidden" value={activeAuthMode} />
-          </FieldControl>
-        </Field>
-      )}
+      <Field name={configFieldset.authMode.name} className="hidden">
+        <FieldControl>
+          <input type="hidden" value={activeAuthMode} />
+        </FieldControl>
+      </Field>
 
       {(activeKeys as (keyof typeof configFieldset)[]).map((key) => {
         const field = configFieldset[key];
