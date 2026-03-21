@@ -102,13 +102,9 @@ type ConfigureProviderDialogProps = {
 } & React.ComponentProps<typeof Dialog>;
 
 function getProviderModes(slug: string) {
-  const entry = ProviderConfigureSchema.options.find((o) => {
-    const s = o.shape.slug;
-    // z.enum exposes .options, z.literal exposes .value at runtime
-    return "options" in s
-      ? (s.options as string[]).includes(slug)
-      : (s as unknown as { value: string }).value === slug;
-  });
+  const entry = ProviderConfigureSchema.options.find((o) =>
+    (o.shape.slug.options as string[]).includes(slug),
+  );
   if (!entry) return [];
 
   return entry.shape.config.options.map((opt) => {
@@ -177,12 +173,11 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
 
       {(activeKeys as (keyof typeof configFieldset)[]).map((key) => {
         const field = configFieldset[key];
-        if (!field) return null;
         return (
           <Field key={key} name={field.name}>
             <FieldLabel>{labelize(key)}</FieldLabel>
             <FieldControl>
-              {activeMode && isTextarea(activeMode.schema, key) ? (
+              {isTextarea(activeMode.schema, key) ? (
                 <Textarea
                   placeholder={`Set ${labelize(key).toLowerCase()}`}
                   autoComplete="off"
