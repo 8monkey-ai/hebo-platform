@@ -93,33 +93,34 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       const region = bedrockConfig.region;
       if (!region) return;
 
-      if ("authMode" in bedrockConfig && bedrockConfig.authMode === "access-key") {
-        const { accessKeyId, secretAccessKey } = bedrockConfig;
-        if (!accessKeyId || !secretAccessKey) return;
-        return withCanonicalIdsForBedrock(
-          createAmazonBedrock({ region, accessKeyId, secretAccessKey }),
-        );
+      switch (bedrockConfig.authMode) {
+        case "access-key": {
+          const { accessKeyId, secretAccessKey } = bedrockConfig;
+          if (!accessKeyId || !secretAccessKey) return;
+          return withCanonicalIdsForBedrock(
+            createAmazonBedrock({ region, accessKeyId, secretAccessKey }),
+          );
+        }
+        case "iam-role": {
+          const { bedrockRoleArn } = bedrockConfig;
+          if (!bedrockRoleArn) return;
+          return withCanonicalIdsForBedrock(
+            createAmazonBedrock({
+              region,
+              credentialProvider: fromTemporaryCredentials({
+                params: { RoleArn: bedrockRoleArn },
+                masterCredentials: fromContainerMetadata(),
+                clientConfig: { region },
+              }),
+            }),
+            {
+              inferenceProfile: {
+                arn: { accountId: bedrockRoleArn.split(":")[4], region },
+              },
+            },
+          );
+        }
       }
-
-      // Default: IAM role path (cloud deployments)
-      const bedrockRoleArn =
-        "bedrockRoleArn" in bedrockConfig ? bedrockConfig.bedrockRoleArn : undefined;
-      if (!bedrockRoleArn) return;
-      return withCanonicalIdsForBedrock(
-        createAmazonBedrock({
-          region,
-          credentialProvider: fromTemporaryCredentials({
-            params: { RoleArn: bedrockRoleArn },
-            masterCredentials: fromContainerMetadata(),
-            clientConfig: { region },
-          }),
-        }),
-        {
-          inferenceProfile: {
-            arn: { accountId: bedrockRoleArn.split(":")[4], region },
-          },
-        },
-      );
     }
     case "groq": {
       const { apiKey } = config as ApiKeyProviderConfig;
@@ -131,36 +132,36 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       const { location, project } = vertexConfig;
       if (!location || !project) return;
 
-      if ("authMode" in vertexConfig && vertexConfig.authMode === "service-account") {
-        const { clientEmail, privateKey } = vertexConfig;
-        if (!clientEmail || !privateKey) return;
-        return withCanonicalIdsForVertex(
-          createVertex({
-            googleAuthOptions: {
-              credentials: { client_email: clientEmail, private_key: privateKey },
-              scopes: ["https://www.googleapis.com/auth/cloud-platform"],
-            },
-            location,
-            project,
-          }),
-        );
+      switch (vertexConfig.authMode) {
+        case "service-account": {
+          const { clientEmail, privateKey } = vertexConfig;
+          if (!clientEmail || !privateKey) return;
+          return withCanonicalIdsForVertex(
+            createVertex({
+              googleAuthOptions: {
+                credentials: { client_email: clientEmail, private_key: privateKey },
+                scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+              },
+              location,
+              project,
+            }),
+          );
+        }
+        case "identity-federation": {
+          const { serviceAccountEmail, audience } = vertexConfig;
+          if (!serviceAccountEmail || !audience) return;
+          return withCanonicalIdsForVertex(
+            createVertex({
+              googleAuthOptions: {
+                credentials: buildWifOptions(audience, serviceAccountEmail),
+                scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+              },
+              location,
+              project,
+            }),
+          );
+        }
       }
-
-      // Default: Identity federation path (cloud deployments)
-      const serviceAccountEmail =
-        "serviceAccountEmail" in vertexConfig ? vertexConfig.serviceAccountEmail : undefined;
-      const audience = "audience" in vertexConfig ? vertexConfig.audience : undefined;
-      if (!serviceAccountEmail || !audience) return;
-      return withCanonicalIdsForVertex(
-        createVertex({
-          googleAuthOptions: {
-            credentials: buildWifOptions(audience, serviceAccountEmail),
-            scopes: ["https://www.googleapis.com/auth/cloud-platform"],
-          },
-          location,
-          project,
-        }),
-      );
     }
     case "voyage": {
       const { apiKey } = config as ApiKeyProviderConfig;

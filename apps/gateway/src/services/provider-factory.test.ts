@@ -54,12 +54,12 @@ describe("createProvider", () => {
       expect(provider).toBeDefined();
     });
 
-    it("falls back to IAM role path when authMode is not present", () => {
+    it("returns undefined when authMode is missing", () => {
       const provider = createProvider("bedrock", {
         bedrockRoleArn: "arn:aws:iam::123456789012:role/test-role",
         region: "us-east-1",
       });
-      expect(provider).toBeDefined();
+      expect(provider).toBeUndefined();
     });
   });
 
@@ -118,6 +118,17 @@ describe("createProvider", () => {
         project: "my-project",
       });
       expect(provider).toBeDefined();
+    });
+
+    it("returns undefined when authMode is missing", () => {
+      const provider = createProvider("vertex", {
+        serviceAccountEmail: "sa@proj.iam.gserviceaccount.com",
+        audience:
+          "//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/aws",
+        location: "us-central1",
+        project: "my-project",
+      });
+      expect(provider).toBeUndefined();
     });
   });
 
