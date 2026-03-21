@@ -80,7 +80,10 @@ export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
   }),
   z.object({
     slug: z.enum(["vertex"]),
-    config: z.discriminatedUnion("authMode", [VertexIdentityFederationSchema, VertexServiceAccountSchema]),
+    config: z.discriminatedUnion("authMode", [
+      VertexIdentityFederationSchema,
+      VertexServiceAccountSchema,
+    ]),
   }),
   z.object({
     slug: z.enum(["azure"]),
@@ -98,6 +101,9 @@ type ConfigureProviderDialogProps = {
   provider?: { name: string; slug: string; config?: Record<string, unknown> };
 } & React.ComponentProps<typeof Dialog>;
 
+type ConfigSchemaOption =
+  (typeof ProviderConfigureSchema.options)[number]["shape"]["config"]["options"][number];
+
 function getProviderModes(slug: string) {
   const entry = ProviderConfigureSchema.options.find((o) => {
     const s = o.shape.slug;
@@ -108,20 +114,18 @@ function getProviderModes(slug: string) {
   });
   if (!entry) return [];
 
-  const configSchema = entry.shape.config as z.ZodDiscriminatedUnion<string, z.ZodObject<z.ZodRawShape>[]>;
-  return [...configSchema.options].map((opt) => {
-    const value = (opt.shape.authMode as z.ZodLiteral<string>).value;
-    return { value, label: labelize(value), schema: opt as z.ZodObject<z.ZodRawShape> };
+  return entry.shape.config.options.map((opt) => {
+    const value = opt.shape.authMode.value;
+    return { value, label: labelize(value), schema: opt };
   });
 }
 
-function getConfigFields(schema: z.ZodObject<z.ZodRawShape>): string[] {
+function getConfigFields(schema: ConfigSchemaOption): string[] {
   return Object.keys(schema.shape).filter((k) => k !== "authMode");
 }
 
-function isTextarea(schema: z.ZodObject<z.ZodRawShape>, key: string): boolean {
-  const field = schema.shape[key];
-  if (!field) return false;
+function isTextarea(schema: ConfigSchemaOption, key: string): boolean {
+  const field = schema.shape[key as keyof typeof schema.shape];
   return field.meta()?.textarea === true;
 }
 
@@ -132,7 +136,9 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
   const hasTabs = modes.length > 1;
   const rawAuthMode = provider?.config?.authMode as string | undefined;
   const defaultAuthMode =
-    rawAuthMode && modes.some((m) => m.value === rawAuthMode) ? rawAuthMode : (modes[0]?.value ?? "");
+    rawAuthMode && modes.some((m) => m.value === rawAuthMode)
+      ? rawAuthMode
+      : (modes[0]?.value ?? "");
   const [activeAuthMode, setActiveAuthMode] = useState(defaultAuthMode);
 
   useEffect(() => {
