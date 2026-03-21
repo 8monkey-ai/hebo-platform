@@ -101,9 +101,6 @@ type ConfigureProviderDialogProps = {
   provider?: { name: string; slug: string; config?: Record<string, unknown> };
 } & React.ComponentProps<typeof Dialog>;
 
-type ConfigSchemaOption =
-  (typeof ProviderConfigureSchema.options)[number]["shape"]["config"]["options"][number];
-
 function getProviderModes(slug: string) {
   const entry = ProviderConfigureSchema.options.find((o) => {
     const s = o.shape.slug;
@@ -120,33 +117,31 @@ function getProviderModes(slug: string) {
   });
 }
 
-function getConfigFields(schema: ConfigSchemaOption): string[] {
+function getConfigFields(schema: z.ZodObject): string[] {
   return Object.keys(schema.shape).filter((k) => k !== "authMode");
 }
 
-function isTextarea(schema: ConfigSchemaOption, key: string): boolean {
+function isTextarea(schema: z.ZodObject, key: string): boolean {
   const field = schema.shape[key as keyof typeof schema.shape];
   return field.meta()?.textarea === true;
 }
 
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
   const fetcher = useFetcher();
-  const slug = provider?.slug ?? "";
-  const modes = getProviderModes(slug);
-  const hasTabs = modes.length > 1;
-  const rawAuthMode = provider?.config?.authMode as string | undefined;
+
+  const modes = getProviderModes(provider?.slug ?? "");
+
   const defaultAuthMode =
-    rawAuthMode && modes.some((m) => m.value === rawAuthMode)
-      ? rawAuthMode
-      : (modes[0]?.value ?? "");
+    modes.find((m) => m.value === provider?.config?.authMode)?.value ?? modes[0]?.value ?? "";
+
   const [activeAuthMode, setActiveAuthMode] = useState(defaultAuthMode);
 
   useEffect(() => {
     setActiveAuthMode(defaultAuthMode);
-  }, [slug, defaultAuthMode]);
+  }, [defaultAuthMode]);
 
   const [form, fields] = useForm<ProviderConfigureFormValues>({
-    id: `${slug}-${activeAuthMode ?? "default"}`,
+    id: `${provider?.slug}-${activeAuthMode ?? "default"}`,
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
     constraint: getZodConstraint(ProviderConfigureSchema),
     defaultValue: {
@@ -217,7 +212,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
             </DialogDescription>
           </DialogHeader>
 
-          {hasTabs ? (
+          {modes.length > 1 ? (
             <Tabs value={activeAuthMode} onValueChange={setActiveAuthMode}>
               <TabsList>
                 {modes.map((mode) => (
