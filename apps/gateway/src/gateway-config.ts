@@ -44,12 +44,15 @@ export const gw = gateway({
       project: secrets.vertexProject,
     }),
     voyage: createProvider("voyage", { authMode: "api-key", apiKey: secrets.voyageApiKey }),
-    anthropic: createProvider("anthropic", { authMode: "api-key", apiKey: secrets.anthropicApiKey }),
+    anthropic: createProvider("anthropic", {
+      authMode: "api-key",
+      apiKey: secrets.anthropicApiKey,
+    }),
     openai: createProvider("openai", { authMode: "api-key", apiKey: secrets.openAiApiKey }),
     azure: createProvider("azure", {
-      authMode: "azure-api-key",
-      apiKey: secrets.azureApiKey,
+      authMode: "resource-api-key",
       resourceName: secrets.azureResourceName,
+      apiKey: secrets.azureApiKey,
     }),
   },
 
