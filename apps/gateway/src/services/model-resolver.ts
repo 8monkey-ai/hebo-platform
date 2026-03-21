@@ -174,7 +174,7 @@ export async function resolveProvider(ctx: ResolveProviderHookContext) {
   }
 
   // Default to bedrock if supported & available
-  if (providers.bedrock && models[modelId]?.providers.includes("bedrock")) {
+  if (!customProviderSlug && providers.bedrock && models[modelId]?.providers.includes("bedrock")) {
     return providers.bedrock;
   }
 }

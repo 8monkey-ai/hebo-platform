@@ -124,12 +124,11 @@ describe("resolveProvider", () => {
         requiresByok: false,
         bedrockProvider: undefined,
       });
-      ctx.providers.bedrock = undefined;
       const result = await resolveProvider(ctx);
       expect(result).toBeUndefined();
     });
 
-    it("prefers bedrock for aliased routes when the resolved model supports it", async () => {
+    it("does not override explicit aliased routing", async () => {
       const ctx = makeCtx({
         modelId: "agent/main/copilot",
         resolvedModelId: "anthropic/claude-opus-4.6",
@@ -138,7 +137,7 @@ describe("resolveProvider", () => {
         customProviderSlug: "anthropic",
       });
       const result = await resolveProvider(ctx);
-      expect(result).toBe(ctx.providers.bedrock);
+      expect(result).toBeUndefined();
     });
   });
 });

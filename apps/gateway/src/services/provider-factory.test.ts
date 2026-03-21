@@ -61,14 +61,22 @@ describe("createProvider", () => {
       });
       expect(provider).toBeUndefined();
     });
+
+    it("returns undefined when authMode is invalid", () => {
+      const provider = createProvider("bedrock", {
+        authMode: "api-key",
+        apiKey: "test-key-123",
+        region: "us-east-1",
+      });
+      expect(provider).toBeUndefined();
+    });
   });
 
   describe("vertex", () => {
-    it("returns undefined when authMode is missing", () => {
+    it("returns undefined when authMode is invalid", () => {
       const provider = createProvider("vertex", {
-        serviceAccountEmail: "sa@proj.iam.gserviceaccount.com",
-        audience:
-          "//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/aws",
+        authMode: "api-key",
+        apiKey: "test-key-123",
         location: "us-central1",
         project: "my-project",
       });
