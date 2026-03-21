@@ -120,6 +120,8 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
             },
           );
         }
+        default:
+          return;
       }
     }
     case "groq": {
@@ -161,6 +163,8 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
             }),
           );
         }
+        default:
+          return;
       }
     }
     case "voyage": {

@@ -17,7 +17,10 @@ function makeCtx(overrides: {
   providerConfigsResult?: unknown;
   bedrockProvider?: ProviderV3 | undefined;
 }) {
-  const bedrockProvider = overrides.bedrockProvider ?? ({ id: "bedrock" } as unknown as ProviderV3);
+  const bedrockProvider =
+    "bedrockProvider" in overrides
+      ? overrides.bedrockProvider
+      : ({ id: "bedrock" } as unknown as ProviderV3);
 
   return {
     modelId: overrides.modelId,
@@ -128,7 +131,7 @@ describe("resolveProvider", () => {
       expect(result).toBeUndefined();
     });
 
-    it("does not override explicit aliased routing", async () => {
+    it("returns undefined when a custom provider slug is set but unresolved", async () => {
       const ctx = makeCtx({
         modelId: "agent/main/copilot",
         resolvedModelId: "anthropic/claude-opus-4.6",
