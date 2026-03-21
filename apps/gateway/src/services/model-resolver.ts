@@ -127,7 +127,7 @@ async function resolveCustomProvider(
 }
 
 export async function resolveProvider(ctx: ResolveProviderHookContext) {
-  const { resolvedModelId: modelId, state } = ctx;
+  const { resolvedModelId: modelId, models, providers, state } = ctx;
 
   const { prismaClient, organizationId } = state as {
     prismaClient: PrismaClient;
@@ -162,8 +162,6 @@ export async function resolveProvider(ctx: ResolveProviderHookContext) {
         "BYOK_REQUIRED",
       );
     }
-
-    return;
   }
 
   // No custom provider configured — block non-free models when enforcement is on
@@ -173,5 +171,10 @@ export async function resolveProvider(ctx: ResolveProviderHookContext) {
       402,
       "BYOK_REQUIRED",
     );
+  }
+
+  // Default to bedrock if supported & available
+  if (providers.bedrock && models[modelId]?.providers.includes("bedrock")) {
+    return providers.bedrock;
   }
 }
