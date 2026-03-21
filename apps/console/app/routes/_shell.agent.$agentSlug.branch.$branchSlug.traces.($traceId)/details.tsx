@@ -348,15 +348,18 @@ function MessageBlock({ message }: { message: TraceMessage }) {
 
             {texts.map((text, index) =>
               texts.length > 1 ? (
+                // oxlint-disable-next-line no-array-index-key
                 <div key={index} className="rounded-sm bg-muted/30 px-2 py-1.5">
                   <CollapsibleText text={text} maxLength={500} />
                 </div>
               ) : (
+                // oxlint-disable-next-line no-array-index-key -- text-only items with no stable id
                 <CollapsibleText key={index} text={text} maxLength={500} />
               ),
             )}
 
             {toolCalls.map((tc, index) => (
+              // oxlint-disable-next-line no-array-index-key
               <div key={`tool-call:${index}`} className="space-y-2">
                 <Badge variant="outline">
                   <Wrench className="size-3" />
@@ -367,6 +370,7 @@ function MessageBlock({ message }: { message: TraceMessage }) {
             ))}
 
             {otherParts.map((part, index) => (
+              // oxlint-disable-next-line no-array-index-key
               <div key={`${part.type}:${index}`} className="space-y-2">
                 <div className="text-xs font-medium text-muted-foreground uppercase">
                   {part.type}
