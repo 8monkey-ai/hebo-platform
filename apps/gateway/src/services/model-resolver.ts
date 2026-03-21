@@ -153,18 +153,8 @@ export async function resolveProvider(ctx: ResolveProviderHookContext) {
     );
 
     if (provider) return provider;
-
-    // Org configured a custom provider slug, but no credentials found
-    if (requiresByok && free === false) {
-      throw new GatewayError(
-        "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
-        402,
-        "BYOK_REQUIRED",
-      );
-    }
   }
 
-  // No custom provider configured — block non-free models when enforcement is on
   if (requiresByok && free === false) {
     throw new GatewayError(
       "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
