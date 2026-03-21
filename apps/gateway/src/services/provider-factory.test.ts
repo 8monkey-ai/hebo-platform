@@ -64,6 +64,17 @@ describe("createProvider", () => {
   });
 
   describe("vertex", () => {
+    it("falls back to identity-federation path when authMode is not present", () => {
+      const provider = createProvider("vertex", {
+        serviceAccountEmail: "sa@proj.iam.gserviceaccount.com",
+        audience:
+          "//iam.googleapis.com/projects/123/locations/global/workloadIdentityPools/pool/providers/aws",
+        location: "us-central1",
+        project: "my-project",
+      });
+      expect(provider).toBeDefined();
+    });
+
     it("returns undefined when location is missing", () => {
       expect(
         createProvider("vertex", {

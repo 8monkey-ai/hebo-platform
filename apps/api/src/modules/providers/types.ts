@@ -41,7 +41,10 @@ const VertexIdentityFederationConfig = t.Object({
 const VertexServiceAccountConfig = t.Object({
   authMode: t.Literal("service-account"),
   clientEmail: t.String(),
-  privateKey: t.String({ "x-redact": true }),
+  privateKey: t
+    .Transform(t.String({ "x-redact": true }))
+    .Decode((v) => v.replace(/\\n/g, "\n"))
+    .Encode((v) => v),
   location: t.String(),
   project: t.String(),
 });
