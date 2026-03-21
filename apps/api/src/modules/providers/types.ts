@@ -2,7 +2,7 @@ import { t, type Static } from "elysia";
 
 export const supportedProviders = {
   anthropic: { name: "Anthropic" },
-  azure: { name: "Azure OpenAI" },
+  azure: { name: "Microsoft Azure" },
   bedrock: { name: "Amazon Bedrock" },
   groq: { name: "Groq" },
   openai: { name: "OpenAI" },

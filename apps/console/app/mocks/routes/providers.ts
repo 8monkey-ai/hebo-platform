@@ -4,7 +4,7 @@ import { db } from "~console/mocks/db";
 
 const SUPPORTED_PROVIDERS: Record<string, { name: string }> = {
   anthropic: { name: "Anthropic" },
-  azure: { name: "Azure OpenAI" },
+  azure: { name: "Microsoft Azure" },
   bedrock: { name: "Amazon Bedrock" },
   groq: { name: "Groq" },
   openai: { name: "OpenAI" },
