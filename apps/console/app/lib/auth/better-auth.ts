@@ -168,6 +168,27 @@ export const authService: AuthService = {
     globalThis.location.replace(appRedirectPath);
   },
 
+  async signInWithPassword(email: string, password: string) {
+    const { error } = await authClient.signIn.email({
+      email,
+      password,
+      callbackURL: appRedirectPath,
+    });
+    if (error) throw new Error(error.message ?? "Invalid credentials");
+    globalThis.location.replace(appRedirectPath);
+  },
+
+  async signUpWithPassword(name: string, email: string, password: string) {
+    const { error } = await authClient.signUp.email({
+      name,
+      email,
+      password,
+      callbackURL: appRedirectPath,
+    });
+    if (error) throw new Error(error.message ?? "Sign-up failed");
+    globalThis.location.replace(appRedirectPath);
+  },
+
   async signOut() {
     await authClient.signOut();
     shellStore.user = undefined;

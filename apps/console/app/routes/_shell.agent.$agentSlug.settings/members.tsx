@@ -1,6 +1,6 @@
 import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
-import { Mail, Trash2, UserPlus } from "lucide-react";
+import { Link, Mail, Trash2, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useFetcher } from "react-router";
 
@@ -18,6 +18,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@hebo/shared-ui/components/Avatar";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
+import { CopyButton } from "@hebo/shared-ui/components/CopyButton";
 import {
   FieldControl,
   Field,
@@ -138,7 +139,14 @@ export function MembersSettings({
                 <TableCell>expires {new Date(inv.expiresAt).toLocaleDateString()}</TableCell>
                 {canManage && (
                   <TableCell>
-                    <RevokeInvitationButton invitationId={inv.id} />
+                    <div className="flex items-center">
+                      <CopyButton
+                        value={`${window.location.origin}/accept-invitation?id=${encodeURIComponent(inv.id)}`}
+                        tooltip="Copy invitation link"
+                        icon={<Link />}
+                      />
+                      <RevokeInvitationButton invitationId={inv.id} />
+                    </div>
                   </TableCell>
                 )}
               </TableRow>

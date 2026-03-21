@@ -10,7 +10,7 @@ import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import { PrismaClient } from "~auth/generated/prisma/client";
 
-import { sendOrganizationInvitationEmail, sendVerificationOtpEmail } from "./lib/email";
+import { hasSmtpConfig, sendOrganizationInvitationEmail, sendVerificationOtpEmail } from "./lib/email";
 import { createOrganizationHook, syncActiveOrganizationHook } from "./lib/organization";
 import { verifyApiKeyPlugin, type AuthWithApiKeyPlugin } from "./lib/verify-api-key-plugin";
 
@@ -21,7 +21,10 @@ export const prisma = new PrismaClient({
 export const auth = betterAuth({
   accountLinking: {
     enabled: true,
-    trustedProviders: ["google", "github", "microsoft"],
+    trustedProviders: ["google", "github", "microsoft", "email-password"],
+  },
+  emailAndPassword: {
+    enabled: !hasSmtpConfig(),
   },
   advanced: {
     ...betterAuthCookieOptions.advanced,
