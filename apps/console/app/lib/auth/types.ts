@@ -10,7 +10,7 @@ export interface AuthService {
   // Organization
   getOrganization(): Promise<{ members: OrgMember[]; invitations: OrgInvitation[] }>;
   setActiveOrganization(orgId: string): Promise<void>;
-  inviteMember(email: string, role: string): Promise<void>;
+  inviteMember(email: string, role: string, teamId?: string): Promise<void>;
   removeMember(memberIdOrEmail: string): Promise<void>;
   cancelInvitation(invitationId: string): Promise<void>;
   acceptInvitation(invitationId: string): Promise<void>;
@@ -47,6 +47,7 @@ export type OrgInvitation = {
   role: string;
   expiresAt: string;
   status: string;
+  teamId?: string;
 };
 
 export type ApiKey = {

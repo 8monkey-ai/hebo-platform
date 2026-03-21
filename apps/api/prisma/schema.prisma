@@ -44,7 +44,7 @@ model agents {
   deleted_at      DateTime?
   /// @prismabox.hide
   organization_id String
-  /// @prismabox.hide
+  /// @prismabox.input.hide
   team_id         String
 }
 
