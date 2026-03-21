@@ -24,6 +24,7 @@ import {
 } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@hebo/shared-ui/components/Tabs";
+import { Textarea } from "@hebo/shared-ui/components/Textarea";
 
 import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
@@ -183,11 +184,10 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
             <FieldLabel>{labelize(key)}</FieldLabel>
             <FieldControl>
               {activeMode && isTextarea(activeMode.schema, key) ? (
-                <textarea
+                <Textarea
                   placeholder={`Set ${labelize(key).toLowerCase()}`}
                   autoComplete="off"
                   rows={4}
-                  className="w-full min-w-0 rounded-md border border-input bg-transparent px-2.5 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:bg-input/30 bg-background"
                 />
               ) : (
                 <Input placeholder={`Set ${labelize(key).toLowerCase()}`} autoComplete="off" />

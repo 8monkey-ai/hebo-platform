@@ -180,7 +180,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
     case "azure": {
       const { apiKey, resourceName } = config as AzureProviderConfig;
       if (!apiKey || !resourceName) return;
-      return withCanonicalIdsForOpenAI(createAzure({ apiKey, resourceName }));
+      return createAzure({ apiKey, resourceName });
     }
     default: {
       throw new Error(`Unsupported provider: ${slug}`);
