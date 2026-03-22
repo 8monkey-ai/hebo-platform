@@ -6,7 +6,7 @@ services:
       - "80:80"
     volumes:
       - hebo-data:/data
-    environment:
+    # environment:
       # All infrastructure env vars have zero-config defaults in the entrypoint:
       # AUTH_SECRET — auto-generated and persisted to /data/.auth_secret
       # DATABASE_URL — defaults to postgresql://postgres:password@postgres:5432/hebo
