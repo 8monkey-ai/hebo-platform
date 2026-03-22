@@ -9,15 +9,15 @@ import {
 import { EmbeddingsBodySchema, EmbeddingsSchema } from "@hebo-ai/gateway/endpoints/embeddings";
 import { ModelListSchema, ModelSchema } from "@hebo-ai/gateway/endpoints/models";
 import { OpenAIErrorSchema } from "@hebo-ai/gateway/errors/openai";
-import Elysia from "elysia";
+import { Elysia } from "elysia";
 
 import { corsConfig } from "@hebo/shared-api/lib/cors";
 import { getOpenapiConfig } from "@hebo/shared-api/lib/openapi";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { authService } from "@hebo/shared-api/middlewares/auth";
-import { logger } from "@hebo/shared-api/middlewares/logging";
+import { logging } from "@hebo/shared-api/middlewares/logging";
 
-import { prismaClient } from "~api/middleware/prisma";
+import { prisma } from "~api/middleware/prisma";
 
 import { basePath, gw } from "./gateway-config";
 import { errorHandler } from "./middlewares/error-handler";
@@ -28,7 +28,7 @@ const GATEWAY_URL = process.env.GATEWAY_URL ?? `http://localhost:${PORT}`;
 export const createGateway = () =>
   new Elysia()
     .use(opentelemetry(getOtelConfig("hebo-gateway")))
-    .use(logger("hebo-gateway"))
+    .use(logging("hebo-gateway"))
     // Root route ("/") is unauthenticated and unprotected for health checks.
     .get("/", () => "🐵 Hebo AI Gateway says hello!")
     .use(cors(corsConfig))
@@ -65,7 +65,7 @@ export const createGateway = () =>
     .use(authService)
     .group(basePath, { isSignedIn: true }, (app) =>
       app
-        .use(prismaClient)
+        .use(prisma)
         .post(
           "/chat/completions",
           ({ request, prismaClient, organizationId }) =>

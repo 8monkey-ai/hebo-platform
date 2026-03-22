@@ -82,6 +82,7 @@ export function UserMenu({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 render={
+                  // oxlint-disable-next-line jsx-no-target-blank
                   <a href="https://hebo.ai/docs" target="_blank" rel="noopener">
                     <BookOpen />
                     <span>Documentation</span>

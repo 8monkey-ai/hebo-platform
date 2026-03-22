@@ -2,7 +2,7 @@ import { Elysia, status, t } from "elysia";
 
 import { BadRequestError } from "@hebo/shared-api/errors";
 
-import { greptimeDb as greptimeDbMiddleware } from "~api/middleware/greptime";
+import { greptime } from "~api/middleware/greptime";
 
 import { getSpans, listTraces } from "./service";
 import { SpanDetail, TraceListQuery, TraceListResponse } from "./types";
@@ -13,7 +13,7 @@ const DEFAULT_TO = () => new Date();
 export const spansModule = new Elysia({
   prefix: "/agents/:agentSlug/branches/:branchSlug/traces",
 })
-  .use(greptimeDbMiddleware)
+  .use(greptime)
   .get(
     "/",
     async ({ greptimeDb, organizationId, params, query }) => {

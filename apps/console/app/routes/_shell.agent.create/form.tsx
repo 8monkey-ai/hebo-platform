@@ -65,7 +65,7 @@ export function AgentCreateForm() {
           </CardTitle>
           <CardDescription>
             Each agent has its own set of models. Model choice usually depends on use case and
-            pricing.{" "}
+            pricing. {/* oxlint-disable-next-line jsx-no-target-blank */}
             <a href="https://hebo.ai/docs" target="_blank" rel="noopener">
               Learn more
             </a>

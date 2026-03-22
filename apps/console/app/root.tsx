@@ -2,9 +2,13 @@ import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 
 import type { Route } from "./+types/root";
 import { ErrorView } from "./components/ui/ErrorView";
+// oxlint-disable-next-line no-unassigned-import
 import "./init";
+// oxlint-disable-next-line no-unassigned-import
 import "./styles/fonts.css";
+// oxlint-disable-next-line no-unassigned-import
 import "./styles/tailwind.css";
+// oxlint-disable-next-line no-unassigned-import
 import "./styles/global.css";
 
 export const links: Route.LinksFunction = () => [{ rel: "icon", href: "/hebo-icon.png" }];

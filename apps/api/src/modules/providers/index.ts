@@ -1,6 +1,6 @@
 import { Elysia, status, t } from "elysia";
 
-import { prismaClient } from "~api/middleware/prisma";
+import { prisma } from "~api/middleware/prisma";
 
 import { type Models } from "./types";
 import { Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./types";
@@ -8,7 +8,7 @@ import { Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./ty
 export const providersModule = new Elysia({
   prefix: "/providers",
 })
-  .use(prismaClient)
+  .use(prisma)
   .get(
     "/",
     async ({ prismaClient, query }) => {
