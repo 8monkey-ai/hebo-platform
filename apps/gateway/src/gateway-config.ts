@@ -48,7 +48,7 @@ export const gw = gateway({
       authMode: "api-key",
       apiKey: secrets.anthropicApiKey,
     }),
-    openai: createProvider("openai", { authMode: "api-key", apiKey: secrets.openAiApiKey }),
+    openai: createProvider("openai", { authMode: "api-key", apiKey: secrets.openaiApiKey }),
     azure: createProvider("azure", {
       authMode: "resource-api-key",
       resourceName: secrets.azureResourceName,

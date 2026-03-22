@@ -113,11 +113,12 @@ Secret names:
   - BetterAuth: `AuthSecret` (https://www.better-auth.com/docs/reference/options#secret))
 
 - LLMs
-  - Bedrock: `BedrockRoleArn`, `BedrockRegion`
-  - Vertex: `VertexServiceAccountEmail`, `VertexAwsProviderAudience`, `VertexProject`, `VertexLocation`
   - Anthropic: `AnthropicApiKey`
-  - OpenAI: `OpenAiApiKey`
-  - Others: `VoyageApiKey`, `GroqApiKey`
+  - Azure: `AzureOpenaiApiKey`, `AzureOpenaiResourceName`
+  - Bedrock: `BedrockRegion`, `BedrockRoleArn`
+  - OpenAI: `OpenaiApiKey`
+  - Vertex: `VertexAwsProviderAudience`, `VertexLocation`, `VertexProject`, `VertexServiceAccountEmail`
+  - Others: `GroqApiKey`, `VoyageApiKey`
 
 - BYOK (Bring Your Own Key)
   - `EnforceByok`: when set, non-free models require org-level provider credentials
