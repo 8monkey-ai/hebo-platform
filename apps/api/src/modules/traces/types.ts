@@ -17,7 +17,7 @@ export const TraceListQuery = t.Object({
 const SpanStatus = t.Union([t.Literal("ok"), t.Literal("error"), t.Literal("unknown")]);
 
 export const TraceListItem = t.Object({
-  timestamp: t.String(),
+  timestamp: t.Date(),
   traceId: t.String(),
   operationName: t.String(),
   model: t.String(),
@@ -103,7 +103,7 @@ const GenAIOutputMessages = t.Array(GenAIOutputMessage);
 const GenAIFinishReasons = t.Nullable(t.Array(t.String()));
 
 export const SpanDetail = t.Object({
-  timestamp: t.String(),
+  timestamp: t.Date(),
   spanId: t.String(),
   operationName: t.String(),
   model: t.String(),

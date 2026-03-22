@@ -18,6 +18,7 @@ export const createOrganizationHook = (prisma: PrismaClient) => {
       const org = await tx.organizations.create({
         data: {
           id: Bun.randomUUIDv7(),
+          // oxlint-disable-next-line prefer-nullish-coalescing
           name: `${user.name || user.email}'s Org`,
           slug: slugFromName(user.name, user.email),
           createdAt: new Date(),

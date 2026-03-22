@@ -30,7 +30,7 @@ import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
 
 const requiredString = (msg: string) => z.string(msg).trim().min(1, msg);
-const requiredEmail = (msg: string) => z.string(msg).trim().min(1, msg).email(msg);
+const requiredEmail = (msg: string) => z.email(msg);
 const textareaString = (msg: string) => requiredString(msg).meta({ textarea: true });
 
 const BedrockIamRoleSchema = z.object({

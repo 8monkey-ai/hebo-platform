@@ -42,7 +42,7 @@ export async function resolveModelId(ctx: ResolveModelHookContext) {
   });
 
   if (canonicalModelIds.has(aliasPath)) {
-    const modelConfig = models[aliasPath as keyof typeof models];
+    const modelConfig = models[aliasPath];
     state.modelConfig = {
       type: aliasPath,
       // Currently, we only support routing to the first provider.
