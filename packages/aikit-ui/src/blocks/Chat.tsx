@@ -222,6 +222,7 @@ export function Chat({
               <div key={message.id} className="flex flex-col gap-1">
                 {/* oxlint-disable no-array-index-key -- safe as append-only */}
                 {message.parts.map((part, i) => {
+                  // oxlint-disable-next-line switch-exhaustiveness-check
                   switch (part.type) {
                     case "text": {
                       return (
