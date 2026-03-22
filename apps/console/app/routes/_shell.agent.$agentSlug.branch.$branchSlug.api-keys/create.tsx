@@ -138,7 +138,7 @@ export function CreateApiKeyDialog() {
       <ApiKeyRevealDialog
         open={revealOpen}
         onOpenChange={setRevealOpen}
-        apiKey={fetcher.data?.apiKey.key || ""}
+        apiKey={fetcher.data?.apiKey.key ?? ""}
       />
     </>
   );

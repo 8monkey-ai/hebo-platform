@@ -569,7 +569,7 @@ export const traceHandlers = [
       const filtered =
         filterEntries.length > 0
           ? mockTraces.filter((t) => {
-              const detail = mockSpanDetails[t.traceId] as any;
+              const detail = mockSpanDetails[t.traceId] as { metadata: Record<string, unknown> };
               return filterEntries.every(
                 ([metaKey, value]) => detail?.metadata?.[metaKey] === value,
               );

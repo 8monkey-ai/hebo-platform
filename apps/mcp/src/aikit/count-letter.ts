@@ -17,7 +17,7 @@ export const countLetterTool = {
     const lettersSet = new Set(letters.toLowerCase());
     for (const char of wordLower) {
       if (lettersSet.has(char)) {
-        counts.set(char, (counts.get(char) || 0) + 1);
+        counts.set(char, (counts.get(char) ?? 0) + 1);
         total++;
       }
     }

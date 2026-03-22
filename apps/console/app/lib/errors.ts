@@ -14,6 +14,7 @@ export function parseError(error: unknown) {
     status = error.status;
   } else if (typeof error === "object" && error !== null && "summary" in error) {
     const e = error as { summary?: string; message?: string };
+    // oxlint-disable-next-line prefer-nullish-coalescing
     message = e.summary || e.message || "Unknown Error";
   } else if (error instanceof TimeoutError) {
     message = error.message;

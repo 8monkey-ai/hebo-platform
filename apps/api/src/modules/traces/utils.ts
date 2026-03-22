@@ -23,6 +23,12 @@ export function parseNullableNumber(value: unknown): number | null {
   return null;
 }
 
+export function parseString(value: unknown): string {
+  if (typeof value === "string") return value;
+  if (value === null || value === undefined || value === "") return "";
+  return "";
+}
+
 function normalizeJsonUnicodeEscapes(value: string): string {
   return value.replaceAll(/\\u\{([0-9a-fA-F]+)\}/g, (match, hex) => {
     const codePoint = Number.parseInt(hex, 16);
@@ -49,7 +55,7 @@ export function parseJsonArray(value: unknown): unknown[] | null {
   return parsed.map((item) => parseJson(item));
 }
 
-export function formatStatus(statusCode: string | null): "ok" | "error" | "unknown" {
+export function formatStatus(statusCode: unknown): "ok" | "error" | "unknown" {
   if (!statusCode) return "unknown";
   if (statusCode === "STATUS_CODE_OK" || statusCode === "STATUS_CODE_UNSET") return "ok";
   if (statusCode === "STATUS_CODE_ERROR") return "error";

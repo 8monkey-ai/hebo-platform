@@ -83,7 +83,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
 }
 
 export default function Branches() {
-  const agent = useRoute("routes/_shell.agent.$agentSlug")!.loaderData!.agent!;
+  const agent = useRoute("routes/_shell.agent.$agentSlug")!.loaderData!.agent;
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">

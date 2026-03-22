@@ -166,7 +166,7 @@ function ModelCard(props: {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [routingEnabled, setRoutingEnabled] = useState(Boolean(model.getFieldset().routing.value));
 
-  const aliasPath = [agentSlug, branchSlug, model.getFieldset().alias.value || "alias"].join("/");
+  const aliasPath = [agentSlug, branchSlug, model.getFieldset().alias.value ?? "(alias)"].join("/");
 
   const cardRef = useRef<HTMLDivElement>(null);
   useEffect(() => {

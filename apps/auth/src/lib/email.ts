@@ -105,8 +105,9 @@ export async function sendOrganizationInvitationEmail({
   }
 
   const acceptUrl = new URL("/accept-invitation", consoleUrl);
-
   acceptUrl.searchParams.set("id", invitationId);
+
+  // oxlint-disable-next-line prefer-nullish-coalescing
   const inviter = inviterName || inviterEmail;
   const subject = `You've been invited to ${organizationName}`;
 
