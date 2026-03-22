@@ -222,14 +222,13 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
   const outputMessages = trace.outputMessages;
 
   return (
+    // oxlint-disable no-array-index-key - static read-only data
     <div className="flex flex-col divide-y">
       {inputMessages.map((msg, index) => (
-        // oxlint-disable-next-line no-array-index-key - static read-only data
         <MessageBlock key={`${trace.spanId}:in:${index}`} message={msg} />
       ))}
 
       {outputMessages.map((msg, index) => (
-        // oxlint-disable-next-line no-array-index-key - static read-only data
         <MessageBlock key={`${trace.spanId}:out:${index}`} message={msg} />
       ))}
 
@@ -242,6 +241,7 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
         </Empty>
       )}
     </div>
+    // oxlint-enable no-array-index-key - static read-only data
   );
 }
 
@@ -337,6 +337,7 @@ function MessageBlock({ message }: { message: TraceMessage }) {
         {!reasoning && texts.length === 0 && toolCalls.length === 0 && otherParts.length === 0 ? (
           <p className="text-xs text-muted-foreground opacity-50">(no message)</p>
         ) : (
+          // oxlint-disable no-array-index-key - static read-only data
           <div ref={contentRef} className="space-y-3">
             {reasoning && (
               <ExpandableContent label="Reasoning">
@@ -348,18 +349,15 @@ function MessageBlock({ message }: { message: TraceMessage }) {
 
             {texts.map((text, index) =>
               texts.length > 1 ? (
-                // oxlint-disable-next-line no-array-index-key - static read-only data
                 <div key={`msg:${index}`} className="rounded-sm bg-muted/30 px-2 py-1.5">
                   <CollapsibleText text={text} maxLength={500} />
                 </div>
               ) : (
-                // oxlint-disable-next-line no-array-index-key - static read-only data
                 <CollapsibleText key={`msg:${index}`} text={text} maxLength={500} />
               ),
             )}
 
             {toolCalls.map((tc, index) => (
-              // oxlint-disable-next-line no-array-index-key - static read-only data
               <div key={`tool-call:${index}`} className="space-y-2">
                 <Badge variant="outline">
                   <Wrench className="size-3" />
@@ -370,7 +368,6 @@ function MessageBlock({ message }: { message: TraceMessage }) {
             ))}
 
             {otherParts.map((part, index) => (
-              // oxlint-disable-next-line no-array-index-key - static read-only data
               <div key={`${part.type}:${index}`} className="space-y-2">
                 <div className="text-xs font-medium text-muted-foreground uppercase">
                   {part.type}
@@ -379,6 +376,7 @@ function MessageBlock({ message }: { message: TraceMessage }) {
               </div>
             ))}
           </div>
+          // oxlint-enable no-array-index-key - static read-only data
         )}
       </div>
     </section>
