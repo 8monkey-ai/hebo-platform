@@ -67,7 +67,7 @@ void invitations.create({
 
 export const authService = {
   ensureSignedIn() {
-    if (shellStore.user?.organizationId) return true;
+    if (shellStore.user?.organizationId) return Promise.resolve(true);
     const persistedOrgId = globalThis.localStorage?.getItem("hebo:dummy-org-id") ?? "dummy-org-id";
     shellStore.user = {
       userId: "dummy-user-id",
@@ -81,7 +81,7 @@ export const authService = {
       { id: "dummy-org-id", name: "Dummy Org", slug: "dummy-org" },
       { id: "dummy-org-id-2", name: "Second Org", slug: "second-org" },
     ];
-    return true;
+    return Promise.resolve(true);
   },
 
   async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
@@ -96,40 +96,45 @@ export const authService = {
 
   revokeApiKey(apiKeyId: string) {
     apiKeys.delete((q) => q.where({ id: apiKeyId }));
+    return Promise.resolve();
   },
 
   listApiKeys() {
-    return apiKeys.findMany();
+    return Promise.resolve(apiKeys.findMany());
   },
 
   signInWithOAuth() {
     globalThis.location.href = "/";
+    return Promise.resolve();
   },
 
   sendMagicLinkEmail() {
-    return "dummy nonce";
+    return Promise.resolve("dummy nonce");
   },
 
   signInWithMagicLink() {
-    throw new Error("Magic Link not implemented");
+    return Promise.reject(new Error("Magic Link not implemented"));
   },
 
   signInWithPassword() {
     globalThis.location.href = "/";
+    return Promise.resolve();
   },
 
   signUpWithPassword() {
     globalThis.location.href = "/";
+    return Promise.resolve();
   },
 
   signOut() {
     shellStore.user = undefined;
     shellStore.organizations = [];
+    return Promise.resolve();
   },
 
   getOrganization() {
     const organizationId = shellStore.user?.organizationId;
-    return {
+    return Promise.resolve({
       members: members.findMany().flatMap((m) =>
         m.organizationId === organizationId
           ? [
@@ -156,18 +161,19 @@ export const authService = {
             ]
           : [],
       ),
-    };
+    });
   },
 
   setActiveOrganization(orgId) {
     if (shellStore.user) shellStore.user.organizationId = orgId;
     globalThis.localStorage?.setItem("hebo:dummy-org-id", orgId);
     globalThis.location.replace("/");
+    return Promise.resolve();
   },
 
   inviteMember(email, role, _teamId) {
     const organizationId = shellStore.user?.organizationId;
-    if (!organizationId) throw new Error("No active organization");
+    if (!organizationId) return Promise.reject(new Error("No active organization"));
     void invitations.create({
       organizationId,
       email,
@@ -175,21 +181,24 @@ export const authService = {
       expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
       status: "pending",
     });
+    return Promise.resolve();
   },
 
   removeMember(memberIdOrEmail) {
     members.delete((q) => q.where({ userEmail: memberIdOrEmail }));
+    return Promise.resolve();
   },
 
   cancelInvitation(invitationId) {
     invitations.delete((q) => q.where({ id: invitationId }));
+    return Promise.resolve();
   },
 
   acceptInvitation(invitationId) {
     const invite = invitations.findFirst((q) => q.where({ id: invitationId, status: "pending" }));
-    if (!invite) throw new Error("Invitation not found or already accepted.");
+    if (!invite) return Promise.reject(new Error("Invitation not found or already accepted."));
     if (Date.parse(invite.expiresAt) <= Date.now()) {
-      throw new Error("Invitation has expired.");
+      return Promise.reject(new Error("Invitation has expired."));
     }
     invitations.delete((q) => q.where({ id: invitationId }));
     const user = shellStore.user;
@@ -201,5 +210,6 @@ export const authService = {
       userName: user?.name ?? invite.email.split("@")[0],
       userEmail: user?.email ?? invite.email,
     });
+    return Promise.resolve();
   },
 } satisfies AuthService;
