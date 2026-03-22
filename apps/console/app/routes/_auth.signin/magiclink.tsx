@@ -74,7 +74,7 @@ export function MagicLinkSignIn() {
         e.preventDefault();
         setLoading(true);
         try {
-          await authService.sendMagicLinkEmail(email!);
+          await authService.sendMagicLinkEmail(email);
           setLinkSent(true);
         } catch (err) {
           if (err instanceof Error) setError(err.message);

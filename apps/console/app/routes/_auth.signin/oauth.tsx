@@ -48,7 +48,11 @@ function SignInButton({ provider, icon: Icon }: { provider: string; icon?: React
           </>
         )}
       </Button>
-      {error && <div className="text-sm text-destructive">{error}</div>}
+      {error && (
+        <div role="alert" className="text-sm text-destructive">
+          {error}
+        </div>
+      )}
     </>
   );
 }
