@@ -1,0 +1,65 @@
+# syntax=docker/dockerfile:1
+
+########################  builder stage  ########################
+FROM oven/bun:1 AS builder
+ENV CI=1
+ENV NODE_ENV=production
+WORKDIR /repo
+
+COPY . .
+RUN bun install --frozen-lockfile
+
+# Build console (SPA static assets)
+ENV VITE_API_URL=/api
+ENV VITE_AUTH_URL=/auth
+ENV VITE_GATEWAY_URL=/gateway
+RUN bun run --filter @hebo/console build
+
+# Build backend binaries (gateway needs api's Prisma client)
+RUN bun run --filter @hebo/api build
+RUN bun run --filter @hebo/auth build
+RUN bun run --filter @hebo/gateway --filter @hebo/api build
+
+########################  runtime stage  ########################
+FROM caddy:2-alpine
+
+RUN apk add --no-cache libgcc libstdc++
+
+WORKDIR /app
+
+# Copy bun binary for prisma migrations
+COPY --from=builder /usr/local/bin/bun /usr/local/bin/bun
+COPY --from=builder /usr/local/bin/bunx /usr/local/bin/bunx
+
+# Copy compiled backend binaries
+COPY --from=builder /repo/apps/api/dist/server /app/api-server
+COPY --from=builder /repo/apps/auth/dist/server /app/auth-server
+COPY --from=builder /repo/apps/gateway/dist/server /app/gateway-server
+
+# Copy console static build output
+COPY --from=builder /repo/apps/console/build/client /srv/console
+
+# Copy Prisma migration files and CLI
+COPY --from=builder /repo/apps/api/prisma/migrations /app/prisma/api/migrations
+COPY --from=builder /repo/apps/api/prisma/schema.prisma /app/prisma/api/schema.prisma
+COPY --from=builder /repo/apps/auth/prisma/migrations /app/prisma/auth/migrations
+COPY --from=builder /repo/apps/auth/prisma/schema.prisma /app/prisma/auth/schema.prisma
+COPY --from=builder /repo/node_modules/.prisma /app/node_modules/.prisma
+COPY --from=builder /repo/node_modules/prisma /app/node_modules/prisma
+COPY --from=builder /repo/node_modules/@prisma /app/node_modules/@prisma
+
+# Copy Caddyfile
+COPY infra/docker/self-hosted/Caddyfile /etc/caddy/Caddyfile
+
+# Copy entrypoint
+COPY infra/docker/self-hosted/entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+
+# Create non-root user and data directory
+RUN addgroup -S hebo && adduser -S hebo -G hebo \
+    && mkdir -p /data && chown hebo:hebo /data
+
+EXPOSE 80
+USER hebo
+
+ENTRYPOINT ["/app/entrypoint.sh"]

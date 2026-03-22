@@ -1,5 +1,6 @@
-import { secrets } from "bun";
 import { Resource } from "sst";
+
+const toEnvKey = (name: string) => name.replace(/([a-z])([A-Z])/g, "$1_$2").toUpperCase();
 
 export const getSecret = async (name: string) => {
   try {
@@ -7,6 +8,16 @@ export const getSecret = async (name: string) => {
     const value = Resource[name].value;
     return value === "undefined" ? undefined : value;
   } catch {
-    return await secrets.get({ service: "hebo", name });
+    // Env var fallback (self-hosted): PascalCase → SCREAMING_SNAKE_CASE
+    const envValue = process.env[toEnvKey(name)];
+    if (envValue) return envValue;
+
+    // Bun secrets fallback (local dev)
+    try {
+      const { secrets } = await import("bun");
+      return await secrets.get({ service: "hebo", name });
+    } catch {
+      return undefined;
+    }
   }
 };

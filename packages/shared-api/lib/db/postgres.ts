@@ -9,7 +9,13 @@ export const getConnectionString = (schema: string) => {
     const db = Resource.HeboDatabase;
     return `postgresql://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}?sslmode=verify-full&schema=${schema.toLowerCase()}`;
   } catch {
-    // FUTURE: keep in sync with dev:infra:up script once updated
+    // Self-hosted: DATABASE_URL env var (set by entrypoint with default)
+    const databaseUrl = process.env.DATABASE_URL;
+    if (databaseUrl) {
+      const sep = databaseUrl.includes("?") ? "&" : "?";
+      return `${databaseUrl}${sep}schema=${schema.toLowerCase()}`;
+    }
+    // Local dev fallback
     return `postgresql://postgres:password@localhost:5432/local?schema=${schema.toLowerCase()}`;
   }
 };

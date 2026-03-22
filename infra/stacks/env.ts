@@ -24,7 +24,7 @@ export const anthropicApiKey = getSstSecret("AnthropicApiKey");
 export const bedrockRegion = getSstSecret("BedrockRegion");
 export const bedrockRoleArn = getSstSecret("BedrockRoleArn");
 export const groqApiKey = getSstSecret("GroqApiKey");
-export const openAiApiKey = getSstSecret("OpenAiApiKey");
+export const openaiApiKey = getSstSecret("OpenaiApiKey");
 export const vertexAwsProviderAudience = getSstSecret("VertexAwsProviderAudience");
 export const vertexLocation = getSstSecret("VertexLocation");
 export const vertexProject = getSstSecret("VertexProject");
@@ -63,7 +63,7 @@ export const llmSecrets = [
   vertexProject,
   vertexLocation,
   anthropicApiKey,
-  openAiApiKey,
+  openaiApiKey,
   enforceByok,
   freeModelIds,
 ];

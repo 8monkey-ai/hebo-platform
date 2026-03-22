@@ -1,0 +1,52 @@
+services:
+  hebo:
+    image: ghcr.io/8monkey-ai/hebo:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - hebo-data:/data
+    environment:
+      # All infrastructure env vars have zero-config defaults in the entrypoint:
+      # AUTH_SECRET — auto-generated and persisted to /data/.auth_secret
+      # DATABASE_URL — defaults to postgresql://postgres:password@postgres:5432/hebo
+      # GREPTIME_HOST — defaults to greptimedb
+
+      # Uncomment below for OAuth on a public domain:
+      # AUTH_URL: https://hebo.example.com/auth
+      # GITHUB_CLIENT_ID: ...
+      # GITHUB_CLIENT_SECRET: ...
+      # GOOGLE_CLIENT_ID: ...
+      # GOOGLE_CLIENT_SECRET: ...
+    depends_on:
+      postgres:
+        condition: service_healthy
+      greptimedb:
+        condition: service_started
+
+  postgres:
+    image: postgres:17.6
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hebo
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  greptimedb:
+    image: greptime/greptimedb:v1.0.0-rc.1
+    restart: unless-stopped
+    volumes:
+      - greptimedb-data:/greptimedb_data
+    command: standalone start --http-addr 0.0.0.0:4000 --rpc-bind-addr 0.0.0.0:4001 --mysql-addr 0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
+
+volumes:
+  hebo-data:
+  postgres-data:
+  greptimedb-data:

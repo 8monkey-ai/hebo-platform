@@ -116,7 +116,7 @@ Secret names:
   - Bedrock: `BedrockRoleArn`, `BedrockRegion`
   - Vertex: `VertexServiceAccountEmail`, `VertexAwsProviderAudience`, `VertexProject`, `VertexLocation`
   - Anthropic: `AnthropicApiKey`
-  - OpenAI: `OpenAiApiKey`
+  - OpenAI: `OpenaiApiKey`
   - Others: `VoyageApiKey`, `GroqApiKey`
 
 - BYOK (Bring Your Own Key)
@@ -173,7 +173,58 @@ bun run test
 bun run -F @hebo/console test
 ```
 
-## Deployment
+## Self-Hosted Deployment
+
+Run Hebo on your own infrastructure with a single Docker Compose command:
+
+```bash
+docker compose -f docker-compose.self-hosted.yml up
+```
+
+This starts three containers: `hebo` (all services + console), `postgres`, and `greptimedb`. No configuration is required for the basic setup — `AUTH_SECRET` is auto-generated, and database connections use sensible defaults.
+
+The console is available at `http://localhost` once all services are ready.
+
+### Environment Variables
+
+All infrastructure variables have zero-config defaults. Optional variables can be set on the `hebo` service in `docker-compose.self-hosted.yml`:
+
+| Variable | Default | Purpose |
+|---|---|---|
+| `AUTH_SECRET` | Auto-generated, persisted to `/data/.auth_secret` | Session signing key |
+| `DATABASE_URL` | `postgresql://postgres:password@postgres:5432/hebo` | PostgreSQL connection string |
+| `GREPTIME_HOST` | `greptimedb` | GreptimeDB hostname for observability |
+| `AUTH_URL` | `http://localhost:3000` | Set to `https://<your-domain>/auth` when using OAuth on a public domain |
+| `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | — | GitHub OAuth |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | — | Google OAuth |
+| `OPENAI_API_KEY` | — | OpenAI API key (platform-managed) |
+| `ANTHROPIC_API_KEY` | — | Anthropic API key (platform-managed) |
+
+See the [issue #309](https://github.com/8monkey-ai/hebo-platform/issues/309) for the complete environment variable reference.
+
+### HTTPS with Caddy
+
+For production deployments on a public domain, use [Caddy](https://caddyserver.com/) as a reverse proxy for automatic HTTPS via Let's Encrypt.
+
+Create a `Caddyfile` on your host:
+
+```
+hebo.example.com {
+    reverse_proxy localhost:80
+}
+```
+
+Then run Caddy alongside the compose stack:
+
+```bash
+caddy run --config Caddyfile
+```
+
+Caddy automatically provisions and renews TLS certificates. When using OAuth on a public domain, set `AUTH_URL=https://hebo.example.com/auth` so that better-auth generates correct callback URLs.
+
+[Traefik](https://traefik.io/) and [Nginx](https://nginx.org/) are viable alternatives — refer to their respective documentation for TLS configuration.
+
+## Cloud Deployment
 
 The repository uses GitHub Actions for CI/CD:
 
