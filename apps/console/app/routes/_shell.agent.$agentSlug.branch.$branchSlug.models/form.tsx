@@ -241,7 +241,8 @@ function ModelCard(props: {
                   >
                     Providers page
                   </Link>
-                  , then select it in &quot;Advanced options&quot; → &quot;Bring Your Own Provider&quot;.
+                  , then select it in &quot;Advanced options&quot; → &quot;Bring Your Own
+                  Provider&quot;.
                 </AlertDescription>
               </Alert>
             )}

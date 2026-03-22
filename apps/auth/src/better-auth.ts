@@ -10,7 +10,11 @@ import { getSecret } from "@hebo/shared-api/utils/secrets";
 
 import { PrismaClient } from "~auth/generated/prisma/client";
 
-import { hasSmtpConfig, sendOrganizationInvitationEmail, sendVerificationOtpEmail } from "./lib/email";
+import {
+  hasSmtpConfig,
+  sendOrganizationInvitationEmail,
+  sendVerificationOtpEmail,
+} from "./lib/email";
 import { createOrganizationHook, syncActiveOrganizationHook } from "./lib/organization";
 import { verifyApiKeyPlugin, type AuthWithApiKeyPlugin } from "./lib/verify-api-key-plugin";
 

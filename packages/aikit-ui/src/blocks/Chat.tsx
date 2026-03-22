@@ -282,6 +282,7 @@ export function Chat({
                     }
                     default: {
                       // FUTURE: add tool support
+                      return null;
                     }
                   }
                 })}

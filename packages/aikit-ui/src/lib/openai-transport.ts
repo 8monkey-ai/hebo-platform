@@ -104,6 +104,7 @@ async function toOpenAIMessage(message: UIMessage): Promise<OpenAIMessage> {
         break;
       }
       case "file": {
+        // oxlint-disable-next-line no-await-in-loop - these are local file URLs
         const filePart = await toFileContent(part);
         if (filePart) contentParts.push(filePart);
 
@@ -155,8 +156,7 @@ async function toFileContent(part: {
     const arrayBuffer = await blob.arrayBuffer();
     const data = toBase64(arrayBuffer);
     return { type: "file", file: { data, media_type: mediaType, filename } };
-  } catch {
-  }
+  } catch {}
 }
 
 function handleSSEStream(stream: ReadableStream<Uint8Array>): ReadableStream<UIMessageChunk> {

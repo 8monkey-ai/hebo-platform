@@ -82,15 +82,14 @@ export const providersModule = new Elysia({
       await prismaClient.$transaction([
         ...affectedBranches.map((branch) => {
           const models = branch.models as Models;
+          for (const model of models) {
+            if (model.routing?.only?.includes(params.slug)) {
+              model.routing = undefined;
+            }
+          }
           return prismaClient.branches.update({
             where: { id: branch.id },
-            data: {
-              models: models.map((model) =>
-                model.routing?.only?.includes(params.slug)
-                  ? { ...model, routing: undefined }
-                  : model,
-              ),
-            },
+            data: { models },
           });
         }),
         prismaClient.provider_configs.update({

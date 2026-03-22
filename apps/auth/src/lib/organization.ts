@@ -41,7 +41,8 @@ export const syncActiveOrganizationHook = (prisma: PrismaClient) => {
   return async (session: { userId: string; activeOrganizationId?: string | null }) => {
     if (session.activeOrganizationId !== undefined && session.activeOrganizationId !== null) return;
     await prisma.$transaction(async (tx) => {
-      const orgId = (await tx.members.findFirst({ where: { userId: session.userId } }))?.organizationId;
+      const orgId = (await tx.members.findFirst({ where: { userId: session.userId } }))
+        ?.organizationId;
       await updateOrganizationInSession(tx, session.userId, orgId ?? null);
     });
   };

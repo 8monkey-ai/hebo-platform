@@ -129,10 +129,13 @@ export const authService: AuthService = {
       },
     });
     if (error) throw new Error(error.message);
-    const keys = data.apiKeys.map((key) => ({
-      ...key,
-      key: `${key.start}******`,
-    })) as ApiKey[];
+    const keys: ApiKey[] = data.apiKeys.map((k) => ({
+      id: k.id,
+      name: k.name ?? "",
+      createdAt: k.createdAt,
+      expiresAt: k.expiresAt,
+      key: `${k.start}******`,
+    }));
     return keys.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   },
 

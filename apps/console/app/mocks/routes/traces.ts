@@ -37,6 +37,7 @@ const mockTraces = [
     status: "ok",
     durationMs: 842,
     summary: "Find me the cheapest flight from Kuala Lumpur to Tokyo Narita for March 20th.",
+    metadata: { session_id: "sess_abc123", environment: "production", user_id: "usr_456" },
   },
   {
     timestamp: new Date(now - 6 * min).toISOString(),
@@ -47,6 +48,7 @@ const mockTraces = [
     status: "ok",
     durationMs: 1234,
     summary: "How do I deploy using the new CI/CD pipeline?",
+    metadata: { session_id: "sess_def456", environment: "staging" },
   },
   {
     timestamp: new Date(now - 12 * min).toISOString(),
@@ -57,6 +59,7 @@ const mockTraces = [
     status: "error",
     durationMs: 2834,
     summary: "Analyze this dataset and provide recommendations for optimization.",
+    metadata: { session_id: "sess_ghi789", environment: "production" },
   },
   {
     timestamp: new Date(now - 18 * min).toISOString(),
@@ -67,6 +70,7 @@ const mockTraces = [
     status: "ok",
     durationMs: 456,
     summary: "Hello!",
+    metadata: { environment: "staging" },
   },
   {
     timestamp: new Date(now - 25 * min).toISOString(),
@@ -77,6 +81,7 @@ const mockTraces = [
     status: "ok",
     durationMs: 89,
     summary: "",
+    metadata: { environment: "production" },
   },
 ];
 
@@ -105,6 +110,7 @@ const generatedMockTraces = Array.from({ length: 18 }).map((_, index) => {
       status === "error"
         ? "Provider timeout after a long tool-augmented reasoning pass. User-safe fallback was not emitted."
         : "Expanded mock trace generated to make the list scroll region obvious while keeping realistic-looking summaries.",
+    metadata: { environment: index % 2 === 0 ? "production" : "staging", provider },
   };
 });
 
@@ -575,10 +581,7 @@ export const traceHandlers = [
       const hasNextPage = start + pageSize < filtered.length;
 
       return HttpResponse.json({
-        data: paged.map((t) => ({
-          ...t,
-          metadata: (mockSpanDetails[t.traceId] as any)?.metadata ?? {},
-        })),
+        data: paged,
         hasNextPage,
         metadataKeys: mockMetadataKeys,
       });
