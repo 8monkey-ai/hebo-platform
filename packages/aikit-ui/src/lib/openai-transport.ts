@@ -95,19 +95,16 @@ async function toOpenAIMessage(message: UIMessage): Promise<OpenAIMessage> {
     switch (part.type) {
       case "text": {
         contentParts.push({ type: "text", text: part.text });
-
         break;
       }
       case "reasoning": {
         reasoningText.push(part.text);
-
         break;
       }
       case "file": {
         // oxlint-disable-next-line no-await-in-loop - these are local file URLs
         const filePart = await toFileContent(part);
         if (filePart) contentParts.push(filePart);
-
         break;
       }
       // No default
@@ -156,7 +153,9 @@ async function toFileContent(part: {
     const arrayBuffer = await blob.arrayBuffer();
     const data = toBase64(arrayBuffer);
     return { type: "file", file: { data, media_type: mediaType, filename } };
-  } catch {}
+  } catch (error) {
+    console.error("Failed to convert file content:", error, { url: part.url });
+  }
 }
 
 function handleSSEStream(stream: ReadableStream<Uint8Array>): ReadableStream<UIMessageChunk> {

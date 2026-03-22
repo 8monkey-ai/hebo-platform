@@ -83,9 +83,11 @@ export const providersModule = new Elysia({
         ...affectedBranches.map((branch) => {
           const models = branch.models as Models;
           for (const model of models) {
-            if (model.routing?.only?.includes(params.slug)) {
-              model.routing = undefined;
-            }
+            const only = model.routing?.only;
+            if (!only?.includes(params.slug)) continue;
+
+            const nextOnly = only.filter((slug) => slug !== params.slug);
+            model.routing = nextOnly.length > 0 ? { ...model.routing, only: nextOnly } : undefined;
           }
           return prismaClient.branches.update({
             where: { id: branch.id },
