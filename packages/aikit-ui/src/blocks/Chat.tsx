@@ -221,6 +221,7 @@ export function Chat({
             {messages.map((message) => (
               <div key={message.id} className="flex flex-col gap-1">
                 {message.parts.map((part, i) => {
+                  // oxlint-disable-next-line switch-exhaustiveness-check
                   switch (part.type) {
                     case "text": {
                       return (
@@ -288,8 +289,7 @@ export function Chat({
                       );
                     }
                     default: {
-                      // FUTURE: add tool support
-                      return;
+                      // FUTURE: "dynamic-tool", "source-document", "source-url", "step-start"
                     }
                   }
                 })}
