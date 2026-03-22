@@ -99,7 +99,7 @@ export function DangerSettings({ agent }: { agent: { slug: string } }) {
                     }
                   />
                   <Button
-                    isLoading={fetcher.state !== "idle" && fetcher.formData !== null}
+                    isLoading={fetcher.state !== "idle" && fetcher.formData != null}
                     type="submit"
                   >
                     Delete

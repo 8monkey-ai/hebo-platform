@@ -212,7 +212,7 @@ export function Chat({
           <ConversationContent className="gap-5 px-2" aria-label="Chat conversation" tabIndex={-1}>
             {messages.map((message) => (
               <div key={message.id} className="flex flex-col gap-1">
-                {/* oxlint-disable no-array-index-key -- index is the only key for message parts */}
+                {/* oxlint-disable no-array-index-key -- safe as append-only */}
                 {message.parts.map((part, i) => {
                   switch (part.type) {
                     case "text": {

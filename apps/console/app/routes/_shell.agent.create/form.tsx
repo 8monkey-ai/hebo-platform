@@ -65,7 +65,7 @@ export function AgentCreateForm() {
           </CardTitle>
           <CardDescription>
             Each agent has its own set of models. Model choice usually depends on use case and
-            pricing. {/* oxlint-disable-next-line jsx-no-target-blank */}
+            pricing. {/* oxlint-disable-next-line jsx-no-target-blank - safe for internal links */}
             <a href="https://hebo.ai/docs" target="_blank" rel="noopener">
               Learn more
             </a>
@@ -99,7 +99,7 @@ export function AgentCreateForm() {
         <CardFooter className="flex justify-end">
           <Button
             type="submit"
-            isLoading={navigation.state !== "idle" && navigation.formData !== null}
+            isLoading={navigation.state !== "idle" && navigation.formData != null}
           >
             Create
           </Button>

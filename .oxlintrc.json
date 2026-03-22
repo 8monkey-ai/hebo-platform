@@ -20,7 +20,8 @@
     "prefer-array-to-reversed": "off",
     "prefer-array-to-sorted": "off",
     "no-unsafe-type-assertion": "off",
-    "strict-boolean-expressions": "off"
+    "strict-boolean-expressions": "off",
+    "eqeqeq": ["error", "always", { "null": "ignore" }]
   },
   "ignorePatterns": [
     "**/_*/**",
