@@ -13,7 +13,6 @@ import { greptimeSqlClient } from "@hebo/shared-api/lib/db/greptime";
 import { getOtelLogger } from "@hebo/shared-api/lib/otel";
 import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino-adapter";
 
-import { OrgScopedStorage } from "./services/org-scoped-storage";
 import { resolveModelId, resolveProvider } from "./services/model-resolver";
 import { createProvider, loadProviderSecrets } from "./services/provider-factory";
 
@@ -22,11 +21,10 @@ instrumentFetch("full");
 export const basePath = "/v1";
 const secrets = await loadProviderSecrets();
 
-const sqlStorage = new SqlStorage({
+const storage = new SqlStorage({
   dialect: new GrepTimeDialect({ client: greptimeSqlClient }),
 });
-await sqlStorage.migrate();
-const storage = new OrgScopedStorage(sqlStorage);
+await storage.migrate();
 
 const withTier = (modelId: string) => ({
   additionalProperties: {
@@ -35,10 +33,11 @@ const withTier = (modelId: string) => ({
   },
 });
 
+const conversationsPath = `${basePath}/conversations`;
+
 export const gw = gateway({
   basePath,
   storage,
-
   providers: {
     groq: createProvider("groq", { authMode: "api-key", apiKey: secrets.groqApiKey }),
     bedrock: createProvider("bedrock", {
@@ -78,6 +77,37 @@ export const gw = gateway({
   ),
 
   hooks: {
+    onRequest: async (ctx) => {
+      const { state, request } = ctx as unknown as {
+        request: Request;
+        state: { organizationId: string };
+      };
+      const { organizationId } = state;
+
+      const mutableCtx = ctx as { request: Request };
+      const url = new URL(request.url);
+      if (!url.pathname.startsWith(conversationsPath)) return;
+
+      if (request.method === "POST" && url.pathname === conversationsPath) {
+        const payload = (await request.json()) as Record<string, unknown>;
+        mutableCtx.request = new Request(url, {
+          method: "POST",
+          headers: request.headers,
+          body: JSON.stringify({
+            ...payload,
+            metadata: {
+              ...(payload.metadata as Record<string, unknown> | undefined),
+              organization_id: organizationId,
+            },
+          }),
+        });
+        return;
+      }
+
+      // Enforce tenant filtering via query param for list/read/delete.
+      url.searchParams.set("metadata.organization_id", organizationId);
+      mutableCtx.request = new Request(url, request);
+    },
     before: ({ body, operation }) => {
       if (operation === "chat") {
         (body as ChatCompletionsBody).cache_control ??= { type: "ephemeral" };

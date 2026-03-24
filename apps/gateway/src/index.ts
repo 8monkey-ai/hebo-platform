@@ -31,7 +31,6 @@ import { prisma } from "~api/middleware/prisma";
 
 import { basePath, gw } from "./gateway-config";
 import { errorHandler } from "./middlewares/error-handler";
-import { orgContext } from "./services/org-scoped-storage";
 
 const PORT = Number(process.env.PORT ?? 3002);
 const GATEWAY_URL = process.env.GATEWAY_URL ?? `http://localhost:${PORT}`;
@@ -110,9 +109,7 @@ export const createGateway = () =>
         .post(
           "/conversations",
           ({ request, prismaClient, organizationId }) =>
-            orgContext.run(organizationId, () =>
-              gw.handler(request, { prismaClient, organizationId }),
-            ),
+            gw.handler(request, { prismaClient, organizationId }),
           {
             parse: "none",
             body: ConversationCreateParamsSchema,
@@ -126,9 +123,7 @@ export const createGateway = () =>
         .get(
           "/conversations",
           ({ request, prismaClient, organizationId }) =>
-            orgContext.run(organizationId, () =>
-              gw.handler(request, { prismaClient, organizationId }),
-            ),
+            gw.handler(request, { prismaClient, organizationId }),
           {
             response: {
               200: ConversationListSchema,
@@ -140,9 +135,7 @@ export const createGateway = () =>
         .get(
           "/conversations/:id",
           ({ request, prismaClient, organizationId }) =>
-            orgContext.run(organizationId, () =>
-              gw.handler(request, { prismaClient, organizationId }),
-            ),
+            gw.handler(request, { prismaClient, organizationId }),
           {
             response: {
               200: ConversationSchema,
@@ -154,9 +147,7 @@ export const createGateway = () =>
         .post(
           "/conversations/:id",
           ({ request, prismaClient, organizationId }) =>
-            orgContext.run(organizationId, () =>
-              gw.handler(request, { prismaClient, organizationId }),
-            ),
+            gw.handler(request, { prismaClient, organizationId }),
           {
             parse: "none",
             body: ConversationUpdateBodySchema,
@@ -171,9 +162,7 @@ export const createGateway = () =>
         .delete(
           "/conversations/:id",
           ({ request, prismaClient, organizationId }) =>
-            orgContext.run(organizationId, () =>
-              gw.handler(request, { prismaClient, organizationId }),
-            ),
+            gw.handler(request, { prismaClient, organizationId }),
           {
             response: {
               200: ConversationDeletedSchema,
@@ -185,9 +174,7 @@ export const createGateway = () =>
         .get(
           "/conversations/:id/items",
           ({ request, prismaClient, organizationId }) =>
-            orgContext.run(organizationId, () =>
-              gw.handler(request, { prismaClient, organizationId }),
-            ),
+            gw.handler(request, { prismaClient, organizationId }),
           {
             response: {
               200: ConversationItemListSchema,
@@ -199,9 +186,7 @@ export const createGateway = () =>
         .post(
           "/conversations/:id/items",
           ({ request, prismaClient, organizationId }) =>
-            orgContext.run(organizationId, () =>
-              gw.handler(request, { prismaClient, organizationId }),
-            ),
+            gw.handler(request, { prismaClient, organizationId }),
           {
             parse: "none",
             body: ConversationItemsAddBodySchema,
@@ -216,9 +201,7 @@ export const createGateway = () =>
         .get(
           "/conversations/:id/items/:itemId",
           ({ request, prismaClient, organizationId }) =>
-            orgContext.run(organizationId, () =>
-              gw.handler(request, { prismaClient, organizationId }),
-            ),
+            gw.handler(request, { prismaClient, organizationId }),
           {
             response: {
               200: ConversationItemSchema,
@@ -230,9 +213,7 @@ export const createGateway = () =>
         .delete(
           "/conversations/:id/items/:itemId",
           ({ request, prismaClient, organizationId }) =>
-            orgContext.run(organizationId, () =>
-              gw.handler(request, { prismaClient, organizationId }),
-            ),
+            gw.handler(request, { prismaClient, organizationId }),
           {
             response: {
               200: ConversationSchema,
