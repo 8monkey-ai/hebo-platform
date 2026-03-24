@@ -5,12 +5,15 @@ import { claudeHaiku45, claudeOpus46, claudeSonnet46 } from "@hebo-ai/gateway/mo
 import { gemini } from "@hebo-ai/gateway/models/google";
 import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
 import { voyage35 } from "@hebo-ai/gateway/models/voyage";
+import { GrepTimeDialect, SqlStorage } from "@hebo-ai/gateway/storage/sql";
 import { instrumentFetch } from "@hebo-ai/gateway/telemetry";
 import { trace } from "@opentelemetry/api";
 
+import { greptimeSqlClient } from "@hebo/shared-api/lib/db/greptime";
 import { getOtelLogger } from "@hebo/shared-api/lib/otel";
 import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino-adapter";
 
+import { OrgScopedStorage } from "./services/org-scoped-storage";
 import { resolveModelId, resolveProvider } from "./services/model-resolver";
 import { createProvider, loadProviderSecrets } from "./services/provider-factory";
 
@@ -18,6 +21,12 @@ instrumentFetch("full");
 
 export const basePath = "/v1";
 const secrets = await loadProviderSecrets();
+
+const sqlStorage = new SqlStorage({
+  dialect: new GrepTimeDialect({ client: greptimeSqlClient }),
+});
+await sqlStorage.migrate();
+const storage = new OrgScopedStorage(sqlStorage);
 
 const withTier = (modelId: string) => ({
   additionalProperties: {
@@ -28,6 +37,7 @@ const withTier = (modelId: string) => ({
 
 export const gw = gateway({
   basePath,
+  storage,
 
   providers: {
     groq: createProvider("groq", { authMode: "api-key", apiKey: secrets.groqApiKey }),
