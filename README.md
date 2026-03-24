@@ -181,13 +181,21 @@ Run Hebo on your own infrastructure with a single Docker Compose command:
 docker compose -f infra/self-hosted/docker-compose.self-hosted.yml up
 ```
 
-This starts three containers: `hebo` (all services + console), `postgres`, and `greptimedb`. `AUTH_SECRET` and database settings have sensible defaults, but you must provide at least one LLM provider key.
+This starts three containers: `hebo` (all services + console), `postgres`, and `greptimedb`.
+
+All infrastructure configuration (database, auth, metrics) works out of the box with sensible defaults — no environment variables required. To enable chat, provide at least one LLM provider key:
+
+```bash
+GROQ_API_KEY=gsk_... docker compose -f infra/self-hosted/docker-compose.self-hosted.yml up -d
+```
+
+[Groq's free tier](https://console.groq.com/) is the quickest way to get started. You can also pass multiple provider keys at once (e.g. `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`).
 
 The console is available at `http://localhost` once all services are ready.
 
 ### Environment Variables
 
-All infrastructure variables have zero-config defaults. Provider and OAuth variables can be set on the `hebo` service in `infra/self-hosted/docker-compose.self-hosted.yml`:
+Infrastructure variables have zero-config defaults. Provider and OAuth variables can be passed to the `hebo` service via shell environment or a `.env` file next to the compose file:
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -197,9 +205,11 @@ All infrastructure variables have zero-config defaults. Provider and OAuth varia
 | `AUTH_URL` | `http://localhost:3000` | Set to `https://<your-domain>/auth` when using OAuth on a public domain |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | — | GitHub OAuth |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | — | Google OAuth |
-| `GROQ_API_KEY` | - | Groq API key (enables gateway providers) |
-| `OPENAI_API_KEY` | — | OpenAI API key (platform-managed) |
-| `ANTHROPIC_API_KEY` | — | Anthropic API key (platform-managed) |
+| `GROQ_API_KEY` | — | Groq provider (free tier available) |
+| `OPENAI_API_KEY` | — | OpenAI provider |
+| `ANTHROPIC_API_KEY` | — | Anthropic provider |
+| `AZURE_OPENAI_API_KEY` | — | Azure OpenAI provider |
+| `AZURE_OPENAI_RESOURCE_NAME` | — | Azure OpenAI resource name |
 
 ### HTTPS with Caddy
 
