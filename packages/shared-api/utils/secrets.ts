@@ -1,7 +1,5 @@
 import { Resource } from "sst";
 
-const toEnvKey = (name: string) => name.replace(/([a-z])([A-Z])/g, "$1_$2").toUpperCase();
-
 export const getSecret = async (name: string) => {
   try {
     // @ts-expect-error: Resource may not be defined
@@ -9,7 +7,7 @@ export const getSecret = async (name: string) => {
     return value === "undefined" ? undefined : value;
   } catch {
     // Env var fallback (self-hosted): PascalCase → SCREAMING_SNAKE_CASE
-    const envValue = process.env[toEnvKey(name)];
+    const envValue = process.env[name.replaceAll(/([a-z])([A-Z])/g, "$1_$2").toUpperCase()];
     if (envValue) return envValue;
 
     // Bun secrets fallback (local dev)
@@ -17,7 +15,7 @@ export const getSecret = async (name: string) => {
       const { secrets } = await import("bun");
       return await secrets.get({ service: "hebo", name });
     } catch {
-      return undefined;
+      return;
     }
   }
 };
