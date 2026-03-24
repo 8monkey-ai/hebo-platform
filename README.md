@@ -200,8 +200,6 @@ All infrastructure variables have zero-config defaults. Optional variables can b
 | `OPENAI_API_KEY` | — | OpenAI API key (platform-managed) |
 | `ANTHROPIC_API_KEY` | — | Anthropic API key (platform-managed) |
 
-See the [issue #309](https://github.com/8monkey-ai/hebo-platform/issues/309) for the complete environment variable reference.
-
 ### HTTPS with Caddy
 
 For production deployments on a public domain, use [Caddy](https://caddyserver.com/) as a reverse proxy for automatic HTTPS via Let's Encrypt.

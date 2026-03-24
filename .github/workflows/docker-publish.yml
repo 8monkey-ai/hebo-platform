@@ -39,7 +39,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: Dockerfile.self-hosted
+          file: infra/self-hosted/Dockerfile.self-hosted
           push: true
           tags: |
             ghcr.io/8monkey-ai/hebo:latest

@@ -1,5 +1,10 @@
 const shouldAutoDetect = import.meta.env.DEV && !import.meta.env.VITE_API_URL;
 
+const toAbsoluteUrl = (value: string) =>
+  value.startsWith("/") && globalThis.location?.origin
+    ? new URL(value, globalThis.location.origin).toString()
+    : value;
+
 const isReachable = (url: string) =>
   fetch(url, { signal: AbortSignal.timeout(400) }).then(
     () => true,
@@ -10,12 +15,12 @@ export const useMocks = shouldAutoDetect && !(await isReachable("http://localhos
 
 export const apiUrl = useMocks
   ? "http://localhost:5173/api"
-  : import.meta.env.VITE_API_URL || "http://localhost:3001";
+  : toAbsoluteUrl(import.meta.env.VITE_API_URL || "http://localhost:3001");
 
-export const authUrl = import.meta.env.VITE_AUTH_URL || "http://localhost:3000";
+export const authUrl = toAbsoluteUrl(import.meta.env.VITE_AUTH_URL || "http://localhost:3000");
 
 export const gatewayUrl = useMocks
   ? "http://localhost:5173/gateway"
-  : import.meta.env.VITE_GATEWAY_URL || "http://localhost:3002";
+  : toAbsoluteUrl(import.meta.env.VITE_GATEWAY_URL || "http://localhost:3002");
 
 export const magicLinkAuth = import.meta.env.VITE_MAGICLINK_AUTH === "true";

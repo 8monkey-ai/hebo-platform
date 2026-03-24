@@ -6,18 +6,26 @@ services:
       - "80:80"
     volumes:
       - hebo-data:/data
-    # environment:
-      # All infrastructure env vars have zero-config defaults in the entrypoint:
-      # AUTH_SECRET — auto-generated and persisted to /data/.auth_secret
-      # DATABASE_URL — defaults to postgresql://postgres:password@postgres:5432/hebo
-      # GREPTIME_HOST — defaults to greptimedb
+    environment:
+      # Provider key (enabled by default; read from shell/.env)
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
 
-      # Uncomment below for OAuth on a public domain:
-      # AUTH_URL: https://hebo.example.com/auth
-      # GITHUB_CLIENT_ID: ...
-      # GITHUB_CLIENT_SECRET: ...
-      # GOOGLE_CLIENT_ID: ...
-      # GOOGLE_CLIENT_SECRET: ...
+      # Infrastructure envs already have entrypoint defaults:
+      # AUTH_SECRET: ${AUTH_SECRET:-}       # auto-generated and persisted to /data/.auth_secret
+      # DATABASE_URL: ${DATABASE_URL:-}     # defaults to postgresql://postgres:password@postgres:5432/hebo
+      # GREPTIME_HOST: ${GREPTIME_HOST:-}   # defaults to greptimedb
+
+      # Optional provider keys (read from shell/.env)
+      # OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      # ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      # AZURE_OPENAI_API_KEY: ${AZURE_OPENAI_API_KEY:-}
+
+      # Optional OAuth on a public domain
+      # AUTH_URL: ${AUTH_URL:-https://hebo.example.com/auth}
+      # GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      # GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      # GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      # GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
     depends_on:
       postgres:
         condition: service_healthy
