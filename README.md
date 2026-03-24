@@ -181,13 +181,13 @@ Run Hebo on your own infrastructure with a single Docker Compose command:
 docker compose -f docker-compose.self-hosted.yml up
 ```
 
-This starts three containers: `hebo` (all services + console), `postgres`, and `greptimedb`. No configuration is required for the basic setup — `AUTH_SECRET` is auto-generated, and database connections use sensible defaults.
+This starts three containers: `hebo` (all services + console), `postgres`, and `greptimedb`. `AUTH_SECRET` and database settings have sensible defaults, but you must provide at least one LLM provider key.
 
 The console is available at `http://localhost` once all services are ready.
 
 ### Environment Variables
 
-All infrastructure variables have zero-config defaults. Optional variables can be set on the `hebo` service in `docker-compose.self-hosted.yml`:
+All infrastructure variables have zero-config defaults. Provider and OAuth variables can be set on the `hebo` service in `docker-compose.self-hosted.yml`:
 
 | Variable | Default | Purpose |
 |---|---|---|
@@ -197,6 +197,7 @@ All infrastructure variables have zero-config defaults. Optional variables can b
 | `AUTH_URL` | `http://localhost:3000` | Set to `https://<your-domain>/auth` when using OAuth on a public domain |
 | `GITHUB_CLIENT_ID` / `GITHUB_CLIENT_SECRET` | — | GitHub OAuth |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | — | Google OAuth |
+| `GROQ_API_KEY` | - | Groq API key (enables gateway providers) |
 | `OPENAI_API_KEY` | — | OpenAI API key (platform-managed) |
 | `ANTHROPIC_API_KEY` | — | Anthropic API key (platform-managed) |
 
