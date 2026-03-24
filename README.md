@@ -207,7 +207,7 @@ For production deployments on a public domain, use [Caddy](https://caddyserver.c
 
 Create a `Caddyfile` on your host:
 
-```
+```caddyfile
 hebo.example.com {
     reverse_proxy localhost:80
 }
