@@ -17,7 +17,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
   return prisma.$extends({
     query: {
       $allModels: {
-        async $allOperations({ args, query, operation }) {
+        $allOperations({ args, query, operation }) {
           if (operation !== "create") {
             const a = args as { where?: Record<string, unknown> };
             a.where = {
@@ -29,7 +29,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
 
           return query(args);
         },
-        async create({ args, model, query }) {
+        create({ args, model, query }) {
           args.data = {
             ...args.data,
             created_by: userId,
@@ -55,7 +55,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
           }
           return query(args);
         },
-        async update({ args, query }) {
+        update({ args, query }) {
           args.data = {
             ...args.data,
             updated_by: userId,
@@ -66,7 +66,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
     },
     model: {
       $allModels: {
-        async softDelete<T, W>(this: T, where: W) {
+        softDelete<T, W>(this: T, where: W) {
           const context = Prisma.getExtensionContext(this);
           return (context as any).update({
             where,
@@ -78,7 +78,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
         },
       },
       provider_configs: {
-        async getUnredacted(slug: string) {
+        getUnredacted(slug: string) {
           return prisma.provider_configs.findFirst({
             where: {
               provider_slug: slug,

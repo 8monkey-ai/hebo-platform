@@ -14,29 +14,7 @@ export function PasswordSignIn() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
-  return !emailSubmitted ? (
-    <form
-      className="flex flex-col gap-2"
-      onSubmit={(e) => {
-        e.preventDefault();
-        setError(undefined);
-        setEmailSubmitted(true);
-      }}
-    >
-      <Label htmlFor="email">Email</Label>
-      <Input
-        id="email"
-        type="email"
-        autoComplete="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        disabled={loading}
-        required
-      />
-
-      <Button type="submit">Continue</Button>
-    </form>
-  ) : (
+  return emailSubmitted ? (
     <form
       className="flex flex-col gap-2"
       onSubmit={async (e) => {
@@ -79,12 +57,34 @@ export function PasswordSignIn() {
         </div>
       ) : (
         <p className="py-2 text-center text-sm">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link to="/signup" viewTransition className="font-medium underline">
             Sign up
           </Link>
         </p>
       )}
+    </form>
+  ) : (
+    <form
+      className="flex flex-col gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        setError(undefined);
+        setEmailSubmitted(true);
+      }}
+    >
+      <Label htmlFor="email">Email</Label>
+      <Input
+        id="email"
+        type="email"
+        autoComplete="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={loading}
+        required
+      />
+
+      <Button type="submit">Continue</Button>
     </form>
   );
 }

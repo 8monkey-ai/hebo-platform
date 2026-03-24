@@ -1,6 +1,6 @@
 import { Elysia, status, t } from "elysia";
 
-import { prismaClient } from "~api/middleware/prisma";
+import { prisma } from "~api/middleware/prisma";
 
 import { type Models } from "./types";
 import { Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./types";
@@ -8,7 +8,7 @@ import { Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./ty
 export const providersModule = new Elysia({
   prefix: "/providers",
 })
-  .use(prismaClient)
+  .use(prisma)
   .get(
     "/",
     async ({ prismaClient, query }) => {
@@ -82,15 +82,16 @@ export const providersModule = new Elysia({
       await prismaClient.$transaction([
         ...affectedBranches.map((branch) => {
           const models = branch.models as Models;
+          for (const model of models) {
+            const only = model.routing?.only;
+            if (!only?.includes(params.slug)) continue;
+
+            const nextOnly = only.filter((slug) => slug !== params.slug);
+            model.routing = nextOnly.length > 0 ? { ...model.routing, only: nextOnly } : undefined;
+          }
           return prismaClient.branches.update({
             where: { id: branch.id },
-            data: {
-              models: models.map((model) =>
-                model.routing?.only?.includes(params.slug)
-                  ? { ...model, routing: undefined }
-                  : model,
-              ),
-            },
+            data: { models },
           });
         }),
         prismaClient.provider_configs.update({

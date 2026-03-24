@@ -13,6 +13,7 @@ export default function AuthLayout() {
           className="absolute top-5 left-6"
           nativeButton={false}
           render={
+            // oxlint-disable-next-line jsx-no-target-blank - safe for internal links
             <a href="https://hebo.ai/docs" target="_blank" rel="noopener">
               <BookOpen />
               <span>Docs</span>

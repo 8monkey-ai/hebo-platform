@@ -43,7 +43,7 @@ const VertexServiceAccountConfig = t.Object({
   clientEmail: t.String(),
   privateKey: t
     .Transform(t.String({ "x-redact": true }))
-    .Decode((v) => v.replace(/\\n/g, "\n"))
+    .Decode((v) => v.replaceAll("\\n", "\n"))
     .Encode((v) => v),
   location: t.String(),
   project: t.String(),

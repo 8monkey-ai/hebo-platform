@@ -6,7 +6,7 @@ import { createPinoOtelAdapter } from "../utils/otel-pino-adapter";
 
 export type Logger = ReturnType<typeof createPinoOtelAdapter>;
 
-export const logger = (
+export const logging = (
   serviceName: string,
   logger = createPinoOtelAdapter(getOtelLogger(serviceName, logSeverity)),
 ) => {

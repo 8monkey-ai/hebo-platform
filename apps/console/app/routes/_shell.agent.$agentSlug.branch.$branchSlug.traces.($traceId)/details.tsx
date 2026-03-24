@@ -223,6 +223,7 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
 
   return (
     <div className="flex flex-col divide-y">
+      {/* oxlint-disable no-array-index-key - static read-only data */}
       {inputMessages.map((msg, index) => (
         <MessageBlock key={`${trace.spanId}:in:${index}`} message={msg} />
       ))}
@@ -230,6 +231,7 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
       {outputMessages.map((msg, index) => (
         <MessageBlock key={`${trace.spanId}:out:${index}`} message={msg} />
       ))}
+      {/* oxlint-enable no-array-index-key - static read-only data */}
 
       {inputMessages.length === 0 && outputMessages.length === 0 && (
         <Empty className="py-8">
@@ -344,13 +346,14 @@ function MessageBlock({ message }: { message: TraceMessage }) {
               </ExpandableContent>
             )}
 
+            {/* oxlint-disable no-array-index-key - static read-only data */}
             {texts.map((text, index) =>
               texts.length > 1 ? (
-                <div key={index} className="rounded-sm bg-muted/30 px-2 py-1.5">
+                <div key={`msg:${index}`} className="rounded-sm bg-muted/30 px-2 py-1.5">
                   <CollapsibleText text={text} maxLength={500} />
                 </div>
               ) : (
-                <CollapsibleText key={index} text={text} maxLength={500} />
+                <CollapsibleText key={`msg:${index}`} text={text} maxLength={500} />
               ),
             )}
 
@@ -372,6 +375,7 @@ function MessageBlock({ message }: { message: TraceMessage }) {
                 <CollapsibleCode code={part.value} maxLength={300} />
               </div>
             ))}
+            {/* oxlint-enable no-array-index-key - static read-only data */}
           </div>
         )}
       </div>

@@ -71,10 +71,11 @@ function withObjectParams(sp: URLSearchParams): TraceURLSearchParams {
 export function parseTraceSearchParams(searchParams: URLSearchParams) {
   const fallback = timeRangeToParams("15m");
 
-  const preset = ((p) =>
-    p && (traceTimePresets as readonly string[]).includes(p)
-      ? (p as (typeof traceTimePresets)[number])
-      : "15m")(searchParams.get("preset"));
+  const rawPreset = searchParams.get("preset");
+  const preset =
+    rawPreset && (traceTimePresets as readonly string[]).includes(rawPreset)
+      ? (rawPreset as (typeof traceTimePresets)[number])
+      : "15m";
 
   const { from: effectiveFrom, to: effectiveTo } =
     preset === "custom"
@@ -86,17 +87,22 @@ export function parseTraceSearchParams(searchParams: URLSearchParams) {
 
   const metadata = parseObjectParam(searchParams, "metadata");
 
-  const status = ((s) =>
-    s && (traceStatuses as readonly string[]).includes(s)
-      ? (s as (typeof traceStatuses)[number])
-      : undefined)(searchParams.get("status"));
+  const rawStatus = searchParams.get("status");
+  const status =
+    rawStatus && (traceStatuses as readonly string[]).includes(rawStatus)
+      ? (rawStatus as (typeof traceStatuses)[number])
+      : undefined;
 
-  const operation = ((o) =>
-    o && (traceOperations as readonly string[]).includes(o)
-      ? (o as (typeof traceOperations)[number])
-      : undefined)(searchParams.get("operation"));
+  const rawOperation = searchParams.get("operation");
+  const operation =
+    rawOperation && (traceOperations as readonly string[]).includes(rawOperation)
+      ? (rawOperation as (typeof traceOperations)[number])
+      : undefined;
 
-  return { preset, effectiveFrom, effectiveTo, metadata, status, operation };
+  const rawPage = Number(searchParams.get("page"));
+  const page = Number.isInteger(rawPage) && rawPage > 0 ? rawPage : 1;
+
+  return { preset, effectiveFrom, effectiveTo, metadata, status, operation, page };
 }
 
 export function useTraceSearchParams() {

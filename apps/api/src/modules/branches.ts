@@ -7,14 +7,14 @@ import {
   branchesInputCreate,
   branchesInputUpdate,
 } from "~api/generated/prismabox/branches";
-import { prismaClient } from "~api/middleware/prisma";
+import { prisma } from "~api/middleware/prisma";
 
 import { Models } from "./providers/types";
 
 export const branchesModule = new Elysia({
   prefix: "/agents/:agentSlug/branches",
 })
-  .use(prismaClient)
+  .use(prisma)
   .get(
     "/",
     async ({ prismaClient, params }) => {

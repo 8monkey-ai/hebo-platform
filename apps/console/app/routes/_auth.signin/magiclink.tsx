@@ -15,40 +15,7 @@ export function MagicLinkSignIn() {
   const [otp, setOtp] = useState<string>("");
   const [error, setError] = useState<string | undefined>();
 
-  return !linkSent ? (
-    <form
-      className="flex flex-col gap-2"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-          await authService.sendMagicLinkEmail(email!);
-          setLinkSent(true);
-        } catch (error) {
-          if (error instanceof Error) setError(error.message);
-        } finally {
-          setLoading(false);
-        }
-      }}
-    >
-      <Label htmlFor="email">Email</Label>
-      <Input
-        id="email"
-        type="email"
-        autoComplete="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        disabled={loading}
-        required
-      />
-
-      <Button type="submit" disabled={loading}>
-        {loading ? <Loader2Icon className="animate-spin" /> : "Send Email"}
-      </Button>
-
-      {error && <div className="text-sm text-destructive">{error}</div>}
-    </form>
-  ) : (
+  return linkSent ? (
     <form
       className="flex flex-col items-center gap-2"
       onSubmit={async (e) => {
@@ -56,8 +23,8 @@ export function MagicLinkSignIn() {
         setLoading(true);
         try {
           await authService.signInWithMagicLink(otp, email);
-        } catch (error) {
-          if (error instanceof Error) setError(error.message);
+        } catch (err) {
+          if (err instanceof Error) setError(err.message);
         } finally {
           setLoading(false);
         }
@@ -99,6 +66,39 @@ export function MagicLinkSignIn() {
       >
         Cancel
       </Button>
+    </form>
+  ) : (
+    <form
+      className="flex flex-col gap-2"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+          await authService.sendMagicLinkEmail(email);
+          setLinkSent(true);
+        } catch (err) {
+          if (err instanceof Error) setError(err.message);
+        } finally {
+          setLoading(false);
+        }
+      }}
+    >
+      <Label htmlFor="email">Email</Label>
+      <Input
+        id="email"
+        type="email"
+        autoComplete="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={loading}
+        required
+      />
+
+      <Button type="submit" disabled={loading}>
+        {loading ? <Loader2Icon className="animate-spin" /> : "Send Email"}
+      </Button>
+
+      {error && <div className="text-sm text-destructive">{error}</div>}
     </form>
   );
 }

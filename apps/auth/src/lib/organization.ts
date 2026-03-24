@@ -2,7 +2,7 @@ import { slugFromName } from "@hebo/shared-api/utils/create-slug";
 
 import type { Prisma, PrismaClient } from "~auth/generated/prisma/client";
 
-const updateOrganizationInSession = async (
+const updateOrganizationInSession = (
   tx: Prisma.TransactionClient,
   userId: string,
   orgId: string | null,

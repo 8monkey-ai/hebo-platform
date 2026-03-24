@@ -38,13 +38,13 @@ export const agentHandlers = [
     return HttpResponse.json(agent, { status: 201 });
   }),
 
-  http.get("/api/v1/agents", async () => {
+  http.get("/api/v1/agents", () => {
     const agents = db.agents.findMany();
 
     return HttpResponse.json(agents);
   }),
 
-  http.get<{ agentSlug: string }>("/api/v1/agents/:agentSlug", async ({ params, request }) => {
+  http.get<{ agentSlug: string }>("/api/v1/agents/:agentSlug", ({ params, request }) => {
     const url = new URL(request.url);
     const branchesInclude = url.searchParams.get("branches");
 
@@ -59,7 +59,7 @@ export const agentHandlers = [
       : HttpResponse.json({ ...agent, branches: [] });
   }),
 
-  http.delete<{ agentSlug: string }>("/api/v1/agents/:agentSlug", async ({ params }) => {
+  http.delete<{ agentSlug: string }>("/api/v1/agents/:agentSlug", ({ params }) => {
     db.agents.delete((q) => q.where({ slug: params.agentSlug }));
 
     return new HttpResponse(undefined, { status: 200 });

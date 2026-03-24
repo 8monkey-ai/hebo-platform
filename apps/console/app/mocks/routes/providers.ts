@@ -13,7 +13,7 @@ const SUPPORTED_PROVIDERS: Record<string, { name: string }> = {
 };
 
 export const providerHandlers = [
-  http.get("/api/v1/providers", async ({ request }) => {
+  http.get("/api/v1/providers", ({ request }) => {
     const configured = new URL(request.url).searchParams.get("configured");
 
     const providers = [];
@@ -53,7 +53,7 @@ export const providerHandlers = [
     return HttpResponse.json(provider, { status: 201 });
   }),
 
-  http.delete<{ slug: string }>("/api/v1/providers/:slug/config", async ({ params }) => {
+  http.delete<{ slug: string }>("/api/v1/providers/:slug/config", ({ params }) => {
     db.providers.delete((q) => q.where({ slug: params.slug }));
 
     return new HttpResponse(undefined, { status: 200 });

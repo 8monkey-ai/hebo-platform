@@ -16,11 +16,17 @@ import {
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
 
 const OPTIONAL_SPAN_COLUMNS = [
-  { column: "span_attributes.gen_ai.usage.cache_read.input_tokens", alias: "cache_read_input_tokens" },
+  {
+    column: "span_attributes.gen_ai.usage.cache_read.input_tokens",
+    alias: "cache_read_input_tokens",
+  },
   { column: "span_attributes.gen_ai.usage.reasoning.output_tokens", alias: "reasoning_tokens" },
 ] as const;
 
-const traceColumnsCache = new LRUCache<string, { metadataColumns: string[]; optionalColumns: Set<string> }>({
+const traceColumnsCache = new LRUCache<
+  string,
+  { metadataColumns: string[]; optionalColumns: Set<string> }
+>({
   max: 1,
   ttl: 2_000,
 });

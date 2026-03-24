@@ -42,7 +42,7 @@ function makeCtx(overrides: {
     state: {
       prismaClient: {
         provider_configs: {
-          getUnredacted: async () => overrides.providerConfigsResult,
+          getUnredacted: () => Promise.resolve(overrides.providerConfigsResult),
         },
       },
       organizationId: overrides.organizationId ?? "org-1",
