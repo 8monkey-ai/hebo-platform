@@ -19,7 +19,7 @@ const appRedirectPath = "/?after-signin";
 const appRedirectURL = `${globalThis.location.origin}${appRedirectPath}`;
 
 const authClient = createAuthClient({
-  baseURL: new URL("/v1", authUrl).toString(),
+  baseURL: new URL("v1", authUrl).toString(),
   plugins: [
     emailOTPClient(),
     apiKeyClient(),
