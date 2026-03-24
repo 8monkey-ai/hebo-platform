@@ -89,14 +89,14 @@ export const gw = gateway({
       if (!url.pathname.startsWith(conversationsPath)) return;
 
       if (request.method === "POST" && url.pathname === conversationsPath) {
-        const payload = (await request.json()) as Record<string, unknown>;
+        const payload = await request.json();
         mutableCtx.request = new Request(url, {
           method: "POST",
           headers: request.headers,
           body: JSON.stringify({
             ...payload,
             metadata: {
-              ...(payload.metadata as Record<string, unknown> | undefined),
+              ...payload.metadata,
               organization_id: organizationId,
             },
           }),
