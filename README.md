@@ -178,7 +178,7 @@ bun run -F @hebo/console test
 Run Hebo on your own infrastructure with a single Docker Compose command:
 
 ```bash
-docker compose -f docker-compose.self-hosted.yml up
+docker compose -f infra/self-hosted/docker-compose.self-hosted.yml up
 ```
 
 This starts three containers: `hebo` (all services + console), `postgres`, and `greptimedb`. `AUTH_SECRET` and database settings have sensible defaults, but you must provide at least one LLM provider key.
@@ -187,7 +187,7 @@ The console is available at `http://localhost` once all services are ready.
 
 ### Environment Variables
 
-All infrastructure variables have zero-config defaults. Provider and OAuth variables can be set on the `hebo` service in `docker-compose.self-hosted.yml`:
+All infrastructure variables have zero-config defaults. Provider and OAuth variables can be set on the `hebo` service in `infra/self-hosted/docker-compose.self-hosted.yml`:
 
 | Variable | Default | Purpose |
 |---|---|---|
