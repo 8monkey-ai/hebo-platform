@@ -18,13 +18,15 @@ ENV VITE_AUTH_URL=/auth/
 ENV VITE_GATEWAY_URL=/gateway/
 RUN bun run --filter @hebo/console build
 
-# Build backend binaries (gateway needs api's Prisma client)
-RUN bun run --filter @hebo/api build
-RUN bun run --filter @hebo/auth build
-RUN bun run --filter @hebo/gateway build
+# Build self-hosted backend JS bundles
+RUN bun run --filter @hebo/api db generate
+RUN bun run --filter @hebo/auth db generate
+RUN bun build apps/api/src/index.ts --minify-whitespace --minify-syntax --keep-names --target=bun --production --outfile apps/api/dist/self-hosted-server.js
+RUN bun build apps/auth/src/index.ts --minify-whitespace --minify-syntax --keep-names --target=bun --production --outfile apps/auth/dist/self-hosted-server.js
+RUN bun build apps/gateway/src/index.ts --minify-whitespace --minify-syntax --keep-names --target=bun --production --outfile apps/gateway/dist/self-hosted-server.js
 
 ########################  runtime stage  ########################
-FROM oven/bun:1
+FROM oven/bun:1-slim
 
 RUN apt-get update -qq \
     && apt-get install -y -qq --no-install-recommends caddy \
@@ -32,9 +34,9 @@ RUN apt-get update -qq \
 
 WORKDIR /app
 
-COPY --from=builder /repo/apps/api/dist/server /app/api-server
-COPY --from=builder /repo/apps/auth/dist/server /app/auth-server
-COPY --from=builder /repo/apps/gateway/dist/server /app/gateway-server
+COPY --from=builder /repo/apps/api/dist/self-hosted-server.js /app/api-server.js
+COPY --from=builder /repo/apps/auth/dist/self-hosted-server.js /app/auth-server.js
+COPY --from=builder /repo/apps/gateway/dist/self-hosted-server.js /app/gateway-server.js
 
 COPY --from=builder /repo/apps/console/build/client /srv/console
 

@@ -21,11 +21,11 @@ export GREPTIME_HOST
 DATABASE_URL="${DATABASE_URL}?schema=api" bunx prisma migrate deploy --config=/app/apps/api/prisma.config.ts
 DATABASE_URL="${DATABASE_URL}?schema=auth" bunx prisma migrate deploy --config=/app/apps/auth/prisma.config.ts
 
-/app/api-server &
+bun /app/api-server.js &
 api_pid=$!
-/app/auth-server &
+bun /app/auth-server.js &
 auth_pid=$!
-/app/gateway-server &
+bun /app/gateway-server.js &
 gateway_pid=$!
 caddy run --config /etc/caddy/Caddyfile &
 caddy_pid=$!
