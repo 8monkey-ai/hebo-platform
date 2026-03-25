@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 
 import type { ProviderV3 } from "@ai-sdk/provider";
-import { GatewayError } from "@hebo-ai/gateway";
+import { GatewayError, type ResolveProviderHookContext } from "@hebo-ai/gateway";
 
 import { resolveProvider } from "./model-resolver";
 
@@ -17,14 +17,10 @@ function makeCtx(overrides: {
   providerConfigsResult?: unknown;
   bedrockProvider?: ProviderV3 | undefined;
 }) {
-  const bedrockProvider =
-    "bedrockProvider" in overrides
-      ? overrides.bedrockProvider
-      : ({ id: "bedrock" } as unknown as ProviderV3);
-
   return {
     modelId: overrides.modelId,
     resolvedModelId: overrides.resolvedModelId ?? overrides.modelId,
+    requestId: "",
     operation: "chat",
     request: new Request("https://example.com/v1/chat/completions", {
       method: "POST",
@@ -37,7 +33,7 @@ function makeCtx(overrides: {
       },
     },
     providers: {
-      bedrock: bedrockProvider,
+      bedrock: overrides.bedrockProvider,
     },
     state: {
       prismaClient: {
@@ -53,7 +49,7 @@ function makeCtx(overrides: {
         requiresByok: overrides.requiresByok,
       },
     },
-  } as unknown as Parameters<typeof resolveProvider>[0];
+  } satisfies ResolveProviderHookContext;
 }
 
 describe("resolveProvider", () => {

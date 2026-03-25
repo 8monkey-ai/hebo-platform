@@ -14,14 +14,11 @@ export const providersModule = new Elysia({
     async ({ prismaClient, query }) => {
       const providerConfigs = await prismaClient.provider_configs.findMany();
 
-      let providers = Object.entries(supportedProviders).map(
-        ([slug, { name }]) =>
-          ({
-            slug,
-            name,
-            config: providerConfigs.find((p) => p.provider_slug === slug)?.value,
-          }) as Provider,
-      );
+      let providers = Object.entries(supportedProviders).map(([slug, { name }]) => ({
+        slug,
+        name,
+        config: providerConfigs.find((p) => p.provider_slug === slug)?.value,
+      }));
 
       if (query.configured) {
         providers = providers.filter((p) => p.config !== undefined);
