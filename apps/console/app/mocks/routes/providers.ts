@@ -40,7 +40,7 @@ export const providerHandlers = [
   }),
 
   http.put<{ slug: string }>("/api/v1/providers/:slug/config", async ({ params, request }) => {
-    const body = (await request.json()) as unknown;
+    const body = await request.json();
 
     db.providers.delete((q) => q.where({ slug: params.slug }));
 
