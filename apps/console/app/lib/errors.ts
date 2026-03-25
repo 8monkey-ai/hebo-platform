@@ -9,8 +9,10 @@ export function parseError(error: unknown) {
   let status: number | undefined;
 
   if (isRouteErrorResponse(error)) {
-    const msg = typeof error.data === "string" ? error.data : error.data?.message;
-    message = `${error.statusText}: ${msg}`;
+    const data = error.data as string | Record<string, unknown> | undefined | null;
+    message = error.statusText;
+    if (typeof data === "string") message += `: ${data}`;
+    else if (typeof data?.message === "string") message += `: ${data.message}`;
     status = error.status;
   } else if (typeof error === "object" && error !== null && "summary" in error) {
     const e = error as { summary?: string; message?: string };
