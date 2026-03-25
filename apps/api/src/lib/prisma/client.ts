@@ -1,8 +1,8 @@
 import { createPrismaAdapter } from "@hebo/shared-api/lib/db/postgres";
 
 import { Prisma, PrismaClient } from "~api/generated/prisma/client";
-import { redactProviderConfigValue } from "~api/lib/redact-provider";
-import type { ProviderConfig } from "~api/modules/providers/types";
+import { redactSensitiveValues } from "~api/lib/redact-provider";
+import { ProviderConfig } from "~api/modules/providers/types";
 
 const dbNull = null;
 
@@ -95,7 +95,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
         value: {
           needs: { value: true },
           compute({ value }: { value: ProviderConfig }) {
-            return redactProviderConfigValue(value);
+            redactSensitiveValues(ProviderConfig, value);
           },
         },
       },
