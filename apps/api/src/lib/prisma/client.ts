@@ -95,7 +95,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
         value: {
           needs: { value: true },
           compute({ value }: { value: ProviderConfig }) {
-            redactSensitiveValues(ProviderConfig, value);
+            return redactSensitiveValues(ProviderConfig, value);
           },
         },
       },
