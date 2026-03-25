@@ -9,7 +9,7 @@ import type { VerifyApiKeyPlugin } from "~auth/lib/verify-api-key-plugin";
 import { authSecret, authUrl } from "../env";
 import { AuthError, BadRequestError } from "../errors";
 import { betterAuthCookieOptions } from "../lib/cookie-options";
-import type { Logger } from "./logging";
+import { logging } from "./logging";
 
 const cookieConfig = getCookies(betterAuthCookieOptions);
 
@@ -52,23 +52,21 @@ const createAuthClient = (request: Request) => {
 };
 
 export const authService = new Elysia({ name: "auth-service" })
-  .resolve(async function resolveAuthContext(ctx) {
-    const logger = (ctx as unknown as { logger: Logger }).logger;
+  .use(logging("hebo-auth"))
+  .resolve(async function resolveAuthContext({ request, cookie, logger }) {
+    const authorization = request.headers.get("authorization");
 
-    const cookie = ctx.request.headers.get("cookie");
-    const authorization = ctx.request.headers.get("authorization");
-
-    if (cookie && authorization) {
+    if (request.headers.get("cookie") && authorization) {
       throw new BadRequestError("Provide exactly one credential: Bearer API Key or JWT Header");
     }
 
-    const authClient = createAuthClient(ctx.request);
+    const authClient = createAuthClient(request);
 
     let userId: string | undefined;
     let organizationId: string | undefined;
 
     if (cookie) {
-      const session = await getCookieCache(ctx.request, {
+      const session = await getCookieCache(request, {
         secret: authSecret,
         isSecure: betterAuthCookieOptions.advanced.useSecureCookies,
       });
@@ -102,7 +100,7 @@ export const authService = new Elysia({ name: "auth-service" })
 
       // Clear the session cookie when unauthorized
       const { attributes, name } = cookieConfig.sessionToken;
-      ctx.cookie[name] = {
+      cookie[name] = {
         value: "",
         maxAge: 0,
         ...attributes,
