@@ -6,4 +6,4 @@ export const isProduction = process.env.NODE_ENV === "production";
 export const logLevel = process.env.LOG_LEVEL ?? (isProduction ? "info" : "debug");
 export const logSeverity = parseLogSeverity(logLevel);
 export const authSecret =
-  (await getSecret("AuthSecret")) ?? (isProduction ? undefined : "dev-placeholder-secret");
+  (await getSecret("AuthSecret")) ?? (isProduction ? "" : "dev-placeholder-secret");
