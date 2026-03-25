@@ -118,7 +118,7 @@ function getConfigFields(schema: z.ZodObject): string[] {
 }
 
 function isTextarea(schema: z.ZodObject, key: string): boolean {
-  const field = schema.shape[key as keyof typeof schema.shape];
+  const field = schema.shape[key];
   return field.meta()?.textarea === true;
 }
 
