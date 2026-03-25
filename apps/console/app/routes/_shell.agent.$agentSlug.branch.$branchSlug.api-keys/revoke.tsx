@@ -27,7 +27,7 @@ export const ApiKeyRevokeSchema = z.object({
 type ApiKeyRevokeFormValues = z.infer<typeof ApiKeyRevokeSchema>;
 
 type RevokeApiKeyDialogProps = {
-  apiKey?: { id: string; name: string; key: string };
+  apiKey?: { id: string; name: string | null; key: string };
 } & React.ComponentProps<typeof Dialog>;
 
 export function RevokeApiKeyDialog({ apiKey, ...props }: RevokeApiKeyDialogProps) {

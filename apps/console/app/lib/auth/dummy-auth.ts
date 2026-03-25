@@ -21,7 +21,7 @@ const members = new Collection({
     organizationId: z.string(),
     userId: z.string(),
     role: z.string(),
-    createdAt: z.string(),
+    createdAt: z.date(),
     userName: z.string(),
     userEmail: z.string(),
   }),
@@ -33,7 +33,7 @@ const invitations = new Collection({
     organizationId: z.string(),
     email: z.string(),
     role: z.string(),
-    expiresAt: z.string(),
+    expiresAt: z.date(),
     status: z.string(),
   }),
 });
@@ -43,7 +43,7 @@ void members.create({
   organizationId: "dummy-org-id",
   userId: "dummy-user-id",
   role: "owner",
-  createdAt: new Date().toISOString(),
+  createdAt: new Date(),
   userName: "Dummy User",
   userEmail: "dummy@user.com",
 });
@@ -52,7 +52,7 @@ void members.create({
   organizationId: "dummy-org-id",
   userId: "dummy-user-id-2",
   role: "member",
-  createdAt: new Date().toISOString(),
+  createdAt: new Date(),
   userName: "Jane Smith",
   userEmail: "jane@example.com",
 });
@@ -61,7 +61,7 @@ void invitations.create({
   organizationId: "dummy-org-id",
   email: "pending@example.com",
   role: "member",
-  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+  expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
   status: "pending",
 });
 
@@ -178,7 +178,7 @@ export const authService = {
       organizationId,
       email,
       role,
-      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       status: "pending",
     });
     return Promise.resolve();
@@ -197,7 +197,7 @@ export const authService = {
   acceptInvitation(invitationId) {
     const invite = invitations.findFirst((q) => q.where({ id: invitationId, status: "pending" }));
     if (!invite) return Promise.reject(new Error("Invitation not found or already accepted."));
-    if (Date.parse(invite.expiresAt) <= Date.now()) {
+    if (invite.expiresAt.getTime() <= Date.now()) {
       return Promise.reject(new Error("Invitation has expired."));
     }
     invitations.delete((q) => q.where({ id: invitationId }));
@@ -206,7 +206,7 @@ export const authService = {
       organizationId: invite.organizationId,
       userId: user?.userId ?? `accepted-${invitationId}`,
       role: invite.role,
-      createdAt: new Date().toISOString(),
+      createdAt: new Date(),
       userName: user?.name ?? invite.email.split("@")[0],
       userEmail: user?.email ?? invite.email,
     });

@@ -107,7 +107,7 @@ export function MembersSettings({
                     {member.role}
                   </Badge>
                 </TableCell>
-                <TableCell>{new Date(member.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell>{member.createdAt.toLocaleDateString()}</TableCell>
                 {canManage && (
                   <TableCell>
                     {isOwner && member.role !== "owner" && (
@@ -138,7 +138,7 @@ export function MembersSettings({
                     <Badge variant="outline">Invited</Badge>
                   </div>
                 </TableCell>
-                <TableCell>expires {new Date(inv.expiresAt).toLocaleDateString()}</TableCell>
+                <TableCell>expires {inv.expiresAt.toLocaleDateString()}</TableCell>
                 {canManage && (
                   <TableCell>
                     <div className="flex items-center">
