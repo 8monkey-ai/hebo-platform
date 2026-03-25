@@ -30,7 +30,7 @@ export function parseString(value: unknown): string {
 }
 
 function normalizeJsonUnicodeEscapes(value: string): string {
-  return value.replaceAll(/\\u\{([0-9a-fA-F]+)\}/g, (match, hex) => {
+  return value.replaceAll(/\\u\{([0-9a-fA-F]+)\}/g, (match, hex: string) => {
     const codePoint = Number.parseInt(hex, 16);
     return Number.isFinite(codePoint) ? String.fromCodePoint(codePoint) : match;
   });
@@ -70,29 +70,34 @@ export function extractLastUserSummary(messages: unknown): string {
   const parsed = parseJsonArray(messages);
   if (!parsed) return "";
   for (let i = parsed.length - 1; i >= 0; i--) {
-    const msg = parsed[i] as any;
-    if (msg?.role === "user") return extractSummary(msg);
+    const msg = parsed[i];
+    if (!msg || typeof msg !== "object") continue;
+    if ((msg as Record<string, unknown>).role === "user") return extractSummary(msg);
   }
   return "";
 }
 
 function extractSummary(message: unknown): string {
   const parsed = parseJson(message);
-  if (!parsed) return "";
 
   if (typeof parsed === "string") return truncateSummary(parsed.trim());
-  if (typeof parsed !== "object") return "";
+  if (!parsed || typeof parsed !== "object") return "";
 
-  const { content, parts } = parsed as any;
+  const record = parsed as Record<string, unknown>;
+
   const texts: string[] = [];
+  if (typeof record.content === "string") texts.push(record.content);
 
-  if (typeof content === "string") texts.push(content);
-
-  for (const arr of [content, parts]) {
+  for (const arr of [record.content, record.parts]) {
     if (!Array.isArray(arr)) continue;
+
     for (const part of arr) {
-      const value = part?.text ?? part?.content;
-      if ((part?.type === "text" || part?.type === "reasoning") && typeof value === "string") {
+      if (typeof part !== "object" || part === null) continue;
+
+      const p = part as Record<string, unknown>;
+      const value = p.text ?? p.content;
+
+      if ((p.type === "text" || p.type === "reasoning") && typeof value === "string") {
         texts.push(value);
       }
     }
