@@ -33,7 +33,7 @@ export function timeRangeToParams(
 
 function parseObjectParam(sp: URLSearchParams, param: string): Record<string, string> {
   try {
-    const v = JSON.parse(sp.get(param) ?? "{}");
+    const v: unknown = JSON.parse(sp.get(param) ?? "{}");
     if (!v || typeof v !== "object" || Array.isArray(v)) return {};
     return Object.fromEntries(Object.entries(v).map(([k, val]) => [k, String(val)]));
   } catch {
