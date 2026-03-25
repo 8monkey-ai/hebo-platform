@@ -1,3 +1,8 @@
+image:
+  registry: docker.io
+  repository: greptime/greptimedb
+  tag: "v1.0.0-rc.2-nightly-20260323"
+
 frontend:
   replicas: 3
   service:

@@ -106,3 +106,50 @@ kubectl -n "$GREPTIME_NS" run curl-test --rm -i --restart=Never \
 # S3 check (expect no output)
 kubectl -n "$GREPTIME_NS" logs statefulset/${HELM_RELEASE_CLUSTER}-datanode --since=10m | rg "AccessDenied|OpenDAL operator failed|no valid credential found|Unable to load credentials"
 ```
+
+---
+
+## Upgrading GreptimeDB
+
+The operator handles rolling updates. Change the `image.tag` in `greptime-values.yaml`, then run the steps below.
+
+### 1) Update the operator
+
+```
+helm repo update
+helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n greptimedb-admin
+```
+
+### 2) Apply the Helm upgrade
+
+```
+helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
+  -n "$GREPTIME_NS" \
+  -f infra/k8s/greptime/greptime-values.yaml
+```
+
+### 3) Monitor the rollout
+
+```
+# Watch pods cycle to the new image
+kubectl -n "$GREPTIME_NS" get pods -o wide -w
+
+# Confirm the image tag on running pods
+kubectl -n "$GREPTIME_NS" get pods \
+  -o jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.spec.containers[0].image}{"\n"}{end}'
+```
+
+### 4) Verify health
+
+```
+# API health check (expect {})
+kubectl -n "$GREPTIME_NS" run curl-test --rm -i --restart=Never \
+  --image=curlimages/curl:8.6.0 \
+  --command -- curl -sS http://${HELM_RELEASE_CLUSTER}-frontend.${GREPTIME_NS}.svc.cluster.local:4000/health
+
+# Check metasrv logs for errors (expect no output)
+kubectl -n "$GREPTIME_NS" logs deployment/${HELM_RELEASE_CLUSTER}-meta --since=5m | rg "ERROR|Failed"
+
+# Check datanode logs for S3/storage errors (expect no output)
+kubectl -n "$GREPTIME_NS" logs statefulset/${HELM_RELEASE_CLUSTER}-datanode --since=5m | rg "AccessDenied|OpenDAL operator failed"
+```
