@@ -12,6 +12,7 @@ import BranchesTable from "./table";
 export async function clientAction({ request, params }: Route.ClientActionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
+  if (!intent) return;
 
   let result, submission;
 
