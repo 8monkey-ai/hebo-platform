@@ -10,7 +10,7 @@ Environment-specific values (VPC, subnets, Aurora host, S3 bucket, IAM role, etc
 
 ## 0) One-time shell setup
 
-```
+```bash
 export GREPTIME_NS="greptime"
 export HELM_RELEASE_CLUSTER="greptime-cluster"
 ```
@@ -19,13 +19,13 @@ export HELM_RELEASE_CLUSTER="greptime-cluster"
 
 Replace the `<PLACEHOLDER>` values in `cluster.yaml` with your VPC, subnet, and region before running.
 
-```
+```bash
 eksctl create cluster -f infra/k8s/greptime/cluster.yaml
 ```
 
 ## 2) Create S3 bucket (object storage)
 
-```
+```bash
 aws s3api create-bucket \
   --bucket "<S3_BUCKET>" \
   --region "<AWS_REGION>" \
@@ -34,7 +34,7 @@ aws s3api create-bucket \
 
 ## 3) Install GreptimeDB operator (Helm)
 
-```
+```bash
 helm repo add greptime https://greptimeteam.github.io/helm-charts/
 helm repo update
 
@@ -45,7 +45,7 @@ helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n grept
 
 Replace the `<PLACEHOLDER>` values in `greptime-values.yaml` with your Aurora host, database, S3 bucket, and region before running.
 
-```
+```bash
 helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
   -n "$GREPTIME_NS" --create-namespace \
   -f infra/k8s/greptime/greptime-values.yaml
@@ -56,7 +56,7 @@ helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
 Use an S3 policy ARN, then let `eksctl` create the IRSA role/trust for the datanode service account.
 Set `<GREPTIME_S3_ROLE_ARN>` in `greptime-values.yaml` to the printed role ARN, then run Helm upgrade again to apply it.
 
-```
+```bash
 eksctl create iamserviceaccount \
   --cluster "<CLUSTER_NAME>" \
   --region "<AWS_REGION>" \
@@ -72,7 +72,7 @@ aws iam get-role --role-name "GreptimeS3Role-<CLUSTER_NAME>" --query 'Role.Arn' 
 
 ## 6) Apply updated Helm values (role ARN)
 
-```
+```bash
 helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
   -n "$GREPTIME_NS" \
   -f infra/k8s/greptime/greptime-values.yaml
@@ -80,7 +80,7 @@ helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
 
 ## 7) Create Aurora credentials secret (metasrv backend)
 
-```
+```bash
 kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
   --from-literal=username="<POSTGRES_USER>" \
   --from-literal=password="<POSTGRES_PASSWORD>"
@@ -88,13 +88,13 @@ kubectl -n "$GREPTIME_NS" create secret generic meta-postgresql-credentials \
 
 ## 8) Restart Greptime workloads (pick up secret and updated ServiceAccount configuration)
 
-```
+```bash
 kubectl -n "$GREPTIME_NS" rollout restart deployment,statefulset
 ```
 
 ## 9) Verify (pods, service, health, meta logs)
 
-```
+```bash
 # Pods should be Running/Ready
 kubectl -n "$GREPTIME_NS" get pods -o wide
 
@@ -115,14 +115,14 @@ The operator handles rolling updates. Change the `image.tag` in `greptime-values
 
 ### 1) Update the operator
 
-```
+```bash
 helm repo update
 helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n greptimedb-admin
 ```
 
 ### 2) Apply the Helm upgrade
 
-```
+```bash
 helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
   -n "$GREPTIME_NS" \
   -f infra/k8s/greptime/greptime-values.yaml
@@ -130,7 +130,7 @@ helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
 
 ### 3) Monitor the rollout
 
-```
+```bash
 # Watch pods cycle to the new image
 kubectl -n "$GREPTIME_NS" get pods -o wide -w
 
@@ -141,7 +141,7 @@ kubectl -n "$GREPTIME_NS" get pods \
 
 ### 4) Verify health
 
-```
+```bash
 # API health check (expect {})
 kubectl -n "$GREPTIME_NS" run curl-test --rm -i --restart=Never \
   --image=curlimages/curl:8.6.0 \
