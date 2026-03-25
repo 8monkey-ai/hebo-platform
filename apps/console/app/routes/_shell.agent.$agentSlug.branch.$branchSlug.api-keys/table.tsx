@@ -51,9 +51,11 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
             </TableRow>
           ) : (
             apiKeys.map((key) => {
-              const isExpired = key.expiresAt.getTime() <= Date.now();
+              const isExpired = key.expiresAt != null && key.expiresAt.getTime() <= Date.now();
               const isExpiringSoon =
-                !isExpired && key.expiresAt.getTime() - Date.now() <= 7 * 24 * 60 * 60 * 1000; // 7 Days
+                !isExpired &&
+                key.expiresAt != null &&
+                key.expiresAt.getTime() - Date.now() <= 7 * 24 * 60 * 60 * 1000; // 7 Days
 
               return (
                 <TableRow key={key.id}>
@@ -77,8 +79,9 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
                         }
                       />
                       <TooltipContent>
-                        {isExpired ? "Expired " : "Expires "}
-                        {formatDateTime(key.expiresAt)}
+                        {key.expiresAt
+                          ? `${isExpired ? "Expired" : "Expires"} ${formatDateTime(key.expiresAt)}`
+                          : "Never expires"}
                       </TooltipContent>
                     </Tooltip>
                   </TableCell>

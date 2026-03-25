@@ -164,7 +164,7 @@ function ApiKeyRevealDialog({ apiKey, ...props }: ApiKeyRevealDialogProps) {
             API Key
           </DialogTitle>
           <DialogDescription>
-            Copy your key to a safe place, you won't be able to view it again.
+            Copy your key to a safe place, you won&apos;t be able to view it again.
           </DialogDescription>
         </DialogHeader>
 
@@ -182,7 +182,7 @@ function ApiKeyRevealDialog({ apiKey, ...props }: ApiKeyRevealDialogProps) {
                 checked={acknowledged}
                 onCheckedChange={setAcknowledged}
               />
-              <span>I understand that I won't be able to view this key again</span>
+              <span>I understand that I won&apos;t be able to view this key again</span>
             </Label>
           </AlertTitle>
         </Alert>

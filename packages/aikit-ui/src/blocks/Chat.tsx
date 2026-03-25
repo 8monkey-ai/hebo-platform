@@ -156,7 +156,7 @@ export function Chat({
     };
   }, []);
 
-  const handleSubmit = async (message: PromptInputMessage) => {
+  const handleSubmit = (message: PromptInputMessage) => {
     if (status === "streaming") void stop();
     if (!message.text && !message.files) return;
 
@@ -220,6 +220,7 @@ export function Chat({
           <ConversationContent className="gap-5 px-2" aria-label="Chat conversation" tabIndex={-1}>
             {messages.map((message) => (
               <div key={message.id} className="flex flex-col gap-1">
+                {/* oxlint-disable no-array-index-key -- safe as append-only */}
                 {message.parts.map((part, i) => {
                   // oxlint-disable-next-line switch-exhaustiveness-check
                   switch (part.type) {
@@ -290,9 +291,11 @@ export function Chat({
                     }
                     default: {
                       // FUTURE: "dynamic-tool", "source-document", "source-url", "step-start"
+                      return null;
                     }
                   }
                 })}
+                {/* oxlint-enable no-array-index-key */}
               </div>
             ))}
             {status === "submitted" && <Spinner role="status" />}

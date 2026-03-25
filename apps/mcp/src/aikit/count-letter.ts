@@ -9,7 +9,7 @@ export const countLetterTool = {
       letters: z.string().describe("The letters to count (e.g., 'aeiou' for vowels)"),
     },
   },
-  handler: async ({ word, letters }: { word: string; letters: string }) => {
+  handler: ({ word, letters }: { word: string; letters: string }) => {
     const counts = new Map<string, number>();
     let total = 0;
     const wordLower = word.toLowerCase();

@@ -59,6 +59,7 @@ export async function clientLoader() {
                 },
               ]),
             );
+            return null;
           })
           .catch(() => {
             // Non-fatal — models will be fetched on next navigation

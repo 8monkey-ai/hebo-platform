@@ -12,7 +12,7 @@ import { API_KEY_EXPIRATION_OPTIONS, ApiKeyCreateSchema, CreateApiKeyDialog } fr
 import { ApiKeyRevokeSchema } from "./revoke";
 import { ApiKeysTable } from "./table";
 
-export async function clientLoader() {
+export function clientLoader() {
   return { apiKeys: authService.listApiKeys() };
 }
 

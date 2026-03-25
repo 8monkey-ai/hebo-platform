@@ -13,7 +13,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
   const formData = await request.formData();
   const intent = formData.get("intent");
 
-  let submission, result;
+  let result, submission;
 
   switch (intent) {
     case "create": {

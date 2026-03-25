@@ -57,5 +57,5 @@ export type ApiKey = {
   name: string;
   key: string;
   createdAt: Date;
-  expiresAt: Date;
+  expiresAt: Date | null;
 };

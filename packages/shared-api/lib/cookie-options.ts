@@ -3,7 +3,7 @@ import { getRootDomain } from "../utils/domains";
 
 // eTLD+1 domain for cross-subdomain cookies (e.g., "hebo.ai")
 const cookieDomain = getRootDomain(authUrl);
-const useSecureCookies = isProduction ? true : false;
+const useSecureCookies = isProduction;
 
 export const betterAuthCookieOptions = {
   advanced: {

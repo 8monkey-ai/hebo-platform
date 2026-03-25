@@ -13,9 +13,9 @@ export async function clientLoader({
   params: { agentSlug, branchSlug },
   request,
 }: Route.ClientLoaderArgs) {
-  const sp = new URL(request.url).searchParams;
-  const { effectiveFrom, effectiveTo, metadata, status, operation } = parseTraceSearchParams(sp);
-  const page = ((p) => (Number.isInteger(p) && p > 0 ? p : 1))(Number(sp.get("page")));
+  const { effectiveFrom, effectiveTo, metadata, status, operation, page } = parseTraceSearchParams(
+    new URL(request.url).searchParams,
+  );
 
   const listResult = await api
     .agents({ agentSlug })

@@ -6,7 +6,7 @@ export function clientLoader() {
 }
 
 export default function UnknownRoute() {
-  return <></>;
+  return null;
 }
 
 export function ErrorBoundary() {

@@ -9,6 +9,7 @@ export function Skeleton({ count = 1, className, ...props }: SkeletonProps) {
   return (
     <>
       {Array.from({ length: count }).map((_, i) => (
+        // oxlint-disable-next-line no-array-index-key
         <ShadCnSkeleton key={i} className={className} {...props} />
       ))}
     </>
@@ -25,6 +26,7 @@ export function TableSkeleton() {
       </TableHeader>
       <TableBody>
         {Array.from({ length: 4 }).map((_, index) => (
+          // oxlint-disable-next-line no-array-index-key
           <TableRow key={index}>
             <TableCell className="h-13">
               <Skeleton className="h-5" />
