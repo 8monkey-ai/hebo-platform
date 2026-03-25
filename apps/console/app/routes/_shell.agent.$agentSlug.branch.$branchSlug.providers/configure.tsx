@@ -120,8 +120,11 @@ function getConfigFields(schema: z.ZodObject): string[] {
 }
 
 function isTextarea(schema: z.ZodObject, key: string): boolean {
-  const field = schema.shape[key];
-  return field.meta()?.textarea === true;
+  const field = schema.shape[key] as z.ZodType & {
+    meta?: () => { textarea?: boolean } | undefined;
+  };
+
+  return field.meta?.()?.textarea === true;
 }
 
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
