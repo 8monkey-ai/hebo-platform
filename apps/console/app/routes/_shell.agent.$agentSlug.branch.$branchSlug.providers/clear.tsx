@@ -18,6 +18,8 @@ import { FieldControl, Field, FormControl } from "@hebo/shared-ui/components/Fie
 
 import { useFormErrorToast } from "~console/lib/errors";
 
+import type { clientAction } from "./route";
+
 export const CredentialsClearSchema = z.object({
   providerSlug: ((msg) => z.string(msg).trim().min(1, msg))(
     "Select a provider to clear the credentials for",
@@ -31,7 +33,7 @@ type ClearCredentialsDialogProps = {
 } & React.ComponentProps<typeof Dialog>;
 
 export function ClearCredentialsDialog({ provider, ...props }: ClearCredentialsDialogProps) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
   const [form, fields] = useForm<CredentialsClearFormValues>({
     id: provider?.slug,
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,

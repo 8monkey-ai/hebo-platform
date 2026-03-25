@@ -44,6 +44,7 @@ import { ModelSelector } from "~console/components/ui/ModelSelector";
 import { useFormErrorToast } from "~console/lib/errors";
 import { shellStore } from "~console/lib/shell";
 
+import type { clientAction } from "./route";
 import {
   modelsConfigFormSchema,
   type ModelConfigFormValue,
@@ -63,7 +64,7 @@ export default function ModelsConfigForm({
   models,
   providers,
 }: ModelsConfigProps) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
 
   const [form, fields] = useForm<ModelsConfigFormValues>({
     lastResult: fetcher.state === "idle" ? fetcher.data : undefined,

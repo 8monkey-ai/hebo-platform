@@ -32,6 +32,8 @@ import { Select } from "@hebo/shared-ui/components/Select";
 
 import { useFormErrorToast } from "~console/lib/errors";
 
+import type { clientAction } from "./route";
+
 const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 export const API_KEY_EXPIRATION_OPTIONS = [
@@ -53,7 +55,7 @@ export const ApiKeyCreateSchema = z.object({
 type ApiKeyCreateFormValues = z.infer<typeof ApiKeyCreateSchema>;
 
 export function CreateApiKeyDialog() {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
 
   const [form, fields] = useForm<ApiKeyCreateFormValues>({
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
@@ -138,7 +140,7 @@ export function CreateApiKeyDialog() {
       <ApiKeyRevealDialog
         open={revealOpen}
         onOpenChange={setRevealOpen}
-        apiKey={fetcher.data?.apiKey.key ?? ""}
+        apiKey={fetcher.data?.apiKey?.key ?? ""}
       />
     </>
   );

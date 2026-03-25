@@ -29,6 +29,8 @@ import { Textarea } from "@hebo/shared-ui/components/Textarea";
 import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
 
+import type { clientAction } from "./route";
+
 const requiredString = (msg: string) => z.string(msg).trim().min(1, msg);
 const requiredEmail = (msg: string) => z.email(msg);
 const textareaString = (msg: string) => requiredString(msg).meta({ textarea: true });
@@ -123,7 +125,7 @@ function isTextarea(schema: z.ZodObject, key: string): boolean {
 }
 
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
 
   const modes = getProviderModes(provider?.slug ?? "");
 

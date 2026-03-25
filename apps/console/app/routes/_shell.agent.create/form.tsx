@@ -28,6 +28,8 @@ import { ModelSelector } from "~console/components/ui/ModelSelector";
 import { useFormErrorToast } from "~console/lib/errors";
 import { shellStore } from "~console/lib/shell";
 
+import type { clientAction } from "./route";
+
 export const AgentCreateSchema = z.object({
   agentName: ((msg) => z.string(msg).trim().min(1, msg))("Please enter an agent name"),
   defaultModel: z.string(),
@@ -38,7 +40,7 @@ export function AgentCreateForm() {
   const { models } = useSnapshot(shellStore);
   const navigation = useNavigation();
 
-  const lastResult = useActionData();
+  const lastResult = useActionData<typeof clientAction>();
   const [form, fields] = useForm<AgentCreateFormValues>({
     lastResult: navigation.state === "idle" ? lastResult : undefined,
     constraint: getZodConstraint(AgentCreateSchema),

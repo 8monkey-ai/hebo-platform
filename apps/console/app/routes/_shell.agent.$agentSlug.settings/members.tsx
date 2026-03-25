@@ -41,6 +41,8 @@ import type { OrgInvitation, OrgMember } from "~console/lib/auth/types";
 import { useFormErrorToast } from "~console/lib/errors";
 import { inviteSchema } from "~console/routes/_shell.agent.$agentSlug.settings.members/invite-schema";
 
+import type { clientAction } from "../_shell.agent.$agentSlug.settings.members/route";
+
 type MembersSettingsProps = {
   members: OrgMember[];
   invitations: OrgInvitation[];
@@ -55,7 +57,7 @@ export function MembersSettings({
   canManage,
   agent,
 }: MembersSettingsProps) {
-  const fetcher = useFetcher<{ intent: string; submission: any }>();
+  const fetcher = useFetcher<typeof clientAction>();
   const [role, setRole] = useState("member");
 
   const [form, fields] = useForm({
@@ -202,7 +204,7 @@ export function MembersSettings({
 }
 
 function RemoveMemberButton({ email }: { email: string }) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
   return (
     <AlertDialog>
       <AlertDialogTrigger
@@ -237,7 +239,7 @@ function RemoveMemberButton({ email }: { email: string }) {
 }
 
 function RevokeInvitationButton({ invitationId }: { invitationId: string }) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
   return (
     <AlertDialog>
       <AlertDialogTrigger
