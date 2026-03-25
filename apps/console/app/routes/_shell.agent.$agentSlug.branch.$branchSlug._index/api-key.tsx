@@ -12,22 +12,24 @@ export function GenerateApiKey() {
   const [key, setKey] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleGenerateAPIKey = async () => {
-    setLoading("loading");
+  function handleGenerateAPIKey() {
+    void (async () => {
+      setLoading("loading");
 
-    setError(null);
-    setKey("Generating API Key ...");
+      setError(null);
+      setKey("Generating API Key ...");
 
-    try {
-      const newKey = await authService.generateApiKey("On-boarding Key");
-      setKey(newKey.key ?? "Failed to generate key");
-      setLoading("success");
-    } catch (error_) {
-      setError((error_ as Error).message);
-      setKey((error_ as Error).message);
-      setLoading("idle");
-    }
-  };
+      try {
+        const newKey = await authService.generateApiKey("On-boarding Key");
+        setKey(newKey.key ?? "Failed to generate key");
+        setLoading("success");
+      } catch (error_) {
+        setError((error_ as Error).message);
+        setKey((error_ as Error).message);
+        setLoading("idle");
+      }
+    })();
+  }
 
   return (
     <div className={cn("flex flex-row gap-2", error ? "text-destructive" : "text-foreground")}>

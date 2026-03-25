@@ -15,21 +15,39 @@ export function MagicLinkSignIn() {
   const [otp, setOtp] = useState<string>("");
   const [error, setError] = useState<string | undefined>();
 
+  const handleVerifySubmit: React.SubmitEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+
+    void (async () => {
+      setLoading(true);
+      try {
+        await authService.signInWithMagicLink(otp, email);
+      } catch (err) {
+        if (err instanceof Error) setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
+  const handleSendEmailSubmit: React.SubmitEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+
+    void (async () => {
+      setLoading(true);
+      try {
+        await authService.sendMagicLinkEmail(email);
+        setLinkSent(true);
+      } catch (err) {
+        if (err instanceof Error) setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
   return linkSent ? (
-    <form
-      className="flex flex-col items-center gap-2"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-          await authService.signInWithMagicLink(otp, email);
-        } catch (err) {
-          if (err instanceof Error) setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      }}
-    >
+    <form className="flex flex-col items-center gap-2" onSubmit={handleVerifySubmit}>
       <Label>Enter the code from your email</Label>
       <div className="flex gap-2">
         <InputOTP
@@ -70,21 +88,7 @@ export function MagicLinkSignIn() {
       </Button>
     </form>
   ) : (
-    <form
-      className="flex flex-col gap-2"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-          await authService.sendMagicLinkEmail(email);
-          setLinkSent(true);
-        } catch (err) {
-          if (err instanceof Error) setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      }}
-    >
+    <form className="flex flex-col gap-2" onSubmit={handleSendEmailSubmit}>
       <Label htmlFor="email">Email</Label>
       <Input
         id="email"

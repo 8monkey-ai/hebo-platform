@@ -14,21 +14,23 @@ export function PasswordSignIn() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
+  const handlePasswordSubmit: React.SubmitEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+
+    void (async () => {
+      setLoading(true);
+      try {
+        await authService.signInWithPassword(email, password);
+      } catch (err) {
+        if (err instanceof Error) setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
   return emailSubmitted ? (
-    <form
-      className="flex flex-col gap-2"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-          await authService.signInWithPassword(email, password);
-        } catch (err) {
-          if (err instanceof Error) setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      }}
-    >
+    <form className="flex flex-col gap-2" onSubmit={handlePasswordSubmit}>
       <Label htmlFor="password">Password</Label>
       <div className="flex gap-2">
         <Input

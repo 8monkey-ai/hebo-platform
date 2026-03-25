@@ -16,26 +16,28 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
+  const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+
+    void (async () => {
+      setLoading(true);
+      setError(undefined);
+      try {
+        await authService.signUpWithPassword(name, email, password);
+      } catch (err) {
+        if (err instanceof Error) setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
   return (
     <div className="flex w-xs flex-col items-center gap-4">
       <Logo />
       <p className="text-center text-base">Create your account</p>
 
-      <form
-        className="flex w-full flex-col gap-2"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setLoading(true);
-          setError(undefined);
-          try {
-            await authService.signUpWithPassword(name, email, password);
-          } catch (err) {
-            if (err instanceof Error) setError(err.message);
-          } finally {
-            setLoading(false);
-          }
-        }}
-      >
+      <form className="flex w-full flex-col gap-2" onSubmit={handleSubmit}>
         <Label htmlFor="name">Name</Label>
         <Input
           id="name"
