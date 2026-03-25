@@ -42,7 +42,9 @@ export default function SignUp() {
           type="text"
           autoComplete="name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
           disabled={loading}
           required
         />
@@ -53,7 +55,9 @@ export default function SignUp() {
           type="email"
           autoComplete="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+          }}
           disabled={loading}
           required
         />
@@ -64,7 +68,9 @@ export default function SignUp() {
           type="password"
           autoComplete="new-password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+          }}
           disabled={loading}
           minLength={8}
           required

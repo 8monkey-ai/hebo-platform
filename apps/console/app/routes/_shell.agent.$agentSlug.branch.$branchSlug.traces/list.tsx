@@ -243,7 +243,9 @@ function TagStrip({
   const overflowCount = entries.length - visible.length;
   function toggleMetadataFilter(key: string, value: string, event: React.MouseEvent) {
     event.preventDefault();
-    updateParams((sp) => sp.toggleValue("metadata", key, value));
+    updateParams((sp) => {
+      sp.toggleValue("metadata", key, value);
+    });
     setOpen(false);
   }
 
@@ -341,7 +343,9 @@ function TagBadge({
       <button
         type="button"
         className="inline-flex size-3.5 items-center justify-center rounded-sm hover:bg-accent"
-        onClick={(e) => onToggle(badgeKey, value, e)}
+        onClick={(e) => {
+          onToggle(badgeKey, value, e);
+        }}
         aria-label={isActive ? `Remove ${badgeKey} filter` : `Filter by ${badgeKey}:${value}`}
       >
         {isActive ? <X className="size-2.5" /> : <Filter className="size-2.5" />}
@@ -522,7 +526,11 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                 {status && (
                   <RemovableBadge
                     label="Remove status filter"
-                    onRemove={() => updateParams((sp) => sp.delete("status"))}
+                    onRemove={() => {
+                      updateParams((sp) => {
+                        sp.delete("status");
+                      });
+                    }}
                   >
                     status: {status}
                   </RemovableBadge>
@@ -530,7 +538,11 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                 {operation && (
                   <RemovableBadge
                     label="Remove operation filter"
-                    onRemove={() => updateParams((sp) => sp.delete("operation"))}
+                    onRemove={() => {
+                      updateParams((sp) => {
+                        sp.delete("operation");
+                      });
+                    }}
                   >
                     operation: {operation}
                   </RemovableBadge>
@@ -539,7 +551,11 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                   <RemovableBadge
                     key={key}
                     label={`Remove ${key} filter`}
-                    onRemove={() => updateParams((sp) => sp.removeValue("metadata", key))}
+                    onRemove={() => {
+                      updateParams((sp) => {
+                        sp.removeValue("metadata", key);
+                      });
+                    }}
                   >
                     {key}: {value}
                   </RemovableBadge>
@@ -552,12 +568,12 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
             <p className="text-xs font-semibold text-muted-foreground">Status</p>
             <Select
               value={status ?? ""}
-              onValueChange={(value) =>
+              onValueChange={(value) => {
                 updateParams((sp) => {
                   if (value) sp.set("status", value as string);
                   else sp.delete("status");
-                })
-              }
+                });
+              }}
               items={traceStatuses.map((s) => ({ value: s, label: s === "ok" ? "OK" : "Error" }))}
               placeholder="Any status"
             />
@@ -567,12 +583,12 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
             <p className="text-xs font-semibold text-muted-foreground">Operation</p>
             <Select
               value={operation ?? ""}
-              onValueChange={(value) =>
+              onValueChange={(value) => {
                 updateParams((sp) => {
                   if (value) sp.set("operation", value as string);
                   else sp.delete("operation");
-                })
-              }
+                });
+              }}
               items={traceOperations.map((o) => ({
                 value: o,
                 label: o.charAt(0).toUpperCase() + o.slice(1),
@@ -615,7 +631,9 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                   className="shrink-0"
                   onClick={() => {
                     if (!filterKey || !filterValue) return;
-                    updateParams((sp) => sp.addValue("metadata", filterKey, filterValue));
+                    updateParams((sp) => {
+                      sp.addValue("metadata", filterKey, filterValue);
+                    });
                     setFilterKey("");
                     setFilterValue("");
                     setFiltersOpen(false);
