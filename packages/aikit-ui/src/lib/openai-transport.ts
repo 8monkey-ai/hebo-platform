@@ -65,7 +65,7 @@ export class OpenAIHttpChatTransport<
           messages.map((m) => toOpenAIMessage(m as UIMessage)),
         );
 
-        const reasoning = body!.reasoningEffort ? { effort: body!.reasoningEffort } : undefined;
+        const effort = (body as { reasoningEffort?: string })?.reasoningEffort;
 
         return {
           ...(credentials ? { credentials } : {}),
@@ -73,7 +73,7 @@ export class OpenAIHttpChatTransport<
             ...body,
             messages: openaiMessages,
             stream: true,
-            ...(reasoning ? { reasoning } : {}),
+            ...(effort && { reasoning: { effort } }),
           },
         };
       },
@@ -107,7 +107,10 @@ async function toOpenAIMessage(message: UIMessage): Promise<OpenAIMessage> {
         if (filePart) contentParts.push(filePart);
         break;
       }
-      // No default
+      case "dynamic-tool":
+      case "source-document":
+      case "source-url":
+      case "step-start":
     }
   }
 
@@ -137,6 +140,7 @@ async function toFileContent(part: {
   | undefined
 > {
   if (!part.url) return;
+  // oxlint-disable-next-line prefer-nullish-coalescing
   const filename = part.filename || "file";
 
   if (part.url.startsWith("data:")) {
@@ -149,6 +153,7 @@ async function toFileContent(part: {
   try {
     const resp = await fetch(part.url);
     const blob = await resp.blob();
+    // oxlint-disable-next-line prefer-nullish-coalescing
     const mediaType = part.mediaType || blob.type || "application/octet-stream";
     const arrayBuffer = await blob.arrayBuffer();
     const data = toBase64(arrayBuffer);
