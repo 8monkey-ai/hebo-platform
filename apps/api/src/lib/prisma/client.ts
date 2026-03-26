@@ -18,13 +18,15 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
     query: {
       $allModels: {
         $allOperations({ args, query, operation }) {
-          if (operation !== "create") {
-            const a = args as { where?: Record<string, unknown> };
+          if (!["create", "createMany", "createManyAndReturn"].includes(operation)) {
+            // oxlint-disable no-unsafe-member-access, no-unsafe-assignment
+            const a = args as any;
             a.where = {
               ...a.where,
               deleted_at: dbNull,
               organization_id: organizationId,
             };
+            // oxlint-enable no-unsafe-member-access, no-unsafe-assignment
           }
 
           return query(args);
@@ -68,6 +70,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
       $allModels: {
         softDelete<T, W>(this: T, where: W) {
           const context = Prisma.getExtensionContext(this);
+          // oxlint-disable-next-line no-unsafe-assignment, no-unsafe-member-access, no-unsafe-call, no-unsafe-return
           return (context as any).update({
             where,
             data: {
