@@ -9,7 +9,9 @@ const getNodeText = (node: React.ReactNode): string => {
     return String(node);
   }
   if (Array.isArray(node)) {
-    return node.map((child) => getNodeText(child)).join("");
+    return React.Children.toArray(node)
+      .map((child) => getNodeText(child))
+      .join("");
   }
   if (React.isValidElement(node)) {
     return getNodeText((node as React.ReactElement<{ children?: React.ReactNode }>).props.children);
@@ -56,7 +58,9 @@ const EVT = "codegroup:tab:change";
 
 export function CodeGroup({ className, ...props }: CodeGroupProps) {
   const id = React.useId();
-  const [value, setValue] = React.useState(props.defaultValue ?? "");
+
+  // oxlint-disable-next-line no-unsafe-assignment
+  const [value, setValue] = React.useState(props.defaultValue);
 
   React.useEffect(() => {
     const onChange = (e: Event) => {
@@ -76,9 +80,11 @@ export function CodeGroup({ className, ...props }: CodeGroupProps) {
   return (
     <Tabs
       id={id}
+      // oxlint-disable-next-line no-unsafe-assignment
       value={value}
       onValueChange={(next) => {
         setValue(next);
+        // oxlint-disable-next-line no-unsafe-assignment
         globalThis.dispatchEvent(new CustomEvent(EVT, { detail: next }));
       }}
       className={cn(
