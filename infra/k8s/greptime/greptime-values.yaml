@@ -1,7 +1,7 @@
 image:
   registry: docker.io
   repository: greptime/greptimedb
-  tag: "v1.0.0-rc.2-nightly-20260323"
+  tag: "<IMAGE_TAG>"
 
 frontend:
   replicas: 3
