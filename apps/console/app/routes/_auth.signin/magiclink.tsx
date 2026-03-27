@@ -20,6 +20,7 @@ export function MagicLinkSignIn() {
 
     void (async () => {
       setLoading(true);
+      setError(undefined);
       try {
         await authService.signInWithMagicLink(otp, email);
       } catch (err) {
@@ -35,6 +36,7 @@ export function MagicLinkSignIn() {
 
     void (async () => {
       setLoading(true);
+      setError(undefined);
       try {
         await authService.sendMagicLinkEmail(email);
         setLinkSent(true);

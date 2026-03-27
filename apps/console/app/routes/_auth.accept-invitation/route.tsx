@@ -9,7 +9,7 @@ import { authService } from "~console/lib/auth";
 
 import type { Route } from "./+types/route";
 
-export async function clientLoader({ request }: { request: Request }) {
+export async function clientLoader({ request }: Route.LoaderArgs) {
   const invitationId = new URL(request.url).searchParams.get("id");
   if (!invitationId) return { status: "no-id" as const };
 
