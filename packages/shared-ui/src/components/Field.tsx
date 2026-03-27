@@ -29,7 +29,7 @@ function Field({
   className,
   ...props
 }: React.ComponentProps<typeof ShadCnField> & { name?: string }) {
-  const [field] = useField(name || "");
+  const [field] = useField(name ?? "");
 
   return (
     <FieldCtx.Provider value={name ? field : undefined}>
@@ -69,7 +69,9 @@ function FieldError() {
   const field = useF();
 
   const errors = field?.errors;
-  const errorsDict = Array.isArray(errors) ? errors.map((message) => ({ message })) : undefined;
+  const errorsDict = Array.isArray(errors)
+    ? errors.map((message) => ({ message: String(message) }))
+    : undefined;
 
   return <ShadCnFieldError id={field?.errorId} errors={errorsDict} />;
 }
