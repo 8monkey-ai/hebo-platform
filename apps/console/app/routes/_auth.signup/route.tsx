@@ -16,7 +16,7 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
-  const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = (e) => {
+  const handleSignUp: React.SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
 
     void (async () => {
@@ -25,7 +25,7 @@ export default function SignUp() {
       try {
         await authService.signUpWithPassword(name, email, password);
       } catch (err) {
-        if (err instanceof Error) setError(err.message);
+        setError(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }
@@ -37,7 +37,7 @@ export default function SignUp() {
       <Logo />
       <p className="text-center text-base">Create your account</p>
 
-      <form className="flex w-full flex-col gap-2" onSubmit={handleSubmit}>
+      <form className="flex w-full flex-col gap-2" onSubmit={handleSignUp}>
         <Label htmlFor="name">Name</Label>
         <Input
           id="name"

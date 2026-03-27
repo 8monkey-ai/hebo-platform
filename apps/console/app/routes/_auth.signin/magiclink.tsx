@@ -15,7 +15,7 @@ export function MagicLinkSignIn() {
   const [otp, setOtp] = useState<string>("");
   const [error, setError] = useState<string | undefined>();
 
-  const handleVerifySubmit: React.SubmitEventHandler<HTMLFormElement> = (e) => {
+  const handleVerifyOTP: React.SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
 
     void (async () => {
@@ -23,14 +23,14 @@ export function MagicLinkSignIn() {
       try {
         await authService.signInWithMagicLink(otp, email);
       } catch (err) {
-        if (err instanceof Error) setError(err.message);
+        setError(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }
     })();
   };
 
-  const handleSendEmailSubmit: React.SubmitEventHandler<HTMLFormElement> = (e) => {
+  const handleSendEmail: React.SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
 
     void (async () => {
@@ -39,7 +39,7 @@ export function MagicLinkSignIn() {
         await authService.sendMagicLinkEmail(email);
         setLinkSent(true);
       } catch (err) {
-        if (err instanceof Error) setError(err.message);
+        setError(err instanceof Error ? err.message : String(err));
       } finally {
         setLoading(false);
       }
@@ -47,7 +47,7 @@ export function MagicLinkSignIn() {
   };
 
   return linkSent ? (
-    <form className="flex flex-col items-center gap-2" onSubmit={handleVerifySubmit}>
+    <form className="flex flex-col items-center gap-2" onSubmit={handleVerifyOTP}>
       <Label>Enter the code from your email</Label>
       <div className="flex gap-2">
         <InputOTP
@@ -88,7 +88,7 @@ export function MagicLinkSignIn() {
       </Button>
     </form>
   ) : (
-    <form className="flex flex-col gap-2" onSubmit={handleSendEmailSubmit}>
+    <form className="flex flex-col gap-2" onSubmit={handleSendEmail}>
       <Label htmlFor="email">Email</Label>
       <Input
         id="email"

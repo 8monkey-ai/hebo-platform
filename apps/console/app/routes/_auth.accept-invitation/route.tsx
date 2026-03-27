@@ -17,7 +17,7 @@ export async function clientLoader({ request }: { request: Request }) {
     await authService.acceptInvitation(invitationId);
     return { status: "success" as const };
   } catch (err) {
-    return { status: "error" as const, message: (err as Error).message };
+    return { status: "error" as const, message: err instanceof Error ? err.message : String(err) };
   }
 }
 

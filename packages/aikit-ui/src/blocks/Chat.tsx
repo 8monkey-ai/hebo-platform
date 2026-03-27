@@ -222,7 +222,6 @@ export function Chat({
               <div key={message.id} className="flex flex-col gap-1">
                 {/* oxlint-disable no-array-index-key -- safe as append-only */}
                 {message.parts.map((part, i) => {
-                  // oxlint-disable-next-line switch-exhaustiveness-check
                   switch (part.type) {
                     case "text": {
                       return (
@@ -289,9 +288,14 @@ export function Chat({
                         </Item>
                       );
                     }
-                    default: {
-                      // FUTURE: "dynamic-tool", "source-document", "source-url", "step-start"
+                    case "dynamic-tool":
+                    case "source-document":
+                    case "source-url":
+                    case "step-start": {
                       return null;
+                    }
+                    default: {
+                      throw new Error(`Unhandled part type: ${(part as { type: string }).type}`);
                     }
                   }
                 })}
