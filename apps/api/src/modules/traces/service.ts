@@ -43,7 +43,7 @@ async function getTraceColumnNames(greptimeDb: GreptimeDb) {
   //      WHERE table_name = 'opentelemetry_traces' AND column_name LIKE $1`,
   //     [`${METADATA_PREFIX}%`],
   //   )
-  const rows = await greptimeDb.unsafe<Array<{ column_name: unknown }>>(
+  const rows = await greptimeDb.unsafe<Array<{ column_name: string }>>(
     `SELECT column_name
      FROM information_schema.columns
      WHERE table_name = 'opentelemetry_traces'
@@ -54,7 +54,7 @@ async function getTraceColumnNames(greptimeDb: GreptimeDb) {
   const metadataColumns: string[] = [];
   const optionalColumns = new Set<string>();
   for (const { column_name } of rows) {
-    const name = String(column_name);
+    const name = column_name;
     if (name.startsWith(METADATA_PREFIX)) metadataColumns.push(name);
     else optionalColumns.add(name);
   }

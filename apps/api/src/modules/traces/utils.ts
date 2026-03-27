@@ -14,18 +14,13 @@ export function toTimestampLiteral(value: Date): string {
 }
 
 export function parseNullableNumber(value: unknown): number | null {
-  if (value === null || value === undefined || value === "") return null;
-  if (typeof value === "number") return Number.isFinite(value) ? value : null;
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
+  if (typeof value === "string") return Number(value);
+  if (typeof value === "number") return value;
   return null;
 }
 
 export function parseString(value: unknown): string {
   if (typeof value === "string") return value;
-  if (value === null || value === undefined || value === "") return "";
   return "";
 }
 
@@ -56,7 +51,6 @@ export function parseJsonArray(value: unknown): unknown[] | null {
 }
 
 export function formatStatus(statusCode: unknown): "ok" | "error" | "unknown" {
-  if (!statusCode) return "unknown";
   if (statusCode === "STATUS_CODE_OK" || statusCode === "STATUS_CODE_UNSET") return "ok";
   if (statusCode === "STATUS_CODE_ERROR") return "error";
   return "unknown";
