@@ -59,8 +59,7 @@ const EVT = "codegroup:tab:change";
 export function CodeGroup({ className, ...props }: CodeGroupProps) {
   const id = React.useId();
 
-  // oxlint-disable-next-line no-unsafe-assignment
-  const [value, setValue] = React.useState(props.defaultValue);
+  const [value, setValue] = React.useState<unknown>(props.defaultValue);
 
   React.useEffect(() => {
     const onChange = (e: Event) => {
@@ -80,12 +79,10 @@ export function CodeGroup({ className, ...props }: CodeGroupProps) {
   return (
     <Tabs
       id={id}
-      // oxlint-disable-next-line no-unsafe-assignment
       value={value}
       onValueChange={(next) => {
         setValue(next);
-        // oxlint-disable-next-line no-unsafe-assignment
-        globalThis.dispatchEvent(new CustomEvent(EVT, { detail: next }));
+        globalThis.dispatchEvent(new CustomEvent<unknown>(EVT, { detail: next }));
       }}
       className={cn(
         "relative flex min-h-0 w-full min-w-0 gap-0",
