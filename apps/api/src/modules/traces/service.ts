@@ -145,7 +145,9 @@ export async function listTraces(
   for (const row of pageRows) {
     const metadata: Record<string, string> = {};
     for (const col of metadataColumns) {
-      metadata[col.slice(METADATA_PREFIX.length)] = parseString(row[col]);
+      if (row[col] !== null && row[col] !== undefined) {
+        metadata[col.slice(METADATA_PREFIX.length)] = parseString(row[col]);
+      }
     }
     data.push({
       timestamp: row.timestamp as Date,
