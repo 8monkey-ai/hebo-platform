@@ -52,7 +52,7 @@ const createAuthClient = (request: Request) => {
 };
 
 export const authService = new Elysia({ name: "auth-service" })
-  .use(logging("hebo-auth"))
+  .use(logging())
   .resolve(async function resolveAuthContext({ request, cookie, logger }) {
     const cookieHeader = request.headers.get("cookie");
     const authHeader = request.headers.get("authorization");
