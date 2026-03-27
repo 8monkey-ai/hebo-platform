@@ -54,9 +54,10 @@ const createAuthClient = (request: Request) => {
 export const authService = new Elysia({ name: "auth-service" })
   .use(logging("hebo-auth"))
   .resolve(async function resolveAuthContext({ request, cookie, logger }) {
-    const authorization = request.headers.get("authorization");
+    const cookieHeader = request.headers.get("cookie");
+    const authHeader = request.headers.get("authorization");
 
-    if (request.headers.get("cookie") && authorization) {
+    if (cookieHeader && authHeader) {
       throw new BadRequestError("Provide exactly one credential: Bearer API Key or JWT Header");
     }
 
@@ -65,7 +66,7 @@ export const authService = new Elysia({ name: "auth-service" })
     let userId: string | undefined;
     let organizationId: string | undefined;
 
-    if (cookie) {
+    if (cookieHeader) {
       const session = await getCookieCache(request, {
         secret: authSecret,
         isSecure: betterAuthCookieOptions.advanced.useSecureCookies,
@@ -75,9 +76,9 @@ export const authService = new Elysia({ name: "auth-service" })
         userId = session.user.id;
         organizationId = session.session.activeOrganizationId as string;
       }
-    } else if (authorization) {
+    } else if (authHeader) {
       const { data: result } = await authClient.internal.verifyApiKey({
-        key: authorization.slice(7) || "invalid-key",
+        key: authHeader.slice(7) || "invalid-key",
         fetchOptions: {
           headers: { "x-internal-secret": authSecret },
         },
