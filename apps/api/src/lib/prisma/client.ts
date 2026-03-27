@@ -22,19 +22,19 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
       $allModels: {
         $allOperations({ args, query, operation }) {
           if (operation !== "create") {
-            const a = args as {
+            const queryArgs = args as {
               where?: Record<string, unknown>;
               include?: Record<string, unknown>;
             };
-            a.where = { ...a.where, ...tenantFilters };
+            queryArgs.where = { ...queryArgs.where, ...tenantFilters };
 
             // Prisma's $allOperations hook does not intercept nested relation
             // queries resolved via `include`. We inject tenant + soft-delete
             // filters into `include` entries so related rows are filtered too.
-            if (a.include) {
-              for (const [key, value] of Object.entries(a.include)) {
+            if (queryArgs.include) {
+              for (const [key, value] of Object.entries(queryArgs.include)) {
                 if (value === true) {
-                  a.include[key] = { where: tenantFilters };
+                  queryArgs.include[key] = { where: tenantFilters };
                 }
               }
             }
