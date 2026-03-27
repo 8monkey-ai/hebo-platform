@@ -3,9 +3,9 @@
   "plugins": ["eslint", "unicorn", "typescript", "oxc", "react", "promise", "jsx-a11y", "import"],
   "categories": {
     "correctness": "error",
-    "suspicious": "warn",
-    "pedantic": "warn",
-    "perf": "warn"
+    "suspicious": "error",
+    "pedantic": "error",
+    "perf": "error"
   },
   "rules": {
     "react-in-jsx-scope": "off",
