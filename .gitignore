@@ -60,6 +60,9 @@ sst-env.d.ts
 # db
 .local-storage
 
+# k8s
+infra/k8s/greptime/greptime-values.*.yaml
+
 # bun
 server
 *.bun-build

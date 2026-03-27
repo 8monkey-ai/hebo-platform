@@ -14,7 +14,7 @@ services:
 
   greptimedb:
     container_name: greptime
-    image: greptime/greptimedb:v1.0.0-rc.1
+    image: greptime/greptimedb:v1.0.0-rc.2-nightly-20260323
     restart: unless-stopped
     ports:
       - "127.0.0.1:4000:4000"
