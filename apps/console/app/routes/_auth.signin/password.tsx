@@ -19,6 +19,7 @@ export function PasswordSignIn() {
 
     void (async () => {
       setLoading(true);
+      setError(undefined);
       try {
         await authService.signInWithPassword(email, password);
       } catch (err) {
