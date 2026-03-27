@@ -77,12 +77,12 @@ function extractSummary(message: unknown): string {
   if (typeof parsed === "string") return truncateSummary(parsed.trim());
   if (!parsed || typeof parsed !== "object") return "";
 
-  const record = parsed as Record<string, unknown>;
-
   const texts: string[] = [];
-  if (typeof record.content === "string") texts.push(record.content);
+  const { content, parts } = parsed as Record<string, unknown>;
 
-  for (const arr of [record.content, record.parts]) {
+  if (typeof content === "string") texts.push(content);
+
+  for (const arr of [content, parts]) {
     if (!Array.isArray(arr)) continue;
 
     for (const part of arr) {
