@@ -22,12 +22,21 @@ export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
 });
 
-const GOOGLE_CLIENT_ID = await getSecret("GoogleClientId");
-const GOOGLE_CLIENT_SECRET = await getSecret("GoogleClientSecret");
-const GITHUB_CLIENT_ID = await getSecret("GithubClientId");
-const GITHUB_CLIENT_SECRET = await getSecret("GithubClientSecret");
-const MICROSOFT_CLIENT_ID = await getSecret("MicrosoftClientId");
-const MICROSOFT_CLIENT_SECRET = await getSecret("MicrosoftClientSecret");
+const [
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  MICROSOFT_CLIENT_ID,
+  MICROSOFT_CLIENT_SECRET,
+] = await Promise.all([
+  getSecret("GoogleClientId"),
+  getSecret("GoogleClientSecret"),
+  getSecret("GithubClientId"),
+  getSecret("GithubClientSecret"),
+  getSecret("MicrosoftClientId"),
+  getSecret("MicrosoftClientSecret"),
+]);
 
 export const auth = betterAuth({
   accountLinking: {
