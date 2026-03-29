@@ -26,6 +26,7 @@
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",
     "@prisma/client": "catalog:",
+    "@sinclair/typebox": "^0.34.49",
     "elysia": "catalog:",
     "lru-cache": "catalog:"
   },
