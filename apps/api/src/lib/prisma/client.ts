@@ -22,8 +22,10 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
       $allModels: {
         $allOperations({ args, query, operation }) {
           if (!["create", "createMany", "createManyAndReturn"].includes(operation)) {
+            // oxlint-disable no-unsafe-member-access, no-unsafe-assignment
             const queryArgs = args as any;
             queryArgs.where = { ...queryArgs.where, ...tenantFilters };
+            // oxlint-enable no-unsafe-member-access, no-unsafe-assignment
 
             // Prisma's $allOperations hook does not intercept nested relation
             // queries resolved via `include`. We inject tenant + soft-delete
