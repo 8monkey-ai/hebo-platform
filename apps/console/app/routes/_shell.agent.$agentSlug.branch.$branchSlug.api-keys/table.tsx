@@ -59,7 +59,7 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
 
               return (
                 <TableRow key={key.id}>
-                  <TableCell>{key.name || "—"}</TableCell>
+                  <TableCell>{key.name ?? "—"}</TableCell>
                   <TableCell className="align-middle">
                     <Tooltip>
                       <TooltipTrigger

@@ -33,6 +33,8 @@ import {
 
 import { useFormErrorToast } from "~console/lib/errors";
 
+import type { clientAction } from "../_shell.agent.$agentSlug.settings.danger/route";
+
 export function createAgentDeleteSchema(agentSlug: string) {
   return z.object({
     slugConfirm: z.literal(agentSlug, "You must type your EXACT agent slug"),
@@ -42,7 +44,7 @@ export function createAgentDeleteSchema(agentSlug: string) {
 export type AgentDeleteFormValues = z.infer<ReturnType<typeof createAgentDeleteSchema>>;
 
 export function DangerSettings({ agent }: { agent: { slug: string } }) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
 
   const [form, fields] = useForm<AgentDeleteFormValues>({
     lastResult: fetcher.state === "idle" ? fetcher.data : undefined,

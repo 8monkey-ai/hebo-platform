@@ -30,6 +30,8 @@
     "apps/console/public/mockServiceWorker.js",
     "**/migrations/**",
     "**/generated/**",
-    "apps/console/app/routes/_shell.agent.*.branch.*._index/route.mdx"
+    "apps/console/app/routes/_shell.agent.*.branch.*._index/route.mdx",
+    ".agents/**/**",
+    ".claude/**/**"
   ]
 }

@@ -19,22 +19,26 @@ function SignInButton({ provider, icon: Icon }: { provider: string; icon?: React
   const [isLoading, setIsLoading] = React.useState(false);
   const [error, setError] = React.useState<string | undefined>();
 
+  function handleSignIn() {
+    void (async () => {
+      try {
+        setIsLoading(true);
+        await authService.signInWithOAuth(provider);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }
+
   return (
     <>
       <Button
         variant="outline"
         className="relative w-full"
         isLoading={isLoading}
-        onClick={async () => {
-          try {
-            setIsLoading(true);
-            await authService.signInWithOAuth(provider);
-          } catch (err) {
-            if (err instanceof Error) setError(err.message);
-          } finally {
-            setIsLoading(false);
-          }
-        }}
+        onClick={handleSignIn}
       >
         {!isLoading && (
           <>

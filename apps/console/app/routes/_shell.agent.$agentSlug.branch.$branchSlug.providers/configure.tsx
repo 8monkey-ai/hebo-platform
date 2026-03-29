@@ -29,8 +29,10 @@ import { Textarea } from "@hebo/shared-ui/components/Textarea";
 import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
 
+import type { clientAction } from "./route";
+
 const requiredString = (msg: string) => z.string(msg).trim().min(1, msg);
-const requiredEmail = (msg: string) => z.string(msg).trim().min(1, msg).email(msg);
+const requiredEmail = (msg: string) => z.email(msg);
 const textareaString = (msg: string) => requiredString(msg).meta({ textarea: true });
 
 const BedrockIamRoleSchema = z.object({
@@ -118,12 +120,15 @@ function getConfigFields(schema: z.ZodObject): string[] {
 }
 
 function isTextarea(schema: z.ZodObject, key: string): boolean {
-  const field = schema.shape[key as keyof typeof schema.shape];
-  return field.meta()?.textarea === true;
+  const field = schema.shape[key] as z.ZodType & {
+    meta?: () => { textarea?: boolean } | undefined;
+  };
+
+  return field.meta?.()?.textarea === true;
 }
 
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
 
   const modes = getProviderModes(provider?.slug ?? "");
 

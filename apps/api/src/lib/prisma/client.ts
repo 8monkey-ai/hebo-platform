@@ -1,8 +1,8 @@
 import { createPrismaAdapter } from "@hebo/shared-api/lib/db/postgres";
 
 import { Prisma, PrismaClient } from "~api/generated/prisma/client";
-import { redactProviderConfigValue } from "~api/lib/redact-provider";
-import type { ProviderConfig } from "~api/modules/providers/types";
+import { redactSensitiveValues } from "~api/lib/redact-provider";
+import { ProviderConfig } from "~api/modules/providers/types";
 
 const dbNull = null;
 
@@ -21,11 +21,8 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
     query: {
       $allModels: {
         $allOperations({ args, query, operation }) {
-          if (operation !== "create") {
-            const queryArgs = args as {
-              where?: Record<string, unknown>;
-              include?: Record<string, unknown>;
-            };
+          if (!["create", "createMany", "createManyAndReturn"].includes(operation)) {
+            const queryArgs = args as any;
             queryArgs.where = { ...queryArgs.where, ...tenantFilters };
 
             // Prisma's $allOperations hook does not intercept nested relation
@@ -39,7 +36,6 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
               }
             }
           }
-
           return query(args);
         },
         create({ args, model, query }) {
@@ -81,6 +77,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
       $allModels: {
         softDelete<T, W>(this: T, where: W) {
           const context = Prisma.getExtensionContext(this);
+          // oxlint-disable-next-line no-unsafe-assignment, no-unsafe-member-access, no-unsafe-call, no-unsafe-return
           return (context as any).update({
             where,
             data: {
@@ -108,7 +105,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
         value: {
           needs: { value: true },
           compute({ value }: { value: ProviderConfig }) {
-            return redactProviderConfigValue(value);
+            return redactSensitiveValues(ProviderConfig, value);
           },
         },
       },

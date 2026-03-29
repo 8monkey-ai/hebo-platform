@@ -3,21 +3,24 @@ import { SmtpTransport } from "@upyo/smtp";
 
 import { getSecret } from "@hebo/shared-api/utils/secrets";
 
-const smtpHost = await getSecret("SmtpHost");
-const smtpPort = Number(await getSecret("SmtpPort"));
-const smtpUser = await getSecret("SmtpUser");
-const smtpPass = await getSecret("SmtpPass");
-const smtpFrom = await getSecret("SmtpFrom");
-const logoUrl = "https://hebo.ai/icon.png";
+const SMTP_HOST = await getSecret("SmtpHost");
+const SMTP_PORT = Number(await getSecret("SmtpPort"));
+const SMTP_USER = await getSecret("SmtpUser");
+const SMTP_PASS = await getSecret("SmtpPass");
+const SMTP_FROM = await getSecret("SmtpFrom");
 
-const transport = new SmtpTransport({
-  host: smtpHost,
-  port: smtpPort,
-  secure: smtpPort === 465,
-  auth: { user: smtpUser, pass: smtpPass },
-});
+const LOGO_URL = "https://hebo.ai/icon.png";
 
-export const hasSmtpConfig = () => !!(smtpHost && smtpPort && smtpUser && smtpPass && smtpFrom);
+export const HAS_SMTP_CONFIG = !!(SMTP_HOST && SMTP_PORT && SMTP_USER && SMTP_PASS && SMTP_FROM);
+
+const transport = HAS_SMTP_CONFIG
+  ? new SmtpTransport({
+      host: SMTP_HOST!,
+      port: SMTP_PORT,
+      secure: SMTP_PORT === 465,
+      auth: { user: SMTP_USER!, pass: SMTP_PASS! },
+    })
+  : undefined;
 
 const emailTemplate = (title: string, subtitle: string, body: string) => `
 <table width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(180deg,#fefce8 0%,#f8fafc 45%,#eef2ff 100%);padding:32px 0;color:#0f172a;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
@@ -26,7 +29,7 @@ const emailTemplate = (title: string, subtitle: string, body: string) => `
       <table width="640" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:32px 28px;box-shadow:0 8px 30px rgba(15,23,42,0.08);text-align:center;">
         <tr>
           <td style="padding-bottom:20px;text-align:left;">
-            <img src="${logoUrl}" alt="Hebo icon" width="36" height="36" style="display:block;border-radius:10px;" />
+            <img src="${LOGO_URL}" alt="Hebo icon" width="36" height="36" style="display:block;border-radius:10px;" />
           </td>
         </tr>
         <tr><td style="font-size:22px;font-weight:700;color:#0f172a;padding-bottom:10px;text-align:center;">${title}</td></tr>
@@ -52,8 +55,11 @@ export async function sendVerificationOtpEmail({
   otp: string;
   consoleUrl?: string;
 }) {
-  if (!hasSmtpConfig()) return;
-  if (!consoleUrl) return console.warn("Missing origin header, cannot send verification email");
+  if (!transport) return;
+  if (!consoleUrl) {
+    console.warn("Missing origin header, cannot send verification email");
+    return;
+  }
 
   const magicLinkUrl = new URL("/signin/magic-link", consoleUrl);
   magicLinkUrl.searchParams.set("email", email);
@@ -67,7 +73,7 @@ export async function sendVerificationOtpEmail({
   );
 
   const message = createMessage({
-    from: `Hebo Cloud <${smtpFrom}>`,
+    from: `Hebo Cloud <${SMTP_FROM!}>`,
     to: email,
     subject: "Sign in to Hebo Cloud",
     content: {
@@ -95,12 +101,16 @@ export async function sendOrganizationInvitationEmail({
   inviterEmail: string;
   consoleUrl?: string;
 }) {
-  if (!hasSmtpConfig()) return;
-  if (!consoleUrl) return console.warn("Missing origin header, cannot send invitation email");
+  if (!transport) return;
+  if (!consoleUrl) {
+    console.warn("Missing origin header, cannot send invitation email");
+    return;
+  }
 
   const acceptUrl = new URL("/accept-invitation", consoleUrl);
-
   acceptUrl.searchParams.set("id", invitationId);
+
+  // oxlint-disable-next-line prefer-nullish-coalescing
   const inviter = inviterName || inviterEmail;
   const subject = `You've been invited to ${organizationName}`;
 
@@ -111,7 +121,7 @@ export async function sendOrganizationInvitationEmail({
   );
 
   const message = createMessage({
-    from: `Hebo Cloud <${smtpFrom}>`,
+    from: `Hebo Cloud <${SMTP_FROM!}>`,
     to: email,
     subject,
     content: {

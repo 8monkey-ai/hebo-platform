@@ -9,7 +9,9 @@ const getNodeText = (node: React.ReactNode): string => {
     return String(node);
   }
   if (Array.isArray(node)) {
-    return node.map((child) => getNodeText(child)).join("");
+    return React.Children.toArray(node)
+      .map((child) => getNodeText(child))
+      .join("");
   }
   if (React.isValidElement(node)) {
     return getNodeText((node as React.ReactElement<{ children?: React.ReactNode }>).props.children);
@@ -56,7 +58,8 @@ const EVT = "codegroup:tab:change";
 
 export function CodeGroup({ className, ...props }: CodeGroupProps) {
   const id = React.useId();
-  const [value, setValue] = React.useState(props.defaultValue ?? "");
+
+  const [value, setValue] = React.useState<unknown>(props.defaultValue);
 
   React.useEffect(() => {
     const onChange = (e: Event) => {
@@ -68,7 +71,9 @@ export function CodeGroup({ className, ...props }: CodeGroupProps) {
     };
 
     globalThis.addEventListener(EVT, onChange);
-    return () => globalThis.removeEventListener(EVT, onChange);
+    return () => {
+      globalThis.removeEventListener(EVT, onChange);
+    };
   }, [id]);
 
   return (
@@ -77,7 +82,7 @@ export function CodeGroup({ className, ...props }: CodeGroupProps) {
       value={value}
       onValueChange={(next) => {
         setValue(next);
-        globalThis.dispatchEvent(new CustomEvent(EVT, { detail: next }));
+        globalThis.dispatchEvent(new CustomEvent<unknown>(EVT, { detail: next }));
       }}
       className={cn(
         "relative flex min-h-0 w-full min-w-0 gap-0",

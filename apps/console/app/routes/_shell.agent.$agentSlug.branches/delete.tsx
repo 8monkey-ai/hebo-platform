@@ -25,6 +25,8 @@ import { Input } from "@hebo/shared-ui/components/Input";
 
 import { useFormErrorToast } from "~console/lib/errors";
 
+import type { clientAction } from "./route";
+
 export function createBranchDeleteSchema(branchSlug: string) {
   return z.object({
     slugConfirm: z.literal(branchSlug, "You must type your EXACT branch slug"),
@@ -38,7 +40,7 @@ type DeleteBranchDialogProps = {
 } & React.ComponentProps<typeof Dialog>;
 
 export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranchDialogProps) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
   const [form, fields] = useForm<BranchDeleteFormValues>({
     id: branchSlug,
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,

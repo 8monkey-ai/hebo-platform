@@ -92,7 +92,11 @@ export function UserMenu({
                   </a>
                 }
               />
-              <DropdownMenuItem onClick={() => setShortcutsOpen(true)}>
+              <DropdownMenuItem
+                onClick={() => {
+                  setShortcutsOpen(true);
+                }}
+              >
                 <Keyboard />
                 <span>Shortcuts</span>
                 <DropdownMenuShortcut>{kbs("mod+/")}</DropdownMenuShortcut>
@@ -118,7 +122,9 @@ export function UserMenu({
                       <DropdownMenuItem
                         key={org.id}
                         className="gap-2 p-2"
-                        onClick={() => authService.setActiveOrganization(org.id)}
+                        onClick={() => {
+                          void authService.setActiveOrganization(org.id);
+                        }}
                       >
                         <span className="truncate">{org.name}</span>
                       </DropdownMenuItem>

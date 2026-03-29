@@ -9,8 +9,12 @@ export function PageLoader() {
 
   useEffect(() => {
     if (!isLoading) {
-      const ft = globalThis.setTimeout(() => setProgress(100), 0);
-      const rt = globalThis.setTimeout(() => setProgress(0), 400);
+      const ft = globalThis.setTimeout(() => {
+        setProgress(100);
+      }, 0);
+      const rt = globalThis.setTimeout(() => {
+        setProgress(0);
+      }, 400);
 
       return () => {
         clearTimeout(ft);
@@ -22,7 +26,9 @@ export function PageLoader() {
       setProgress((p) => Math.min(p + Math.random() * 10, 90));
     }, 200);
 
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+    };
   }, [isLoading]);
 
   return (

@@ -1,5 +1,6 @@
 import { Elysia, status, t } from "elysia";
 
+import type { Prisma } from "~api/generated/prisma/client";
 import { prisma } from "~api/middleware/prisma";
 
 import { type Models } from "./types";
@@ -14,14 +15,11 @@ export const providersModule = new Elysia({
     async ({ prismaClient, query }) => {
       const providerConfigs = await prismaClient.provider_configs.findMany();
 
-      let providers = Object.entries(supportedProviders).map(
-        ([slug, { name }]) =>
-          ({
-            slug: slug as ProviderSlug,
-            name,
-            config: providerConfigs.find((p) => p.provider_slug === slug)?.value,
-          }) as Provider,
-      );
+      let providers = Object.entries(supportedProviders).map(([slug, { name }]) => ({
+        slug,
+        name,
+        config: providerConfigs.find((p) => p.provider_slug === slug)?.value,
+      }));
 
       if (query.configured) {
         providers = providers.filter((p) => p.config !== undefined);
@@ -48,7 +46,7 @@ export const providersModule = new Elysia({
         data: {
           provider_slug: params.slug,
           value: body,
-        } as any,
+        } as unknown as Prisma.provider_configsCreateInput,
       });
 
       if (existing) {

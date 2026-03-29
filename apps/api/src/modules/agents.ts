@@ -3,6 +3,7 @@ import { Elysia, status, t } from "elysia";
 import { authService } from "@hebo/shared-api/middlewares/auth";
 import { slugFromString } from "@hebo/shared-api/utils/create-slug";
 
+import type { Prisma } from "~api/generated/prisma/client";
 import {
   agentsInclude,
   agentsInputCreate,
@@ -72,9 +73,9 @@ export const agentsModule = new Elysia({
                 name: "Main",
                 slug: "main",
                 models: [{ alias: "default", type: body.defaultModel }],
-              },
+              } as unknown as Prisma.branchesCreateWithoutAgentInput,
             },
-          } as any,
+          } as unknown as Prisma.agentsCreateInput,
           include: { branches: true },
         }),
       );

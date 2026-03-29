@@ -22,8 +22,12 @@ export function CopyButton({
 
   React.useEffect(() => {
     if (!hasCopied) return;
-    const timeout = setTimeout(() => setHasCopied(false), 2000);
-    return () => clearTimeout(timeout);
+    const timeout = setTimeout(() => {
+      setHasCopied(false);
+    }, 2000);
+    return () => {
+      clearTimeout(timeout);
+    };
   }, [hasCopied]);
 
   const copy = async () => {

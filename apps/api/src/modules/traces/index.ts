@@ -20,7 +20,7 @@ export const spansModule = new Elysia({
       let metadata: Record<string, string> = {};
       if (query.metadata) {
         try {
-          const parsed = JSON.parse(query.metadata);
+          const parsed: unknown = JSON.parse(query.metadata);
           if (
             !parsed ||
             typeof parsed !== "object" ||

@@ -29,6 +29,8 @@ import { Select } from "@hebo/shared-ui/components/Select";
 
 import { useFormErrorToast } from "~console/lib/errors";
 
+import type { clientAction } from "./route";
+
 export const BranchCreateSchema = z.object({
   branchName: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a branch name"),
   sourceBranchSlug: z.string(),
@@ -43,7 +45,7 @@ type CreateBranchProps = {
 };
 
 export default function CreateBranch({ branches }: CreateBranchProps) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
   const [form, fields] = useForm<BranchCreateFormValues>({
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
     constraint: getZodConstraint(BranchCreateSchema),

@@ -29,7 +29,7 @@ const longToolPayload = {
 
 const mockTraces = [
   {
-    timestamp: new Date(now - 3 * min).toISOString(),
+    timestamp: new Date(now - 3 * min),
     traceId: "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e",
     operationName: "chat",
     model: "gpt-oss-120b",
@@ -40,7 +40,7 @@ const mockTraces = [
     metadata: { session_id: "sess_abc123", environment: "production", user_id: "usr_456" },
   },
   {
-    timestamp: new Date(now - 6 * min).toISOString(),
+    timestamp: new Date(now - 6 * min),
     traceId: "7a2b3c4d-e5f6-7890-abcd-ef1234567890",
     operationName: "chat",
     model: "gpt-4.1",
@@ -51,7 +51,7 @@ const mockTraces = [
     metadata: { session_id: "sess_def456", environment: "staging" },
   },
   {
-    timestamp: new Date(now - 12 * min).toISOString(),
+    timestamp: new Date(now - 12 * min),
     traceId: "3c4d5e6f-7890-abcd-ef12-345678901234",
     operationName: "chat",
     model: "claude-sonnet-4-20250514",
@@ -62,7 +62,7 @@ const mockTraces = [
     metadata: { session_id: "sess_ghi789", environment: "production" },
   },
   {
-    timestamp: new Date(now - 18 * min).toISOString(),
+    timestamp: new Date(now - 18 * min),
     traceId: "4d5e6f70-8901-bcde-f123-456789012345",
     operationName: "chat",
     model: "gpt-oss-20b",
@@ -73,7 +73,7 @@ const mockTraces = [
     metadata: { environment: "staging" },
   },
   {
-    timestamp: new Date(now - 25 * min).toISOString(),
+    timestamp: new Date(now - 25 * min),
     traceId: "5e6f7081-9012-cdef-0123-567890123456",
     operationName: "embeddings",
     model: "voyage-3.5",
@@ -86,7 +86,7 @@ const mockTraces = [
 ];
 
 const generatedMockTraces = Array.from({ length: 18 }).map((_, index) => {
-  const timestamp = new Date(now - (30 + index * 4) * min).toISOString();
+  const timestamp = new Date(now - (30 + index * 4) * min);
   const traceId = `90000000-0000-4000-8000-${String(index + 1).padStart(12, "0")}`;
   const provider = index % 3 === 0 ? "openai" : index % 3 === 1 ? "anthropic" : "google";
   const model =
@@ -118,7 +118,7 @@ mockTraces.push(...generatedMockTraces);
 
 const mockSpanDetails: Record<string, object> = {
   "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e": {
-    timestamp: mockTraces[0]!.timestamp,
+    timestamp: mockTraces[0].timestamp,
     spanId: "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e",
     operationName: "chat",
     model: "gpt-oss-120b",
@@ -246,7 +246,7 @@ const mockSpanDetails: Record<string, object> = {
     },
   },
   "7a2b3c4d-e5f6-7890-abcd-ef1234567890": {
-    timestamp: mockTraces[1]!.timestamp,
+    timestamp: mockTraces[1].timestamp,
     spanId: "7a2b3c4d-e5f6-7890-abcd-ef1234567890",
     operationName: "chat",
     model: "gpt-4.1",
@@ -310,7 +310,7 @@ const mockSpanDetails: Record<string, object> = {
     },
   },
   "3c4d5e6f-7890-abcd-ef12-345678901234": {
-    timestamp: mockTraces[2]!.timestamp,
+    timestamp: mockTraces[2].timestamp,
     spanId: "3c4d5e6f-7890-abcd-ef12-345678901234",
     operationName: "chat",
     model: "claude-sonnet-4-20250514",
@@ -356,7 +356,7 @@ const mockSpanDetails: Record<string, object> = {
     },
   },
   "4d5e6f70-8901-bcde-f123-456789012345": {
-    timestamp: mockTraces[3]!.timestamp,
+    timestamp: mockTraces[3].timestamp,
     spanId: "4d5e6f70-8901-bcde-f123-456789012345",
     operationName: "chat",
     model: "gpt-oss-20b",
@@ -397,7 +397,7 @@ const mockSpanDetails: Record<string, object> = {
     },
   },
   "5e6f7081-9012-cdef-0123-567890123456": {
-    timestamp: mockTraces[4]!.timestamp,
+    timestamp: mockTraces[4].timestamp,
     spanId: "5e6f7081-9012-cdef-0123-567890123456",
     operationName: "embeddings",
     model: "voyage-3.5",
@@ -569,7 +569,7 @@ export const traceHandlers = [
       const filtered =
         filterEntries.length > 0
           ? mockTraces.filter((t) => {
-              const detail = mockSpanDetails[t.traceId] as any;
+              const detail = mockSpanDetails[t.traceId] as { metadata: Record<string, unknown> };
               return filterEntries.every(
                 ([metaKey, value]) => detail?.metadata?.[metaKey] === value,
               );

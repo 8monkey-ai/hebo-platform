@@ -9,7 +9,7 @@ import { authService } from "~console/lib/auth";
 
 import type { Route } from "./+types/route";
 
-export async function clientLoader({ request }: { request: Request }) {
+export async function clientLoader({ request }: Route.LoaderArgs) {
   const invitationId = new URL(request.url).searchParams.get("id");
   if (!invitationId) return { status: "no-id" as const };
 
@@ -17,7 +17,7 @@ export async function clientLoader({ request }: { request: Request }) {
     await authService.acceptInvitation(invitationId);
     return { status: "success" as const };
   } catch (err) {
-    return { status: "error" as const, message: (err as Error).message };
+    return { status: "error" as const, message: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -27,7 +27,9 @@ export default function AcceptInvitation({ loaderData: data }: Route.ComponentPr
       const timer = setTimeout(() => {
         globalThis.location.replace("/");
       }, 1500);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+      };
     }
   }, [data.status]);
 

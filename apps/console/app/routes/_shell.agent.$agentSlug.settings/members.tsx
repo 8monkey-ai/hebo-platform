@@ -41,6 +41,8 @@ import type { OrgInvitation, OrgMember } from "~console/lib/auth/types";
 import { useFormErrorToast } from "~console/lib/errors";
 import { inviteSchema } from "~console/routes/_shell.agent.$agentSlug.settings.members/invite-schema";
 
+import type { clientAction } from "../_shell.agent.$agentSlug.settings.members/route";
+
 type MembersSettingsProps = {
   members: OrgMember[];
   invitations: OrgInvitation[];
@@ -55,7 +57,7 @@ export function MembersSettings({
   canManage,
   agent,
 }: MembersSettingsProps) {
-  const fetcher = useFetcher<{ intent: string; submission: any }>();
+  const fetcher = useFetcher<typeof clientAction>();
   const [role, setRole] = useState("member");
 
   const [form, fields] = useForm({
@@ -105,7 +107,7 @@ export function MembersSettings({
                     {member.role}
                   </Badge>
                 </TableCell>
-                <TableCell>{new Date(member.createdAt).toLocaleDateString()}</TableCell>
+                <TableCell>{member.createdAt.toLocaleDateString()}</TableCell>
                 {canManage && (
                   <TableCell>
                     {isOwner && member.role !== "owner" && (
@@ -136,7 +138,7 @@ export function MembersSettings({
                     <Badge variant="outline">Invited</Badge>
                   </div>
                 </TableCell>
-                <TableCell>expires {new Date(inv.expiresAt).toLocaleDateString()}</TableCell>
+                <TableCell>expires {inv.expiresAt.toLocaleDateString()}</TableCell>
                 {canManage && (
                   <TableCell>
                     <div className="flex items-center">
@@ -181,7 +183,9 @@ export function MembersSettings({
               <input type="hidden" name={fields.role.name} value={role} />
               <Select
                 value={role}
-                onValueChange={(value) => setRole(value as string)}
+                onValueChange={(value) => {
+                  setRole(value as string);
+                }}
                 items={[
                   { value: "member", label: "Member" },
                   { value: "admin", label: "Admin" },
@@ -200,7 +204,7 @@ export function MembersSettings({
 }
 
 function RemoveMemberButton({ email }: { email: string }) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
   return (
     <AlertDialog>
       <AlertDialogTrigger
@@ -235,7 +239,7 @@ function RemoveMemberButton({ email }: { email: string }) {
 }
 
 function RevokeInvitationButton({ invitationId }: { invitationId: string }) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
   return (
     <AlertDialog>
       <AlertDialogTrigger

@@ -14,17 +14,18 @@ export function toTimestampLiteral(value: Date): string {
 }
 
 export function parseNullableNumber(value: unknown): number | null {
-  if (value === null || value === undefined || value === "") return null;
-  if (typeof value === "number") return Number.isFinite(value) ? value : null;
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
+  if (typeof value === "string") return Number(value);
+  if (typeof value === "number") return value;
   return null;
 }
 
+export function parseString(value: unknown): string {
+  if (typeof value === "string") return value;
+  return "";
+}
+
 function normalizeJsonUnicodeEscapes(value: string): string {
-  return value.replaceAll(/\\u\{([0-9a-fA-F]+)\}/g, (match, hex) => {
+  return value.replaceAll(/\\u\{([0-9a-fA-F]+)\}/g, (match, hex: string) => {
     const codePoint = Number.parseInt(hex, 16);
     return Number.isFinite(codePoint) ? String.fromCodePoint(codePoint) : match;
   });
@@ -49,8 +50,7 @@ export function parseJsonArray(value: unknown): unknown[] | null {
   return parsed.map((item) => parseJson(item));
 }
 
-export function formatStatus(statusCode: string | null): "ok" | "error" | "unknown" {
-  if (!statusCode) return "unknown";
+export function formatStatus(statusCode: unknown): "ok" | "error" | "unknown" {
   if (statusCode === "STATUS_CODE_OK" || statusCode === "STATUS_CODE_UNSET") return "ok";
   if (statusCode === "STATUS_CODE_ERROR") return "error";
   return "unknown";
@@ -64,29 +64,34 @@ export function extractLastUserSummary(messages: unknown): string {
   const parsed = parseJsonArray(messages);
   if (!parsed) return "";
   for (let i = parsed.length - 1; i >= 0; i--) {
-    const msg = parsed[i] as any;
-    if (msg?.role === "user") return extractSummary(msg);
+    const msg = parsed[i];
+    if (!msg || typeof msg !== "object") continue;
+    if ((msg as Record<string, unknown>).role === "user") return extractSummary(msg);
   }
   return "";
 }
 
 function extractSummary(message: unknown): string {
   const parsed = parseJson(message);
-  if (!parsed) return "";
 
   if (typeof parsed === "string") return truncateSummary(parsed.trim());
-  if (typeof parsed !== "object") return "";
+  if (!parsed || typeof parsed !== "object") return "";
 
-  const { content, parts } = parsed as any;
   const texts: string[] = [];
+  const { content, parts } = parsed as Record<string, unknown>;
 
   if (typeof content === "string") texts.push(content);
 
   for (const arr of [content, parts]) {
     if (!Array.isArray(arr)) continue;
+
     for (const part of arr) {
-      const value = part?.text ?? part?.content;
-      if ((part?.type === "text" || part?.type === "reasoning") && typeof value === "string") {
+      if (typeof part !== "object" || part === null) continue;
+
+      const p = part as Record<string, unknown>;
+      const value = p.text ?? p.content;
+
+      if ((p.type === "text" || p.type === "reasoning") && typeof value === "string") {
         texts.push(value);
       }
     }

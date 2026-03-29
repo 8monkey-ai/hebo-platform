@@ -31,12 +31,12 @@ export function ErrorView() {
       {retryable && (
         <Button
           className="w-auto self-start"
-          onClick={() =>
-            navigate(`${pathname}${search}${hash}`, {
+          onClick={() => {
+            void navigate(`${pathname}${search}${hash}`, {
               replace: true,
               viewTransition: true,
-            })
-          }
+            });
+          }}
           isLoading={navigation.state !== "idle"}
         >
           Retry

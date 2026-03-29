@@ -18,6 +18,8 @@ import { FormControl, FieldControl, Field } from "@hebo/shared-ui/components/Fie
 
 import { useFormErrorToast } from "~console/lib/errors";
 
+import type { clientAction } from "./route";
+
 export const ApiKeyRevokeSchema = z.object({
   apiKeyId: ((msg) => z.string(msg).trim().min(1, msg))("Select an API key to revoke"),
 });
@@ -25,11 +27,11 @@ export const ApiKeyRevokeSchema = z.object({
 type ApiKeyRevokeFormValues = z.infer<typeof ApiKeyRevokeSchema>;
 
 type RevokeApiKeyDialogProps = {
-  apiKey?: { id: string; name: string; key: string };
+  apiKey?: { id: string; key: string };
 } & React.ComponentProps<typeof Dialog>;
 
 export function RevokeApiKeyDialog({ apiKey, ...props }: RevokeApiKeyDialogProps) {
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<typeof clientAction>();
   const [form, fields] = useForm<ApiKeyRevokeFormValues>({
     id: apiKey?.id,
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
