@@ -12,6 +12,7 @@ import BranchesTable from "./table";
 export async function clientAction({ request, params }: Route.ClientActionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
+  if (!intent) return;
 
   let result, submission;
 
@@ -21,7 +22,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
         schema: BranchCreateSchema,
       });
 
-      if (submission!.status !== "success") return { intent, submission: submission!.reply() };
+      if (submission.status !== "success") return { intent, submission: submission.reply() };
 
       try {
         result = await api
@@ -55,7 +56,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
         schema: createBranchDeleteSchema(formData.get("branchSlug") as string),
       });
 
-      if (submission!.status !== "success") return { intent, submission: submission!.reply() };
+      if (submission.status !== "success") return { intent, submission: submission.reply() };
 
       try {
         result = await api
@@ -83,7 +84,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
 }
 
 export default function Branches() {
-  const agent = useRoute("routes/_shell.agent.$agentSlug")!.loaderData!.agent!;
+  const agent = useRoute("routes/_shell.agent.$agentSlug")!.loaderData!.agent;
 
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-6">

@@ -9,7 +9,7 @@ import type { VerifyApiKeyPlugin } from "~auth/lib/verify-api-key-plugin";
 import { authSecret, authUrl } from "../env";
 import { AuthError, BadRequestError } from "../errors";
 import { betterAuthCookieOptions } from "../lib/cookie-options";
-import type { Logger } from "./logging";
+import { logging } from "./logging";
 
 const cookieConfig = getCookies(betterAuthCookieOptions);
 
@@ -52,34 +52,33 @@ const createAuthClient = (request: Request) => {
 };
 
 export const authService = new Elysia({ name: "auth-service" })
-  .resolve(async function resolveAuthContext(ctx) {
-    const logger = (ctx as unknown as { logger: Logger }).logger;
+  .use(logging())
+  .resolve(async function resolveAuthContext({ request, cookie, logger }) {
+    const cookieHeader = request.headers.get("cookie");
+    const authHeader = request.headers.get("authorization");
 
-    const cookie = ctx.request.headers.get("cookie");
-    const authorization = ctx.request.headers.get("authorization");
-
-    if (cookie && authorization) {
+    if (cookieHeader && authHeader) {
       throw new BadRequestError("Provide exactly one credential: Bearer API Key or JWT Header");
     }
 
-    const authClient = createAuthClient(ctx.request);
+    const authClient = createAuthClient(request);
 
     let userId: string | undefined;
     let organizationId: string | undefined;
 
-    if (cookie) {
-      const session = await getCookieCache(ctx.request, {
+    if (cookieHeader) {
+      const session = await getCookieCache(request, {
         secret: authSecret,
         isSecure: betterAuthCookieOptions.advanced.useSecureCookies,
       });
 
       if (session) {
         userId = session.user.id;
-        organizationId = session.session.activeOrganizationId;
+        organizationId = session.session.activeOrganizationId as string;
       }
-    } else if (authorization) {
+    } else if (authHeader) {
       const { data: result } = await authClient.internal.verifyApiKey({
-        key: authorization.slice(7) || "invalid-key",
+        key: authHeader.slice(7) || "invalid-key",
         fetchOptions: {
           headers: { "x-internal-secret": authSecret },
         },
@@ -87,7 +86,7 @@ export const authService = new Elysia({ name: "auth-service" })
 
       if (result?.valid && result.key) {
         if (result.key.metadata?.createdByUserId) {
-          userId = result.key.metadata.createdByUserId;
+          userId = result.key.metadata.createdByUserId as string;
         } else {
           logger.warn("API key missing createdByUserId in metadata");
         }
@@ -102,7 +101,7 @@ export const authService = new Elysia({ name: "auth-service" })
 
       // Clear the session cookie when unauthorized
       const { attributes, name } = cookieConfig.sessionToken;
-      ctx.cookie[name] = {
+      cookie[name] = {
         value: "",
         maxAge: 0,
         ...attributes,

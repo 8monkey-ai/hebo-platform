@@ -16,33 +16,37 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
+  const handleSignUp: React.SubmitEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+
+    void (async () => {
+      setLoading(true);
+      setError(undefined);
+      try {
+        await authService.signUpWithPassword(name, email, password);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
   return (
     <div className="flex w-xs flex-col items-center gap-4">
       <Logo />
       <p className="text-center text-base">Create your account</p>
 
-      <form
-        className="flex w-full flex-col gap-2"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setLoading(true);
-          setError(undefined);
-          try {
-            await authService.signUpWithPassword(name, email, password);
-          } catch (err) {
-            if (err instanceof Error) setError(err.message);
-          } finally {
-            setLoading(false);
-          }
-        }}
-      >
+      <form className="flex w-full flex-col gap-2" onSubmit={handleSignUp}>
         <Label htmlFor="name">Name</Label>
         <Input
           id="name"
           type="text"
           autoComplete="name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+          }}
           disabled={loading}
           required
         />
@@ -53,7 +57,9 @@ export default function SignUp() {
           type="email"
           autoComplete="email"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) => {
+            setEmail(e.target.value);
+          }}
           disabled={loading}
           required
         />
@@ -64,7 +70,9 @@ export default function SignUp() {
           type="password"
           autoComplete="new-password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+          }}
           disabled={loading}
           minLength={8}
           required

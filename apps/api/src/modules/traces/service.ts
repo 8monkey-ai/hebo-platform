@@ -10,6 +10,7 @@ import {
   formatStatus,
   parseJsonArray,
   parseNullableNumber,
+  parseString,
   toTimestampLiteral,
 } from "./utils";
 
@@ -42,18 +43,18 @@ async function getTraceColumnNames(greptimeDb: GreptimeDb) {
   //      WHERE table_name = 'opentelemetry_traces' AND column_name LIKE $1`,
   //     [`${METADATA_PREFIX}%`],
   //   )
-  const rows = (await greptimeDb.unsafe(
+  const rows = await greptimeDb.unsafe<Array<{ column_name: string }>>(
     `SELECT column_name
      FROM information_schema.columns
      WHERE table_name = 'opentelemetry_traces'
        AND (column_name LIKE '${METADATA_PREFIX}%'
          OR column_name IN (${OPTIONAL_SPAN_COLUMNS.map(({ column }) => `'${escapeSqlIdentifier(column)}'`).join(", ")}))`,
-  )) as Array<{ column_name: unknown }>;
+  );
 
   const metadataColumns: string[] = [];
   const optionalColumns = new Set<string>();
   for (const { column_name } of rows) {
-    const name = String(column_name);
+    const name = column_name;
     if (name.startsWith(METADATA_PREFIX)) metadataColumns.push(name);
     else optionalColumns.add(name);
   }
@@ -136,7 +137,7 @@ export async function listTraces(
     LIMIT ${pageSize + 1} OFFSET ${(page - 1) * pageSize}
   `;
 
-  const rows = (await greptimeDb.unsafe(queryText)) as any[];
+  const rows = await greptimeDb.unsafe<Record<string, unknown>[]>(queryText);
   const hasNextPage = rows.length > pageSize;
   const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
 
@@ -144,19 +145,18 @@ export async function listTraces(
   for (const row of pageRows) {
     const metadata: Record<string, string> = {};
     for (const col of metadataColumns) {
-      const value = row[col];
-      if (value !== null && value !== undefined) {
-        metadata[col.slice(METADATA_PREFIX.length)] = String(value);
+      if (row[col] !== null && row[col] !== undefined) {
+        metadata[col.slice(METADATA_PREFIX.length)] = parseString(row[col]);
       }
     }
     data.push({
-      timestamp: String(row.timestamp),
-      traceId: String(row.trace_id ?? ""),
-      operationName: String(row.operation_name ?? ""),
-      model: String(row.response_model ?? ""),
-      provider: String(row.provider_name ?? ""),
+      timestamp: row.timestamp as Date,
+      traceId: parseString(row.trace_id),
+      operationName: parseString(row.operation_name),
+      model: parseString(row.response_model),
+      provider: parseString(row.provider_name),
       status: formatStatus(row.span_status_code),
-      durationMs: Number(row.duration_nano ?? 0) / 1e6,
+      durationMs: Number(row.duration_nano) / 1e6,
       summary: extractLastUserSummary(row.input_messages),
       metadata,
     });
@@ -227,7 +227,7 @@ export async function getSpans(
     ORDER BY "timestamp" ASC
   `;
 
-  const rows = (await greptimeDb.unsafe(queryText)) as any[];
+  const rows = await greptimeDb.unsafe<Record<string, unknown>[]>(queryText);
 
   const result = [];
   for (const row of rows) {
@@ -247,12 +247,12 @@ export async function getSpans(
     }
 
     result.push({
-      timestamp: String(row.timestamp),
-      spanId: String(row.span_id ?? ""),
-      operationName: String(row.operation_name ?? ""),
-      model: String(row.request_model ?? ""),
-      responseModel: String(row.response_model ?? ""),
-      provider: String(row.provider_name ?? ""),
+      timestamp: row.timestamp as Date,
+      spanId: parseString(row.span_id),
+      operationName: parseString(row.operation_name),
+      model: parseString(row.request_model),
+      responseModel: parseString(row.response_model),
+      provider: parseString(row.provider_name),
       status: formatStatus(row.span_status_code),
       durationMs: Number(row.duration_nano ?? 0) / 1e6,
       inputTokens: parseNullableNumber(row.input_tokens),
@@ -263,7 +263,7 @@ export async function getSpans(
       inputMessages: (parseJsonArray(row.input_messages) ?? []) as GenAIInputMessages,
       outputMessages: (parseJsonArray(row.output_messages) ?? []) as GenAIOutputMessages,
       finishReasons: (parseJsonArray(row.finish_reasons) ?? null) as GenAIFinishReasons,
-      responseId: String(row.response_id ?? ""),
+      responseId: parseString(row.response_id),
       metadata,
       spanAttributes,
     });

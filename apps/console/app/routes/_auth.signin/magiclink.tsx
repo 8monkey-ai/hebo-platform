@@ -15,28 +15,50 @@ export function MagicLinkSignIn() {
   const [otp, setOtp] = useState<string>("");
   const [error, setError] = useState<string | undefined>();
 
+  const handleVerifyOTP: React.SubmitEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+
+    void (async () => {
+      setLoading(true);
+      setError(undefined);
+      try {
+        await authService.signInWithMagicLink(otp, email);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
+  const handleSendEmail: React.SubmitEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+
+    void (async () => {
+      setLoading(true);
+      setError(undefined);
+      try {
+        await authService.sendMagicLinkEmail(email);
+        setLinkSent(true);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
   return linkSent ? (
-    <form
-      className="flex flex-col items-center gap-2"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-          await authService.signInWithMagicLink(otp, email);
-        } catch (err) {
-          if (err instanceof Error) setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      }}
-    >
+    <form className="flex flex-col items-center gap-2" onSubmit={handleVerifyOTP}>
       <Label>Enter the code from your email</Label>
       <div className="flex gap-2">
         <InputOTP
           maxLength={6}
           pattern={"^[a-zA-Z0-9]+$"}
           value={otp}
-          onChange={(value) => setOtp(value.toUpperCase())}
+          onChange={(value) => {
+            setOtp(value.toUpperCase());
+          }}
           disabled={loading}
         >
           <InputOTPGroup>
@@ -68,28 +90,16 @@ export function MagicLinkSignIn() {
       </Button>
     </form>
   ) : (
-    <form
-      className="flex flex-col gap-2"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-          await authService.sendMagicLinkEmail(email);
-          setLinkSent(true);
-        } catch (err) {
-          if (err instanceof Error) setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      }}
-    >
+    <form className="flex flex-col gap-2" onSubmit={handleSendEmail}>
       <Label htmlFor="email">Email</Label>
       <Input
         id="email"
         type="email"
         autoComplete="email"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => {
+          setEmail(e.target.value);
+        }}
         disabled={loading}
         required
       />

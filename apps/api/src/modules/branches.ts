@@ -2,6 +2,7 @@ import { Elysia, status, t } from "elysia";
 
 import { slugFromString } from "@hebo/shared-api/utils/create-slug";
 
+import type { Prisma } from "~api/generated/prisma/client";
 import {
   branches,
   branchesInputCreate,
@@ -43,7 +44,7 @@ export const branchesModule = new Elysia({
             name: body.name,
             slug: slugFromString(body.name),
             models,
-          } as any,
+          } as unknown as Prisma.branchesCreateInput,
         }),
       );
     },

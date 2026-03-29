@@ -39,7 +39,13 @@ export default function TraceDetailRoute({ loaderData }: Route.ComponentProps) {
     <div className="flex h-full min-h-0 flex-col gap-3">
       {traceId && (
         <div className="shrink-0 @2xl:hidden">
-          <Button variant="outline" size="sm" onClick={() => navigate("..")}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              void navigate("..");
+            }}
+          >
             <ChevronLeft className="size-4" />
             Back to traces
           </Button>

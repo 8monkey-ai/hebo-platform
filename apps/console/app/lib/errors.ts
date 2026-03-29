@@ -9,21 +9,24 @@ export function parseError(error: unknown) {
   let status: number | undefined;
 
   if (isRouteErrorResponse(error)) {
-    const msg = typeof error.data === "string" ? error.data : error.data?.message;
-    message = `${error.statusText}: ${msg}`;
+    message = error.statusText;
+    if (typeof error.data === "object" && error.data !== null && "message" in error.data)
+      message += `: ${(error.data as { message: any }).message}`;
+    else message += `: ${error.data}`;
     status = error.status;
   } else if (typeof error === "object" && error !== null && "summary" in error) {
     const e = error as { summary?: string; message?: string };
+    // oxlint-disable-next-line prefer-nullish-coalescing
     message = e.summary || e.message || "Unknown Error";
   } else if (error instanceof TimeoutError) {
-    message = `${error.message}`;
+    message = error.message;
   } else if (isNetworkError(error)) {
     message = `Network error: ${error.message}`;
   } else if (error instanceof HTTPError) {
     message = `${error.response.statusText}: ${error.message}`;
     status = error.response.status;
   } else if (error instanceof Error) {
-    message = `${error.message}`;
+    message = error.message;
   } else if (typeof error === "string") {
     message = error;
   } else {

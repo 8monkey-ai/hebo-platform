@@ -17,13 +17,13 @@ export const verifyApiKeyPlugin = (getAuth: () => AuthWithApiKeyPlugin) => {
           method: "POST",
           body: z.object({ key: z.string() }),
         },
-        async (ctx) => {
+        (ctx) => {
           const secret = ctx.request?.headers.get("x-internal-secret");
           if (secret !== ctx.context.secret) {
             throw new APIError("FORBIDDEN");
           }
 
-          return await getAuth().api.verifyApiKey({
+          return getAuth().api.verifyApiKey({
             body: ctx.body,
             asResponse: false,
           });

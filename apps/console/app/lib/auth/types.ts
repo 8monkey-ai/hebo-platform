@@ -39,7 +39,7 @@ export type OrgMember = {
   id: string;
   userId: string;
   role: string;
-  createdAt: string;
+  createdAt: Date;
   user: { name: string; email: string };
 };
 
@@ -47,14 +47,14 @@ export type OrgInvitation = {
   id: string;
   email: string;
   role: string;
-  expiresAt: string;
+  expiresAt: Date;
   status: string;
   teamId?: string;
 };
 
 export type ApiKey = {
   id: string;
-  name: string;
+  name: string | null;
   key: string;
   createdAt: Date;
   expiresAt: Date | null;

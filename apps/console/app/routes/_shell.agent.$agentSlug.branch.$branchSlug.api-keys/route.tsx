@@ -19,6 +19,7 @@ export function clientLoader() {
 export async function clientAction({ request }: Route.ClientActionArgs) {
   const formData = await request.formData();
   const intent = formData.get("intent");
+  if (!intent) return;
 
   switch (intent) {
     case "create": {

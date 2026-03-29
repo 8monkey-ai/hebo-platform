@@ -243,7 +243,9 @@ function TagStrip({
   const overflowCount = entries.length - visible.length;
   function toggleMetadataFilter(key: string, value: string, event: React.MouseEvent) {
     event.preventDefault();
-    updateParams((sp) => sp.toggleValue("metadata", key, value));
+    updateParams((sp) => {
+      sp.toggleValue("metadata", key, value);
+    });
     setOpen(false);
   }
 
@@ -341,7 +343,9 @@ function TagBadge({
       <button
         type="button"
         className="inline-flex size-3.5 items-center justify-center rounded-sm hover:bg-accent"
-        onClick={(e) => onToggle(badgeKey, value, e)}
+        onClick={(e) => {
+          onToggle(badgeKey, value, e);
+        }}
         aria-label={isActive ? `Remove ${badgeKey} filter` : `Filter by ${badgeKey}:${value}`}
       >
         {isActive ? <X className="size-2.5" /> : <Filter className="size-2.5" />}
@@ -464,7 +468,9 @@ function TimePresetControl() {
               type="datetime-local"
               className="text-xs"
               value={customFrom}
-              onChange={(event) => setCustomFrom(event.target.value)}
+              onChange={(event) => {
+                setCustomFrom(event.target.value);
+              }}
             />
           </div>
           <div className="flex flex-col gap-1">
@@ -476,7 +482,9 @@ function TimePresetControl() {
               type="datetime-local"
               className="text-xs"
               value={customTo}
-              onChange={(event) => setCustomTo(event.target.value)}
+              onChange={(event) => {
+                setCustomTo(event.target.value);
+              }}
             />
           </div>
           <Button type="submit" size="sm" className="ml-auto">
@@ -511,14 +519,18 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
         </PopoverHeader>
         <div className="-mx-4 border-t" />
         <div className="flex flex-col gap-3">
-          {(Object.keys(metadata).length > 0 || status || operation) && (
+          {(Object.keys(metadata).length > 0 || status != null || operation != null) && (
             <div className="flex flex-col gap-1.5">
               <p className="text-xs font-semibold text-muted-foreground">Active filters</p>
               <div className="flex flex-wrap gap-1">
                 {status && (
                   <RemovableBadge
                     label="Remove status filter"
-                    onRemove={() => updateParams((sp) => sp.delete("status"))}
+                    onRemove={() => {
+                      updateParams((sp) => {
+                        sp.delete("status");
+                      });
+                    }}
                   >
                     status: {status}
                   </RemovableBadge>
@@ -526,7 +538,11 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                 {operation && (
                   <RemovableBadge
                     label="Remove operation filter"
-                    onRemove={() => updateParams((sp) => sp.delete("operation"))}
+                    onRemove={() => {
+                      updateParams((sp) => {
+                        sp.delete("operation");
+                      });
+                    }}
                   >
                     operation: {operation}
                   </RemovableBadge>
@@ -535,7 +551,11 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                   <RemovableBadge
                     key={key}
                     label={`Remove ${key} filter`}
-                    onRemove={() => updateParams((sp) => sp.removeValue("metadata", key))}
+                    onRemove={() => {
+                      updateParams((sp) => {
+                        sp.removeValue("metadata", key);
+                      });
+                    }}
                   >
                     {key}: {value}
                   </RemovableBadge>
@@ -548,12 +568,12 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
             <p className="text-xs font-semibold text-muted-foreground">Status</p>
             <Select
               value={status ?? ""}
-              onValueChange={(value) =>
+              onValueChange={(value) => {
                 updateParams((sp) => {
                   if (value) sp.set("status", value as string);
                   else sp.delete("status");
-                })
-              }
+                });
+              }}
               items={traceStatuses.map((s) => ({ value: s, label: s === "ok" ? "OK" : "Error" }))}
               placeholder="Any status"
             />
@@ -563,12 +583,12 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
             <p className="text-xs font-semibold text-muted-foreground">Operation</p>
             <Select
               value={operation ?? ""}
-              onValueChange={(value) =>
+              onValueChange={(value) => {
                 updateParams((sp) => {
                   if (value) sp.set("operation", value as string);
                   else sp.delete("operation");
-                })
-              }
+                });
+              }}
               items={traceOperations.map((o) => ({
                 value: o,
                 label: o.charAt(0).toUpperCase() + o.slice(1),
@@ -588,7 +608,9 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                 <div className="min-w-0 flex-1">
                   <Select
                     value={filterKey}
-                    onValueChange={(value) => setFilterKey(value as string)}
+                    onValueChange={(value) => {
+                      setFilterKey(value as string);
+                    }}
                     items={[...metadataKeys]
                       .sort((a, b) => a.localeCompare(b))
                       .map((key) => ({ value: key, label: key }))}
@@ -598,7 +620,9 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                 <div className="min-w-0 flex-1">
                   <Input
                     value={filterValue}
-                    onChange={(e) => setFilterValue(e.target.value)}
+                    onChange={(e) => {
+                      setFilterValue(e.target.value);
+                    }}
                     placeholder="Value"
                   />
                 </div>
@@ -607,7 +631,9 @@ function FiltersControl({ metadataKeys }: { metadataKeys: string[] }) {
                   className="shrink-0"
                   onClick={() => {
                     if (!filterKey || !filterValue) return;
-                    updateParams((sp) => sp.addValue("metadata", filterKey, filterValue));
+                    updateParams((sp) => {
+                      sp.addValue("metadata", filterKey, filterValue);
+                    });
                     setFilterKey("");
                     setFilterValue("");
                     setFiltersOpen(false);

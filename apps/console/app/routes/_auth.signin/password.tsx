@@ -14,21 +14,24 @@ export function PasswordSignIn() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
+  const handlePassword: React.SubmitEventHandler<HTMLFormElement> = (e) => {
+    e.preventDefault();
+
+    void (async () => {
+      setLoading(true);
+      setError(undefined);
+      try {
+        await authService.signInWithPassword(email, password);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : String(err));
+      } finally {
+        setLoading(false);
+      }
+    })();
+  };
+
   return emailSubmitted ? (
-    <form
-      className="flex flex-col gap-2"
-      onSubmit={async (e) => {
-        e.preventDefault();
-        setLoading(true);
-        try {
-          await authService.signInWithPassword(email, password);
-        } catch (err) {
-          if (err instanceof Error) setError(err.message);
-        } finally {
-          setLoading(false);
-        }
-      }}
-    >
+    <form className="flex flex-col gap-2" onSubmit={handlePassword}>
       <Label htmlFor="password">Password</Label>
       <div className="flex gap-2">
         <Input
@@ -36,7 +39,9 @@ export function PasswordSignIn() {
           type="password"
           autoComplete="current-password"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) => {
+            setPassword(e.target.value);
+          }}
           disabled={loading}
           required
           // eslint-disable-next-line jsx-a11y/no-autofocus
@@ -79,7 +84,9 @@ export function PasswordSignIn() {
         type="email"
         autoComplete="email"
         value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        onChange={(e) => {
+          setEmail(e.target.value);
+        }}
         disabled={loading}
         required
       />

@@ -14,20 +14,16 @@ export function formatDuration(durationMs: number): string {
   return sep === "." ? result : result.replace(".", sep);
 }
 
-export function formatTimestampShort(ts: string): string {
-  try {
-    return format(new Date(ts), "HH:mm");
-  } catch {
-    return ts;
+export function formatTimestampShort(date: Date): string {
+  if (Number.isNaN(date.getTime())) {
+    return "n/a";
   }
+  return format(date, "HH:mm");
 }
 
-export function formatTimestampFull(ts: string): string {
-  try {
-    return format(new Date(ts), "MMMM d, yyyy 'at' HH:mm:ss");
-  } catch {
-    return ts;
-  }
+export function formatTimestampFull(date: Date): string {
+  if (Number.isNaN(date.getTime())) return "n/a";
+  return format(date, "MMMM d, yyyy 'at' HH:mm:ss");
 }
 
 export function truncateText(text: string, maxLength: number): string {

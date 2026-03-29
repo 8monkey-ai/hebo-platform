@@ -11,7 +11,7 @@ import { getSecret } from "@hebo/shared-api/utils/secrets";
 import { PrismaClient } from "~auth/generated/prisma/client";
 
 import {
-  hasSmtpConfig,
+  HAS_SMTP_CONFIG,
   sendOrganizationInvitationEmail,
   sendVerificationOtpEmail,
 } from "./lib/email";
@@ -22,13 +22,29 @@ export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
 });
 
+const [
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GITHUB_CLIENT_ID,
+  GITHUB_CLIENT_SECRET,
+  MICROSOFT_CLIENT_ID,
+  MICROSOFT_CLIENT_SECRET,
+] = await Promise.all([
+  getSecret("GoogleClientId"),
+  getSecret("GoogleClientSecret"),
+  getSecret("GithubClientId"),
+  getSecret("GithubClientSecret"),
+  getSecret("MicrosoftClientId"),
+  getSecret("MicrosoftClientSecret"),
+]);
+
 export const auth = betterAuth({
   accountLinking: {
     enabled: true,
     trustedProviders: ["google", "github", "microsoft", "email-password"],
   },
   emailAndPassword: {
-    enabled: !hasSmtpConfig(),
+    enabled: !HAS_SMTP_CONFIG,
   },
   advanced: {
     ...betterAuthCookieOptions.advanced,
@@ -113,19 +129,25 @@ export const auth = betterAuth({
     cookieCache: { enabled: true },
   },
   socialProviders: {
-    google: {
-      prompt: "select_account",
-      clientId: await getSecret("GoogleClientId"),
-      clientSecret: await getSecret("GoogleClientSecret"),
-    },
-    github: {
-      clientId: await getSecret("GithubClientId"),
-      clientSecret: await getSecret("GithubClientSecret"),
-    },
-    microsoft: {
-      clientId: await getSecret("MicrosoftClientId"),
-      clientSecret: await getSecret("MicrosoftClientSecret"),
-    },
+    ...(GOOGLE_CLIENT_ID && {
+      google: {
+        prompt: "select_account",
+        clientId: GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+      },
+    }),
+    ...(GITHUB_CLIENT_ID && {
+      github: {
+        clientId: GITHUB_CLIENT_ID,
+        clientSecret: GITHUB_CLIENT_SECRET,
+      },
+    }),
+    ...(MICROSOFT_CLIENT_ID && {
+      microsoft: {
+        clientId: MICROSOFT_CLIENT_ID,
+        clientSecret: MICROSOFT_CLIENT_SECRET,
+      },
+    }),
   },
   trustedOrigins: cookieDomain ? [`https://*.${cookieDomain}`] : ["*"],
 });

@@ -112,7 +112,7 @@ export const authService: AuthService = {
       metadata: { createdByUserId: shellStore.user?.userId },
     });
     if (error) throw new Error(error.message);
-    return data as ApiKey;
+    return data satisfies ApiKey;
   },
 
   async revokeApiKey(apiKeyId) {
@@ -204,15 +204,13 @@ export const authService: AuthService = {
     if (!data) return { members: [], invitations: [] };
 
     const seen = new Set<string>();
-    const members: OrgMember[] = [];
-    for (const m of data.members as unknown as OrgMember[]) {
-      if (!seen.has(m.userId)) {
-        seen.add(m.userId);
-        members.push(m);
-      }
-    }
+    const members = (data.members satisfies OrgMember[]).filter(({ userId }) => {
+      if (seen.has(userId)) return false;
+      seen.add(userId);
+      return true;
+    });
 
-    const invitations = ((data.invitations ?? []) as unknown as OrgInvitation[]).filter(
+    const invitations = ((data.invitations ?? []) satisfies OrgInvitation[]).filter(
       (i) => i.status === "pending",
     );
 
@@ -227,10 +225,10 @@ export const authService: AuthService = {
     globalThis.location.replace("/");
   },
 
-  async inviteMember(email, role, teamId) {
+  async inviteMember(email, role: "member" | "admin" | "owner", teamId) {
     const { error } = await authClient.organization.inviteMember({
       email,
-      role: role as "member" | "admin" | "owner",
+      role,
       resend: true,
       ...(teamId && { teamId }),
     });
