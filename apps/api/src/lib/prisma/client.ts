@@ -22,7 +22,6 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
       $allModels: {
         $allOperations({ args, query, operation }) {
           if (!["create", "createMany", "createManyAndReturn"].includes(operation)) {
-            // oxlint-disable no-unsafe-member-access, no-unsafe-assignment, no-unsafe-argument
             const queryArgs = args as {
               where?: Record<string, unknown>;
               include?: Record<string, unknown>;
@@ -41,7 +40,6 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
                 }
               }
             }
-            // oxlint-enable no-unsafe-member-access, no-unsafe-assignment, no-unsafe-argument
           }
           return query(args);
         },
