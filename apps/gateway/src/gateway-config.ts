@@ -14,6 +14,11 @@ import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino-adapter"
 import { resolveModelId, resolveProvider } from "./services/model-resolver";
 import { createProvider, loadProviderSecrets } from "./services/provider-factory";
 
+// Disable Bun's hardcoded 5-minute fetch timeout (https://github.com/oven-sh/bun/issues/16682)
+const _fetch = globalThis.fetch;
+// @ts-expect-error -- Bun-specific `timeout` option not in standard RequestInit
+globalThis.fetch = ((input, init) => _fetch(input, { ...init, timeout: false })) as typeof fetch;
+
 instrumentFetch("full");
 
 export const basePath = "/v1";
@@ -77,6 +82,10 @@ export const gw = gateway({
     resolveProvider,
   },
   logger: createPinoOtelAdapter(getOtelLogger("hebo-gateway", 1)), // trace severity
+  timeouts: {
+    flex: 30 * 60_000, // 30 minutes
+    normal: 5 * 60_000, // 5 minutes
+  },
   telemetry: {
     enabled: true,
     tracer: trace.getTracer("hebo-gateway"),

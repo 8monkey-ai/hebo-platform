@@ -44,7 +44,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   },
   transform: {
     loadBalancer: (args) => {
-      args.idleTimeout = 300; // 5 minutes
+      args.idleTimeout = 30 * 60; // 30 minutes
     },
     listener: (args) => {
       if (args.protocol === "HTTPS") {
