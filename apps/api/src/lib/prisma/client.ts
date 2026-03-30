@@ -33,6 +33,8 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
               for (const [key, value] of Object.entries(queryArgs.include)) {
                 if (value === true) {
                   queryArgs.include[key] = { where: tenantFilters };
+                } else if (typeof value === "object" && value !== null) {
+                  (value as any).where = { ...(value as any).where, ...tenantFilters };
                 }
               }
             }
