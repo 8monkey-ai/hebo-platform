@@ -16,7 +16,7 @@
     "dev": "bun --hot src/index.ts",
     "format": "oxfmt .",
     "lint": "oxlint",
-    "typecheck": "bun run predev && oxlint --type-aware --type-check",
+    "typecheck": "oxlint --type-aware --type-check",
     "prestart": "bun run build",
     "start": "./dist/server"
   },
