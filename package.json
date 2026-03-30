@@ -23,6 +23,7 @@
     "prepare": "test -n \"$CI\" || lefthook install",
     "secret": "bun run scripts/secrets.ts",
     "test": "bun run --workspaces --if-present --parallel test",
+    "pretypecheck": "bun run predev",
     "typecheck": "bun run --workspaces --if-present --parallel typecheck"
   },
   "devDependencies": {
