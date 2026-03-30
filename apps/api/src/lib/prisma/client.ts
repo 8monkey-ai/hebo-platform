@@ -31,10 +31,10 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
             // filters into `include` entries so related rows are filtered too.
             if (queryArgs.include) {
               for (const [key, value] of Object.entries(queryArgs.include)) {
-                if (value === true) {
-                  queryArgs.include[key] = { where: tenantFilters };
-                } else if (typeof value === "object" && value !== null) {
-                  (value as any).where = { ...(value as any).where, ...tenantFilters };
+                if (value) {
+                  const opts = value === true ? {} : (value as any);
+                  opts.where = { ...opts.where, ...tenantFilters };
+                  queryArgs.include[key] = opts;
                 }
               }
             }
