@@ -14,21 +14,33 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
   if (!organizationId || !userId) {
     throw new Error("Organization ID and User ID are required");
   }
+
+  const tenantFilters = { deleted_at: dbNull, organization_id: organizationId };
+
   return prisma.$extends({
     query: {
       $allModels: {
         $allOperations({ args, query, operation }) {
           if (!["create", "createMany", "createManyAndReturn"].includes(operation)) {
-            // oxlint-disable no-unsafe-member-access, no-unsafe-assignment
-            const a = args as any;
-            a.where = {
-              ...a.where,
-              deleted_at: dbNull,
-              organization_id: organizationId,
+            const queryArgs = args as {
+              where?: Record<string, unknown>;
+              include?: Record<string, unknown>;
             };
-            // oxlint-enable no-unsafe-member-access, no-unsafe-assignment
-          }
+            queryArgs.where = { ...queryArgs.where, ...tenantFilters };
 
+            // Prisma's $allOperations hook does not intercept nested relation
+            // queries resolved via `include`. We inject tenant + soft-delete
+            // filters into `include` entries so related rows are filtered too.
+            if (queryArgs.include) {
+              for (const [key, value] of Object.entries(queryArgs.include)) {
+                if (value) {
+                  const opts = value === true ? {} : (value as { where?: Record<string, unknown> });
+                  opts.where = { ...opts.where, ...tenantFilters };
+                  queryArgs.include[key] = opts;
+                }
+              }
+            }
+          }
           return query(args);
         },
         create({ args, model, query }) {
