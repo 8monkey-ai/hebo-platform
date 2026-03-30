@@ -5,7 +5,7 @@ const MASK = "***" as const;
 export function redactSensitiveValues<T>(schema: TSchema, value: T): T {
   const obj = value as Record<string, unknown>;
 
-  for (const variant of (schema as TUnion).anyOf ?? [schema]) {
+  for (const variant of schema.anyOf ?? [schema]) {
     for (const candidate of (variant as TUnion).anyOf ?? [variant]) {
       const props = (candidate as TObject).properties ?? {};
 
