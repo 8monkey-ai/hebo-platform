@@ -31,3 +31,7 @@ pre-commit:
     lint:
       glob: "**/*.{ts,tsx,js,jsx,mjs,cjs}"
       run: bun run lint:staged -- {staged_files} && git add {staged_files}
+
+    typecheck:
+      glob: "**/*.{ts,tsx}"
+      run: bun run typecheck
