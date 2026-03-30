@@ -26,12 +26,12 @@
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",
     "@prisma/client": "catalog:",
-    "@sinclair/typebox": "^0.34.49",
     "elysia": "catalog:",
     "lru-cache": "catalog:"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
+    "@sinclair/typebox": "^0.34.49",
     "@types/bun": "catalog:",
     "prisma": "catalog:",
     "prismabox": "^1.1.26"
