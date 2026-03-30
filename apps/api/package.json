@@ -31,7 +31,7 @@
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
-    "@sinclair/typebox": "^0.34.49",
+    "@sinclair/typebox": ">= 0.34.0 < 1",
     "@types/bun": "catalog:",
     "prisma": "catalog:",
     "prismabox": "^1.1.26"
