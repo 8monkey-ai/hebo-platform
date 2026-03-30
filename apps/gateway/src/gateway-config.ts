@@ -77,6 +77,7 @@ export const gw = gateway({
     resolveProvider,
   },
   logger: createPinoOtelAdapter(getOtelLogger("hebo-gateway", 1)), // trace severity
+  timeouts: { flex: 30 * 60_000 }, // 30 minutes
   telemetry: {
     enabled: true,
     tracer: trace.getTracer("hebo-gateway"),
