@@ -14,6 +14,11 @@ import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino-adapter"
 import { resolveModelId, resolveProvider } from "./services/model-resolver";
 import { createProvider, loadProviderSecrets } from "./services/provider-factory";
 
+// Disable Bun's hardcoded 5-minute fetch timeout (https://github.com/oven-sh/bun/issues/16682)
+const _fetch = globalThis.fetch;
+// @ts-expect-error -- Bun-specific `timeout` option not in standard RequestInit
+globalThis.fetch = ((input, init) => _fetch(input, { ...init, timeout: false })) as typeof fetch;
+
 instrumentFetch("full");
 
 export const basePath = "/v1";
