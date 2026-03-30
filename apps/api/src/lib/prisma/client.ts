@@ -23,7 +23,10 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
         $allOperations({ args, query, operation }) {
           if (!["create", "createMany", "createManyAndReturn"].includes(operation)) {
             // oxlint-disable no-unsafe-member-access, no-unsafe-assignment, no-unsafe-argument
-            const queryArgs = args as any;
+            const queryArgs = args as {
+              where?: Record<string, unknown>;
+              include?: Record<string, unknown>;
+            };
             queryArgs.where = { ...queryArgs.where, ...tenantFilters };
 
             // Prisma's $allOperations hook does not intercept nested relation
