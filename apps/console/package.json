@@ -14,7 +14,7 @@
     "format": "oxfmt .",
     "lint": "oxlint",
     "start": "vite preview",
-    "typecheck": "oxlint --type-aware --type-check"
+    "typecheck": "bun run predev && oxlint --type-aware --type-check"
   },
   "dependencies": {
     "@better-auth/api-key": "catalog:",

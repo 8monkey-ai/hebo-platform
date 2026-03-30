@@ -16,7 +16,7 @@
     "format": "oxfmt .",
     "lint": "oxlint",
     "test": "bun test",
-    "typecheck": "oxlint --type-aware --type-check",
+    "typecheck": "bun run predev && oxlint --type-aware --type-check",
     "prestart": "bun run build",
     "start": "./dist/server"
   },
