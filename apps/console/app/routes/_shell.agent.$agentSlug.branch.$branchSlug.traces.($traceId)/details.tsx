@@ -505,14 +505,14 @@ function MetadataView({ trace }: { trace: TraceDetailData }) {
                 label="Finish Reasons"
                 value={trace.finishReasons?.join(", ") ?? null}
               />
-              <IdentifierRow label="Reasoning Effort" value={trace.reasoningEffort || null} />
+              <IdentifierRow label="Reasoning Effort" value={trace.reasoningEffort ?? null} />
               <IdentifierRow
                 label="Reasoning Enabled"
-                value={trace.reasoningEnabled != null ? String(trace.reasoningEnabled) : null}
+                value={trace.reasoningEnabled == null ? null : String(trace.reasoningEnabled)}
               />
               <IdentifierRow
                 label="Reasoning Max Tokens"
-                value={trace.reasoningMaxTokens != null ? String(trace.reasoningMaxTokens) : null}
+                value={trace.reasoningMaxTokens == null ? null : String(trace.reasoningMaxTokens)}
               />
             </tbody>
           </table>
