@@ -3,7 +3,7 @@ import { describe, expect, it } from "bun:test";
 import type { ProviderV3 } from "@ai-sdk/provider";
 import { GatewayError, type ResolveProviderHookContext } from "@hebo-ai/gateway";
 
-import { resolveProvider } from "./model-resolver";
+import { resolveProvider } from "./hooks";
 
 // Minimal mock for ResolveProviderHookContext
 function makeCtx(overrides: {

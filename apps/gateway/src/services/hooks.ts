@@ -14,7 +14,7 @@ import type { createPrismaClient } from "~api/db/prisma";
 import type { Models, ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "./aws-wif";
-import { createProvider } from "./provider-factory";
+import { createProvider } from "./provider";
 
 type PrismaClient = ReturnType<typeof createPrismaClient>;
 

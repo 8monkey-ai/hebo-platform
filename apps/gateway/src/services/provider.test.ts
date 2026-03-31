@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import { createProvider } from "./provider-factory";
+import { createProvider } from "./provider";
 
 describe("createProvider", () => {
   describe("bedrock", () => {
