@@ -2,7 +2,7 @@ import { cors } from "@elysiajs/cors";
 import { opentelemetry } from "@elysiajs/opentelemetry";
 import { Elysia } from "elysia";
 
-import { corsConfig } from "@hebo/shared-api/lib/cors";
+import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { logging } from "@hebo/shared-api/middlewares/logging";
 
@@ -15,7 +15,7 @@ const createAuth = () =>
     .use(opentelemetry(getOtelConfig("hebo-auth")))
     .use(logging("hebo-auth"))
     .get("/", () => "🐵 Hebo Auth says hello!")
-    .use(cors(corsConfig))
+    .use(cors(CORS_CONFIG))
     .mount(auth.handler);
 
 if (import.meta.main) {

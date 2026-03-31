@@ -1,12 +1,12 @@
-import { createPrismaAdapter } from "@hebo/shared-api/lib/db/postgres";
+import { createPrismaAdapter } from "@hebo/shared-api/db/postgres";
 
+import { redactSensitiveValues } from "~api/db/utils";
 import { Prisma, PrismaClient } from "~api/generated/prisma/client";
-import { redactSensitiveValues } from "~api/lib/redact-provider";
 import { ProviderConfig } from "~api/modules/providers/types";
 
-const dbNull = null;
+const DB_NULL = null;
 
-export const prisma = new PrismaClient({
+const prisma = new PrismaClient({
   adapter: createPrismaAdapter("api"),
 });
 
@@ -15,7 +15,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
     throw new Error("Organization ID and User ID are required");
   }
 
-  const tenantFilters = { deleted_at: dbNull, organization_id: organizationId };
+  const tenantFilters = { deleted_at: DB_NULL, organization_id: organizationId };
 
   return prisma.$extends({
     query: {
@@ -98,7 +98,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
             where: {
               provider_slug: slug,
               created_by: userId,
-              deleted_at: dbNull,
+              deleted_at: DB_NULL,
               organization_id: organizationId,
             },
           });

@@ -1,6 +1,6 @@
 import { SQL } from "bun";
 
-import { getSecret } from "../../utils/secrets";
+import { getSecret } from "../utils/secret";
 import { DEFAULT_DB_IDLE_TIMEOUT_MS, DEFAULT_DB_POOL_MAX } from "./config";
 
 export const getGreptimeConnectionString = async () => {

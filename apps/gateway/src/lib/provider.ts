@@ -14,7 +14,7 @@ import { withCanonicalIdsForVertex } from "@hebo-ai/gateway/providers/vertex";
 import { withCanonicalIdsForVoyage } from "@hebo-ai/gateway/providers/voyage";
 import { createVoyage } from "voyage-ai-provider";
 
-import { getSecret } from "@hebo/shared-api/utils/secrets";
+import { getSecret } from "@hebo/shared-api/utils/secret";
 
 import type {
   ApiKeyProviderConfig,
@@ -24,24 +24,24 @@ import type {
   VertexProviderConfig,
 } from "~api/modules/providers/types";
 
-import { buildWifOptions } from "./aws-wif";
+import { buildWifOptions } from "../utils/aws";
 
 export async function loadProviderSecrets() {
   const [
-    groqApiKey,
-    bedrockRoleArn,
-    bedrockRegion,
-    voyageApiKey,
-    vertexServiceAccountEmail,
-    vertexAudience,
-    vertexLocation,
-    vertexProject,
-    anthropicApiKey,
-    openAiApiKey,
-    azureApiKey,
-    azureResourceName,
-    enforceByok,
-    freeModelIdsRaw,
+    GROQ_API_KEY,
+    BEDROCK_ROLE_ARN,
+    BEDROCK_REGION,
+    VOYAGE_API_KEY,
+    VERTEX_SERVICE_ACCOUNT_EMAIL,
+    VERTEX_AUDIENCE,
+    VERTEX_LOCATION,
+    VERTEX_PROJECT,
+    ANTHROPIC_API_KEY,
+    OPENAI_API_KEY,
+    AZURE_API_KEY,
+    AZURE_RESOURCE_NAME,
+    ENFORCE_BYOK,
+    FREE_MODEL_IDS_RAW,
   ] = await Promise.all([
     getSecret("GroqApiKey"),
     getSecret("BedrockRoleArn"),
@@ -59,28 +59,28 @@ export async function loadProviderSecrets() {
     getSecret("FreeModelIds"),
   ]);
 
-  const freeModelIds = new Set(
-    (freeModelIdsRaw ?? "")
+  const FREE_MODEL_IDS = new Set(
+    (FREE_MODEL_IDS_RAW ?? "")
       .split(",")
       .map((s: string) => s.trim())
       .filter(Boolean),
   );
 
   return {
-    groqApiKey,
-    bedrockRoleArn,
-    bedrockRegion,
-    voyageApiKey,
-    vertexServiceAccountEmail,
-    vertexAudience,
-    vertexLocation,
-    vertexProject,
-    anthropicApiKey,
-    openAiApiKey,
-    azureApiKey,
-    azureResourceName,
-    enforceByok,
-    freeModelIds,
+    GROQ_API_KEY,
+    BEDROCK_ROLE_ARN,
+    BEDROCK_REGION,
+    VOYAGE_API_KEY,
+    VERTEX_SERVICE_ACCOUNT_EMAIL,
+    VERTEX_AUDIENCE,
+    VERTEX_LOCATION,
+    VERTEX_PROJECT,
+    ANTHROPIC_API_KEY,
+    OPENAI_API_KEY,
+    AZURE_API_KEY,
+    AZURE_RESOURCE_NAME,
+    ENFORCE_BYOK,
+    FREE_MODEL_IDS,
   };
 }
 

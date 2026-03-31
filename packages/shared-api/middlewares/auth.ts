@@ -4,14 +4,14 @@ import { organizationClient } from "better-auth/client/plugins";
 import { getCookieCache, getCookies } from "better-auth/cookies";
 import { type Cookie, Elysia } from "elysia";
 
-import type { VerifyApiKeyPlugin } from "~auth/lib/verify-api-key-plugin";
+import type { VerifyApiKeyPlugin } from "~auth/lib/api-key";
 
-import { authSecret, authUrl } from "../env";
+import { AUTH_SECRET, AUTH_URL } from "../env";
 import { AuthError, BadRequestError } from "../errors";
-import { betterAuthCookieOptions } from "../lib/cookie-options";
+import { COOKIE_CONFIG } from "../lib/better-auth";
 import { logging } from "./logging";
 
-const cookieConfig = getCookies(betterAuthCookieOptions);
+const SESSION_TOKEN = getCookies(COOKIE_CONFIG).sessionToken;
 
 const createAuthClient = (request: Request) => {
   const headers: Record<string, string> = {};
@@ -26,7 +26,7 @@ const createAuthClient = (request: Request) => {
   });
 
   return createBetterAuthClient({
-    baseURL: new URL("/v1", authUrl).toString(),
+    baseURL: new URL("/v1", AUTH_URL).toString(),
     plugins: [
       organizationClient({
         teams: { enabled: true },
@@ -51,7 +51,7 @@ const createAuthClient = (request: Request) => {
   });
 };
 
-export const authService = new Elysia({ name: "auth-service" })
+export const auth = new Elysia({ name: "auth-service" })
   .use(logging())
   .resolve(async function resolveAuthContext({ request, cookie, logger }) {
     const cookieHeader = request.headers.get("cookie");
@@ -68,8 +68,8 @@ export const authService = new Elysia({ name: "auth-service" })
 
     if (cookieHeader) {
       const session = await getCookieCache(request, {
-        secret: authSecret,
-        isSecure: betterAuthCookieOptions.advanced.useSecureCookies,
+        secret: AUTH_SECRET,
+        isSecure: COOKIE_CONFIG.advanced.useSecureCookies,
       });
 
       if (session) {
@@ -80,7 +80,7 @@ export const authService = new Elysia({ name: "auth-service" })
       const { data: result } = await authClient.internal.verifyApiKey({
         key: authHeader.slice(7) || "invalid-key",
         fetchOptions: {
-          headers: { "x-internal-secret": authSecret },
+          headers: { "x-internal-secret": AUTH_SECRET },
         },
       });
 
@@ -100,7 +100,7 @@ export const authService = new Elysia({ name: "auth-service" })
       logger.info("Authentication failed or no credentials provided");
 
       // Clear the session cookie when unauthorized
-      const { attributes, name } = cookieConfig.sessionToken;
+      const { name, attributes } = SESSION_TOKEN;
       cookie[name] = {
         value: "",
         maxAge: 0,

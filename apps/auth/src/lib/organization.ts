@@ -1,4 +1,4 @@
-import { slugFromName } from "@hebo/shared-api/utils/create-slug";
+import { slugFromName } from "@hebo/shared-api/utils/slug";
 
 import type { Prisma, PrismaClient } from "~auth/generated/prisma/client";
 

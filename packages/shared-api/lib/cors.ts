@@ -1,21 +1,17 @@
-import { authUrl } from "../env";
-import { getRootDomain } from "../utils/domains";
+import { AUTH_URL } from "../env";
+import { getRootDomain } from "../utils/url";
 
-const rootDomain = getRootDomain(authUrl)?.replaceAll(".", String.raw`\.`);
+const ROOT_DOMAIN = getRootDomain(AUTH_URL);
 
-export const corsConfig = rootDomain
-  ? {
-      // Matches HTTPS origins for exact domain or subdomains
-      origin: new RegExp(
-        String.raw`^https://(?:${rootDomain}|(?:[a-z0-9-]+\.)+${rootDomain})$`,
-        "i",
-      ),
-      credentials: true,
-      // reduces noise of OPTION calls without compromising security
-      maxAge: 3600,
-    }
-  : {
-      origin: true,
-      credentials: true,
-      maxAge: 3600,
-    };
+export const CORS_CONFIG = {
+  origin: (request: Request) => {
+    if (!ROOT_DOMAIN) return true;
+    const origin = request.headers.get("origin");
+    if (!origin || !origin.startsWith("https://")) return false;
+
+    const hostname = origin.slice(8).split("/", 1)[0].split(":")[0];
+    return hostname === ROOT_DOMAIN || hostname.endsWith(`.${ROOT_DOMAIN}`);
+  },
+  credentials: true,
+  maxAge: 3600,
+};

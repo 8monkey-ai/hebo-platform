@@ -11,16 +11,16 @@ import { ModelListSchema, ModelSchema } from "@hebo-ai/gateway/endpoints/models"
 import { OpenAIErrorSchema } from "@hebo-ai/gateway/errors/openai";
 import { Elysia } from "elysia";
 
-import { corsConfig } from "@hebo/shared-api/lib/cors";
-import { getOpenapiConfig } from "@hebo/shared-api/lib/openapi";
+import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";
+import { createOpenapiConfig } from "@hebo/shared-api/lib/openapi";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
-import { authService } from "@hebo/shared-api/middlewares/auth";
+import { auth } from "@hebo/shared-api/middlewares/auth";
 import { logging } from "@hebo/shared-api/middlewares/logging";
 
-import { prisma } from "~api/middleware/prisma";
+import { prisma } from "~api/middlewares/prisma";
 
-import { basePath, gw } from "./gateway-config";
-import { errorHandler } from "./middlewares/error-handler";
+import { BASE_PATH, gw } from "./gateway";
+import { openaiErrors } from "./middlewares/errors";
 
 const PORT = Number(process.env.PORT ?? 3002);
 const GATEWAY_URL = process.env.GATEWAY_URL ?? `http://localhost:${PORT}`;
@@ -31,13 +31,13 @@ export const createGateway = () =>
     .use(logging("hebo-gateway"))
     // Root route ("/") is unauthenticated and unprotected for health checks.
     .get("/", () => "🐵 Hebo AI Gateway says hello!")
-    .use(cors(corsConfig))
+    .use(cors(CORS_CONFIG))
     .use(
       openapi(
-        getOpenapiConfig("Hebo Gateway", "OpenAI-compatible AI Gateway", GATEWAY_URL, "0.1.0"),
+        createOpenapiConfig("Hebo Gateway", "OpenAI-compatible AI Gateway", GATEWAY_URL, "0.1.0"),
       ),
     )
-    .use(errorHandler)
+    .use(openaiErrors)
     // Public routes (no authentication required)
     .get(
       "/v1/models",
@@ -62,8 +62,8 @@ export const createGateway = () =>
         },
       },
     )
-    .use(authService)
-    .group(basePath, { isSignedIn: true }, (app) =>
+    .use(auth)
+    .group(BASE_PATH, { isSignedIn: true }, (app) =>
       app
         .use(prisma)
         .post(

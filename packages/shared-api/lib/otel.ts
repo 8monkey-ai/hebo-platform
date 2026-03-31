@@ -20,19 +20,19 @@ import {
 } from "@opentelemetry/sdk-trace-base";
 import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrumentation";
 
-import { isProduction } from "../env";
-import { getSecret } from "../utils/secrets";
+import { IS_PRODUCTION } from "../env";
+import { getSecret } from "../utils/secret";
 import { isRootPathUrl } from "../utils/url";
 
-const SensitiveSpanAttributes = [
+const SENSITIVE_SPAN_ATTRIBUTES = [
   "http.request.header.authorization",
   "http.request.header.cookie",
   "http.request.cookie",
 ];
 
-export const greptimeOtlpEndpoint = `http://${(await getSecret("GreptimeHost")) ?? "localhost"}:4000/v1/otlp`;
+export const GREPTIME_OTLP_ENDPOINT = `http://${(await getSecret("GreptimeHost")) ?? "localhost"}:4000/v1/otlp`;
 
-export const getOtelLogger = (serviceName: string, minimumSeverity: SeverityNumber) => {
+export const createOtelLogger = (serviceName: string, minimumSeverity: SeverityNumber) => {
   const loggerProvider = new LoggerProvider({
     resource: resourceFromAttributes({
       "service.name": serviceName,
@@ -46,10 +46,10 @@ export const getOtelLogger = (serviceName: string, minimumSeverity: SeverityNumb
       },
     ]),
     processors: [
-      ...(isProduction ? [] : [new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())]),
+      ...(IS_PRODUCTION ? [] : [new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())]),
       new BatchLogRecordProcessor(
         new OTLPLogExporter({
-          url: `${greptimeOtlpEndpoint}/v1/logs`,
+          url: `${GREPTIME_OTLP_ENDPOINT}/v1/logs`,
           compression: CompressionAlgorithm.GZIP,
         }),
         {
@@ -81,19 +81,19 @@ registerInstrumentations({
   ],
 });
 
-const Redacted = "[REDACTED]";
+const REDACTED = "[REDACTED]";
 
 const createRedactingBatchSpanProcessor = (exporter: SpanExporter, config?: BufferConfig) => {
   const processor = new BatchSpanProcessor(exporter, config);
   const originalOnEnd = processor.onEnd.bind(processor);
-  const keys = SensitiveSpanAttributes;
+  const keys = SENSITIVE_SPAN_ATTRIBUTES;
 
   processor.onEnd = (span) => {
     const attrs = span.attributes as Record<string, unknown>;
 
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      if (attrs[key] !== undefined) attrs[key] = Redacted;
+      if (attrs[key] !== undefined) attrs[key] = REDACTED;
     }
 
     originalOnEnd(span);
@@ -107,7 +107,7 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
     serviceName,
     metricReader: new PeriodicExportingMetricReader({
       exporter: new OTLPMetricExporter({
-        url: `${greptimeOtlpEndpoint}/v1/metrics`,
+        url: `${GREPTIME_OTLP_ENDPOINT}/v1/metrics`,
         compression: CompressionAlgorithm.GZIP,
       }),
     }),
@@ -118,7 +118,7 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
     spanProcessors: [
       createRedactingBatchSpanProcessor(
         new OTLPTraceExporter({
-          url: `${greptimeOtlpEndpoint}/v1/traces`,
+          url: `${GREPTIME_OTLP_ENDPOINT}/v1/traces`,
           headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
           compression: CompressionAlgorithm.GZIP,
         }),

@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test";
 
 import { t } from "elysia";
 
-import { redactSensitiveValues } from "./redact-provider";
+import { redactSensitiveValues } from "./utils";
 
 describe("redactSensitiveValues", () => {
   it("redacts direct x-redact properties", () => {

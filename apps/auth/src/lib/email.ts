@@ -1,13 +1,16 @@
 import { createMessage } from "@upyo/core";
 import { SmtpTransport } from "@upyo/smtp";
 
-import { getSecret } from "@hebo/shared-api/utils/secrets";
+import { getSecret } from "@hebo/shared-api/utils/secret";
 
-const SMTP_HOST = await getSecret("SmtpHost");
-const SMTP_PORT = Number(await getSecret("SmtpPort"));
-const SMTP_USER = await getSecret("SmtpUser");
-const SMTP_PASS = await getSecret("SmtpPass");
-const SMTP_FROM = await getSecret("SmtpFrom");
+const [SMTP_HOST, smtpPort, SMTP_USER, SMTP_PASS, SMTP_FROM] = await Promise.all([
+  getSecret("SmtpHost"),
+  getSecret("SmtpPort"),
+  getSecret("SmtpUser"),
+  getSecret("SmtpPass"),
+  getSecret("SmtpFrom"),
+]);
+const SMTP_PORT = Number(smtpPort);
 
 const LOGO_URL = "https://hebo.ai/icon.png";
 

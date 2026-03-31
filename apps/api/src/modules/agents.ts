@@ -1,7 +1,7 @@
 import { Elysia, status, t } from "elysia";
 
-import { authService } from "@hebo/shared-api/middlewares/auth";
-import { slugFromString } from "@hebo/shared-api/utils/create-slug";
+import { auth } from "@hebo/shared-api/middlewares/auth";
+import { slugFromString } from "@hebo/shared-api/utils/slug";
 
 import type { Prisma } from "~api/generated/prisma/client";
 import {
@@ -11,16 +11,16 @@ import {
   agentsPlain,
   agentsRelations,
 } from "~api/generated/prismabox/agents";
-import { prisma } from "~api/middleware/prisma";
+import { prisma } from "~api/middlewares/prisma";
 
-export const agents = t.Composite([agentsPlain, t.Partial(agentsRelations)], {
+const agents = t.Composite([agentsPlain, t.Partial(agentsRelations)], {
   additionalProperties: false,
 });
 
 export const agentsModule = new Elysia({
   prefix: "/agents",
 })
-  .use(authService)
+  .use(auth)
   .use(prisma)
   .get(
     "/",
