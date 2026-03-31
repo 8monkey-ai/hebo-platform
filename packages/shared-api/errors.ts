@@ -33,7 +33,7 @@ export class ConflictError extends HttpError {
   }
 }
 
-const PRISMA_ERROR_MAP: Record<string, new () => HttpError> = {
+const PRISMA_ERROR_MAP: Record<string, new (message?: string) => HttpError> = {
   P2025: NotFoundError,
   P2002: ConflictError,
 };
@@ -46,6 +46,10 @@ export const identifyPrismaError = (error: unknown): HttpError | undefined => {
     typeof error.code === "string" &&
     error.code in PRISMA_ERROR_MAP
   ) {
-    return new PRISMA_ERROR_MAP[error.code]();
+    const message =
+      "message" in error && typeof error.message === "string"
+        ? error.message
+        : undefined;
+    return new PRISMA_ERROR_MAP[error.code](message);
   }
 };
