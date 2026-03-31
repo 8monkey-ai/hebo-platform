@@ -9,7 +9,7 @@ import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { auth } from "@hebo/shared-api/middlewares/auth";
 import { logging } from "@hebo/shared-api/middlewares/logging";
 
-import { errors } from "./middleware/errors";
+import { errors } from "./middlewares/errors";
 import { agentsModule } from "./modules/agents";
 import { branchesModule } from "./modules/branches";
 import { providersModule } from "./modules/providers";

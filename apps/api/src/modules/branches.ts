@@ -8,7 +8,7 @@ import {
   branchesInputCreate,
   branchesInputUpdate,
 } from "~api/generated/prismabox/branches";
-import { prisma } from "~api/middleware/prisma";
+import { prisma } from "~api/middlewares/prisma";
 
 import { Models } from "./providers/types";
 

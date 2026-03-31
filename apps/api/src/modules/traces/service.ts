@@ -1,6 +1,6 @@
 import { LRUCache } from "lru-cache";
 
-import type { GreptimeDb } from "~api/middleware/greptime";
+import type { GreptimeDb } from "~api/middlewares/greptime";
 
 import type { GenAIFinishReasons, GenAIInputMessages, GenAIOutputMessages } from "./types";
 import {

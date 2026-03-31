@@ -17,7 +17,7 @@ import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { auth } from "@hebo/shared-api/middlewares/auth";
 import { logging } from "@hebo/shared-api/middlewares/logging";
 
-import { prisma } from "~api/middleware/prisma";
+import { prisma } from "~api/middlewares/prisma";
 
 import { BASE_PATH, gw } from "./gateway";
 import { openaiErrors } from "./middlewares/errors";

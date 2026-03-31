@@ -2,7 +2,7 @@ import { Elysia, status, t } from "elysia";
 
 import { BadRequestError } from "@hebo/shared-api/errors";
 
-import { greptime } from "~api/middleware/greptime";
+import { greptime } from "~api/middlewares/greptime";
 
 import { getSpans, listTraces } from "./service";
 import { SpanDetail, TraceListQuery, TraceListResponse } from "./types";

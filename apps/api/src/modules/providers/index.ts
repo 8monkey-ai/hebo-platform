@@ -1,7 +1,7 @@
 import { Elysia, status, t } from "elysia";
 
 import type { Prisma } from "~api/generated/prisma/client";
-import { prisma } from "~api/middleware/prisma";
+import { prisma } from "~api/middlewares/prisma";
 
 import { type Models } from "./types";
 import { Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./types";

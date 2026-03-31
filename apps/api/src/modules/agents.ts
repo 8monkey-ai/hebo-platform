@@ -11,7 +11,7 @@ import {
   agentsPlain,
   agentsRelations,
 } from "~api/generated/prismabox/agents";
-import { prisma } from "~api/middleware/prisma";
+import { prisma } from "~api/middlewares/prisma";
 
 const agents = t.Composite([agentsPlain, t.Partial(agentsRelations)], {
   additionalProperties: false,
