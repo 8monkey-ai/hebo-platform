@@ -19,7 +19,7 @@ import {
 } from "./lib/email";
 import { createOrganizationHook, syncActiveOrganizationHook } from "./lib/organization";
 
-export const prisma = new PrismaClient({
+const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
 });
 

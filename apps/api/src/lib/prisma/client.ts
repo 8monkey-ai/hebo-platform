@@ -6,7 +6,7 @@ import { ProviderConfig } from "~api/modules/providers/types";
 
 const dbNull = null;
 
-export const prisma = new PrismaClient({
+const prisma = new PrismaClient({
   adapter: createPrismaAdapter("api"),
 });
 
