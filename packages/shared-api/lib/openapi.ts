@@ -1,4 +1,4 @@
-export const getOpenapiConfig = (
+export const createOpenapiConfig = (
   title: string,
   description: string,
   serverUrl: string,

@@ -1,14 +1,14 @@
 import { Elysia } from "elysia";
 
 import { IS_PRODUCTION, LOG_SEVERITY } from "../env";
-import { getOtelLogger } from "../lib/otel";
+import { createOtelLogger } from "../lib/otel";
 import { createPinoOtelAdapter } from "../utils/otel-pino";
 
 export type Logger = ReturnType<typeof createPinoOtelAdapter>;
 
 export const logging = (serviceName?: string) => {
   const logger = serviceName
-    ? createPinoOtelAdapter(getOtelLogger(serviceName, LOG_SEVERITY))
+    ? createPinoOtelAdapter(createOtelLogger(serviceName, LOG_SEVERITY))
     : ({} as Logger);
   const app = new Elysia({ name: "hebo-logging" }).decorate("logger", logger);
 

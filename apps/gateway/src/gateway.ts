@@ -8,7 +8,7 @@ import { voyage35 } from "@hebo-ai/gateway/models/voyage";
 import { instrumentFetch } from "@hebo-ai/gateway/telemetry";
 import { trace } from "@opentelemetry/api";
 
-import { getOtelLogger } from "@hebo/shared-api/lib/otel";
+import { createOtelLogger } from "@hebo/shared-api/lib/otel";
 import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino";
 
 import { resolveModelId, resolveProvider } from "./lib/hooks";
@@ -83,7 +83,7 @@ export const gw = gateway({
     resolveProvider,
   },
 
-  logger: createPinoOtelAdapter(getOtelLogger("hebo-gateway", 1)), // trace severity
+  logger: createPinoOtelAdapter(createOtelLogger("hebo-gateway", 1)), // trace severity
 
   timeouts: {
     flex: 30 * 60_000, // 30 minutes

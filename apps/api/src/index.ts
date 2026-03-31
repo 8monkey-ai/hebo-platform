@@ -4,7 +4,7 @@ import { opentelemetry } from "@elysiajs/opentelemetry";
 import { Elysia } from "elysia";
 
 import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";
-import { getOpenapiConfig } from "@hebo/shared-api/lib/openapi";
+import { createOpenapiConfig } from "@hebo/shared-api/lib/openapi";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { auth } from "@hebo/shared-api/middlewares/auth";
 import { logging } from "@hebo/shared-api/middlewares/logging";
@@ -25,7 +25,7 @@ const createApi = () =>
     // Root route ("/") is unauthenticated and unprotected for health checks.
     .get("/", () => "🐵 Hebo API says hello!")
     .use(cors(CORS_CONFIG))
-    .use(openapi(getOpenapiConfig("Hebo API", "Platform API", API_URL, "0.1.0")))
+    .use(openapi(createOpenapiConfig("Hebo API", "Platform API", API_URL, "0.1.0")))
     .use(auth)
     .use(errors)
     .group(

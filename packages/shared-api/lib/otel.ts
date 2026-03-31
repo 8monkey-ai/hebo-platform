@@ -32,7 +32,7 @@ const SENSITIVE_SPAN_ATTRIBUTES = [
 
 export const GREPTIME_OTLP_ENDPOINT = `http://${(await getSecret("GreptimeHost")) ?? "localhost"}:4000/v1/otlp`;
 
-export const getOtelLogger = (serviceName: string, minimumSeverity: SeverityNumber) => {
+export const createOtelLogger = (serviceName: string, minimumSeverity: SeverityNumber) => {
   const loggerProvider = new LoggerProvider({
     resource: resourceFromAttributes({
       "service.name": serviceName,
