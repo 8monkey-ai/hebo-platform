@@ -22,6 +22,9 @@ const OPTIONAL_SPAN_COLUMNS = [
     alias: "cache_read_input_tokens",
   },
   { column: "span_attributes.gen_ai.usage.reasoning.output_tokens", alias: "reasoning_tokens" },
+  { column: "span_attributes.gen_ai.request.reasoning.effort", alias: "reasoning_effort" },
+  { column: "span_attributes.gen_ai.request.reasoning.enabled", alias: "reasoning_enabled" },
+  { column: "span_attributes.gen_ai.request.reasoning.max_tokens", alias: "reasoning_max_tokens" },
 ] as const;
 
 const traceColumnsCache = new LRUCache<
@@ -260,6 +263,9 @@ export async function getSpans(
       totalTokens: parseNullableNumber(row.total_tokens),
       cacheReadInputTokens: parseNullableNumber(row.cache_read_input_tokens),
       reasoningTokens: parseNullableNumber(row.reasoning_tokens),
+      reasoningEffort: parseString(row.reasoning_effort),
+      reasoningEnabled: row.reasoning_enabled == null ? null : Boolean(row.reasoning_enabled),
+      reasoningMaxTokens: parseNullableNumber(row.reasoning_max_tokens),
       inputMessages: (parseJsonArray(row.input_messages) ?? []) as GenAIInputMessages,
       outputMessages: (parseJsonArray(row.output_messages) ?? []) as GenAIOutputMessages,
       finishReasons: (parseJsonArray(row.finish_reasons) ?? null) as GenAIFinishReasons,
