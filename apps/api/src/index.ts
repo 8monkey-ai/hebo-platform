@@ -6,7 +6,7 @@ import { Elysia } from "elysia";
 import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";
 import { getOpenapiConfig } from "@hebo/shared-api/lib/openapi";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
-import { authService } from "@hebo/shared-api/middlewares/auth";
+import { auth } from "@hebo/shared-api/middlewares/auth";
 import { logging } from "@hebo/shared-api/middlewares/logging";
 
 import { errorHandler } from "./middleware/error-handler";
@@ -26,7 +26,7 @@ const createApi = () =>
     .get("/", () => "🐵 Hebo API says hello!")
     .use(cors(CORS_CONFIG))
     .use(openapi(getOpenapiConfig("Hebo API", "Platform API", API_URL, "0.1.0")))
-    .use(authService)
+    .use(auth)
     .use(errorHandler)
     .group(
       "/v1",

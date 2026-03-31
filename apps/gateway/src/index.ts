@@ -14,7 +14,7 @@ import { Elysia } from "elysia";
 import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";
 import { getOpenapiConfig } from "@hebo/shared-api/lib/openapi";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
-import { authService } from "@hebo/shared-api/middlewares/auth";
+import { auth } from "@hebo/shared-api/middlewares/auth";
 import { logging } from "@hebo/shared-api/middlewares/logging";
 
 import { prisma } from "~api/middleware/prisma";
@@ -62,7 +62,7 @@ export const createGateway = () =>
         },
       },
     )
-    .use(authService)
+    .use(auth)
     .group(basePath, { isSignedIn: true }, (app) =>
       app
         .use(prisma)

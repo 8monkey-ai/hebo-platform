@@ -51,7 +51,7 @@ const createAuthClient = (request: Request) => {
   });
 };
 
-export const authService = new Elysia({ name: "auth-service" })
+export const auth = new Elysia({ name: "auth-service" })
   .use(logging())
   .resolve(async function resolveAuthContext({ request, cookie, logger }) {
     const cookieHeader = request.headers.get("cookie");
