@@ -11,8 +11,8 @@ import { trace } from "@opentelemetry/api";
 import { getOtelLogger } from "@hebo/shared-api/lib/otel";
 import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino";
 
-import { resolveModelId, resolveProvider } from "./services/hooks";
-import { createProvider, loadProviderSecrets } from "./services/provider";
+import { resolveModelId, resolveProvider } from "./lib/hooks";
+import { createProvider, loadProviderSecrets } from "./lib/provider";
 
 // Disable Bun's hardcoded 5-minute fetch timeout (https://github.com/oven-sh/bun/issues/16682)
 const _fetch = globalThis.fetch;
