@@ -13,7 +13,7 @@ import { LRUCache } from "lru-cache";
 import type { createPrismaClient } from "~api/db/prisma";
 import type { Models, ProviderSlug } from "~api/modules/providers/types";
 
-import { injectMetadataCredentials } from "../utils/aws-wif";
+import { injectMetadataCredentials } from "../utils/aws";
 import { createProvider } from "./provider";
 
 type PrismaClient = ReturnType<typeof createPrismaClient>;
