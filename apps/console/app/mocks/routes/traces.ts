@@ -131,6 +131,7 @@ const mockSpanDetails: Record<string, object> = {
     totalTokens: 1284,
     cacheReadInputTokens: null,
     reasoningTokens: null,
+    reasoningEffort: "",
     inputMessages: [
       {
         role: "system",
@@ -259,6 +260,7 @@ const mockSpanDetails: Record<string, object> = {
     totalTokens: 3584,
     cacheReadInputTokens: 1024,
     reasoningTokens: 512,
+    reasoningEffort: "high",
     inputMessages: [
       {
         role: "system",
@@ -323,6 +325,7 @@ const mockSpanDetails: Record<string, object> = {
     totalTokens: 4096,
     cacheReadInputTokens: null,
     reasoningTokens: null,
+    reasoningEffort: "",
     inputMessages: [
       {
         role: "user",
@@ -369,6 +372,7 @@ const mockSpanDetails: Record<string, object> = {
     totalTokens: 192,
     cacheReadInputTokens: null,
     reasoningTokens: null,
+    reasoningEffort: "",
     inputMessages: [
       { role: "system", parts: [{ type: "text", content: "You are a friendly assistant." }] },
       { role: "user", parts: [{ type: "text", content: "Hello!" }] },
@@ -410,6 +414,7 @@ const mockSpanDetails: Record<string, object> = {
     totalTokens: 256,
     cacheReadInputTokens: null,
     reasoningTokens: null,
+    reasoningEffort: "",
     inputMessages: [{ role: "user", parts: [] }],
     outputMessages: [],
     finishReasons: [],
@@ -445,6 +450,7 @@ for (const [index, trace] of generatedMockTraces.entries()) {
     totalTokens: trace.status === "error" ? 1200 + index * 40 : 1680 + index * 60,
     cacheReadInputTokens: index % 3 === 0 ? 800 + index * 30 : null,
     reasoningTokens: index % 2 === 0 ? 220 + index * 10 : null,
+    reasoningEffort: index % 2 === 0 ? "medium" : "",
     inputMessages: [
       {
         role: "system",

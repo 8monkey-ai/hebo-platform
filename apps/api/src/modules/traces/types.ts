@@ -116,6 +116,7 @@ export const SpanDetail = t.Object({
   totalTokens: t.Nullable(t.Number()),
   cacheReadInputTokens: t.Nullable(t.Number()),
   reasoningTokens: t.Nullable(t.Number()),
+  reasoningEffort: t.String(),
   inputMessages: GenAIInputMessages,
   outputMessages: GenAIOutputMessages,
   finishReasons: GenAIFinishReasons,
