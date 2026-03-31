@@ -6,10 +6,11 @@ const ROOT_DOMAIN = getRootDomain(AUTH_URL);
 export const CORS_CONFIG = {
   origin: (request: Request) => {
     if (!ROOT_DOMAIN) return true;
-    if (!request.url.startsWith("https://")) return false;
+    const origin = request.headers.get("origin");
+    if (!origin || !origin.startsWith("https://")) return false;
 
-    const host = request.url.slice(8).split("/", 1)[0];
-    return host === ROOT_DOMAIN || host.endsWith(`.${ROOT_DOMAIN}`);
+    const hostname = origin.slice(8).split("/", 1)[0].split(":")[0];
+    return hostname === ROOT_DOMAIN || hostname.endsWith(`.${ROOT_DOMAIN}`);
   },
   credentials: true,
   maxAge: 3600,

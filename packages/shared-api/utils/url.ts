@@ -11,5 +11,14 @@ export function isRootPathUrl(url: string): boolean {
 
 export function getRootDomain(baseUrl: string) {
   const { hostname } = new URL(baseUrl);
-  return hostname === "localhost" ? undefined : hostname.split(".").slice(-2).join(".");
+  if (hostname === "localhost") return;
+
+  const parts = hostname.split(".");
+  const tld = parts.at(-1);
+  const sld = parts.at(-2);
+
+  // ccTLDs with a registry second level (e.g. co.uk, com.au, org.nz)
+  const take3 = tld?.length === 2 && /^(co|com|net|org|edu|gov|ac|me|ne)$/.test(sld ?? "");
+
+  return parts.slice(take3 ? -3 : -2).join(".");
 }
