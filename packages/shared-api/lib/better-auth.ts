@@ -2,7 +2,7 @@ import { AUTH_URL, IS_PRODUCTION } from "../env";
 import { getRootDomain } from "../utils/url";
 
 // eTLD+1 domain for cross-subdomain cookies (e.g., "hebo.ai")
-export const ROOT_DOMAIN = getRootDomain(AUTH_URL);
+const ROOT_DOMAIN = getRootDomain(AUTH_URL);
 
 export const COOKIE_CONFIG = {
   advanced: {

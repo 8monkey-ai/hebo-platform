@@ -4,9 +4,10 @@ import { betterAuth } from "better-auth/minimal";
 import { emailOTP, organization } from "better-auth/plugins";
 
 import { AUTH_SECRET, AUTH_URL, LOG_LEVEL } from "@hebo/shared-api/env";
-import { COOKIE_CONFIG, ROOT_DOMAIN } from "@hebo/shared-api/lib/better-auth";
+import { COOKIE_CONFIG } from "@hebo/shared-api/lib/better-auth";
 import { createPrismaAdapter } from "@hebo/shared-api/lib/db/postgres";
 import { getSecret } from "@hebo/shared-api/utils/secrets";
+import { getRootDomain } from "@hebo/shared-api/utils/url";
 
 import { PrismaClient } from "~auth/generated/prisma/client";
 
@@ -21,6 +22,8 @@ import { createOrganizationHook, syncActiveOrganizationHook } from "./lib/organi
 export const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
 });
+
+const ROOT_DOMAIN = getRootDomain(AUTH_URL);
 
 const [
   GOOGLE_CLIENT_ID,

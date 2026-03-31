@@ -1,7 +1,7 @@
 import { Elysia, status, t } from "elysia";
 
 import { authService } from "@hebo/shared-api/middlewares/auth";
-import { slugFromString } from "@hebo/shared-api/utils/create-slug";
+import { slugFromString } from "@hebo/shared-api/utils/slug";
 
 import type { Prisma } from "~api/generated/prisma/client";
 import {

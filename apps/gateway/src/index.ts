@@ -11,7 +11,7 @@ import { ModelListSchema, ModelSchema } from "@hebo-ai/gateway/endpoints/models"
 import { OpenAIErrorSchema } from "@hebo-ai/gateway/errors/openai";
 import { Elysia } from "elysia";
 
-import { corsConfig } from "@hebo/shared-api/lib/cors";
+import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";
 import { getOpenapiConfig } from "@hebo/shared-api/lib/openapi";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { authService } from "@hebo/shared-api/middlewares/auth";
@@ -31,7 +31,7 @@ export const createGateway = () =>
     .use(logging("hebo-gateway"))
     // Root route ("/") is unauthenticated and unprotected for health checks.
     .get("/", () => "🐵 Hebo AI Gateway says hello!")
-    .use(cors(corsConfig))
+    .use(cors(CORS_CONFIG))
     .use(
       openapi(
         getOpenapiConfig("Hebo Gateway", "OpenAI-compatible AI Gateway", GATEWAY_URL, "0.1.0"),
