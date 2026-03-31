@@ -20,3 +20,32 @@ export class BadRequestError extends HttpError {
     super(message, 400, code);
   }
 }
+
+export class NotFoundError extends HttpError {
+  constructor(message = "Resource not found", code = "not_found") {
+    super(message, 404, code);
+  }
+}
+
+export class ConflictError extends HttpError {
+  constructor(message = "Resource already exists", code = "conflict") {
+    super(message, 409, code);
+  }
+}
+
+const PRISMA_ERROR_MAP: Record<string, new () => HttpError> = {
+  P2025: NotFoundError,
+  P2002: ConflictError,
+};
+
+export const identifyPrismaError = (error: unknown): HttpError | undefined => {
+  if (
+    error &&
+    typeof error === "object" &&
+    "code" in error &&
+    typeof error.code === "string" &&
+    error.code in PRISMA_ERROR_MAP
+  ) {
+    return new PRISMA_ERROR_MAP[error.code]();
+  }
+};
