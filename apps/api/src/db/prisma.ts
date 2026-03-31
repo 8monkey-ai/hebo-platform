@@ -1,7 +1,7 @@
 import { createPrismaAdapter } from "@hebo/shared-api/db/postgres";
 
+import { redactSensitiveValues } from "~api/db/utils";
 import { Prisma, PrismaClient } from "~api/generated/prisma/client";
-import { redactSensitiveValues } from "~api/lib/redact-provider";
 import { ProviderConfig } from "~api/modules/providers/types";
 
 const DB_NULL = null;

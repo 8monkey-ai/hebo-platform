@@ -10,7 +10,7 @@ import {
 import { trace } from "@opentelemetry/api";
 import { LRUCache } from "lru-cache";
 
-import type { createPrismaClient } from "~api/lib/prisma/client";
+import type { createPrismaClient } from "~api/db/prisma";
 import type { Models, ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "./aws-wif";

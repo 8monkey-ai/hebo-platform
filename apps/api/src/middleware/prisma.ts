@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 
 import { auth } from "@hebo/shared-api/middlewares/auth";
 
-import { createPrismaClient } from "~api/lib/prisma/client";
+import { createPrismaClient } from "~api/db/prisma";
 
 export const prisma = new Elysia({
   name: "prisma-client",
@@ -14,5 +14,3 @@ export const prisma = new Elysia({
     };
   })
   .as("scoped");
-
-export { type createPrismaClient } from "~api/lib/prisma/client";
