@@ -19,7 +19,7 @@ import { logging } from "@hebo/shared-api/middlewares/logging";
 
 import { prisma } from "~api/middleware/prisma";
 
-import { basePath, gw } from "./gateway-config";
+import { BASE_PATH, gw } from "./gateway";
 import { errorHandler } from "./middlewares/error-handler";
 
 const PORT = Number(process.env.PORT ?? 3002);
@@ -63,7 +63,7 @@ export const createGateway = () =>
       },
     )
     .use(auth)
-    .group(basePath, { isSignedIn: true }, (app) =>
+    .group(BASE_PATH, { isSignedIn: true }, (app) =>
       app
         .use(prisma)
         .post(

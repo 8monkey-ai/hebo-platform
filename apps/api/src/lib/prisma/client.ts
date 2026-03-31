@@ -1,4 +1,4 @@
-import { createPrismaAdapter } from "@hebo/shared-api/lib/db/postgres";
+import { createPrismaAdapter } from "@hebo/shared-api/db/postgres";
 
 import { Prisma, PrismaClient } from "~api/generated/prisma/client";
 import { redactSensitiveValues } from "~api/lib/redact-provider";

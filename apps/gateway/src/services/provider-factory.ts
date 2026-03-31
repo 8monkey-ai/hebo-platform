@@ -28,20 +28,20 @@ import { buildWifOptions } from "./aws-wif";
 
 export async function loadProviderSecrets() {
   const [
-    groqApiKey,
-    bedrockRoleArn,
-    bedrockRegion,
-    voyageApiKey,
-    vertexServiceAccountEmail,
-    vertexAudience,
-    vertexLocation,
-    vertexProject,
-    anthropicApiKey,
-    openAiApiKey,
-    azureApiKey,
-    azureResourceName,
-    enforceByok,
-    freeModelIdsRaw,
+    GROQ_API_KEY,
+    BEDROCK_ROLE_ARN,
+    BEDROCK_REGION,
+    VOYAGE_API_KEY,
+    VERTEX_SERVICE_ACCOUNT_EMAIL,
+    VERTEX_AUDIENCE,
+    VERTEX_LOCATION,
+    VERTEX_PROJECT,
+    ANTHROPIC_API_KEY,
+    OPENAI_API_KEY,
+    AZURE_API_KEY,
+    AZURE_RESOURCE_NAME,
+    ENFORCE_BYOK,
+    FREE_MODEL_IDS_RAW,
   ] = await Promise.all([
     getSecret("GroqApiKey"),
     getSecret("BedrockRoleArn"),
@@ -59,28 +59,28 @@ export async function loadProviderSecrets() {
     getSecret("FreeModelIds"),
   ]);
 
-  const freeModelIds = new Set(
-    (freeModelIdsRaw ?? "")
+  const FREE_MODEL_IDS = new Set(
+    (FREE_MODEL_IDS_RAW ?? "")
       .split(",")
       .map((s: string) => s.trim())
       .filter(Boolean),
   );
 
   return {
-    groqApiKey,
-    bedrockRoleArn,
-    bedrockRegion,
-    voyageApiKey,
-    vertexServiceAccountEmail,
-    vertexAudience,
-    vertexLocation,
-    vertexProject,
-    anthropicApiKey,
-    openAiApiKey,
-    azureApiKey,
-    azureResourceName,
-    enforceByok,
-    freeModelIds,
+    GROQ_API_KEY,
+    BEDROCK_ROLE_ARN,
+    BEDROCK_REGION,
+    VOYAGE_API_KEY,
+    VERTEX_SERVICE_ACCOUNT_EMAIL,
+    VERTEX_AUDIENCE,
+    VERTEX_LOCATION,
+    VERTEX_PROJECT,
+    ANTHROPIC_API_KEY,
+    OPENAI_API_KEY,
+    AZURE_API_KEY,
+    AZURE_RESOURCE_NAME,
+    ENFORCE_BYOK,
+    FREE_MODEL_IDS,
   };
 }
 

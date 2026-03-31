@@ -21,43 +21,44 @@ globalThis.fetch = ((input, init) => _fetch(input, { ...init, timeout: false }))
 
 instrumentFetch("full");
 
-export const basePath = "/v1";
-const secrets = await loadProviderSecrets();
+export const BASE_PATH = "/v1";
+
+const SECRETS = await loadProviderSecrets();
 
 const withTier = (modelId: string) => ({
   additionalProperties: {
-    free: secrets.freeModelIds.has(modelId),
-    requiresByok: secrets.enforceByok && !secrets.freeModelIds.has(modelId),
+    free: SECRETS.FREE_MODEL_IDS.has(modelId),
+    requiresByok: SECRETS.ENFORCE_BYOK && !SECRETS.FREE_MODEL_IDS.has(modelId),
   },
 });
 
 export const gw = gateway({
-  basePath,
+  basePath: BASE_PATH,
 
   providers: {
-    groq: createProvider("groq", { authMode: "api-key", apiKey: secrets.groqApiKey }),
+    groq: createProvider("groq", { authMode: "api-key", apiKey: SECRETS.GROQ_API_KEY }),
     bedrock: createProvider("bedrock", {
       authMode: "iam-role",
-      bedrockRoleArn: secrets.bedrockRoleArn,
-      region: secrets.bedrockRegion,
+      bedrockRoleArn: SECRETS.BEDROCK_ROLE_ARN,
+      region: SECRETS.BEDROCK_REGION,
     }),
     vertex: createProvider("vertex", {
       authMode: "identity-federation",
-      serviceAccountEmail: secrets.vertexServiceAccountEmail,
-      audience: secrets.vertexAudience,
-      location: secrets.vertexLocation,
-      project: secrets.vertexProject,
+      serviceAccountEmail: SECRETS.VERTEX_SERVICE_ACCOUNT_EMAIL,
+      audience: SECRETS.VERTEX_AUDIENCE,
+      location: SECRETS.VERTEX_LOCATION,
+      project: SECRETS.VERTEX_PROJECT,
     }),
-    voyage: createProvider("voyage", { authMode: "api-key", apiKey: secrets.voyageApiKey }),
+    voyage: createProvider("voyage", { authMode: "api-key", apiKey: SECRETS.VOYAGE_API_KEY }),
     anthropic: createProvider("anthropic", {
       authMode: "api-key",
-      apiKey: secrets.anthropicApiKey,
+      apiKey: SECRETS.ANTHROPIC_API_KEY,
     }),
-    openai: createProvider("openai", { authMode: "api-key", apiKey: secrets.openAiApiKey }),
+    openai: createProvider("openai", { authMode: "api-key", apiKey: SECRETS.OPENAI_API_KEY }),
     azure: createProvider("azure", {
       authMode: "resource-api-key",
-      resourceName: secrets.azureResourceName,
-      apiKey: secrets.azureApiKey,
+      resourceName: SECRETS.AZURE_RESOURCE_NAME,
+      apiKey: SECRETS.AZURE_API_KEY,
     }),
   },
 
@@ -81,11 +82,14 @@ export const gw = gateway({
     resolveModelId,
     resolveProvider,
   },
+
   logger: createPinoOtelAdapter(getOtelLogger("hebo-gateway", 1)), // trace severity
+
   timeouts: {
     flex: 30 * 60_000, // 30 minutes
     normal: 5 * 60_000, // 5 minutes
   },
+
   telemetry: {
     enabled: true,
     tracer: trace.getTracer("hebo-gateway"),

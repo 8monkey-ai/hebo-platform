@@ -3,9 +3,9 @@ import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { betterAuth } from "better-auth/minimal";
 import { emailOTP, organization } from "better-auth/plugins";
 
+import { createPrismaAdapter } from "@hebo/shared-api/db/postgres";
 import { AUTH_SECRET, AUTH_URL, LOG_LEVEL } from "@hebo/shared-api/env";
 import { COOKIE_CONFIG } from "@hebo/shared-api/lib/better-auth";
-import { createPrismaAdapter } from "@hebo/shared-api/lib/db/postgres";
 import { getSecret } from "@hebo/shared-api/utils/secret";
 import { getRootDomain } from "@hebo/shared-api/utils/url";
 

@@ -7,13 +7,7 @@
     "lib/otel.ts"
   ],
   "exports": {
-    "./lib/*": "./lib/*.ts",
-    "./middlewares/*": "./middlewares/*.ts",
-    "./schemas/*": "./schemas/*.ts",
-    "./types/*": "./types/*.ts",
-    "./utils/*": "./utils/*.ts",
-    "./env": "./env.ts",
-    "./errors": "./errors.ts"
+    "./*": "./*.ts"
   },
   "scripts": {
     "clean": "git clean -fdx -e '.env*' .",
