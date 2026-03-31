@@ -129,7 +129,7 @@
         "@elysiajs/cors": "catalog:",
         "@elysiajs/openapi": "catalog:",
         "@elysiajs/opentelemetry": "catalog:",
-        "@hebo-ai/gateway": "^0.8.0",
+        "@hebo-ai/gateway": "^0.8.2",
         "@hebo/api": "workspace:*",
         "@hebo/shared-api": "workspace:*",
         "@opentelemetry/api": "catalog:",
@@ -561,7 +561,7 @@
 
     "@grpc/proto-loader": ["@grpc/proto-loader@0.8.0", "", { "dependencies": { "lodash.camelcase": "^4.3.0", "long": "^5.0.0", "protobufjs": "^7.5.3", "yargs": "^17.7.2" }, "bin": { "proto-loader-gen-types": "build/bin/proto-loader-gen-types.js" } }, "sha512-rc1hOQtjIWGxcxpb9aHAfLpIctjEnsDehj0DAiVfBlmT84uvR0uUtN2hEi/ecvWVjXUGf5qPF4qEgiLOx1YIMQ=="],
 
-    "@hebo-ai/gateway": ["@hebo-ai/gateway@0.8.0", "", { "dependencies": { "@ai-sdk/provider": "^3.0.8", "ai": "^6.0.116", "lru-cache": "^11.2.6", "uuid": "^13.0.0", "zod": "^4.3.6" }, "peerDependencies": { "@ai-sdk/amazon-bedrock": "^4.0.77", "@ai-sdk/anthropic": "^3.0.58", "@ai-sdk/cohere": "^3.0.25", "@ai-sdk/google": "^3.0.43", "@ai-sdk/google-vertex": "^4.0.80", "@ai-sdk/groq": "^3.0.29", "@ai-sdk/openai": "^3.0.41", "@libsql/client": "^0.14.0", "@opentelemetry/api": "^1.9.0", "better-sqlite3": "^11.0.0", "mysql2": "^3.11.0", "pg": "^8.13.0", "postgres": "^3.4.0", "typescript": "^5.9.3", "voyage-ai-provider": "^3.0.0" }, "optionalPeers": ["@ai-sdk/amazon-bedrock", "@ai-sdk/anthropic", "@ai-sdk/cohere", "@ai-sdk/google", "@ai-sdk/google-vertex", "@ai-sdk/groq", "@ai-sdk/openai", "@libsql/client", "better-sqlite3", "mysql2", "pg", "postgres", "voyage-ai-provider"] }, "sha512-Ms6oIvFV0qI4bOPHPYq4sqSK/4OktV0zIufi0HXHmSz5nf+tujQW8YBGpMcwu2OtCuJ1BIbV21itQKOLdVoEuw=="],
+    "@hebo-ai/gateway": ["@hebo-ai/gateway@0.8.2", "", { "dependencies": { "@ai-sdk/provider": "^3.0.8", "ai": "^6.0.116", "lru-cache": "^11.2.6", "uuid": "^13.0.0", "zod": "^4.3.6" }, "peerDependencies": { "@ai-sdk/amazon-bedrock": "^4.0.77", "@ai-sdk/anthropic": "^3.0.58", "@ai-sdk/cohere": "^3.0.25", "@ai-sdk/google": "^3.0.43", "@ai-sdk/google-vertex": "^4.0.80", "@ai-sdk/groq": "^3.0.29", "@ai-sdk/openai": "^3.0.41", "@libsql/client": "^0.14.0", "@opentelemetry/api": "^1.9.0", "better-sqlite3": "^11.0.0", "mysql2": "^3.11.0", "pg": "^8.13.0", "postgres": "^3.4.0", "typescript": "^5.9.3", "voyage-ai-provider": "^3.0.0" }, "optionalPeers": ["@ai-sdk/amazon-bedrock", "@ai-sdk/anthropic", "@ai-sdk/cohere", "@ai-sdk/google", "@ai-sdk/google-vertex", "@ai-sdk/groq", "@ai-sdk/openai", "@libsql/client", "better-sqlite3", "mysql2", "pg", "postgres", "voyage-ai-provider"] }, "sha512-1elfnSpAk3bD87HXADA4pJISU6zwIxLUlUkvRj8OBrAZ50h8+6h84UB8pP56KA87tLJPgKQlQkdeUXfSZDYARg=="],
 
     "@hebo/aikit-ui": ["@hebo/aikit-ui@workspace:packages/aikit-ui"],
 
