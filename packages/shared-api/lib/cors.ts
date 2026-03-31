@@ -1,7 +1,7 @@
-import { authUrl } from "../env";
-import { getRootDomain } from "../utils/domains";
+import { AUTH_URL } from "../env";
+import { getRootDomain } from "../utils/url";
 
-const rootDomain = getRootDomain(authUrl)?.replaceAll(".", String.raw`\.`);
+const rootDomain = getRootDomain(AUTH_URL)?.replaceAll(".", String.raw`\.`);
 
 export const corsConfig = rootDomain
   ? {

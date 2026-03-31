@@ -20,7 +20,7 @@ import {
 } from "@opentelemetry/sdk-trace-base";
 import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrumentation";
 
-import { isProduction } from "../env";
+import { IS_PRODUCTION } from "../env";
 import { getSecret } from "../utils/secrets";
 import { isRootPathUrl } from "../utils/url";
 
@@ -46,7 +46,7 @@ export const getOtelLogger = (serviceName: string, minimumSeverity: SeverityNumb
       },
     ]),
     processors: [
-      ...(isProduction ? [] : [new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())]),
+      ...(IS_PRODUCTION ? [] : [new SimpleLogRecordProcessor(new ConsoleLogRecordExporter())]),
       new BatchLogRecordProcessor(
         new OTLPLogExporter({
           url: `${greptimeOtlpEndpoint}/v1/logs`,
