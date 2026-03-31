@@ -21,7 +21,7 @@ import {
 import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrumentation";
 
 import { IS_PRODUCTION } from "../env";
-import { getSecret } from "../utils/secrets";
+import { getSecret } from "../utils/secret";
 import { isRootPathUrl } from "../utils/url";
 
 const SENSITIVE_SPAN_ATTRIBUTES = [

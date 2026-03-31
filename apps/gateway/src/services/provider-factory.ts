@@ -14,7 +14,7 @@ import { withCanonicalIdsForVertex } from "@hebo-ai/gateway/providers/vertex";
 import { withCanonicalIdsForVoyage } from "@hebo-ai/gateway/providers/voyage";
 import { createVoyage } from "voyage-ai-provider";
 
-import { getSecret } from "@hebo/shared-api/utils/secrets";
+import { getSecret } from "@hebo/shared-api/utils/secret";
 
 import type {
   ApiKeyProviderConfig,

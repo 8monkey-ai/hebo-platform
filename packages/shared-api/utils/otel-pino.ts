@@ -1,6 +1,6 @@
 import { SeverityNumber, type Logger, type AnyValueMap } from "@opentelemetry/api-logs";
 
-const otelSeverityByLevel = {
+const OTEL_SEVERITY_BY_LEVEL = {
   trace: SeverityNumber.TRACE,
   debug: SeverityNumber.DEBUG,
   info: SeverityNumber.INFO,
@@ -8,7 +8,7 @@ const otelSeverityByLevel = {
   error: SeverityNumber.ERROR,
 } as const;
 
-type LogLevel = keyof typeof otelSeverityByLevel;
+type LogLevel = keyof typeof OTEL_SEVERITY_BY_LEVEL;
 type LogRecord = Parameters<Logger["emit"]>[0];
 
 const isRecord = (value: unknown): value is AnyValueMap =>
@@ -90,13 +90,13 @@ const buildLogRecord = (args: unknown[]): LogRecord => {
 };
 
 export const createPinoOtelAdapter = (otelLogger: Logger) => {
-  const levels = Object.keys(otelSeverityByLevel) as LogLevel[];
+  const levels = Object.keys(OTEL_SEVERITY_BY_LEVEL) as LogLevel[];
   return Object.fromEntries(
     levels.map((level) => [
       level,
       (...args: unknown[]) => {
         const record = buildLogRecord(args);
-        record.severityNumber = otelSeverityByLevel[level];
+        record.severityNumber = OTEL_SEVERITY_BY_LEVEL[level];
         record.severityText = level.toUpperCase();
         otelLogger.emit(record);
       },
@@ -105,10 +105,10 @@ export const createPinoOtelAdapter = (otelLogger: Logger) => {
 };
 
 export const parseLogSeverity = (raw: string): SeverityNumber => {
-  if (!(raw in otelSeverityByLevel)) {
+  if (!(raw in OTEL_SEVERITY_BY_LEVEL)) {
     throw new Error(
-      `Unsupported LOG_LEVEL "${raw}". Must be one of: ${Object.keys(otelSeverityByLevel).join(", ")}`,
+      `Unsupported LOG_LEVEL "${raw}". Must be one of: ${Object.keys(OTEL_SEVERITY_BY_LEVEL).join(", ")}`,
     );
   }
-  return otelSeverityByLevel[raw as LogLevel];
+  return OTEL_SEVERITY_BY_LEVEL[raw as LogLevel];
 };

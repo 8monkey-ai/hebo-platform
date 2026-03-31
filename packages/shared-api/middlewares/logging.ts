@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 
 import { IS_PRODUCTION, LOG_SEVERITY } from "../env";
 import { getOtelLogger } from "../lib/otel";
-import { createPinoOtelAdapter } from "../utils/otel-pino-adapter";
+import { createPinoOtelAdapter } from "../utils/otel-pino";
 
 export type Logger = ReturnType<typeof createPinoOtelAdapter>;
 

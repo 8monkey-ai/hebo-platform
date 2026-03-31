@@ -1,7 +1,7 @@
 import { createMessage } from "@upyo/core";
 import { SmtpTransport } from "@upyo/smtp";
 
-import { getSecret } from "@hebo/shared-api/utils/secrets";
+import { getSecret } from "@hebo/shared-api/utils/secret";
 
 const [SMTP_HOST, smtpPort, SMTP_USER, SMTP_PASS, SMTP_FROM] = await Promise.all([
   getSecret("SmtpHost"),

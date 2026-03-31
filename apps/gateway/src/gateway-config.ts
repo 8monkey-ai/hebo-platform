@@ -9,7 +9,7 @@ import { instrumentFetch } from "@hebo-ai/gateway/telemetry";
 import { trace } from "@opentelemetry/api";
 
 import { getOtelLogger } from "@hebo/shared-api/lib/otel";
-import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino-adapter";
+import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino";
 
 import { resolveModelId, resolveProvider } from "./services/model-resolver";
 import { createProvider, loadProviderSecrets } from "./services/provider-factory";
