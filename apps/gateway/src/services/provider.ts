@@ -24,7 +24,7 @@ import type {
   VertexProviderConfig,
 } from "~api/modules/providers/types";
 
-import { buildWifOptions } from "./aws-wif";
+import { buildWifOptions } from "../utils/aws-wif";
 
 export async function loadProviderSecrets() {
   const [
