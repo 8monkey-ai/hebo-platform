@@ -4,7 +4,7 @@ import { HttpError } from "@hebo/shared-api/errors";
 
 import { identifyPrismaError } from "~api/lib/prisma/errors";
 
-export const errorHandler = new Elysia({ name: "error-handler" })
+export const errors = new Elysia({ name: "error-handler" })
   .onError(function handleApiError({ error }) {
     if (error instanceof HttpError) {
       return status(error.status, error.message);

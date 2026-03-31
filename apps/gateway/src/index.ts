@@ -20,7 +20,7 @@ import { logging } from "@hebo/shared-api/middlewares/logging";
 import { prisma } from "~api/middleware/prisma";
 
 import { BASE_PATH, gw } from "./gateway";
-import { errorHandler } from "./middlewares/error-handler";
+import { openaiErrors } from "./middlewares/errors";
 
 const PORT = Number(process.env.PORT ?? 3002);
 const GATEWAY_URL = process.env.GATEWAY_URL ?? `http://localhost:${PORT}`;
@@ -37,7 +37,7 @@ export const createGateway = () =>
         getOpenapiConfig("Hebo Gateway", "OpenAI-compatible AI Gateway", GATEWAY_URL, "0.1.0"),
       ),
     )
-    .use(errorHandler)
+    .use(openaiErrors)
     // Public routes (no authentication required)
     .get(
       "/v1/models",
