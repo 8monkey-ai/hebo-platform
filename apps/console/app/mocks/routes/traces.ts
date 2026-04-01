@@ -1164,7 +1164,7 @@ const mockTraces = traceDetails.map(({ spanId, metadata, inputMessages, ...detai
   metadata,
 }));
 
-const mockMetadataKeys = ["environment", "provider", "scenario", "session_id", "user_id"];
+const mockMetadataKeys = [...new Set(traceDetails.flatMap((t) => Object.keys(t.metadata)))];
 
 export const traceHandlers = [
   // List traces
