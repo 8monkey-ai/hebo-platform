@@ -33,7 +33,7 @@ function parseJson(value: unknown): unknown {
 }
 
 export function parseJsonArray(value: unknown): unknown[] | null {
-  if (!Array.isArray(value)) return null;
+  if (!Array.isArray(value)) return [];
   return value.map((item) => parseJson(item));
 }
 
