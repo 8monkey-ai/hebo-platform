@@ -134,8 +134,18 @@ function scrollDemoOutputMessages(n: number, status: string) {
 function summaryFromMessages(
   inputMessages: Array<{ role: string; parts: Array<{ type: string; content?: string }> }>,
 ) {
-  const userMsg = inputMessages.find((m) => m.role === "user");
-  return userMsg?.parts.find((p) => p.type === "text")?.content ?? "";
+  for (let i = inputMessages.length - 1; i >= 0; i--) {
+    const msg = inputMessages[i];
+    if (msg.role !== "user") continue;
+
+    return (msg.parts ?? [])
+      .filter((p) => p.type === "text" || p.type === "reasoning")
+      .map((p) => p.content)
+      .filter((c): c is string => typeof c === "string")
+      .join("\n")
+      .trim();
+  }
+  return "";
 }
 
 // Single source of truth: full detail objects.
