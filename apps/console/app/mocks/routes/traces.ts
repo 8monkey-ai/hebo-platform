@@ -138,6 +138,7 @@ function summaryFromMessages(
 const traceDetails = [
   {
     timestamp: new Date(now - 3 * min),
+    traceId: "a0000001-0000-4000-9000-000000000001",
     spanId: "2fd9c1ab-f4d0-48b0-a1e3-8c5f2d3b4a6e",
     operationName: "chat",
     model: "gpt-oss-120b",
@@ -269,6 +270,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 6 * min),
+    traceId: "a0000002-0000-4000-9000-000000000002",
     spanId: "7a2b3c4d-e5f6-7890-abcd-ef1234567890",
     operationName: "chat",
     model: "gpt-4.1",
@@ -336,6 +338,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 12 * min),
+    traceId: "a0000003-0000-4000-9000-000000000003",
     spanId: "3c4d5e6f-7890-abcd-ef12-345678901234",
     operationName: "chat",
     model: "claude-sonnet-4-20250514",
@@ -385,6 +388,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 18 * min),
+    traceId: "a0000004-0000-4000-9000-000000000004",
     spanId: "4d5e6f70-8901-bcde-f123-456789012345",
     operationName: "chat",
     model: "gpt-oss-20b",
@@ -429,6 +433,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 25 * min),
+    traceId: "a0000005-0000-4000-9000-000000000005",
     spanId: "5e6f7081-9012-cdef-0123-567890123456",
     operationName: "embeddings",
     model: "voyage-3.5",
@@ -464,6 +469,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 30 * min),
+    traceId: "a0000006-0000-4000-9000-000000000006",
     spanId: "90000000-0000-4000-8000-000000000001",
     operationName: "response.create",
     model: "gpt-oss-120b",
@@ -502,6 +508,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 34 * min),
+    traceId: "a0000007-0000-4000-9000-000000000007",
     spanId: "90000000-0000-4000-8000-000000000002",
     operationName: "chat.completion",
     model: "claude-sonnet-4-20250514",
@@ -540,6 +547,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 38 * min),
+    traceId: "a0000008-0000-4000-9000-000000000008",
     spanId: "90000000-0000-4000-8000-000000000003",
     operationName: "chat.completion",
     model: "gemini-2.5-pro",
@@ -578,6 +586,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 42 * min),
+    traceId: "a0000009-0000-4000-9000-000000000009",
     spanId: "90000000-0000-4000-8000-000000000004",
     operationName: "chat.completion",
     model: "gpt-oss-120b",
@@ -616,6 +625,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 46 * min),
+    traceId: "a0000010-0000-4000-9000-000000000010",
     spanId: "90000000-0000-4000-8000-000000000005",
     operationName: "response.create",
     model: "claude-sonnet-4-20250514",
@@ -654,6 +664,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 50 * min),
+    traceId: "a0000011-0000-4000-9000-000000000011",
     spanId: "90000000-0000-4000-8000-000000000006",
     operationName: "chat.completion",
     model: "gemini-2.5-pro",
@@ -692,6 +703,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 54 * min),
+    traceId: "a0000012-0000-4000-9000-000000000012",
     spanId: "90000000-0000-4000-8000-000000000007",
     operationName: "chat.completion",
     model: "gpt-oss-120b",
@@ -730,6 +742,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 58 * min),
+    traceId: "a0000013-0000-4000-9000-000000000013",
     spanId: "90000000-0000-4000-8000-000000000008",
     operationName: "chat.completion",
     model: "claude-sonnet-4-20250514",
@@ -768,6 +781,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 62 * min),
+    traceId: "a0000014-0000-4000-9000-000000000014",
     spanId: "90000000-0000-4000-8000-000000000009",
     operationName: "response.create",
     model: "gemini-2.5-pro",
@@ -806,6 +820,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 66 * min),
+    traceId: "a0000015-0000-4000-9000-000000000015",
     spanId: "90000000-0000-4000-8000-000000000010",
     operationName: "chat.completion",
     model: "gpt-oss-120b",
@@ -844,6 +859,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 70 * min),
+    traceId: "a0000016-0000-4000-9000-000000000016",
     spanId: "90000000-0000-4000-8000-000000000011",
     operationName: "chat.completion",
     model: "claude-sonnet-4-20250514",
@@ -882,6 +898,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 74 * min),
+    traceId: "a0000017-0000-4000-9000-000000000017",
     spanId: "90000000-0000-4000-8000-000000000012",
     operationName: "chat.completion",
     model: "gemini-2.5-pro",
@@ -920,6 +937,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 78 * min),
+    traceId: "a0000018-0000-4000-9000-000000000018",
     spanId: "90000000-0000-4000-8000-000000000013",
     operationName: "response.create",
     model: "gpt-oss-120b",
@@ -958,6 +976,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 82 * min),
+    traceId: "a0000019-0000-4000-9000-000000000019",
     spanId: "90000000-0000-4000-8000-000000000014",
     operationName: "chat.completion",
     model: "claude-sonnet-4-20250514",
@@ -996,6 +1015,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 86 * min),
+    traceId: "a0000020-0000-4000-9000-000000000020",
     spanId: "90000000-0000-4000-8000-000000000015",
     operationName: "chat.completion",
     model: "gemini-2.5-pro",
@@ -1034,6 +1054,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 90 * min),
+    traceId: "a0000021-0000-4000-9000-000000000021",
     spanId: "90000000-0000-4000-8000-000000000016",
     operationName: "chat.completion",
     model: "gpt-oss-120b",
@@ -1072,6 +1093,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 94 * min),
+    traceId: "a0000022-0000-4000-9000-000000000022",
     spanId: "90000000-0000-4000-8000-000000000017",
     operationName: "response.create",
     model: "claude-sonnet-4-20250514",
@@ -1110,6 +1132,7 @@ const traceDetails = [
   },
   {
     timestamp: new Date(now - 98 * min),
+    traceId: "a0000023-0000-4000-9000-000000000023",
     spanId: "90000000-0000-4000-8000-000000000018",
     operationName: "chat.completion",
     model: "gemini-2.5-pro",
@@ -1148,12 +1171,12 @@ const traceDetails = [
   },
 ];
 
-// Lookup map for the detail route
-const mockSpanDetails = Object.fromEntries(traceDetails.map((t) => [t.spanId, t]));
+// Lookup map for the detail route – keyed by traceId to match the real API contract
+const mockSpanDetails = Object.fromEntries(traceDetails.map((t) => [t.traceId, t]));
 
 // List-view projection derived from the single source above
-const mockTraces = traceDetails.map(({ spanId, metadata, inputMessages, ...detail }) => ({
-  traceId: spanId,
+const mockTraces = traceDetails.map(({ metadata, inputMessages, ...detail }) => ({
+  traceId: detail.traceId,
   timestamp: detail.timestamp,
   operationName: detail.operationName,
   model: detail.model,
