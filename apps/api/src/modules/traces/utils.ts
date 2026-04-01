@@ -2,17 +2,6 @@ export function escapeSqlIdentifier(value: string): string {
   return value.replaceAll(`"`, `""`);
 }
 
-// Workaround for GreptimeDB cluster-mode bug where binary-encoded parameters
-// in the Postgres extended query protocol hang indefinitely.
-// See: https://github.com/GreptimeTeam/greptimedb/issues/7819
-export function escapeSqlString(value: string): string {
-  return `'${value.replaceAll("'", "''")}'`;
-}
-
-export function toTimestampLiteral(value: Date): string {
-  return `'${value.toISOString()}'`;
-}
-
 export function parseNullableNumber(value: unknown): number | null {
   if (typeof value === "string") return Number(value);
   if (typeof value === "number") return value;
@@ -33,7 +22,6 @@ function normalizeJsonUnicodeEscapes(value: string): string {
 
 function parseJson(value: unknown): unknown {
   if (value === null || value === undefined) return null;
-  if (typeof value === "object") return value;
   if (typeof value === "string") {
     try {
       return JSON.parse(normalizeJsonUnicodeEscapes(value));
@@ -41,13 +29,12 @@ function parseJson(value: unknown): unknown {
       return value;
     }
   }
+  return value;
 }
 
-// FUTURE: remove once this is fixed https://github.com/GreptimeTeam/greptimedb/issues/7808
 export function parseJsonArray(value: unknown): unknown[] | null {
-  const parsed = parseJson(value);
-  if (!Array.isArray(parsed)) return null;
-  return parsed.map((item) => parseJson(item));
+  if (!Array.isArray(value)) return null;
+  return value.map((item) => parseJson(item));
 }
 
 export function formatStatus(statusCode: unknown): "ok" | "error" | "unknown" {
@@ -61,10 +48,9 @@ function truncateSummary(value: string): string {
 }
 
 export function extractLastUserSummary(messages: unknown): string {
-  const parsed = parseJsonArray(messages);
-  if (!parsed) return "";
-  for (let i = parsed.length - 1; i >= 0; i--) {
-    const msg = parsed[i];
+  if (!Array.isArray(messages)) return "";
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const msg = parseJson(messages[i]);
     if (!msg || typeof msg !== "object") continue;
     if ((msg as Record<string, unknown>).role === "user") return extractSummary(msg);
   }

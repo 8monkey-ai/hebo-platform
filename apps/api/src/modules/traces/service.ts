@@ -5,13 +5,11 @@ import type { GreptimeDb } from "~api/middlewares/greptime";
 import type { GenAIFinishReasons, GenAIInputMessages, GenAIOutputMessages } from "./types";
 import {
   escapeSqlIdentifier,
-  escapeSqlString,
   extractLastUserSummary,
   formatStatus,
   parseJsonArray,
   parseNullableNumber,
   parseString,
-  toTimestampLiteral,
 } from "./utils";
 
 const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
@@ -38,20 +36,13 @@ const traceColumnsCache = new LRUCache<
 async function getTraceColumnNames(greptimeDb: GreptimeDb) {
   const cached = traceColumnsCache.get("trace_columns");
   if (cached) return cached;
-  // Workaround: values inlined instead of using $1 params due to GreptimeDB cluster-mode bug.
-  // See: https://github.com/GreptimeTeam/greptimedb/issues/7819
-  // Parametrized version to restore once fixed upstream:
-  //   greptimeDb.unsafe(
-  //     `SELECT column_name FROM information_schema.columns
-  //      WHERE table_name = 'opentelemetry_traces' AND column_name LIKE $1`,
-  //     [`${METADATA_PREFIX}%`],
-  //   )
   const rows = await greptimeDb.unsafe<Array<{ column_name: string }>>(
     `SELECT column_name
      FROM information_schema.columns
      WHERE table_name = 'opentelemetry_traces'
-       AND (column_name LIKE '${METADATA_PREFIX}%'
-         OR column_name IN (${OPTIONAL_SPAN_COLUMNS.map(({ column }) => `'${escapeSqlIdentifier(column)}'`).join(", ")}))`,
+       AND (column_name LIKE $1
+         OR column_name IN (${OPTIONAL_SPAN_COLUMNS.map((_, i) => `$${i + 2}`).join(", ")}))`,
+    [`${METADATA_PREFIX}%`, ...OPTIONAL_SPAN_COLUMNS.map(({ column }) => column)],
   );
 
   const metadataColumns: string[] = [];
@@ -82,10 +73,16 @@ export async function listTraces(
   const { metadataColumns } = await getTraceColumnNames(greptimeDb);
   const metadataKeys = metadataColumns.map((col) => col.slice(METADATA_PREFIX.length));
 
+  const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
+  function addParam(value: unknown) {
+    params.push(value);
+    return `$${params.length}`;
+  }
+
   let metaFilterSql = "";
   for (const [key, value] of Object.entries(metadataFilters)) {
     if (!metadataKeys.includes(key)) continue;
-    metaFilterSql += ` AND "${escapeSqlIdentifier(`${METADATA_PREFIX}${key}`)}" = ${escapeSqlString(value)}`;
+    metaFilterSql += ` AND "${escapeSqlIdentifier(`${METADATA_PREFIX}${key}`)}" = ${addParam(value)}`;
   }
 
   let statusFilterSql = "";
@@ -97,23 +94,12 @@ export async function listTraces(
 
   let operationFilterSql = "";
   if (operationFilter) {
-    operationFilterSql = ` AND "span_attributes.gen_ai.operation.name" = ${escapeSqlString(operationFilter)}`;
+    operationFilterSql = ` AND "span_attributes.gen_ai.operation.name" = ${addParam(operationFilter)}`;
   }
 
   const metadataSelectSql = metadataColumns
     .map((col) => `"${escapeSqlIdentifier(col)}"`)
     .join(",\n      ");
-
-  // Parametrized version to restore once https://github.com/GreptimeTeam/greptimedb/issues/7819 is fixed:
-  //   const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
-  //   function addParam(value: unknown) { params.push(value); return `$${params.length}`; }
-  //   metaFilterSql: ... `= ${addParam(value)}`
-  //   WHERE ... "span_attributes.hebo.agent.slug" = $1
-  //     AND "span_attributes.hebo.branch.slug" = $2
-  //     AND "span_attributes.hebo.organization.id" = $3
-  //     AND "timestamp" >= $4 AND "timestamp" <= $5
-  //   LIMIT ${addParam(pageSize + 1)} OFFSET ${addParam((page - 1) * pageSize)}
-  //   greptimeDb.unsafe(queryText, params)
 
   const queryText = `
     SELECT
@@ -124,23 +110,23 @@ export async function listTraces(
       "span_attributes.gen_ai.operation.name" AS operation_name,
       "span_attributes.gen_ai.response.model" AS response_model,
       "span_attributes.gen_ai.provider.name" AS provider_name,
-      json_to_string("span_attributes.gen_ai.input.messages") AS input_messages
+      "span_attributes.gen_ai.input.messages" AS input_messages
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
     WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
-      AND "span_attributes.hebo.agent.slug" = ${escapeSqlString(agentSlug)}
-      AND "span_attributes.hebo.branch.slug" = ${escapeSqlString(branchSlug)}
-      AND "span_attributes.hebo.organization.id" = ${escapeSqlString(organizationId)}
-      AND "timestamp" >= ${toTimestampLiteral(from)}
-      AND "timestamp" <= ${toTimestampLiteral(to)}
+      AND "span_attributes.hebo.agent.slug" = $1
+      AND "span_attributes.hebo.branch.slug" = $2
+      AND "span_attributes.hebo.organization.id" = $3
+      AND "timestamp" >= $4
+      AND "timestamp" <= $5
       ${metaFilterSql}
       ${statusFilterSql}
       ${operationFilterSql}
     ORDER BY "timestamp" DESC
-    LIMIT ${pageSize + 1} OFFSET ${(page - 1) * pageSize}
+    LIMIT ${addParam(pageSize + 1)} OFFSET ${addParam((page - 1) * pageSize)}
   `;
 
-  const rows = await greptimeDb.unsafe<Record<string, unknown>[]>(queryText);
+  const rows = await greptimeDb.unsafe<Record<string, unknown>[]>(queryText, params);
   const hasNextPage = rows.length > pageSize;
   const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
 
@@ -191,14 +177,6 @@ export async function getSpans(
       : `NULL AS "${escapeSqlIdentifier(alias)}"`,
   ).join(",\n      ");
 
-  // Parametrized version to restore once https://github.com/GreptimeTeam/greptimedb/issues/7819 is fixed:
-  //   const params = [traceId, organizationId, agentSlug, branchSlug];
-  //   WHERE "trace_id" = $1
-  //     AND "span_attributes.hebo.organization.id" = $2
-  //     AND "span_attributes.hebo.agent.slug" = $3
-  //     AND "span_attributes.hebo.branch.slug" = $4
-  //   greptimeDb.unsafe(queryText, params)
-
   const queryText = `
     SELECT
       "timestamp" AS timestamp,
@@ -209,9 +187,9 @@ export async function getSpans(
       "span_attributes.gen_ai.request.model" AS request_model,
       "span_attributes.gen_ai.response.model" AS response_model,
       "span_attributes.gen_ai.provider.name" AS provider_name,
-      json_to_string("span_attributes.gen_ai.input.messages") AS input_messages,
-      json_to_string("span_attributes.gen_ai.output.messages") AS output_messages,
-      json_to_string("span_attributes.gen_ai.response.finish_reasons") AS finish_reasons,
+      "span_attributes.gen_ai.input.messages" AS input_messages,
+      "span_attributes.gen_ai.output.messages" AS output_messages,
+      "span_attributes.gen_ai.response.finish_reasons" AS finish_reasons,
       "span_attributes.gen_ai.response.id" AS response_id,
       "span_attributes.gen_ai.usage.input_tokens" AS input_tokens,
       "span_attributes.gen_ai.usage.output_tokens" AS output_tokens,
@@ -222,15 +200,20 @@ export async function getSpans(
       "span_attributes.hebo.organization.id"
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
-    WHERE "trace_id" = ${escapeSqlString(traceId)}
-      AND "span_attributes.hebo.organization.id" = ${escapeSqlString(organizationId)}
-      AND "span_attributes.hebo.agent.slug" = ${escapeSqlString(agentSlug)}
-      AND "span_attributes.hebo.branch.slug" = ${escapeSqlString(branchSlug)}
+    WHERE "trace_id" = $1
+      AND "span_attributes.hebo.organization.id" = $2
+      AND "span_attributes.hebo.agent.slug" = $3
+      AND "span_attributes.hebo.branch.slug" = $4
       AND "span_attributes.gen_ai.operation.name" IS NOT NULL
     ORDER BY "timestamp" ASC
   `;
 
-  const rows = await greptimeDb.unsafe<Record<string, unknown>[]>(queryText);
+  const rows = await greptimeDb.unsafe<Record<string, unknown>[]>(queryText, [
+    traceId,
+    organizationId,
+    agentSlug,
+    branchSlug,
+  ]);
 
   const result = [];
   for (const row of rows) {
@@ -268,7 +251,7 @@ export async function getSpans(
       reasoningMaxTokens: parseNullableNumber(row.reasoning_max_tokens),
       inputMessages: (parseJsonArray(row.input_messages) ?? []) as GenAIInputMessages,
       outputMessages: (parseJsonArray(row.output_messages) ?? []) as GenAIOutputMessages,
-      finishReasons: (parseJsonArray(row.finish_reasons) ?? null) as GenAIFinishReasons,
+      finishReasons: (parseJsonArray(row.finish_reasons) ?? []) as GenAIFinishReasons,
       responseId: parseString(row.response_id),
       metadata,
       spanAttributes,
