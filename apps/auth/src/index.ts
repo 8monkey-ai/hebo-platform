@@ -8,7 +8,7 @@ import { logging } from "@hebo/shared-api/middlewares/logging";
 
 import { auth } from "./better-auth";
 
-const PORT = Number(process.env.PORT ?? 3000);
+const PORT = Number(process.env.PORT ?? 4100);
 
 const createAuth = () =>
   new Elysia()

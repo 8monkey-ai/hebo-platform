@@ -19,6 +19,6 @@ WORKDIR /app
 COPY --from=builder --chown=nonroot:nonroot /rds-bundle.pem /etc/ssl/certs/rds-bundle.pem
 COPY --from=builder /repo/apps/auth/dist/server .
 
-EXPOSE 3000
+EXPOSE 4100
 USER nonroot:nonroot
 ENTRYPOINT ["/app/server"]
