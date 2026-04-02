@@ -100,7 +100,7 @@ export const createGateway = () =>
     );
 
 if (import.meta.main) {
-  serve(createGateway, { port: PORT, idleTimeout: 0 }, "Hebo Gateway");
+  serve(createGateway, PORT, "Hebo Gateway", { idleTimeout: 0 });
 }
 
 export type Gateway = ReturnType<typeof createGateway>;
