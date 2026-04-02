@@ -39,18 +39,20 @@ export function onRequest(ctx: OnRequestHookContext) {
 }
 
 export async function onError(ctx: OnErrorHookContext) {
-  if (
-    !ctx.resolvedModelId &&
-    typeof ctx.body === "object" &&
-    ctx.body !== null &&
-    "model" in ctx.body &&
-    ctx.body.model
-  ) {
-    try {
-      await resolveModelId(ctx as unknown as ResolveModelHookContext);
-    } catch {
-      // Best-effort: body may be partially valid, swallow resolution failures
-    }
+  if (ctx.resolvedModelId) return;
+  if (typeof ctx.body !== "object" || ctx.body === null) return;
+
+  const modelId =
+    "model" in ctx.body && typeof ctx.body.model === "string" ? ctx.body.model : undefined;
+  if (!modelId) return;
+
+  try {
+    await resolveModelId({
+      ...(ctx as unknown as Omit<ResolveModelHookContext, "modelId">),
+      modelId,
+    } as ResolveModelHookContext);
+  } catch {
+    // Best-effort: body may be partially valid, swallow resolution failures
   }
 }
 
