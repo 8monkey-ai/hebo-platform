@@ -4,6 +4,7 @@ import { Elysia } from "elysia";
 
 import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
+import { serve } from "@hebo/shared-api/lib/serve";
 import { logging } from "@hebo/shared-api/middlewares/logging";
 
 import { auth } from "./better-auth";
@@ -19,8 +20,7 @@ const createAuth = () =>
     .mount(auth.handler);
 
 if (import.meta.main) {
-  const app = createAuth().listen(PORT);
-  console.log(`🐵 Hebo Auth running at ${app.server!.url}`);
+  serve(createAuth, PORT, "Hebo Auth");
 }
 
 export type Auth = ReturnType<typeof createAuth>;

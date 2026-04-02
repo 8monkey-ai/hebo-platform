@@ -14,6 +14,7 @@ import { Elysia } from "elysia";
 import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";
 import { createOpenapiConfig } from "@hebo/shared-api/lib/openapi";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
+import { serve } from "@hebo/shared-api/lib/serve";
 import { auth } from "@hebo/shared-api/middlewares/auth";
 import { logging } from "@hebo/shared-api/middlewares/logging";
 
@@ -99,8 +100,7 @@ export const createGateway = () =>
     );
 
 if (import.meta.main) {
-  const app = createGateway().listen({ port: PORT, idleTimeout: 0 }); // Prevent idle timeout
-  console.log(`🐵 Hebo Gateway running at ${app.server!.url}`);
+  serve(createGateway, { port: PORT, idleTimeout: 0 }, "Hebo Gateway");
 }
 
 export type Gateway = ReturnType<typeof createGateway>;
