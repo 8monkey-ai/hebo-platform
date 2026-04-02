@@ -3,6 +3,7 @@
  * which fails in the nested scroll-container layout of the playground sidebar.
  * Switching to absolute positioning makes buttons reliably clickable.
  * FUTURE: remove when streamdown fixes this upstream.
+ * https://github.com/vercel/streamdown/issues/494
  */
 [data-streamdown="code-block"] {
   position: relative;
