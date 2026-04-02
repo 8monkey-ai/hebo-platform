@@ -33,20 +33,20 @@ const providerCache = new LRUCache<string, ProviderV3>({
   max: 100,
 });
 
-export function onRequest(ctx: OnRequestHookContext) {
+export function tagSpanWithOrganization(ctx: OnRequestHookContext) {
   const { organizationId } = ctx.state as { organizationId: string };
   trace.getActiveSpan()?.setAttributes({
     "hebo.organization.id": organizationId,
   });
 }
 
-export function before({ body, operation }: BeforeHookContext) {
+export function injectDefaultCacheControl({ body, operation }: BeforeHookContext) {
   if (operation === "chat") {
     (body as ChatCompletionsBody).cache_control ??= { type: "ephemeral" };
   }
 }
 
-export async function onError(ctx: OnErrorHookContext) {
+export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
   if (ctx.resolvedModelId) return;
   if (typeof ctx.body !== "object" || ctx.body === null) return;
 
