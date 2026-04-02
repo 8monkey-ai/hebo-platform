@@ -224,10 +224,12 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
 
   return (
     <div className="flex flex-col divide-y">
-      {trace.status === "error" && trace.statusMessage && (
+      {trace.status === "error" && (
         <Alert variant="destructive">
           <AlertTitle>Error</AlertTitle>
-          <AlertDescription className="whitespace-pre-wrap">{trace.statusMessage}</AlertDescription>
+          <AlertDescription className="whitespace-pre-wrap">
+            {trace.statusMessage ?? "Unknown error"}
+          </AlertDescription>
         </Alert>
       )}
 
