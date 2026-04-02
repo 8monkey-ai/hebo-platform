@@ -11,7 +11,9 @@ export function serve(
   name: string,
   options?: Record<string, unknown>,
 ) {
-  const workers = IS_PRODUCTION && process.platform === "linux" ? os.availableParallelism() : 1;
+  const workers =
+    Number(process.env.WORKERS) ||
+    (IS_PRODUCTION && process.platform === "linux" ? os.availableParallelism() : 1);
 
   if (workers > 1 && cluster.isPrimary) {
     for (let i = 0; i < workers; i++) cluster.fork();
