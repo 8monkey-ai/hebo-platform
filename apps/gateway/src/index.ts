@@ -24,6 +24,7 @@ import { BASE_PATH, gw } from "./gateway";
 import { openaiErrors } from "./middlewares/errors";
 
 const PORT = Number(process.env.PORT ?? 3002);
+const WORKERS = Number(process.env.WORKERS) || undefined;
 const GATEWAY_URL = process.env.GATEWAY_URL ?? `http://localhost:${PORT}`;
 
 export const createGateway = () =>
@@ -100,7 +101,7 @@ export const createGateway = () =>
     );
 
 if (import.meta.main) {
-  serve(createGateway, PORT, "Hebo Gateway", { idleTimeout: 0 });
+  serve(createGateway, PORT, "Hebo Gateway", { idleTimeout: 0, workers: WORKERS });
 }
 
 export type Gateway = ReturnType<typeof createGateway>;

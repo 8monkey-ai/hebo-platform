@@ -10,6 +10,7 @@ import { logging } from "@hebo/shared-api/middlewares/logging";
 import { auth } from "./better-auth";
 
 const PORT = Number(process.env.PORT ?? 3000);
+const WORKERS = Number(process.env.WORKERS) || undefined;
 
 const createAuth = () =>
   new Elysia()
@@ -20,7 +21,7 @@ const createAuth = () =>
     .mount(auth.handler);
 
 if (import.meta.main) {
-  serve(createAuth, PORT, "Hebo Auth");
+  serve(createAuth, PORT, "Hebo Auth", { workers: WORKERS });
 }
 
 export type Auth = ReturnType<typeof createAuth>;

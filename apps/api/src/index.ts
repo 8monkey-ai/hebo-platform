@@ -17,6 +17,7 @@ import { providersModule } from "./modules/providers";
 import { spansModule } from "./modules/traces";
 
 const PORT = Number(process.env.PORT ?? 3001);
+const WORKERS = Number(process.env.WORKERS) || undefined;
 const API_URL = process.env.API_URL ?? `http://localhost:${PORT}`;
 
 const createApi = () =>
@@ -47,7 +48,7 @@ const createApi = () =>
     );
 
 if (import.meta.main) {
-  serve(createApi, PORT, "Hebo API");
+  serve(createApi, PORT, "Hebo API", { workers: WORKERS });
 }
 
 export type Api = ReturnType<typeof createApi>;
