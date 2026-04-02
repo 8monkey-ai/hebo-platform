@@ -53,8 +53,18 @@ export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
     "model" in ctx.body && typeof ctx.body.model === "string" ? ctx.body.model : undefined;
   if (!modelId) return;
 
+  const span = trace.getActiveSpan();
+
   // Always attach the raw model string so users can identify the affected model alias
-  trace.getActiveSpan()?.setAttribute("gen_ai.request.model", modelId);
+  span?.setAttribute("gen_ai.request.model", modelId);
+
+  // Preserve client-supplied metadata so users can correlate error traces with their own identifiers
+  if ("metadata" in ctx.body && typeof ctx.body.metadata === "object" && ctx.body.metadata !== null) {
+    const metadata = ctx.body.metadata as Record<string, unknown>;
+    for (const key in metadata) {
+      span?.setAttribute(`gen_ai.request.metadata.${key}`, String(metadata[key]));
+    }
+  }
 
   try {
     await resolveModelAlias({
