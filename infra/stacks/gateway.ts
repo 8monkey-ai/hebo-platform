@@ -7,7 +7,7 @@ import heboDatabase from "./db";
 import { authSecret, isProduction, llmSecrets, greptimeHost, normalizedStage } from "./env";
 
 const gatewayDomain = isProduction ? "gateway.hebo.ai" : `gateway.${normalizedStage}.hebo.ai`;
-const gatewayPort = "4102";
+const gatewayPort = "8522";
 
 const heboGateway = new sst.aws.Service("HeboGateway", {
   cluster: heboCluster,

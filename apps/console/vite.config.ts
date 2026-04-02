@@ -10,7 +10,7 @@ import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(({ mode }) => {
   return {
-    server: { port: 4200 },
+    server: { port: 8520 },
     plugins: [
       tsconfigPaths(),
       preserveDirectives(),

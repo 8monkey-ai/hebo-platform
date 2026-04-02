@@ -9,7 +9,7 @@ import { logging } from "@hebo/shared-api/middlewares/logging";
 import { countLetterTool } from "./aikit/count-letter.js";
 import hello from "./hello.txt";
 
-const PORT = Number(process.env.PORT ?? 4103);
+const PORT = Number(process.env.PORT ?? 8524);
 
 function createMcpServer() {
   const mcp = new McpServer({ name: "hebo-mcp", version: "0.0.3" });

@@ -7,7 +7,7 @@ import heboDatabase, { createMigrator } from "./db";
 import { authSecret, isProduction, greptimeHost, normalizedStage } from "./env";
 
 const apiDomain = isProduction ? "api.hebo.ai" : `api.${normalizedStage}.hebo.ai`;
-const apiPort = "4101";
+const apiPort = "8521";
 
 const heboApi = new sst.aws.Service("HeboApi", {
   cluster: heboCluster,

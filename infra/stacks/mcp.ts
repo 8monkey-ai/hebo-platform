@@ -5,7 +5,7 @@ import heboCluster from "./cluster";
 import { isProduction, greptimeHost, authSecret, normalizedStage } from "./env";
 
 const mcpDomain = isProduction ? "mcp.hebo.ai" : `mcp.${normalizedStage}.hebo.ai`;
-const mcpPort = "4103";
+const mcpPort = "8524";
 
 const heboMcp = new sst.aws.Service("HeboMcp", {
   cluster: heboCluster,
