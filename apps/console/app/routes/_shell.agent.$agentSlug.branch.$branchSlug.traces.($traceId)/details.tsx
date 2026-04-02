@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronRight, ChevronUp, Wrench } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { Alert, AlertDescription, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
@@ -224,14 +225,10 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
   return (
     <div className="flex flex-col divide-y">
       {trace.status === "error" && trace.statusMessage && (
-        <div className="py-4">
-          <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2">
-            <p className="text-xs font-medium text-destructive">Error</p>
-            <p className="mt-1 text-xs whitespace-pre-wrap text-destructive/90">
-              {trace.statusMessage}
-            </p>
-          </div>
-        </div>
+        <Alert variant="destructive">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription className="whitespace-pre-wrap">{trace.statusMessage}</AlertDescription>
+        </Alert>
       )}
 
       {/* oxlint-disable no-array-index-key - static read-only data */}
