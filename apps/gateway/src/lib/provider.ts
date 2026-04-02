@@ -38,8 +38,8 @@ export async function loadProviderSecrets() {
     VERTEX_PROJECT,
     ANTHROPIC_API_KEY,
     OPENAI_API_KEY,
-    AZURE_API_KEY,
-    AZURE_RESOURCE_NAME,
+    FOUNDRY_API_KEY,
+    FOUNDRY_RESOURCE_NAME,
     ENFORCE_BYOK,
     FREE_MODEL_IDS_RAW,
   ] = await Promise.all([
@@ -53,8 +53,8 @@ export async function loadProviderSecrets() {
     getSecret("VertexProject"),
     getSecret("AnthropicApiKey"),
     getSecret("OpenAiApiKey"),
-    getSecret("AzureOpenAiApiKey"),
-    getSecret("AzureOpenAiResourceName"),
+    getSecret("FoundryApiKey"),
+    getSecret("FoundryResourceName"),
     getSecret("EnforceByok").then((v) => v === "true"),
     getSecret("FreeModelIds"),
   ]);
@@ -77,8 +77,8 @@ export async function loadProviderSecrets() {
     VERTEX_PROJECT,
     ANTHROPIC_API_KEY,
     OPENAI_API_KEY,
-    AZURE_API_KEY,
-    AZURE_RESOURCE_NAME,
+    FOUNDRY_API_KEY,
+    FOUNDRY_RESOURCE_NAME,
     ENFORCE_BYOK,
     FREE_MODEL_IDS,
   };

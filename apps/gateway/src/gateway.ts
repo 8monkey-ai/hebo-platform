@@ -57,8 +57,8 @@ export const gw = gateway({
     openai: createProvider("openai", { authMode: "api-key", apiKey: SECRETS.OPENAI_API_KEY }),
     azure: createProvider("azure", {
       authMode: "resource-api-key",
-      resourceName: SECRETS.AZURE_RESOURCE_NAME,
-      apiKey: SECRETS.AZURE_API_KEY,
+      resourceName: SECRETS.FOUNDRY_RESOURCE_NAME,
+      apiKey: SECRETS.FOUNDRY_API_KEY,
     }),
   },
 

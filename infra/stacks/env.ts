@@ -21,8 +21,8 @@ export const smtpFrom = getSstSecret("SmtpFrom");
 
 // LLMs
 export const anthropicApiKey = getSstSecret("AnthropicApiKey");
-export const azureOpenAiApiKey = getSstSecret("AzureOpenAiApiKey");
-export const azureOpenAiResourceName = getSstSecret("AzureOpenAiResourceName");
+export const foundryApiKey = getSstSecret("FoundryApiKey");
+export const foundryResourceName = getSstSecret("FoundryResourceName");
 export const bedrockRegion = getSstSecret("BedrockRegion");
 export const bedrockRoleArn = getSstSecret("BedrockRoleArn");
 export const groqApiKey = getSstSecret("GroqApiKey");
@@ -57,8 +57,8 @@ export const authSecrets = [
 
 export const llmSecrets = [
   anthropicApiKey,
-  azureOpenAiApiKey,
-  azureOpenAiResourceName,
+  foundryApiKey,
+  foundryResourceName,
   bedrockRoleArn,
   bedrockRegion,
   voyageApiKey,
