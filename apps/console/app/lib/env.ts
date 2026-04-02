@@ -6,18 +6,18 @@ const isReachable = (url: string) =>
     () => false,
   );
 
-export const useMocks = shouldAutoDetect && !(await isReachable("http://localhost:3001"));
+export const useMocks = shouldAutoDetect && !(await isReachable("http://localhost:8521"));
 
 // oxlint-disable prefer-nullish-coalescing -- empty string should use the fallback URL
 export const apiUrl = useMocks
-  ? "http://localhost:5173/api"
-  : import.meta.env.VITE_API_URL || "http://localhost:3001";
+  ? "http://localhost:8520/api"
+  : import.meta.env.VITE_API_URL || "http://localhost:8521";
 
-export const authUrl = import.meta.env.VITE_AUTH_URL || "http://localhost:3000";
+export const authUrl = import.meta.env.VITE_AUTH_URL || "http://localhost:8523";
 
 export const gatewayUrl = useMocks
-  ? "http://localhost:5173/gateway"
-  : import.meta.env.VITE_GATEWAY_URL || "http://localhost:3002";
+  ? "http://localhost:8520/gateway"
+  : import.meta.env.VITE_GATEWAY_URL || "http://localhost:8522";
 // oxlint-enable prefer-nullish-coalescing
 
 export const magicLinkAuth = import.meta.env.VITE_MAGICLINK_AUTH === "true";

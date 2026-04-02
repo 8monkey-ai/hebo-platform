@@ -6,7 +6,7 @@ import heboDatabase, { createMigrator } from "./db";
 import { authSecrets, isProduction, greptimeHost, normalizedStage } from "./env";
 
 const authDomain = isProduction ? "auth.hebo.ai" : `auth.${normalizedStage}.hebo.ai`;
-const authPort = "3000";
+const authPort = "8523";
 
 const heboAuth = new sst.aws.Service("HeboAuth", {
   cluster: heboCluster,
