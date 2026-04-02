@@ -11,7 +11,7 @@ import { trace } from "@opentelemetry/api";
 import { createOtelLogger } from "@hebo/shared-api/lib/otel";
 import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino";
 
-import { resolveModelId, resolveProvider } from "./lib/hooks";
+import { onError, onRequest, resolveModelId, resolveProvider } from "./lib/hooks";
 import { createProvider, loadProviderSecrets } from "./lib/provider";
 
 // Disable Bun's hardcoded 5-minute fetch timeout (https://github.com/oven-sh/bun/issues/16682)
@@ -74,6 +74,7 @@ export const gw = gateway({
   ),
 
   hooks: {
+    onRequest,
     before: ({ body, operation }) => {
       if (operation === "chat") {
         (body as ChatCompletionsBody).cache_control ??= { type: "ephemeral" };
@@ -81,6 +82,7 @@ export const gw = gateway({
     },
     resolveModelId,
     resolveProvider,
+    onError,
   },
 
   logger: createPinoOtelAdapter(createOtelLogger("hebo-gateway", 1)), // trace severity

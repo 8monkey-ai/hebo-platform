@@ -85,6 +85,10 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
             </div>
           </div>
 
+          {trace.status === "error" && trace.statusMessage && (
+            <p className="mt-2 text-xs text-destructive">{trace.statusMessage}</p>
+          )}
+
           <div className="flex items-center justify-between gap-3 pt-3">
             <TabsList>
               <TabsTrigger value="formatted">Formatted</TabsTrigger>

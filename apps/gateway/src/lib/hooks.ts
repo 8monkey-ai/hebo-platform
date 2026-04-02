@@ -4,6 +4,8 @@ import type { ProviderV3 } from "@ai-sdk/provider";
 import {
   CANONICAL_MODEL_IDS,
   GatewayError,
+  type OnErrorHookContext,
+  type OnRequestHookContext,
   type ResolveModelHookContext,
   type ResolveProviderHookContext,
 } from "@hebo-ai/gateway";
@@ -29,17 +31,29 @@ const providerCache = new LRUCache<string, ProviderV3>({
   max: 100,
 });
 
-export async function resolveModelId(ctx: ResolveModelHookContext) {
-  const { modelId: aliasPath, models, state } = ctx;
-
-  const { prismaClient, organizationId } = state as {
-    prismaClient: PrismaClient;
-    organizationId: string;
-  };
-
+export function onRequest(ctx: OnRequestHookContext) {
+  const { organizationId } = ctx.state as { organizationId: string };
   trace.getActiveSpan()?.setAttributes({
     "hebo.organization.id": organizationId,
   });
+}
+
+export async function onError(ctx: OnErrorHookContext) {
+  if (!ctx.resolvedModelId && ctx.body && "model" in ctx.body && ctx.body.model) {
+    try {
+      await resolveModelId(ctx as unknown as ResolveModelHookContext);
+    } catch {
+      // Best-effort: body may be partially valid, swallow resolution failures
+    }
+  }
+}
+
+export async function resolveModelId(ctx: ResolveModelHookContext) {
+  const { modelId: aliasPath, models, state } = ctx;
+
+  const { prismaClient } = state as {
+    prismaClient: PrismaClient;
+  };
 
   if (canonicalModelIds.has(aliasPath)) {
     const modelConfig = models[aliasPath];

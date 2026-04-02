@@ -168,6 +168,10 @@ export function TraceList({
                       <p className="line-clamp-2 text-xs text-muted-foreground">
                         {trace.summary ? (
                           truncateText(trace.summary, 120)
+                        ) : trace.status === "error" && trace.statusMessage ? (
+                          <span className="text-destructive">
+                            {truncateText(trace.statusMessage, 120)}
+                          </span>
                         ) : (
                           <span className="opacity-50">(no user message)</span>
                         )}
