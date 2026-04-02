@@ -39,7 +39,13 @@ export function onRequest(ctx: OnRequestHookContext) {
 }
 
 export async function onError(ctx: OnErrorHookContext) {
-  if (!ctx.resolvedModelId && ctx.body && "model" in ctx.body && ctx.body.model) {
+  if (
+    !ctx.resolvedModelId &&
+    typeof ctx.body === "object" &&
+    ctx.body !== null &&
+    "model" in ctx.body &&
+    ctx.body.model
+  ) {
     try {
       await resolveModelId(ctx as unknown as ResolveModelHookContext);
     } catch {
