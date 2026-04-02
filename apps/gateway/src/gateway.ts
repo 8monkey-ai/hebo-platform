@@ -13,7 +13,7 @@ import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino";
 import {
   bestEffortResolveModelOnError,
   injectDefaultCacheControl,
-  resolveModelAliasFromBranch,
+  resolveModelAlias,
   selectProviderWithByokFallback,
   tagSpanWithOrganization,
 } from "./lib/hooks";
@@ -81,7 +81,7 @@ export const gw = gateway({
   hooks: {
     onRequest: tagSpanWithOrganization,
     before: injectDefaultCacheControl,
-    resolveModelId: resolveModelAliasFromBranch,
+    resolveModelId: resolveModelAlias,
     resolveProvider: selectProviderWithByokFallback,
     onError: bestEffortResolveModelOnError,
   },

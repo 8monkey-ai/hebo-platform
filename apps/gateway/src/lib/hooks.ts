@@ -10,7 +10,6 @@ import {
   type ResolveModelHookContext,
   type ResolveProviderHookContext,
 } from "@hebo-ai/gateway";
-import type { ChatCompletionsBody } from "@hebo-ai/gateway/endpoints/chat-completions";
 import { trace } from "@opentelemetry/api";
 import { LRUCache } from "lru-cache";
 
@@ -41,8 +40,8 @@ export function tagSpanWithOrganization(ctx: OnRequestHookContext) {
 }
 
 export function injectDefaultCacheControl({ body, operation }: BeforeHookContext) {
-  if (operation === "chat") {
-    (body as ChatCompletionsBody).cache_control ??= { type: "ephemeral" };
+  if (operation === "chat" || operation === "responses") {
+    body.cache_control ??= { type: "ephemeral" };
   }
 }
 
@@ -55,7 +54,7 @@ export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
   if (!modelId) return;
 
   try {
-    await resolveModelAliasFromBranch({
+    await resolveModelAlias({
       ...(ctx as unknown as Omit<ResolveModelHookContext, "modelId">),
       modelId,
     } as ResolveModelHookContext);
@@ -64,7 +63,7 @@ export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
   }
 }
 
-export async function resolveModelAliasFromBranch(ctx: ResolveModelHookContext) {
+export async function resolveModelAlias(ctx: ResolveModelHookContext) {
   const { modelId: aliasPath, models, state } = ctx;
 
   const { prismaClient } = state as {

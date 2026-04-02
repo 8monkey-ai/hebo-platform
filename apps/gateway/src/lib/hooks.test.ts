@@ -3,7 +3,7 @@ import { describe, expect, it } from "bun:test";
 import type { ProviderV3 } from "@ai-sdk/provider";
 import { GatewayError, type ResolveProviderHookContext } from "@hebo-ai/gateway";
 
-import { resolveProvider } from "./hooks";
+import { selectProviderWithByokFallback } from "./hooks";
 
 // Minimal mock for ResolveProviderHookContext
 function makeCtx(overrides: {
@@ -61,7 +61,7 @@ describe("resolveProvider", () => {
         requiresByok: true,
       });
       try {
-        await resolveProvider(ctx);
+        await selectProviderWithByokFallback(ctx);
         expect.unreachable("should have thrown");
       } catch (e) {
         expect(e).toBeInstanceOf(GatewayError);
@@ -78,7 +78,7 @@ describe("resolveProvider", () => {
         customProviderSlug: "bedrock",
       });
       try {
-        await resolveProvider(ctx);
+        await selectProviderWithByokFallback(ctx);
         expect.unreachable("should have thrown");
       } catch (e) {
         expect(e).toBeInstanceOf(GatewayError);
@@ -89,7 +89,7 @@ describe("resolveProvider", () => {
 
     it("does not throw for free model without custom provider", async () => {
       const ctx = makeCtx({ modelId: "openai/gpt-oss-20b", free: true, requiresByok: true });
-      const result = await resolveProvider(ctx);
+      const result = await selectProviderWithByokFallback(ctx);
       expect(result).toBe(ctx.providers.bedrock);
     });
   });
@@ -101,7 +101,7 @@ describe("resolveProvider", () => {
         free: false,
         requiresByok: false,
       });
-      const result = await resolveProvider(ctx);
+      const result = await selectProviderWithByokFallback(ctx);
       expect(result).toBe(ctx.providers.bedrock);
     });
 
@@ -112,7 +112,7 @@ describe("resolveProvider", () => {
         requiresByok: false,
         modelProviders: ["vertex"],
       });
-      const result = await resolveProvider(ctx);
+      const result = await selectProviderWithByokFallback(ctx);
       expect(result).toBeUndefined();
     });
 
@@ -123,7 +123,7 @@ describe("resolveProvider", () => {
         requiresByok: false,
         bedrockProvider: undefined,
       });
-      const result = await resolveProvider(ctx);
+      const result = await selectProviderWithByokFallback(ctx);
       expect(result).toBeUndefined();
     });
 
@@ -135,7 +135,7 @@ describe("resolveProvider", () => {
         requiresByok: false,
         customProviderSlug: "anthropic",
       });
-      const result = await resolveProvider(ctx);
+      const result = await selectProviderWithByokFallback(ctx);
       expect(result).toBeUndefined();
     });
   });
