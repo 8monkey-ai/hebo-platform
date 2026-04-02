@@ -21,6 +21,8 @@ export const smtpFrom = getSstSecret("SmtpFrom");
 
 // LLMs
 export const anthropicApiKey = getSstSecret("AnthropicApiKey");
+export const foundryApiKey = getSstSecret("FoundryApiKey");
+export const foundryResourceName = getSstSecret("FoundryResourceName");
 export const bedrockRegion = getSstSecret("BedrockRegion");
 export const bedrockRoleArn = getSstSecret("BedrockRoleArn");
 export const groqApiKey = getSstSecret("GroqApiKey");
@@ -54,18 +56,20 @@ export const authSecrets = [
 ];
 
 export const llmSecrets = [
-  bedrockRoleArn,
-  bedrockRegion,
-  voyageApiKey,
-  groqApiKey,
-  vertexServiceAccountEmail,
-  vertexAwsProviderAudience,
-  vertexProject,
-  vertexLocation,
   anthropicApiKey,
-  openAiApiKey,
+  bedrockRegion,
+  bedrockRoleArn,
   enforceByok,
+  foundryApiKey,
+  foundryResourceName,
   freeModelIds,
+  groqApiKey,
+  openAiApiKey,
+  vertexAwsProviderAudience,
+  vertexLocation,
+  vertexProject,
+  vertexServiceAccountEmail,
+  voyageApiKey,
 ];
 
 export const normalizedStage = $app.stage
