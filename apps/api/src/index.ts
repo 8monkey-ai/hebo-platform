@@ -17,7 +17,7 @@ import { providersModule } from "./modules/providers";
 import { spansModule } from "./modules/traces";
 
 const PORT = Number(process.env.PORT ?? 8521);
-const WORKERS = Number(process.env.WORKERS) || undefined;
+const WORKERS = Number(process.env.WORKERS);
 const API_URL = process.env.API_URL ?? `http://localhost:${PORT}`;
 
 const createApi = () =>

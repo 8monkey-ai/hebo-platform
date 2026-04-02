@@ -24,7 +24,7 @@ import { BASE_PATH, gw } from "./gateway";
 import { openaiErrors } from "./middlewares/errors";
 
 const PORT = Number(process.env.PORT ?? 8522);
-const WORKERS = Number(process.env.WORKERS) || undefined;
+const WORKERS = Number(process.env.WORKERS);
 const GATEWAY_URL = process.env.GATEWAY_URL ?? `http://localhost:${PORT}`;
 
 export const createGateway = () =>

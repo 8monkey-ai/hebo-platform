@@ -11,7 +11,7 @@ import { countLetterTool } from "./aikit/count-letter.js";
 import hello from "./hello.txt";
 
 const PORT = Number(process.env.PORT ?? 8524);
-const WORKERS = Number(process.env.WORKERS) || undefined;
+const WORKERS = Number(process.env.WORKERS);
 
 function createMcpServer() {
   const mcp = new McpServer({ name: "hebo-mcp", version: "0.0.3" });
