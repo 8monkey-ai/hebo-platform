@@ -6,6 +6,7 @@ import { Elysia } from "elysia";
 import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";
 import { createOpenapiConfig } from "@hebo/shared-api/lib/openapi";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
+import { serve } from "@hebo/shared-api/lib/serve";
 import { auth } from "@hebo/shared-api/middlewares/auth";
 import { logging } from "@hebo/shared-api/middlewares/logging";
 
@@ -16,6 +17,7 @@ import { providersModule } from "./modules/providers";
 import { spansModule } from "./modules/traces";
 
 const PORT = Number(process.env.PORT ?? 8521);
+const WORKERS = Number(process.env.WORKERS);
 const API_URL = process.env.API_URL ?? `http://localhost:${PORT}`;
 
 const createApi = () =>
@@ -46,8 +48,7 @@ const createApi = () =>
     );
 
 if (import.meta.main) {
-  const app = createApi().listen(PORT);
-  console.log(`🐵 Hebo API running at ${app.server!.url}`);
+  serve(createApi, PORT, "Hebo API", { workers: WORKERS });
 }
 
 export type Api = ReturnType<typeof createApi>;

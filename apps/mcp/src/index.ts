@@ -4,12 +4,14 @@ import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/
 import { Elysia } from "elysia";
 
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
+import { serve } from "@hebo/shared-api/lib/serve";
 import { logging } from "@hebo/shared-api/middlewares/logging";
 
 import { countLetterTool } from "./aikit/count-letter.js";
 import hello from "./hello.txt";
 
 const PORT = Number(process.env.PORT ?? 8524);
+const WORKERS = Number(process.env.WORKERS);
 
 function createMcpServer() {
   const mcp = new McpServer({ name: "hebo-mcp", version: "0.0.3" });
@@ -32,8 +34,7 @@ const createMcp = () =>
     );
 
 if (import.meta.main) {
-  const mcp = createMcp().listen(PORT);
-  console.log(`🐵 Hebo MCP running at ${mcp.server!.url}`);
+  serve(createMcp, PORT, "Hebo MCP", { workers: WORKERS });
 }
 
 export type Mcp = ReturnType<typeof createMcp>;
