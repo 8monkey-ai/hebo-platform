@@ -53,6 +53,9 @@ export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
     "model" in ctx.body && typeof ctx.body.model === "string" ? ctx.body.model : undefined;
   if (!modelId) return;
 
+  // Always attach the raw model string so users can identify the affected model alias
+  trace.getActiveSpan()?.setAttribute("gen_ai.request.model", modelId);
+
   try {
     await resolveModelAlias({
       ...(ctx as unknown as Omit<ResolveModelHookContext, "modelId">),
