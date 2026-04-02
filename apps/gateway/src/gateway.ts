@@ -1,5 +1,4 @@
 import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
-import type { ChatCompletionsBody } from "@hebo-ai/gateway/endpoints/chat-completions";
 import { nova2MultimodalEmbeddings } from "@hebo-ai/gateway/models/amazon";
 import { claudeHaiku45, claudeOpus46, claudeSonnet46 } from "@hebo-ai/gateway/models/anthropic";
 import { gemini } from "@hebo-ai/gateway/models/google";
@@ -11,7 +10,13 @@ import { trace } from "@opentelemetry/api";
 import { createOtelLogger } from "@hebo/shared-api/lib/otel";
 import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino";
 
-import { resolveModelId, resolveProvider } from "./lib/hooks";
+import {
+  bestEffortResolveModelOnError,
+  injectDefaultCacheControl,
+  resolveModelAlias,
+  selectProviderWithByokFallback,
+  tagSpanWithOrganization,
+} from "./lib/hooks";
 import { createProvider, loadProviderSecrets } from "./lib/provider";
 
 // Disable Bun's hardcoded 5-minute fetch timeout (https://github.com/oven-sh/bun/issues/16682)
@@ -74,13 +79,11 @@ export const gw = gateway({
   ),
 
   hooks: {
-    before: ({ body, operation }) => {
-      if (operation === "chat") {
-        (body as ChatCompletionsBody).cache_control ??= { type: "ephemeral" };
-      }
-    },
-    resolveModelId,
-    resolveProvider,
+    onRequest: tagSpanWithOrganization,
+    before: injectDefaultCacheControl,
+    resolveModelId: resolveModelAlias,
+    resolveProvider: selectProviderWithByokFallback,
+    onError: bestEffortResolveModelOnError,
   },
 
   logger: createPinoOtelAdapter(createOtelLogger("hebo-gateway", 1)), // trace severity

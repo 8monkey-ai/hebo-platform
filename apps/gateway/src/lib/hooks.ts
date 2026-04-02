@@ -4,6 +4,9 @@ import type { ProviderV3 } from "@ai-sdk/provider";
 import {
   CANONICAL_MODEL_IDS,
   GatewayError,
+  type BeforeHookContext,
+  type OnErrorHookContext,
+  type OnRequestHookContext,
   type ResolveModelHookContext,
   type ResolveProviderHookContext,
 } from "@hebo-ai/gateway";
@@ -29,17 +32,59 @@ const providerCache = new LRUCache<string, ProviderV3>({
   max: 100,
 });
 
-export async function resolveModelId(ctx: ResolveModelHookContext) {
-  const { modelId: aliasPath, models, state } = ctx;
-
-  const { prismaClient, organizationId } = state as {
-    prismaClient: PrismaClient;
-    organizationId: string;
-  };
-
+export function tagSpanWithOrganization(ctx: OnRequestHookContext) {
+  const { organizationId } = ctx.state as { organizationId: string };
   trace.getActiveSpan()?.setAttributes({
     "hebo.organization.id": organizationId,
   });
+}
+
+export function injectDefaultCacheControl({ body, operation }: BeforeHookContext) {
+  if (operation === "chat" || operation === "responses") {
+    body.cache_control ??= { type: "ephemeral" };
+  }
+}
+
+export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
+  if (ctx.resolvedModelId) return;
+  if (typeof ctx.body !== "object" || ctx.body === null) return;
+
+  const modelId =
+    "model" in ctx.body && typeof ctx.body.model === "string" ? ctx.body.model : undefined;
+  if (!modelId) return;
+
+  const span = trace.getActiveSpan();
+
+  // Collect all attributes up front so we only call setAttributes() once
+  const attrs: Record<string, string> = {
+    "gen_ai.request.model": modelId,
+  };
+
+  if ("metadata" in ctx.body && typeof ctx.body.metadata === "object" && ctx.body.metadata !== null) {
+    const metadata = ctx.body.metadata as Record<string, unknown>;
+    for (const key in metadata) {
+      attrs[`gen_ai.request.metadata.${key}`] = String(metadata[key]);
+    }
+  }
+
+  span?.setAttributes(attrs);
+
+  try {
+    await resolveModelAlias({
+      ...(ctx as unknown as Omit<ResolveModelHookContext, "modelId">),
+      modelId,
+    } as ResolveModelHookContext);
+  } catch {
+    // Best-effort: body may be partially valid, swallow resolution failures
+  }
+}
+
+export async function resolveModelAlias(ctx: ResolveModelHookContext) {
+  const { modelId: aliasPath, models, state } = ctx;
+
+  const { prismaClient } = state as {
+    prismaClient: PrismaClient;
+  };
 
   if (canonicalModelIds.has(aliasPath)) {
     const modelConfig = models[aliasPath];
@@ -126,7 +171,7 @@ async function resolveCustomProvider(
   return provider;
 }
 
-export async function resolveProvider(ctx: ResolveProviderHookContext) {
+export async function selectProviderWithByokFallback(ctx: ResolveProviderHookContext) {
   const { resolvedModelId: modelId, models, providers, state } = ctx;
 
   const { prismaClient, organizationId } = state as {

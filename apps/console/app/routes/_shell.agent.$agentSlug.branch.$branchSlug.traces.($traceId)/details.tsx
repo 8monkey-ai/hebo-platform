@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronRight, ChevronUp, Wrench } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
+import { Alert, AlertDescription, AlertTitle } from "@hebo/shared-ui/components/Alert";
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
@@ -223,6 +224,15 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
 
   return (
     <div className="flex flex-col divide-y">
+      {trace.status === "error" && (
+        <Alert variant="destructive">
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription className="whitespace-pre-wrap">
+            {trace.statusMessage?.trim() || "Unknown error"}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {/* oxlint-disable no-array-index-key - static read-only data */}
       {inputMessages.map((msg, index) => (
         <MessageBlock key={`${trace.spanId}:in:${index}`} message={msg} />
