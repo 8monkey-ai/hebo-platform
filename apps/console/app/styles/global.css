@@ -10,7 +10,9 @@
 
 [data-streamdown="code-block"] > div:has(> [data-streamdown="code-block-actions"]) {
   position: absolute !important;
+  top: 0.5rem;
   right: 0.5rem;
+  z-index: 1;
   margin-top: 0 !important;
   pointer-events: auto;
 }
