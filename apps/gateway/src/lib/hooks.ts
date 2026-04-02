@@ -4,11 +4,13 @@ import type { ProviderV3 } from "@ai-sdk/provider";
 import {
   CANONICAL_MODEL_IDS,
   GatewayError,
+  type BeforeHookContext,
   type OnErrorHookContext,
   type OnRequestHookContext,
   type ResolveModelHookContext,
   type ResolveProviderHookContext,
 } from "@hebo-ai/gateway";
+import type { ChatCompletionsBody } from "@hebo-ai/gateway/endpoints/chat-completions";
 import { trace } from "@opentelemetry/api";
 import { LRUCache } from "lru-cache";
 
@@ -36,6 +38,12 @@ export function onRequest(ctx: OnRequestHookContext) {
   trace.getActiveSpan()?.setAttributes({
     "hebo.organization.id": organizationId,
   });
+}
+
+export function before({ body, operation }: BeforeHookContext) {
+  if (operation === "chat") {
+    (body as ChatCompletionsBody).cache_control ??= { type: "ephemeral" };
+  }
 }
 
 export async function onError(ctx: OnErrorHookContext) {
