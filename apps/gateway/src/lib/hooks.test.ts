@@ -52,7 +52,7 @@ function makeCtx(overrides: {
   } satisfies ResolveProviderHookContext;
 }
 
-describe("resolveProvider", () => {
+describe("selectProviderWithByokFallback", () => {
   describe("requiresByok: true", () => {
     it("throws 402 BYOK_REQUIRED for non-free model without custom provider", async () => {
       const ctx = makeCtx({

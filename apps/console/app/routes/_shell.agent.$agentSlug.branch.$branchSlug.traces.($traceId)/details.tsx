@@ -228,7 +228,7 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
         <Alert variant="destructive">
           <AlertTitle>Error</AlertTitle>
           <AlertDescription className="whitespace-pre-wrap">
-            {trace.statusMessage ?? "Unknown error"}
+            {trace.statusMessage?.trim() || "Unknown error"}
           </AlertDescription>
         </Alert>
       )}
