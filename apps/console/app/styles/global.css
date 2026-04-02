@@ -1,3 +1,20 @@
+/* Fix: code block copy/download buttons unclickable (issue #318)
+ * Streamdown positions buttons with sticky + pointer-events-none/auto,
+ * which fails in the nested scroll-container layout of the playground sidebar.
+ * Switching to absolute positioning makes buttons reliably clickable.
+ * FUTURE: remove when streamdown fixes this upstream.
+ */
+[data-streamdown="code-block"] {
+  position: relative;
+}
+
+[data-streamdown="code-block"] > div:has(> [data-streamdown="code-block-actions"]) {
+  position: absolute !important;
+  right: 0.5rem;
+  margin-top: 0 !important;
+  pointer-events: auto;
+}
+
 /* Global cross-fade duration */
 ::view-transition-old(root),
 ::view-transition-new(root) {
