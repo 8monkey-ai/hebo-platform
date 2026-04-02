@@ -55,7 +55,7 @@ export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
   if (!modelId) return;
 
   try {
-    await resolveModelId({
+    await resolveModelAliasFromBranch({
       ...(ctx as unknown as Omit<ResolveModelHookContext, "modelId">),
       modelId,
     } as ResolveModelHookContext);
@@ -64,7 +64,7 @@ export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
   }
 }
 
-export async function resolveModelId(ctx: ResolveModelHookContext) {
+export async function resolveModelAliasFromBranch(ctx: ResolveModelHookContext) {
   const { modelId: aliasPath, models, state } = ctx;
 
   const { prismaClient } = state as {
@@ -156,7 +156,7 @@ async function resolveCustomProvider(
   return provider;
 }
 
-export async function resolveProvider(ctx: ResolveProviderHookContext) {
+export async function selectProviderWithByokFallback(ctx: ResolveProviderHookContext) {
   const { resolvedModelId: modelId, models, providers, state } = ctx;
 
   const { prismaClient, organizationId } = state as {
