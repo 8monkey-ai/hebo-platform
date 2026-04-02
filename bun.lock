@@ -4,13 +4,6 @@
   "workspaces": {
     "": {
       "name": "hebo",
-      "dependencies": {
-        "@streamdown/cjk": "^1.0.3",
-        "@streamdown/code": "^1.1.1",
-        "@streamdown/math": "^1.0.2",
-        "@streamdown/mermaid": "^1.0.2",
-        "streamdown": "^2.5.0",
-      },
       "devDependencies": {
         "@types/bun": "catalog:",
         "check-dependency-version-consistency": "^6.0.0",
