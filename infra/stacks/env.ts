@@ -57,19 +57,19 @@ export const authSecrets = [
 
 export const llmSecrets = [
   anthropicApiKey,
+  bedrockRegion,
+  bedrockRoleArn,
+  enforceByok,
   foundryApiKey,
   foundryResourceName,
-  bedrockRoleArn,
-  bedrockRegion,
-  voyageApiKey,
-  groqApiKey,
-  vertexServiceAccountEmail,
-  vertexAwsProviderAudience,
-  vertexProject,
-  vertexLocation,
-  openAiApiKey,
-  enforceByok,
   freeModelIds,
+  groqApiKey,
+  openAiApiKey,
+  vertexAwsProviderAudience,
+  vertexLocation,
+  vertexProject,
+  vertexServiceAccountEmail,
+  voyageApiKey,
 ];
 
 export const normalizedStage = $app.stage

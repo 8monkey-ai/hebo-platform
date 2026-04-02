@@ -36,12 +36,22 @@ export const gw = gateway({
   basePath: BASE_PATH,
 
   providers: {
-    groq: createProvider("groq", { authMode: "api-key", apiKey: SECRETS.GROQ_API_KEY }),
+    anthropic: createProvider("anthropic", {
+      authMode: "api-key",
+      apiKey: SECRETS.ANTHROPIC_API_KEY,
+    }),
+    azure: createProvider("azure", {
+      authMode: "resource-api-key",
+      resourceName: SECRETS.FOUNDRY_RESOURCE_NAME,
+      apiKey: SECRETS.FOUNDRY_API_KEY,
+    }),
     bedrock: createProvider("bedrock", {
       authMode: "iam-role",
       bedrockRoleArn: SECRETS.BEDROCK_ROLE_ARN,
       region: SECRETS.BEDROCK_REGION,
     }),
+    groq: createProvider("groq", { authMode: "api-key", apiKey: SECRETS.GROQ_API_KEY }),
+    openai: createProvider("openai", { authMode: "api-key", apiKey: SECRETS.OPENAI_API_KEY }),
     vertex: createProvider("vertex", {
       authMode: "identity-federation",
       serviceAccountEmail: SECRETS.VERTEX_SERVICE_ACCOUNT_EMAIL,
@@ -50,16 +60,6 @@ export const gw = gateway({
       project: SECRETS.VERTEX_PROJECT,
     }),
     voyage: createProvider("voyage", { authMode: "api-key", apiKey: SECRETS.VOYAGE_API_KEY }),
-    anthropic: createProvider("anthropic", {
-      authMode: "api-key",
-      apiKey: SECRETS.ANTHROPIC_API_KEY,
-    }),
-    openai: createProvider("openai", { authMode: "api-key", apiKey: SECRETS.OPENAI_API_KEY }),
-    azure: createProvider("azure", {
-      authMode: "resource-api-key",
-      resourceName: SECRETS.FOUNDRY_RESOURCE_NAME,
-      apiKey: SECRETS.FOUNDRY_API_KEY,
-    }),
   },
 
   models: defineModelCatalog(
