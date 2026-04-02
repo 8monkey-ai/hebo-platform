@@ -7,8 +7,9 @@ import { IS_PRODUCTION } from "../env";
 
 export function serve(
   factory: () => AnyElysia,
-  port: Parameters<AnyElysia["listen"]>[0],
+  port: number,
   name: string,
+  options?: Record<string, unknown>,
 ) {
   const workers = IS_PRODUCTION && process.platform === "linux" ? os.availableParallelism() : 1;
 
@@ -17,7 +18,7 @@ export function serve(
     return;
   }
 
-  const app = factory().listen(port);
+  const app = factory().listen(options ? { port, ...options } : port);
   console.log(
     `🐵 ${name} running at ${app.server!.url}${workers > 1 ? ` (worker ${process.pid})` : ""}`,
   );
