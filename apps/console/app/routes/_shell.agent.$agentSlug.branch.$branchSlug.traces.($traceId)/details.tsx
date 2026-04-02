@@ -85,10 +85,6 @@ export function TraceDetail({ trace, loading }: TraceDetailProps) {
             </div>
           </div>
 
-          {trace.status === "error" && trace.statusMessage && (
-            <p className="mt-2 text-xs text-destructive">{trace.statusMessage}</p>
-          )}
-
           <div className="flex items-center justify-between gap-3 pt-3">
             <TabsList>
               <TabsTrigger value="formatted">Formatted</TabsTrigger>
@@ -227,6 +223,17 @@ function FormattedView({ trace }: { trace: TraceDetailData }) {
 
   return (
     <div className="flex flex-col divide-y">
+      {trace.status === "error" && trace.statusMessage && (
+        <div className="py-4">
+          <div className="rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2">
+            <p className="text-xs font-medium text-destructive">Error</p>
+            <p className="mt-1 text-xs whitespace-pre-wrap text-destructive/90">
+              {trace.statusMessage}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* oxlint-disable no-array-index-key - static read-only data */}
       {inputMessages.map((msg, index) => (
         <MessageBlock key={`${trace.spanId}:in:${index}`} message={msg} />
