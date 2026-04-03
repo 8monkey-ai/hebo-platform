@@ -28,6 +28,11 @@ meta:
 
 datanode:
   replicas: 3
+  configData: |
+    [[region_engine]]
+    [region_engine.mito]
+    experimental_compaction_memory_limit = "500MB"
+    experimental_compaction_on_exhausted = "fail"
   podTemplate:
     serviceAccount:
       create: true
