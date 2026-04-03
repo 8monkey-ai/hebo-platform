@@ -38,7 +38,7 @@
     "motion": "^12.34.4",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "streamdown": "^2.3.0",
+    "streamdown": "^2.5.0",
     "tailwind-merge": "catalog:",
     "tailwindcss": "catalog:",
     "use-stick-to-bottom": "^1.1.3"
