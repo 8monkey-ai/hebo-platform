@@ -189,7 +189,7 @@ const AuthService = new Elysia({ name: 'Auth.Service' })
                 if (!cookie.session.value) return status(401)
 
                 return {
-                	session: cookie.session.value,
+                	user: cookie.session.value,
                 }
             }
         }
@@ -197,7 +197,7 @@ const AuthService = new Elysia({ name: 'Auth.Service' })
 
 const UserController = new Elysia()
     .use(AuthService)
-    .get('/profile', ({ Auth: { user } }) => user, {
+    .get('/profile', ({ user }) => user, {
     	isSignIn: true
     })
 ```
@@ -341,7 +341,7 @@ export const AuthModel = {
 	})
 }
 
-const models = AuthModel.models
+
 ```
 
 ### Model Injection
@@ -361,7 +361,7 @@ const AuthModel = new Elysia()
         sign: customBody
     })
 
-const models = AuthModel.models
+
 
 const UserController = new Elysia({ prefix: '/auth' })
     .use(AuthModel)

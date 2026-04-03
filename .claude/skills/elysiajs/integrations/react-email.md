@@ -89,7 +89,7 @@ const transporter = nodemailer.createTransport({
   auth: { user: 'makoto', pass: '12345678' }
 })
 
-.get('/otp', async ({ body }) => {
+.post('/otp', async ({ body }) => {
   const otp = ~~(Math.random() * 900_000) + 100_000
   const html = renderToStaticMarkup(<OTPEmail otp={otp} />)
   
@@ -113,7 +113,7 @@ import Resend from 'resend'
 
 const resend = new Resend('re_123456789')
 
-.get('/otp', ({ body }) => {
+.post('/otp', async ({ body }) => {
   const otp = ~~(Math.random() * 900_000) + 100_000
   
   await resend.emails.send({

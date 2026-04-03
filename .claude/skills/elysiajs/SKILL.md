@@ -229,7 +229,7 @@ import { z } from 'zod'
 ### Project Structure (Recommended)
 Elysia takes an unopinionated approach but based on user request. But without any specific preference, we recommend a feature-based and domain driven folder structure where each feature has its own folder containing controllers, services, and models.
 
-```
+```text
 src/
 ├── index.ts              # Main server entry
 ├── modules/
@@ -449,7 +449,7 @@ Guide to integrate Elysia with external library/runtime:
 - `nodejs.md` - Run Elysia on Node.js
 - `nuxt.md` - Elysia on API route
 - `prisma.md` - Integrate Elysia with Prisma
-- `react-email.d` - Create and Send Email with React and Elysia
+- `react-email.md` - Create and Send Email with React and Elysia
 - `sveltekit.md` - Run Elysia on Svelte Kit API route
 - `tanstack-start.md` - Run Elysia on Tanstack Start / React Query
 - `vercel.md` - Deploy Elysia to Vercel
@@ -461,7 +461,7 @@ Guide to integrate Elysia with external library/runtime:
 - `cookie.ts` - Setting cookie
 - `error.ts` - Error handling
 - `file.ts` - Returning local file from server
-- `guard.ts` - Setting mulitple validation schema and lifecycle
+- `guard.ts` - Setting multiple validation schema and lifecycle
 - `map-response.ts` - Custom response mapper
 - `redirect.ts` - Redirect response
 - `rename.ts` - Rename context's property 

@@ -2,8 +2,14 @@ import { Elysia } from 'elysia'
 
 const prettyJson = new Elysia()
 	.mapResponse(({ response }) => {
-		if (response instanceof Object)
-			return new Response(JSON.stringify(response, null, 4))
+		if (
+			response &&
+			typeof response === 'object' &&
+			!(response instanceof Response)
+		)
+			return new Response(JSON.stringify(response, null, 4), {
+				headers: { 'content-type': 'application/json; charset=utf-8' }
+			})
 	})
 	.as('scoped')
 

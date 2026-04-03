@@ -75,7 +75,7 @@ Value can be one of the following:
 
 @default `*`
 
-Response CORS with specified headers by sssign Access-Control-Expose-Headers header.
+Response CORS with specified headers by assigning the Access-Control-Expose-Headers header.
 
 Value can be one of the following:
 - **string** - Expects either a single header or a comma-delimited string.

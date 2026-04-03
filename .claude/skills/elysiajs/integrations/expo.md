@@ -42,7 +42,7 @@ Ensures routing works in any location.
 const app = new Elysia()
   .get('/', 'Hello Nextjs')
   .post('/user', ({ body }) => body, {
-    body: treaty.schema('User', { name: 'string' })
+    body: t.Object({ name: t.String() })
   })
 
 export type app = typeof app

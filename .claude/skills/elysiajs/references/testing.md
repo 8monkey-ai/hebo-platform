@@ -82,7 +82,7 @@ it('should create user', async () => {
 ## Testing Module/Plugin
 
 ### Module Structure
-```
+```text
 src/
 ├── modules/
 │   └── auth/
@@ -177,9 +177,9 @@ describe('Auth Module', () => {
 ### Setup
 ```typescript
 import { treaty } from '@elysiajs/eden'
-import { app } from '../src/modules/auth'
+import { authModule } from '../src/modules/auth'
 
-const api = treaty(app)
+const api = treaty(authModule)
 ```
 
 ### Eden Tests

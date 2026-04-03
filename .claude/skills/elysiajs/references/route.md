@@ -133,7 +133,7 @@ new Elysia()
 
 ```ts
 new Elysia()
-	`.state('version', 1)
+	.state('version', 1)
 	.get('/', ({ store: { version } }) => version)
 	// Multiple
 	.state({ counter: 0, visits: 0 })
@@ -274,51 +274,6 @@ new Elysia()
     })
 ```
 
-## To Throw or Return
-
-Elysia provide a `status` function for returning HTTP status code, prefers over `set.status`.
-
-`status` can be import from Elysia but preferably extract from route handler Context for type safety.
-
-```ts
-import { Elysia, status } from 'elysia'
-
-function doThing() {
-    if (Math.random() > 0.33) return status(418, "I'm a teapot")
-}
-
-new Elysia().get('/', ({ status }) => {
-    if (Math.random() > 0.33) return status(418)
-
-    return 'ok'
-})
-```
-
-Error Handling in Elysia can be done by throwing an error and will be handle in `onError`.
-
-Status could either be **return** or **throw** based on your specific needs.
-
-- If an `status` is **throw**, it will be caught by `onError` middleware.
-- If an `status` is **return**, it will be **NOT** caught by `onError` middleware.
-
-See the following code:
-
-```typescript
-import { Elysia, file } from 'elysia'
-
-new Elysia()
-    .onError(({ code, error, path }) => {
-        if (code === 418) return 'caught'
-    })
-    .get('/throw', ({ status }) => {
-        // This will be caught by onError
-        throw status(418)
-    })
-    .get('/return', ({ status }) => {
-        // This will NOT be caught by onError
-        return status(418)
-    })
-```
 
 ## Notes
 

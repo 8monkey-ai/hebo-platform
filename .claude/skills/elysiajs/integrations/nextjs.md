@@ -44,7 +44,7 @@ Isomorphic fetch pattern:
 export const app = new Elysia({ prefix: '/api' })
   .get('/', 'Hello Nextjs')
   .post('/user', ({ body }) => body, {
-    body: treaty.schema('User', { name: 'string' })
+    body: t.Object({ name: t.String() })
   })
 
 export type app = typeof app
@@ -57,7 +57,7 @@ export const POST = app.fetch
 ```typescript
 // lib/eden.ts
 import { treaty } from '@elysiajs/eden'
-import type { app } from '../app/api/[[...slugs]]/route'
+import { app } from '../app/api/[[...slugs]]/route'
 
 export const api =
   typeof process !== 'undefined'

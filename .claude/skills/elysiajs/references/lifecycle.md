@@ -4,7 +4,7 @@ Instead of a sequential process, Elysia's request handling is divided into multi
 
 It's designed to separate the process into distinct phases based on their responsibility without interfering with each others.
 
-### List of events in order
+## List of events in order
 
 1. **request** - early, global
 2. **parse** - body parsing
@@ -116,7 +116,7 @@ new Elysia().guard(
 _Runs after the handler finishes._
 
 - Can **modify response headers**, wrap the result in a `Response`, or transform the payload.
-- Returning a value **replaces** the handlerâ€™s result, but the next `afterHandle` hooks still run.
+- Returning a value **replaces** the handler's result, but the next `afterHandle` hooks still run.
 
 ```ts
 new Elysia().get('/', () => '<h1>Hello</h1>', {
@@ -167,7 +167,7 @@ _Caught whenever an error bubbles up from any lifecycle stage._
 
 ```ts
 new Elysia().onError(({ code, status }) => {
-    if (code === 'NOT_FOUND') return status(404, 'â“ Not found')
+    if (code === 'NOT_FOUND') return status(404, 'Not found')
     return new Response('Oops', { status: 500 })
 })
 ```
@@ -182,7 +182,7 @@ _Runs **after** the response has been sent to the client._
 
 ```ts
 new Elysia().onAfterResponse(() =>
-    console.log('âœ… response sent at', Date.now())
+    console.log('response sent at', Date.now())
 )
 ```
 
@@ -192,7 +192,7 @@ new Elysia().onAfterResponse(() =>
 
 | Type                 | Scope                             | How to add                                                |
 | -------------------- | --------------------------------- | --------------------------------------------------------- |
-| **Local Hook**       | Single route                      | Inside route options (`afterHandle`, `beforeHandle`, â€¦) |
+| **Local Hook**       | Single route                      | Inside route options (`afterHandle`, `beforeHandle`, ...) |
 | **Interceptor Hook** | Whole instance (and later routes) | `.onXxx(cb)` or `.use(plugin)`                            |
 
 > **Remember:** Hooks only affect routes **defined after** they are registered, except `onRequest` which is global because it runs before route matching.

@@ -79,7 +79,7 @@ Import env from `cloudflare:workers`:
 import { env } from 'cloudflare:workers'
 
 export default new Elysia({ adapter: CloudflareAdapter })
-  .get('/', () => `Hello ${await env.KV.get('my-key')}`)
+  .get('/', async () => `Hello ${await env.KV.get('my-key')}`)
   .compile()
 ```
 

@@ -61,8 +61,8 @@ const app = new Elysia()
 			context: {
 				name: 'Mobius'
 			},
-			// If context is a function on this doesn't present
-			// for some reason it won't infer context type
+			// When context is provided as a function, TypeScript may not infer the context type correctly
+			// Adding useContext helps with type inference
 			useContext(_) {},
 			resolvers: {
 				Query: {

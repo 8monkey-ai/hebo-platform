@@ -87,8 +87,8 @@ Elysia reads function names as span names:
   return { user: await getProfile(session) }
 })
 
-// ✅ Named span: "getProfile"
-.derive(async function getProfile({ cookie: { session } }) {
+// ✅ Named span: "getProfileHandler"
+.derive(async function getProfileHandler({ cookie: { session } }) {
   return { user: await getProfile(session) }
 })
 ```

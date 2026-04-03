@@ -1,5 +1,5 @@
 # Eden Treaty
-e2e type safe RPC client for share type from backend to frontend.
+End-to-end, type-safe RPC client for sharing types between the backend and the frontend.
 
 ## What It Is
 Type-safe object representation for Elysia server. Auto-completion + error handling.

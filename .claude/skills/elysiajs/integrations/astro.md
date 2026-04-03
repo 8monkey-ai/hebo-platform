@@ -1,4 +1,4 @@
-# Astro Integration - SKILLS.md
+# Astro Integration
 
 ## What It Is
 Run Elysia on Astro via Astro Endpoint.
