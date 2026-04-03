@@ -415,7 +415,6 @@ Detailed documentation split by topic:
 - `cookie.md` - Detailed documentation on cookie
 - `deployment.md` - Production deployment guide / Docker
 - `eden.md` - e2e type safe RPC client for share type from backend to frontend
-- `guard.md` - Setting validation/lifecycle all at once
 - `macro.md` - Compose multiple schema/lifecycle as a reusable Elysia via key-value (recommended for complex setup, eg. authentication, authorization, Role-based Access Check)
 - `plugin.md` - Decouple part of Elysia into a standalone component
 - `route.md` - Elysia foundation building block: Routing, Handler and Context
