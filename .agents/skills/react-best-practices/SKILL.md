@@ -19,6 +19,7 @@ Adapted for this project's stack: React Router 7 (Framework mode), Tailwind 4, V
 - **React Compiler is enabled.** Do NOT use `useMemo`, `useCallback`, or `React.memo` — the compiler handles memoization automatically. Skip rules `rerender-memo`, `rerender-memo-with-default-value`, and `rerender-simple-expression-in-memo`.
 - **This project uses React Router, not Next.js.** Skip Next.js-specific rules (`server-cache-react`, `server-dedup-props`, `server-serialization`, `server-parallel-fetching`, `server-no-shared-module-state`, `server-parallel-nested-fetching`, `server-after-nonblocking`, `server-hoist-static-io`, `bundle-dynamic-imports` using `next/dynamic`). Use React Router equivalents (e.g. `React.lazy` + `Suspense` for code splitting, `clientLoader` for data loading).
 - **Valtio for client state.** Valtio uses proxies for fine-grained reactivity — most `rerender-derived-state`, `rerender-derived-state-no-effect`, and `rerender-defer-reads` patterns are handled by Valtio's `useSnapshot`.
+- **This project does not use SWR.** For client-side data fetching deduplication, use React Router's `clientLoader` or standard fetch patterns. Skip rule `client-swr-dedup`.
 
 ## When to Apply
 
@@ -76,7 +77,7 @@ Reference these guidelines when:
 
 ### 4. Client-Side Data Fetching (MEDIUM-HIGH)
 
-- `client-swr-dedup` - Use SWR for automatic request deduplication
+- ~~`client-swr-dedup` - Use SWR for automatic request deduplication~~ *(skipped — no SWR; use clientLoader)*
 - `client-event-listeners` - Deduplicate global event listeners
 - `client-passive-event-listeners` - Use passive listeners for scroll
 - `client-localstorage-schema` - Version and minimize localStorage data
@@ -84,14 +85,14 @@ Reference these guidelines when:
 ### 5. Re-render Optimization (MEDIUM)
 
 - `rerender-defer-reads` - Don't subscribe to state only used in callbacks
-- `rerender-memo` - Extract expensive work into memoized components
-- `rerender-memo-with-default-value` - Hoist default non-primitive props
+- ~~`rerender-memo` - Extract expensive work into memoized components~~ *(skipped — React Compiler)*
+- ~~`rerender-memo-with-default-value` - Hoist default non-primitive props~~ *(skipped — React Compiler)*
 - `rerender-dependencies` - Use primitive dependencies in effects
 - `rerender-derived-state` - Subscribe to derived booleans, not raw values
 - `rerender-derived-state-no-effect` - Derive state during render, not effects
 - `rerender-functional-setstate` - Use functional setState for stable callbacks
 - `rerender-lazy-state-init` - Pass function to useState for expensive values
-- `rerender-simple-expression-in-memo` - Avoid memo for simple primitives
+- ~~`rerender-simple-expression-in-memo` - Avoid memo for simple primitives~~ *(skipped — React Compiler)*
 - `rerender-split-combined-hooks` - Split hooks with independent dependencies
 - `rerender-move-effect-to-event` - Put interaction logic in event handlers
 - `rerender-transitions` - Use startTransition for non-urgent updates
