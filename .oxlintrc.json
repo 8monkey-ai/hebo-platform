@@ -31,6 +31,8 @@
     "**/migrations/**",
     "**/generated/**",
     "infra/**",
-    "sst.config.ts"
+    "sst.config.ts",
+    ".agents/**/**",
+    ".claude/**/**"
   ]
 }
