@@ -97,8 +97,12 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
         case "access-key": {
           const { accessKeyId, secretAccessKey } = bedrockConfig;
           if (!accessKeyId || !secretAccessKey) return;
+          // See #351: credentialProvider avoids AWS_SESSION_TOKEN from IRSA + BYOK key mix-up.
           return withCanonicalIdsForBedrock(
-            createAmazonBedrock({ region, accessKeyId, secretAccessKey }),
+            createAmazonBedrock({
+              region,
+              credentialProvider: () => Promise.resolve({ accessKeyId, secretAccessKey }),
+            }),
           );
         }
         case "iam-role": {
