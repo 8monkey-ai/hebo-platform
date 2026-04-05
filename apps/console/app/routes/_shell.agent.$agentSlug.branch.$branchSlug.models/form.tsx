@@ -67,7 +67,6 @@ export default function ModelsConfigForm({
   const fetcher = useFetcher<typeof clientAction>();
 
   const [form, fields] = useForm<ModelsConfigFormValues>({
-    key: JSON.stringify(models),
     lastResult: fetcher.state === "idle" ? fetcher.data : undefined,
     constraint: getZodConstraint(modelsConfigFormSchema),
     defaultValue: { models },
@@ -86,7 +85,7 @@ export default function ModelsConfigForm({
   const formRef = useRef<HTMLFormElement>(null);
 
   return (
-    <FormControl form={form} as={fetcher.Form} ref={formRef} className="flex flex-col gap-4">
+    <FormControl key={JSON.stringify(models)} form={form} as={fetcher.Form} ref={formRef} className="flex flex-col gap-4">
       <button type="submit" hidden aria-hidden="true" tabIndex={-1} disabled={!form.dirty} />
 
       {fields.models.getFieldList().map((model, index) => (
