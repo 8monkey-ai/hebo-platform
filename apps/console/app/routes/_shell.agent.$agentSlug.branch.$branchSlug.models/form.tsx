@@ -67,6 +67,7 @@ export default function ModelsConfigForm({
   const fetcher = useFetcher<typeof clientAction>();
 
   const [form, fields] = useForm<ModelsConfigFormValues>({
+    key: JSON.stringify(models),
     lastResult: fetcher.state === "idle" ? fetcher.data : undefined,
     constraint: getZodConstraint(modelsConfigFormSchema),
     defaultValue: { models },
