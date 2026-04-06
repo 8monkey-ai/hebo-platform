@@ -4,7 +4,6 @@
     "paths": {
       "~auth/*": ["./src/*"]
     },
-    "types": ["@types/bun"],
-    "verbatimModuleSyntax": true
+    "types": ["@types/bun"]
   }
 }

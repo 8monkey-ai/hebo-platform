@@ -4,7 +4,6 @@
     "paths": {
       "~mcp/*": ["./src/*"]
     },
-    "types": ["@types/bun"],
-    "verbatimModuleSyntax": true
+    "types": ["@types/bun"]
   }
 }

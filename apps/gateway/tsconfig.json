@@ -6,7 +6,6 @@
       "~api": ["../api/src/index.ts"],
       "~api/*": ["../api/src/*"]
     },
-    "types": ["@types/bun"],
-    "verbatimModuleSyntax": true
+    "types": ["@types/bun"]
   }
 }
