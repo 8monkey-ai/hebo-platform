@@ -91,7 +91,7 @@ export default function ModelsConfigForm({
 
       {fields.models.getFieldList().map((model, index) => (
         <ModelCard
-          key={model.name}
+          key={model.key}
           model={model}
           agentSlug={agentSlug}
           branchSlug={branchSlug}
