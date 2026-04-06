@@ -1,4 +1,4 @@
-import { t, type Static } from "elysia";
+import { z } from "zod";
 
 export const supportedProviders = {
   anthropic: { name: "Anthropic" },
@@ -10,90 +10,105 @@ export const supportedProviders = {
   voyage: { name: "Voyage AI" },
 } as const;
 
-export const ProviderSlug = t.Enum(
-  Object.fromEntries(Object.keys(supportedProviders).map((k) => [k, k])),
-  { error: "Invalid provider slug" },
-);
+const providerSlugs = Object.keys(supportedProviders) as [string, ...string[]];
 
-const BedrockIamRoleConfig = t.Object({
-  authMode: t.Literal("iam-role"),
-  bedrockRoleArn: t.String(),
-  region: t.String(),
+export const ProviderSlug = z.enum(providerSlugs, { error: "Invalid provider slug" });
+
+export const BedrockIamRoleConfig = z.object({
+  authMode: z.literal("iam-role"),
+  bedrockRoleArn: z.string().trim().min(1),
+  region: z.string().trim().min(1),
 });
 
-const BedrockAccessKeyConfig = t.Object({
-  authMode: t.Literal("access-key"),
-  accessKeyId: t.String({ "x-redact": true }),
-  secretAccessKey: t.String({ "x-redact": true }),
-  region: t.String(),
+export const BedrockAccessKeyConfig = z.object({
+  authMode: z.literal("access-key"),
+  accessKeyId: z.string().trim().min(1).meta({ redact: true }),
+  secretAccessKey: z.string().trim().min(1).meta({ redact: true }),
+  region: z.string().trim().min(1),
 });
 
-const BedrockProviderConfig = t.Union([BedrockIamRoleConfig, BedrockAccessKeyConfig]);
-
-const VertexIdentityFederationConfig = t.Object({
-  authMode: t.Literal("identity-federation"),
-  serviceAccountEmail: t.String(),
-  audience: t.String(),
-  location: t.String(),
-  project: t.String(),
+export const VertexIdentityFederationConfig = z.object({
+  authMode: z.literal("identity-federation"),
+  serviceAccountEmail: z.email(),
+  audience: z.string().trim().min(1),
+  location: z.string().trim().min(1),
+  project: z.string().trim().min(1),
 });
 
-const VertexServiceAccountConfig = t.Object({
-  authMode: t.Literal("service-account"),
-  clientEmail: t.String(),
-  privateKey: t
-    .Transform(t.String({ "x-redact": true }))
-    .Decode((v) => v.replaceAll("\\n", "\n"))
-    .Encode((v) => v),
-  location: t.String(),
-  project: t.String(),
+export const VertexServiceAccountConfig = z.object({
+  authMode: z.literal("service-account"),
+  clientEmail: z.email(),
+  privateKey: z.string().trim().min(1).meta({ redact: true, textarea: true }),
+  location: z.string().trim().min(1),
+  project: z.string().trim().min(1),
 });
 
-const VertexProviderConfig = t.Union([VertexIdentityFederationConfig, VertexServiceAccountConfig]);
-
-const ApiKeyProviderConfig = t.Object({
-  authMode: t.Literal("api-key"),
-  apiKey: t.String({ "x-redact": true }),
+export const ApiKeyProviderConfig = z.object({
+  authMode: z.literal("api-key"),
+  apiKey: z.string().trim().min(1).meta({ redact: true }),
 });
 
-const AzureProviderConfig = t.Object({
-  authMode: t.Literal("resource-api-key"),
-  resourceName: t.String(),
-  apiKey: t.String({ "x-redact": true }),
+export const AzureProviderConfig = z.object({
+  authMode: z.literal("resource-api-key"),
+  resourceName: z.string().trim().min(1),
+  apiKey: z.string().trim().min(1).meta({ redact: true }),
 });
 
-export const ProviderConfig = t.Union([
-  BedrockProviderConfig,
-  VertexProviderConfig,
+export const ProviderConfig = z.union([
+  z.union([BedrockIamRoleConfig, BedrockAccessKeyConfig]),
+  z.union([VertexIdentityFederationConfig, VertexServiceAccountConfig]),
   ApiKeyProviderConfig,
   AzureProviderConfig,
 ]);
 
-export const Provider = t.Object({
+export const Provider = z.object({
   slug: ProviderSlug,
-  name: t.String(),
-  config: t.Optional(ProviderConfig),
+  name: z.string(),
+  config: ProviderConfig.optional(),
 });
 
-export const Models = t.Array(
-  t.Object({
-    alias: t.String({ minLength: 1, pattern: "^[a-zA-Z0-9][a-zA-Z0-9_-]*$" }),
-    // FUTURE: Add a validation for the model type
-    type: t.String({ minLength: 1 }),
-    // Inspired from Vercel Provider Options: https://vercel.com/docs/ai-gateway/provider-options
-    routing: t.Optional(t.Object({ only: t.Array(ProviderSlug) })),
-  }),
-);
+export const aliasPattern = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
 
-export type Models = Static<typeof Models>;
-export type BedrockIamRoleConfig = Static<typeof BedrockIamRoleConfig>;
-export type BedrockAccessKeyConfig = Static<typeof BedrockAccessKeyConfig>;
-export type BedrockProviderConfig = Static<typeof BedrockProviderConfig>;
-export type VertexIdentityFederationConfig = Static<typeof VertexIdentityFederationConfig>;
-export type VertexServiceAccountConfig = Static<typeof VertexServiceAccountConfig>;
-export type VertexProviderConfig = Static<typeof VertexProviderConfig>;
-export type ApiKeyProviderConfig = Static<typeof ApiKeyProviderConfig>;
-export type AzureProviderConfig = Static<typeof AzureProviderConfig>;
-export type Provider = Static<typeof Provider>;
-export type ProviderConfig = Static<typeof ProviderConfig>;
-export type ProviderSlug = Static<typeof ProviderSlug>;
+export const ModelConfig = z.object({
+  alias: z.string().min(1).regex(aliasPattern),
+  type: z.string().min(1),
+  routing: z.object({ only: z.array(ProviderSlug) }).optional(),
+});
+
+export const Models = z.array(ModelConfig);
+
+// Discriminated union for the console provider configuration form.
+// Shared here so both API and console use a single schema definition.
+export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
+  z.object({
+    slug: z.enum(["bedrock"]),
+    config: z.discriminatedUnion("authMode", [BedrockIamRoleConfig, BedrockAccessKeyConfig]),
+  }),
+  z.object({
+    slug: z.enum(["vertex"]),
+    config: z.discriminatedUnion("authMode", [
+      VertexIdentityFederationConfig,
+      VertexServiceAccountConfig,
+    ]),
+  }),
+  z.object({
+    slug: z.enum(["azure"]),
+    config: z.discriminatedUnion("authMode", [AzureProviderConfig]),
+  }),
+  z.object({
+    slug: z.enum(["voyage", "groq", "anthropic", "openai"]),
+    config: z.discriminatedUnion("authMode", [ApiKeyProviderConfig]),
+  }),
+]);
+
+export type Models = z.infer<typeof Models>;
+export type ModelConfig = z.infer<typeof ModelConfig>;
+export type BedrockIamRoleConfig = z.infer<typeof BedrockIamRoleConfig>;
+export type BedrockAccessKeyConfig = z.infer<typeof BedrockAccessKeyConfig>;
+export type VertexIdentityFederationConfig = z.infer<typeof VertexIdentityFederationConfig>;
+export type VertexServiceAccountConfig = z.infer<typeof VertexServiceAccountConfig>;
+export type ApiKeyProviderConfig = z.infer<typeof ApiKeyProviderConfig>;
+export type AzureProviderConfig = z.infer<typeof AzureProviderConfig>;
+export type Provider = z.infer<typeof Provider>;
+export type ProviderConfig = z.infer<typeof ProviderConfig>;
+export type ProviderSlug = z.infer<typeof ProviderSlug>;

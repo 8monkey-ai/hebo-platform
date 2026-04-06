@@ -1,21 +1,32 @@
-import type { TObject, TSchema, TUnion } from "@sinclair/typebox";
+import type { z } from "zod";
 
 const MASK = "***" as const;
 
-export function redactSensitiveValues<T>(schema: TSchema, value: T): T {
+export function redactSensitiveValues<T>(schema: z.ZodUnion<z.ZodUnionOptions>, value: T): T {
   const obj = value as Record<string, unknown>;
 
-  for (const variant of schema.anyOf ?? [schema]) {
-    for (const candidate of (variant as TUnion).anyOf ?? [variant]) {
-      const props = (candidate as TObject).properties ?? {};
-
-      for (const key in props) {
-        if (props[key]?.["x-redact"] && key in obj) {
-          obj[key] = MASK;
-        }
+  for (const variant of schema.options) {
+    // Handle nested unions (e.g. BedrockProviderConfig = union of two objects)
+    if ("options" in variant && Array.isArray((variant as z.ZodUnion<z.ZodUnionOptions>).options)) {
+      for (const inner of (variant as z.ZodUnion<z.ZodUnionOptions>).options) {
+        redactObjectFields(inner, obj);
       }
+    } else {
+      redactObjectFields(variant, obj);
     }
   }
 
   return obj as T;
+}
+
+function redactObjectFields(schema: z.ZodType, obj: Record<string, unknown>) {
+  if (!("shape" in schema)) return;
+
+  const shape = (schema as z.ZodObject).shape as Record<string, z.ZodType>;
+
+  for (const key in shape) {
+    if (key in obj && shape[key]?.meta?.()?.redact) {
+      obj[key] = MASK;
+    }
+  }
 }

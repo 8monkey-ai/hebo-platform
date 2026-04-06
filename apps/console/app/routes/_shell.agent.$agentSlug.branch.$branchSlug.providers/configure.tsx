@@ -2,7 +2,7 @@ import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
-import { z } from "zod";
+import type { z } from "zod";
 
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
@@ -29,73 +29,9 @@ import { Textarea } from "@hebo/shared-ui/components/Textarea";
 import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
 
+import { ProviderConfigureSchema } from "~api/modules/providers/types";
+
 import type { clientAction } from "./route";
-
-const requiredString = (msg: string) => z.string(msg).trim().min(1, msg);
-const requiredEmail = (msg: string) => z.email(msg);
-const textareaString = (msg: string) => requiredString(msg).meta({ textarea: true });
-
-const BedrockIamRoleSchema = z.object({
-  authMode: z.literal("iam-role"),
-  bedrockRoleArn: requiredString("Please enter a valid Bedrock ARN role"),
-  region: requiredString("Please enter a valid AWS region"),
-});
-
-const BedrockAccessKeySchema = z.object({
-  authMode: z.literal("access-key"),
-  accessKeyId: requiredString("Please enter a valid access key ID"),
-  secretAccessKey: requiredString("Please enter a valid secret access key"),
-  region: requiredString("Please enter a valid AWS region"),
-});
-
-const VertexIdentityFederationSchema = z.object({
-  authMode: z.literal("identity-federation"),
-  serviceAccountEmail: requiredEmail("Please enter a valid service account email"),
-  audience: requiredString("Please enter a valid audience"),
-  location: requiredString("Please enter a valid location"),
-  project: requiredString("Please enter a valid project"),
-});
-
-const VertexServiceAccountSchema = z.object({
-  authMode: z.literal("service-account"),
-  clientEmail: requiredEmail("Please enter a valid service account email"),
-  privateKey: textareaString("Please enter the private key"),
-  location: requiredString("Please enter a valid location"),
-  project: requiredString("Please enter a valid project"),
-});
-
-const AzureSchema = z.object({
-  authMode: z.literal("resource-api-key"),
-  resourceName: requiredString("Please enter a valid resource name"),
-  apiKey: requiredString("Please enter a valid API key"),
-});
-
-const ApiKeySchema = z.object({
-  authMode: z.literal("api-key"),
-  apiKey: requiredString("Please enter a valid API key"),
-});
-
-export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
-  z.object({
-    slug: z.enum(["bedrock"]),
-    config: z.discriminatedUnion("authMode", [BedrockIamRoleSchema, BedrockAccessKeySchema]),
-  }),
-  z.object({
-    slug: z.enum(["vertex"]),
-    config: z.discriminatedUnion("authMode", [
-      VertexIdentityFederationSchema,
-      VertexServiceAccountSchema,
-    ]),
-  }),
-  z.object({
-    slug: z.enum(["azure"]),
-    config: z.discriminatedUnion("authMode", [AzureSchema]),
-  }),
-  z.object({
-    slug: z.enum(["voyage", "groq", "anthropic", "openai"]),
-    config: z.discriminatedUnion("authMode", [ApiKeySchema]),
-  }),
-]);
 
 type ProviderConfigureFormValues = z.infer<typeof ProviderConfigureSchema>;
 

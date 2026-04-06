@@ -1,77 +1,71 @@
-import { t, type Static } from "elysia";
+import { z } from "zod";
 
 const TraceTimeRangeQuery = {
-  from: t.Optional(t.Date()),
-  to: t.Optional(t.Date()),
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
 };
 
-export const TraceListQuery = t.Object({
-  metadata: t.Optional(t.String()),
-  status: t.Optional(t.Union([t.Literal("ok"), t.Literal("error")])),
-  operation: t.Optional(t.Union([t.Literal("chat"), t.Literal("embeddings")])),
+export const TraceListQuery = z.object({
+  metadata: z.string().optional(),
+  status: z.union([z.literal("ok"), z.literal("error")]).optional(),
+  operation: z.union([z.literal("chat"), z.literal("embeddings")]).optional(),
   ...TraceTimeRangeQuery,
-  page: t.Optional(t.Number({ default: 1 })),
-  pageSize: t.Optional(t.Number({ default: 50 })),
+  page: z.coerce.number().default(1).optional(),
+  pageSize: z.coerce.number().default(50).optional(),
 });
 
-const SpanStatus = t.Union([t.Literal("ok"), t.Literal("error"), t.Literal("unknown")]);
+const SpanStatus = z.union([z.literal("ok"), z.literal("error"), z.literal("unknown")]);
 
-export const TraceListItem = t.Object({
-  timestamp: t.Date(),
-  traceId: t.String(),
-  operationName: t.String(),
-  model: t.String(),
-  provider: t.String(),
+export const TraceListItem = z.object({
+  timestamp: z.coerce.date(),
+  traceId: z.string(),
+  operationName: z.string(),
+  model: z.string(),
+  provider: z.string(),
   status: SpanStatus,
-  statusMessage: t.String(),
-  durationMs: t.Number(),
-  summary: t.String(),
-  metadata: t.Record(t.String(), t.String()),
+  statusMessage: z.string(),
+  durationMs: z.number(),
+  summary: z.string(),
+  metadata: z.record(z.string(), z.string()),
 });
 
-export const TraceListResponse = t.Object({
-  data: t.Array(TraceListItem),
-  hasNextPage: t.Boolean(),
-  metadataKeys: t.Array(t.String()),
+export const TraceListResponse = z.object({
+  data: z.array(TraceListItem),
+  hasNextPage: z.boolean(),
+  metadataKeys: z.array(z.string()),
 });
 
-const SpanAttributes = t.Record(
-  t.String(),
-  t.Union([t.String(), t.Number(), t.Boolean(), t.Null()]),
+const SpanAttributes = z.record(
+  z.string(),
+  z.union([z.string(), z.number(), z.boolean(), z.null()]),
 );
 
-const GenericPart = t.Object({ type: t.String() }, { additionalProperties: true });
+const GenericPart = z.object({ type: z.string() }).passthrough();
 
-const TextPart = t.Object(
-  { type: t.Literal("text"), content: t.String() },
-  { additionalProperties: true },
-);
+const TextPart = z.object({ type: z.literal("text"), content: z.string() }).passthrough();
 
-const ReasoningPart = t.Object(
-  { type: t.Literal("reasoning"), content: t.String() },
-  { additionalProperties: true },
-);
+const ReasoningPart = z
+  .object({ type: z.literal("reasoning"), content: z.string() })
+  .passthrough();
 
-const ToolCallPart = t.Object(
-  {
-    type: t.Literal("tool_call"),
-    id: t.Optional(t.Nullable(t.String())),
-    name: t.String(),
-    arguments: t.Any(),
-  },
-  { additionalProperties: true },
-);
+const ToolCallPart = z
+  .object({
+    type: z.literal("tool_call"),
+    id: z.string().nullable().optional(),
+    name: z.string(),
+    arguments: z.any(),
+  })
+  .passthrough();
 
-const ToolCallResponsePart = t.Object(
-  {
-    type: t.Literal("tool_call_response"),
-    id: t.Optional(t.Nullable(t.String())),
-    response: t.Any(),
-  },
-  { additionalProperties: true },
-);
+const ToolCallResponsePart = z
+  .object({
+    type: z.literal("tool_call_response"),
+    id: z.string().nullable().optional(),
+    response: z.any(),
+  })
+  .passthrough();
 
-const GenAIMessagePart = t.Union([
+const GenAIMessagePart = z.union([
   TextPart,
   ReasoningPart,
   ToolCallPart,
@@ -79,56 +73,54 @@ const GenAIMessagePart = t.Union([
   GenericPart,
 ]);
 
-const GenAIInputMessage = t.Object(
-  {
-    role: t.String(),
-    name: t.Optional(t.Nullable(t.String())),
-    content: t.Optional(t.Union([t.String(), t.Array(GenAIMessagePart), t.Null()])),
-    parts: t.Optional(t.Array(GenAIMessagePart)),
-  },
-  { additionalProperties: true },
-);
+const GenAIInputMessage = z
+  .object({
+    role: z.string(),
+    name: z.string().nullable().optional(),
+    content: z.union([z.string(), z.array(GenAIMessagePart), z.null()]).optional(),
+    parts: z.array(GenAIMessagePart).optional(),
+  })
+  .passthrough();
 
-const GenAIOutputMessage = t.Object(
-  {
-    role: t.String(),
-    name: t.Optional(t.Nullable(t.String())),
-    parts: t.Array(GenAIMessagePart),
-    finish_reason: t.Optional(t.String()),
-  },
-  { additionalProperties: true },
-);
+const GenAIOutputMessage = z
+  .object({
+    role: z.string(),
+    name: z.string().nullable().optional(),
+    parts: z.array(GenAIMessagePart),
+    finish_reason: z.string().optional(),
+  })
+  .passthrough();
 
-const GenAIInputMessages = t.Array(GenAIInputMessage);
-const GenAIOutputMessages = t.Array(GenAIOutputMessage);
-const GenAIFinishReasons = t.Nullable(t.Array(t.String()));
+const GenAIInputMessages = z.array(GenAIInputMessage);
+const GenAIOutputMessages = z.array(GenAIOutputMessage);
+const GenAIFinishReasons = z.array(z.string()).nullable();
 
-export const SpanDetail = t.Object({
-  timestamp: t.Date(),
-  spanId: t.String(),
-  operationName: t.String(),
-  model: t.String(),
-  responseModel: t.String(),
-  provider: t.String(),
+export const SpanDetail = z.object({
+  timestamp: z.coerce.date(),
+  spanId: z.string(),
+  operationName: z.string(),
+  model: z.string(),
+  responseModel: z.string(),
+  provider: z.string(),
   status: SpanStatus,
-  statusMessage: t.String(),
-  durationMs: t.Number(),
-  inputTokens: t.Nullable(t.Number()),
-  outputTokens: t.Nullable(t.Number()),
-  totalTokens: t.Nullable(t.Number()),
-  cacheReadInputTokens: t.Nullable(t.Number()),
-  reasoningTokens: t.Nullable(t.Number()),
-  reasoningEffort: t.String(),
-  reasoningEnabled: t.Nullable(t.Boolean()),
-  reasoningMaxTokens: t.Nullable(t.Number()),
+  statusMessage: z.string(),
+  durationMs: z.number(),
+  inputTokens: z.number().nullable(),
+  outputTokens: z.number().nullable(),
+  totalTokens: z.number().nullable(),
+  cacheReadInputTokens: z.number().nullable(),
+  reasoningTokens: z.number().nullable(),
+  reasoningEffort: z.string(),
+  reasoningEnabled: z.boolean().nullable(),
+  reasoningMaxTokens: z.number().nullable(),
   inputMessages: GenAIInputMessages,
   outputMessages: GenAIOutputMessages,
   finishReasons: GenAIFinishReasons,
-  responseId: t.String(),
-  metadata: t.Record(t.String(), t.String()),
+  responseId: z.string(),
+  metadata: z.record(z.string(), z.string()),
   spanAttributes: SpanAttributes,
 });
 
-export type GenAIInputMessages = Static<typeof GenAIInputMessages>;
-export type GenAIOutputMessages = Static<typeof GenAIOutputMessages>;
-export type GenAIFinishReasons = Static<typeof GenAIFinishReasons>;
+export type GenAIInputMessages = z.infer<typeof GenAIInputMessages>;
+export type GenAIOutputMessages = z.infer<typeof GenAIOutputMessages>;
+export type GenAIFinishReasons = z.infer<typeof GenAIFinishReasons>;

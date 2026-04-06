@@ -32,7 +32,7 @@ import { useFormErrorToast } from "~console/lib/errors";
 import type { clientAction } from "./route";
 
 export const BranchCreateSchema = z.object({
-  branchName: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a branch name"),
+  branchName: z.string().trim().min(1),
   sourceBranchSlug: z.string(),
 });
 export type BranchCreateFormValues = z.infer<typeof BranchCreateSchema>;

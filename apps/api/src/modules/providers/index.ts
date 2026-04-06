@@ -1,10 +1,10 @@
-import { Elysia, status, t } from "elysia";
+import { Elysia, status } from "elysia";
+import { z } from "zod";
 
 import type { Prisma } from "~api/generated/prisma/client";
 import { prisma } from "~api/middlewares/prisma";
 
-import { type Models } from "./types";
-import { Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./types";
+import { type Models, Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./types";
 
 export const providersModule = new Elysia({
   prefix: "/providers",
@@ -28,10 +28,10 @@ export const providersModule = new Elysia({
       return status(200, providers);
     },
     {
-      query: t.Object({
-        configured: t.Optional(t.Boolean({ default: false })),
+      query: z.object({
+        configured: z.coerce.boolean().default(false).optional(),
       }),
-      response: { 200: t.Array(Provider) },
+      response: { 200: z.array(Provider) },
     },
   )
   .put(
@@ -57,7 +57,7 @@ export const providersModule = new Elysia({
     },
     {
       body: ProviderConfig,
-      params: t.Object({ slug: ProviderSlug }),
+      params: z.object({ slug: ProviderSlug }),
       response: { 201: ProviderConfig },
     },
   )
@@ -101,7 +101,7 @@ export const providersModule = new Elysia({
       return status(204);
     },
     {
-      params: t.Object({ slug: ProviderSlug }),
-      response: { 204: t.Void(), 404: t.String() },
+      params: z.object({ slug: ProviderSlug }),
+      response: { 204: z.void(), 404: z.string() },
     },
   );

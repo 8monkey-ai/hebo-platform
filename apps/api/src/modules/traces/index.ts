@@ -1,4 +1,5 @@
-import { Elysia, status, t } from "elysia";
+import { Elysia, status } from "elysia";
+import { z } from "zod";
 
 import { BadRequestError } from "@hebo/shared-api/errors";
 
@@ -43,8 +44,6 @@ export const spansModule = new Elysia({
           params.branchSlug,
           query.from ?? DEFAULT_FROM(),
           query.to ?? DEFAULT_TO(),
-          // FUTURE: remove '!' on page & pageSize
-          // https://github.com/elysiajs/elysia/issues/817
           query.page!,
           query.pageSize!,
           metadata,
@@ -72,6 +71,6 @@ export const spansModule = new Elysia({
       return status(200, spans);
     },
     {
-      response: { 200: t.Array(SpanDetail), 404: t.Null() },
+      response: { 200: z.array(SpanDetail), 404: z.null() },
     },
   );

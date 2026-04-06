@@ -21,9 +21,7 @@ import { useFormErrorToast } from "~console/lib/errors";
 import type { clientAction } from "./route";
 
 export const CredentialsClearSchema = z.object({
-  providerSlug: ((msg) => z.string(msg).trim().min(1, msg))(
-    "Select a provider to clear the credentials for",
-  ),
+  providerSlug: z.string().trim().min(1),
 });
 
 type CredentialsClearFormValues = z.infer<typeof CredentialsClearSchema>;
