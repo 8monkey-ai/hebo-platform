@@ -2,13 +2,15 @@ import type { z } from "zod";
 
 const MASK = "***" as const;
 
-export function redactSensitiveValues<T>(schema: z.ZodUnion<z.ZodUnionOptions>, value: T): T {
+type ZodUnionMembers = readonly [z.ZodType, ...z.ZodType[]];
+
+export function redactSensitiveValues<T>(schema: z.ZodUnion<ZodUnionMembers>, value: T): T {
   const obj = value as Record<string, unknown>;
 
   for (const variant of schema.options) {
     // Handle nested unions (e.g. BedrockProviderConfig = union of two objects)
-    if ("options" in variant && Array.isArray((variant as z.ZodUnion<z.ZodUnionOptions>).options)) {
-      for (const inner of (variant as z.ZodUnion<z.ZodUnionOptions>).options) {
+    if ("options" in variant && Array.isArray((variant as z.ZodUnion<ZodUnionMembers>).options)) {
+      for (const inner of (variant as z.ZodUnion<ZodUnionMembers>).options) {
         redactObjectFields(inner, obj);
       }
     } else {

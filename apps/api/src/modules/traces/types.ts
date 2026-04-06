@@ -40,13 +40,13 @@ const SpanAttributes = z.record(
   z.union([z.string(), z.number(), z.boolean(), z.null()]),
 );
 
-const GenericPart = z.object({ type: z.string() }).passthrough();
+const GenericPart = z.object({ type: z.string() }).loose();
 
-const TextPart = z.object({ type: z.literal("text"), content: z.string() }).passthrough();
+const TextPart = z.object({ type: z.literal("text"), content: z.string() }).loose();
 
 const ReasoningPart = z
   .object({ type: z.literal("reasoning"), content: z.string() })
-  .passthrough();
+  .loose();
 
 const ToolCallPart = z
   .object({
@@ -55,7 +55,7 @@ const ToolCallPart = z
     name: z.string(),
     arguments: z.any(),
   })
-  .passthrough();
+  .loose();
 
 const ToolCallResponsePart = z
   .object({
@@ -63,7 +63,7 @@ const ToolCallResponsePart = z
     id: z.string().nullable().optional(),
     response: z.any(),
   })
-  .passthrough();
+  .loose();
 
 const GenAIMessagePart = z.union([
   TextPart,
@@ -80,7 +80,7 @@ const GenAIInputMessage = z
     content: z.union([z.string(), z.array(GenAIMessagePart), z.null()]).optional(),
     parts: z.array(GenAIMessagePart).optional(),
   })
-  .passthrough();
+  .loose();
 
 const GenAIOutputMessage = z
   .object({
@@ -89,7 +89,7 @@ const GenAIOutputMessage = z
     parts: z.array(GenAIMessagePart),
     finish_reason: z.string().optional(),
   })
-  .passthrough();
+  .loose();
 
 const GenAIInputMessages = z.array(GenAIInputMessage);
 const GenAIOutputMessages = z.array(GenAIOutputMessage);
