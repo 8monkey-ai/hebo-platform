@@ -10,8 +10,8 @@ export const TraceListQuery = z.object({
   status: z.union([z.literal("ok"), z.literal("error")]).optional(),
   operation: z.union([z.literal("chat"), z.literal("embeddings")]).optional(),
   ...TraceTimeRangeQuery,
-  page: z.coerce.number().default(1).optional(),
-  pageSize: z.coerce.number().default(50).optional(),
+  page: z.coerce.number().default(1),
+  pageSize: z.coerce.number().default(50),
 });
 
 const SpanStatus = z.union([z.literal("ok"), z.literal("error"), z.literal("unknown")]);

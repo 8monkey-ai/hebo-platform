@@ -13,7 +13,7 @@ const agentsPlain = agentsModelSchema.omit({ id: true });
 const agentsWithBranches = agentsPlain.extend({
   branches: z.array(z.any()).optional(),
 });
-const agentsInclude = z.object({ branches: z.boolean().optional() });
+const agentsInclude = z.object({ branches: z.coerce.boolean().optional() });
 
 export const agentsModule = new Elysia({
   prefix: "/agents",

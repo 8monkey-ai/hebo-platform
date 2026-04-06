@@ -22,7 +22,8 @@ export async function clientLoader({
     .branches({ branchSlug })
     .traces.get({
       query: {
-        page: page,
+        page,
+        pageSize: 50,
         from: effectiveFrom,
         to: effectiveTo,
         metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : undefined,

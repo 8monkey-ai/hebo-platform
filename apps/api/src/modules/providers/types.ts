@@ -38,7 +38,12 @@ export const VertexIdentityFederationConfig = z.object({
 export const VertexServiceAccountConfig = z.object({
   authMode: z.literal("service-account"),
   clientEmail: z.email(),
-  privateKey: z.string().trim().min(1).meta({ redact: true, textarea: true }),
+  privateKey: z
+    .string()
+    .trim()
+    .min(1)
+    .transform((v) => v.replaceAll("\\n", "\n"))
+    .meta({ redact: true, textarea: true }),
   location: z.string().trim().min(1),
   project: z.string().trim().min(1),
 });

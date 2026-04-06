@@ -51,11 +51,11 @@ function getProviderModes(slug: string) {
   });
 }
 
-function getConfigFields(schema: z.ZodObject): string[] {
+function getConfigFields(schema: z.ZodObject<z.ZodRawShape>): string[] {
   return Object.keys(schema.shape).filter((k) => k !== "authMode");
 }
 
-function isTextarea(schema: z.ZodObject, key: string): boolean {
+function isTextarea(schema: z.ZodObject<z.ZodRawShape>, key: string): boolean {
   const field = schema.shape[key] as z.ZodType & {
     meta?: () => { textarea?: boolean } | undefined;
   };
