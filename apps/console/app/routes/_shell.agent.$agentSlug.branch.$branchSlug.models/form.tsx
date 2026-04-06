@@ -2,7 +2,7 @@ import { useForm, type FieldMetadata } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 import { Brain, ChevronsUpDown, Edit, Info } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Link, useFetcher } from "react-router";
+import { Link, useFetcher, useNavigation } from "react-router";
 import { useSnapshot } from "valtio";
 
 import { Alert, AlertDescription } from "@hebo/shared-ui/components/Alert";
@@ -65,9 +65,10 @@ export default function ModelsConfigForm({
   providers,
 }: ModelsConfigProps) {
   const fetcher = useFetcher<typeof clientAction>();
+  const navigation = useNavigation();
 
   const [form, fields] = useForm<ModelsConfigFormValues>({
-    lastResult: fetcher.state === "idle" ? fetcher.data : undefined,
+    lastResult: fetcher.state === "idle" && navigation.state === "idle" ? fetcher.data : undefined,
     constraint: getZodConstraint(modelsConfigFormSchema),
     defaultValue: { models },
   });
@@ -90,7 +91,7 @@ export default function ModelsConfigForm({
 
       {fields.models.getFieldList().map((model, index) => (
         <ModelCard
-          key={model.name}
+          key={model.key}
           model={model}
           agentSlug={agentSlug}
           branchSlug={branchSlug}
@@ -338,14 +339,18 @@ function ModelCard(props: {
                     }
                   />
 
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    onClick={onRemove}
-                    isLoading={isSubmitting}
-                  >
-                    Remove
-                  </Button>
+                  <DialogClose
+                    render={
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        onClick={onRemove}
+                        isLoading={isSubmitting}
+                      >
+                        Remove
+                      </Button>
+                    }
+                  />
                 </DialogFooter>
               </DialogContent>
             </Dialog>
