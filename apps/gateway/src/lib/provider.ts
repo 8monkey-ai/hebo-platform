@@ -97,6 +97,8 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
         case "access-key": {
           const { accessKeyId, secretAccessKey } = bedrockConfig;
           if (!accessKeyId || !secretAccessKey) return;
+          // credentialProvider: passing keys alone still merges AWS_SESSION_TOKEN from
+          // the process env (IRSA, etc.); see https://github.com/vercel/ai/issues/14136
           return withCanonicalIdsForBedrock(
             createAmazonBedrock({
               region,
