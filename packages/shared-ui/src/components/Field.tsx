@@ -1,6 +1,6 @@
 import { useRender } from "@base-ui/react";
 import { mergeProps } from "@base-ui/react/merge-props";
-import { FormMetadata, FormProvider, getFormProps, useField } from "@conform-to/react";
+import { type FormMetadata, FormProvider, getFormProps, useField } from "@conform-to/react";
 import * as React from "react";
 
 import {

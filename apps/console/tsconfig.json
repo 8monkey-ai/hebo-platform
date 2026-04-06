@@ -9,8 +9,7 @@
       "~gateway/*": ["../gateway/src/*"]
     },
     "rootDirs": [".", "./.react-router/types"],
-    "types": ["vite/client", "mdx"],
-    "verbatimModuleSyntax": true
+    "types": ["vite/client", "mdx"]
   },
   "include": ["**/*", "**/.server/**/*", "**/.client/**/*", ".react-router/types/**/*"]
 }
