@@ -1,6 +1,3 @@
 {
-  "extends": "@hebo/typescript-config/base.json",
-  "compilerOptions": {
-    "types": ["@types/react", "@types/react-dom"]
-  }
+  "extends": "@hebo/typescript-config/base.json"
 }
