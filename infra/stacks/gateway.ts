@@ -1,8 +1,6 @@
 // oxlint-disable-next-line triple-slash-reference
 /// <reference path="../../.sst/platform/config.d.ts" />
 
-import { getCallerIdentityOutput } from "@pulumi/aws";
-
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase from "./db";
@@ -14,7 +12,7 @@ const gatewayPort = "8522";
 /** Prefix for ALB access logs; must not contain the literal "AWSLogs". */
 const gatewayAlbAccessLogPrefix = "gateway-alb";
 
-const gatewayAlbAccessLogsCaller = getCallerIdentityOutput({});
+const gatewayAlbAccessLogsCaller = aws.getCallerIdentityOutput({});
 
 const heboGatewayAlbAccessLogs = new sst.aws.Bucket("HeboGatewayAlbAccessLogs", {
   cors: false,
