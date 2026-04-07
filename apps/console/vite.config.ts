@@ -5,12 +5,11 @@ import tailwindcss from "@tailwindcss/vite";
 import preserveDirectives from "rollup-preserve-directives";
 import { defineConfig } from "vite";
 import babel from "vite-plugin-babel";
-import devtoolsJson from "vite-plugin-devtools-json";
 
 export default defineConfig(({ mode }) => {
   return {
     resolve: { tsconfigPaths: true },
-    server: { port: 8520 },
+    server: { port: 8520, devtoolsJsonFile: true },
     optimizeDeps: {
       entries: ["app/root.tsx", "app/routes/**/route.{ts,tsx,mdx}"],
       include: ["react/compiler-runtime"],
@@ -42,7 +41,6 @@ export default defineConfig(({ mode }) => {
           plugins: [["babel-plugin-react-compiler"]],
         },
       }),
-      ...(mode === "development" ? [devtoolsJson()] : []),
     ],
   };
 });
