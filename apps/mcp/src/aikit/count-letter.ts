@@ -6,9 +6,8 @@ function countLetters(word: string, letters: string) {
   let total = 0;
   const wordLower = word.toLowerCase();
 
-  const lettersSet = new Set(requestedLetters);
   for (const char of wordLower) {
-    if (lettersSet.has(char)) {
+    if (counts.has(char)) {
       counts.set(char, (counts.get(char) ?? 0) + 1);
       total++;
     }
