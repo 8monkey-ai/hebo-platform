@@ -6,7 +6,7 @@ import preserveDirectives from "rollup-preserve-directives";
 import { defineConfig } from "vite";
 import babel from "vite-plugin-babel";
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
   return {
     resolve: { tsconfigPaths: true },
     server: { port: 8520, devtoolsJsonFile: true },
