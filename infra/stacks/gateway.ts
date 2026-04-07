@@ -12,11 +12,9 @@ const gatewayPort = "8522";
 /** Prefix for ALB access logs; must not contain the literal "AWSLogs". */
 const gatewayAlbAccessLogPrefix = "gateway-alb";
 
-const gatewayAlbAccessLogsCaller = aws.getCallerIdentityOutput({});
-
 const heboGatewayAlbAccessLogs = new sst.aws.Bucket("HeboGatewayAlbAccessLogs", {
   cors: false,
-  policy: gatewayAlbAccessLogsCaller.accountId.apply((accountId) => [
+  policy: aws.getCallerIdentityOutput({}).accountId.apply((accountId) => [
     {
       principals: [
         {
