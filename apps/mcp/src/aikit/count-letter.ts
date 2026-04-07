@@ -1,11 +1,12 @@
 import { Elysia, t } from "elysia";
 
 function countLetters(word: string, letters: string) {
-  const counts = new Map<string, number>();
+  const requestedLetters = [...new Set(letters.toLowerCase())];
+  const counts = new Map<string, number>(requestedLetters.map((l) => [l, 0]));
   let total = 0;
   const wordLower = word.toLowerCase();
 
-  const lettersSet = new Set(letters.toLowerCase());
+  const lettersSet = new Set(requestedLetters);
   for (const char of wordLower) {
     if (lettersSet.has(char)) {
       counts.set(char, (counts.get(char) ?? 0) + 1);
@@ -13,7 +14,7 @@ function countLetters(word: string, letters: string) {
     }
   }
 
-  const breakdown = [...counts.entries()].map(([l, c]) => `'${l}': ${c}`).join(", ");
+  const breakdown = requestedLetters.map((l) => `'${l}': ${counts.get(l) ?? 0}`).join(", ");
   return `Word: "${word}"\nLetters: "${letters}"\n\nResults: ${breakdown}\nTotal: ${total}`;
 }
 
