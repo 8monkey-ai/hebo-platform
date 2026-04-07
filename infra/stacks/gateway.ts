@@ -9,7 +9,6 @@ import { authSecret, isProduction, llmSecrets, greptimeHost, normalizedStage } f
 const gatewayDomain = isProduction ? "gateway.hebo.ai" : `gateway.${normalizedStage}.hebo.ai`;
 const gatewayPort = "8522";
 
-/** Prefix for ALB access logs; must not contain the literal "AWSLogs". */
 const gatewayAlbAccessLogPrefix = "gateway-alb";
 
 const heboGatewayAlbAccessLogs = new sst.aws.Bucket("HeboGatewayAlbAccessLogs", {
