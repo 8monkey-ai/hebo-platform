@@ -63,10 +63,9 @@
     "slugify": "^1.6.6",
     "tailwindcss": "catalog:",
     "tw-animate-css": "catalog:",
-    "vite": "^7.3.1",
-    "vite-plugin-babel": "^1.4.1",
-    "vite-plugin-devtools-json": "^1.0.0",
-    "vite-tsconfig-paths": "^6.0.4"
+    "vite": "^8.0.3",
+    "vite-plugin-babel": "^1.6.0",
+    "vite-plugin-devtools-json": "^1.0.0"
   },
   "msw": {
     "workerDirectory": [

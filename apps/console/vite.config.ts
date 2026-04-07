@@ -6,13 +6,12 @@ import preserveDirectives from "rollup-preserve-directives";
 import { defineConfig } from "vite";
 import babel from "vite-plugin-babel";
 import devtoolsJson from "vite-plugin-devtools-json";
-import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig(({ mode }) => {
   return {
+    resolve: { tsconfigPaths: true },
     server: { port: 8520 },
     plugins: [
-      tsconfigPaths(),
       preserveDirectives(),
       mdx({
         providerImportSource: "~console/mdx-components",
