@@ -1,6 +1,8 @@
 // oxlint-disable-next-line triple-slash-reference
 /// <reference path="../../.sst/platform/config.d.ts" />
 
+import { getCallerIdentityOutput } from "@pulumi/aws";
+
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase from "./db";
@@ -8,6 +10,38 @@ import { authSecret, isProduction, llmSecrets, greptimeHost, normalizedStage } f
 
 const gatewayDomain = isProduction ? "gateway.hebo.ai" : `gateway.${normalizedStage}.hebo.ai`;
 const gatewayPort = "8522";
+
+/** Prefix for ALB access logs; must not contain the literal "AWSLogs". */
+const gatewayAlbAccessLogPrefix = "gateway-alb";
+
+const gatewayAlbAccessLogsCaller = getCallerIdentityOutput({});
+
+const heboGatewayAlbAccessLogs = new sst.aws.Bucket("HeboGatewayAlbAccessLogs", {
+  cors: false,
+  policy: gatewayAlbAccessLogsCaller.accountId.apply((accountId) => [
+    {
+      principals: [
+        {
+          type: "service",
+          identifiers: ["logdelivery.elasticloadbalancing.amazonaws.com"],
+        },
+      ],
+      actions: ["s3:PutObject"],
+      paths: [`${gatewayAlbAccessLogPrefix}/AWSLogs/${accountId}/*`],
+    },
+  ]),
+  transform: {
+    bucket: (args) => {
+      args.serverSideEncryptionConfiguration = {
+        rule: {
+          applyServerSideEncryptionByDefault: {
+            sseAlgorithm: "AES256",
+          },
+        },
+      };
+    },
+  },
+});
 
 const heboGateway = new sst.aws.Service("HeboGateway", {
   cluster: heboCluster,
@@ -45,6 +79,11 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   transform: {
     loadBalancer: (args) => {
       args.idleTimeout = 30 * 60; // 30 minutes
+      args.accessLogs = {
+        bucket: heboGatewayAlbAccessLogs.name,
+        enabled: true,
+        prefix: gatewayAlbAccessLogPrefix,
+      };
     },
     listener: (args) => {
       if (args.protocol === "HTTPS") {
