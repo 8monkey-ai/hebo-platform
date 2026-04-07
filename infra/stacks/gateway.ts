@@ -9,6 +9,22 @@ import { authSecret, isProduction, llmSecrets, greptimeHost, normalizedStage } f
 const gatewayDomain = isProduction ? "gateway.hebo.ai" : `gateway.${normalizedStage}.hebo.ai`;
 const gatewayPort = "8522";
 
+const heboGatewayAlbAccessLogs = new sst.aws.Bucket("HeboGatewayAlbAccessLogs", {
+  cors: false,
+  policy: [
+    {
+      principals: [
+        {
+          type: "service",
+          identifiers: ["logdelivery.elasticloadbalancing.amazonaws.com"],
+        },
+      ],
+      actions: ["s3:PutObject"],
+      paths: ["*"],
+    },
+  ],
+});
+
 const heboGateway = new sst.aws.Service("HeboGateway", {
   cluster: heboCluster,
   architecture: "arm64",
@@ -45,6 +61,11 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   transform: {
     loadBalancer: (args) => {
       args.idleTimeout = 30 * 60; // 30 minutes
+      args.accessLogs = {
+        bucket: heboGatewayAlbAccessLogs.name,
+        enabled: true,
+        prefix: "gateway-alb",
+      };
     },
     listener: (args) => {
       if (args.protocol === "HTTPS") {
