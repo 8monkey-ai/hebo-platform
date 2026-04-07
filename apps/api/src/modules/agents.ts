@@ -7,11 +7,13 @@ import { slugFromString } from "@hebo/shared-api/utils/slug";
 import type { Prisma } from "~api/generated/prisma/client";
 import { agentsModelSchema } from "~api/generated/zod/schemas/variants/pure/agents.pure";
 import { agentsInputSchema } from "~api/generated/zod/schemas/variants/input/agents.input";
+import { branchesModelSchema } from "~api/generated/zod/schemas/variants/pure/branches.pure";
 import { prisma } from "~api/middlewares/prisma";
 
 const agentsPlain = agentsModelSchema.omit({ id: true });
+const branchPlain = branchesModelSchema.omit({ id: true, agent: true });
 const agentsWithBranches = agentsPlain.extend({
-  branches: z.array(z.any()).optional(),
+  branches: z.array(branchPlain).optional(),
 });
 const agentsInclude = z.object({ branches: z.coerce.boolean().optional() });
 
