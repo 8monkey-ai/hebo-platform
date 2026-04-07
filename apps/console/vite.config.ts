@@ -11,6 +11,10 @@ export default defineConfig(({ mode }) => {
   return {
     resolve: { tsconfigPaths: true },
     server: { port: 8520 },
+    optimizeDeps: {
+      entries: ["app/root.tsx", "app/routes/**/route.{ts,tsx,mdx}"],
+      include: ["react/compiler-runtime"],
+    },
     plugins: [
       preserveDirectives(),
       mdx({
