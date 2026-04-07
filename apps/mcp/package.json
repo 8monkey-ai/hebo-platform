@@ -16,9 +16,8 @@
   "dependencies": {
     "@elysiajs/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",
-    "@modelcontextprotocol/sdk": "^1.26.0",
-    "elysia": "catalog:",
-    "zod": "catalog:"
+    "@8monkey/elysia-mcp": "^0.1.0-rc0",
+    "elysia": "catalog:"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",

@@ -1,37 +1,24 @@
 import { opentelemetry } from "@elysiajs/opentelemetry";
-import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
+import { mcp } from "@8monkey/elysia-mcp";
 import { Elysia } from "elysia";
 
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { serve } from "@hebo/shared-api/lib/serve";
 import { logging } from "@hebo/shared-api/middlewares/logging";
 
-import { countLetterTool } from "./aikit/count-letter.js";
+import { countLetterRoute } from "./aikit/count-letter.js";
 import hello from "./hello.txt";
 
 const PORT = Number(process.env.PORT ?? 8524);
 const WORKERS = Number(process.env.WORKERS);
 
-function createMcpServer() {
-  const mcp = new McpServer({ name: "hebo-mcp", version: "0.0.3" });
-  mcp.registerTool(countLetterTool.name, countLetterTool.config, countLetterTool.handler);
-  return mcp;
-}
-
 const createMcp = () =>
   new Elysia()
     .use(opentelemetry(getOtelConfig("hebo-mcp")))
     .use(logging("hebo-mcp"))
-    .get("/", () => hello)
-    .group("/aikit", (app) =>
-      app.mount("/", async (request) => {
-        const mcp = createMcpServer();
-        const transport = new WebStandardStreamableHTTPServerTransport();
-        await mcp.connect(transport);
-        return transport.handleRequest(request);
-      }),
-    );
+    .use(mcp({ name: "hebo-mcp", version: "0.0.3", path: "/aikit" }))
+    .get("/", () => hello, { detail: { mcp: false } })
+    .group("/aikit", (app) => app.use(countLetterRoute));
 
 if (import.meta.main) {
   serve(createMcp, PORT, "Hebo MCP", { workers: WORKERS });
