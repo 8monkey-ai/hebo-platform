@@ -9,11 +9,9 @@ import { authSecret, isProduction, llmSecrets, greptimeHost, normalizedStage } f
 const gatewayDomain = isProduction ? "gateway.hebo.ai" : `gateway.${normalizedStage}.hebo.ai`;
 const gatewayPort = "8522";
 
-const gatewayAlbAccessLogPrefix = "gateway-alb";
-
 const heboGatewayAlbAccessLogs = new sst.aws.Bucket("HeboGatewayAlbAccessLogs", {
   cors: false,
-  policy: aws.getCallerIdentityOutput({}).accountId.apply((accountId) => [
+  policy: [
     {
       principals: [
         {
@@ -22,20 +20,9 @@ const heboGatewayAlbAccessLogs = new sst.aws.Bucket("HeboGatewayAlbAccessLogs", 
         },
       ],
       actions: ["s3:PutObject"],
-      paths: [`${gatewayAlbAccessLogPrefix}/AWSLogs/${accountId}/*`],
+      paths: ["*"],
     },
-  ]),
-  transform: {
-    bucket: (args) => {
-      args.serverSideEncryptionConfiguration = {
-        rule: {
-          applyServerSideEncryptionByDefault: {
-            sseAlgorithm: "AES256",
-          },
-        },
-      };
-    },
-  },
+  ],
 });
 
 const heboGateway = new sst.aws.Service("HeboGateway", {
@@ -77,7 +64,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
       args.accessLogs = {
         bucket: heboGatewayAlbAccessLogs.name,
         enabled: true,
-        prefix: gatewayAlbAccessLogPrefix,
+        prefix: "gateway-alb",
       };
     },
     listener: (args) => {
