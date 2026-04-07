@@ -18,7 +18,7 @@ const createMcp = () =>
     .use(logging("hebo-mcp"))
     .use(mcp({ name: "hebo-mcp", version: "0.0.3", path: "/aikit" }))
     .get("/", () => hello, { detail: { mcp: false } })
-    .use(countLetterRoute);
+    .group("/aikit", (app) => app.use(countLetterRoute));
 
 if (import.meta.main) {
   serve(createMcp, PORT, "Hebo MCP", { workers: WORKERS });

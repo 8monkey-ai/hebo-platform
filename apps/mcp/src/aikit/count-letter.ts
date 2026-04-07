@@ -18,7 +18,7 @@ function countLetters(word: string, letters: string) {
 }
 
 export const countLetterRoute = new Elysia().post(
-  "/aikit/count-letters",
+  "/count-letters",
   ({ body: { word, letters } }) => countLetters(word, letters),
   {
     body: t.Object({
@@ -26,6 +26,7 @@ export const countLetterRoute = new Elysia().post(
       letters: t.String({ description: "The letters to count (e.g., 'aeiou' for vowels)" }),
     }),
     detail: {
+      operationId: "count_letters",
       summary: "Counts occurrences of specific letters in a given word",
     },
   },
