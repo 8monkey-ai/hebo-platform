@@ -1,0 +1,93 @@
+# syntax=docker/dockerfile:1
+
+# ---------------------------------------------------------------------------
+#  Hebo self-hosted — single image, multi-mode (s6-overlay)
+#
+#  HEBO_MODE selects which services start:
+#    standalone (default) — all services + console
+#    api | auth | gateway | mcp — single role
+# ---------------------------------------------------------------------------
+
+ARG BUN_VERSION=1
+ARG S6_OVERLAY_VERSION=3.2.0.2
+
+########################  builder — install deps + compile all apps  ########################
+FROM oven/bun:${BUN_VERSION} AS builder
+
+ENV CI=1
+WORKDIR /repo
+COPY . .
+
+# Install workspace dependencies (all apps + packages)
+RUN bun install --frozen-lockfile
+
+# Build console (static assets)
+RUN bun run --filter @hebo/console build
+
+# Build backend apps (compiled standalone binaries)
+RUN NODE_ENV=production bun run --filter @hebo/api build && \
+    NODE_ENV=production bun run --filter @hebo/auth build && \
+    NODE_ENV=production bun run --filter @hebo/gateway build && \
+    NODE_ENV=production bun run --filter @hebo/mcp build
+
+########################  runtime  ########################
+FROM oven/bun:${BUN_VERSION}-slim AS runtime
+
+ARG S6_OVERLAY_VERSION
+ARG TARGETARCH
+
+# Install s6-overlay
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
+ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${TARGETARCH}.tar.xz /tmp
+RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
+    tar -C / -Jxpf /tmp/s6-overlay-${TARGETARCH}.tar.xz && \
+    rm -f /tmp/s6-overlay-*.tar.xz
+
+# Install openssl for AUTH_SECRET generation + ca-certificates for TLS
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends openssl ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
+
+# App layout
+WORKDIR /app
+
+# Backend binaries
+COPY --from=builder /repo/apps/api/dist/server      /app/api
+COPY --from=builder /repo/apps/auth/dist/server      /app/auth
+COPY --from=builder /repo/apps/gateway/dist/server   /app/gateway
+COPY --from=builder /repo/apps/mcp/dist/server       /app/mcp
+
+# Console static assets + dependencies for vite preview
+COPY --from=builder /repo/apps/console/build         /app/console/build
+COPY --from=builder /repo/apps/console/package.json  /app/console/package.json
+COPY --from=builder /repo/apps/console/node_modules  /app/console/node_modules
+COPY --from=builder /repo/apps/console/vite.config.ts /app/console/vite.config.ts
+
+# Prisma schemas + migrations (needed for prisma migrate deploy)
+COPY --from=builder /repo/apps/api/prisma            /app/prisma/api
+COPY --from=builder /repo/apps/auth/prisma           /app/prisma/auth
+
+# s6-overlay service definitions
+COPY infra/docker/self-hosted/s6-overlay/ /etc/s6-overlay/s6-rc.d/
+
+# Bootstrap script (oneshot init)
+COPY infra/docker/self-hosted/init-hebo.sh /etc/s6-overlay/s6-rc.d/init-hebo/run
+RUN chmod +x /etc/s6-overlay/s6-rc.d/init-hebo/run
+
+# Make longrun scripts executable
+RUN chmod +x /etc/s6-overlay/s6-rc.d/svc-*/run
+
+# Persistent data directory
+RUN mkdir -p /data
+VOLUME /data
+
+ENV HEBO_MODE=standalone \
+    HEBO_DATA_DIR=/data \
+    NODE_ENV=production \
+    S6_KEEP_ENV=1 \
+    S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
+    S6_CMD_WAIT_FOR_SERVICES_MAXTIME=60000
+
+EXPOSE 8520 8521 8522 8523 8524
+
+ENTRYPOINT ["/init"]

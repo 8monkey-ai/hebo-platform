@@ -23,6 +23,7 @@ Thumbs.db
 *.pem
 .env*
 !.env.example
+!.env.self-hosted.example
 .secrets*
 .build-complete
 .node_repl_history

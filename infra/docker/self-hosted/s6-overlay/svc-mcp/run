@@ -1,0 +1,8 @@
+#!/bin/sh
+HEBO_MODE="${HEBO_MODE:-standalone}"
+if [ "${HEBO_MODE}" != "standalone" ] && [ "${HEBO_MODE}" != "mcp" ]; then
+  echo "[svc-mcp] Skipped (HEBO_MODE=${HEBO_MODE})"
+  exec s6-svc -Od .
+fi
+echo "[svc-mcp] Starting MCP on :8524"
+exec /app/mcp

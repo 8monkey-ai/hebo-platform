@@ -1,0 +1,74 @@
+# Hebo self-hosted — docker compose up -d
+#
+# Copy .env.self-hosted.example to .env.self-hosted and adjust as needed.
+# All services start with sensible defaults — no required env vars.
+#
+# Usage:
+#   docker compose -f docker-compose.self-hosted.yml --env-file .env.self-hosted up -d
+
+services:
+  hebo:
+    image: ghcr.io/hebo-ai/hebo:${HEBO_VERSION:-latest}
+    build:
+      context: .
+      dockerfile: infra/docker/Dockerfile.self-hosted
+    restart: unless-stopped
+    ports:
+      - "${CONSOLE_PORT:-8520}:8520"
+      - "${API_PORT:-8521}:8521"
+      - "${GATEWAY_PORT:-8522}:8522"
+      - "${AUTH_PORT:-8523}:8523"
+      - "${MCP_PORT:-8524}:8524"
+    environment:
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-hebo}@postgres:5432/hebo
+      GREPTIME_HOST: greptimedb
+      AUTH_SECRET: ${AUTH_SECRET:-}
+      AUTH_URL: http://localhost:${AUTH_PORT:-8523}
+      HEBO_MODE: ${HEBO_MODE:-standalone}
+      # Optional: OAuth
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:-}
+      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:-}
+      # Optional: SMTP
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+    volumes:
+      - hebo-data:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+      greptimedb:
+        condition: service_started
+
+  postgres:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hebo}
+      POSTGRES_DB: hebo
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  greptimedb:
+    image: greptime/greptimedb:v1.0
+    restart: unless-stopped
+    volumes:
+      - greptimedb-data:/greptimedb_data
+    command: standalone start --http-addr 0.0.0.0:4000 --postgres-addr 0.0.0.0:4003
+
+volumes:
+  hebo-data:
+  postgres-data:
+  greptimedb-data:
