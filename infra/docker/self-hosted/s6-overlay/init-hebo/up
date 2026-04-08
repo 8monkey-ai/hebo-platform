@@ -1,1 +1,1 @@
-/etc/s6-overlay/s6-rc.d/init-hebo/run
+/etc/s6-overlay/scripts/init-hebo.sh

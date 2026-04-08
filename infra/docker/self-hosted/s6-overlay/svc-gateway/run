@@ -1,8 +1,2 @@
 #!/bin/sh
-HEBO_MODE="${HEBO_MODE:-standalone}"
-if [ "${HEBO_MODE}" != "standalone" ] && [ "${HEBO_MODE}" != "gateway" ]; then
-  echo "[svc-gateway] Skipped (HEBO_MODE=${HEBO_MODE})"
-  exec s6-svc -Od .
-fi
-echo "[svc-gateway] Starting Gateway on :8522"
-exec /app/gateway
+exec /etc/s6-overlay/scripts/svc-run.sh svc-gateway "standalone gateway" /app/gateway

@@ -1,8 +1,2 @@
 #!/bin/sh
-HEBO_MODE="${HEBO_MODE:-standalone}"
-if [ "${HEBO_MODE}" != "standalone" ] && [ "${HEBO_MODE}" != "auth" ]; then
-  echo "[svc-auth] Skipped (HEBO_MODE=${HEBO_MODE})"
-  exec s6-svc -Od .
-fi
-echo "[svc-auth] Starting Auth on :8523"
-exec /app/auth
+exec /etc/s6-overlay/scripts/svc-run.sh svc-auth "standalone auth" /app/auth

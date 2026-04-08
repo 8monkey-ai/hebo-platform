@@ -1,8 +1,2 @@
 #!/bin/sh
-HEBO_MODE="${HEBO_MODE:-standalone}"
-if [ "${HEBO_MODE}" != "standalone" ] && [ "${HEBO_MODE}" != "api" ]; then
-  echo "[svc-api] Skipped (HEBO_MODE=${HEBO_MODE})"
-  exec s6-svc -Od .
-fi
-echo "[svc-api] Starting API on :8521"
-exec /app/api
+exec /etc/s6-overlay/scripts/svc-run.sh svc-api "standalone api" /app/api

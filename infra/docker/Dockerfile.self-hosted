@@ -70,12 +70,10 @@ COPY --from=builder /repo/apps/auth/prisma           /app/prisma/auth
 # s6-overlay service definitions
 COPY infra/docker/self-hosted/s6-overlay/ /etc/s6-overlay/s6-rc.d/
 
-# Bootstrap script (oneshot init)
-COPY infra/docker/self-hosted/init-hebo.sh /etc/s6-overlay/s6-rc.d/init-hebo/run
-RUN chmod +x /etc/s6-overlay/s6-rc.d/init-hebo/run
-
-# Make longrun scripts executable
-RUN chmod +x /etc/s6-overlay/s6-rc.d/svc-*/run
+# Shared scripts (bootstrap + service runner helper)
+COPY infra/docker/self-hosted/init-hebo.sh /etc/s6-overlay/scripts/init-hebo.sh
+COPY infra/docker/self-hosted/svc-run.sh   /etc/s6-overlay/scripts/svc-run.sh
+RUN chmod +x /etc/s6-overlay/scripts/*.sh /etc/s6-overlay/s6-rc.d/svc-*/run
 
 # Persistent data directory
 RUN mkdir -p /data
