@@ -1,11 +1,13 @@
 # syntax=docker/dockerfile:1
 
 # ---------------------------------------------------------------------------
-#  Hebo self-hosted — single image, multi-mode (s6-overlay)
+#  Hebo — single image, multi-mode (s6-overlay)
 #
 #  HEBO_MODE selects which services start:
 #    standalone (default) — all services + console
 #    api | auth | gateway | mcp — single role
+#
+#  Used for both self-hosted (standalone) and ECS (single-role) deployments.
 # ---------------------------------------------------------------------------
 
 ARG BUN_VERSION=1
@@ -30,6 +32,9 @@ RUN NODE_ENV=production bun run --filter @hebo/api build && \
     NODE_ENV=production bun run --filter @hebo/gateway build && \
     NODE_ENV=production bun run --filter @hebo/mcp build
 
+# RDS CA bundle (used by ECS deployments for Aurora TLS)
+ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /rds-bundle.pem
+
 ########################  runtime  ########################
 FROM oven/bun:${BUN_VERSION}-slim AS runtime
 
@@ -51,6 +56,9 @@ RUN apt-get update && \
 # App layout
 WORKDIR /app
 
+# RDS CA bundle (ECS deployments use NODE_EXTRA_CA_CERTS to point here)
+COPY --from=builder /rds-bundle.pem /etc/ssl/certs/rds-bundle.pem
+
 # Backend binaries
 COPY --from=builder /repo/apps/api/dist/server      /app/api
 COPY --from=builder /repo/apps/auth/dist/server      /app/auth
@@ -68,11 +76,11 @@ COPY --from=builder /repo/apps/api/prisma            /app/prisma/api
 COPY --from=builder /repo/apps/auth/prisma           /app/prisma/auth
 
 # s6-overlay service definitions
-COPY infra/docker/self-hosted/s6-overlay/ /etc/s6-overlay/s6-rc.d/
+COPY infra/docker/s6/services/ /etc/s6-overlay/s6-rc.d/
 
 # Shared scripts (bootstrap + service runner helper)
-COPY infra/docker/self-hosted/init-hebo.sh /etc/s6-overlay/scripts/init-hebo.sh
-COPY infra/docker/self-hosted/svc-run.sh   /etc/s6-overlay/scripts/svc-run.sh
+COPY infra/docker/s6/scripts/init-hebo.sh /etc/s6-overlay/scripts/init-hebo.sh
+COPY infra/docker/s6/scripts/svc-run.sh   /etc/s6-overlay/scripts/svc-run.sh
 RUN chmod +x /etc/s6-overlay/scripts/*.sh /etc/s6-overlay/s6-rc.d/svc-*/run
 
 # Persistent data directory

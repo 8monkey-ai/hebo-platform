@@ -15,13 +15,11 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
   link: [authSecret, greptimeHost],
   image: {
     context: ".",
-    dockerfile: "infra/docker/Dockerfile.mcp",
+    dockerfile: "infra/docker/Dockerfile",
     tags: [mcpDomain],
-    args: {
-      NODE_ENV: isProduction ? "production" : "development",
-    },
   },
   environment: {
+    HEBO_MODE: "mcp",
     PORT: mcpPort,
   },
   loadBalancer: {

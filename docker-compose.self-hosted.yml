@@ -11,7 +11,7 @@ services:
     image: ghcr.io/hebo-ai/hebo:${HEBO_VERSION:-latest}
     build:
       context: .
-      dockerfile: infra/docker/Dockerfile.self-hosted
+      dockerfile: infra/docker/Dockerfile
     restart: unless-stopped
     ports:
       - "${CONSOLE_PORT:-8520}:8520"
