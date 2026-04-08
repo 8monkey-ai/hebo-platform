@@ -8,7 +8,14 @@ import babel from "vite-plugin-babel";
 
 export default defineConfig(() => {
   return {
-    resolve: { tsconfigPaths: true },
+    // React Router's build always emits a server bundle (even with ssr:false).
+    // Force Node entry so react-dom/server resolves to server.node.js
+    // instead of server.bun.js which lacks renderToPipeableStream.
+    // See: https://github.com/remix-run/react-router/issues/12568
+    resolve: {
+      tsconfigPaths: true,
+      alias: { "react-dom/server": "react-dom/server.node" },
+    },
     server: { port: 8520, devtoolsJsonFile: true },
     optimizeDeps: {
       entries: ["app/root.tsx", "app/routes/**/route.{ts,tsx,mdx}"],
