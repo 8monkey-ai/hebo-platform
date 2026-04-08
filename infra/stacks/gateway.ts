@@ -4,7 +4,14 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase from "./db";
-import { authSecret, isProduction, llmSecrets, greptimeHost, normalizedStage } from "./env";
+import {
+  authSecret,
+  heboImage,
+  isProduction,
+  llmSecrets,
+  greptimeHost,
+  normalizedStage,
+} from "./env";
 
 const gatewayDomain = isProduction ? "gateway.hebo.ai" : `gateway.${normalizedStage}.hebo.ai`;
 const gatewayPort = "8522";
@@ -37,7 +44,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
     },
   ],
   link: [heboDatabase, authSecret, ...llmSecrets, greptimeHost],
-  image: {
+  image: heboImage ?? {
     context: ".",
     dockerfile: "infra/docker/Dockerfile",
     tags: [gatewayDomain],

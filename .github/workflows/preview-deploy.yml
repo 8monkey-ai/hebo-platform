@@ -5,9 +5,18 @@ on:
     types: [labeled]
 
 jobs:
+  quality:
+    if: ${{ github.event.label.name == 'preview deploy' }}
+    uses: ./.github/workflows/quality.yml
+
+  build:
+    needs: quality
+    if: success()
+    uses: ./.github/workflows/build-image.yml
+
   deploy:
     name: Deploy to Preview
-    if: ${{ github.event.label.name == 'preview deploy' }}
+    needs: build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,6 +43,8 @@ jobs:
 
       - name: Deploy to Preview
         id: deploy
+        env:
+          HEBO_IMAGE: ${{ needs.build.outputs.image }}
         run: |
           STAGE="pr-${{ github.event.pull_request.number }}"
           printf '%s' "${{ secrets.AUTH_GITHUB_CLIENT_ID }}" | bun run sst secret set GithubClientId --stage $STAGE
