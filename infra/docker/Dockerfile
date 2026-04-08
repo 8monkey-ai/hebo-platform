@@ -11,7 +11,6 @@
 # ---------------------------------------------------------------------------
 
 ARG BUN_VERSION=1
-ARG S6_OVERLAY_VERSION=3.2.0.2
 
 ########################  builder — install deps + compile all apps  ########################
 FROM oven/bun:${BUN_VERSION} AS builder
@@ -24,32 +23,23 @@ COPY . .
 # Install workspace dependencies (all apps + packages)
 RUN bun install --frozen-lockfile
 
-# Build console (static assets)
-RUN bun run --filter @hebo/console build
-
-# Build backend apps (compiled standalone binaries)
-RUN bun run --filter @hebo/api build && \
-    bun run --filter @hebo/auth build && \
-    bun run --filter @hebo/gateway build && \
-    bun run --filter @hebo/mcp build
+# Build all apps (console static assets + backend standalone binaries)
+RUN bun run build
 
 ########################  runtime  ########################
 FROM oven/bun:${BUN_VERSION}-slim AS runtime
 
-ARG S6_OVERLAY_VERSION
-ARG TARGETARCH
-
-# Install s6-overlay
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp
-ADD https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}/s6-overlay-${TARGETARCH}.tar.xz /tmp
-RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-${TARGETARCH}.tar.xz && \
-    rm -f /tmp/s6-overlay-*.tar.xz
-
-# Install openssl for AUTH_SECRET generation + ca-certificates for TLS
+# Install openssl for AUTH_SECRET generation + ca-certificates and curl for downloads
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends openssl ca-certificates && \
+    apt-get install -y --no-install-recommends openssl ca-certificates curl xz-utils && \
     rm -rf /var/lib/apt/lists/*
+
+# Install s6-overlay (s6 uses aarch64 instead of Docker's arm64)
+ARG TARGETARCH
+RUN S6_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "$TARGETARCH") && \
+    S6_BASE="https://github.com/just-containers/s6-overlay/releases/download/v3.2.0.2" && \
+    curl -sSfL "${S6_BASE}/s6-overlay-noarch.tar.xz" | tar -C / -Jxpf - && \
+    curl -sSfL "${S6_BASE}/s6-overlay-${S6_ARCH}.tar.xz" | tar -C / -Jxpf -
 
 # App layout
 WORKDIR /app
