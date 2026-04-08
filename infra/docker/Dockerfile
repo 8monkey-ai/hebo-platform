@@ -33,9 +33,6 @@ RUN bun run --filter @hebo/api build && \
     bun run --filter @hebo/gateway build && \
     bun run --filter @hebo/mcp build
 
-# RDS CA bundle (used by ECS deployments for Aurora TLS)
-ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /rds-bundle.pem
-
 ########################  runtime  ########################
 FROM oven/bun:${BUN_VERSION}-slim AS runtime
 
@@ -58,7 +55,7 @@ RUN apt-get update && \
 WORKDIR /app
 
 # RDS CA bundle (ECS deployments use NODE_EXTRA_CA_CERTS to point here)
-COPY --from=builder /rds-bundle.pem /etc/ssl/certs/rds-bundle.pem
+ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /etc/ssl/certs/rds-bundle.pem
 
 # Backend binaries
 COPY --from=builder /repo/apps/api/dist/server      /app/api
@@ -80,13 +77,11 @@ COPY --from=builder /repo/apps/auth/prisma           /app/prisma/auth
 COPY infra/docker/s6/services/ /etc/s6-overlay/s6-rc.d/
 
 # Shared scripts (bootstrap + service runner helper)
-COPY infra/docker/s6/scripts/init-hebo.sh /etc/s6-overlay/scripts/init-hebo.sh
-COPY infra/docker/s6/scripts/svc-run.sh   /etc/s6-overlay/scripts/svc-run.sh
+COPY infra/docker/s6/scripts/ /etc/s6-overlay/scripts/
 RUN chmod +x /etc/s6-overlay/scripts/*.sh /etc/s6-overlay/s6-rc.d/svc-*/run
 
 # Persistent data directory
 RUN mkdir -p /data
-VOLUME /data
 
 ENV HEBO_MODE=standalone \
     HEBO_DATA_DIR=/data \
@@ -94,7 +89,5 @@ ENV HEBO_MODE=standalone \
     S6_KEEP_ENV=1 \
     S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=60000
-
-EXPOSE 8520 8521 8522 8523 8524
 
 ENTRYPOINT ["/init"]
