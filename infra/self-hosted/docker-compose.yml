@@ -1,17 +1,15 @@
 # Hebo self-hosted — docker compose up -d
 #
-# Copy .env.self-hosted.example to .env.self-hosted and adjust as needed.
+# Copy .env.example to .env and adjust as needed.
 # All services start with sensible defaults — no required env vars.
 #
 # Usage:
-#   docker compose -f docker-compose.self-hosted.yml --env-file .env.self-hosted up -d
+#   cp .env.example .env
+#   docker compose --env-file .env up -d
 
 services:
   hebo:
     image: ghcr.io/hebo-ai/hebo:${HEBO_VERSION:-latest}
-    build:
-      context: .
-      dockerfile: infra/docker/Dockerfile
     restart: unless-stopped
     ports:
       - "${CONSOLE_PORT:-8520}:8520"
