@@ -44,6 +44,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   },
   environment: {
     HEBO_MODE: "gateway",
+    NODE_ENV: isProduction ? "production" : "development",
     AUTH_URL: heboAuth.url,
     GATEWAY_URL: `https://${gatewayDomain}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",

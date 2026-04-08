@@ -20,6 +20,7 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
   },
   environment: {
     HEBO_MODE: "mcp",
+    NODE_ENV: isProduction ? "production" : "development",
     PORT: mcpPort,
   },
   loadBalancer: {

@@ -22,6 +22,7 @@ const heboApi = new sst.aws.Service("HeboApi", {
   },
   environment: {
     HEBO_MODE: "api",
+    NODE_ENV: isProduction ? "production" : "development",
     API_URL: `https://${apiDomain}`,
     AUTH_URL: heboAuth.url,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
