@@ -16,7 +16,8 @@ ARG S6_OVERLAY_VERSION=3.2.0.2
 ########################  builder — install deps + compile all apps  ########################
 FROM oven/bun:${BUN_VERSION} AS builder
 
-ENV CI=1
+ARG NODE_ENV
+ENV CI=1 NODE_ENV=$NODE_ENV
 WORKDIR /repo
 COPY . .
 
@@ -27,10 +28,10 @@ RUN bun install --frozen-lockfile
 RUN bun run --filter @hebo/console build
 
 # Build backend apps (compiled standalone binaries)
-RUN NODE_ENV=production bun run --filter @hebo/api build && \
-    NODE_ENV=production bun run --filter @hebo/auth build && \
-    NODE_ENV=production bun run --filter @hebo/gateway build && \
-    NODE_ENV=production bun run --filter @hebo/mcp build
+RUN bun run --filter @hebo/api build && \
+    bun run --filter @hebo/auth build && \
+    bun run --filter @hebo/gateway build && \
+    bun run --filter @hebo/mcp build
 
 # RDS CA bundle (used by ECS deployments for Aurora TLS)
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /rds-bundle.pem

@@ -2,6 +2,10 @@ name: Build Image
 
 on:
   workflow_call:
+    inputs:
+      node_env:
+        type: string
+        default: production
     outputs:
       image:
         description: "Full GHCR image URI with tag"
@@ -38,6 +42,7 @@ jobs:
           file: infra/docker/Dockerfile
           push: true
           platforms: linux/arm64
+          build-args: NODE_ENV=${{ inputs.node_env }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
