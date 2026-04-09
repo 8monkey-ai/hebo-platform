@@ -11,7 +11,7 @@ const heboGreptime = isProduction
       architecture: "arm64",
       cpu: "0.25 vCPU",
       memory: "0.5 GB",
-      image: "greptime/greptimedb:v1.0.0-rc.2-nightly-20260323",
+      image: "greptime/greptimedb:v1.0.0",
       command: [
         "standalone",
         "start",
