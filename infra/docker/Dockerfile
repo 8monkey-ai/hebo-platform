@@ -12,7 +12,7 @@
 
 ARG BUN_VERSION=1
 
-########################  builder — install deps + compile all apps  ########################
+########################  builder — install deps + bundle all apps  ########################
 FROM oven/bun:${BUN_VERSION} AS builder
 
 ARG NODE_ENV
@@ -23,7 +23,7 @@ COPY . .
 # Install workspace dependencies (all apps + packages)
 RUN bun install --frozen-lockfile
 
-# Build all apps (console static assets + backend standalone binaries)
+# Build all apps (console static assets + backend JS bundles)
 RUN bun run build
 
 ########################  runtime  ########################
@@ -47,11 +47,11 @@ WORKDIR /app
 # RDS CA bundle (ECS deployments use NODE_EXTRA_CA_CERTS to point here)
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /etc/ssl/certs/rds-bundle.pem
 
-# Backend binaries
-COPY --from=builder /repo/apps/api/dist/server      /app/api
-COPY --from=builder /repo/apps/auth/dist/server      /app/auth
-COPY --from=builder /repo/apps/gateway/dist/server   /app/gateway
-COPY --from=builder /repo/apps/mcp/dist/server       /app/mcp
+# Backend JS bundles (run via bun from the base image)
+COPY --from=builder /repo/apps/api/dist/index.js      /app/api/index.js
+COPY --from=builder /repo/apps/auth/dist/index.js      /app/auth/index.js
+COPY --from=builder /repo/apps/gateway/dist/index.js   /app/gateway/index.js
+COPY --from=builder /repo/apps/mcp/dist/index.js       /app/mcp/index.js
 
 # Console static assets + dependencies for vite preview
 COPY --from=builder /repo/apps/console/build         /app/console/build

@@ -1,2 +1,2 @@
 #!/bin/sh
-exec /etc/s6-overlay/scripts/svc-run.sh svc-gateway "standalone gateway" /app/gateway
+exec /etc/s6-overlay/scripts/svc-run.sh svc-gateway "standalone gateway" bun /app/gateway/index.js

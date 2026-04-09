@@ -1,2 +1,2 @@
 #!/bin/sh
-exec /etc/s6-overlay/scripts/svc-run.sh svc-mcp "standalone mcp" /app/mcp
+exec /etc/s6-overlay/scripts/svc-run.sh svc-mcp "standalone mcp" bun /app/mcp/index.js

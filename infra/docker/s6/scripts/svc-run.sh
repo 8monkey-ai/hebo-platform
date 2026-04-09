@@ -1,7 +1,7 @@
 #!/bin/sh
 # Shared service runner for s6-overlay longruns.
 # Usage: svc-run.sh <service-name> <allowed-modes> <exec-command...>
-#   svc-run.sh svc-api "standalone api" /app/api
+#   svc-run.sh svc-api "standalone api" bun /app/api/index.js
 #   svc-run.sh svc-console "standalone" bun run vite preview --host 0.0.0.0 --port 8520
 SVC_NAME="$1"; shift
 ALLOWED_MODES="$1"; shift

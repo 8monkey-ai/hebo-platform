@@ -1,2 +1,2 @@
 #!/bin/sh
-exec /etc/s6-overlay/scripts/svc-run.sh svc-api "standalone api" /app/api
+exec /etc/s6-overlay/scripts/svc-run.sh svc-api "standalone api" bun /app/api/index.js
