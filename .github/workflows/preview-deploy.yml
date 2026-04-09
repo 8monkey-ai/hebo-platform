@@ -11,7 +11,6 @@ jobs:
 
   build:
     needs: quality
-    if: success()
     uses: ./.github/workflows/build-image.yml
     with:
       node_env: development
