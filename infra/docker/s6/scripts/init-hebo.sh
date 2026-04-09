@@ -38,15 +38,18 @@ if [ -n "${AUTH_SECRET}" ]; then
 fi
 
 # ── 2. Run Prisma migrations for schemas owned by this mode ──
+# Determine separator: & if DATABASE_URL already has query params, ? otherwise
+case "$DATABASE_URL" in *"?"*) SEP="&";; *) SEP="?";; esac
+
 if [ "$HEBO_MODE" = "standalone" ] || [ "$HEBO_MODE" = "api" ]; then
   echo "[init] Running API schema migrations"
-  DATABASE_URL="${DATABASE_URL}?schema=api" \
+  DATABASE_URL="${DATABASE_URL}${SEP}schema=api" \
     bunx prisma migrate deploy --schema /app/prisma/api/schema.prisma
 fi
 
 if [ "$HEBO_MODE" = "standalone" ] || [ "$HEBO_MODE" = "auth" ]; then
   echo "[init] Running Auth schema migrations"
-  DATABASE_URL="${DATABASE_URL}?schema=auth" \
+  DATABASE_URL="${DATABASE_URL}${SEP}schema=auth" \
     bunx prisma migrate deploy --schema /app/prisma/auth/schema.prisma
 fi
 
