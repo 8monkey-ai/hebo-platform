@@ -19,7 +19,7 @@ export const getSecret = async (name: string): Promise<string | undefined> => {
   // Bun secrets for local development
   try {
     return (await secrets.get({ service: "hebo", name })) ?? undefined;
-  } catch {
-    return undefined;
-  }
+  } catch {}
+
+  return undefined;
 };
