@@ -41,6 +41,9 @@ RUN S6_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "$TARGETARCH
     curl -sSfL "${S6_BASE}/s6-overlay-noarch.tar.xz" | tar -C / -Jxpf - && \
     curl -sSfL "${S6_BASE}/s6-overlay-${S6_ARCH}.tar.xz" | tar -C / -Jxpf -
 
+# Create non-root user for running services
+RUN groupadd -r hebo && useradd -r -g hebo hebo
+
 # App layout
 WORKDIR /app
 
