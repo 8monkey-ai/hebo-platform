@@ -40,7 +40,7 @@ jobs:
           context: .
           file: infra/docker/Dockerfile
           push: true
-          platforms: linux/arm64
+          platforms: linux/amd64,linux/arm64
           build-args: NODE_ENV=${{ inputs.node_env }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
