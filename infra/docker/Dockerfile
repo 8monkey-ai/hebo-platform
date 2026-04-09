@@ -78,7 +78,6 @@ RUN mkdir -p /data
 
 ENV HEBO_MODE=standalone \
     HEBO_DATA_DIR=/data \
-    NODE_ENV=production \
     S6_KEEP_ENV=1 \
     S6_BEHAVIOUR_IF_STAGE2_FAILS=2 \
     S6_CMD_WAIT_FOR_SERVICES_MAXTIME=60000

@@ -12,8 +12,6 @@ jobs:
   build:
     needs: quality
     uses: ./.github/workflows/build-image.yml
-    with:
-      node_env: development
 
   deploy:
     name: Deploy to Preview

@@ -5,7 +5,7 @@ on:
     inputs:
       node_env:
         type: string
-        default: production
+        default: development
     outputs:
       image:
         value: ${{ jobs.build.outputs.image }}
