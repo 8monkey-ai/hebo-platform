@@ -3,7 +3,7 @@
 
 export const isProduction = $app.stage === "production";
 
-// Pre-built image URI (set by CI via HEBO_IMAGE env var, falls back to Dockerfile build)
+// Pre-built image URI (set by CI or manually via HEBO_IMAGE env var)
 export const heboImage = process.env.HEBO_IMAGE;
 
 const getSstSecret = (name: string) => new sst.Secret(name, "undefined");

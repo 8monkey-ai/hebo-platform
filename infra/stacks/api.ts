@@ -15,11 +15,7 @@ const heboApi = new sst.aws.Service("HeboApi", {
   cpu: isProduction ? "1 vCPU" : "0.25 vCPU",
   memory: isProduction ? "2 GB" : "0.5 GB",
   link: [heboDatabase, authSecret, greptimeHost],
-  image: heboImage ?? {
-    context: ".",
-    dockerfile: "infra/docker/Dockerfile",
-    tags: [apiDomain],
-  },
+  image: heboImage,
   environment: {
     HEBO_MODE: "api",
     API_URL: `https://${apiDomain}`,

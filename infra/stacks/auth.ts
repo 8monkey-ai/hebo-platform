@@ -14,11 +14,7 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
   cpu: isProduction ? "1 vCPU" : "0.25 vCPU",
   memory: isProduction ? "2 GB" : "0.5 GB",
   link: [heboDatabase, ...authSecrets, greptimeHost],
-  image: heboImage ?? {
-    context: ".",
-    dockerfile: "infra/docker/Dockerfile",
-    tags: [authDomain],
-  },
+  image: heboImage,
   environment: {
     HEBO_MODE: "auth",
     AUTH_URL: `https://${authDomain}`,

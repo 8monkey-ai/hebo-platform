@@ -44,11 +44,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
     },
   ],
   link: [heboDatabase, authSecret, ...llmSecrets, greptimeHost],
-  image: heboImage ?? {
-    context: ".",
-    dockerfile: "infra/docker/Dockerfile",
-    tags: [gatewayDomain],
-  },
+  image: heboImage,
   environment: {
     HEBO_MODE: "gateway",
     AUTH_URL: heboAuth.url,
