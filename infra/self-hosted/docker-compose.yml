@@ -23,7 +23,7 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:password@postgres:5432/hebo}
       GREPTIME_HOST: ${GREPTIME_HOST:-greptimedb}
-      AUTH_URL: http://localhost:8523
+      AUTH_URL: ${AUTH_URL:-http://localhost:8523}
       HEBO_MODE: ${HEBO_MODE:-standalone}
     volumes:
       - hebo-data:/data
