@@ -3,7 +3,7 @@
 
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
-import heboDatabase from "./db";
+import { databaseUrl } from "./db";
 import {
   authSecret,
   heboImage,
@@ -43,10 +43,11 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
       resources: ["*"],
     },
   ],
-  link: [heboDatabase, authSecret, ...llmSecrets, greptimeHost],
+  link: [authSecret, ...llmSecrets, greptimeHost],
   image: heboImage,
   environment: {
     HEBO_MODE: "gateway",
+    DATABASE_URL: databaseUrl,
     AUTH_URL: heboAuth.url,
     GATEWAY_URL: `https://${gatewayDomain}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",

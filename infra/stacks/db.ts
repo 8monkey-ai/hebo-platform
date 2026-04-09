@@ -33,4 +33,6 @@ const heboDatabase = new sst.aws.Aurora("HeboDatabase", {
   },
 });
 
+export const databaseUrl = $interpolate`postgresql://${heboDatabase.username}:${heboDatabase.password}@${heboDatabase.host}:${heboDatabase.port}/${heboDatabase.database}?sslmode=verify-full`;
+
 export default heboDatabase;

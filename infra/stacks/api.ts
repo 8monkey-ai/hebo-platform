@@ -3,7 +3,7 @@
 
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
-import heboDatabase from "./db";
+import { databaseUrl } from "./db";
 import { authSecret, heboImage, isProduction, greptimeHost, normalizedStage } from "./env";
 
 const apiDomain = isProduction ? "api.hebo.ai" : `api.${normalizedStage}.hebo.ai`;
@@ -14,10 +14,11 @@ const heboApi = new sst.aws.Service("HeboApi", {
   architecture: "arm64",
   cpu: isProduction ? "1 vCPU" : "0.25 vCPU",
   memory: isProduction ? "2 GB" : "0.5 GB",
-  link: [heboDatabase, authSecret, greptimeHost],
+  link: [authSecret, greptimeHost],
   image: heboImage,
   environment: {
     HEBO_MODE: "api",
+    DATABASE_URL: databaseUrl,
     API_URL: `https://${apiDomain}`,
     AUTH_URL: heboAuth.url,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
