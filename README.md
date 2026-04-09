@@ -19,8 +19,11 @@ This is the monorepo for Hebo, containing all our applications and shared packag
 │   ├── shared-data/                # Shared data models & schemas
 │   └── shared-ui/                  # UI components (Shadcn + custom)
 │
-├── infra/                          # Infrastructure as Code (SST)
-│   └── stacks/                     # SST stacks
+├── infra/                          # Infrastructure
+│   ├── dev/                        # Docker Compose for local development (Postgres, GreptimeDB)
+│   ├── docker/                     # Dockerfile + s6-overlay service definitions
+│   ├── self-hosted/                # Docker Compose + env template for self-hosted deployments
+│   └── stacks/                     # SST stacks (AWS ECS deployments)
 │
 ├── .github/
 │   └── workflows/                  # CI/CD pipelines
@@ -35,7 +38,7 @@ This is the monorepo for Hebo, containing all our applications and shared packag
 
 ## Prerequisites
 
-- Bun >= 1.3.8
+- Bun >= 1.3.11
 - Docker >= 28
 - AWS CLI (only required for deployment)
 
@@ -99,7 +102,11 @@ bun run clean
 
 ## Secrets (local and remote)
 
-We use Bun secrets for local development and SST secrets for remote deployments. Code reads values via `getSecret(name)` (see `packages/shared-api/utils/secret.ts`), which resolves from SST first and falls back to Bun secrets locally.
+Code reads values via `getSecret(name)` (see `packages/shared-api/utils/secret.ts`), which resolves in order:
+
+1. **SST Resource** — used in ECS deployments
+2. **Environment variable** — `SCREAMING_SNAKE_CASE` conversion (e.g. `AnthropicApiKey` → `ANTHROPIC_API_KEY`), used in self-hosted/Docker deployments
+3. **Bun secrets** — `bun run secret set <name> <value>`, used in local development
 
 Local development secrets are optional. Only configure the ones needed for the features you're working with (e.g., configure LLM provider secrets to test AI features).
 
@@ -147,11 +154,16 @@ bun run sst secret remove GithubClientId --stage <stage>
 
 ## Run modes
 
-| #   | Mode                        | Command                        | Database              | API availability                  |
-| --- | --------------------------- | ------------------------------ | --------------------- | --------------------------------- |
-| 1   | **Frontend-only** (offline) | `bun run -F @hebo/console dev` | —                     | none – UI relies on mock services |
-| 2   | **Local full-stack**        | `bun run dev`                  | Dockerized PostgreSQL | URLs from env                     |
-| 3   | **Remote full-stack**       | `bun run sst deploy`           | Aurora PostgreSQL     | HTTPS URLs exported by SST        |
+| #   | Mode                        | Command                                                | Database              | Notes                             |
+| --- | --------------------------- | ------------------------------------------------------ | --------------------- | --------------------------------- |
+| 1   | **Frontend-only** (offline) | `bun run -F @hebo/console dev`                         | —                     | UI relies on mock services        |
+| 2   | **Local full-stack**        | `bun run dev`                                          | Dockerized PostgreSQL | All apps with hot reload          |
+| 3   | **Self-hosted**             | `docker compose up -d` (from `infra/self-hosted/`)     | Dockerized PostgreSQL | Single container, all services    |
+| 4   | **Cloud (ECS)**             | `bun run sst deploy`                                   | Aurora PostgreSQL     | HTTPS URLs exported by SST        |
+
+## Self-hosted
+
+A single Docker image (`ghcr.io/8monkey-ai/hebo-platform`) packages all services for self-hosted deployments. The image uses [s6-overlay](https://github.com/just-containers/s6-overlay) to run API, Auth, Console, Gateway, and MCP inside one container. Configuration and compose files live in `infra/self-hosted/`. The same image is also used for cloud ECS deployments in single-role mode via the `HEBO_MODE` env var (`api`, `auth`, `gateway`, `mcp`).
 
 ## Building
 
@@ -175,11 +187,21 @@ bun run -F @hebo/console test
 
 ## Deployment
 
-The repository uses GitHub Actions for CI/CD:
+### Docker image
 
-- Push a new tag to trigger the deployment
+The Docker image is built from `infra/docker/Dockerfile` and published to GHCR via the `build-image.yml` workflow:
 
-### Service URLs
+- **Production** — pushing a `v*` tag builds with `NODE_ENV=production` and tags the image as `v<semver>` + `latest`
+- **Preview** — opening a PR with the `preview deploy` label builds with `NODE_ENV=development` and tags as `pr-<number>`
+
+### Cloud (AWS ECS)
+
+The repository uses GitHub Actions for CI/CD with SST managing the infrastructure:
+
+- Push a `v*` tag to trigger a production deployment
+- Add the `preview deploy` label to a PR to deploy a preview environment
+
+#### Service URLs
 
 - API: `https://api.hebo.ai` (prod) or `https://api.<stage>.hebo.ai` (preview)
 - Auth: `https://auth.hebo.ai` (prod) or `https://auth.<stage>.hebo.ai` (preview)
@@ -187,11 +209,9 @@ The repository uses GitHub Actions for CI/CD:
 - Console: `https://console.hebo.ai` (prod) or `https://console.<stage>.hebo.ai` (preview)
 - MCP: `https://mcp.hebo.ai` (prod) or `https://mcp.<stage>.hebo.ai` (preview)
 
-### Manual deployments
+#### Manual deployments
 
 For deployments, we utilize the SST framework ([sst.dev](https://sst.dev/)).
-
-#### Launch and Clean up
 
 ```bash
 # Install providers
