@@ -29,7 +29,7 @@ services:
       - hebo-data:/data
     depends_on:
       postgres:
-        condition: service_healthy
+        condition: service_started
       greptimedb:
         condition: service_started
 
