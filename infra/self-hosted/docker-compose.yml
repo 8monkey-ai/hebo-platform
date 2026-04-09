@@ -17,25 +17,14 @@ services:
       - "${GATEWAY_PORT:-8522}:8522"
       - "${AUTH_PORT:-8523}:8523"
       - "${MCP_PORT:-8524}:8524"
+    env_file:
+      - path: .env
+        required: false
     environment:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/hebo
       GREPTIME_HOST: greptimedb
-      AUTH_SECRET: ${AUTH_SECRET:-}
       AUTH_URL: http://localhost:${AUTH_PORT:-8523}
       HEBO_MODE: ${HEBO_MODE:-standalone}
-      # Optional: OAuth
-      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
-      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
-      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
-      MICROSOFT_CLIENT_ID: ${MICROSOFT_CLIENT_ID:-}
-      MICROSOFT_CLIENT_SECRET: ${MICROSOFT_CLIENT_SECRET:-}
-      # Optional: SMTP
-      SMTP_HOST: ${SMTP_HOST:-}
-      SMTP_PORT: ${SMTP_PORT:-}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASS: ${SMTP_PASS:-}
-      SMTP_FROM: ${SMTP_FROM:-}
     volumes:
       - hebo-data:/data
     depends_on:
