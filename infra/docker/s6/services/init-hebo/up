@@ -1,1 +1,2 @@
+with-contenv
 /etc/s6-overlay/scripts/init-hebo.sh

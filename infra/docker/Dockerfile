@@ -53,15 +53,16 @@ COPY --from=builder /repo/apps/auth/dist/index.js      /app/auth/index.js
 COPY --from=builder /repo/apps/gateway/dist/index.js   /app/gateway/index.js
 COPY --from=builder /repo/apps/mcp/dist/index.js       /app/mcp/index.js
 
-# Console static assets + dependencies for vite preview
-COPY --from=builder /repo/apps/console/build         /app/console/build
-COPY --from=builder /repo/apps/console/package.json  /app/console/package.json
-COPY --from=builder /repo/apps/console/node_modules  /app/console/node_modules
-COPY --from=builder /repo/apps/console/vite.config.ts /app/console/vite.config.ts
+# Console SPA — static assets + serve script
+COPY --from=builder /repo/apps/console/build/client  /app/console/build/client
+COPY --from=builder /repo/apps/console/serve.ts      /app/console/serve.ts
 
-# Prisma schemas + migrations (needed for prisma migrate deploy)
-COPY --from=builder /repo/apps/api/prisma            /app/prisma/api
-COPY --from=builder /repo/apps/auth/prisma           /app/prisma/auth
+# Prisma config + schemas + migrations (needed for prisma migrate deploy)
+# Layout: /app/prisma/{api,auth}/prisma.config.ts + prisma/{schema.prisma,migrations/}
+COPY --from=builder /repo/apps/api/prisma.config.ts  /app/prisma/api/prisma.config.ts
+COPY --from=builder /repo/apps/api/prisma            /app/prisma/api/prisma
+COPY --from=builder /repo/apps/auth/prisma.config.ts /app/prisma/auth/prisma.config.ts
+COPY --from=builder /repo/apps/auth/prisma           /app/prisma/auth/prisma
 
 # s6-overlay service definitions
 COPY infra/docker/s6/services/ /etc/s6-overlay/s6-rc.d/

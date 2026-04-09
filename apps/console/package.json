@@ -13,7 +13,7 @@
     "dev": "react-router dev",
     "format": "oxfmt .",
     "lint": "oxlint",
-    "start": "vite preview",
+    "start": "bun serve.ts",
     "typecheck": "bun run predev && oxlint --type-aware --type-check"
   },
   "dependencies": {

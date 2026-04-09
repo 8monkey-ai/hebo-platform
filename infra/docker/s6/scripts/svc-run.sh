@@ -10,7 +10,7 @@ HEBO_MODE="${HEBO_MODE:-standalone}"
 for m in $ALLOWED_MODES; do
   if [ "$HEBO_MODE" = "$m" ]; then
     echo "[${SVC_NAME}] Starting (HEBO_MODE=${HEBO_MODE})"
-    exec "$@"
+    exec s6-envdir /run/hebo-env "$@"
   fi
 done
 

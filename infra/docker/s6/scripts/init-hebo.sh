@@ -4,7 +4,7 @@ set -e
 # init-hebo — oneshot bootstrap (runs before any longrun services)
 #
 # 1. (standalone only) Create HEBO_DATA_DIR and generate/persist AUTH_SECRET
-# 2. Write AUTH_SECRET to s6 environment so longruns inherit it
+# 2. Write AUTH_SECRET to /run/hebo-env/ so longruns inherit it via s6-envdir
 # 3. Run Prisma migrations for the schemas this mode owns
 
 HEBO_MODE="${HEBO_MODE:-standalone}"
@@ -32,9 +32,10 @@ if [ "$HEBO_MODE" = "standalone" ]; then
   fi
 fi
 
-# Write AUTH_SECRET to s6 environment so longruns inherit it
+# Write AUTH_SECRET to a custom env dir so longruns pick it up via s6-envdir
+mkdir -p /run/hebo-env
 if [ -n "${AUTH_SECRET}" ]; then
-  printf '%s' "${AUTH_SECRET}" > /run/s6/container_environment/AUTH_SECRET
+  printf '%s' "${AUTH_SECRET}" > /run/hebo-env/AUTH_SECRET
 fi
 
 # ── 2. Run Prisma migrations for schemas owned by this mode ──
@@ -44,13 +45,16 @@ case "$DATABASE_URL" in *"?"*) SEP="&";; *) SEP="?";; esac
 if [ "$HEBO_MODE" = "standalone" ] || [ "$HEBO_MODE" = "api" ]; then
   echo "[init] Running API schema migrations"
   DATABASE_URL="${DATABASE_URL}${SEP}schema=api" \
-    bunx prisma migrate deploy --schema /app/prisma/api/schema.prisma
+    bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
 fi
 
 if [ "$HEBO_MODE" = "standalone" ] || [ "$HEBO_MODE" = "auth" ]; then
   echo "[init] Running Auth schema migrations"
   DATABASE_URL="${DATABASE_URL}${SEP}schema=auth" \
-    bunx prisma migrate deploy --schema /app/prisma/auth/schema.prisma
+    bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
 fi
+
+echo "[init] Cleaning up Prisma CLI cache"
+rm -rf /root/.bun/install/cache /tmp/prisma* /root/.cache/prisma
 
 echo "[init] Bootstrap complete (HEBO_MODE=${HEBO_MODE})"
