@@ -29,7 +29,7 @@ export const foundryResourceName = getSstSecret("FoundryResourceName");
 export const bedrockRegion = getSstSecret("BedrockRegion");
 export const bedrockRoleArn = getSstSecret("BedrockRoleArn");
 export const groqApiKey = getSstSecret("GroqApiKey");
-export const openAiApiKey = getSstSecret("OpenAiApiKey");
+export const openaiApiKey = getSstSecret("OpenaiApiKey");
 export const vertexAwsProviderAudience = getSstSecret("VertexAwsProviderAudience");
 export const vertexLocation = getSstSecret("VertexLocation");
 export const vertexProject = getSstSecret("VertexProject");
@@ -67,7 +67,7 @@ export const llmSecrets = [
   foundryResourceName,
   freeModelIds,
   groqApiKey,
-  openAiApiKey,
+  openaiApiKey,
   vertexAwsProviderAudience,
   vertexLocation,
   vertexProject,

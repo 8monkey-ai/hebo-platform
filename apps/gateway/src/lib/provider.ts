@@ -51,7 +51,7 @@ export async function loadProviderSecrets() {
     getSecret("FoundryResourceName"),
     getSecret("FreeModelIds"),
     getSecret("GroqApiKey"),
-    getSecret("OpenAiApiKey"),
+    getSecret("OpenaiApiKey"),
     getSecret("VertexAwsProviderAudience"),
     getSecret("VertexLocation"),
     getSecret("VertexProject"),
