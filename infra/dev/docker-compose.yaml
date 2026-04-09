@@ -1,3 +1,6 @@
+# Shared infrastructure services for local development.
+# Also used as the base for the self-hosted compose via `extends`.
+
 services:
   postgres:
     container_name: hebo-postgres
@@ -5,16 +8,21 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: local
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: hebo
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   greptimedb:
-    container_name: greptime
-    image: greptime/greptimedb:v1.0.0-rc.2-nightly-20260323
+    container_name: greptimedb
+    image: greptime/greptimedb:v1.0
     restart: unless-stopped
     ports:
       - "127.0.0.1:4000:4000"
@@ -23,7 +31,12 @@ services:
       - "127.0.0.1:4003:4003"
     volumes:
       - greptimedb-data:/greptimedb_data
-    command: standalone start --http-addr 0.0.0.0:4000 --rpc-bind-addr 0.0.0.0:4001 --mysql-addr 0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
+    command: >-
+      standalone start
+      --http-addr 0.0.0.0:4000
+      --rpc-bind-addr 0.0.0.0:4001
+      --mysql-addr 0.0.0.0:4002
+      --postgres-addr 0.0.0.0:4003
 
 volumes:
   postgres-data:
