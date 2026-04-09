@@ -3,7 +3,7 @@
 
 services:
   postgres:
-    container_name: hebo-postgres
+    container_name: postgres
     image: postgres:17.6
     restart: unless-stopped
     environment:
