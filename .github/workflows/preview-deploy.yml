@@ -4,6 +4,10 @@ on:
   pull_request:
     types: [labeled]
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   quality:
     if: ${{ github.event.label.name == 'preview deploy' }}
