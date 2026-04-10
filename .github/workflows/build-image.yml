@@ -14,6 +14,9 @@ jobs:
   build:
     name: Build and Push
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     outputs:
       image: ${{ steps.meta.outputs.version && format('ghcr.io/8monkey-ai/hebo-platform:{0}', steps.meta.outputs.version) || '' }}
     steps:
