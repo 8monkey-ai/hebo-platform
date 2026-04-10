@@ -2,7 +2,8 @@
 /// <reference path="../../.sst/platform/config.d.ts" />
 
 import heboCluster from "./cluster";
-import { heboImage, isProduction, greptimeHost, authSecret, normalizedStage } from "./env";
+import { isProduction, greptimeHost, authSecret, normalizedStage } from "./env";
+import { heboImage, disableInitProcess } from "./image";
 
 const mcpDomain = isProduction ? "mcp.hebo.ai" : `mcp.${normalizedStage}.hebo.ai`;
 const mcpPort = "8524";
@@ -26,6 +27,7 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
     ],
   },
   transform: {
+    taskDefinition: disableInitProcess,
     listener: (args) => {
       if (args.protocol === "HTTPS") {
         args.sslPolicy = "ELBSecurityPolicy-TLS13-1-2-2021-06";

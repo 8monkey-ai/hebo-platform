@@ -4,14 +4,8 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import { databaseUrl } from "./db";
-import {
-  authSecret,
-  heboImage,
-  isProduction,
-  llmSecrets,
-  greptimeHost,
-  normalizedStage,
-} from "./env";
+import { authSecret, isProduction, llmSecrets, greptimeHost, normalizedStage } from "./env";
+import { heboImage, disableInitProcess } from "./image";
 
 const gatewayDomain = isProduction ? "gateway.hebo.ai" : `gateway.${normalizedStage}.hebo.ai`;
 const gatewayPort = "8522";
@@ -61,6 +55,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
     ],
   },
   transform: {
+    taskDefinition: disableInitProcess,
     loadBalancer: (args) => {
       args.idleTimeout = 30 * 60; // 30 minutes
       args.accessLogs = {

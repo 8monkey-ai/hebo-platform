@@ -3,7 +3,8 @@
 
 import heboCluster from "./cluster";
 import { databaseUrl } from "./db";
-import { authSecrets, heboImage, isProduction, greptimeHost, normalizedStage } from "./env";
+import { authSecrets, isProduction, greptimeHost, normalizedStage } from "./env";
+import { heboImage, disableInitProcess } from "./image";
 
 const authDomain = isProduction ? "auth.hebo.ai" : `auth.${normalizedStage}.hebo.ai`;
 const authPort = "8523";
@@ -30,6 +31,7 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
     ],
   },
   transform: {
+    taskDefinition: disableInitProcess,
     listener: (args) => {
       if (args.protocol === "HTTPS") {
         args.sslPolicy = "ELBSecurityPolicy-TLS13-1-2-2021-06";
