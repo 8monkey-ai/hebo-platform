@@ -38,7 +38,11 @@ This is the monorepo for Hebo, containing all our applications and shared packag
 
 ## Prerequisites
 
+<<<<<<< claude-issue-298-20260408-0219
 - Bun >= 1.3.11
+=======
+- Bun >= 1.3.12
+>>>>>>> main
 - Docker >= 28
 - AWS CLI (only required for deployment)
 
