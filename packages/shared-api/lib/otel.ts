@@ -18,6 +18,7 @@ import {
   type SpanExporter,
   BatchSpanProcessor,
 } from "@opentelemetry/sdk-trace-base";
+import { BunSqlInstrumentation } from "@8monkey/opentelemetry-instrumentation-bun-sql";
 import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrumentation";
 
 import { IS_PRODUCTION } from "../env";
@@ -77,6 +78,11 @@ registerInstrumentations({
         "prisma:engine:db_query",
         "prisma:engine:connection",
       ],
+    }),
+    new BunSqlInstrumentation({
+      requireParentSpan: true,
+      ignoreConnectionSpans: true,
+      maskStatement: false,
     }),
   ],
 });

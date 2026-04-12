@@ -18,6 +18,7 @@
     "typecheck": "oxlint --type-aware --type-check"
   },
   "dependencies": {
+    "@8monkey/opentelemetry-instrumentation-bun-sql": "^0.1.0-rc0",
     "@opentelemetry/api": "catalog:",
     "@opentelemetry/api-logs": "^0.212.0",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.212.0",
