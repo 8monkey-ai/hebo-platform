@@ -1,3 +1,4 @@
+import { BunSqlInstrumentation } from "@8monkey/opentelemetry-instrumentation-bun-sql";
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
 import type { SeverityNumber } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
@@ -77,6 +78,12 @@ registerInstrumentations({
         "prisma:engine:db_query",
         "prisma:engine:connection",
       ],
+    }),
+    new BunSqlInstrumentation({
+      requireParentSpan: true,
+      ignoreConnectionSpans: true,
+      // FUTURE: set to true to avoid leaking sensitive information
+      maskStatement: false,
     }),
   ],
 });
