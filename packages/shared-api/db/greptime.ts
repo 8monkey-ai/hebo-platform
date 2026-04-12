@@ -1,5 +1,3 @@
-import type { SQL } from "bun";
-
 import { getSecret } from "../utils/secret";
 import { DEFAULT_DB_IDLE_TIMEOUT_MS, DEFAULT_DB_POOL_MAX } from "./config";
 
@@ -18,4 +16,4 @@ export const createBunSqlClient = (url: string) => {
 
 export const greptimeSqlClient = createBunSqlClient(await getGreptimeConnectionString());
 
-export type BunSqlClient = InstanceType<typeof SQL>;
+export type BunSqlClient = ReturnType<typeof createBunSqlClient>;
