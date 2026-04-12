@@ -86,6 +86,7 @@ export const gw = gateway({
     onError: bestEffortResolveModelOnError,
   },
 
+  // FUTURE change severity from `trace` to `info` to avoid leaking sensitive information
   logger: createPinoOtelAdapter(createOtelLogger("hebo-gateway", 1)), // trace severity
 
   timeouts: {
