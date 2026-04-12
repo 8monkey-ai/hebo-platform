@@ -1,3 +1,4 @@
+import { BunSqlInstrumentation } from "@8monkey/opentelemetry-instrumentation-bun-sql";
 import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
 import type { SeverityNumber } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
@@ -18,7 +19,6 @@ import {
   type SpanExporter,
   BatchSpanProcessor,
 } from "@opentelemetry/sdk-trace-base";
-import { BunSqlInstrumentation } from "@8monkey/opentelemetry-instrumentation-bun-sql";
 import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrumentation";
 
 import { IS_PRODUCTION } from "../env";
@@ -82,6 +82,7 @@ registerInstrumentations({
     new BunSqlInstrumentation({
       requireParentSpan: true,
       ignoreConnectionSpans: true,
+      // FUTURE: set to true to avoid leaking sensitive information
       maskStatement: false,
     }),
   ],
