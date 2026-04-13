@@ -21,6 +21,7 @@ function makeCtx(overrides: {
     modelId: overrides.modelId,
     resolvedModelId: overrides.resolvedModelId ?? overrides.modelId,
     requestId: "",
+    otel: {},
     operation: "chat",
     request: new Request("https://example.com/v1/chat/completions", {
       method: "POST",

@@ -10,7 +10,6 @@ import {
   type ResolveModelHookContext,
   type ResolveProviderHookContext,
 } from "@hebo-ai/gateway";
-import { trace } from "@opentelemetry/api";
 import { LRUCache } from "lru-cache";
 
 import type { createPrismaClient } from "~api/db/prisma";
@@ -34,9 +33,7 @@ const providerCache = new LRUCache<string, ProviderV3>({
 
 export function tagSpanWithOrganization(ctx: OnRequestHookContext) {
   const { organizationId } = ctx.state as { organizationId: string };
-  trace.getActiveSpan()?.setAttributes({
-    "hebo.organization.id": organizationId,
-  });
+  ctx.otel["hebo.organization.id"] = organizationId;
 }
 
 export function injectDefaultCacheControl({ body, operation }: BeforeHookContext) {
@@ -53,21 +50,14 @@ export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
     "model" in ctx.body && typeof ctx.body.model === "string" ? ctx.body.model : undefined;
   if (!modelId) return;
 
-  const span = trace.getActiveSpan();
-
-  // Collect all attributes up front so we only call setAttributes() once
-  const attrs: Record<string, string> = {
-    "gen_ai.request.model": modelId,
-  };
+  ctx.otel["gen_ai.request.model"] = modelId;
 
   if ("metadata" in ctx.body && typeof ctx.body.metadata === "object" && ctx.body.metadata !== null) {
     const metadata = ctx.body.metadata as Record<string, unknown>;
     for (const key in metadata) {
-      attrs[`gen_ai.request.metadata.${key}`] = String(metadata[key]);
+      ctx.otel[`gen_ai.request.metadata.${key}`] = String(metadata[key]);
     }
   }
-
-  span?.setAttributes(attrs);
 
   try {
     await resolveModelAlias({
@@ -100,10 +90,8 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
 
   const [agentSlug, branchSlug, modelAlias] = aliasPath.split("/");
 
-  trace.getActiveSpan()?.setAttributes({
-    "hebo.agent.slug": agentSlug,
-    "hebo.branch.slug": branchSlug,
-  });
+  ctx.otel["hebo.agent.slug"] = agentSlug;
+  ctx.otel["hebo.branch.slug"] = branchSlug;
 
   const branch = await prismaClient.branches.findFirst({
     where: { agent_slug: agentSlug, slug: branchSlug },
