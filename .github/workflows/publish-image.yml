@@ -1,4 +1,4 @@
-name: Publish Self-Hosted Image
+name: Publish Docker Image
 
 on:
   push:
@@ -28,10 +28,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/8monkey-ai/hebo-platform
-          tags: |
-            type=semver,pattern={{version}}
-            type=sha,prefix=sha-
-            type=raw,value=latest,enable=${{ github.ref_type == 'tag' }}
+          tags: type=semver,pattern={{version}}
 
       - uses: docker/build-push-action@v6
         with:
