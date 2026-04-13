@@ -4,7 +4,7 @@ import { getSecret } from "../utils/secret";
 import { DEFAULT_DB_IDLE_TIMEOUT_MS, DEFAULT_DB_POOL_MAX } from "./config";
 
 export const getGreptimeConnectionString = async () => {
-  return `postgres://${(await getSecret("GreptimeHost")) ?? "localhost"}:4003/public`;
+  return `postgres://${(await getSecret("GREPTIME_HOST")) ?? "localhost"}:4003/public`;
 };
 
 export const createBunSqlClient = (url: string) =>

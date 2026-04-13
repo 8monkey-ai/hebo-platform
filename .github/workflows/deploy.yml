@@ -39,28 +39,28 @@ jobs:
 
       - name: Deploy to Production
         run: |
-          printf '%s' "${{ secrets.AUTH_SECRET }}" | bun run sst secret set AuthSecret --stage production
-          printf '%s' "${{ secrets.AUTH_GITHUB_CLIENT_ID }}" | bun run sst secret set GithubClientId --stage production
-          printf '%s' "${{ secrets.AUTH_GITHUB_CLIENT_SECRET }}" | bun run sst secret set GithubClientSecret --stage production
-          printf '%s' "${{ secrets.GOOGLE_CLIENT_ID }}" | bun run sst secret set GoogleClientId --stage production
-          printf '%s' "${{ secrets.GOOGLE_CLIENT_SECRET }}" | bun run sst secret set GoogleClientSecret --stage production
-          printf '%s' "${{ secrets.MICROSOFT_CLIENT_ID }}" | bun run sst secret set MicrosoftClientId --stage production
-          printf '%s' "${{ secrets.MICROSOFT_CLIENT_SECRET }}" | bun run sst secret set MicrosoftClientSecret --stage production
-          printf '%s' "${{ secrets.SMTP_HOST }}" | bun run sst secret set SmtpHost --stage production
-          printf '%s' "${{ secrets.SMTP_PORT }}" | bun run sst secret set SmtpPort --stage production
-          printf '%s' "${{ secrets.SMTP_USER }}" | bun run sst secret set SmtpUser --stage production
-          printf '%s' "${{ secrets.SMTP_PASS }}" | bun run sst secret set SmtpPass --stage production
-          printf '%s' "${{ secrets.SMTP_FROM }}" | bun run sst secret set SmtpFrom --stage production
-          printf '%s' "${{ secrets.ANTHROPIC_API_KEY }}" | bun run sst secret set AnthropicApiKey --stage production
-          printf '%s' "${{ secrets.BEDROCK_REGION }}" | bun run sst secret set BedrockRegion --stage production
-          printf '%s' "${{ secrets.BEDROCK_ROLE_ARN }}" | bun run sst secret set BedrockRoleArn --stage production
-          printf '%s' "${{ secrets.OPENAI_API_KEY }}" | bun run sst secret set OpenAiApiKey --stage production
-          printf '%s' "${{ secrets.GOOGLE_VERTEX_AWS_PROVIDER_AUDIENCE }}" | bun run sst secret set VertexAwsProviderAudience --stage production
-          printf '%s' "${{ secrets.GOOGLE_VERTEX_LOCATION }}" | bun run sst secret set VertexLocation --stage production
-          printf '%s' "${{ secrets.GOOGLE_VERTEX_PROJECT }}" | bun run sst secret set VertexProject --stage production
-          printf '%s' "${{ secrets.GOOGLE_VERTEX_SERVICE_ACCOUNT_EMAIL }}" | bun run sst secret set VertexServiceAccountEmail --stage production
-          printf '%s' "${{ secrets.VOYAGE_API_KEY }}" | bun run sst secret set VoyageApiKey --stage production
-          printf '%s' "${{ secrets.GREPTIMEDB_HOST }}" | bun run sst secret set GreptimeHost --stage production
-          printf '%s' "${{ secrets.ENFORCE_BYOK }}" | bun run sst secret set EnforceByok --stage production
-          printf '%s' "${{ secrets.FREE_MODEL_IDS }}" | bun run sst secret set FreeModelIds --stage production
+          printf '%s' "${{ secrets.AUTH_SECRET }}" | bun run sst secret set AUTH_SECRET --stage production
+          printf '%s' "${{ secrets.AUTH_GITHUB_CLIENT_ID }}" | bun run sst secret set GITHUB_CLIENT_ID --stage production
+          printf '%s' "${{ secrets.AUTH_GITHUB_CLIENT_SECRET }}" | bun run sst secret set GITHUB_CLIENT_SECRET --stage production
+          printf '%s' "${{ secrets.GOOGLE_CLIENT_ID }}" | bun run sst secret set GOOGLE_CLIENT_ID --stage production
+          printf '%s' "${{ secrets.GOOGLE_CLIENT_SECRET }}" | bun run sst secret set GOOGLE_CLIENT_SECRET --stage production
+          printf '%s' "${{ secrets.MICROSOFT_CLIENT_ID }}" | bun run sst secret set MICROSOFT_CLIENT_ID --stage production
+          printf '%s' "${{ secrets.MICROSOFT_CLIENT_SECRET }}" | bun run sst secret set MICROSOFT_CLIENT_SECRET --stage production
+          printf '%s' "${{ secrets.SMTP_HOST }}" | bun run sst secret set SMTP_HOST --stage production
+          printf '%s' "${{ secrets.SMTP_PORT }}" | bun run sst secret set SMTP_PORT --stage production
+          printf '%s' "${{ secrets.SMTP_USER }}" | bun run sst secret set SMTP_USER --stage production
+          printf '%s' "${{ secrets.SMTP_PASS }}" | bun run sst secret set SMTP_PASS --stage production
+          printf '%s' "${{ secrets.SMTP_FROM }}" | bun run sst secret set SMTP_FROM --stage production
+          printf '%s' "${{ secrets.ANTHROPIC_API_KEY }}" | bun run sst secret set ANTHROPIC_API_KEY --stage production
+          printf '%s' "${{ secrets.BEDROCK_REGION }}" | bun run sst secret set BEDROCK_REGION --stage production
+          printf '%s' "${{ secrets.BEDROCK_ROLE_ARN }}" | bun run sst secret set BEDROCK_ROLE_ARN --stage production
+          printf '%s' "${{ secrets.OPENAI_API_KEY }}" | bun run sst secret set OPENAI_API_KEY --stage production
+          printf '%s' "${{ secrets.GOOGLE_VERTEX_AWS_PROVIDER_AUDIENCE }}" | bun run sst secret set VERTEX_AWS_PROVIDER_AUDIENCE --stage production
+          printf '%s' "${{ secrets.GOOGLE_VERTEX_LOCATION }}" | bun run sst secret set VERTEX_LOCATION --stage production
+          printf '%s' "${{ secrets.GOOGLE_VERTEX_PROJECT }}" | bun run sst secret set VERTEX_PROJECT --stage production
+          printf '%s' "${{ secrets.GOOGLE_VERTEX_SERVICE_ACCOUNT_EMAIL }}" | bun run sst secret set VERTEX_SERVICE_ACCOUNT_EMAIL --stage production
+          printf '%s' "${{ secrets.VOYAGE_API_KEY }}" | bun run sst secret set VOYAGE_API_KEY --stage production
+          printf '%s' "${{ secrets.GREPTIMEDB_HOST }}" | bun run sst secret set GREPTIME_HOST --stage production
+          printf '%s' "${{ secrets.ENFORCE_BYOK }}" | bun run sst secret set ENFORCE_BYOK --stage production
+          printf '%s' "${{ secrets.FREE_MODEL_IDS }}" | bun run sst secret set FREE_MODEL_IDS --stage production
           bun run sst deploy --stage production

@@ -30,7 +30,7 @@ const SENSITIVE_SPAN_ATTRIBUTES = [
   "http.request.cookie",
 ];
 
-export const GREPTIME_OTLP_ENDPOINT = `http://${(await getSecret("GreptimeHost")) ?? "localhost"}:4000/v1/otlp`;
+export const GREPTIME_OTLP_ENDPOINT = `http://${(await getSecret("GREPTIME_HOST")) ?? "localhost"}:4000/v1/otlp`;
 
 export const createOtelLogger = (serviceName: string, minimumSeverity: SeverityNumber) => {
   const loggerProvider = new LoggerProvider({

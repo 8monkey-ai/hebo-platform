@@ -6,39 +6,39 @@ export const isProduction = $app.stage === "production";
 const getSstSecret = (name: string) => new sst.Secret(name, "undefined");
 
 // Auth
-export const authSecret = getSstSecret("AuthSecret");
-export const githubClientId = getSstSecret("GithubClientId");
-export const githubClientSecret = getSstSecret("GithubClientSecret");
-export const googleClientId = getSstSecret("GoogleClientId");
-export const googleClientSecret = getSstSecret("GoogleClientSecret");
-export const microsoftClientId = getSstSecret("MicrosoftClientId");
-export const microsoftClientSecret = getSstSecret("MicrosoftClientSecret");
-export const smtpHost = getSstSecret("SmtpHost");
-export const smtpPort = getSstSecret("SmtpPort");
-export const smtpUser = getSstSecret("SmtpUser");
-export const smtpPass = getSstSecret("SmtpPass");
-export const smtpFrom = getSstSecret("SmtpFrom");
+export const authSecret = getSstSecret("AUTH_SECRET");
+export const githubClientId = getSstSecret("GITHUB_CLIENT_ID");
+export const githubClientSecret = getSstSecret("GITHUB_CLIENT_SECRET");
+export const googleClientId = getSstSecret("GOOGLE_CLIENT_ID");
+export const googleClientSecret = getSstSecret("GOOGLE_CLIENT_SECRET");
+export const microsoftClientId = getSstSecret("MICROSOFT_CLIENT_ID");
+export const microsoftClientSecret = getSstSecret("MICROSOFT_CLIENT_SECRET");
+export const smtpHost = getSstSecret("SMTP_HOST");
+export const smtpPort = getSstSecret("SMTP_PORT");
+export const smtpUser = getSstSecret("SMTP_USER");
+export const smtpPass = getSstSecret("SMTP_PASS");
+export const smtpFrom = getSstSecret("SMTP_FROM");
 
 // LLMs
-export const anthropicApiKey = getSstSecret("AnthropicApiKey");
-export const foundryApiKey = getSstSecret("FoundryApiKey");
-export const foundryResourceName = getSstSecret("FoundryResourceName");
-export const bedrockRegion = getSstSecret("BedrockRegion");
-export const bedrockRoleArn = getSstSecret("BedrockRoleArn");
-export const groqApiKey = getSstSecret("GroqApiKey");
-export const openAiApiKey = getSstSecret("OpenAiApiKey");
-export const vertexAwsProviderAudience = getSstSecret("VertexAwsProviderAudience");
-export const vertexLocation = getSstSecret("VertexLocation");
-export const vertexProject = getSstSecret("VertexProject");
-export const vertexServiceAccountEmail = getSstSecret("VertexServiceAccountEmail");
-export const voyageApiKey = getSstSecret("VoyageApiKey");
+export const anthropicApiKey = getSstSecret("ANTHROPIC_API_KEY");
+export const foundryApiKey = getSstSecret("FOUNDRY_API_KEY");
+export const foundryResourceName = getSstSecret("FOUNDRY_RESOURCE_NAME");
+export const bedrockRegion = getSstSecret("BEDROCK_REGION");
+export const bedrockRoleArn = getSstSecret("BEDROCK_ROLE_ARN");
+export const groqApiKey = getSstSecret("GROQ_API_KEY");
+export const openAiApiKey = getSstSecret("OPENAI_API_KEY");
+export const vertexAwsProviderAudience = getSstSecret("VERTEX_AWS_PROVIDER_AUDIENCE");
+export const vertexLocation = getSstSecret("VERTEX_LOCATION");
+export const vertexProject = getSstSecret("VERTEX_PROJECT");
+export const vertexServiceAccountEmail = getSstSecret("VERTEX_SERVICE_ACCOUNT_EMAIL");
+export const voyageApiKey = getSstSecret("VOYAGE_API_KEY");
 
 // BYOK
-export const enforceByok = getSstSecret("EnforceByok");
-export const freeModelIds = getSstSecret("FreeModelIds");
+export const enforceByok = getSstSecret("ENFORCE_BYOK");
+export const freeModelIds = getSstSecret("FREE_MODEL_IDS");
 
 // OTEL Exporter
-export const greptimeHost = getSstSecret("GreptimeHost");
+export const greptimeHost = getSstSecret("GREPTIME_HOST");
 
 export const authSecrets = [
   authSecret,

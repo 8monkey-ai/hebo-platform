@@ -105,7 +105,7 @@ bun run clean
 Code reads values via `getSecret(name)` (see `packages/shared-api/utils/secret.ts`), which resolves in order:
 
 1. **SST Resource** — used in ECS deployments
-2. **Environment variable** — `SCREAMING_SNAKE_CASE` conversion (e.g. `AnthropicApiKey` → `ANTHROPIC_API_KEY`), used in self-hosted/Docker deployments
+2. **Environment variable** — same name used directly (e.g. `ANTHROPIC_API_KEY`), used in self-hosted/Docker deployments
 3. **Bun secrets** — `bun run secret set <name> <value>`, used in local development
 
 Local development secrets are optional. Only configure the ones needed for the features you're working with (e.g., configure LLM provider secrets to test AI features).
@@ -113,25 +113,25 @@ Local development secrets are optional. Only configure the ones needed for the f
 Secret names:
 
 - Auth
-  - GitHub: `GithubClientId`, `GithubClientSecret`
-  - Google: `GoogleClientId`, `GoogleClientSecret`
-  - Microsoft: `MicrosoftClientId`, `MicrosoftClientSecret`
-  - Email OTP and Magic Link: `SmtpHost`, `SmtpPort`, `SmtpUser`, `SmtpPass`, `SmtpFrom`
-  - BetterAuth: `AuthSecret` (https://www.better-auth.com/docs/reference/options#secret))
+  - GitHub: `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET`
+  - Google: `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+  - Microsoft: `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`
+  - Email OTP and Magic Link: `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`
+  - BetterAuth: `AUTH_SECRET` (https://www.better-auth.com/docs/reference/options#secret))
 
 - LLMs
-  - Bedrock: `BedrockRoleArn`, `BedrockRegion`
-  - Vertex: `VertexServiceAccountEmail`, `VertexAwsProviderAudience`, `VertexProject`, `VertexLocation`
-  - Anthropic: `AnthropicApiKey`
-  - OpenAI: `OpenAiApiKey`
-  - Others: `VoyageApiKey`, `GroqApiKey`
+  - Bedrock: `BEDROCK_ROLE_ARN`, `BEDROCK_REGION`
+  - Vertex: `VERTEX_SERVICE_ACCOUNT_EMAIL`, `VERTEX_AWS_PROVIDER_AUDIENCE`, `VERTEX_PROJECT`, `VERTEX_LOCATION`
+  - Anthropic: `ANTHROPIC_API_KEY`
+  - OpenAI: `OPENAI_API_KEY`
+  - Others: `VOYAGE_API_KEY`, `GROQ_API_KEY`
 
 - BYOK (Bring Your Own Key)
-  - `EnforceByok`: when set, non-free models require org-level provider credentials
-  - `FreeModelIds`: comma-separated list of model IDs that are free (bypass BYOK enforcement)
+  - `ENFORCE_BYOK`: when set, non-free models require org-level provider credentials
+  - `FREE_MODEL_IDS`: comma-separated list of model IDs that are free (bypass BYOK enforcement)
 
 - Observability / traces
-  - Greptime: `GreptimeHost` (hostname only, e.g. `my-greptimedb.example.com`)
+  - Greptime: `GREPTIME_HOST` (hostname only, e.g. `my-greptimedb.example.com`)
 
 Note for local development: if SMTP secrets are not configured, the email OTP is logged to the console (look for `>>> OTP:`) so you can sign in without setting up an email provider.
 
@@ -139,17 +139,17 @@ Local (Bun) examples:
 
 ```bash
 # set / get / delete
-bun run secret set GithubClientId <value>
-bun run secret get GithubClientId
-bun run secret delete GithubClientId
+bun run secret set GITHUB_CLIENT_ID <value>
+bun run secret get GITHUB_CLIENT_ID
+bun run secret delete GITHUB_CLIENT_ID
 ```
 
 Remote (SST) examples:
 
 ```bash
 # set / remove (choose your <stage>)
-bun run sst secret set GithubClientId <value> --stage <stage>
-bun run sst secret remove GithubClientId --stage <stage>
+bun run sst secret set GITHUB_CLIENT_ID <value> --stage <stage>
+bun run sst secret remove GITHUB_CLIENT_ID --stage <stage>
 ```
 
 ## Run modes
