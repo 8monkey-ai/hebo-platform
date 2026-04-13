@@ -1,2 +1,2 @@
 #!/bin/sh
-exec /etc/s6-overlay/scripts/svc-run.sh svc-auth "standalone auth" bun /app/auth/index.js
+exec /etc/s6-overlay/scripts/svc-run.sh "standalone auth"

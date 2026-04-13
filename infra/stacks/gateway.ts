@@ -3,7 +3,7 @@
 
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
-import { databaseUrl } from "./db";
+import heboDatabase from "./db";
 import { authSecret, isProduction, llmSecrets, greptimeHost, normalizedStage } from "./env";
 import { heboImage, disableInitProcess } from "./image";
 
@@ -37,11 +37,15 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
       resources: ["*"],
     },
   ],
-  link: [authSecret, ...llmSecrets, greptimeHost],
-  image: heboImage,
+  link: [heboDatabase, authSecret, ...llmSecrets, greptimeHost],
+  image: heboImage ?? {
+    context: ".",
+    dockerfile: "infra/docker/Dockerfile",
+    tags: [gatewayDomain],
+    args: { NODE_ENV: isProduction ? "production" : "development" },
+  },
   environment: {
     HEBO_MODE: "gateway",
-    DATABASE_URL: databaseUrl,
     AUTH_URL: heboAuth.url,
     GATEWAY_URL: `https://${gatewayDomain}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",

@@ -4,22 +4,10 @@ on:
   pull_request:
     types: [labeled]
 
-permissions:
-  contents: read
-  packages: write
-
 jobs:
-  quality:
-    if: ${{ github.event.label.name == 'preview deploy' }}
-    uses: ./.github/workflows/quality.yml
-
-  build:
-    needs: quality
-    uses: ./.github/workflows/build-image.yml
-
   deploy:
     name: Deploy to Preview
-    needs: build
+    if: ${{ github.event.label.name == 'preview deploy' }}
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -46,11 +34,14 @@ jobs:
 
       - name: Deploy to Preview
         id: deploy
-        env:
-          HEBO_IMAGE: ${{ needs.build.outputs.image }}
         run: |
           STAGE="pr-${{ github.event.pull_request.number }}"
           printf '%s' "${{ secrets.AUTH_GITHUB_CLIENT_ID }}" | bun run sst secret set GithubClientId --stage $STAGE
           printf '%s' "${{ secrets.AUTH_GITHUB_CLIENT_SECRET }}" | bun run sst secret set GithubClientSecret --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_HOST }}" | bun run sst secret set SmtpHost --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_PORT }}" | bun run sst secret set SmtpPort --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_USER }}" | bun run sst secret set SmtpUser --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_PASS }}" | bun run sst secret set SmtpPass --stage $STAGE
+          printf '%s' "${{ secrets.SMTP_FROM }}" | bun run sst secret set SmtpFrom --stage $STAGE
           echo "Deploying to stage: $STAGE"
           bun run sst deploy --stage $STAGE

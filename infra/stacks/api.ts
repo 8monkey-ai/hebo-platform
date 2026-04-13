@@ -3,7 +3,7 @@
 
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
-import { databaseUrl } from "./db";
+import heboDatabase, { createMigrator } from "./db";
 import { authSecret, isProduction, greptimeHost, normalizedStage } from "./env";
 import { heboImage, disableInitProcess } from "./image";
 
@@ -15,11 +15,15 @@ const heboApi = new sst.aws.Service("HeboApi", {
   architecture: "arm64",
   cpu: isProduction ? "1 vCPU" : "0.25 vCPU",
   memory: isProduction ? "2 GB" : "0.5 GB",
-  link: [authSecret, greptimeHost],
-  image: heboImage,
+  link: [heboDatabase, authSecret, greptimeHost],
+  image: heboImage ?? {
+    context: ".",
+    dockerfile: "infra/docker/Dockerfile",
+    tags: [apiDomain],
+    args: { NODE_ENV: isProduction ? "production" : "development" },
+  },
   environment: {
     HEBO_MODE: "api",
-    DATABASE_URL: databaseUrl,
     API_URL: `https://${apiDomain}`,
     AUTH_URL: heboAuth.url,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
@@ -47,5 +51,7 @@ const heboApi = new sst.aws.Service("HeboApi", {
   capacity: isProduction ? undefined : "spot",
   wait: isProduction,
 });
+
+createMigrator("api");
 
 export default heboApi;

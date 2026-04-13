@@ -5,25 +5,15 @@ on:
     tags:
       - "v*"
 
-permissions:
-  contents: read
-  packages: write
-
 jobs:
   quality:
     uses: ./.github/workflows/quality.yml
 
-  build:
-    needs: quality
-    if: success()
-    uses: ./.github/workflows/build-image.yml
-    with:
-      node_env: production
-
   deploy:
     name: Deploy to Production
-    needs: build
+    needs: quality
     runs-on: ubuntu-latest
+    if: success()
     defaults:
       run:
         working-directory: .
@@ -48,8 +38,6 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Deploy to Production
-        env:
-          HEBO_IMAGE: ${{ needs.build.outputs.image }}
         run: |
           printf '%s' "${{ secrets.AUTH_SECRET }}" | bun run sst secret set AuthSecret --stage production
           printf '%s' "${{ secrets.AUTH_GITHUB_CLIENT_ID }}" | bun run sst secret set GithubClientId --stage production
@@ -66,7 +54,7 @@ jobs:
           printf '%s' "${{ secrets.ANTHROPIC_API_KEY }}" | bun run sst secret set AnthropicApiKey --stage production
           printf '%s' "${{ secrets.BEDROCK_REGION }}" | bun run sst secret set BedrockRegion --stage production
           printf '%s' "${{ secrets.BEDROCK_ROLE_ARN }}" | bun run sst secret set BedrockRoleArn --stage production
-          printf '%s' "${{ secrets.OPENAI_API_KEY }}" | bun run sst secret set OpenaiApiKey --stage production
+          printf '%s' "${{ secrets.OPENAI_API_KEY }}" | bun run sst secret set OpenAiApiKey --stage production
           printf '%s' "${{ secrets.GOOGLE_VERTEX_AWS_PROVIDER_AUDIENCE }}" | bun run sst secret set VertexAwsProviderAudience --stage production
           printf '%s' "${{ secrets.GOOGLE_VERTEX_LOCATION }}" | bun run sst secret set VertexLocation --stage production
           printf '%s' "${{ secrets.GOOGLE_VERTEX_PROJECT }}" | bun run sst secret set VertexProject --stage production

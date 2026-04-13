@@ -26,13 +26,34 @@ const heboDatabase = new sst.aws.Aurora("HeboDatabase", {
       if (isProduction) {
         a.performanceInsightsEnabled = true;
         a.performanceInsightsRetentionPeriod = 465;
-        // Enable after first deploy — requires PI to be active on the cluster first.
         a.databaseInsightsMode = "advanced";
       }
     },
   },
 });
 
-export const databaseUrl = $interpolate`postgresql://${heboDatabase.username}:${heboDatabase.password}@${heboDatabase.host}:${heboDatabase.port}/${heboDatabase.database}?sslmode=verify-full`;
+export function createMigrator(schema: string) {
+  const migrator = new sst.aws.Function(`${schema}DatabaseMigrator`, {
+    handler: "packages/shared-api/db/lambda/migrator.handler",
+    vpc: heboVpc,
+    link: [heboDatabase],
+    copyFiles: [
+      { from: `apps/${schema}/prisma`, to: "./prisma" },
+      { from: `apps/${schema}/prisma.config.ts`, to: "./prisma.config.ts" },
+    ],
+    environment: {
+      NODE_EXTRA_CA_CERTS: "/var/runtime/ca-cert.pem",
+      NPM_CONFIG_CACHE: "/tmp/.npm",
+    },
+    timeout: "300 seconds",
+    storage: "1 GB",
+  });
+
+  new aws.lambda.Invocation(`${schema}DatabaseMigratorInvocation`, {
+    input: JSON.stringify({ schema }),
+    functionName: migrator.name,
+    triggers: { deployedAt: Date.now().toString() },
+  });
+}
 
 export default heboDatabase;

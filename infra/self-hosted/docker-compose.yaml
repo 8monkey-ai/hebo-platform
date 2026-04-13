@@ -21,29 +21,51 @@ services:
       - path: .env
         required: false
     environment:
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:password@postgres:5432/hebo}
+      POSTGRES_URL: ${POSTGRES_URL:-postgresql://postgres:${POSTGRES_PASSWORD:-hebo}@postgres:5432/hebo}
       GREPTIME_HOST: ${GREPTIME_HOST:-greptimedb}
-      AUTH_URL: ${AUTH_URL:-http://localhost:8523}
-      HEBO_MODE: ${HEBO_MODE:-standalone}
     volumes:
-      - hebo-data:/data
+      - hebo-secrets:/data/secrets
     depends_on:
       postgres:
-        condition: service_started
+        condition: service_healthy
       greptimedb:
-        condition: service_started
+        condition: service_healthy
 
   postgres:
-    extends:
-      file: ../dev/docker-compose.yaml
-      service: postgres
+    image: postgres:17.6
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hebo}
+      POSTGRES_DB: hebo
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
   greptimedb:
-    extends:
-      file: ../dev/docker-compose.yaml
-      service: greptimedb
+    image: greptime/greptimedb:v1.0.0
+    restart: unless-stopped
+    volumes:
+      - greptimedb-data:/greptimedb_data
+    command: >-
+      standalone start
+      --http-addr 0.0.0.0:4000
+      --rpc-bind-addr 0.0.0.0:4001
+      --mysql-addr 0.0.0.0:4002
+      --postgres-addr 0.0.0.0:4003
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4000/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
 volumes:
-  hebo-data:
+  hebo-secrets:
   postgres-data:
   greptimedb-data:

@@ -1,2 +1,2 @@
 #!/bin/sh
-exec /etc/s6-overlay/scripts/svc-run.sh svc-console "standalone" bun /app/console/serve.ts
+exec /etc/s6-overlay/scripts/svc-run.sh "standalone"

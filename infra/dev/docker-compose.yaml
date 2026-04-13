@@ -1,5 +1,4 @@
 # Shared infrastructure services for local development.
-# Also used as the base for the self-hosted compose via `extends`.
 
 services:
   postgres:

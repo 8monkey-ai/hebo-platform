@@ -38,11 +38,7 @@ This is the monorepo for Hebo, containing all our applications and shared packag
 
 ## Prerequisites
 
-<<<<<<< claude-issue-298-20260408-0219
-- Bun >= 1.3.11
-=======
 - Bun >= 1.3.12
->>>>>>> main
 - Docker >= 28
 - AWS CLI (only required for deployment)
 
@@ -127,7 +123,7 @@ Secret names:
   - Bedrock: `BedrockRoleArn`, `BedrockRegion`
   - Vertex: `VertexServiceAccountEmail`, `VertexAwsProviderAudience`, `VertexProject`, `VertexLocation`
   - Anthropic: `AnthropicApiKey`
-  - OpenAI: `OpenaiApiKey`
+  - OpenAI: `OpenAiApiKey`
   - Others: `VoyageApiKey`, `GroqApiKey`
 
 - BYOK (Bring Your Own Key)
@@ -191,12 +187,12 @@ bun run -F @hebo/console test
 
 ## Deployment
 
-### Docker image
+### Self-hosted Docker image
 
 The Docker image is built from `infra/docker/Dockerfile` and published to GHCR via the `build-image.yml` workflow:
 
-- **Production** — pushing a `v*` tag builds with `NODE_ENV=production` and tags the image as `v<semver>` + `latest`
-- **Preview** — opening a PR with the `preview deploy` label builds with `NODE_ENV=development` and tags as `pr-<number>`
+- **Release** — pushing a `v*` tag builds with `NODE_ENV=production` and tags the image as `v<semver>` + `latest`
+- **Manual** — trigger the workflow manually for development builds
 
 ### Cloud (AWS ECS)
 
