@@ -1,2 +1,5 @@
 #!/bin/sh
-exec /etc/s6-overlay/scripts/svc-run.sh "standalone gateway"
+case "${HEBO_MODE:-standalone}" in
+  standalone|gateway) exec bun /app/gateway/index.js ;;
+esac
+exec s6-svc -Od .

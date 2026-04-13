@@ -1,2 +1,5 @@
 #!/bin/sh
-exec /etc/s6-overlay/scripts/svc-run.sh "standalone"
+case "${HEBO_MODE:-standalone}" in
+  standalone) exec bun /app/console/serve.ts ;;
+esac
+exec s6-svc -Od .

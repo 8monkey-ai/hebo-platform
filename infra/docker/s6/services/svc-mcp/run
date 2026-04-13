@@ -1,2 +1,5 @@
 #!/bin/sh
-exec /etc/s6-overlay/scripts/svc-run.sh "standalone mcp"
+case "${HEBO_MODE:-standalone}" in
+  standalone|mcp) exec bun /app/mcp/index.js ;;
+esac
+exec s6-svc -Od .

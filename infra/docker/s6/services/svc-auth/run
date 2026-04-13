@@ -1,2 +1,5 @@
 #!/bin/sh
-exec /etc/s6-overlay/scripts/svc-run.sh "standalone auth"
+case "${HEBO_MODE:-standalone}" in
+  standalone|auth) exec bun /app/auth/index.js ;;
+esac
+exec s6-svc -Od .
