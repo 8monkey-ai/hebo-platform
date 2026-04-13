@@ -31,7 +31,7 @@ import { shellStore } from "~console/lib/shell";
 import type { clientAction } from "./route";
 
 export const AgentCreateSchema = z.object({
-  agentName: z.string().trim().min(1),
+  agentName: ((msg) => z.string(msg).trim().min(1, msg))("Please enter an agent name"),
   defaultModel: z.string(),
 });
 export type AgentCreateFormValues = z.infer<typeof AgentCreateSchema>;

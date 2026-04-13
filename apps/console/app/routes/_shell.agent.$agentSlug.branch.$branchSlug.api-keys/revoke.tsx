@@ -21,7 +21,7 @@ import { useFormErrorToast } from "~console/lib/errors";
 import type { clientAction } from "./route";
 
 export const ApiKeyRevokeSchema = z.object({
-  apiKeyId: z.string().trim().min(1),
+  apiKeyId: ((msg) => z.string(msg).trim().min(1, msg))("Select an API key to revoke"),
 });
 
 type ApiKeyRevokeFormValues = z.infer<typeof ApiKeyRevokeSchema>;
