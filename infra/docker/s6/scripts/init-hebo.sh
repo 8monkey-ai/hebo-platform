@@ -34,21 +34,23 @@ else
 fi
 export AUTH_SECRET
 
-# ── 2. Run Prisma migrations ──
-if [ -z "${POSTGRES_URL}" ]; then
-  echo "[init] ERROR: POSTGRES_URL is required for migrations" >&2
-  exit 1
+# ── 2. Run Prisma migrations (standalone only) ──
+if [ "$HEBO_MODE" = "standalone" ]; then
+  if [ -z "${POSTGRES_URL}" ]; then
+    echo "[init] ERROR: POSTGRES_URL is required for migrations" >&2
+    exit 1
+  fi
+
+  echo "[init] Running API schema migrations"
+  DATABASE_URL="${POSTGRES_URL}?schema=api" \
+    bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
+
+  echo "[init] Running Auth schema migrations"
+  DATABASE_URL="${POSTGRES_URL}?schema=auth" \
+    bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
+
+  echo "[init] Cleaning up Prisma CLI cache"
+  rm -rf /root/.bun/install/cache /tmp/prisma* /root/.cache/prisma
 fi
-
-echo "[init] Running API schema migrations"
-DATABASE_URL="${POSTGRES_URL}?schema=api" \
-  bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
-
-echo "[init] Running Auth schema migrations"
-DATABASE_URL="${POSTGRES_URL}?schema=auth" \
-  bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
-
-echo "[init] Cleaning up Prisma CLI cache"
-rm -rf /root/.bun/install/cache /tmp/prisma* /root/.cache/prisma
 
 echo "[init] Bootstrap complete"
