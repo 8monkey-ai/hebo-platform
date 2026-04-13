@@ -128,7 +128,7 @@
         "@elysiajs/cors": "catalog:",
         "@elysiajs/openapi": "catalog:",
         "@elysiajs/opentelemetry": "catalog:",
-        "@hebo-ai/gateway": "0.9.2",
+        "@hebo-ai/gateway": "0.9.1",
         "@hebo/api": "workspace:*",
         "@hebo/shared-api": "workspace:*",
         "@opentelemetry/api": "catalog:",
@@ -575,7 +575,7 @@
 
     "@grpc/proto-loader": ["@grpc/proto-loader@0.8.0", "", { "dependencies": { "lodash.camelcase": "^4.3.0", "long": "^5.0.0", "protobufjs": "^7.5.3", "yargs": "^17.7.2" }, "bin": { "proto-loader-gen-types": "build/bin/proto-loader-gen-types.js" } }, "sha512-rc1hOQtjIWGxcxpb9aHAfLpIctjEnsDehj0DAiVfBlmT84uvR0uUtN2hEi/ecvWVjXUGf5qPF4qEgiLOx1YIMQ=="],
 
-    "@hebo-ai/gateway": ["@hebo-ai/gateway@0.9.2", "", { "dependencies": { "@ai-sdk/provider": "^3.0.8", "ai": "^6.0.154", "lru-cache": "^11.3.3", "uuid": "^13.0.0", "zod": "^4.3.6" }, "peerDependencies": { "@ai-sdk/amazon-bedrock": "^4.0.77", "@ai-sdk/anthropic": "^3.0.58", "@ai-sdk/cohere": "^3.0.25", "@ai-sdk/google": "^3.0.43", "@ai-sdk/google-vertex": "^4.0.80", "@ai-sdk/groq": "^3.0.29", "@ai-sdk/openai": "^3.0.41", "@libsql/client": "^0.14.0", "@opentelemetry/api": "^1.9.1", "better-sqlite3": "^11.0.0", "mysql2": "^3.11.0", "pg": "^8.13.0", "postgres": "^3.4.0", "typescript": ">=5.9.3", "voyage-ai-provider": "^3.0.0" }, "optionalPeers": ["@ai-sdk/amazon-bedrock", "@ai-sdk/anthropic", "@ai-sdk/cohere", "@ai-sdk/google", "@ai-sdk/google-vertex", "@ai-sdk/groq", "@ai-sdk/openai", "@libsql/client", "better-sqlite3", "mysql2", "pg", "postgres", "voyage-ai-provider"] }, "sha512-3+seu0r+Qcc2tUCwt2z4+SaSKN8RXu6HFvov9taIH8kM9WrTSZs5CL5cpyc5mihMPEz4+Yo9YOB3o7JtLiK8tg=="],
+    "@hebo-ai/gateway": ["@hebo-ai/gateway@0.9.1", "", { "dependencies": { "@ai-sdk/provider": "^3.0.8", "ai": "^6.0.116", "lru-cache": "^11.2.6", "uuid": "^13.0.0", "zod": "^4.3.6" }, "peerDependencies": { "@ai-sdk/amazon-bedrock": "^4.0.77", "@ai-sdk/anthropic": "^3.0.58", "@ai-sdk/cohere": "^3.0.25", "@ai-sdk/google": "^3.0.43", "@ai-sdk/google-vertex": "^4.0.80", "@ai-sdk/groq": "^3.0.29", "@ai-sdk/openai": "^3.0.41", "@libsql/client": "^0.14.0", "@opentelemetry/api": "^1.9.0", "better-sqlite3": "^11.0.0", "mysql2": "^3.11.0", "pg": "^8.13.0", "postgres": "^3.4.0", "typescript": ">=5.9.3", "voyage-ai-provider": "^3.0.0" }, "optionalPeers": ["@ai-sdk/amazon-bedrock", "@ai-sdk/anthropic", "@ai-sdk/cohere", "@ai-sdk/google", "@ai-sdk/google-vertex", "@ai-sdk/groq", "@ai-sdk/openai", "@libsql/client", "better-sqlite3", "mysql2", "pg", "postgres", "voyage-ai-provider"] }, "sha512-8zUQGa/BSiF7XmkjnKeZNI5ppAywGAzz5sEj1qB/OQzBEJX6sEFzbN4V04U3/Ccn5PUoMktsCfnzGNNaaykR5A=="],
 
     "@hebo/aikit-ui": ["@hebo/aikit-ui@workspace:packages/aikit-ui"],
 
@@ -2051,7 +2051,7 @@
 
     "longest-streak": ["longest-streak@3.1.0", "", {}, "sha512-9Ri+o0JYgehTaVBBDoMqIl8GXtbWg711O3srftcHhZ0dqnETqLaoIK0x17fUw9rFSlK/0NlsKe0Ahhyl5pXE2g=="],
 
-    "lru-cache": ["lru-cache@11.2.6", "", {}, "sha512-ESL2CrkS/2wTPfuend7Zhkzo2u0daGJ/A2VucJOgQ/C48S/zB8MMeMHSGKYpXhIjbPxfuezITkaBH1wqv00DDQ=="],
+    "lru-cache": ["lru-cache@11.3.3", "", {}, "sha512-JvNw9Y81y33E+BEYPr0U7omo+U9AySnsMsEiXgwT6yqd31VQWTLNQqmT4ou5eqPFUrTfIDFta2wKhB1hyohtAQ=="],
 
     "lru.min": ["lru.min@1.1.4", "", {}, "sha512-DqC6n3QQ77zdFpCMASA1a3Jlb64Hv2N2DciFGkO/4L9+q/IpIAuRlKOvCXabtRW6cQf8usbmM6BE/TOPysCdIA=="],
 
@@ -2938,8 +2938,6 @@
     "@grpc/proto-loader/protobufjs": ["protobufjs@7.5.4", "", { "dependencies": { "@protobufjs/aspromise": "^1.1.2", "@protobufjs/base64": "^1.1.2", "@protobufjs/codegen": "^2.0.4", "@protobufjs/eventemitter": "^1.1.0", "@protobufjs/fetch": "^1.1.0", "@protobufjs/float": "^1.0.2", "@protobufjs/inquire": "^1.1.0", "@protobufjs/path": "^1.1.2", "@protobufjs/pool": "^1.1.0", "@protobufjs/utf8": "^1.1.0", "@types/node": ">=13.7.0", "long": "^5.0.0" } }, "sha512-CvexbZtbov6jW2eXAvLukXjXUW1TzFaivC46BpWc/3BpcCysb5Vffu+B3XHMm8lVEuy2Mm4XGex8hBSg1yapPg=="],
 
     "@hebo-ai/gateway/ai": ["ai@6.0.158", "", { "dependencies": { "@ai-sdk/gateway": "3.0.95", "@ai-sdk/provider": "3.0.8", "@ai-sdk/provider-utils": "4.0.23", "@opentelemetry/api": "1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-gLTp1UXFtMqKUi3XHs33K7UFglbvojkxF/aq337TxnLGOhHIW9+GyP2jwW4hYX87f1es+wId3VQoPRRu9zEStQ=="],
-
-    "@hebo-ai/gateway/lru-cache": ["lru-cache@11.3.3", "", {}, "sha512-JvNw9Y81y33E+BEYPr0U7omo+U9AySnsMsEiXgwT6yqd31VQWTLNQqmT4ou5eqPFUrTfIDFta2wKhB1hyohtAQ=="],
 
     "@isaacs/cliui/string-width": ["string-width@5.1.2", "", { "dependencies": { "eastasianwidth": "^0.2.0", "emoji-regex": "^9.2.2", "strip-ansi": "^7.0.1" } }, "sha512-HnLOCR3vjcY8beoNLtcjZ5/nxn2afmME6lhrDrebokqMap+XbeW8n9TXpPDOqdGK5qcI3oT0GKTW6wC7EMiVqA=="],
 
