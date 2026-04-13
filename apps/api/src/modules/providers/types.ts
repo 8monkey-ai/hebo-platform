@@ -78,13 +78,7 @@ export const aliasPattern = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
 export const ModelConfig = z.object({
   alias: z.string().min(1).regex(aliasPattern),
   type: z.string().min(1),
-  routing: z
-    .object({
-      only: z
-        .array(z.string().optional())
-        .transform((value) => value.filter((v): v is string => v !== undefined)),
-    })
-    .optional(),
+  routing: z.object({ only: z.array(z.string()) }).optional(),
 });
 
 export const Models = z.array(ModelConfig);

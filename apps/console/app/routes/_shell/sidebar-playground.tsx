@@ -9,9 +9,7 @@ type Agent = {
 
 type Branch = {
   agent_slug: string;
-  models?: Array<{
-    alias: string;
-  }>;
+  models?: unknown[];
   slug: string;
 };
 
@@ -22,14 +20,17 @@ export function PlaygroundSidebar({
   activeAgent?: Agent;
   activeBranch?: Branch;
 }) {
-  const modelsConfig = (activeBranch?.models ?? []).map((model) => ({
-    alias: `${activeBranch?.agent_slug}/${activeBranch?.slug}/${model.alias}`,
-    endpoint: {
-      baseUrl: new URL("v1", gatewayUrl).toString(),
-      fetch: kyFetch as unknown as typeof fetch,
-      credentials: "include" as const,
-    },
-  }));
+  const modelsConfig = (activeBranch?.models ?? []).map((m) => {
+    const model = m as { alias: string };
+    return {
+      alias: `${activeBranch?.agent_slug}/${activeBranch?.slug}/${model.alias}`,
+      endpoint: {
+        baseUrl: new URL("v1", gatewayUrl).toString(),
+        fetch: kyFetch as unknown as typeof fetch,
+        credentials: "include" as const,
+      },
+    };
+  });
 
   return (
     <Chat

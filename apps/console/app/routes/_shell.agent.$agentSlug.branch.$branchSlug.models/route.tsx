@@ -6,7 +6,7 @@ import { api } from "~console/lib/service";
 
 import type { Route } from "./+types/route";
 import ModelsConfigForm from "./form";
-import { modelsConfigFormSchema } from "./schema";
+import { modelsConfigFormSchema, type ModelsConfigFormValues } from "./schema";
 
 export async function clientLoader() {
   const providers = (await api.providers.get({ query: { configured: true } })).data ?? [];
@@ -64,7 +64,7 @@ export default function ModelsConfigRoute({ loaderData }: Route.ComponentProps) 
       <ModelsConfigForm
         agentSlug={agent.slug}
         branchSlug={branch!.slug}
-        models={branch!.models}
+        models={branch!.models as ModelsConfigFormValues["models"]}
         providers={loaderData.providers}
       />
     </div>

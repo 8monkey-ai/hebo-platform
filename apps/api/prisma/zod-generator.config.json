@@ -5,7 +5,7 @@
   "variants": {
     "pure": {
       "enabled": true,
-      "excludeFields": ["id", "deleted_by", "deleted_at", "organization_id"]
+      "excludeFields": ["id", "deleted_by", "deleted_at", "organization_id", "agent", "branches"]
     },
     "input": {
       "enabled": true,
