@@ -27,7 +27,6 @@ COPY apps/console/package.json apps/console/package.json
 COPY apps/gateway/package.json apps/gateway/package.json
 COPY apps/mcp/package.json apps/mcp/package.json
 COPY packages/shared-api/package.json packages/shared-api/package.json
-COPY packages/shared-data/package.json packages/shared-data/package.json
 COPY packages/shared-ui/package.json packages/shared-ui/package.json
 COPY packages/aikit-ui/package.json packages/aikit-ui/package.json
 COPY packages/typescript-config/package.json packages/typescript-config/package.json
