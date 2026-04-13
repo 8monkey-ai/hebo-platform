@@ -26,36 +26,5 @@
     "result": {
       "enabled": false
     }
-  },
-  "models": {
-    "branches": {
-      "input": {
-        "excludeFields": [
-          "id",
-          "slug",
-          "agent_slug",
-          "created_by",
-          "created_at",
-          "updated_by",
-          "updated_at",
-          "deleted_by",
-          "deleted_at",
-          "organization_id"
-        ]
-      }
-    },
-    "provider_configs": {
-      "pure": {
-        "excludeFields": [
-          "created_by",
-          "created_at",
-          "updated_by",
-          "updated_at",
-          "deleted_by",
-          "deleted_at",
-          "organization_id"
-        ]
-      }
-    }
   }
 }
