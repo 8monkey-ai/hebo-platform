@@ -37,19 +37,44 @@ RUN bun install --frozen-lockfile
 COPY . .
 RUN bun run build
 
-########################  runtime  ########################
-FROM oven/bun:${BUN_VERSION}-slim AS runtime
+########################  tools — binaries for distroless  ########################
+FROM debian:bookworm-slim AS tools
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends openssl ca-certificates curl xz-utils && \
+    apt-get install -y --no-install-recommends ca-certificates curl xz-utils && \
     rm -rf /var/lib/apt/lists/*
 
-# Install s6-overlay
 ARG TARGETARCH
 RUN S6_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "x86_64") && \
     S6_BASE="https://github.com/just-containers/s6-overlay/releases/download/v3.2.0.2" && \
     curl -sSfL "${S6_BASE}/s6-overlay-noarch.tar.xz" | tar -C / -Jxpf - && \
     curl -sSfL "${S6_BASE}/s6-overlay-${S6_ARCH}.tar.xz" | tar -C / -Jxpf -
+
+# Pre-chmod s6 scripts (distroless has no RUN)
+COPY infra/docker/s6/services/ /staged/s6-rc.d/
+COPY infra/docker/s6/scripts/  /staged/scripts/
+RUN chmod +x /staged/scripts/*.sh /staged/s6-rc.d/svc-*/run && \
+    mkdir -p /staged/data/secrets
+
+########################  runtime — distroless  ########################
+FROM gcr.io/distroless/cc-debian12 AS runtime
+
+# Bun runtime (shared by all services)
+COPY --from=builder /usr/local/bin/bun /usr/local/bin/bun
+
+# s6-overlay
+COPY --from=tools /command/ /command/
+COPY --from=tools /package/ /package/
+COPY --from=tools /etc/s6-overlay/ /etc/s6-overlay/
+COPY --from=tools /init /init
+
+# CA certs
+COPY --from=tools /etc/ssl/certs/ /etc/ssl/certs/
+
+# Shell + coreutils required by s6 init scripts
+COPY --from=tools /bin/sh /bin/sh
+COPY --from=tools /usr/bin/env /usr/bin/env
+COPY --from=tools /bin/cat /bin/cat
 
 WORKDIR /app
 
@@ -76,14 +101,13 @@ COPY --from=builder /repo/apps/mcp/dist                /app/mcp/
 COPY --from=builder /repo/apps/console/build/client    /app/console/build/client
 COPY --from=builder /repo/apps/console/serve.ts        /app/console/serve.ts
 
-# s6-overlay service definitions + scripts
-COPY infra/docker/s6/services/ /etc/s6-overlay/s6-rc.d/
-COPY infra/docker/s6/scripts/  /etc/s6-overlay/scripts/
-RUN chmod +x /etc/s6-overlay/scripts/*.sh /etc/s6-overlay/s6-rc.d/svc-*/run
+# s6-overlay scripts + services (pre-chmod'd in tools stage)
+COPY --from=tools /staged/s6-rc.d/ /etc/s6-overlay/s6-rc.d/
+COPY --from=tools /staged/scripts/ /etc/s6-overlay/scripts/
 
 # Persistent data directory (used by standalone mode for AUTH_SECRET)
+COPY --from=tools /staged/data/ /data/
 ENV HEBO_DATA_DIR=/data
-RUN mkdir -p ${HEBO_DATA_DIR}
 
 ENV HEBO_MODE=standalone \
     S6_KEEP_ENV=1 \

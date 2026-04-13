@@ -15,7 +15,6 @@ if [ "$HEBO_MODE" != "standalone" ]; then
 fi
 
 # ── 1. Generate / persist AUTH_SECRET ──
-mkdir -p "${HEBO_DATA_DIR}/secrets"
 SECRET_FILE="${HEBO_DATA_DIR}/secrets/auth_secret"
 
 if [ -z "${AUTH_SECRET}" ]; then
@@ -24,33 +23,26 @@ if [ -z "${AUTH_SECRET}" ]; then
     AUTH_SECRET="$(cat "${SECRET_FILE}")"
   else
     echo "[init] Generating AUTH_SECRET"
-    AUTH_SECRET="$(openssl rand -hex 32)"
-    printf '%s' "${AUTH_SECRET}" > "${SECRET_FILE}"
-    chmod 600 "${SECRET_FILE}"
+    AUTH_SECRET="$(bun -e 'process.stdout.write(require("crypto").randomBytes(32).toString("hex"))')"
+    echo -n "${AUTH_SECRET}" > "${SECRET_FILE}"
   fi
 else
-  printf '%s' "${AUTH_SECRET}" > "${SECRET_FILE}"
-  chmod 600 "${SECRET_FILE}"
+  echo -n "${AUTH_SECRET}" > "${SECRET_FILE}"
 fi
 export AUTH_SECRET
 
-# ── 2. Run Prisma migrations (standalone only) ──
-if [ "$HEBO_MODE" = "standalone" ]; then
-  if [ -z "${POSTGRES_URL}" ]; then
-    echo "[init] ERROR: POSTGRES_URL is required for migrations" >&2
-    exit 1
-  fi
-
-  echo "[init] Running API schema migrations"
-  DATABASE_URL="${POSTGRES_URL}?schema=api" \
-    bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
-
-  echo "[init] Running Auth schema migrations"
-  DATABASE_URL="${POSTGRES_URL}?schema=auth" \
-    bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
-
-  echo "[init] Cleaning up Prisma CLI cache"
-  rm -rf /root/.bun/install/cache /tmp/prisma* /root/.cache/prisma
+# ── 2. Run Prisma migrations ──
+if [ -z "${POSTGRES_URL}" ]; then
+  echo "[init] ERROR: POSTGRES_URL is required for migrations" >&2
+  exit 1
 fi
+
+echo "[init] Running API schema migrations"
+DATABASE_URL="${POSTGRES_URL}?schema=api" \
+  bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
+
+echo "[init] Running Auth schema migrations"
+DATABASE_URL="${POSTGRES_URL}?schema=auth" \
+  bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
 
 echo "[init] Bootstrap complete"
