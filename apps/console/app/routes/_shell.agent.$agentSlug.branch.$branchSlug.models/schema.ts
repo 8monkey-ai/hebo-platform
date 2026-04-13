@@ -1,8 +1,8 @@
 import { z } from "zod";
 
-import { aliasPattern } from "~api/modules/providers/types";
+import { ModelConfig, aliasPattern } from "~api/modules/providers/types";
 
-export const modelConfigSchema = z.object({
+export const modelConfigSchema = ModelConfig.extend({
   alias: ((msg) =>
     z
       .string(msg)
@@ -13,13 +13,6 @@ export const modelConfigSchema = z.object({
         "Alias must start with a letter or number and contain only letters, numbers, hyphens, and underscores",
       ))("Please enter a unique alias name"),
   type: ((msg) => z.string(msg).trim().min(1, msg))("Select one of the supported models"),
-  routing: z
-    .object({
-      only: z
-        .array(z.string().optional())
-        .transform((value) => value.filter((v): v is string => v !== undefined)),
-    })
-    .optional(),
 });
 
 export const modelsConfigFormSchema = z.object({
