@@ -21,7 +21,7 @@ services:
       - path: .env
         required: false
     environment:
-      POSTGRES_URL: ${POSTGRES_URL:-postgresql://postgres:${POSTGRES_PASSWORD:-hebo}@postgres:5432/hebo}
+      POSTGRES_URL: ${POSTGRES_URL:-postgresql://postgres:hebo@postgres:5432/hebo}
       GREPTIME_HOST: ${GREPTIME_HOST:-greptimedb}
     volumes:
       - hebo-secrets:/data/secrets
