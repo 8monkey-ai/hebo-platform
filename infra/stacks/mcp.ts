@@ -3,7 +3,7 @@
 
 import heboCluster from "./cluster";
 import { isProduction, greptimeHost, authSecret, normalizedStage } from "./env";
-import { heboImage, disableInitProcess } from "./image";
+import { disableInitProcess } from "./image";
 
 const mcpDomain = isProduction ? "mcp.hebo.ai" : `mcp.${normalizedStage}.hebo.ai`;
 const mcpPort = "8524";
@@ -14,7 +14,7 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
   cpu: "0.25 vCPU",
   memory: "0.5 GB",
   link: [authSecret, greptimeHost],
-  image: heboImage ?? {
+  image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile",
     tags: [mcpDomain],
