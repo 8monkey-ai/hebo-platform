@@ -1,6 +1,7 @@
 import { Elysia, status, t } from "elysia";
 
 import { BadRequestError } from "@hebo/shared-api/errors";
+import { orgIdToTableName } from "@hebo/shared-api/lib/trace-table";
 
 import { greptime } from "~api/middlewares/greptime";
 
@@ -17,6 +18,8 @@ export const spansModule = new Elysia({
   .get(
     "/",
     async ({ greptimeDb, organizationId, params, query }) => {
+      const tableName = orgIdToTableName(organizationId!);
+
       let metadata: Record<string, string> = {};
       if (query.metadata) {
         try {
@@ -38,6 +41,7 @@ export const spansModule = new Elysia({
         200,
         await listTraces(
           greptimeDb,
+          tableName,
           organizationId!,
           params.agentSlug,
           params.branchSlug,
@@ -61,8 +65,10 @@ export const spansModule = new Elysia({
   .get(
     "/:traceId",
     async ({ greptimeDb, organizationId, params }) => {
+      const tableName = orgIdToTableName(organizationId!);
       const spans = await getSpans(
         greptimeDb,
+        tableName,
         organizationId!,
         params.agentSlug,
         params.branchSlug,

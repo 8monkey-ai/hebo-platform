@@ -1,3 +1,5 @@
+import { greptimeSqlClient } from "@hebo/shared-api/db/greptime";
+import { ensureTenantTraceTable } from "@hebo/shared-api/lib/trace-table";
 import { slugFromName } from "@hebo/shared-api/utils/slug";
 
 import type { Prisma, PrismaClient } from "~auth/generated/prisma/client";
@@ -14,6 +16,8 @@ const updateOrganizationInSession = (
 
 export const createOrganizationHook = (prisma: PrismaClient) => {
   return async (user: { id: string; name?: string | null; email: string }) => {
+    let orgId: string | undefined;
+
     await prisma.$transaction(async (tx) => {
       const org = await tx.organizations.create({
         data: {
@@ -24,6 +28,7 @@ export const createOrganizationHook = (prisma: PrismaClient) => {
           createdAt: new Date(),
         },
       });
+      orgId = org.id;
       await tx.members.create({
         data: {
           id: Bun.randomUUIDv7(),
@@ -35,6 +40,11 @@ export const createOrganizationHook = (prisma: PrismaClient) => {
       });
       await updateOrganizationInSession(tx, user.id, org.id);
     });
+
+    // Provision a per-tenant Greptime trace table (best-effort, non-blocking).
+    // If this fails the table will be auto-created on first OTLP ingest via the pipeline,
+    // or can be retried via the provision-tenant-trace-tables migration script.
+    if (orgId) ensureTenantTraceTable(greptimeSqlClient, orgId).catch(() => {});
   };
 };
 

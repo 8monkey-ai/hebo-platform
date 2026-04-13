@@ -29,20 +29,20 @@ const traceColumnsCache = new LRUCache<
   string,
   { metadataColumns: string[]; optionalColumns: Set<string> }
 >({
-  max: 1,
+  max: 100,
   ttl: 2_000,
 });
 
-async function getTraceColumnNames(greptimeDb: GreptimeDb) {
-  const cached = traceColumnsCache.get("trace_columns");
+async function getTraceColumnNames(greptimeDb: GreptimeDb, tableName: string) {
+  const cached = traceColumnsCache.get(tableName);
   if (cached) return cached;
   const rows = await greptimeDb.unsafe<Array<{ column_name: string }>>(
     `SELECT column_name
      FROM information_schema.columns
-     WHERE table_name = 'opentelemetry_traces'
-       AND (column_name LIKE $1
-         OR column_name IN (${OPTIONAL_SPAN_COLUMNS.map((_, i) => `$${i + 2}`).join(", ")}))`,
-    [`${METADATA_PREFIX}%`, ...OPTIONAL_SPAN_COLUMNS.map(({ column }) => column)],
+     WHERE table_name = $1
+       AND (column_name LIKE $2
+         OR column_name IN (${OPTIONAL_SPAN_COLUMNS.map((_, i) => `$${i + 3}`).join(", ")}))`,
+    [tableName, `${METADATA_PREFIX}%`, ...OPTIONAL_SPAN_COLUMNS.map(({ column }) => column)],
   );
 
   const metadataColumns: string[] = [];
@@ -53,12 +53,13 @@ async function getTraceColumnNames(greptimeDb: GreptimeDb) {
     else optionalColumns.add(name);
   }
   const result = { metadataColumns, optionalColumns };
-  traceColumnsCache.set("trace_columns", result);
+  traceColumnsCache.set(tableName, result);
   return result;
 }
 
 export async function listTraces(
   greptimeDb: GreptimeDb,
+  tableName: string,
   organizationId: string,
   agentSlug: string,
   branchSlug: string,
@@ -70,7 +71,7 @@ export async function listTraces(
   statusFilter?: "ok" | "error",
   operationFilter?: "chat" | "embeddings",
 ) {
-  const { metadataColumns } = await getTraceColumnNames(greptimeDb);
+  const { metadataColumns } = await getTraceColumnNames(greptimeDb, tableName);
   const metadataKeys = metadataColumns.map((col) => col.slice(METADATA_PREFIX.length));
 
   const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
@@ -113,7 +114,7 @@ export async function listTraces(
       "span_attributes.gen_ai.provider.name" AS provider_name,
       "span_attributes.gen_ai.input.messages" AS input_messages
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
-    FROM opentelemetry_traces
+    FROM "${escapeSqlIdentifier(tableName)}"
     WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
       AND "span_attributes.hebo.agent.slug" = $1
       AND "span_attributes.hebo.branch.slug" = $2
@@ -162,12 +163,13 @@ export async function listTraces(
 
 export async function getSpans(
   greptimeDb: GreptimeDb,
+  tableName: string,
   organizationId: string,
   agentSlug: string,
   branchSlug: string,
   traceId: string,
 ) {
-  const { metadataColumns, optionalColumns } = await getTraceColumnNames(greptimeDb);
+  const { metadataColumns, optionalColumns } = await getTraceColumnNames(greptimeDb, tableName);
 
   const metadataSelectSql = metadataColumns
     .map((col) => `"${escapeSqlIdentifier(col)}"`)
@@ -202,7 +204,7 @@ export async function getSpans(
       "span_attributes.hebo.branch.slug",
       "span_attributes.hebo.organization.id"
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
-    FROM opentelemetry_traces
+    FROM "${escapeSqlIdentifier(tableName)}"
     WHERE "trace_id" = $1
       AND "span_attributes.hebo.organization.id" = $2
       AND "span_attributes.hebo.agent.slug" = $3

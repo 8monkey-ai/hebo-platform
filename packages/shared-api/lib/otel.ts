@@ -3,7 +3,6 @@ import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
 import type { SeverityNumber } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
-import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
 import { CompressionAlgorithm } from "@opentelemetry/otlp-exporter-base";
 import { resourceFromAttributes } from "@opentelemetry/resources";
 import {
@@ -24,6 +23,7 @@ import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrum
 import { IS_PRODUCTION } from "../env";
 import { getSecret } from "../utils/secret";
 import { isRootPathUrl } from "../utils/url";
+import { TenantRoutingSpanExporter } from "./tenant-routing-span-exporter";
 
 const SENSITIVE_SPAN_ATTRIBUTES = [
   "http.request.header.authorization",
@@ -124,7 +124,7 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
     },
     spanProcessors: [
       createRedactingBatchSpanProcessor(
-        new OTLPTraceExporter({
+        new TenantRoutingSpanExporter({
           url: `${GREPTIME_OTLP_ENDPOINT}/v1/traces`,
           headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
           compression: CompressionAlgorithm.GZIP,
