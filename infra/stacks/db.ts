@@ -26,6 +26,7 @@ const heboDatabase = new sst.aws.Aurora("HeboDatabase", {
       if (isProduction) {
         a.performanceInsightsEnabled = true;
         a.performanceInsightsRetentionPeriod = 465;
+        // Enable after first deploy — requires PI to be active on the cluster first.
         a.databaseInsightsMode = "advanced";
       }
     },
