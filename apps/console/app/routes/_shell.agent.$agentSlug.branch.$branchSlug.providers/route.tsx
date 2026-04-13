@@ -5,7 +5,7 @@ import { api } from "~console/lib/service";
 
 import type { Route } from "./+types/route";
 import { CredentialsClearSchema } from "./clear";
-import { ProviderConfigureSchema } from "~api/modules/providers/types";
+import { ProviderConfigureSchema } from "./configure";
 import { ProvidersList } from "./list";
 
 export async function clientLoader() {

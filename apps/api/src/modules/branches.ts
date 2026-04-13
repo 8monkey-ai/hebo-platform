@@ -9,7 +9,7 @@ import { prisma } from "~api/middlewares/prisma";
 
 import { Models as ModelsSchema } from "./providers/types";
 
-const branches = branchesModelSchema.omit({ id: true, agent: true });
+const branches = branchesModelSchema.omit({ agent: true });
 
 export const branchesModule = new Elysia({
   prefix: "/agents/:agentSlug/branches",

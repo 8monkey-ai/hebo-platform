@@ -10,8 +10,8 @@ import { agentsInputSchema } from "~api/generated/zod/schemas/variants/input/age
 import { branchesModelSchema } from "~api/generated/zod/schemas/variants/pure/branches.pure";
 import { prisma } from "~api/middlewares/prisma";
 
-const agentsPlain = agentsModelSchema.omit({ id: true });
-const branchPlain = branchesModelSchema.omit({ id: true, agent: true });
+const agentsPlain = agentsModelSchema;
+const branchPlain = branchesModelSchema.omit({ agent: true });
 const agentsWithBranches = agentsPlain.extend({
   branches: z.array(branchPlain).optional(),
 });

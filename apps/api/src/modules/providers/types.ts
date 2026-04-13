@@ -10,9 +10,10 @@ export const supportedProviders = {
   voyage: { name: "Voyage AI" },
 } as const;
 
-const providerSlugs = Object.keys(supportedProviders) as [string, ...string[]];
-
-export const ProviderSlug = z.enum(providerSlugs, { error: "Invalid provider slug" });
+export const ProviderSlug = z.enum(
+  Object.keys(supportedProviders) as [string, ...string[]],
+  { error: "Invalid provider slug" },
+);
 
 export const BedrockIamRoleConfig = z.object({
   authMode: z.literal("iam-role"),
@@ -43,7 +44,7 @@ export const VertexServiceAccountConfig = z.object({
     .trim()
     .min(1)
     .transform((v) => v.replaceAll("\\n", "\n"))
-    .meta({ redact: true, textarea: true }),
+    .meta({ redact: true, text: true }),
   location: z.string().trim().min(1),
   project: z.string().trim().min(1),
 });
@@ -81,30 +82,6 @@ export const ModelConfig = z.object({
 });
 
 export const Models = z.array(ModelConfig);
-
-// Discriminated union for the console provider configuration form.
-// Shared here so both API and console use a single schema definition.
-export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
-  z.object({
-    slug: z.enum(["bedrock"]),
-    config: z.discriminatedUnion("authMode", [BedrockIamRoleConfig, BedrockAccessKeyConfig]),
-  }),
-  z.object({
-    slug: z.enum(["vertex"]),
-    config: z.discriminatedUnion("authMode", [
-      VertexIdentityFederationConfig,
-      VertexServiceAccountConfig,
-    ]),
-  }),
-  z.object({
-    slug: z.enum(["azure"]),
-    config: z.discriminatedUnion("authMode", [AzureProviderConfig]),
-  }),
-  z.object({
-    slug: z.enum(["voyage", "groq", "anthropic", "openai"]),
-    config: z.discriminatedUnion("authMode", [ApiKeyProviderConfig]),
-  }),
-]);
 
 export type Models = z.infer<typeof Models>;
 export type ModelConfig = z.infer<typeof ModelConfig>;
