@@ -4,8 +4,8 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
+import { disableInitProcess } from "./ecs";
 import { authSecret, isProduction, greptimeHost, normalizedStage } from "./env";
-import { disableInitProcess } from "./image";
 
 const apiDomain = isProduction ? "api.hebo.ai" : `api.${normalizedStage}.hebo.ai`;
 const apiPort = "8521";

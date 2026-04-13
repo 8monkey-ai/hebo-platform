@@ -2,8 +2,8 @@
 /// <reference path="../../.sst/platform/config.d.ts" />
 
 import heboCluster from "./cluster";
+import { disableInitProcess } from "./ecs";
 import { isProduction, greptimeHost, authSecret, normalizedStage } from "./env";
-import { disableInitProcess } from "./image";
 
 const mcpDomain = isProduction ? "mcp.hebo.ai" : `mcp.${normalizedStage}.hebo.ai`;
 const mcpPort = "8524";

@@ -3,8 +3,8 @@
 
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
+import { disableInitProcess } from "./ecs";
 import { authSecrets, isProduction, greptimeHost, normalizedStage } from "./env";
-import { disableInitProcess } from "./image";
 
 const authDomain = isProduction ? "auth.hebo.ai" : `auth.${normalizedStage}.hebo.ai`;
 const authPort = "8523";
