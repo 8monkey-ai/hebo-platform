@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/command/with-contenv sh
 case "${HEBO_MODE:-standalone}" in
   standalone|auth) exec bun /app/auth/index.js ;;
 esac

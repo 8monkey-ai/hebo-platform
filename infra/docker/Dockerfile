@@ -19,47 +19,70 @@ ARG NODE_ENV
 ENV CI=1 NODE_ENV=$NODE_ENV
 WORKDIR /repo
 
-# Copy dependency manifests first for better Docker cache
-COPY package.json bun.lock ./
-COPY apps/api/package.json apps/api/package.json
-COPY apps/auth/package.json apps/auth/package.json
-COPY apps/console/package.json apps/console/package.json
-COPY apps/gateway/package.json apps/gateway/package.json
-COPY apps/mcp/package.json apps/mcp/package.json
-COPY packages/shared-api/package.json packages/shared-api/package.json
-COPY packages/shared-ui/package.json packages/shared-ui/package.json
-COPY packages/aikit-ui/package.json packages/aikit-ui/package.json
-COPY packages/typescript-config/package.json packages/typescript-config/package.json
-
+# Dependency manifests first for better Docker layer caching —
+# source-only changes skip the install step entirely.
+COPY --parents package.json bun.lock \
+     apps/*/package.json \
+     packages/*/package.json \
+     ./
 RUN bun install --frozen-lockfile
 
-# Copy remaining source and build
 COPY . .
 RUN bun run build
 
-########################  tools — binaries for distroless  ########################
+########################  tools  ########################
 FROM debian:bookworm-slim AS tools
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ca-certificates curl xz-utils && \
     rm -rf /var/lib/apt/lists/*
 
+# s6-overlay
 ARG TARGETARCH
 RUN S6_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "x86_64") && \
     S6_BASE="https://github.com/just-containers/s6-overlay/releases/download/v3.2.0.2" && \
     curl -sSfL "${S6_BASE}/s6-overlay-noarch.tar.xz" | tar -C / -Jxpf - && \
     curl -sSfL "${S6_BASE}/s6-overlay-${S6_ARCH}.tar.xz" | tar -C / -Jxpf -
 
-# Pre-chmod s6 scripts (distroless has no RUN)
-COPY infra/docker/s6/services/ /staged/s6-rc.d/
-COPY infra/docker/s6/scripts/  /staged/scripts/
-RUN chmod +x /staged/scripts/*.sh /staged/s6-rc.d/svc-*/run
+# RDS CA bundle — fetched at build time for reproducibility
+ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /staged/etc/ssl/certs/rds-bundle.pem
 
-########################  runtime — distroless  ########################
-FROM gcr.io/distroless/cc-debian12 AS runtime
+# s6 classic layout (cont-init.d + services.d)
+COPY --chmod=755 infra/docker/s6/cont-init.d/ /staged/cont-init.d/
+COPY --chmod=755 infra/docker/s6/services.d/  /staged/services.d/
 
-# Bun runtime (shared by all services)
-COPY --from=builder /usr/local/bin/bun /usr/local/bin/bun
+########################  packer  ########################
+FROM scratch AS packer
+
+# API
+COPY --from=builder /repo/apps/api/dist              /app/api/
+COPY --from=builder /repo/apps/api/prisma.config.ts  /app/prisma/api/prisma.config.ts
+COPY --from=builder /repo/apps/api/prisma            /app/prisma/api/prisma
+
+# Auth
+COPY --from=builder /repo/apps/auth/dist             /app/auth/
+COPY --from=builder /repo/apps/auth/prisma.config.ts /app/prisma/auth/prisma.config.ts
+COPY --from=builder /repo/apps/auth/prisma           /app/prisma/auth/prisma
+
+# Gateway
+COPY --from=builder /repo/apps/gateway/dist          /app/gateway/
+
+# MCP
+COPY --from=builder /repo/apps/mcp/dist              /app/mcp/
+
+# Console
+COPY --from=builder /repo/apps/console/build/client  /app/console/build/client
+COPY --from=builder /repo/apps/console/serve.ts      /app/console/serve.ts
+
+# s6 scripts (classic layout)
+COPY --from=tools /staged/cont-init.d/ /etc/cont-init.d/
+COPY --from=tools /staged/services.d/  /etc/services.d/
+
+# RDS CA bundle
+COPY --from=tools /staged/etc/ssl/certs/rds-bundle.pem /etc/ssl/certs/rds-bundle.pem
+
+########################  runtime  ########################
+FROM oven/bun:${BUN_VERSION}-slim
 
 # s6-overlay
 COPY --from=tools /command/ /command/
@@ -67,42 +90,10 @@ COPY --from=tools /package/ /package/
 COPY --from=tools /etc/s6-overlay/ /etc/s6-overlay/
 COPY --from=tools /init /init
 
-# CA certs
-COPY --from=tools /etc/ssl/certs/ /etc/ssl/certs/
-
-# Shell + coreutils required by s6 init scripts
-COPY --from=tools /bin/sh /bin/sh
-COPY --from=tools /usr/bin/env /usr/bin/env
-COPY --from=tools /bin/cat /bin/cat
+# App tree + s6 scripts + RDS cert (assembled in packer)
+COPY --from=packer / /
 
 WORKDIR /app
-
-# RDS CA bundle (ECS deployments use NODE_EXTRA_CA_CERTS to point here)
-ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /etc/ssl/certs/rds-bundle.pem
-
-# ── API service ──
-COPY --from=builder /repo/apps/api/dist                /app/api/
-COPY --from=builder /repo/apps/api/prisma.config.ts    /app/prisma/api/prisma.config.ts
-COPY --from=builder /repo/apps/api/prisma              /app/prisma/api/prisma
-
-# ── Auth service ──
-COPY --from=builder /repo/apps/auth/dist               /app/auth/
-COPY --from=builder /repo/apps/auth/prisma.config.ts   /app/prisma/auth/prisma.config.ts
-COPY --from=builder /repo/apps/auth/prisma             /app/prisma/auth/prisma
-
-# ── Gateway service ──
-COPY --from=builder /repo/apps/gateway/dist            /app/gateway/
-
-# ── MCP service ──
-COPY --from=builder /repo/apps/mcp/dist                /app/mcp/
-
-# ── Console SPA ──
-COPY --from=builder /repo/apps/console/build/client    /app/console/build/client
-COPY --from=builder /repo/apps/console/serve.ts        /app/console/serve.ts
-
-# s6-overlay scripts + services (pre-chmod'd in tools stage)
-COPY --from=tools /staged/s6-rc.d/ /etc/s6-overlay/s6-rc.d/
-COPY --from=tools /staged/scripts/ /etc/s6-overlay/scripts/
 
 ENV HEBO_MODE=standalone \
     S6_KEEP_ENV=1 \

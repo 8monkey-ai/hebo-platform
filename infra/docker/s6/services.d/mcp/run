@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/command/with-contenv sh
 case "${HEBO_MODE:-standalone}" in
   standalone|mcp) exec bun /app/mcp/index.js ;;
 esac

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/command/with-contenv sh
 set -e
 
 # init-hebo — oneshot bootstrap (runs before any longrun services)
