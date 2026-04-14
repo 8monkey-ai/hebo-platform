@@ -5,13 +5,19 @@ import { auth } from "@hebo/shared-api/middlewares/auth";
 import { slugFromString } from "@hebo/shared-api/utils/slug";
 
 import type { Prisma } from "~api/generated/prisma/client";
-import { agentsModelSchema } from "~api/generated/zod/schemas/variants/pure/agents.pure";
 import { agentsInputSchema } from "~api/generated/zod/schemas/variants/input/agents.input";
+import { agentsModelSchema } from "~api/generated/zod/schemas/variants/pure/agents.pure";
 import { branchesModelSchema } from "~api/generated/zod/schemas/variants/pure/branches.pure";
 import { prisma } from "~api/middlewares/prisma";
 
+import { ModelsSchema } from "./providers/types";
+
+const branchResponse = branchesModelSchema.extend({
+  models: ModelsSchema,
+});
+
 const agentsWithBranches = agentsModelSchema.extend({
-  branches: z.array(branchesModelSchema).optional(),
+  branches: z.array(branchResponse).optional(),
 });
 const agentsInclude = z.object({ branches: z.coerce.boolean().optional() });
 

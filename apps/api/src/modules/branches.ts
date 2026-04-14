@@ -9,6 +9,10 @@ import { prisma } from "~api/middlewares/prisma";
 
 import { ModelsSchema } from "./providers/types";
 
+const branchResponse = branches.extend({
+  models: ModelsSchema,
+});
+
 export const branchesModule = new Elysia({
   prefix: "/agents/:agentSlug/branches",
 })
@@ -24,7 +28,7 @@ export const branchesModule = new Elysia({
       );
     },
     {
-      response: { 200: z.array(branches), 404: z.string() },
+      response: { 200: z.array(branchResponse), 404: z.string() },
     },
   )
   .post(
@@ -50,7 +54,7 @@ export const branchesModule = new Elysia({
         name: z.string(),
         sourceBranchSlug: z.string(),
       }),
-      response: { 201: branches, 404: z.string(), 409: z.string() },
+      response: { 201: branchResponse, 404: z.string(), 409: z.string() },
     },
   )
   .get(
@@ -64,7 +68,7 @@ export const branchesModule = new Elysia({
       );
     },
     {
-      response: { 200: branches, 404: z.string() },
+      response: { 200: branchResponse, 404: z.string() },
     },
   )
   .patch(
@@ -86,7 +90,7 @@ export const branchesModule = new Elysia({
         name: z.string().optional(),
         models: ModelsSchema.optional(),
       }),
-      response: { 200: branches, 404: z.string() },
+      response: { 200: branchResponse, 404: z.string() },
     },
   )
   .delete(

@@ -46,10 +46,10 @@
     "branches": {
       "variants": {
         "pure": {
-          "excludeFields": ["agent"]
+          "excludeFields": ["agent", "models"]
         },
         "input": {
-          "excludeFields": ["agent", "agent_slug"]
+          "excludeFields": ["agent", "agent_slug", "models"]
         }
       }
     }

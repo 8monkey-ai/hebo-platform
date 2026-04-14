@@ -7,6 +7,11 @@ generator client {
   engineType = "client"
 }
 
+generator json {
+  provider     = "prisma-json-types-generator"
+  clientOutput = "../src/generated/prisma"
+}
+
 datasource db {
   provider = "postgresql"
 }
@@ -39,6 +44,7 @@ model branches {
   slug       String
   agent_slug String
   name       String
+  /// [ModelConfig]
   models     Json[] @default([])
   agent      agents @relation(fields: [agent_slug], references: [slug], onDelete: Cascade)
 
@@ -57,6 +63,7 @@ model branches {
 model provider_configs {
   id            String @id @default(uuid(7)) @db.Uuid
   provider_slug String
+  /// [ProviderConfig]
   value         Json
 
   // Common audit fields across entities

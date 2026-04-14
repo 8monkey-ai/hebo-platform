@@ -171,7 +171,6 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
         />
         <Sidebar side="right" collapsible="offcanvas">
           <SidebarContent>
-            {/* @ts-expect-error will fix later */}
             <PlaygroundSidebar activeAgent={activeAgent} activeBranch={activeBranch} />
           </SidebarContent>
         </Sidebar>

@@ -64,7 +64,6 @@ export default function ModelsConfigRoute({ loaderData }: Route.ComponentProps) 
       <ModelsConfigForm
         agentSlug={agent.slug}
         branchSlug={branch!.slug}
-        // @ts-expect-error will fix later
         models={branch!.models}
         providers={loaderData.providers}
       />

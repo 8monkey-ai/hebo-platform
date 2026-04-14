@@ -34,6 +34,7 @@
     "@hebo/typescript-config": "workspace:*",
     "@types/bun": "catalog:",
     "prisma": "catalog:",
+    "prisma-json-types-generator": "^4.1.1",
     "prisma-zod-generator": "^2.1.4"
   }
 }
