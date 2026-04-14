@@ -9,7 +9,7 @@
 
 services:
   hebo:
-    image: ghcr.io/8monkey-ai/hebo-platform:${HEBO_VERSION:-latest}
+    image: 8monkey/hebo-platform:${HEBO_VERSION:-latest}
     restart: unless-stopped
     ports:
       - "8520:8520"
