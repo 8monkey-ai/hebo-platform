@@ -19,7 +19,8 @@ import {
   type SpanExporter,
   BatchSpanProcessor,
 } from "@opentelemetry/sdk-trace-base";
-import { PrismaInstrumentation, registerInstrumentations } from "@prisma/instrumentation";
+import { registerInstrumentations } from "@opentelemetry/instrumentation";
+import { PgInstrumentation } from "@opentelemetry/instrumentation-pg";
 
 import { IS_PRODUCTION } from "../env";
 import { getSecret } from "../utils/secret";
@@ -67,17 +68,9 @@ export const createOtelLogger = (serviceName: string, minimumSeverity: SeverityN
 
 registerInstrumentations({
   instrumentations: [
-    new PrismaInstrumentation({
-      ignoreSpanTypes: [
-        "prisma:client:compile",
-        "prisma:client:connect",
-        "prisma:client:serialize",
-        "prisma:engine:query",
-        "prisma:engine:response_json_serialization",
-        "prisma:engine:serialize",
-        "prisma:engine:db_query",
-        "prisma:engine:connection",
-      ],
+    new PgInstrumentation({
+      requireParentSpan: true,
+      enhancedDatabaseReporting: false,
     }),
     new BunSqlInstrumentation({
       requireParentSpan: true,
