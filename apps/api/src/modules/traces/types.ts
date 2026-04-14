@@ -1,52 +1,52 @@
 import { z } from "zod";
 
-const TraceTimeRangeQuery = {
+const TraceTimeRangeQuerySchema = {
   from: z.coerce.date().optional(),
   to: z.coerce.date().optional(),
 };
 
-export const TraceListQuery = z.object({
+export const TraceListQuerySchema = z.object({
   metadata: z.string().optional(),
   status: z.union([z.literal("ok"), z.literal("error")]).optional(),
   operation: z.union([z.literal("chat"), z.literal("embeddings")]).optional(),
-  ...TraceTimeRangeQuery,
+  ...TraceTimeRangeQuerySchema,
   page: z.coerce.number().int().min(1).default(1).optional(),
   pageSize: z.coerce.number().int().min(1).max(200).default(50).optional(),
 });
 
-const SpanStatus = z.union([z.literal("ok"), z.literal("error"), z.literal("unknown")]);
+const SpanStatusSchema = z.union([z.literal("ok"), z.literal("error"), z.literal("unknown")]);
 
-export const TraceListItem = z.object({
+export const TraceListItemSchema = z.object({
   timestamp: z.coerce.date(),
   traceId: z.string(),
   operationName: z.string(),
   model: z.string(),
   provider: z.string(),
-  status: SpanStatus,
+  status: SpanStatusSchema,
   statusMessage: z.string(),
   durationMs: z.number(),
   summary: z.string(),
   metadata: z.record(z.string(), z.string()),
 });
 
-export const TraceListResponse = z.object({
-  data: z.array(TraceListItem),
+export const TraceListResponseSchema = z.object({
+  data: z.array(TraceListItemSchema),
   hasNextPage: z.boolean(),
   metadataKeys: z.array(z.string()),
 });
 
-const SpanAttributes = z.record(
+const SpanAttributesSchema = z.record(
   z.string(),
   z.union([z.string(), z.number(), z.boolean(), z.null()]),
 );
 
-const GenericPart = z.object({ type: z.string() }).loose();
+const GenericPartSchema = z.object({ type: z.string() }).loose();
 
-const TextPart = z.object({ type: z.literal("text"), content: z.string() }).loose();
+const TextPartSchema = z.object({ type: z.literal("text"), content: z.string() }).loose();
 
-const ReasoningPart = z.object({ type: z.literal("reasoning"), content: z.string() }).loose();
+const ReasoningPartSchema = z.object({ type: z.literal("reasoning"), content: z.string() }).loose();
 
-const ToolCallPart = z
+const ToolCallPartSchema = z
   .object({
     type: z.literal("tool_call"),
     id: z.string().nullable().optional(),
@@ -55,7 +55,7 @@ const ToolCallPart = z
   })
   .loose();
 
-const ToolCallResponsePart = z
+const ToolCallResponsePartSchema = z
   .object({
     type: z.literal("tool_call_response"),
     id: z.string().nullable().optional(),
@@ -63,44 +63,44 @@ const ToolCallResponsePart = z
   })
   .loose();
 
-const GenAIMessagePart = z.union([
-  TextPart,
-  ReasoningPart,
-  ToolCallPart,
-  ToolCallResponsePart,
-  GenericPart,
+const GenAIMessagePartSchema = z.union([
+  TextPartSchema,
+  ReasoningPartSchema,
+  ToolCallPartSchema,
+  ToolCallResponsePartSchema,
+  GenericPartSchema,
 ]);
 
-const GenAIInputMessage = z
+const GenAIInputMessageSchema = z
   .object({
     role: z.string(),
     name: z.string().nullable().optional(),
-    content: z.union([z.string(), z.array(GenAIMessagePart), z.null()]).optional(),
-    parts: z.array(GenAIMessagePart).optional(),
+    content: z.union([z.string(), z.array(GenAIMessagePartSchema), z.null()]).optional(),
+    parts: z.array(GenAIMessagePartSchema).optional(),
   })
   .loose();
 
-const GenAIOutputMessage = z
+const GenAIOutputMessageSchema = z
   .object({
     role: z.string(),
     name: z.string().nullable().optional(),
-    parts: z.array(GenAIMessagePart),
+    parts: z.array(GenAIMessagePartSchema),
     finish_reason: z.string().optional(),
   })
   .loose();
 
-const GenAIInputMessages = z.array(GenAIInputMessage);
-const GenAIOutputMessages = z.array(GenAIOutputMessage);
-const GenAIFinishReasons = z.array(z.string()).nullable();
+const GenAIInputMessagesSchema = z.array(GenAIInputMessageSchema);
+const GenAIOutputMessagesSchema = z.array(GenAIOutputMessageSchema);
+const GenAIFinishReasonsSchema = z.array(z.string()).nullable();
 
-export const SpanDetail = z.object({
+export const SpanDetailSchema = z.object({
   timestamp: z.coerce.date(),
   spanId: z.string(),
   operationName: z.string(),
   model: z.string(),
   responseModel: z.string(),
   provider: z.string(),
-  status: SpanStatus,
+  status: SpanStatusSchema,
   statusMessage: z.string(),
   durationMs: z.number(),
   inputTokens: z.number().nullable(),
@@ -111,14 +111,14 @@ export const SpanDetail = z.object({
   reasoningEffort: z.string(),
   reasoningEnabled: z.boolean().nullable(),
   reasoningMaxTokens: z.number().nullable(),
-  inputMessages: GenAIInputMessages,
-  outputMessages: GenAIOutputMessages,
-  finishReasons: GenAIFinishReasons,
+  inputMessages: GenAIInputMessagesSchema,
+  outputMessages: GenAIOutputMessagesSchema,
+  finishReasons: GenAIFinishReasonsSchema,
   responseId: z.string(),
   metadata: z.record(z.string(), z.string()),
-  spanAttributes: SpanAttributes,
+  spanAttributes: SpanAttributesSchema,
 });
 
-export type GenAIInputMessages = z.infer<typeof GenAIInputMessages>;
-export type GenAIOutputMessages = z.infer<typeof GenAIOutputMessages>;
-export type GenAIFinishReasons = z.infer<typeof GenAIFinishReasons>;
+export type GenAIInputMessagesSchema = z.infer<typeof GenAIInputMessagesSchema>;
+export type GenAIOutputMessagesSchema = z.infer<typeof GenAIOutputMessagesSchema>;
+export type GenAIFinishReasonsSchema = z.infer<typeof GenAIFinishReasonsSchema>;

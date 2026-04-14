@@ -4,12 +4,12 @@ import { z } from "zod";
 import { slugFromString } from "@hebo/shared-api/utils/slug";
 
 import type { Prisma } from "~api/generated/prisma/client";
-import { branchesModelSchema as branches } from "~api/generated/zod/schemas/variants/pure/branches.pure";
+import { branchesModelSchema } from "~api/generated/zod/schemas/variants/pure/branches.pure";
 import { prisma } from "~api/middlewares/prisma";
 
 import { ModelsSchema } from "./providers/types";
 
-const branchResponse = branches.extend({
+const branchResponseSchema = branchesModelSchema.extend({
   models: ModelsSchema,
 });
 
@@ -28,7 +28,7 @@ export const branchesModule = new Elysia({
       );
     },
     {
-      response: { 200: z.array(branchResponse), 404: z.string() },
+      response: { 200: z.array(branchResponseSchema), 404: z.string() },
     },
   )
   .post(
@@ -54,7 +54,7 @@ export const branchesModule = new Elysia({
         name: z.string(),
         sourceBranchSlug: z.string(),
       }),
-      response: { 201: branchResponse, 404: z.string(), 409: z.string() },
+      response: { 201: branchResponseSchema, 404: z.string(), 409: z.string() },
     },
   )
   .get(
@@ -68,7 +68,7 @@ export const branchesModule = new Elysia({
       );
     },
     {
-      response: { 200: branchResponse, 404: z.string() },
+      response: { 200: branchResponseSchema, 404: z.string() },
     },
   )
   .patch(
@@ -90,7 +90,7 @@ export const branchesModule = new Elysia({
         name: z.string().optional(),
         models: ModelsSchema.optional(),
       }),
-      response: { 200: branchResponse, 404: z.string() },
+      response: { 200: branchResponseSchema, 404: z.string() },
     },
   )
   .delete(
