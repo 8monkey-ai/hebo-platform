@@ -16,7 +16,13 @@ import { createVoyage } from "voyage-ai-provider";
 
 import { getSecret } from "@hebo/shared-api/utils/secret";
 
-import type { ApiKey, Azure, Bedrock, ProviderSlug, Vertex } from "~api/modules/providers/types";
+import type {
+  ApiKeyConfig,
+  AzureConfig,
+  BedrockConfig,
+  ProviderSlug,
+  VertexConfig,
+} from "~api/modules/providers/types";
 
 import { buildWifOptions } from "../utils/aws";
 
@@ -83,7 +89,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
 
   switch (slug) {
     case "bedrock": {
-      const bedrockConfig = config as Bedrock;
+      const bedrockConfig = config as BedrockConfig;
       const region = bedrockConfig.region;
       if (!region) return;
 
@@ -120,12 +126,12 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       }
     }
     case "groq": {
-      const { apiKey } = config as ApiKey;
+      const { apiKey } = config as ApiKeyConfig;
       if (!apiKey) return;
       return withCanonicalIdsForGroq(createGroq({ apiKey }));
     }
     case "vertex": {
-      const vertexConfig = config as Vertex;
+      const vertexConfig = config as VertexConfig;
       const { location, project } = vertexConfig;
 
       switch (vertexConfig.authMode) {
@@ -160,22 +166,22 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       }
     }
     case "voyage": {
-      const { apiKey } = config as ApiKey;
+      const { apiKey } = config as ApiKeyConfig;
       if (!apiKey) return;
       return withCanonicalIdsForVoyage(createVoyage({ apiKey }));
     }
     case "anthropic": {
-      const { apiKey } = config as ApiKey;
+      const { apiKey } = config as ApiKeyConfig;
       if (!apiKey) return;
       return withCanonicalIdsForAnthropic(createAnthropic({ apiKey }));
     }
     case "openai": {
-      const { apiKey } = config as ApiKey;
+      const { apiKey } = config as ApiKeyConfig;
       if (!apiKey) return;
       return withCanonicalIdsForOpenAI(createOpenAI({ apiKey }));
     }
     case "azure": {
-      const { apiKey, resourceName } = config as Azure;
+      const { apiKey, resourceName } = config as AzureConfig;
       if (!apiKey || !resourceName) return;
       return createAzure({ apiKey, resourceName });
     }
