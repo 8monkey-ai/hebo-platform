@@ -44,6 +44,8 @@ export const spansModule = new Elysia({
           params.branchSlug,
           query.from ?? DEFAULT_FROM(),
           query.to ?? DEFAULT_TO(),
+          // FUTURE: remove '!' on page & pageSize
+          // https://github.com/elysiajs/elysia/issues/817
           query.page!,
           query.pageSize!,
           metadata,
