@@ -47,9 +47,8 @@ RUN S6_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "x86_64") &&
 # RDS CA bundle — fetched at build time for reproducibility
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /staged/etc/ssl/certs/rds-bundle.pem
 
-# s6 classic layout (cont-init.d + services.d)
-COPY --chmod=755 infra/docker/s6/cont-init.d/ /staged/cont-init.d/
-COPY --chmod=755 infra/docker/s6/services.d/  /staged/services.d/
+# Stage s6-overlay into a single tree for one-shot copy into runtime
+RUN cp -a /command /package /init /etc/s6-overlay /staged/
 
 ########################  packer  ########################
 FROM scratch AS packer
@@ -74,23 +73,17 @@ COPY --from=builder /repo/apps/mcp/dist              /app/mcp/
 COPY --from=builder /repo/apps/console/build/client  /app/console/build/client
 COPY --from=builder /repo/apps/console/serve.ts      /app/console/serve.ts
 
-# s6 scripts (classic layout)
-COPY --from=tools /staged/cont-init.d/ /etc/cont-init.d/
-COPY --from=tools /staged/services.d/  /etc/services.d/
-
-# RDS CA bundle
-COPY --from=tools /staged/etc/ssl/certs/rds-bundle.pem /etc/ssl/certs/rds-bundle.pem
+# s6 scripts (classic layout — chmod applied directly, no tools detour)
+COPY --chmod=755 infra/docker/s6/cont-init.d/ /etc/cont-init.d/
+COPY --chmod=755 infra/docker/s6/services.d/  /etc/services.d/
 
 ########################  runtime  ########################
 FROM oven/bun:${BUN_VERSION}-slim
 
-# s6-overlay
-COPY --from=tools /command/ /command/
-COPY --from=tools /package/ /package/
-COPY --from=tools /etc/s6-overlay/ /etc/s6-overlay/
-COPY --from=tools /init /init
+# s6-overlay + RDS cert (single copy from staged tree)
+COPY --from=tools /staged/ /
 
-# App tree + s6 scripts + RDS cert (assembled in packer)
+# App tree + s6 scripts (assembled in packer)
 COPY --from=packer / /
 
 WORKDIR /app
