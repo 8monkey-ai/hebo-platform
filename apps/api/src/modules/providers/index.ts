@@ -4,7 +4,13 @@ import { z } from "zod";
 import type { Prisma } from "~api/generated/prisma/client";
 import { prisma } from "~api/middlewares/prisma";
 
-import { type Models, Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./types";
+import {
+  type Models,
+  ProviderSchema,
+  ProviderConfigSchema,
+  ProviderSlugSchema,
+  supportedProviders,
+} from "./types";
 
 export const providersModule = new Elysia({
   prefix: "/providers",
@@ -31,7 +37,7 @@ export const providersModule = new Elysia({
       query: z.object({
         configured: z.coerce.boolean().default(false).optional(),
       }),
-      response: { 200: z.array(Provider) },
+      response: { 200: z.array(ProviderSchema) },
     },
   )
   .put(
@@ -56,9 +62,9 @@ export const providersModule = new Elysia({
       return status(201, providerConfig.value);
     },
     {
-      body: ProviderConfig,
-      params: z.object({ slug: ProviderSlug }),
-      response: { 201: ProviderConfig },
+      body: ProviderConfigSchema,
+      params: z.object({ slug: ProviderSlugSchema }),
+      response: { 201: ProviderConfigSchema },
     },
   )
   .delete(
@@ -101,7 +107,7 @@ export const providersModule = new Elysia({
       return status(204);
     },
     {
-      params: z.object({ slug: ProviderSlug }),
+      params: z.object({ slug: ProviderSlugSchema }),
       response: { 204: z.void(), 404: z.string() },
     },
   );

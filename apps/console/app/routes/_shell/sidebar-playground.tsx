@@ -9,7 +9,9 @@ type Agent = {
 
 type Branch = {
   agent_slug: string;
-  models?: unknown[];
+  models?: Array<{
+    alias: string;
+  }>;
   slug: string;
 };
 
@@ -20,8 +22,7 @@ export function PlaygroundSidebar({
   activeAgent?: Agent;
   activeBranch?: Branch;
 }) {
-  const modelsConfig = (activeBranch?.models ?? []).map((m) => {
-    const model = m as { alias: string };
+  const modelsConfig = (activeBranch?.models ?? []).map((model) => {
     return {
       alias: `${activeBranch?.agent_slug}/${activeBranch?.slug}/${model.alias}`,
       endpoint: {

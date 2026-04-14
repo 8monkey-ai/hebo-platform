@@ -10,8 +10,8 @@ export const TraceListQuery = z.object({
   status: z.union([z.literal("ok"), z.literal("error")]).optional(),
   operation: z.union([z.literal("chat"), z.literal("embeddings")]).optional(),
   ...TraceTimeRangeQuery,
-  page: z.coerce.number().int().min(1).optional(),
-  pageSize: z.coerce.number().int().min(1).max(200).optional(),
+  page: z.coerce.number().int().min(1).default(1).optional(),
+  pageSize: z.coerce.number().int().min(1).max(200).default(50).optional(),
 });
 
 const SpanStatus = z.union([z.literal("ok"), z.literal("error"), z.literal("unknown")]);
@@ -44,9 +44,7 @@ const GenericPart = z.object({ type: z.string() }).loose();
 
 const TextPart = z.object({ type: z.literal("text"), content: z.string() }).loose();
 
-const ReasoningPart = z
-  .object({ type: z.literal("reasoning"), content: z.string() })
-  .loose();
+const ReasoningPart = z.object({ type: z.literal("reasoning"), content: z.string() }).loose();
 
 const ToolCallPart = z
   .object({

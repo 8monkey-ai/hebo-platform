@@ -2,29 +2,54 @@
   "mode": "custom",
   "zodImportTarget": "v4",
   "dateTimeStrategy": "date",
+  "emit": {
+    "objects": false,
+    "crud": false
+  },
+  "globalExclusions": {
+    "pure": ["id", "deleted_by", "deleted_at", "organization_id"],
+    "input": [
+      "id",
+      "created_by",
+      "created_at",
+      "updated_by",
+      "updated_at",
+      "deleted_by",
+      "deleted_at",
+      "organization_id"
+    ]
+  },
   "variants": {
     "pure": {
-      "enabled": true,
-      "excludeFields": ["id", "deleted_by", "deleted_at", "organization_id", "agent", "branches"]
+      "enabled": true
     },
     "input": {
-      "enabled": true,
-      "excludeFields": [
-        "id",
-        "slug",
-        "agent_slug",
-        "created_by",
-        "created_at",
-        "updated_by",
-        "updated_at",
-        "deleted_by",
-        "deleted_at",
-        "organization_id",
-        "team_id"
-      ]
+      "enabled": true
     },
     "result": {
       "enabled": false
+    }
+  },
+  "models": {
+    "agents": {
+      "variants": {
+        "pure": {
+          "excludeFields": ["branches"]
+        },
+        "input": {
+          "excludeFields": ["slug", "branches", "team_id"]
+        }
+      }
+    },
+    "branches": {
+      "variants": {
+        "pure": {
+          "excludeFields": ["agent"]
+        },
+        "input": {
+          "excludeFields": ["slug", "agent", "agent_slug"]
+        }
+      }
     }
   }
 }

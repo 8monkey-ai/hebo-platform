@@ -4,12 +4,10 @@ import { z } from "zod";
 import { slugFromString } from "@hebo/shared-api/utils/slug";
 
 import type { Prisma } from "~api/generated/prisma/client";
-import { branchesModelSchema } from "~api/generated/zod/schemas/variants/pure/branches.pure";
+import { branchesModelSchema as branches } from "~api/generated/zod/schemas/variants/pure/branches.pure";
 import { prisma } from "~api/middlewares/prisma";
 
-import { Models as ModelsSchema } from "./providers/types";
-
-const branches = branchesModelSchema;
+import { ModelsSchema } from "./providers/types";
 
 export const branchesModule = new Elysia({
   prefix: "/agents/:agentSlug/branches",

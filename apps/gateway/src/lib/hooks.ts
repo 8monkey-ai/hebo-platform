@@ -13,7 +13,7 @@ import {
 import { LRUCache } from "lru-cache";
 
 import type { createPrismaClient } from "~api/db/prisma";
-import type { Models, ProviderSlug } from "~api/modules/providers/types";
+import type { Models, ProviderSlugSchema } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "../utils/aws";
 import { createProvider } from "./provider";
@@ -52,7 +52,11 @@ export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
 
   ctx.otel["gen_ai.request.model"] = modelId;
 
-  if ("metadata" in ctx.body && typeof ctx.body.metadata === "object" && ctx.body.metadata !== null) {
+  if (
+    "metadata" in ctx.body &&
+    typeof ctx.body.metadata === "object" &&
+    ctx.body.metadata !== null
+  ) {
     const metadata = ctx.body.metadata as Record<string, unknown>;
     for (const key in metadata) {
       ctx.otel[`gen_ai.request.metadata.${key}`] = String(metadata[key]);
@@ -124,7 +128,7 @@ async function resolveCustomProvider(
   prismaClient: PrismaClient,
   organizationId: string,
   modelId: string,
-  customProviderSlug: ProviderSlug,
+  customProviderSlug: ProviderSlugSchema,
 ): Promise<ProviderV3 | undefined> {
   const configCacheKey = `${organizationId}:${customProviderSlug}:${modelId}`;
   const cachedConfigHash = configCache.get(configCacheKey);
@@ -172,7 +176,7 @@ export async function selectProviderWithByokFallback(ctx: ResolveProviderHookCon
   }
 
   const { customProviderSlug, free, requiresByok } = state.modelConfig as {
-    customProviderSlug?: ProviderSlug;
+    customProviderSlug?: ProviderSlugSchema;
     free?: boolean;
     requiresByok?: boolean;
   };

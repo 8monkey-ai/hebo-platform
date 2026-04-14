@@ -27,12 +27,12 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@hebo/shared-ui/compon
 import { Textarea } from "@hebo/shared-ui/components/Textarea";
 
 import {
-  BedrockIamRoleConfig,
-  BedrockAccessKeyConfig,
-  VertexIdentityFederationConfig,
-  VertexServiceAccountConfig,
-  AzureProviderConfig,
-  ApiKeyProviderConfig,
+  BedrockIamRoleSchema,
+  BedrockAccessKeySchema,
+  VertexIdentityFederationSchema,
+  VertexServiceAccountSchema,
+  AzureProviderSchema,
+  ApiKeyProviderSchema,
 } from "~api/modules/providers/types";
 import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
@@ -42,22 +42,22 @@ import type { clientAction } from "./route";
 export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
   z.object({
     slug: z.enum(["bedrock"]),
-    config: z.discriminatedUnion("authMode", [BedrockIamRoleConfig, BedrockAccessKeyConfig]),
+    config: z.discriminatedUnion("authMode", [BedrockIamRoleSchema, BedrockAccessKeySchema]),
   }),
   z.object({
     slug: z.enum(["vertex"]),
     config: z.discriminatedUnion("authMode", [
-      VertexIdentityFederationConfig,
-      VertexServiceAccountConfig,
+      VertexIdentityFederationSchema,
+      VertexServiceAccountSchema,
     ]),
   }),
   z.object({
     slug: z.enum(["azure"]),
-    config: z.discriminatedUnion("authMode", [AzureProviderConfig]),
+    config: z.discriminatedUnion("authMode", [AzureProviderSchema]),
   }),
   z.object({
     slug: z.enum(["voyage", "groq", "anthropic", "openai"]),
-    config: z.discriminatedUnion("authMode", [ApiKeyProviderConfig]),
+    config: z.discriminatedUnion("authMode", [ApiKeyProviderSchema]),
   }),
 ]);
 
