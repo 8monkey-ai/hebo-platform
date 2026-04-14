@@ -4,24 +4,22 @@ import { createProvider } from "./provider";
 
 describe("createProvider", () => {
   describe("bedrock", () => {
-    it("returns undefined when region is missing", () => {
-      expect(
-        createProvider("bedrock", {
-          authMode: "iam-role",
-          bedrockRoleArn: "arn:aws:iam::123:role/test",
-          region: "",
-        }),
-      ).toBeUndefined();
+    it("returns a provider when region is missing (uses default)", () => {
+      const provider = createProvider("bedrock", {
+        authMode: "iam-role",
+        bedrockRoleArn: "arn:aws:iam::123:role/test",
+        region: "",
+      });
+      expect(provider).toBeDefined();
     });
 
-    it("returns undefined when IAM role ARN is missing", () => {
-      expect(
-        createProvider("bedrock", {
-          authMode: "iam-role",
-          bedrockRoleArn: "",
-          region: "us-east-1",
-        }),
-      ).toBeUndefined();
+    it("returns a provider when IAM role ARN is missing", () => {
+      const provider = createProvider("bedrock", {
+        authMode: "iam-role",
+        bedrockRoleArn: "",
+        region: "us-east-1",
+      });
+      expect(provider).toBeDefined();
     });
 
     it("returns a provider for valid IAM role config", () => {
@@ -33,15 +31,14 @@ describe("createProvider", () => {
       expect(provider).toBeDefined();
     });
 
-    it("returns undefined when static credentials are incomplete", () => {
-      expect(
-        createProvider("bedrock", {
-          authMode: "access-key",
-          accessKeyId: "AKIA1234",
-          secretAccessKey: "",
-          region: "us-east-1",
-        }),
-      ).toBeUndefined();
+    it("returns a provider when static credentials are incomplete", () => {
+      const provider = createProvider("bedrock", {
+        authMode: "access-key",
+        accessKeyId: "AKIA1234",
+        secretAccessKey: "",
+        region: "us-east-1",
+      });
+      expect(provider).toBeDefined();
     });
 
     it("returns a provider for valid access-key credentials", () => {
@@ -54,45 +51,44 @@ describe("createProvider", () => {
       expect(provider).toBeDefined();
     });
 
-    it("returns undefined when authMode is missing", () => {
+    it("returns a provider when authMode is missing (fallback)", () => {
       const provider = createProvider("bedrock", {
         bedrockRoleArn: "arn:aws:iam::123456789012:role/test-role",
         region: "us-east-1",
       });
-      expect(provider).toBeUndefined();
+      expect(provider).toBeDefined();
     });
 
-    it("returns undefined when authMode is invalid", () => {
+    it("returns a provider when authMode is invalid (fallback)", () => {
       const provider = createProvider("bedrock", {
         authMode: "api-key",
         apiKey: "test-key-123",
         region: "us-east-1",
       });
-      expect(provider).toBeUndefined();
+      expect(provider).toBeDefined();
     });
   });
 
   describe("vertex", () => {
-    it("returns undefined when authMode is invalid", () => {
+    it("returns a provider when authMode is invalid (fallback)", () => {
       const provider = createProvider("vertex", {
         authMode: "api-key",
         apiKey: "test-key-123",
         location: "us-central1",
         project: "my-project",
       });
-      expect(provider).toBeUndefined();
+      expect(provider).toBeDefined();
     });
 
-    it("returns undefined when location is missing", () => {
-      expect(
-        createProvider("vertex", {
-          authMode: "identity-federation",
-          serviceAccountEmail: "sa@proj.iam.gserviceaccount.com",
-          audience: "aud",
-          location: "",
-          project: "proj",
-        }),
-      ).toBeUndefined();
+    it("returns a provider when location is missing (uses default)", () => {
+      const provider = createProvider("vertex", {
+        authMode: "identity-federation",
+        serviceAccountEmail: "sa@proj.iam.gserviceaccount.com",
+        audience: "aud",
+        location: "",
+        project: "proj",
+      });
+      expect(provider).toBeDefined();
     });
 
     it("returns a provider for valid identity-federation config", () => {
@@ -107,7 +103,7 @@ describe("createProvider", () => {
       expect(provider).toBeDefined();
     });
 
-    it("returns undefined when service account credentials are missing", () => {
+    it("returns a provider when service account credentials are missing", () => {
       expect(
         createProvider("vertex", {
           authMode: "service-account",
@@ -116,7 +112,7 @@ describe("createProvider", () => {
           location: "us-central1",
           project: "proj",
         }),
-      ).toBeUndefined();
+      ).toBeDefined();
       expect(
         createProvider("vertex", {
           authMode: "service-account",
@@ -125,7 +121,7 @@ describe("createProvider", () => {
           location: "us-central1",
           project: "proj",
         }),
-      ).toBeUndefined();
+      ).toBeDefined();
     });
 
     it("returns a provider for valid service account config", () => {
@@ -139,7 +135,7 @@ describe("createProvider", () => {
       expect(provider).toBeDefined();
     });
 
-    it("returns undefined when authMode is missing", () => {
+    it("returns a provider when authMode is missing (fallback)", () => {
       const provider = createProvider("vertex", {
         serviceAccountEmail: "sa@proj.iam.gserviceaccount.com",
         audience:
@@ -147,29 +143,27 @@ describe("createProvider", () => {
         location: "us-central1",
         project: "my-project",
       });
-      expect(provider).toBeUndefined();
+      expect(provider).toBeDefined();
     });
   });
 
   describe("azure", () => {
-    it("returns undefined when apiKey is missing", () => {
-      expect(
-        createProvider("azure", {
-          authMode: "resource-api-key",
-          apiKey: "",
-          resourceName: "my-resource",
-        }),
-      ).toBeUndefined();
+    it("returns a provider when apiKey is missing", () => {
+      const provider = createProvider("azure", {
+        authMode: "resource-api-key",
+        apiKey: "",
+        resourceName: "my-resource",
+      });
+      expect(provider).toBeDefined();
     });
 
-    it("returns undefined when resourceName is missing", () => {
-      expect(
-        createProvider("azure", {
-          authMode: "resource-api-key",
-          apiKey: "key123",
-          resourceName: "",
-        }),
-      ).toBeUndefined();
+    it("returns a provider when resourceName is missing", () => {
+      const provider = createProvider("azure", {
+        authMode: "resource-api-key",
+        apiKey: "key123",
+        resourceName: "",
+      });
+      expect(provider).toBeDefined();
     });
 
     it("returns a provider for valid Azure config", () => {
@@ -184,8 +178,8 @@ describe("createProvider", () => {
 
   describe("api key providers", () => {
     for (const slug of ["anthropic", "openai", "groq", "voyage"] as const) {
-      it(`returns undefined for ${slug} when apiKey is missing`, () => {
-        expect(createProvider(slug, { authMode: "api-key", apiKey: "" })).toBeUndefined();
+      it(`returns a provider for ${slug} when apiKey is missing`, () => {
+        expect(createProvider(slug, { authMode: "api-key", apiKey: "" })).toBeDefined();
       });
 
       it(`returns a provider for ${slug} with valid apiKey`, () => {
