@@ -48,12 +48,12 @@ export const VertexServiceAccountSchema = z.object({
   project: z.string().trim().min(1),
 });
 
-export const ApiKeyProviderSchema = z.object({
+export const ApiKeySchema = z.object({
   authMode: z.literal("api-key"),
   apiKey: z.string().trim().min(1).meta({ redact: true }),
 });
 
-export const AzureProviderSchema = z.object({
+export const AzureSchema = z.object({
   authMode: z.literal("resource-api-key"),
   resourceName: z.string().trim().min(1),
   apiKey: z.string().trim().min(1).meta({ redact: true }),
@@ -62,8 +62,8 @@ export const AzureProviderSchema = z.object({
 export const ProviderConfigSchema = z.union([
   z.union([BedrockIamRoleSchema, BedrockAccessKeySchema]),
   z.union([VertexIdentityFederationSchema, VertexServiceAccountSchema]),
-  ApiKeyProviderSchema,
-  AzureProviderSchema,
+  ApiKeySchema,
+  AzureSchema,
 ]);
 
 export const ProviderSchema = z.object({
@@ -94,10 +94,10 @@ export type BedrockIamRoleSchema = z.infer<typeof BedrockIamRoleSchema>;
 export type BedrockAccessKeySchema = z.infer<typeof BedrockAccessKeySchema>;
 export type VertexIdentityFederationSchema = z.infer<typeof VertexIdentityFederationSchema>;
 export type VertexServiceAccountSchema = z.infer<typeof VertexServiceAccountSchema>;
-export type ApiKeyProviderSchema = z.infer<typeof ApiKeyProviderSchema>;
-export type AzureProviderSchema = z.infer<typeof AzureProviderSchema>;
-export type BedrockProviderConfig = BedrockIamRoleSchema | BedrockAccessKeySchema;
-export type VertexProviderConfig = VertexIdentityFederationSchema | VertexServiceAccountSchema;
+export type ApiKeySchema = z.infer<typeof ApiKeySchema>;
+export type AzureSchema = z.infer<typeof AzureSchema>;
+export type BedrockSchema = BedrockIamRoleSchema | BedrockAccessKeySchema;
+export type VertexSchema = VertexIdentityFederationSchema | VertexServiceAccountSchema;
 export type ProviderSchema = z.infer<typeof ProviderSchema>;
 export type ProviderConfigSchema = z.infer<typeof ProviderConfigSchema>;
 export type ProviderSlugSchema = z.infer<typeof ProviderSlugSchema>;

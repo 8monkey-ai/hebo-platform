@@ -31,8 +31,8 @@ import {
   BedrockAccessKeySchema,
   VertexIdentityFederationSchema,
   VertexServiceAccountSchema,
-  AzureProviderSchema,
-  ApiKeyProviderSchema,
+  AzureSchema,
+  ApiKeySchema,
 } from "~api/modules/providers/types";
 import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
@@ -53,11 +53,11 @@ export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
   }),
   z.object({
     slug: z.enum(["azure"]),
-    config: z.discriminatedUnion("authMode", [AzureProviderSchema]),
+    config: z.discriminatedUnion("authMode", [AzureSchema]),
   }),
   z.object({
     slug: z.enum(["voyage", "groq", "anthropic", "openai"]),
-    config: z.discriminatedUnion("authMode", [ApiKeyProviderSchema]),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]),
   }),
 ]);
 

@@ -22,16 +22,14 @@ export function PlaygroundSidebar({
   activeAgent?: Agent;
   activeBranch?: Branch;
 }) {
-  const modelsConfig = (activeBranch?.models ?? []).map((model) => {
-    return {
-      alias: `${activeBranch?.agent_slug}/${activeBranch?.slug}/${model.alias}`,
-      endpoint: {
-        baseUrl: new URL("v1", gatewayUrl).toString(),
-        fetch: kyFetch as unknown as typeof fetch,
-        credentials: "include" as const,
-      },
-    };
-  });
+  const modelsConfig = (activeBranch?.models ?? []).map((model) => ({
+    alias: `${activeBranch?.agent_slug}/${activeBranch?.slug}/${model.alias}`,
+    endpoint: {
+      baseUrl: new URL("v1", gatewayUrl).toString(),
+      fetch: kyFetch as unknown as typeof fetch,
+      credentials: "include" as const,
+    },
+  }));
 
   return (
     <Chat
