@@ -13,7 +13,7 @@ import {
 import { LRUCache } from "lru-cache";
 
 import type { createPrismaClient } from "~api/db/prisma";
-import type { Models, ProviderSlugSchema } from "~api/modules/providers/types";
+import type { Models, ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "../utils/aws";
 import { createProvider } from "./provider";
@@ -128,7 +128,7 @@ async function resolveCustomProvider(
   prismaClient: PrismaClient,
   organizationId: string,
   modelId: string,
-  customProviderSlug: ProviderSlugSchema,
+  customProviderSlug: ProviderSlug,
 ): Promise<ProviderV3 | undefined> {
   const configCacheKey = `${organizationId}:${customProviderSlug}:${modelId}`;
   const cachedConfigHash = configCache.get(configCacheKey);
@@ -176,7 +176,7 @@ export async function selectProviderWithByokFallback(ctx: ResolveProviderHookCon
   }
 
   const { customProviderSlug, free, requiresByok } = state.modelConfig as {
-    customProviderSlug?: ProviderSlugSchema;
+    customProviderSlug?: ProviderSlug;
     free?: boolean;
     requiresByok?: boolean;
   };

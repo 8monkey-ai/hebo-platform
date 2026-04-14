@@ -16,13 +16,7 @@ import { createVoyage } from "voyage-ai-provider";
 
 import { getSecret } from "@hebo/shared-api/utils/secret";
 
-import type {
-  ApiKeySchema,
-  AzureSchema,
-  BedrockSchema,
-  ProviderSlugSchema,
-  VertexSchema,
-} from "~api/modules/providers/types";
+import type { ApiKey, Azure, Bedrock, ProviderSlug, Vertex } from "~api/modules/providers/types";
 
 import { buildWifOptions } from "../utils/aws";
 
@@ -84,12 +78,12 @@ export async function loadProviderSecrets() {
   };
 }
 
-export function createProvider(slug: ProviderSlugSchema, config: unknown): ProviderV3 | undefined {
+export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 | undefined {
   if (config == null || typeof config !== "object") return;
 
   switch (slug) {
     case "bedrock": {
-      const bedrockConfig = config as BedrockSchema;
+      const bedrockConfig = config as Bedrock;
       const region = bedrockConfig.region;
       if (!region) return;
 
@@ -126,12 +120,12 @@ export function createProvider(slug: ProviderSlugSchema, config: unknown): Provi
       }
     }
     case "groq": {
-      const { apiKey } = config as ApiKeySchema;
+      const { apiKey } = config as ApiKey;
       if (!apiKey) return;
       return withCanonicalIdsForGroq(createGroq({ apiKey }));
     }
     case "vertex": {
-      const vertexConfig = config as VertexSchema;
+      const vertexConfig = config as Vertex;
       const { location, project } = vertexConfig;
 
       switch (vertexConfig.authMode) {
@@ -166,22 +160,22 @@ export function createProvider(slug: ProviderSlugSchema, config: unknown): Provi
       }
     }
     case "voyage": {
-      const { apiKey } = config as ApiKeySchema;
+      const { apiKey } = config as ApiKey;
       if (!apiKey) return;
       return withCanonicalIdsForVoyage(createVoyage({ apiKey }));
     }
     case "anthropic": {
-      const { apiKey } = config as ApiKeySchema;
+      const { apiKey } = config as ApiKey;
       if (!apiKey) return;
       return withCanonicalIdsForAnthropic(createAnthropic({ apiKey }));
     }
     case "openai": {
-      const { apiKey } = config as ApiKeySchema;
+      const { apiKey } = config as ApiKey;
       if (!apiKey) return;
       return withCanonicalIdsForOpenAI(createOpenAI({ apiKey }));
     }
     case "azure": {
-      const { apiKey, resourceName } = config as AzureSchema;
+      const { apiKey, resourceName } = config as Azure;
       if (!apiKey || !resourceName) return;
       return createAzure({ apiKey, resourceName });
     }
