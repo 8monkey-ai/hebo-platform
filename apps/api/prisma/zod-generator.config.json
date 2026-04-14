@@ -10,13 +10,15 @@
     "pure": ["id", "deleted_by", "deleted_at", "organization_id"],
     "input": [
       "id",
+      "slug",
       "created_by",
       "created_at",
       "updated_by",
       "updated_at",
       "deleted_by",
       "deleted_at",
-      "organization_id"
+      "organization_id",
+      "team_id"
     ]
   },
   "variants": {
@@ -37,7 +39,7 @@
           "excludeFields": ["branches"]
         },
         "input": {
-          "excludeFields": ["slug", "branches", "team_id"]
+          "excludeFields": ["branches"]
         }
       }
     },
@@ -47,7 +49,7 @@
           "excludeFields": ["agent"]
         },
         "input": {
-          "excludeFields": ["slug", "agent", "agent_slug"]
+          "excludeFields": ["agent", "agent_slug"]
         }
       }
     }
