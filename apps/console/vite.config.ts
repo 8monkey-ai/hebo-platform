@@ -10,11 +10,14 @@ export default defineConfig(({ command }) => {
   return {
     resolve: {
       tsconfigPaths: true,
-      // React Router's build compiles + links a server bundle before discarding
-      // it (even with ssr:false). In a pure-Bun environment (e.g. oven/bun Docker
-      // image), react-dom/server resolves to server.bun.js which uses Web Streams
-      // and does not export renderToPipeableStream — breaking rolldown's link step.
-      // Alias to the Node entrypoint during builds only; dev uses Vite's own server.
+      // FUTURE: Remove once react-dom ships renderToPipeableStream in server.bun.js
+      // (fixed in canary, pending stable 19.3.0).
+      // https://github.com/remix-run/react-router/issues/12568
+      // https://github.com/facebook/react/pull/34193
+      //
+      // In a pure-Bun environment (e.g. oven/bun Docker image), react-dom/server
+      // resolves to server.bun.js which doesn't export renderToPipeableStream —
+      // breaking rolldown's link step during React Router's server bundle build.
       ...(command === "build" && {
         alias: { "react-dom/server": "react-dom/server.node" },
       }),
