@@ -23,8 +23,6 @@ services:
     environment:
       POSTGRES_URL: ${POSTGRES_URL:-postgresql://postgres:hebo@postgres:5432/hebo}
       GREPTIME_HOST: ${GREPTIME_HOST:-greptimedb}
-    volumes:
-      - hebo-secrets:/data/secrets
     depends_on:
       postgres:
         condition: service_healthy
@@ -66,6 +64,5 @@ services:
       retries: 5
 
 volumes:
-  hebo-secrets:
   postgres-data:
   greptimedb-data:

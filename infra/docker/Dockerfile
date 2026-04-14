@@ -53,8 +53,7 @@ RUN S6_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "x86_64") &&
 # Pre-chmod s6 scripts (distroless has no RUN)
 COPY infra/docker/s6/services/ /staged/s6-rc.d/
 COPY infra/docker/s6/scripts/  /staged/scripts/
-RUN chmod +x /staged/scripts/*.sh /staged/s6-rc.d/svc-*/run && \
-    mkdir -p /staged/data/secrets
+RUN chmod +x /staged/scripts/*.sh /staged/s6-rc.d/svc-*/run
 
 ########################  runtime — distroless  ########################
 FROM gcr.io/distroless/cc-debian12 AS runtime
@@ -104,10 +103,6 @@ COPY --from=builder /repo/apps/console/serve.ts        /app/console/serve.ts
 # s6-overlay scripts + services (pre-chmod'd in tools stage)
 COPY --from=tools /staged/s6-rc.d/ /etc/s6-overlay/s6-rc.d/
 COPY --from=tools /staged/scripts/ /etc/s6-overlay/scripts/
-
-# Persistent data directory (used by standalone mode for AUTH_SECRET)
-COPY --from=tools /staged/data/ /data/
-ENV HEBO_DATA_DIR=/data
 
 ENV HEBO_MODE=standalone \
     S6_KEEP_ENV=1 \
