@@ -11,18 +11,10 @@ services:
   hebo:
     image: 8monkey/hebo-platform:${HEBO_VERSION:-latest}
     restart: unless-stopped
-    ports:
-      - "8520:8520"
-      - "8521:8521"
-      - "8522:8522"
-      - "8523:8523"
-      - "8524:8524"
+    network_mode: host
     env_file:
       - path: .env
         required: false
-    environment:
-      POSTGRES_URL: ${POSTGRES_URL:-postgresql://postgres:hebo@postgres:5432/hebo}
-      GREPTIME_HOST: ${GREPTIME_HOST:-greptimedb}
     depends_on:
       postgres:
         condition: service_healthy
@@ -34,7 +26,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hebo}
+      POSTGRES_PASSWORD: password
       POSTGRES_DB: hebo
     ports:
       - "127.0.0.1:5432:5432"
@@ -49,6 +41,11 @@ services:
   greptimedb:
     image: greptime/greptimedb:v1.0.0
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:4000:4000"
+      - "127.0.0.1:4001:4001"
+      - "127.0.0.1:4002:4002"
+      - "127.0.0.1:4003:4003"
     volumes:
       - greptimedb-data:/greptimedb_data
     command: >-

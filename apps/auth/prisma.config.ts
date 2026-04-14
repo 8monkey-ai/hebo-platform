@@ -6,8 +6,6 @@ export default {
     path: "prisma/migrations",
   },
   datasource: {
-    url:
-      process.env.DATABASE_URL ??
-      (await import("@hebo/shared-api/db/postgres")).getConnectionString("auth"),
+    url: (await import("@hebo/shared-api/db/postgres")).getConnectionString("auth"),
   },
 } satisfies PrismaConfig;

@@ -14,17 +14,10 @@ if [ "$HEBO_MODE" != "standalone" ]; then
 fi
 
 # ── Run Prisma migrations ──
-if [ -z "${POSTGRES_URL}" ]; then
-  echo "[init] ERROR: POSTGRES_URL is required for migrations" >&2
-  exit 1
-fi
-
 echo "[init] Running API schema migrations"
-DATABASE_URL="${POSTGRES_URL}?schema=api" \
-  bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
+bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
 
 echo "[init] Running Auth schema migrations"
-DATABASE_URL="${POSTGRES_URL}?schema=auth" \
-  bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
+bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
 
 echo "[init] Bootstrap complete"
