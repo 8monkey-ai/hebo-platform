@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1.7-labs
 
 # ---------------------------------------------------------------------------
 #  Hebo — single image, multi-mode (s6-overlay)
@@ -48,7 +48,7 @@ RUN S6_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "x86_64") &&
 ADD https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem /staged/etc/ssl/certs/rds-bundle.pem
 
 # Stage s6-overlay into a single tree for one-shot copy into runtime
-RUN cp -a /command /package /init /etc/s6-overlay /staged/
+RUN cp -a --parents /command /package /init /etc/s6-overlay /staged/
 
 ########################  packer  ########################
 FROM scratch AS packer
