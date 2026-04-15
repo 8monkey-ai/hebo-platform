@@ -9,7 +9,8 @@ export function isRootPathUrl(url: string): boolean {
   return c === 63 || c === 35;
 }
 
-export function getRootDomain(baseUrl: string) {
+export function getRootDomain(baseUrl: string | undefined) {
+  if (!baseUrl) return;
   const { hostname } = new URL(baseUrl);
   if (hostname === "localhost") return;
 

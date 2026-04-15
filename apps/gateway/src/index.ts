@@ -28,7 +28,7 @@ import { gatewayErrors } from "./middlewares/errors";
 
 const PORT = Number(process.env.PORT ?? 8522);
 const WORKERS = Number(process.env.WORKERS);
-const GATEWAY_URL = process.env.GATEWAY_URL ?? `http://localhost:${PORT}`;
+const PUBLIC_URL = process.env.PUBLIC_URL ?? `http://localhost:${PORT}`;
 
 export const createGateway = () =>
   new Elysia()
@@ -39,7 +39,7 @@ export const createGateway = () =>
     .use(cors(CORS_CONFIG))
     .use(
       openapi(
-        createOpenapiConfig("Hebo Gateway", "OpenAI-compatible AI Gateway", GATEWAY_URL, "0.1.0"),
+        createOpenapiConfig("Hebo Gateway", "OpenAI-compatible AI Gateway", PUBLIC_URL, "0.1.0"),
       ),
     )
     .use(gatewayErrors)

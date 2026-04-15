@@ -1,7 +1,9 @@
 import { parseLogSeverity } from "./utils/otel-pino";
 import { getSecret } from "./utils/secret";
+import { getRootDomain } from "./utils/url";
 
 export const AUTH_URL = process.env.AUTH_URL ?? "http://localhost:8523";
+export const ROOT_DOMAIN = getRootDomain(process.env.PUBLIC_URL);
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
 export const LOG_LEVEL = process.env.LOG_LEVEL ?? (IS_PRODUCTION ? "info" : "debug");
 export const LOG_SEVERITY = parseLogSeverity(LOG_LEVEL);

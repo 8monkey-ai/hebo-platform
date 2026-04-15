@@ -3,8 +3,8 @@
 
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
-import { disableInitProcess, domain } from "./helpers";
 import { authSecrets, isProduction, greptimeHost } from "./env";
+import { disableInitProcess, domain } from "./helpers";
 
 const authPort = "8523";
 
@@ -22,7 +22,7 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
   },
   environment: {
     HEBO_MODE: "auth",
-    AUTH_URL: `https://${domain("auth")}`,
+    PUBLIC_URL: `https://${domain("auth")}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: authPort,
   },

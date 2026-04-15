@@ -4,9 +4,9 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase from "./db";
-import { disableInitProcess, albUrl, domain } from "./helpers";
 import { authSecret, isProduction, llmSecrets, greptimeHost } from "./env";
 import heboGreptime from "./greptime";
+import { disableInitProcess, albUrl, domain } from "./helpers";
 
 const gatewayPort = "8522";
 
@@ -47,7 +47,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   environment: {
     HEBO_MODE: "gateway",
     AUTH_URL: albUrl(heboAuth),
-    GATEWAY_URL: `https://${domain("gateway")}`,
+    PUBLIC_URL: `https://${domain("gateway")}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: gatewayPort,
     ...(heboGreptime ? { GREPTIME_HOST: heboGreptime.service } : {}),
