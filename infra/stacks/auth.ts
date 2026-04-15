@@ -3,6 +3,7 @@
 
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
+import { disableInitProcess } from "./ecs";
 import { authSecrets, isProduction, greptimeHost, normalizedStage } from "./env";
 
 const authDomain = isProduction ? "auth.hebo.ai" : `auth.${normalizedStage}.hebo.ai`;
@@ -16,13 +17,12 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
   link: [heboDatabase, ...authSecrets, greptimeHost],
   image: {
     context: ".",
-    dockerfile: "infra/docker/Dockerfile.auth",
+    dockerfile: "infra/docker/Dockerfile",
     tags: [authDomain],
-    args: {
-      NODE_ENV: isProduction ? "production" : "development",
-    },
+    args: { NODE_ENV: isProduction ? "production" : "development" },
   },
   environment: {
+    HEBO_MODE: "auth",
     AUTH_URL: `https://${authDomain}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: authPort,
@@ -35,6 +35,7 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
     ],
   },
   transform: {
+    taskDefinition: disableInitProcess,
     listener: (args) => {
       if (args.protocol === "HTTPS") {
         args.sslPolicy = "ELBSecurityPolicy-TLS13-1-2-2021-06";

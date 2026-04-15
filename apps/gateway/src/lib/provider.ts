@@ -43,20 +43,20 @@ export async function loadProviderSecrets() {
     VERTEX_SERVICE_ACCOUNT_EMAIL,
     VOYAGE_API_KEY,
   ] = await Promise.all([
-    getSecret("AnthropicApiKey"),
-    getSecret("BedrockRegion"),
-    getSecret("BedrockRoleArn"),
-    getSecret("EnforceByok").then((v) => v === "true"),
-    getSecret("FoundryApiKey"),
-    getSecret("FoundryResourceName"),
-    getSecret("FreeModelIds"),
-    getSecret("GroqApiKey"),
-    getSecret("OpenAiApiKey"),
-    getSecret("VertexAwsProviderAudience"),
-    getSecret("VertexLocation"),
-    getSecret("VertexProject"),
-    getSecret("VertexServiceAccountEmail"),
-    getSecret("VoyageApiKey"),
+    getSecret("ANTHROPIC_API_KEY"),
+    getSecret("BEDROCK_REGION"),
+    getSecret("BEDROCK_ROLE_ARN"),
+    getSecret("ENFORCE_BYOK").then((v) => v === "true"),
+    getSecret("FOUNDRY_API_KEY"),
+    getSecret("FOUNDRY_RESOURCE_NAME"),
+    getSecret("FREE_MODEL_IDS"),
+    getSecret("GROQ_API_KEY"),
+    getSecret("OPENAI_API_KEY"),
+    getSecret("VERTEX_AWS_PROVIDER_AUDIENCE"),
+    getSecret("VERTEX_LOCATION"),
+    getSecret("VERTEX_PROJECT"),
+    getSecret("VERTEX_SERVICE_ACCOUNT_EMAIL"),
+    getSecret("VOYAGE_API_KEY"),
   ]);
 
   const FREE_MODEL_IDS = new Set(
@@ -84,21 +84,14 @@ export async function loadProviderSecrets() {
   };
 }
 
-export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 | undefined {
-  if (config == null || typeof config !== "object") return;
-
+export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 {
   switch (slug) {
     case "bedrock": {
       const bedrockConfig = config as BedrockProviderConfig;
-      const region = bedrockConfig.region;
-      if (!region) return;
 
       switch (bedrockConfig.authMode) {
         case "access-key": {
-          const { accessKeyId, secretAccessKey } = bedrockConfig;
-          if (!accessKeyId || !secretAccessKey) return;
-          // credentialProvider: passing keys alone still merges AWS_SESSION_TOKEN from
-          // the process env (IRSA, etc.); see https://github.com/vercel/ai/issues/14136
+          const { accessKeyId, secretAccessKey, region } = bedrockConfig;
           return withCanonicalIdsForBedrock(
             createAmazonBedrock({
               region,
@@ -107,8 +100,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
           );
         }
         case "iam-role": {
-          const { bedrockRoleArn } = bedrockConfig;
-          if (!bedrockRoleArn) return;
+          const { bedrockRoleArn, region } = bedrockConfig;
           return withCanonicalIdsForBedrock(
             createAmazonBedrock({
               region,
@@ -120,29 +112,26 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
             }),
             {
               inferenceProfile: {
-                arn: { accountId: bedrockRoleArn.split(":")[4], region },
+                arn: { accountId: bedrockRoleArn?.split(":")[4], region },
               },
             },
           );
         }
         default:
-          return;
+          return withCanonicalIdsForBedrock(createAmazonBedrock());
       }
     }
     case "groq": {
       const { apiKey } = config as ApiKeyProviderConfig;
-      if (!apiKey) return;
       return withCanonicalIdsForGroq(createGroq({ apiKey }));
     }
     case "vertex": {
       const vertexConfig = config as VertexProviderConfig;
       const { location, project } = vertexConfig;
-      if (!location || !project) return;
 
       switch (vertexConfig.authMode) {
         case "service-account": {
           const { clientEmail, privateKey } = vertexConfig;
-          if (!clientEmail || !privateKey) return;
           return withCanonicalIdsForVertex(
             createVertex({
               googleAuthOptions: {
@@ -156,7 +145,6 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
         }
         case "identity-federation": {
           const { serviceAccountEmail, audience } = vertexConfig;
-          if (!serviceAccountEmail || !audience) return;
           return withCanonicalIdsForVertex(
             createVertex({
               googleAuthOptions: {
@@ -169,27 +157,23 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
           );
         }
         default:
-          return;
+          return withCanonicalIdsForVertex(createVertex());
       }
     }
     case "voyage": {
       const { apiKey } = config as ApiKeyProviderConfig;
-      if (!apiKey) return;
       return withCanonicalIdsForVoyage(createVoyage({ apiKey }));
     }
     case "anthropic": {
       const { apiKey } = config as ApiKeyProviderConfig;
-      if (!apiKey) return;
       return withCanonicalIdsForAnthropic(createAnthropic({ apiKey }));
     }
     case "openai": {
       const { apiKey } = config as ApiKeyProviderConfig;
-      if (!apiKey) return;
       return withCanonicalIdsForOpenAI(createOpenAI({ apiKey }));
     }
     case "azure": {
       const { apiKey, resourceName } = config as AzureProviderConfig;
-      if (!apiKey || !resourceName) return;
       return createAzure({ apiKey, resourceName });
     }
     default: {

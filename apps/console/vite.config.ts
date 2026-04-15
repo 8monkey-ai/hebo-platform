@@ -6,9 +6,22 @@ import preserveDirectives from "rollup-preserve-directives";
 import { defineConfig } from "vite";
 import babel from "vite-plugin-babel";
 
-export default defineConfig(() => {
+export default defineConfig(({ command }) => {
   return {
-    resolve: { tsconfigPaths: true },
+    resolve: {
+      tsconfigPaths: true,
+      // FUTURE: Remove once react-dom ships renderToPipeableStream in server.bun.js
+      // (fixed in canary, pending stable 19.3.0).
+      // https://github.com/remix-run/react-router/issues/12568
+      // https://github.com/facebook/react/pull/34193
+      //
+      // In a pure-Bun environment (e.g. oven/bun Docker image), react-dom/server
+      // resolves to server.bun.js which doesn't export renderToPipeableStream —
+      // breaking rolldown's link step during React Router's server bundle build.
+      ...(command === "build" && {
+        alias: { "react-dom/server": "react-dom/server.node" },
+      }),
+    },
     server: { port: 8520, devtoolsJsonFile: true },
     optimizeDeps: {
       entries: ["app/root.tsx", "app/routes/**/route.{ts,tsx,mdx}"],

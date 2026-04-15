@@ -1,0 +1,5 @@
+#!/command/with-contenv sh
+case "${HEBO_MODE:-standalone}" in
+  standalone) exec bun /app/console/serve.ts ;;
+esac
+exec s6-svc -Od .

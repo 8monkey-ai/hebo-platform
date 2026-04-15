@@ -1,208 +1,77 @@
-# Hebo
+# Hebo Platform
 
-This is the monorepo for Hebo, containing all our applications and shared packages.
+**Build agents that actually work.**
 
-## Repository Structure
+A platform that brings development and business teams together. Iterate fast. Reach production. Improve continuously.
 
+[Hebo Cloud](https://console.hebo.ai/) | [Docs](https://hebo.ai/docs) | [Blog](https://hebo.ai/blog) | [Discord](https://discord.com/invite/cCJtXZRU5p)
+
+## Key features
+
+- **Gateway** — Unified access to state-of-the-art LLMs via an OpenAI-compatible API. Chat completions, embeddings, responses, and multi-turn conversations out of the box.
+- **Observability** — Conversation-level traces with token and latency tracking, tool call inspection, and full conversation replay — not just individual request logs.
+- **Evaluations** — Define evals as simple Markdown files. Test agent behavior against guidelines, tool usage, and hand-off triggers.
+
+## Get started
+
+### Hebo Cloud
+
+Sign up at [console.hebo.ai](https://console.hebo.ai/) and start sending requests through the gateway — no infrastructure needed.
+
+```typescript
+import OpenAI from "openai";
+
+const hebo = new OpenAI({
+  baseURL: "https://gateway.hebo.ai/v1",
+  apiKey: process.env.HEBO_API_KEY,
+});
+
+const chat = await hebo.chat.completions.create({
+  model: "claude-sonnet-4-5",
+  messages: [
+    { role: "system", content: "You are a helpful assistant." },
+    { role: "user", content: "What is the Hebo gateway?" },
+  ],
+});
 ```
-/ (hebo)
-├── apps/                           # Deployable applications
-│   ├── api/                        # REST API server (ElysiaJS)
-│   ├── auth/                       # Auth Service (ElysiaJS + Better Auth)
-│   ├── console/                    # Web console (React Router + Vite)
-│   ├── gateway/                    # AI Gateway (ElysiaJS + Hebo AI Gateway)
-│   └── mcp/                        # MCP Server (ElysiaJS)
-│
-├── packages/                       # Shared libraries and utilities
-│   ├── aikit-ui/                   # Chat UI components (Shadcn + custom)
-│   ├── shared-api/                 # API utilities (auth, CORS)
-│   ├── shared-data/                # Shared data models & schemas
-│   └── shared-ui/                  # UI components (Shadcn + custom)
-│
-├── infra/                          # Infrastructure as Code (SST)
-│   └── stacks/                     # SST stacks
-│
-├── .github/
-│   └── workflows/                  # CI/CD pipelines
-│
-├── bunfig.toml                     # Bun configuration
-├── lefthook.yml                    # Git hooks configuration
-├── sst.config.ts                   # SST configuration
-├── tsconfig.base.json              # Base TypeScript configuration
-├── .oxlintrc.json                  # Oxlint configuration
-└── .oxfmtrc.json                   # Oxfmt configuration
-```
 
-## Prerequisites
+### Self-hosted
 
-- Bun >= 1.3.12
-- Docker >= 28
-- AWS CLI (only required for deployment)
-
-We recommend to use [mise](https://mise.jdx.dev) to manage your bun version if you work on multiple projects in parallel.
-
-## Installation
+Run everything locally with Docker Compose — a single container with all services included.
 
 ```bash
-# Install dependencies
-bun install
+cd infra/self-hosted
+cp .env.example .env    # all defaults work out of the box
+docker compose up -d
 ```
 
-## Development
+Open `http://localhost:8520` to access the console.
 
-### Quick start
+See [`infra/self-hosted/.env.example`](infra/self-hosted/.env.example) for configuration options (OAuth, SMTP, LLM provider keys, etc.).
 
-```bash
-# 1) Start local infrastructure (Docker Compose)
-bun run dev:infra:up
+## How Hebo compares
 
-# 2) Apply migrations
-bun run db:migrate
+|  | Hebo | Langfuse | Helicone | Portkey | LiteLLM | OpenRouter | Vercel AI |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Gateway | Stateful\* | — | Stateless | Stateless | Stateless | Stateless | Stateless |
+| Observability | Conversation view | Request level | Request level | Request level | 3rd party | 3rd party | 3rd party |
+| Evaluations | Simple Markdown | Yes | Via integrations | Yes | — | — | — |
+| User experience | Dev & Business | Dev-focused | Dev-focused | Dev-focused | Dev-focused | API only | API only |
+| Deployment | Cloud & self-host | Cloud & self-host | Cloud & self-host | Cloud only | Self-host | Cloud only | Cloud only |
 
-# 3) Run all apps (API, Gateway, Console)
-bun run dev
+\* Stateful: Hebo supports `/responses` and `/conversations` endpoints, enabling multi-turn sessions and persistent conversation history without managing state in your application.
 
-# Optional - console only with service mocks
-bun run -F @hebo/console dev
-```
+## Community
 
-### Environment variables
+- [Discord](https://discord.com/invite/cCJtXZRU5p) — ask questions, share feedback
+- [X (@heboai)](https://x.com/heboai) — follow for updates
+- [Docs](https://hebo.ai/docs) — guides and API reference
+- [Blog](https://hebo.ai/blog) — product updates, guides, and research notes
 
-- Each app manages its own environment (e.g. `.env`, `.env.local`). Create a `.env` inside the app directory if you need to override defaults.
+## Contributing
 
-```bash
-cd apps/console
-cp .env.example .env
-```
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, architecture, and guidelines.
 
-### Database
+## License
 
-```bash
-# Start local infrastructure
-bun run dev:infra:up
-
-# Stop local infrastructure
-bun run dev:infra:down
-
-# Migrate
-bun run db:migrate
-
-# Reset (drops data)
-bun run db:reset
-```
-
-### Cleanup
-
-```bash
-bun run clean
-```
-
-## Secrets (local and remote)
-
-We use Bun secrets for local development and SST secrets for remote deployments. Code reads values via `getSecret(name)` (see `packages/shared-api/utils/secret.ts`), which resolves from SST first and falls back to Bun secrets locally.
-
-Local development secrets are optional. Only configure the ones needed for the features you're working with (e.g., configure LLM provider secrets to test AI features).
-
-Secret names:
-
-- Auth
-  - GitHub: `GithubClientId`, `GithubClientSecret`
-  - Google: `GoogleClientId`, `GoogleClientSecret`
-  - Microsoft: `MicrosoftClientId`, `MicrosoftClientSecret`
-  - Email OTP and Magic Link: `SmtpHost`, `SmtpPort`, `SmtpUser`, `SmtpPass`, `SmtpFrom`
-  - BetterAuth: `AuthSecret` (https://www.better-auth.com/docs/reference/options#secret))
-
-- LLMs
-  - Bedrock: `BedrockRoleArn`, `BedrockRegion`
-  - Vertex: `VertexServiceAccountEmail`, `VertexAwsProviderAudience`, `VertexProject`, `VertexLocation`
-  - Anthropic: `AnthropicApiKey`
-  - OpenAI: `OpenAiApiKey`
-  - Others: `VoyageApiKey`, `GroqApiKey`
-
-- BYOK (Bring Your Own Key)
-  - `EnforceByok`: when set, non-free models require org-level provider credentials
-  - `FreeModelIds`: comma-separated list of model IDs that are free (bypass BYOK enforcement)
-
-- Observability / traces
-  - Greptime: `GreptimeHost` (hostname only, e.g. `my-greptimedb.example.com`)
-
-Note for local development: if SMTP secrets are not configured, the email OTP is logged to the console (look for `>>> OTP:`) so you can sign in without setting up an email provider.
-
-Local (Bun) examples:
-
-```bash
-# set / get / delete
-bun run secret set GithubClientId <value>
-bun run secret get GithubClientId
-bun run secret delete GithubClientId
-```
-
-Remote (SST) examples:
-
-```bash
-# set / remove (choose your <stage>)
-bun run sst secret set GithubClientId <value> --stage <stage>
-bun run sst secret remove GithubClientId --stage <stage>
-```
-
-## Run modes
-
-| #   | Mode                        | Command                        | Database              | API availability                  |
-| --- | --------------------------- | ------------------------------ | --------------------- | --------------------------------- |
-| 1   | **Frontend-only** (offline) | `bun run -F @hebo/console dev` | —                     | none – UI relies on mock services |
-| 2   | **Local full-stack**        | `bun run dev`                  | Dockerized PostgreSQL | URLs from env                     |
-| 3   | **Remote full-stack**       | `bun run sst deploy`           | Aurora PostgreSQL     | HTTPS URLs exported by SST        |
-
-## Building
-
-```bash
-# Build all packages and apps
-bun run build
-
-# Build specific package/console
-bun run -F @hebo/console build
-```
-
-## Testing
-
-```bash
-# Run all tests
-bun run test
-
-# Test specific package/console
-bun run -F @hebo/console test
-```
-
-## Deployment
-
-The repository uses GitHub Actions for CI/CD:
-
-- Push a new tag to trigger the deployment
-
-### Service URLs
-
-- API: `https://api.hebo.ai` (prod) or `https://api.<stage>.hebo.ai` (preview)
-- Auth: `https://auth.hebo.ai` (prod) or `https://auth.<stage>.hebo.ai` (preview)
-- Gateway: `https://gateway.hebo.ai` (prod) or `https://gateway.<stage>.hebo.ai` (preview)
-- Console: `https://console.hebo.ai` (prod) or `https://console.<stage>.hebo.ai` (preview)
-- MCP: `https://mcp.hebo.ai` (prod) or `https://mcp.<stage>.hebo.ai` (preview)
-
-### Manual deployments
-
-For deployments, we utilize the SST framework ([sst.dev](https://sst.dev/)).
-
-#### Launch and Clean up
-
-```bash
-# Install providers
-bun run sst install
-
-# Deploy a preview link
-bun run sst deploy --stage PR-XX
-
-# Remove a preview link
-bun run sst remove --stage PR-XX
-
-# Deploy to production
-bun run sst deploy --stage production
-```
+Hebo is licensed under the [Functional Source License (FSL-1.1-ALv2)](LICENSE.md), which keeps Hebo free to use for everyone while converting to Apache 2.0 after two years.

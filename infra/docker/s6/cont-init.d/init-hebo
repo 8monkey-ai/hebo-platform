@@ -1,0 +1,25 @@
+#!/command/with-contenv sh
+set -e
+
+# init-hebo — oneshot bootstrap (runs before any longrun services)
+#
+# Standalone mode: run Prisma migrations
+# ECS single-role modes: skip (Lambda migrator handles DB, SST handles secrets)
+
+HEBO_MODE="${HEBO_MODE:-standalone}"
+
+if [ "$HEBO_MODE" != "standalone" ]; then
+  echo "[init] Skipping bootstrap (HEBO_MODE=${HEBO_MODE}, managed by SST)"
+  exit 0
+fi
+
+# ── Run Prisma migrations ──
+echo "[init] Running API schema migrations"
+POSTGRES_URL="${POSTGRES_URL}?schema=api" \
+  bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
+
+echo "[init] Running Auth schema migrations"
+POSTGRES_URL="${POSTGRES_URL}?schema=auth" \
+  bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
+
+echo "[init] Bootstrap complete"

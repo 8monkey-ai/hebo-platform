@@ -1,19 +1,21 @@
+# Shared infrastructure services for local development.
+
 services:
   postgres:
-    container_name: hebo-postgres
+    container_name: postgres
     image: postgres:17.6
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: local
+      POSTGRES_DB: hebo
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
   greptimedb:
-    container_name: greptime
+    container_name: greptimedb
     image: greptime/greptimedb:v1.0.0
     restart: unless-stopped
     ports:
@@ -23,7 +25,12 @@ services:
       - "127.0.0.1:4003:4003"
     volumes:
       - greptimedb-data:/greptimedb_data
-    command: standalone start --http-addr 0.0.0.0:4000 --rpc-bind-addr 0.0.0.0:4001 --mysql-addr 0.0.0.0:4002 --postgres-addr 0.0.0.0:4003
+    command: >-
+      standalone start
+      --http-addr 0.0.0.0:4000
+      --rpc-bind-addr 0.0.0.0:4001
+      --mysql-addr 0.0.0.0:4002
+      --postgres-addr 0.0.0.0:4003
 
 volumes:
   postgres-data:

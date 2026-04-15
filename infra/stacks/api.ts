@@ -4,7 +4,9 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
+import { disableInitProcess } from "./ecs";
 import { authSecret, isProduction, greptimeHost, normalizedStage } from "./env";
+import heboGreptime from "./greptime";
 
 const apiDomain = isProduction ? "api.hebo.ai" : `api.${normalizedStage}.hebo.ai`;
 const apiPort = "8521";
@@ -17,17 +19,17 @@ const heboApi = new sst.aws.Service("HeboApi", {
   link: [heboDatabase, authSecret, greptimeHost],
   image: {
     context: ".",
-    dockerfile: "infra/docker/Dockerfile.api",
+    dockerfile: "infra/docker/Dockerfile",
     tags: [apiDomain],
-    args: {
-      NODE_ENV: isProduction ? "production" : "development",
-    },
+    args: { NODE_ENV: isProduction ? "production" : "development" },
   },
   environment: {
+    HEBO_MODE: "api",
     API_URL: `https://${apiDomain}`,
     AUTH_URL: heboAuth.url,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: apiPort,
+    ...(heboGreptime ? { GREPTIME_HOST: heboGreptime.service } : {}),
   },
   loadBalancer: {
     domain: apiDomain,
@@ -37,6 +39,7 @@ const heboApi = new sst.aws.Service("HeboApi", {
     ],
   },
   transform: {
+    taskDefinition: disableInitProcess,
     listener: (args) => {
       if (args.protocol === "HTTPS") {
         args.sslPolicy = "ELBSecurityPolicy-TLS13-1-2-2021-06";

@@ -33,12 +33,12 @@ const [
   MICROSOFT_CLIENT_ID,
   MICROSOFT_CLIENT_SECRET,
 ] = await Promise.all([
-  getSecret("GoogleClientId"),
-  getSecret("GoogleClientSecret"),
-  getSecret("GithubClientId"),
-  getSecret("GithubClientSecret"),
-  getSecret("MicrosoftClientId"),
-  getSecret("MicrosoftClientSecret"),
+  getSecret("GOOGLE_CLIENT_ID"),
+  getSecret("GOOGLE_CLIENT_SECRET"),
+  getSecret("GITHUB_CLIENT_ID"),
+  getSecret("GITHUB_CLIENT_SECRET"),
+  getSecret("MICROSOFT_CLIENT_ID"),
+  getSecret("MICROSOFT_CLIENT_SECRET"),
 ]);
 
 export const auth = betterAuth({

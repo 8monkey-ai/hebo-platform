@@ -7,7 +7,7 @@ export const handler = async (event: { schema: string }) => {
   await promisify(exec)("npx prisma migrate deploy --config ./prisma.config.ts", {
     env: {
       ...process.env,
-      DATABASE_URL: getConnectionString(event.schema),
+      POSTGRES_URL: getConnectionString(event.schema),
     },
   });
   return { ok: true };

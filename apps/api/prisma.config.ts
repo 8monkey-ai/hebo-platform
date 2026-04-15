@@ -7,7 +7,7 @@ export default {
   },
   datasource: {
     url:
-      process.env.DATABASE_URL ??
+      process.env.POSTGRES_URL ??
       (await import("@hebo/shared-api/db/postgres")).getConnectionString("api"),
   },
 } satisfies PrismaConfig;
