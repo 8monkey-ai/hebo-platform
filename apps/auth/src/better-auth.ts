@@ -18,9 +18,6 @@ import {
 } from "./lib/email";
 import { createOrganizationHook, syncActiveOrganizationHook } from "./lib/organization";
 
-const PORT = process.env.PORT ?? "8523";
-const PUBLIC_URL = process.env.PUBLIC_URL ?? `http://localhost:${PORT}`;
-
 const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
 });
@@ -42,7 +39,7 @@ const [
 ]);
 
 export const auth = betterAuth({
-  baseURL: PUBLIC_URL,
+  baseURL: process.env.PUBLIC_URL,
   basePath: "/v1",
   secret: AUTH_SECRET,
   accountLinking: {
