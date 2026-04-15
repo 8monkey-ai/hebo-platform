@@ -1,8 +1,8 @@
 // oxlint-disable-next-line triple-slash-reference
 /// <reference path="../../.sst/platform/config.d.ts" />
 
-import { domain } from "./helpers";
 import { smtpHost } from "./env";
+import { hostname } from "./helpers";
 import { apiRouter, authRouter, gatewayRouter } from "./router";
 
 const heboConsole = new sst.aws.StaticSite("HeboConsole", {
@@ -11,7 +11,7 @@ const heboConsole = new sst.aws.StaticSite("HeboConsole", {
     command: "bun run build",
     output: "build/client",
   },
-  domain: domain("console"),
+  domain: hostname("console"),
   environment: {
     VITE_API_URL: apiRouter.url,
     VITE_AUTH_URL: authRouter.url,

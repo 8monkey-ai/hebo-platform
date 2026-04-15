@@ -4,25 +4,25 @@
 import heboApi from "./api";
 import heboAuth from "./auth";
 import heboGateway from "./gateway";
-import { albUrl, domain } from "./helpers";
+import { albUrl, hostname } from "./helpers";
 import heboMcp from "./mcp";
 
 export const authRouter = new sst.aws.Router("HeboAuthRouter", {
-  domain: domain("auth"),
+  domain: hostname("auth"),
 });
 authRouter.route("/", albUrl(heboAuth));
 
 export const apiRouter = new sst.aws.Router("HeboApiRouter", {
-  domain: domain("api"),
+  domain: hostname("api"),
 });
 apiRouter.route("/", albUrl(heboApi));
 
 export const gatewayRouter = new sst.aws.Router("HeboGatewayRouter", {
-  domain: domain("gateway"),
+  domain: hostname("gateway"),
 });
 gatewayRouter.route("/", albUrl(heboGateway), { readTimeout: "60 seconds" });
 
 export const mcpRouter = new sst.aws.Router("HeboMcpRouter", {
-  domain: domain("mcp"),
+  domain: hostname("mcp"),
 });
 mcpRouter.route("/", albUrl(heboMcp));

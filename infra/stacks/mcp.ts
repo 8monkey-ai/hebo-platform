@@ -2,8 +2,8 @@
 /// <reference path="../../.sst/platform/config.d.ts" />
 
 import heboCluster from "./cluster";
-import { disableInitProcess, domain } from "./helpers";
 import { isProduction, greptimeHost, authSecret } from "./env";
+import { disableInitProcess, hostname } from "./helpers";
 
 const mcpPort = "8524";
 
@@ -16,7 +16,7 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile",
-    tags: [domain("mcp")],
+    tags: [hostname("mcp")],
     args: { NODE_ENV: isProduction ? "production" : "development" },
   },
   environment: {

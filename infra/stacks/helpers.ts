@@ -1,6 +1,6 @@
 import { isProduction, normalizedStage } from "./env";
 
-export const domain = (sub: string) =>
+export const hostname = (sub: string) =>
   isProduction ? `${sub}.hebo.ai` : `${sub}.${normalizedStage}.hebo.ai`;
 
 export const albUrl = (service) =>
