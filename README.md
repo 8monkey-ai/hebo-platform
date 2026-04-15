@@ -85,7 +85,3 @@ See [`infra/self-hosted/.env.example`](infra/self-hosted/.env.example) for the f
 ## Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, architecture, and guidelines.
-
-## License
-
-Hebo is licensed under the [Functional Source License (FSL-1.1-ALv2)](LICENSE.md), which keeps Hebo free to use for everyone while converting to Apache 2.0 after two years.
