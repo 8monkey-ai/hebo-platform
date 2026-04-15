@@ -31,7 +31,7 @@ jobs:
       - name: Remove preview environment
         run: |
           STAGE="pr-${{ github.event.pull_request.number }}"
-          if ! bun run sst list --stage $STAGE; then
+          if ! bun run sst state list | grep -q "${STAGE}"; then
             echo "Stage $STAGE does not exist, skipping cleanup"
             exit 0
           fi
