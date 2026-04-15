@@ -36,9 +36,7 @@ const ALLOWED_REQUEST_HEADERS = [
   "content-type",
   "host",
   "origin",
-  "referer",
   "user-agent",
-  "x-forwarded-for",
   "x-forwarded-proto",
   "x-request-id",
 ];
