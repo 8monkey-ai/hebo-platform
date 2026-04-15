@@ -1,0 +1,48 @@
+---
+title: "Tool Calling"
+description: "Provide your agent with additional capabilities"
+---
+
+Tool calling lets models invoke deterministic functions for things they’re bad at: counting, lookups, validation, and calling external systems. It makes responses more reliable and lets you combine LLM reasoning with real-world actions.
+
+## Local
+
+By default, the LLM only suggests a tool call; the actual execution runs in your own agent code and returns the result.
+
+```ts Vercel AI SDK highlight={14-25}
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText, tool } from "ai";
+import { z } from "zod";
+
+const hebo = createOpenAICompatible({
+  name: "hebo",
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const result = await generateText({
+  model: hebo("openai/gpt-oss-20b"),
+  prompt: "How many r's are in Strawberry?",
+  tools: {
+    countLetters: tool({
+      description: "Count letter occurrences in a word",
+      inputSchema: z.object({
+        word: z.string(),
+        letters: z.string(),
+      }),
+      execute: async ({ word, letters }) => {
+        const count = [...word].filter((c) => letters.includes(c)).length;
+        return { count };
+      },
+    }),
+  },
+});
+
+console.log(result.toolResults[0]?.output);
+```
+
+## MCP
+
+MCP (Model Context Protocol) is a standard way to expose tools over a remote server.
+
+For read-to-use MCP tools, see the our [MCP AIKit](/mcp/aikit) docs.

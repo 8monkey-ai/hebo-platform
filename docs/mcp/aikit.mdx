@@ -1,0 +1,51 @@
+---
+title: "AIKit Tools"
+description: "A collection of pre-hosted MCP tools"
+---
+
+Hebo AIKit is a set of ready-to-use MCP toolkits hosted at `https://mcp.hebo.ai/`.
+
+It lets you connect tools to any LLM quickly without standing up your own server.
+
+## Highlights
+
+- Pre-hosted MCP server with real tools you can use immediately
+- Built to cover tasks agents struggle with like counting
+- Simple integration with the Vercel AI SDK and other clients
+- Transparent tool schemas so agents can decide when to call them
+- New toolkits added over time (request more on Discord)
+
+## Why it exists
+
+Most MCP examples are low-level and require self-hosting just to test.
+AIKit removes the infrastructure setup so you can validate MCP end-to-end in minutes.
+
+## Sample Usage
+
+```ts Vercel AI SDK
+import { streamText } from "ai";
+import { createMCPClient } from "@ai-sdk/mcp";
+
+const mcpClient = await createMCPClient({
+  transport: {
+    type: "http",
+    url: "https://mcp.hebo.ai/aikit/",
+  },
+});
+
+const { count_letters } = await mcpClient.tools();
+
+const result = await streamText({
+  model: "openai/gpt-oss-20b",
+  tools: { count_letters },
+  prompt: "How many r's in Strawberry?",
+  onFinish: async () => {
+    await mcpClient.close();
+  },
+});
+```
+
+<Note>
+  You can use any provider supported by the Vercel AI SDK, including [Hebo
+  Gateway](/gateway/quick-start).
+</Note>

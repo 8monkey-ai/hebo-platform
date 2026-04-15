@@ -1,0 +1,122 @@
+---
+title: "Quick Start"
+description: "Your first ```/chat/completions``` call"
+---
+
+Hebo Gateway provides a unified API for completions, embeddings, and model discovery.
+It normalizes provider differences so you can switch models without rewriting your client.
+
+## Why Gateway
+
+- OpenAI-compatible endpoints and normalized model IDs across providers
+- One way to configure reasoning across all models
+- Support for streaming and non-streaming responses, as well as reasoning and tool calls
+- Compatible with common AI SDKs (Vercel AI SDK, TanStack AI, Langchain, OpenAI SDK, ...)
+
+## Choose an SDK
+
+If you havent installed any SDK yet, you'll have to do that first.
+
+Most of our own examples in the documentation will refer to Vercel AI SDK (which we use ourselves internally) using TypeScript.
+
+<CodeGroup>
+
+```ts Vercel AI SDK
+bun add ai @ai-sdk/openai-compatible
+```
+
+```ts OpenAI SDK
+bun add openai
+```
+
+```ts LangChain
+bun add @langchain/openai
+```
+
+</CodeGroup>
+
+<Info>
+  We recommend ```bun``` as your default JavaScript / TypeScript toolkit, but you can also use
+  ```npm```, ```pnpm``` or ```yarn```.
+</Info>
+
+You can use any other SDKs and languages (e.g. Python), as long as they can connect to an OpenAI-compatible endpoint.
+
+If you find any issues accessing Hebo Gateway with another library, we would appreciate a report on our [issue tracker](https://github.com/heboai/hebo/issues).
+
+## Your First Call
+
+Now you're already ready for your first call:
+
+<CodeGroup>
+
+```ts Vercel AI SDK
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText } from "ai";
+
+const hebo = createOpenAICompatible({
+  name: "hebo",
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const { text } = await generateText({
+  model: hebo("openai/gpt-oss-20b"),
+  prompt: "Tell me a joke about monkeys",
+});
+
+console.log(text);
+```
+
+```ts OpenAI SDK
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "openai/gpt-oss-20b",
+  messages: [{ role: "user", content: "Tell me a joke about monkeys" }],
+});
+
+console.log(response.choices[0]?.message?.content);
+```
+
+```ts LangChain
+import { ChatOpenAI } from "@langchain/openai";
+
+const model = new ChatOpenAI({
+  apiKey: process.env.HEBO_API_KEY,
+  configuration: { baseURL: "https://gateway.hebo.ai/v1" },
+  model: "openai/gpt-oss-20b",
+});
+
+const response = await model.invoke([{ role: "user", content: "Tell me a joke about monkeys" }]);
+
+console.log(response.content);
+```
+
+```bash Bash
+curl https://gateway.hebo.ai/v1/chat/completions \
+  -H "Authorization: Bearer $HEBO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "openai/gpt-oss-20b",
+    "messages": [
+      { "role": "user", "content": "Tell me a joke about monkeys" }
+    ]
+  }'
+```
+
+</CodeGroup>
+
+<Info>
+  If you don't have an API key yet, register for free in the [Hebo
+  Console](https://console.hebo.ai).
+</Info>
+
+## What's Next?
+
+- Dig deeper into advanced features like [Tool Calling](/gateway/tool-calling), [Structured Outputs](/gateway/structured-outputs), [Reasoning](/gateway/reasoning), and [Embeddings](/gateway/embeddings).

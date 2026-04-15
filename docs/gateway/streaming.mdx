@@ -1,0 +1,27 @@
+---
+title: "Streaming"
+description: "Stream tokens for faster perceived latency"
+---
+
+Streaming lets you deliver tokens as they are generated, so users see output immediately.
+It improves perceived latency, supports long responses without timeouts, and enables realtime UX like typing indicators.
+
+```ts Vercel AI SDK highlight={10,15-17}
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { streamText } from "ai";
+
+const hebo = createOpenAICompatible({
+  name: "hebo",
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const result = streamText({
+  model: hebo("openai/gpt-oss-20b"),
+  prompt: "Tell me a very long story about monkeys",
+});
+
+for await (const chunk of result.textStream) {
+  process.stdout.write(chunk);
+}
+```

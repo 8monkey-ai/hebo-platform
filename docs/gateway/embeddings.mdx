@@ -1,0 +1,26 @@
+---
+title: "Embeddings"
+description: "Generate vector embeddings from text"
+---
+
+You can generate embeddings with the same OpenAI-compatible API across providers.
+
+Common use cases include semantic search, RAG retrieval, clustering, and deduplication.
+
+```ts Vercel AI SDK highlight={9-13}
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { embed } from "ai";
+
+const hebo = createOpenAICompatible({
+  name: "hebo",
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const { embedding } = await embed({
+  model: hebo.embeddingModel("voyage/voyage-3.5"),
+  value: "Tell me a joke about monkeys",
+});
+
+console.log(embedding.length);
+```

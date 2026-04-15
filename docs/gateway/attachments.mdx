@@ -1,0 +1,90 @@
+---
+title: "Attachments"
+description: "Send images, PDFs, Markdown and other files to chat models"
+---
+
+Attachments let you send file inputs (images, audio, PDFs, Markdown, ...) to the Gateway. They can either be embedded as binary data or referenced with an URL.
+
+<Info>
+  Attachment support varies by provider and model version. The Gateway forwards attachments
+  directly to the provider, so unsupported types will return a provider error.
+
+Many modern models support images, video, audio, and PDFs; some also support Office formats
+(e.g., DOCX, PPTX, XLSX). Refer to `/models` and the provider’s official documentation for the
+latest capability details.
+
+</Info>
+
+# From a URL (e.g. Markdown page)
+
+If you have a file hosted on a URL, you can reference it directly in the message. The Vercel AI SDK will download it and then attach the binary to the message.
+
+```ts highlight={20-24}
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText } from "ai";
+
+const hebo = createOpenAICompatible({
+  name: "hebo",
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const { text } = await generateText({
+  model: hebo("openai/gpt-oss-20b"),
+  messages: [
+    {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: "How to find out which models are supported by Hebo?",
+        },
+        {
+          type: "file",
+          data: new URL("https://hebo.ai/docs/gateway/supported-models.md"),
+          mediaType: "text/markdown",
+        },
+      ],
+    },
+  ],
+});
+
+console.log(text);
+```
+
+# From local File (e.g. Image)
+
+If you already have a file locally, you can attach the binary data to the model call. Internally, it will automatically be converted to base64.
+
+```ts highlight={3,21-24}
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText } from "ai";
+import { readFile } from "node:fs/promises";
+
+const hebo = createOpenAICompatible({
+  name: "hebo",
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const { text } = await generateText({
+  model: hebo("google/gemini-3-flash-preview"),
+  messages: [
+    {
+      role: "user",
+      content: [
+        {
+          type: "text",
+          text: "Describe this image.",
+        },
+        {
+          type: "image",
+          image: await readFile("<FILENAME>"),
+        },
+      ],
+    },
+  ],
+});
+
+console.log(text);
+```

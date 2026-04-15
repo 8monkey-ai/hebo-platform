@@ -1,0 +1,107 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "maple",
+  "name": "Hebo AI",
+  "colors": {
+    "primary": "#3b82f6",
+    "light": "#fde047",
+    "dark": "#facc15"
+  },
+  "background": {
+    "color": {
+      "light": "#f8fafc",
+      "dark": "#020617"
+    }
+  },
+  "logo": {
+    "light": "https://hebo.ai/logo.png",
+    "dark": "https://hebo.ai/logo-dark.png"
+  },
+  "favicon": "https://hebo.ai/favicon.svg",
+  "icons": {
+    "library": "lucide"
+  },
+  "appearance": {
+    "default": "light"
+  },
+  "fonts": {
+    "family": "Recursive"
+  },
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/8monkey-ai/hebo-gateway/"
+    }
+  },
+  "navigation": {
+    "global": {
+      "anchors": [
+        {
+          "anchor": "Gateway",
+          "icon": "brain-circuit",
+          "href": "https://hebo.ai/gateway"
+        },
+        {
+          "anchor": "MCP",
+          "icon": "square-function",
+          "href": "https://hebo.ai/mcp"
+        },
+        {
+          "anchor": "Evals",
+          "icon": "gauge",
+          "href": "https://hebo.ai/evals"
+        }
+      ]
+    },
+    "groups": [
+      {
+        "group": "Overview",
+        "pages": ["introduction"]
+      },
+      {
+        "group": "Gateway",
+        "icon": "brain-circuit",
+        "pages": [
+          "gateway/quick-start",
+          "gateway/streaming",
+          "gateway/tool-calling",
+          "gateway/structured-outputs",
+          "gateway/reasoning",
+          "gateway/attachments",
+          "gateway/embeddings",
+          "gateway/supported-models"
+        ]
+      },
+      {
+        "group": "MCP",
+        "icon": "square-function",
+        "pages": ["mcp/aikit"]
+      },
+      {
+        "group": "Evals",
+        "icon": "gauge",
+        "pages": ["evals/getting-started"]
+      },
+      {
+        "group": "Changelog",
+        "icon": "calendar-days",
+        "pages": ["changelog/updates"]
+      }
+    ]
+  },
+  "contextual": {
+    "options": ["copy", "view", "chatgpt", "mcp", "vscode", "cursor"]
+  },
+  "footer": {
+    "socials": {
+      "x": "https://x.com/heboai",
+      "github": "https://github.com/8monkey-ai/hebo-gateway/",
+      "linkedin": "https://www.linkedin.com/company/heboai/"
+    }
+  },
+  "integrations": {
+    "ga4": {
+      "measurementId": "G-ZJJ115Z0CH"
+    }
+  }
+}

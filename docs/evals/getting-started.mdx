@@ -1,0 +1,340 @@
+---
+title: "Getting Started"
+description: "Markdown for Evals, a human-first format"
+---
+
+## Hebo Eval CLI
+
+Hebo Eval is a powerful command-line tool for evaluating and testing language models. It provides a robust framework for running evaluations against your AI agents and generating detailed reports.
+
+### Installation
+
+```bash
+bun install -g hebo-eval@latest
+```
+
+### Basic Usage
+
+```bash
+hebo-eval run <agent> [options]
+```
+
+### Command Options
+
+| Option                           | Description                                  | Default      |
+| -------------------------------- | -------------------------------------------- | ------------ |
+| `-d, --directory <path>`         | Directory containing test cases              | `./examples` |
+| `-c, --config <path>`            | Path to configuration file                   | -            |
+| `-t, --threshold <number>`       | Score threshold for passing (0-1)            | `0.8`        |
+| `-f, --format <format>`          | Output format (json\|markdown\|text)         | `text`       |
+| `-s, --stop-on-error`            | Stop processing on first error               | `false`      |
+| `-m, --max-concurrency <number>` | Maximum number of concurrent test executions | `5`          |
+| `-v, --verbose`                  | Show detailed output for all test cases      | `false`      |
+
+### Configuration
+
+You can configure Hebo Eval in two ways:
+
+1. **Environment Variables**:
+
+   ```bash
+   export HEBO_API_KEY=your_api_key_here
+   export OPENAI_API_KEY=your_openai_key_here
+   export HEBO_EMBEDDING_API_KEY=your_embedding_key_here
+   ```
+
+2. **Configuration File**:
+   Create a YAML configuration file (e.g., `hebo-evals.config.yaml`):
+
+   ```yaml
+   # Hebo Eval Configuration Template
+   # Copy this file to hebo-evals.config.yaml and replace the values with your own
+
+   # Provider configurations
+   providers:
+     openai:
+       provider: openai
+       baseUrl: https://api.openai.com/v1
+       apiKey: ${OPENAI_API_KEY} # Will be replaced with the value of OPENAI_API_KEY environment variable
+       authHeader:
+         name: Authorization
+         format: Bearer ${OPENAI_API_KEY} # Can use the same environment variable multiple times
+
+     hebo:
+       provider: hebo
+       baseUrl: https://app.hebo.ai
+       apiKey: ${HEBO_API_KEY} # Will be replaced with the value of HEBO_API_KEY environment variable
+       authHeader:
+         name: Authorization
+         format: Bearer ${HEBO_API_KEY}
+
+   # Default provider to use if not specified in the command
+   defaultProvider: hebo
+
+   # Embedding configuration
+   embedding:
+     provider: hebo
+     model: hebo-embeddings
+     baseUrl: https://api.hebo.ai/v1
+     apiKey: ${HEBO_EMBEDDING_API_KEY} # Can reuse the same environment variable
+   ```
+
+   **Note**: The configuration file supports environment variable substitution using `${VARIABLE_NAME}` syntax. This allows you to keep sensitive information like API keys in environment variables while referencing them in your configuration file.
+
+### Configuration Template
+
+Hebo Eval provides a boilerplate configuration template called `hebo-evals.config.yaml`. This template includes:
+
+- **Multiple Provider Support**: Configure both OpenAI and Hebo providers
+- **Environment Variable Integration**: Use `${VARIABLE_NAME}` syntax for secure API key management
+- **Flexible Authentication**: Support for different authentication header formats
+- **Embedding Configuration**: Separate configuration for embedding models
+
+To use the template:
+
+1. Copy the template to your project directory:
+
+   ```bash
+   cp hebo-evals.config.yaml ./your-project/
+   ```
+
+2. Set up your environment variables:
+
+   ```bash
+   export OPENAI_API_KEY=your_openai_key_here
+   export HEBO_API_KEY=your_hebo_key_here
+   export HEBO_EMBEDDING_API_KEY=your_embedding_key_here
+   ```
+
+3. Customize the configuration as needed for your specific use case.
+
+**Security Note**: Never commit your actual configuration file with real API keys to version control. Always use environment variables for sensitive information.
+
+## Provider Mapping Logic
+
+When running Hebo Eval, the provider is automatically determined based on the model or agent name you specify in the command. The tool uses pattern matching to map the model/agent name to the appropriate provider:
+
+- **OpenAI**: Any model name that starts with `gpt-` (e.g., `gpt-3.5-turbo`, `gpt-4`) is mapped to the OpenAI provider.
+- **Hebo**: Any model name that contains a colon (`:`) (e.g., `gato-qa:v1`) is mapped to the Hebo provider.
+- **Anthropic**: Any model name that starts with `claude-` (e.g., `claude-2`, `claude-instant`) is mapped to the Anthropic provider.
+- **Custom**: Any model name that starts with `custom-` is mapped to the Custom provider.
+
+This mapping allows you to simply specify the model or agent name when running evaluations, and Hebo Eval will automatically select the correct provider configuration based on these naming conventions.
+
+**Example:**
+
+```bash
+hebo-eval run gpt-4         # Uses OpenAI provider
+hebo-eval run gato-qa:v1    # Uses Hebo provider
+hebo-eval run claude-2      # Uses Anthropic provider (future support)
+hebo-eval run custom-foo    # Uses Custom provider (future support)
+```
+
+> **Note:**  
+> Currently, Hebo Eval only supports **OpenAI** and **Hebo** as providers. Support for additional providers such as Anthropic and Custom is planned for future releases.
+
+If you need to override the default mapping, you can specify the provider explicitly in your configuration file or command options.
+
+### Test Cases
+
+Hebo Eval supports a flexible test case structure that allows you to organize and manage your test cases effectively.
+
+#### Test Case Structure
+
+1. **Multiple Test Cases in One File**:
+   - Test cases can be defined in a single file, separated by `---`
+   - Each test case starts with a title using `# Test Case Name` format
+
+2. **Directory Organization**:
+   - Test cases can be organized in subdirectories
+   - All test cases in subdirectories are automatically discovered and executed
+
+#### Test Case Format
+
+```text
+# Basic Conversation Test
+user: Hi there!
+assistant: Hello! How can I assist you today?
+
+---
+# Weather Query Test
+user: Could you check the current weather in New York for me?
+assistant: It's rainy in New York today with a temperature of 59°F. There's an 80% chance of rain, high humidity (96%), and a light breeze at 2 mph. You might want to bring an umbrella!
+```
+
+#### Special Characters and Multiline Messages
+
+When writing test cases, it's important to understand how to handle special characters and multiline messages correctly. Here's a comprehensive guide:
+
+#### Special Characters
+
+The following characters have special meaning in test cases:
+
+| Character | Usage                 | Example                          |
+| --------- | --------------------- | -------------------------------- |
+| `:`       | Role marker delimiter | `user:`, `assistant:`, `system:` |
+| `#`       | Test case title       | `# My Test Case`                 |
+| `---`     | Test case separator   | Used between test cases          |
+
+#### Escaping Special Characters
+
+To include literal special characters in your messages, you can use them directly in the message content. The parser will only interpret these characters as special when they appear in specific contexts:
+
+- `:` is only special when it appears after a role marker
+- `#` is only special when it appears at the start of a line
+- `---` is only special when it appears on its own line
+
+Examples:
+
+```text
+# Special Characters Example
+user: The price is $10:50
+assistant: That's correct! The colon (:) is just part of the price.
+
+user: Here's a markdown heading: # Important Note
+assistant: The # symbol is just part of the text here.
+
+user: The separator looks like this: ---
+assistant: Yes, that's just three hyphens in the text.
+```
+
+#### Multiline Message Format
+
+Hebo Eval supports two styles of multiline messages:
+
+1. **Indented Style**:
+
+   ```text
+   user: This is a multiline message
+         that continues on the next line
+         with proper indentation
+   ```
+
+2. **Non-indented Style**:
+   ```text
+   user: This is another multiline message
+   that continues on the next line
+   without indentation
+   ```
+
+Both styles are valid and will be parsed correctly. Choose the style that best fits your needs.
+
+#### Directory Structure Example
+
+```
+tests/
+├── basic/
+│   ├── conversations.txt
+│   └── simple_queries.txt
+├── advanced/
+│   ├── tool_usage.txt
+│   └── complex_scenarios.txt
+└── main.txt
+```
+
+### Output Format
+
+The tool supports three output formats with different verbosity levels:
+
+#### Default Output (Concise)
+
+```
+Passed examples/more tests/test/Silly math
+Passed examples/example/First Test Case
+Passed examples/more tests/test/Math
+Passed examples/math/math
+Passed examples/example/Second Test Case
+Passed examples/example/Third Test Case
+Failed examples/stocks/stocks
+Passed examples/news/news
+Passed examples/translation/translation
+Passed examples/weather/weather
+
+Failed Test Details
+=================
+examples/stocks/stocks
+Status: Failed
+Score: 0.398
+Time: 16694.51ms
+
+Input:
+user: what's the current price of Apple stock?
+assistant: I'll check the current stock price
+Apple's stock (AAPL) is currently trading at USD175.25, up 2.3 percent today
+user: can you write that again in simple terms?
+
+Expected Output:
+assistant: something something someting in simple terms
+
+Actual Response:
+Sure, I can rephrase that in simpler terms:
+
+Apple's shares cost $175.25 each right now. The price went up a bit today.
+
+Error:
+Response mismatch
+
+Test Summary
+============
+Total: 10
+Passed: 9
+Failed: 1
+Duration: 50.54s
+```
+
+### Example Usage
+
+1. **Basic Evaluation**:
+
+   ```bash
+   hebo-eval run gato-qa:v1
+   ```
+
+2. **Custom Directory and Format**:
+
+   ```bash
+   hebo-eval run gato-qa:v1 -d ./my-tests -f markdown
+   ```
+
+3. **With Configuration File**:
+
+   ```bash
+   hebo-eval run gato-qa:v1 -c ./hebo-evals.config.yaml
+   ```
+
+4. **Custom Threshold and Concurrency**:
+
+   ```bash
+   hebo-eval run gato-qa:v1 -t 0.5 -m 10
+   ```
+
+5. **Verbose Output**:
+   ```bash
+   hebo-eval run gato-qa:v1 -v
+   ```
+
+### Best Practices
+
+1. Always set up your API keys using environment variables for security
+2. Use the provided `hebo-evals.config.yaml` template as a starting point
+3. Start with a small test set before running large evaluations
+4. Use descriptive test case titles with the `#` format
+5. Organize test cases in subdirectories for better management
+6. Keep your configuration file secure and never commit API keys to version control
+7. Use the `-v` flag when debugging test failures
+8. Leverage environment variable substitution in your configuration for better security
+
+### Troubleshooting
+
+If you encounter the "HEBO_API_KEY is required" error:
+
+1. Verify your environment variables:
+
+   ```bash
+   export HEBO_API_KEY=your_api_key_here
+   ```
+
+2. Or use a configuration file:
+   ```bash
+   hebo-eval run <agent> --config path/to/hebo-evals.config.yaml
+   ```

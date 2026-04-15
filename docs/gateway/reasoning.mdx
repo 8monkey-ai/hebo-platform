@@ -1,0 +1,169 @@
+---
+title: "Reasoning"
+description: "A standardized a way to configure reasoning across models"
+---
+
+Different providers express reasoning in different ways (token budgets, effort levels, or model-specific flags).
+Hebo Gateway standardizes this into a single `reasoning` configuration so you can keep one client and switch models safely.
+
+## Reasoning Effort
+
+You can pass a normalized `reasoningEffort` parameter with a consistent shape across providers.
+It supports the following values:
+
+| Value     | Meaning                   |
+| --------- | ------------------------- |
+| `none`    | Disable reasoning.        |
+| `minimal` | Lowest reasoning effort.  |
+| `low`     | Low reasoning effort.     |
+| `medium`  | Default reasoning effort. |
+| `high`    | High reasoning effort.    |
+| `xhigh`   | Maximum reasoning effort. |
+
+Hebo automatically maps this setting to the appropriate provider-specific controls (effort tiers, token budgets, or internal flags), so your application code remains unchanged when switching models.
+
+## Basic Example
+
+```ts Vercel AI SDK highlight={13-17,20}
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText } from "ai";
+
+const hebo = createOpenAICompatible({
+  name: "hebo",
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const result = await generateText({
+  model: hebo("openai/gpt-oss-20b"),
+  prompt: "Why did the monkey bring a ladder to the bar?",
+  providerOptions: {
+    hebo: {
+      reasoningEffort: "medium",
+    },
+  },
+});
+
+console.log("Reasoning: ", result.reasoningText);
+console.log("Text: ", result.text);
+```
+
+<Info>
+  Some models don't support returning reasoning content, in which case the ```result.reasoning```
+  parameter will be empty. The model still used reasoniong internally.
+</Info>
+
+## Chain-Of-Thoughts
+
+If you use streaming, you can see the thought process of the model in realtime.
+
+```ts Vercel AI SDK highlight={10,21-24}
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { streamText } from "ai";
+
+const hebo = createOpenAICompatible({
+  name: "hebo",
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const result = streamText({
+  model: hebo("openai/gpt-oss-20b"),
+  prompt: "Tell me a very long story about monkeys",
+  providerOptions: {
+    hebo: {
+      reasoningEffort: "medium",
+    },
+  },
+});
+
+for await (const part of result.fullStream) {
+  if (part.type === "reasoning-delta") {
+    process.stdout.write("<REASONING STEP>\n");
+    process.stdout.write(part.text);
+    process.stdout.write("</REASONING STEP>\n\n");
+  }
+
+  if (part.type === "text-delta") {
+    process.stdout.write(part.text);
+  }
+}
+```
+
+<Info>
+  Not all models provide the detailed chain-of-thoughts output, summ will only provide a reasoning
+  summary at the end.
+</Info>
+
+## Follow-up Calls
+
+Follow-up calls should reuse the previous response messages, so the next request preserves the model’s context, including any tool calls and internal thought process.
+
+Some providers also include reasoning metadata that must be passed along to keep model behavior consistent across a conversation.
+
+Hebo Gateway handles this automatically, as long as you include the full returned messages object in your next request.
+
+```ts
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText } from "ai";
+
+const hebo = createOpenAICompatible({
+  name: "hebo",
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const messages = [
+  { role: "user", content: "Why did the monkey bring a ladder to the bar?" } as const,
+];
+
+const first = await generateText({
+  model: hebo("openai/gpt-oss-20b"),
+  messages,
+  providerOptions: {
+    hebo: {
+      reasoningEffort: "medium",
+    },
+  },
+});
+
+console.log(first.text + "\n");
+
+messages.push(...first.response.messages);
+messages.push({
+  role: "user",
+  content: "Why did the monkey bring a ladder to the bar?",
+} as const);
+
+const second = await generateText({
+  model: hebo("openai/gpt-oss-20b"),
+  messages,
+  providerOptions: {
+    hebo: {
+      reasoningEffort: "medium",
+    },
+  },
+});
+
+console.log(second.text);
+```
+
+Internally, this automatically preserves reasoning details and thought signatures across follow-up calls.
+
+## Advanced Parameters
+
+For more configurability, the normalized `reasoning` object supports the following parameters:
+
+```json
+"reasoning": {
+  "enabled": true,      // turn reasoning on/off
+  "effort": "medium",   // none | minimal | low | medium | high | xhigh
+  "maxTokens": 2048,   // max tokens for reasoning (advanced)
+  "exclude": false      // exclude reasoning from response payload
+}
+```
+
+<Info>
+  Keep in mind, when you tweak the individual parameters that some models might not support your
+  specific settings.
+</Info>
