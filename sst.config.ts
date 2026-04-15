@@ -13,6 +13,20 @@ export default $config({
     };
   },
   async run() {
+    // FUTURE: remove once https://github.com/sst/sst/issues/6742 is fixed upstream.
+    // SST's setUrlOrigin deletes customOriginConfig for HTTP origins but leaves
+    // originAccessControlConfig, causing CloudFront to default to HTTPS:443 → 502.
+    const HTTP_ORIGIN_BUG = /override\.protocol==="http"&&delete origin\.customOriginConfig/g;
+    const HTTP_ORIGIN_FIX =
+      'override.protocol==="http"&&(origin.customOriginConfig={port:80,protocol:"http",sslProtocols:["TLSv1.2"]},delete origin.originAccessControlConfig)';
+    $transform(aws.cloudfront.Function, (args) => {
+      args.code = $util.output(args.code).apply((code) =>
+        HTTP_ORIGIN_BUG.test(code)
+          ? code.replace(HTTP_ORIGIN_BUG, HTTP_ORIGIN_FIX)
+          : code,
+      );
+    });
+
     await import("./infra/stacks/db");
     await import("./infra/stacks/greptime");
     await import("./infra/stacks/auth");
