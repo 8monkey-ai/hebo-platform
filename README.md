@@ -8,9 +8,13 @@ A platform that brings development and business teams together. Iterate fast. Re
 
 ## Key features
 
-- **Gateway** — Unified access to state-of-the-art LLMs via an OpenAI-compatible API. Chat completions, embeddings, responses, and multi-turn conversations out of the box.
+- **Gateway** — Unified access to state-of-the-art LLMs with native support for `/chat/completions` (OpenAI), `/responses` (OpenResponses), and `/messages` (Anthropic). Embeddings and multi-turn conversations out of the box.
 - **Observability** — Conversation-level traces with token and latency tracking, tool call inspection, and full conversation replay — not just individual request logs.
 - **Evaluations** — Define evals as simple Markdown files. Test agent behavior against guidelines, tool usage, and hand-off triggers.
+
+<p align="center">
+  <img src="https://hebo.ai/assets/hebo-platform-Cwx3imlO.png" alt="Hebo observability dashboard" width="800" />
+</p>
 
 ## Get started
 
@@ -41,13 +45,23 @@ Run everything locally with Docker Compose — a single container with all servi
 
 ```bash
 cd infra/self-hosted
-cp .env.example .env    # all defaults work out of the box
 docker compose up -d
 ```
 
 Open `http://localhost:8520` to access the console.
 
-See [`infra/self-hosted/.env.example`](infra/self-hosted/.env.example) for configuration options (OAuth, SMTP, LLM provider keys, etc.).
+#### Production configuration
+
+Create a `.env` file in `infra/self-hosted/` and set the variables you want to override. At minimum for production:
+
+| Variable | Why |
+| --- | --- |
+| `AUTH_SECRET` | Replace the default with a strong random string |
+| `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, … | Platform-wide LLM provider keys (users can also bring their own) |
+
+Optional: OAuth (`GITHUB_CLIENT_ID`, `GOOGLE_CLIENT_ID`, …) and SMTP (`SMTP_HOST`, `SMTP_PORT`, …) for passwordless login and invitations.
+
+See [`infra/self-hosted/.env.example`](infra/self-hosted/.env.example) for the full variable reference.
 
 ## How Hebo compares
 
