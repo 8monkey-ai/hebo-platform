@@ -4,11 +4,10 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase from "./db";
-import { disableInitProcess } from "./ecs";
-import { authSecret, isProduction, llmSecrets, greptimeHost, normalizedStage } from "./env";
+import { disableInitProcess, albUrl, domain } from "./helpers";
+import { authSecret, isProduction, llmSecrets, greptimeHost } from "./env";
 import heboGreptime from "./greptime";
 
-const gatewayDomain = isProduction ? "gateway.hebo.ai" : `gateway.${normalizedStage}.hebo.ai`;
 const gatewayPort = "8522";
 
 const heboGatewayAlbAccessLogs = new sst.aws.Bucket("HeboGatewayAlbAccessLogs", {
@@ -42,23 +41,19 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile",
-    tags: [gatewayDomain],
+    tags: [domain("gateway")],
     args: { NODE_ENV: isProduction ? "production" : "development" },
   },
   environment: {
     HEBO_MODE: "gateway",
-    AUTH_URL: heboAuth.url,
-    GATEWAY_URL: `https://${gatewayDomain}`,
+    AUTH_URL: albUrl(heboAuth),
+    GATEWAY_URL: `https://${domain("gateway")}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: gatewayPort,
     ...(heboGreptime ? { GREPTIME_HOST: heboGreptime.service } : {}),
   },
   loadBalancer: {
-    domain: gatewayDomain,
-    rules: [
-      { listen: "80/http", redirect: "443/https" },
-      { listen: "443/https", forward: `${gatewayPort}/http` },
-    ],
+    rules: [{ listen: "80/http", forward: `${gatewayPort}/http` }],
   },
   transform: {
     taskDefinition: disableInitProcess,
@@ -69,11 +64,6 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
         enabled: true,
         prefix: "gateway-alb",
       };
-    },
-    listener: (args) => {
-      if (args.protocol === "HTTPS") {
-        args.sslPolicy = "ELBSecurityPolicy-TLS13-1-2-2021-06";
-      }
     },
   },
   scaling: {

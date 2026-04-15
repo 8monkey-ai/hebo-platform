@@ -2,10 +2,9 @@
 /// <reference path="../../.sst/platform/config.d.ts" />
 
 import heboCluster from "./cluster";
-import { disableInitProcess } from "./ecs";
-import { isProduction, greptimeHost, authSecret, normalizedStage } from "./env";
+import { disableInitProcess, domain } from "./helpers";
+import { isProduction, greptimeHost, authSecret } from "./env";
 
-const mcpDomain = isProduction ? "mcp.hebo.ai" : `mcp.${normalizedStage}.hebo.ai`;
 const mcpPort = "8524";
 
 const heboMcp = new sst.aws.Service("HeboMcp", {
@@ -17,7 +16,7 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile",
-    tags: [mcpDomain],
+    tags: [domain("mcp")],
     args: { NODE_ENV: isProduction ? "production" : "development" },
   },
   environment: {
@@ -25,19 +24,10 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
     PORT: mcpPort,
   },
   loadBalancer: {
-    domain: mcpDomain,
-    rules: [
-      { listen: "80/http", redirect: "443/https" },
-      { listen: "443/https", forward: `${mcpPort}/http` },
-    ],
+    rules: [{ listen: "80/http", forward: `${mcpPort}/http` }],
   },
   transform: {
     taskDefinition: disableInitProcess,
-    listener: (args) => {
-      if (args.protocol === "HTTPS") {
-        args.sslPolicy = "ELBSecurityPolicy-TLS13-1-2-2021-06";
-      }
-    },
   },
   scaling: {
     min: 1,

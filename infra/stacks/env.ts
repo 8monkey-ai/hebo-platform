@@ -71,9 +71,3 @@ export const llmSecrets = [
   vertexServiceAccountEmail,
   voyageApiKey,
 ];
-
-export const normalizedStage = $app.stage
-  .trim()
-  .toLowerCase()
-  .replaceAll(/[^a-z0-9]+/g, "-")
-  .replaceAll(/^-+|-+$/g, "");

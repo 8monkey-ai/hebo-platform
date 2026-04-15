@@ -1,10 +1,9 @@
 // oxlint-disable-next-line triple-slash-reference
 /// <reference path="../../.sst/platform/config.d.ts" />
 
-import heboApi from "./api";
-import heboAuth from "./auth";
-import { isProduction, normalizedStage, smtpHost } from "./env";
-import heboGateway from "./gateway";
+import { domain } from "./helpers";
+import { smtpHost } from "./env";
+import { apiRouter, authRouter, gatewayRouter } from "./router";
 
 const heboConsole = new sst.aws.StaticSite("HeboConsole", {
   path: "apps/console",
@@ -12,11 +11,11 @@ const heboConsole = new sst.aws.StaticSite("HeboConsole", {
     command: "bun run build",
     output: "build/client",
   },
-  domain: isProduction ? "console.hebo.ai" : `console.${normalizedStage}.hebo.ai`,
+  domain: domain("console"),
   environment: {
-    VITE_API_URL: heboApi.url,
-    VITE_AUTH_URL: heboAuth.url,
-    VITE_GATEWAY_URL: heboGateway.url,
+    VITE_API_URL: apiRouter.url,
+    VITE_AUTH_URL: authRouter.url,
+    VITE_GATEWAY_URL: gatewayRouter.url,
     VITE_MAGICLINK_AUTH: smtpHost.value.apply((v) => (v !== "undefined" ? "true" : "")),
   },
 });

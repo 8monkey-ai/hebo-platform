@@ -1,7 +1,8 @@
 // oxlint-disable-next-line triple-slash-reference
 /// <reference path="../../.sst/platform/config.d.ts" />
 
-import { isProduction, normalizedStage } from "./env";
+import { isProduction } from "./env";
+import { normalizedStage } from "./helpers";
 import heboVpc from "./network";
 
 const globalCluster = new aws.rds.GlobalCluster("HeboDbGlobal", {
