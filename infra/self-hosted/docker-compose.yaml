@@ -1,11 +1,11 @@
-# Hebo self-hosted — docker compose up -d
+# Hebo self-hosted — just run: docker compose up -d
 #
-# Copy .env.example to .env and adjust as needed.
-# All services start with sensible defaults — no required env vars.
+# Works out of the box with sensible defaults. No .env file needed.
+# To customise, create a .env file in this directory — it will override
+# any default. See .env.example for the full variable reference.
 #
 # Usage:
-#   cp .env.example .env
-#   docker compose --env-file .env up -d
+#   docker compose up -d
 
 services:
   hebo:
@@ -17,6 +17,9 @@ services:
       - "127.0.0.1:8522:8522"
       - "127.0.0.1:8523:8523"
       - "127.0.0.1:8524:8524"
+    environment:
+      POSTGRES_URL: ${POSTGRES_URL:-postgresql://postgres:password@postgres:5432/hebo}
+      GREPTIME_HOST: ${GREPTIME_HOST:-greptimedb}
     env_file:
       - path: .env
         required: false
