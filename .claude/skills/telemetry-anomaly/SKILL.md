@@ -151,8 +151,8 @@ Only for dimensions flagged in Phase A, query `opentelemetry_traces` and `opente
 **Dimensions:** group by `("span_attributes.http.request.method", "span_attributes.http.route")`
 
 **Metrics (from traces for drill-down):**
-- 5xx error rate: `COUNT(*) FILTER (WHERE "span_attributes.http.response.status_code"::int >= 500) / COUNT(*)`
-- 4xx error rate: `COUNT(*) FILTER (WHERE "span_attributes.http.response.status_code"::int >= 400 AND "span_attributes.http.response.status_code"::int < 500) / COUNT(*)`
+- 5xx error rate: `COUNT(*) FILTER (WHERE "span_attributes.http.response.status_code"::int >= 500)::double / NULLIF(COUNT(*), 0)`
+- 4xx error rate: `COUNT(*) FILTER (WHERE "span_attributes.http.response.status_code"::int >= 400 AND "span_attributes.http.response.status_code"::int < 500)::double / NULLIF(COUNT(*), 0)`
 - P95 latency: `approx_percentile_cont(duration_nano, 0.95) / 1e6` (ms)
 - P99 latency: `approx_percentile_cont(duration_nano, 0.99) / 1e6` (ms)
 
@@ -171,13 +171,12 @@ Only for dimensions flagged in Phase A, query `opentelemetry_traces` and `opente
 **Dimensions:** group by `("span_attributes.gen_ai.operation.name", "span_attributes.gen_ai.provider.name", "span_attributes.gen_ai.response.model")`
 
 **Metrics:**
-- Error rate: `COUNT(*) FILTER (WHERE span_status_code = 'STATUS_CODE_ERROR') / COUNT(*)`
+- Error rate: `COUNT(*) FILTER (WHERE span_status_code = 'STATUS_CODE_ERROR')::double / NULLIF(COUNT(*), 0)`
 - P95 latency: `approx_percentile_cont(duration_nano, 0.95) / 1e6` (ms)
 - P99 latency: `approx_percentile_cont(duration_nano, 0.99) / 1e6` (ms)
 
 **Absolute thresholds:**
-- 5xx error rate: `> 10%` (env: `ANOMALY_ABS_5XX_RATE_GENAI`, default `0.10`)
-- 4xx error rate: `> 25%` (env: `ANOMALY_ABS_4XX_RATE_GENAI`, default `0.25`)
+- Error rate: `> 10%` (env: `ANOMALY_ABS_ERROR_RATE_GENAI`, default `0.10`)
 - P95 latency: `> 120,000 ms` (env: `ANOMALY_ABS_P95_MS_GENAI`, default `120000`)
 - P99 latency: `> 180,000 ms` (env: `ANOMALY_ABS_P99_MS_GENAI`, default `180000`)
 
@@ -188,7 +187,7 @@ Only for dimensions flagged in Phase A, query `opentelemetry_traces` and `opente
 **Dimensions:** group by `("span_attributes.db.operation", "span_attributes.db.system")`
 
 **Metrics:**
-- Error rate: `COUNT(*) FILTER (WHERE span_status_code = 'STATUS_CODE_ERROR') / COUNT(*)`
+- Error rate: `COUNT(*) FILTER (WHERE span_status_code = 'STATUS_CODE_ERROR')::double / NULLIF(COUNT(*), 0)`
 - P95 latency: `approx_percentile_cont(duration_nano, 0.95) / 1e6` (ms)
 - P99 latency: `approx_percentile_cont(duration_nano, 0.99) / 1e6` (ms)
 
@@ -207,7 +206,7 @@ Only for dimensions flagged in Phase A, query `opentelemetry_traces` and `opente
 
 **Metrics:**
 - Error log count: `COUNT(*) FILTER (WHERE severity_number >= 17)` per 4-hour window
-- Error log ratio: `COUNT(*) FILTER (WHERE severity_number >= 17) / COUNT(*)` per dimension
+- Error log ratio: `COUNT(*) FILTER (WHERE severity_number >= 17)::double / NULLIF(COUNT(*), 0)` per dimension
 
 **Absolute thresholds:**
 - Error log count: `> 100` per 4-hour window (env: `ANOMALY_ABS_ERROR_LOG_COUNT`, default `100`)
@@ -264,10 +263,15 @@ telemetry-anomaly:{category}:{type}:{slugified-dimension}
 
 Slugify: lowercase, replace non-alphanumeric with `-`, collapse consecutive dashes.
 
+**Length limit:** GitHub labels have a 50-character maximum. If the full label exceeds 50 characters:
+1. Compute an 8-character hex SHA-1 hash of the full slugified-dimension
+2. Truncate the slug so that `telemetry-anomaly:{category}:{type}:{truncated_slug}-{sha1_8}` is <= 50 chars
+3. The hash ensures deterministic, collision-resistant labels across runs
+
 Examples:
-- `telemetry-anomaly:gen_ai:5xx_rate:chat-anthropic-claude-sonnet-4-5-20250514`
-- `telemetry-anomaly:http:4xx_rate:GET-api-v1-users`
-- `telemetry-anomaly:logs:error_spike:api-service`
+- `telemetry-anomaly:http:4xx_rate:GET-api-v1-users` (43 chars — no truncation needed)
+- `telemetry-anomaly:logs:error_spike:api-service` (48 chars — no truncation needed)
+- `ta:gen_ai:err:chat-anthropic-clau-a1b2c3d4` (long dimension truncated + hash)
 
 ### Hysteresis State Machine
 
@@ -282,7 +286,13 @@ Examples:
 
 **Low-traffic exception:** Dimensions with sample counts below 2x the minimum threshold require **3 consecutive anomalous runs** (12 hours) before issue creation.
 
-**Tracking hysteresis state:** Check the most recent comments on existing issues for "improvement noted" or "still active" patterns, and search for recently closed issues with the same fingerprint label. No external state store needed.
+**Tracking hysteresis state:** Use a two-step flow to determine state:
+1. List candidate issues: `gh issue list --label "{fingerprint}" --state open --json number,title`
+2. For each candidate, fetch comment bodies: `gh issue view <number> --json comments`
+3. Parse the most recent comment bodies for "improvement noted" or "still active" patterns
+4. Also search recently closed issues: `gh issue list --label "{fingerprint}" --state closed --json number,title`
+
+No external state store needed — hysteresis state is derived from issue comment text.
 
 ### Issue Rate Limiting
 
@@ -375,10 +385,11 @@ For dimensions flagged in Phase A (or all dimensions if metric tables don't exis
 For each detected anomaly:
 
 1. Generate the fingerprint label
-2. Search for existing open issue: `gh issue list --label "{fingerprint}" --state open --json number,title,comments`
-3. Determine hysteresis state from recent comments
-4. Take appropriate action (create / update / close / no-op)
-5. Respect the 5-issue-per-run cap for new issues
+2. Search for existing open issue: `gh issue list --label "{fingerprint}" --state open --json number,title`
+3. For each candidate, fetch comment bodies: `gh issue view <number> --json comments`
+4. Determine hysteresis state from fetched comment text
+5. Take appropriate action (create / update / close / no-op)
+6. Respect the 5-issue-per-run cap for new issues
 
 For each previously open anomaly that is now normal:
 
@@ -422,8 +433,7 @@ If `DRY_RUN=true` is set:
 | `ANOMALY_ABS_4XX_RATE_HTTP` | `0.25` | HTTP 4xx error rate threshold |
 | `ANOMALY_ABS_P95_MS_HTTP` | `5000` | HTTP P95 latency threshold (ms) |
 | `ANOMALY_ABS_P99_MS_HTTP` | `10000` | HTTP P99 latency threshold (ms) |
-| `ANOMALY_ABS_5XX_RATE_GENAI` | `0.10` | Gen AI 5xx error rate threshold |
-| `ANOMALY_ABS_4XX_RATE_GENAI` | `0.25` | Gen AI 4xx error rate threshold |
+| `ANOMALY_ABS_ERROR_RATE_GENAI` | `0.10` | Gen AI error rate threshold |
 | `ANOMALY_ABS_P95_MS_GENAI` | `120000` | Gen AI P95 latency threshold (ms) |
 | `ANOMALY_ABS_P99_MS_GENAI` | `180000` | Gen AI P99 latency threshold (ms) |
 | `ANOMALY_ABS_ERROR_RATE_SQL` | `0.05` | SQL error rate threshold |
