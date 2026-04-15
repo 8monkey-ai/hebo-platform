@@ -14,11 +14,7 @@ import {
   createLoggerConfigurator,
 } from "@opentelemetry/sdk-logs";
 import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
-import {
-  type BufferConfig,
-  type SpanExporter,
-  BatchSpanProcessor,
-} from "@opentelemetry/sdk-trace-base";
+import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { PgInstrumentation } from "@opentelemetry/instrumentation-pg";
 
@@ -26,10 +22,30 @@ import { IS_PRODUCTION } from "../env";
 import { getSecret } from "../utils/secret";
 import { isRootPathUrl } from "../utils/url";
 
-const SENSITIVE_SPAN_ATTRIBUTES = [
-  "http.request.header.authorization",
-  "http.request.header.cookie",
-  "http.request.cookie",
+/**
+ * Headers that are safe and useful to record as span attributes.
+ * The fork's safe-by-default behavior excludes all headers unless explicitly
+ * listed here — no sensitive data (Authorization, Cookie, etc.) is ever recorded.
+ */
+const ALLOWED_REQUEST_HEADERS = [
+  "accept",
+  "accept-encoding",
+  "accept-language",
+  "cache-control",
+  "content-length",
+  "content-type",
+  "host",
+  "origin",
+  "user-agent",
+  "x-forwarded-proto",
+  "x-request-id",
+];
+
+const ALLOWED_RESPONSE_HEADERS = [
+  "content-length",
+  "content-type",
+  "cache-control",
+  "x-request-id",
 ];
 
 export const GREPTIME_OTLP_ENDPOINT = `http://${(await getSecret("GREPTIME_HOST")) ?? "localhost"}:4000/v1/otlp`;
@@ -81,30 +97,13 @@ registerInstrumentations({
   ],
 });
 
-const REDACTED = "[REDACTED]";
-
-const createRedactingBatchSpanProcessor = (exporter: SpanExporter, config?: BufferConfig) => {
-  const processor = new BatchSpanProcessor(exporter, config);
-  const originalOnEnd = processor.onEnd.bind(processor);
-  const keys = SENSITIVE_SPAN_ATTRIBUTES;
-
-  processor.onEnd = (span) => {
-    const attrs = span.attributes as Record<string, unknown>;
-
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i];
-      if (attrs[key] !== undefined) attrs[key] = REDACTED;
-    }
-
-    originalOnEnd(span);
-  };
-
-  return processor;
-};
-
 export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
   return {
     serviceName,
+    headersToSpanAttributes: {
+      requestHeaders: ALLOWED_REQUEST_HEADERS,
+      responseHeaders: ALLOWED_RESPONSE_HEADERS,
+    },
     metricReader: new PeriodicExportingMetricReader({
       exporter: new OTLPMetricExporter({
         url: `${GREPTIME_OTLP_ENDPOINT}/v1/metrics`,
@@ -116,7 +115,7 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
       return !isRootPathUrl(request.url);
     },
     spanProcessors: [
-      createRedactingBatchSpanProcessor(
+      new BatchSpanProcessor(
         new OTLPTraceExporter({
           url: `${GREPTIME_OTLP_ENDPOINT}/v1/traces`,
           headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
