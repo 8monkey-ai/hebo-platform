@@ -207,7 +207,7 @@ Only for dimensions flagged in Phase A, query `opentelemetry_traces` and `opente
 
 **Metrics:**
 - Error log count: `COUNT(*) FILTER (WHERE severity_number >= 17)` per 4-hour window
-- Error log ratio: `COUNT(severity_number >= 17) / COUNT(*)` per dimension
+- Error log ratio: `COUNT(*) FILTER (WHERE severity_number >= 17) / COUNT(*)` per dimension
 
 **Absolute thresholds:**
 - Error log count: `> 100` per 4-hour window (env: `ANOMALY_ABS_ERROR_LOG_COUNT`, default `100`)
@@ -227,7 +227,8 @@ For each metric in each dimension:
 3. **Minimum baseline points:** require at least 4 valid data points (out of 7 days) before using Z-score; fall back to absolute thresholds only when insufficient
 4. **Method:** Modified Z-score using MAD (Median Absolute Deviation)
    - MAD = `median(|xi - median(X)|)`
-   - Modified Z-score = `0.6745 * (x - median(X)) / MAD`
+   - If `MAD = 0`, skip Z-score for that metric/dimension and rely on absolute-threshold/trend checks only
+   - Modified Z-score = `0.6745 * (x - median(X)) / MAD` (only when `MAD > 0`)
 5. **Threshold:** `|z| > 3` (configurable via env: `ANOMALY_Z_THRESHOLD`, default `3`)
 
 An anomaly is reported if **either** the Z-score method **or** the absolute threshold triggers.
@@ -257,7 +258,7 @@ An anomaly is reported if **either** the Z-score method **or** the absolute thre
 
 Each anomaly gets a deterministic label:
 
-```
+```text
 telemetry-anomaly:{category}:{type}:{slugified-dimension}
 ```
 
