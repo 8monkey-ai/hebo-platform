@@ -15,11 +15,11 @@ const httpOriginFix = {
   edge: {
     viewerRequest: {
       injection: [
-        `const _upd = cf.updateRequestOrigin.bind(cf);`,
-        `cf.updateRequestOrigin = (o) => {`,
+        `const _upd = cf.updateRequestOrigin;`,
+        `Object.defineProperty(cf, "updateRequestOrigin", { value: (o) => {`,
         `  if (o.originAccessControlConfig && !o.originAccessControlConfig.enabled) delete o.originAccessControlConfig;`,
         `  _upd(o);`,
-        `};`,
+        `}});`,
       ].join("\n"),
     },
   },
