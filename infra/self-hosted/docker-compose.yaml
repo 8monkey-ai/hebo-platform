@@ -11,7 +11,12 @@ services:
   hebo:
     image: 8monkey/hebo-platform:${HEBO_VERSION:-latest}
     restart: unless-stopped
-    network_mode: host
+    ports:
+      - "127.0.0.1:8520:8520"
+      - "127.0.0.1:8521:8521"
+      - "127.0.0.1:8522:8522"
+      - "127.0.0.1:8523:8523"
+      - "127.0.0.1:8524:8524"
     env_file:
       - path: .env
         required: false
@@ -24,12 +29,12 @@ services:
   postgres:
     image: postgres:17.6
     restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
       POSTGRES_DB: hebo
-    ports:
-      - "127.0.0.1:5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
