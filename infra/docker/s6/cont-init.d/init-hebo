@@ -15,9 +15,11 @@ fi
 
 # ── Run Prisma migrations ──
 echo "[init] Running API schema migrations"
-bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
+POSTGRES_URL="${POSTGRES_URL}?schema=api" \
+  bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
 
 echo "[init] Running Auth schema migrations"
-bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
+POSTGRES_URL="${POSTGRES_URL}?schema=auth" \
+  bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
 
 echo "[init] Bootstrap complete"
