@@ -7,7 +7,10 @@ import {
   ChatCompletionsSchema,
 } from "@hebo-ai/gateway/endpoints/chat-completions";
 import { EmbeddingsBodySchema, EmbeddingsSchema } from "@hebo-ai/gateway/endpoints/embeddings";
+import { MessagesBodySchema, MessagesSchema } from "@hebo-ai/gateway/endpoints/messages";
 import { ModelListSchema, ModelSchema } from "@hebo-ai/gateway/endpoints/models";
+import { ResponsesBodySchema, ResponsesSchema } from "@hebo-ai/gateway/endpoints/responses";
+import { AnthropicErrorSchema } from "@hebo-ai/gateway/errors/anthropic";
 import { OpenAIErrorSchema } from "@hebo-ai/gateway/errors/openai";
 import { Elysia } from "elysia";
 
@@ -21,7 +24,7 @@ import { logging } from "@hebo/shared-api/middlewares/logging";
 import { prisma } from "~api/middlewares/prisma";
 
 import { BASE_PATH, gw } from "./gateway";
-import { openaiErrors } from "./middlewares/errors";
+import { gatewayErrors } from "./middlewares/errors";
 
 const PORT = Number(process.env.PORT ?? 8522);
 const WORKERS = Number(process.env.WORKERS);
@@ -39,7 +42,7 @@ export const createGateway = () =>
         createOpenapiConfig("Hebo Gateway", "OpenAI-compatible AI Gateway", GATEWAY_URL, "0.1.0"),
       ),
     )
-    .use(openaiErrors)
+    .use(gatewayErrors)
     // Public routes (no authentication required)
     .get(
       "/v1/models",
@@ -95,6 +98,36 @@ export const createGateway = () =>
               400: OpenAIErrorSchema,
               402: OpenAIErrorSchema,
               500: OpenAIErrorSchema,
+            },
+          },
+        )
+        .post(
+          "/responses",
+          ({ request, prismaClient, organizationId }) =>
+            gw.handler(request, { prismaClient, organizationId }),
+          {
+            parse: "none",
+            body: ResponsesBodySchema,
+            response: {
+              200: ResponsesSchema,
+              400: OpenAIErrorSchema,
+              402: OpenAIErrorSchema,
+              500: OpenAIErrorSchema,
+            },
+          },
+        )
+        .post(
+          "/messages",
+          ({ request, prismaClient, organizationId }) =>
+            gw.handler(request, { prismaClient, organizationId }),
+          {
+            parse: "none",
+            body: MessagesBodySchema,
+            response: {
+              200: MessagesSchema,
+              400: AnthropicErrorSchema,
+              402: AnthropicErrorSchema,
+              500: AnthropicErrorSchema,
             },
           },
         ),
