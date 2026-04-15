@@ -46,13 +46,19 @@ jobs:
             --parameters '{"host":["${{ secrets.GREPTIMEDB_HOST }}"],"portNumber":["4003"],"localPortNumber":["4003"]}' &
           SSM_PID=$!
           echo "SSM_PID=$SSM_PID" >> "$GITHUB_ENV"
+          ready=false
           for i in $(seq 1 30); do
             if pg_isready -h localhost -p 4003 2>/dev/null; then
               echo "Tunnel is ready"
+              ready=true
               break
             fi
             sleep 1
           done
+          if [ "$ready" != "true" ]; then
+            echo "::error::SSM tunnel to GreptimeDB did not become ready within 30 seconds"
+            exit 1
+          fi
 
       - name: Generate GitHub App token
         id: app-token
