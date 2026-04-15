@@ -30,7 +30,8 @@
     "@opentelemetry/sdk-metrics": "^2.5.0",
     "@opentelemetry/sdk-trace-base": "^2.5.0",
     "@prisma/adapter-pg": "catalog:",
-    "@prisma/instrumentation": "catalog:",
+    "@opentelemetry/instrumentation": "catalog:",
+    "@opentelemetry/instrumentation-pg": "catalog:",
     "@sindresorhus/slugify": "^3.0.0",
     "better-auth": "catalog:",
     "crypto-random-string": "^5.0.0"
