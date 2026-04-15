@@ -1,13 +1,4 @@
-// oxlint-disable-next-line triple-slash-reference
-/// <reference path="../../.sst/platform/config.d.ts" />
-
-import { isProduction } from "./env";
-
-export const normalizedStage = $app.stage
-  .trim()
-  .toLowerCase()
-  .replaceAll(/[^a-z0-9]+/g, "-")
-  .replaceAll(/^-+|-+$/g, "");
+import { isProduction, normalizedStage } from "./env";
 
 export const domain = (sub: string) =>
   isProduction ? `${sub}.hebo.ai` : `${sub}.${normalizedStage}.hebo.ai`;

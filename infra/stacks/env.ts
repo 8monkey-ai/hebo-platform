@@ -3,6 +3,12 @@
 
 export const isProduction = $app.stage === "production";
 
+export const normalizedStage = $app.stage
+  .trim()
+  .toLowerCase()
+  .replaceAll(/[^a-z0-9]+/g, "-")
+  .replaceAll(/^-+|-+$/g, "");
+
 const getSstSecret = (name: string) => new sst.Secret(name, "undefined");
 
 // Auth
