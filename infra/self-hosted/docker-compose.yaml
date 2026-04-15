@@ -9,7 +9,7 @@
 
 services:
   hebo:
-    image: 8monkey/hebo-platform:init
+    image: 8monkey/hebo-platform:latest
     restart: unless-stopped
     ports:
       - "127.0.0.1:8520:8520"
