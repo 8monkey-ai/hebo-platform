@@ -37,7 +37,7 @@ export function tagSpanWithOrganization(ctx: OnRequestHookContext) {
 }
 
 export function injectDefaultCacheControl({ body, operation }: BeforeHookContext) {
-  if (operation === "chat" || operation === "responses") {
+  if (operation === "chat" || operation === "responses" || operation === "messages") {
     body.cache_control ??= { type: "ephemeral" };
   }
 }
