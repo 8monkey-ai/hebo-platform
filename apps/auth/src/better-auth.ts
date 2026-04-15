@@ -39,7 +39,7 @@ const [
 ]);
 
 export const auth = betterAuth({
-  baseURL: process.env.PUBLIC_URL,
+  baseURL: process.env.BASE_URL,
   basePath: "/v1",
   secret: AUTH_SECRET,
   accountLinking: {

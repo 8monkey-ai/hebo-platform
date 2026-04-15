@@ -22,7 +22,7 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
   },
   environment: {
     HEBO_MODE: "auth",
-    PUBLIC_URL: `https://${domain("auth")}`,
+    BASE_URL: `https://${domain("auth")}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: authPort,
   },

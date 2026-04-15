@@ -47,7 +47,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   environment: {
     HEBO_MODE: "gateway",
     AUTH_URL: albUrl(heboAuth),
-    PUBLIC_URL: `https://${domain("gateway")}`,
+    BASE_URL: `https://${domain("gateway")}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: gatewayPort,
     ...(heboGreptime ? { GREPTIME_HOST: heboGreptime.service } : {}),
