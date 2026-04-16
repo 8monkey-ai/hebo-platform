@@ -110,6 +110,5 @@ export const parseLogLevel = (raw: string): { level: LogLevel; severity: Severit
       `Unsupported LOG_LEVEL "${raw}". Must be one of: ${Object.keys(OTEL_SEVERITY_BY_LEVEL).join(", ")}`,
     );
   }
-  const level = raw as LogLevel;
-  return { level, severity: OTEL_SEVERITY_BY_LEVEL[level] };
+  return { level: raw as LogLevel, severity: OTEL_SEVERITY_BY_LEVEL[raw as LogLevel] };
 };
