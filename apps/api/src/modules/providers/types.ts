@@ -10,9 +10,7 @@ export const supportedProviders = {
   voyage: { name: "Voyage AI" },
 } as const;
 
-export const ProviderSlugSchema = z.enum(Object.keys(supportedProviders) as [string, ...string[]], {
-  error: "Invalid provider slug",
-});
+export const ProviderSlugSchema = z.enum(Object.keys(supportedProviders) as [string, ...string[]]);
 
 export const BedrockIamRoleSchema = z.object({
   authMode: z.literal("iam-role"),
@@ -86,18 +84,23 @@ export const ModelConfigSchema = z.object({
     .optional(),
 });
 
-export const ModelsSchema = z.array(ModelConfigSchema);
+export const ModelsConfigSchema = z.array(ModelConfigSchema);
 
-export type Models = z.infer<typeof ModelsSchema>;
-export type ModelConfig = z.infer<typeof ModelConfigSchema>;
+export type ApiKeyConfig = z.infer<typeof ApiKeySchema>;
+
+export type AzureConfig = z.infer<typeof AzureSchema>;
+
 export type BedrockIamRoleConfig = z.infer<typeof BedrockIamRoleSchema>;
 export type BedrockAccessKeyConfig = z.infer<typeof BedrockAccessKeySchema>;
+export type BedrockConfig = BedrockIamRoleConfig | BedrockAccessKeyConfig;
+
 export type VertexIdentityFederationConfig = z.infer<typeof VertexIdentityFederationSchema>;
 export type VertexServiceAccountConfig = z.infer<typeof VertexServiceAccountSchema>;
-export type ApiKeyConfig = z.infer<typeof ApiKeySchema>;
-export type AzureConfig = z.infer<typeof AzureSchema>;
-export type BedrockConfig = BedrockIamRoleConfig | BedrockAccessKeyConfig;
 export type VertexConfig = VertexIdentityFederationConfig | VertexServiceAccountConfig;
-export type Provider = z.infer<typeof ProviderSchema>;
-export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
+
 export type ProviderSlug = z.infer<typeof ProviderSlugSchema>;
+export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
+export type Provider = z.infer<typeof ProviderSchema>;
+
+export type ModelConfig = z.infer<typeof ModelConfigSchema>;
+export type ModelsConfig = z.infer<typeof ModelsConfigSchema>;

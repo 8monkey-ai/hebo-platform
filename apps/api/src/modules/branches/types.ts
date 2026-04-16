@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-import { ModelsSchema } from "~api/modules/providers/types";
+import { ModelsConfigSchema } from "~api/modules/providers/types";
 
 export const BranchPlainSchema = z.object({
   slug: z.string(),
   agent_slug: z.string(),
   name: z.string().trim().min(1),
-  models: ModelsSchema,
+  models: ModelsConfigSchema,
   created_by: z.string(),
   created_at: z.date(),
   updated_by: z.string(),

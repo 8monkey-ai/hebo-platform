@@ -5,7 +5,7 @@ import type { Prisma } from "~api/generated/prisma/client";
 import { prisma } from "~api/middlewares/prisma";
 
 import {
-  type Models,
+  type ModelsConfig,
   ProviderSchema,
   ProviderConfigSchema,
   ProviderSlugSchema,
@@ -78,14 +78,14 @@ export const providersModule = new Elysia({
       const branches = await prismaClient.branches.findMany();
 
       const affectedBranches = branches.filter((branch) => {
-        const models = branch.models as Models;
+        const models = branch.models as ModelsConfig;
         return models.some((model) => model.routing?.only?.includes(params.slug));
       });
 
       // Batch update all affected branches + delete provider in a single transaction
       await prismaClient.$transaction([
         ...affectedBranches.map((branch) => {
-          const models = branch.models as Models;
+          const models = branch.models as ModelsConfig;
           for (const model of models) {
             const only = model.routing?.only;
             if (!only?.includes(params.slug)) continue;
