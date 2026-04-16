@@ -50,9 +50,9 @@ export const auth = betterAuth({
   basePath: "/v1",
   secret: AUTH_SECRET,
   logger: {
-    level: LOG_LEVEL,
-    log: (level, message) => {
-      authLogger[level](message);
+    level: LOG_LEVEL === "trace" ? "debug" : LOG_LEVEL,
+    log: (level, message, ...args) => {
+      authLogger[level]({ args }, message);
     },
   },
   accountLinking: {
