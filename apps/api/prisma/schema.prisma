@@ -59,7 +59,7 @@ model branches {
 model provider_configs {
   id            String @id @default(uuid(7)) @db.Uuid
   provider_slug String
-  /// ![ProviderConfig]
+  /// [ProviderConfig]
   value         Json
 
   // Common audit fields — injected by Prisma extension.

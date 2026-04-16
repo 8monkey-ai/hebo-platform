@@ -26,9 +26,19 @@ import { Input } from "@hebo/shared-ui/components/Input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@hebo/shared-ui/components/Tabs";
 import { Textarea } from "@hebo/shared-ui/components/Textarea";
 
-import { ProviderSchema, type Provider } from "~api/modules/providers/types";
+import {
+  ProviderConfigSchema,
+  ProviderSchema,
+  ProviderSlugSchema,
+  type Provider,
+} from "~api/modules/providers/types";
 import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
+
+export const ProviderConfigureSchema = z.object({
+  slug: ProviderSlugSchema,
+  config: ProviderConfigSchema,
+});
 
 import type { clientAction } from "./route";
 

@@ -1,11 +1,11 @@
 import { parseWithZod } from "@conform-to/zod/v4";
 
-import { ProviderSchema } from "~api/modules/providers/types";
 import { parseError } from "~console/lib/errors";
 import { api } from "~console/lib/service";
 
 import type { Route } from "./+types/route";
 import { CredentialsClearSchema } from "./clear";
+import { ProviderConfigureSchema } from "./configure";
 import { ProvidersList } from "./list";
 
 export async function clientLoader() {
@@ -20,16 +20,16 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
   switch (intent) {
     case "configure": {
       const submission = parseWithZod(formData, {
-        schema: ProviderSchema,
+        schema: ProviderConfigureSchema,
       });
 
       if (submission.status !== "success") return { intent, submission: submission.reply() };
 
       let provider;
       try {
-        provider = await api.providers({ slug: submission.value.slug }).config.put({
-          ...submission.value.config,
-        });
+        provider = await api.providers({ slug: submission.value.slug }).config.put(
+          submission.value.config as Record<string, unknown>,
+        );
       } catch (error) {
         return {
           intent,

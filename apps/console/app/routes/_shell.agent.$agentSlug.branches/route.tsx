@@ -41,11 +41,19 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
         };
       }
 
-      if (result.error?.status === 409 || result.error?.status === 404)
+      if (result.error?.status === 409)
         return {
           intent,
           submission: submission.reply({
             fieldErrors: { name: [parseError(result.error.value).message] },
+          }),
+        };
+
+      if (result.error?.status === 404)
+        return {
+          intent,
+          submission: submission.reply({
+            fieldErrors: { source_branch_slug: [parseError(result.error.value).message] },
           }),
         };
 
