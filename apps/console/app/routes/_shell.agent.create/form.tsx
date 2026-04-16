@@ -24,17 +24,14 @@ import {
 } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 
+import { AgentCreateSchema } from "~api/modules/agents/types";
 import { ModelSelector } from "~console/components/ui/ModelSelector";
 import { useFormErrorToast } from "~console/lib/errors";
 import { shellStore } from "~console/lib/shell";
 
 import type { clientAction } from "./route";
 
-export const AgentCreateSchema = z.object({
-  agentName: ((msg) => z.string(msg).trim().min(1, msg))("Please enter an agent name"),
-  defaultModel: z.string(),
-});
-export type AgentCreateFormValues = z.infer<typeof AgentCreateSchema>;
+type AgentCreateFormValues = z.infer<typeof AgentCreateSchema>;
 
 export function AgentCreateForm() {
   const { models } = useSnapshot(shellStore);
@@ -76,7 +73,7 @@ export function AgentCreateForm() {
 
         <CardContent>
           <FieldGroup>
-            <Field name={fields.agentName.name} orientation="responsive">
+            <Field name={fields.name.name} orientation="responsive">
               <FieldLabel>Agent Name</FieldLabel>
               <FieldContent>
                 <FieldControl>

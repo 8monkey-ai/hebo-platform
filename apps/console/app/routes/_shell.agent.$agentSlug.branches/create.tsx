@@ -27,15 +27,12 @@ import {
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Select } from "@hebo/shared-ui/components/Select";
 
+import { BranchCreateSchema } from "~api/modules/branches/types";
 import { useFormErrorToast } from "~console/lib/errors";
 
 import type { clientAction } from "./route";
 
-export const BranchCreateSchema = z.object({
-  branchName: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a branch name"),
-  sourceBranchSlug: z.string(),
-});
-export type BranchCreateFormValues = z.infer<typeof BranchCreateSchema>;
+type BranchCreateFormValues = z.infer<typeof BranchCreateSchema>;
 
 type CreateBranchProps = {
   branches: {
@@ -50,7 +47,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
     constraint: getZodConstraint(BranchCreateSchema),
     defaultValue: {
-      sourceBranchSlug: branches[0].slug,
+      source_branch_slug: branches[0].slug,
     },
   });
   useFormErrorToast(form.allErrors);
@@ -80,7 +77,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
             <DialogDescription>Set a name and choose a source branch.</DialogDescription>
           </DialogHeader>
           <FieldGroup>
-            <Field name={fields.branchName.name}>
+            <Field name={fields.name.name}>
               <FieldLabel>Branch name</FieldLabel>
               <FieldControl>
                 <Input autoComplete="off" placeholder="Set a branch name" />
@@ -88,7 +85,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
               <FieldError />
             </Field>
 
-            <Field name={fields.sourceBranchSlug.name}>
+            <Field name={fields.source_branch_slug.name}>
               <FieldLabel>Source</FieldLabel>
               <FieldControl>
                 <Select
