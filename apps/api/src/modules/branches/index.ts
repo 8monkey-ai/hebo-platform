@@ -5,7 +5,12 @@ import { slugFromString } from "@hebo/shared-api/utils/slug";
 
 import { prisma } from "~api/middlewares/prisma";
 
-import { BranchCreateSchema, BranchUpdateSchema, BranchPlainSchema } from "./types";
+import {
+  BranchCreateSchema,
+  BranchUpdateSchema,
+  BranchPlainSchema,
+  BranchListSchema,
+} from "./types";
 
 export const branchesModule = new Elysia({
   prefix: "/agents/:agentSlug/branches",
@@ -22,7 +27,7 @@ export const branchesModule = new Elysia({
       );
     },
     {
-      response: { 200: z.array(BranchPlainSchema), 404: z.string() },
+      response: { 200: BranchListSchema, 404: z.string() },
     },
   )
   .post(

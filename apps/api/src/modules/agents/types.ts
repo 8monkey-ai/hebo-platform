@@ -15,6 +15,8 @@ export const AgentPlainSchema = z.object({
   updated_at: z.date(),
 });
 
+export const AgentListSchema = z.array(AgentPlainSchema);
+
 export const AgentCreateSchema = AgentPlainSchema.pick({ name: true }).extend({
   defaultModel: ModelConfigSchema.shape.type,
 });
@@ -26,5 +28,6 @@ export const AgentIncludeSchema = z.object({
 });
 
 export type AgentPlain = z.infer<typeof AgentPlainSchema>;
+export type AgentList = z.infer<typeof AgentListSchema>;
 export type AgentCreate = z.infer<typeof AgentCreateSchema>;
 export type AgentUpdate = z.infer<typeof AgentUpdateSchema>;

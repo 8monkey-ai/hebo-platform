@@ -13,6 +13,8 @@ export const BranchPlainSchema = z.object({
   updated_at: z.date(),
 });
 
+export const BranchListSchema = z.array(BranchPlainSchema);
+
 export const BranchCreateSchema = BranchPlainSchema.pick({ name: true }).extend({
   source_branch_slug: z.string().trim().min(1),
 });
@@ -23,5 +25,6 @@ export const BranchUpdateSchema = BranchPlainSchema.pick({
 }).partial();
 
 export type BranchPlain = z.infer<typeof BranchPlainSchema>;
+export type BranchList = z.infer<typeof BranchListSchema>;
 export type BranchCreate = z.infer<typeof BranchCreateSchema>;
 export type BranchUpdate = z.infer<typeof BranchUpdateSchema>;

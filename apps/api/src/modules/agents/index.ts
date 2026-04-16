@@ -11,6 +11,7 @@ import {
   AgentIncludeSchema,
   AgentUpdateSchema,
   AgentPlainSchema,
+  AgentListSchema,
 } from "./types";
 
 export const agentsModule = new Elysia({
@@ -30,7 +31,7 @@ export const agentsModule = new Elysia({
     },
     {
       query: AgentIncludeSchema,
-      response: { 200: z.array(AgentPlainSchema) },
+      response: { 200: AgentListSchema },
     },
   )
   .post(

@@ -96,6 +96,10 @@ export const ProviderConfigSchema = z.discriminatedUnion("authMode", [
   ),
 ] as [z.core.$ZodTypeDiscriminable, ...z.core.$ZodTypeDiscriminable[]]);
 
+export const ProviderConfiguredSchema = z.object({
+  configured: z.coerce.boolean().default(false).optional(),
+});
+
 export const ProvidersSchema = z.array(ProviderSchema);
 
 export const ModelConfigSchema = z.object({

@@ -6,7 +6,7 @@ import { BadRequestError } from "@hebo/shared-api/errors";
 import { greptime } from "~api/middlewares/greptime";
 
 import { getSpans, listTraces } from "./service";
-import { SpanDetailSchema, TraceListQuerySchema, TraceListResponseSchema } from "./types";
+import { SpanListSchema, TraceListQuerySchema, TraceListResponseSchema } from "./types";
 
 const DEFAULT_FROM = () => new Date(Date.now() - 60 * 60 * 1000);
 const DEFAULT_TO = () => new Date();
@@ -73,6 +73,6 @@ export const spansModule = new Elysia({
       return status(200, spans);
     },
     {
-      response: { 200: z.array(SpanDetailSchema), 404: z.null() },
+      response: { 200: SpanListSchema, 404: z.null() },
     },
   );

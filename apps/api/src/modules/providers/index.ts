@@ -9,6 +9,7 @@ import {
   ProvidersSchema,
   ProviderSlugSchema,
   ProviderConfigSchema,
+  ProviderConfiguredSchema,
 } from "./types";
 
 export const providersModule = new Elysia({
@@ -36,9 +37,7 @@ export const providersModule = new Elysia({
       return status(200, providers);
     },
     {
-      query: z.object({
-        configured: z.coerce.boolean().default(false).optional(),
-      }),
+      query: ProviderConfiguredSchema,
       response: { 200: ProvidersSchema },
     },
   )
