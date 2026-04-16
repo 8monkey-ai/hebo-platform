@@ -52,8 +52,7 @@ export const auth = betterAuth({
   logger: {
     level: LOG_LEVEL as "debug" | "info" | "warn" | "error",
     log: (level, message, ...args) => {
-      const fn = authLogger[level] ?? authLogger.info;
-      fn({ source: "better-auth", args: args.length > 0 ? args : undefined }, message);
+      authLogger[level]({ source: "better-auth", args }, message);
     },
   },
   accountLinking: {
