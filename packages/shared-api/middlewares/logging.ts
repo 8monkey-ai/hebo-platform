@@ -24,13 +24,9 @@ export const logging = (serviceName?: string) => {
   }
 
   app.onError(function logRequestError({ error, set }) {
-    logger.error(
-      {
-        status: typeof set.status === "number" ? set.status : 500,
-        err: error,
-      },
-      "request:error",
-    );
+    const status = typeof set.status === "number" ? set.status : 500;
+    const log = status >= 500 ? logger.error : logger.warn;
+    log.call(logger, { status, err: error }, "request:error");
   });
 
   return app.as("scoped");
