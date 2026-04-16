@@ -10,9 +10,9 @@ export function isRootPathUrl(url: string): boolean {
 }
 
 export function getServerUrl(baseUrl: string, port: number) {
-  const url = new URL(baseUrl);
-  if (url.port || url.protocol === "https:") return baseUrl;
-  if (port === 80 || port === 443) return baseUrl;
+  const { port: urlPort, protocol } = new URL(baseUrl);
+  if (urlPort || (protocol === "http:" && port === 80) || (protocol === "https:" && port === 443))
+    return baseUrl;
   return `${baseUrl}:${port}`;
 }
 
