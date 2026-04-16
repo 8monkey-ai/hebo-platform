@@ -12,6 +12,8 @@ export function isRootPathUrl(url: string): boolean {
 export function getServerUrl(baseUrl: string, port: number | string) {
   const url = new URL(baseUrl);
   if (url.port || url.protocol === "https:") return baseUrl;
+  const p = Number(port);
+  if (p === 80 || p === 443) return baseUrl;
   return `${baseUrl}:${port}`;
 }
 
