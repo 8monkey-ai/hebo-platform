@@ -13,7 +13,7 @@ import {
 import { LRUCache } from "lru-cache";
 
 import type { createPrismaClient } from "~api/db/prisma";
-import type { Models, ProviderSlug } from "~api/modules/providers/types";
+import type { ModelsConfig, ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "../utils/aws";
 import { createProvider } from "./provider";
@@ -106,7 +106,7 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
     throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
   }
 
-  const model = (branch.models as Models)?.find(({ alias }) => alias === modelAlias);
+  const model = (branch.models as ModelsConfig)?.find(({ alias }) => alias === modelAlias);
 
   if (!model) {
     throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
