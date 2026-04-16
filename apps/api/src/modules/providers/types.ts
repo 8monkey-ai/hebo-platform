@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const supportedProviders = {
+export const SUPPORTED_PROVIDERS = {
   anthropic: { name: "Anthropic" },
   azure: { name: "Microsoft Azure" },
   bedrock: { name: "Amazon Bedrock" },
@@ -10,7 +10,7 @@ export const supportedProviders = {
   voyage: { name: "Voyage AI" },
 } as const;
 
-export const ProviderSlugSchema = z.enum(Object.keys(supportedProviders) as [string, ...string[]]);
+export const ProviderSlugSchema = z.enum(Object.keys(SUPPORTED_PROVIDERS) as [string, ...string[]]);
 
 export const BedrockIamRoleSchema = z.object({
   authMode: z.literal("iam-role"),

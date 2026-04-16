@@ -9,7 +9,7 @@ import {
   ProviderSchema,
   ProviderConfigSchema,
   ProviderSlugSchema,
-  supportedProviders,
+  SUPPORTED_PROVIDERS,
 } from "./types";
 
 export const providersModule = new Elysia({
@@ -21,7 +21,7 @@ export const providersModule = new Elysia({
     async ({ prismaClient, query }) => {
       const providerConfigs = await prismaClient.provider_configs.findMany();
 
-      let providers = Object.entries(supportedProviders).map(([slug, { name }]) => ({
+      let providers = Object.entries(SUPPORTED_PROVIDERS).map(([slug, { name }]) => ({
         slug,
         name,
         config: providerConfigs.find((p) => p.provider_slug === slug)?.value,
