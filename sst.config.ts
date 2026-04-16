@@ -19,7 +19,7 @@ export default $config({
     $transform(aws.cloudfront.Function, (args) => {
       const pattern = /override\.protocol==="http"&&delete origin\.customOriginConfig/g;
       const patch =
-        'override.protocol==="http"&&(origin.customOriginConfig={port:80,protocol:"http",sslProtocols:["TLSv1.2"]},delete origin.originAccessControlConfig)';
+        'override.protocol==="http"&&(origin.customOriginConfig={port:80,protocol:"http"},delete origin.originAccessControlConfig)';
       args.code = $util.output(args.code).apply((code) =>
         pattern.test(code) ? code.replace(pattern, patch) : code,
       );
