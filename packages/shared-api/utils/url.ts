@@ -9,11 +9,10 @@ export function isRootPathUrl(url: string): boolean {
   return c === 63 || c === 35;
 }
 
-export function getServerUrl(baseUrl: string, port: number) {
-  const { port: urlPort, protocol } = new URL(baseUrl);
-  if (urlPort || (protocol === "http:" && port === 80) || (protocol === "https:" && port === 443))
-    return baseUrl;
-  return `${baseUrl}:${port}`;
+export function getServerUrl(base: string, port?: number) {
+  const url = new URL(base);
+  if (port) url.port = String(port);
+  return url.href;
 }
 
 export function getRootDomain(baseUrl: string | undefined) {
