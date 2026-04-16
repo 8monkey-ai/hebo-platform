@@ -4,8 +4,10 @@ import { betterAuth } from "better-auth/minimal";
 import { emailOTP, organization } from "better-auth/plugins";
 
 import { createPrismaAdapter } from "@hebo/shared-api/db/postgres";
-import { AUTH_SECRET, AUTH_URL, LOG_LEVEL } from "@hebo/shared-api/env";
+import { AUTH_SECRET, AUTH_URL, LOG_LEVEL, LOG_SEVERITY } from "@hebo/shared-api/env";
 import { COOKIE_CONFIG } from "@hebo/shared-api/lib/better-auth";
+import { createOtelLogger } from "@hebo/shared-api/lib/otel";
+import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino";
 import { getSecret } from "@hebo/shared-api/utils/secret";
 import { getRootDomain } from "@hebo/shared-api/utils/url";
 
@@ -24,6 +26,8 @@ const prisma = new PrismaClient({
 });
 
 const ROOT_DOMAIN = getRootDomain(AUTH_URL);
+
+const authLogger = createPinoOtelAdapter(createOtelLogger("hebo-auth", LOG_SEVERITY));
 
 const [
   GOOGLE_CLIENT_ID,
@@ -45,6 +49,13 @@ export const auth = betterAuth({
   baseURL: AUTH_URL,
   basePath: "/v1",
   secret: AUTH_SECRET,
+  logger: {
+    level: LOG_LEVEL as "debug" | "info" | "warn" | "error",
+    log: (level, message, ...args) => {
+      const fn = authLogger[level] ?? authLogger.info;
+      fn({ source: "better-auth", args: args.length > 0 ? args : undefined }, message);
+    },
+  },
   accountLinking: {
     enabled: true,
     trustedProviders: ["google", "github", "microsoft", "email-password"],

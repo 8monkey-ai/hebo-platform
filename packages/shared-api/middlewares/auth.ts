@@ -77,12 +77,16 @@ export const auth = new Elysia({ name: "auth-service" })
         organizationId = session.session.activeOrganizationId as string;
       }
     } else if (authHeader) {
-      const { data: result } = await authClient.internal.verifyApiKey({
+      const { data: result, error: verifyError } = await authClient.internal.verifyApiKey({
         key: authHeader.slice(7) || "invalid-key",
         fetchOptions: {
           headers: { "x-internal-secret": AUTH_SECRET },
         },
       });
+
+      if (verifyError) {
+        logger.warn({ error: verifyError }, "API key verification request failed");
+      }
 
       if (result?.valid && result.key) {
         if (result.key.metadata?.createdByUserId) {
