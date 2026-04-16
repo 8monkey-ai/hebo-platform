@@ -22,9 +22,8 @@ model agents {
   name     String
   branches branches[]
 
-  // Common audit fields across entities — injected by the Prisma extension,
-  // @default("") makes them optional in create input types while keeping the
-  // result type non-nullable.
+  // Common audit fields — injected by Prisma extension.
+  // @default("") keeps create inputs optional, results non-nullable.
   created_by      String    @default("")
   created_at      DateTime  @default(now())
   updated_by      String    @default("")
@@ -44,9 +43,8 @@ model branches {
   models     Json[] @default([])
   agent      agents @relation(fields: [agent_slug], references: [slug], onDelete: Cascade)
 
-  // Common audit fields across entities — injected by the Prisma extension,
-  // @default("") makes them optional in create input types while keeping the
-  // result type non-nullable.
+  // Common audit fields — injected by Prisma extension.
+  // @default("") keeps create inputs optional, results non-nullable.
   created_by      String    @default("")
   created_at      DateTime  @default(now())
   updated_by      String    @default("")
@@ -64,9 +62,8 @@ model provider_configs {
   /// [ProviderConfig]
   value         Json
 
-  // Common audit fields across entities — injected by the Prisma extension,
-  // @default("") makes them optional in create input types while keeping the
-  // result type non-nullable.
+  // Common audit fields — injected by Prisma extension.
+  // @default("") keeps create inputs optional, results non-nullable.
   created_by      String    @default("")
   created_at      DateTime  @default(now())
   updated_by      String    @default("")
