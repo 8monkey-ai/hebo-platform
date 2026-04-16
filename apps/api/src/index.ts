@@ -18,7 +18,7 @@ import { spansModule } from "./modules/traces";
 
 const PORT = Number(process.env.PORT ?? 8521);
 const WORKERS = Number(process.env.WORKERS);
-const BASE_URL = process.env.BASE_URL ?? `http://localhost:${PORT}`;
+const BASE_URL = process.env.BASE_URL ?? "http://localhost";
 
 const createApi = () =>
   new Elysia()

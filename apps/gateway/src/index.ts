@@ -28,7 +28,7 @@ import { gatewayErrors } from "./middlewares/errors";
 
 const PORT = Number(process.env.PORT ?? 8522);
 const WORKERS = Number(process.env.WORKERS);
-const BASE_URL = process.env.BASE_URL ?? `http://localhost:${PORT}`;
+const BASE_URL = process.env.BASE_URL ?? "http://localhost";
 
 export const createGateway = () =>
   new Elysia()
