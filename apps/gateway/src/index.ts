@@ -20,7 +20,7 @@ import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { serve } from "@hebo/shared-api/lib/serve";
 import { auth } from "@hebo/shared-api/middlewares/auth";
 import { logging } from "@hebo/shared-api/middlewares/logging";
-import { getServerUrl } from "@hebo/shared-api/utils/url";
+import { withPort } from "@hebo/shared-api/utils/url";
 
 import { prisma } from "~api/middlewares/prisma";
 
@@ -43,7 +43,7 @@ export const createGateway = () =>
         createOpenapiConfig(
           "Hebo Gateway",
           "OpenAI-compatible AI Gateway",
-          getServerUrl(BASE_URL, PORT),
+          withPort(BASE_URL, PORT),
           "0.1.0",
         ),
       ),

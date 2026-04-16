@@ -9,9 +9,9 @@ export function isRootPathUrl(url: string): boolean {
   return c === 63 || c === 35;
 }
 
-export function getServerUrl(base: string, port?: number) {
+export function withPort(base: string, port: number) {
   const url = new URL(base);
-  if (port) url.port = String(port);
+  url.port = String(port);
   return url.href;
 }
 

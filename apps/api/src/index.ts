@@ -9,7 +9,7 @@ import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { serve } from "@hebo/shared-api/lib/serve";
 import { auth } from "@hebo/shared-api/middlewares/auth";
 import { logging } from "@hebo/shared-api/middlewares/logging";
-import { getServerUrl } from "@hebo/shared-api/utils/url";
+import { withPort } from "@hebo/shared-api/utils/url";
 
 import { errors } from "./middlewares/errors";
 import { agentsModule } from "./modules/agents";
@@ -29,9 +29,7 @@ const createApi = () =>
     .get("/", () => "🐵 Hebo API says hello!")
     .use(cors(CORS_CONFIG))
     .use(
-      openapi(
-        createOpenapiConfig("Hebo API", "Platform API", getServerUrl(BASE_URL, PORT), "0.1.0"),
-      ),
+      openapi(createOpenapiConfig("Hebo API", "Platform API", withPort(BASE_URL, PORT), "0.1.0")),
     )
     .use(auth)
     .use(errors)
