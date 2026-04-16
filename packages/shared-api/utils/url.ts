@@ -9,6 +9,12 @@ export function isRootPathUrl(url: string): boolean {
   return c === 63 || c === 35;
 }
 
+export function getServerUrl(baseUrl: string, port: number | string) {
+  const url = new URL(baseUrl);
+  if (url.port || url.protocol === "https:") return baseUrl;
+  return `${baseUrl}:${port}`;
+}
+
 export function getRootDomain(baseUrl: string | undefined) {
   if (!baseUrl) return;
   const { hostname } = new URL(baseUrl);
