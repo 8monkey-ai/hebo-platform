@@ -2,11 +2,7 @@ import { LRUCache } from "lru-cache";
 
 import type { GreptimeDb } from "~api/middlewares/greptime";
 
-import type {
-  GenAIFinishReasonsSchema,
-  GenAIInputMessagesSchema,
-  GenAIOutputMessagesSchema,
-} from "./types";
+import type { GenAIFinishReasons, GenAIInputMessages, GenAIOutputMessages } from "./types";
 import {
   escapeSqlIdentifier,
   extractLastUserSummary,
@@ -257,9 +253,9 @@ export async function getSpans(
       reasoningEffort: parseString(row.reasoning_effort),
       reasoningEnabled: row.reasoning_enabled == null ? null : Boolean(row.reasoning_enabled),
       reasoningMaxTokens: parseNullableNumber(row.reasoning_max_tokens),
-      inputMessages: parseJsonArray(row.input_messages) as GenAIInputMessagesSchema,
-      outputMessages: parseJsonArray(row.output_messages) as GenAIOutputMessagesSchema,
-      finishReasons: parseJsonArray(row.finish_reasons) as GenAIFinishReasonsSchema,
+      inputMessages: parseJsonArray(row.input_messages) as GenAIInputMessages,
+      outputMessages: parseJsonArray(row.output_messages) as GenAIOutputMessages,
+      finishReasons: parseJsonArray(row.finish_reasons) as GenAIFinishReasons,
       responseId: parseString(row.response_id),
       metadata,
       spanAttributes,

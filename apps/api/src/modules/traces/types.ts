@@ -121,6 +121,6 @@ export const SpanDetailSchema = z.object({
 
 export const SpanListSchema = z.array(SpanDetailSchema);
 
-export type GenAIInputMessagesSchema = z.infer<typeof GenAIInputMessagesSchema>;
-export type GenAIOutputMessagesSchema = z.infer<typeof GenAIOutputMessagesSchema>;
-export type GenAIFinishReasonsSchema = z.infer<typeof GenAIFinishReasonsSchema>;
+export type GenAIInputMessages = z.infer<typeof GenAIInputMessagesSchema>;
+export type GenAIOutputMessages = z.infer<typeof GenAIOutputMessagesSchema>;
+export type GenAIFinishReasons = z.infer<typeof GenAIFinishReasonsSchema>;
