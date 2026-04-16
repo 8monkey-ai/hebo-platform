@@ -87,16 +87,13 @@ export const ModelConfigSchema = z.object({
 export const ModelsConfigSchema = z.array(ModelConfigSchema);
 
 export type ApiKeyConfig = z.infer<typeof ApiKeySchema>;
-
 export type AzureConfig = z.infer<typeof AzureSchema>;
-
-export type BedrockIamRoleConfig = z.infer<typeof BedrockIamRoleSchema>;
-export type BedrockAccessKeyConfig = z.infer<typeof BedrockAccessKeySchema>;
-export type BedrockConfig = BedrockIamRoleConfig | BedrockAccessKeyConfig;
-
-export type VertexIdentityFederationConfig = z.infer<typeof VertexIdentityFederationSchema>;
-export type VertexServiceAccountConfig = z.infer<typeof VertexServiceAccountSchema>;
-export type VertexConfig = VertexIdentityFederationConfig | VertexServiceAccountConfig;
+export type BedrockConfig =
+  | z.infer<typeof BedrockIamRoleSchema>
+  | z.infer<typeof BedrockAccessKeySchema>;
+export type VertexConfig =
+  | z.infer<typeof VertexIdentityFederationSchema>
+  | z.infer<typeof VertexServiceAccountSchema>;
 
 export type ProviderSlug = z.infer<typeof ProviderSlugSchema>;
 export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
