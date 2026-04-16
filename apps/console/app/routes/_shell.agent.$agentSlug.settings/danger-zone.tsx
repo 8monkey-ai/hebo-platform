@@ -41,7 +41,7 @@ export function createAgentDeleteSchema(agentSlug: string) {
   });
 }
 
-export type AgentDeleteFormValues = z.infer<ReturnType<typeof createAgentDeleteSchema>>;
+type AgentDeleteFormValues = z.infer<ReturnType<typeof createAgentDeleteSchema>>;
 
 export function DangerSettings({ agent }: { agent: { slug: string } }) {
   const fetcher = useFetcher<typeof clientAction>();

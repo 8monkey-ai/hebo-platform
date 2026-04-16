@@ -3,7 +3,6 @@ import { getZodConstraint } from "@conform-to/zod/v4";
 import { GitBranch } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
-import { z } from "zod";
 
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
@@ -27,12 +26,10 @@ import {
 import { Input } from "@hebo/shared-ui/components/Input";
 import { Select } from "@hebo/shared-ui/components/Select";
 
-import { BranchCreateSchema } from "~api/modules/branches/types";
+import { BranchCreateSchema, type BranchCreate } from "~api/modules/branches/types";
 import { useFormErrorToast } from "~console/lib/errors";
 
 import type { clientAction } from "./route";
-
-type BranchCreateFormValues = z.infer<typeof BranchCreateSchema>;
 
 type CreateBranchProps = {
   branches: {
@@ -43,7 +40,7 @@ type CreateBranchProps = {
 
 export default function CreateBranch({ branches }: CreateBranchProps) {
   const fetcher = useFetcher<typeof clientAction>();
-  const [form, fields] = useForm<BranchCreateFormValues>({
+  const [form, fields] = useForm<BranchCreate>({
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
     constraint: getZodConstraint(BranchCreateSchema),
     defaultValue: {

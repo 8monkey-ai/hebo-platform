@@ -7,4 +7,3 @@ export const modelsConfigFormSchema = z.object({
 });
 
 export type ModelsConfigFormValues = z.infer<typeof modelsConfigFormSchema>;
-export type ModelConfigFormValue = NonNullable<ModelsConfigFormValues["models"]>[number];

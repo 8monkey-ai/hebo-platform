@@ -2,7 +2,6 @@ import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 import { Form, useActionData, useNavigation } from "react-router";
 import { useSnapshot } from "valtio";
-import { z } from "zod";
 
 import { Button } from "@hebo/shared-ui/components/Button";
 import {
@@ -24,21 +23,19 @@ import {
 } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 
-import { AgentCreateSchema } from "~api/modules/agents/types";
+import { AgentCreateSchema, type AgentCreate } from "~api/modules/agents/types";
 import { ModelSelector } from "~console/components/ui/ModelSelector";
 import { useFormErrorToast } from "~console/lib/errors";
 import { shellStore } from "~console/lib/shell";
 
 import type { clientAction } from "./route";
 
-type AgentCreateFormValues = z.infer<typeof AgentCreateSchema>;
-
 export function AgentCreateForm() {
   const { models } = useSnapshot(shellStore);
   const navigation = useNavigation();
 
   const lastResult = useActionData<typeof clientAction>();
-  const [form, fields] = useForm<AgentCreateFormValues>({
+  const [form, fields] = useForm<AgentCreate>({
     lastResult: navigation.state === "idle" ? lastResult : undefined,
     constraint: getZodConstraint(AgentCreateSchema),
     defaultValue: {
