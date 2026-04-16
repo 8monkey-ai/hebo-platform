@@ -19,6 +19,7 @@ import { spansModule } from "./modules/traces";
 const PORT = Number(process.env.PORT ?? 8521);
 const WORKERS = Number(process.env.WORKERS);
 const BASE_URL = process.env.BASE_URL ?? "http://localhost";
+const SERVER_URL = BASE_URL.includes("localhost") ? `${BASE_URL}:${PORT}` : BASE_URL;
 
 const createApi = () =>
   new Elysia()
@@ -27,7 +28,7 @@ const createApi = () =>
     // Root route ("/") is unauthenticated and unprotected for health checks.
     .get("/", () => "🐵 Hebo API says hello!")
     .use(cors(CORS_CONFIG))
-    .use(openapi(createOpenapiConfig("Hebo API", "Platform API", BASE_URL, "0.1.0")))
+    .use(openapi(createOpenapiConfig("Hebo API", "Platform API", SERVER_URL, "0.1.0")))
     .use(auth)
     .use(errors)
     .group(
