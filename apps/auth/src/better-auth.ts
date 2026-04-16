@@ -51,8 +51,8 @@ export const auth = betterAuth({
   secret: AUTH_SECRET,
   logger: {
     level: LOG_LEVEL as "debug" | "info" | "warn" | "error",
-    log: (level, message, ...args) => {
-      authLogger[level]({ args }, message);
+    log: (level, message) => {
+      authLogger[level](message);
     },
   },
   accountLinking: {
