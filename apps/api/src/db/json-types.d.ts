@@ -1,4 +1,4 @@
-import type { ModelConfig, ProviderConfig } from "./modules/providers/types";
+import type { ModelConfig, ProviderConfig } from "../modules/providers/types";
 
 declare global {
   namespace PrismaJson {

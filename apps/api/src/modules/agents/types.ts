@@ -25,5 +25,6 @@ export const AgentIncludeSchema = z.object({
   branches: z.coerce.boolean().optional(),
 });
 
+export type AgentPlain = z.infer<typeof AgentPlainSchema>;
 export type AgentCreate = z.infer<typeof AgentCreateSchema>;
 export type AgentUpdate = z.infer<typeof AgentUpdateSchema>;

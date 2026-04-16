@@ -26,56 +26,23 @@ import { Input } from "@hebo/shared-ui/components/Input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@hebo/shared-ui/components/Tabs";
 import { Textarea } from "@hebo/shared-ui/components/Textarea";
 
-import {
-  BedrockIamRoleSchema,
-  BedrockAccessKeySchema,
-  VertexIdentityFederationSchema,
-  VertexServiceAccountSchema,
-  AzureSchema,
-  ApiKeySchema,
-} from "~api/modules/providers/types";
+import { ProviderSchema, type Provider } from "~api/modules/providers/types";
 import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
 
 import type { clientAction } from "./route";
-
-export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
-  z.object({
-    slug: z.enum(["bedrock"]),
-    config: z.discriminatedUnion("authMode", [BedrockIamRoleSchema, BedrockAccessKeySchema]),
-  }),
-  z.object({
-    slug: z.enum(["vertex"]),
-    config: z.discriminatedUnion("authMode", [
-      VertexIdentityFederationSchema,
-      VertexServiceAccountSchema,
-    ]),
-  }),
-  z.object({
-    slug: z.enum(["azure"]),
-    config: z.discriminatedUnion("authMode", [AzureSchema]),
-  }),
-  z.object({
-    slug: z.enum(["voyage", "groq", "anthropic", "openai"]),
-    config: z.discriminatedUnion("authMode", [ApiKeySchema]),
-  }),
-]);
-
-type ProviderConfigureFormValues = z.infer<typeof ProviderConfigureSchema>;
 
 type ConfigureProviderDialogProps = {
   provider?: { name: string; slug: string; config?: Record<string, unknown> };
 } & React.ComponentProps<typeof Dialog>;
 
 function getProviderModes(slug: string) {
-  const entry = ProviderConfigureSchema.options.find((o) =>
-    (o.shape.slug.options as string[]).includes(slug),
-  );
-  if (!entry) return [];
+  const variant = ProviderSchema.options.find((o) => o.shape.slug.value === slug);
+  if (!variant) return [];
 
-  return entry.shape.config.options.map((opt) => {
-    const value = opt.shape.authMode.value;
-    return { value, label: labelize(value), schema: opt };
+  return variant.shape.config.unwrap().options.map((schema) => {
+    const value = (schema.shape.authMode as z.ZodLiteral<string>).value;
+    return { value, label: labelize(value), schema };
   });
 }
 
@@ -105,10 +72,10 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
     setActiveAuthMode(defaultAuthMode);
   }, [defaultAuthMode]);
 
-  const [form, fields] = useForm<ProviderConfigureFormValues>({
+  const [form, fields] = useForm<Provider>({
     id: `${provider?.slug}-${activeAuthMode ?? "default"}`,
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
-    constraint: getZodConstraint(ProviderConfigureSchema),
+    constraint: getZodConstraint(ProviderSchema),
     defaultValue: {
       ...provider,
     },

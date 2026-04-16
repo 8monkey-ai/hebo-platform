@@ -1,15 +1,15 @@
 import { Elysia, status } from "elysia";
 import { z } from "zod";
 
-import type { Prisma } from "~api/generated/prisma/client";
 import { prisma } from "~api/middlewares/prisma";
 
 import {
   type ModelsConfig,
+  type Provider,
   ProviderSchema,
-  ProviderConfigSchema,
+  ProvidersSchema,
   ProviderSlugSchema,
-  SUPPORTED_PROVIDERS,
+  ProviderConfigSchema,
 } from "./types";
 
 export const providersModule = new Elysia({
@@ -21,11 +21,14 @@ export const providersModule = new Elysia({
     async ({ prismaClient, query }) => {
       const providerConfigs = await prismaClient.provider_configs.findMany();
 
-      let providers = Object.entries(SUPPORTED_PROVIDERS).map(([slug, { name }]) => ({
-        slug,
-        name,
-        config: providerConfigs.find((p) => p.provider_slug === slug)?.value,
-      }));
+      let providers = ProviderSchema.options.map(
+        (o) =>
+          ({
+            slug: o.shape.slug.value,
+            name: o.shape.name.value,
+            config: providerConfigs.find((p) => p.provider_slug === o.shape.slug.value)?.value,
+          }) as Provider,
+      );
 
       if (query.configured) {
         providers = providers.filter((p) => p.config !== undefined);
@@ -37,7 +40,7 @@ export const providersModule = new Elysia({
       query: z.object({
         configured: z.coerce.boolean().default(false).optional(),
       }),
-      response: { 200: z.array(ProviderSchema) },
+      response: { 200: ProvidersSchema },
     },
   )
   .put(
@@ -52,7 +55,7 @@ export const providersModule = new Elysia({
         data: {
           provider_slug: params.slug,
           value: body,
-        } as unknown as Prisma.provider_configsCreateInput,
+        },
       });
 
       if (existing) {

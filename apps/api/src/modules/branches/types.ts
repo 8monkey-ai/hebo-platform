@@ -22,5 +22,6 @@ export const BranchUpdateSchema = BranchPlainSchema.pick({
   models: true,
 }).partial();
 
+export type BranchPlain = z.infer<typeof BranchPlainSchema>;
 export type BranchCreate = z.infer<typeof BranchCreateSchema>;
 export type BranchUpdate = z.infer<typeof BranchUpdateSchema>;

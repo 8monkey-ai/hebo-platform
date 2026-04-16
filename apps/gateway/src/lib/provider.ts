@@ -185,8 +185,5 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       if (!apiKey || !resourceName) return;
       return createAzure({ apiKey, resourceName });
     }
-    default: {
-      throw new Error(`Unsupported provider: ${slug}`);
-    }
   }
 }

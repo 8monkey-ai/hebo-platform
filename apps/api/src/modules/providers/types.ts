@@ -1,17 +1,5 @@
 import { z } from "zod";
 
-export const SUPPORTED_PROVIDERS = {
-  anthropic: { name: "Anthropic" },
-  azure: { name: "Microsoft Azure" },
-  bedrock: { name: "Amazon Bedrock" },
-  groq: { name: "Groq" },
-  openai: { name: "OpenAI" },
-  vertex: { name: "Google Vertex AI" },
-  voyage: { name: "Voyage AI" },
-} as const;
-
-export const ProviderSlugSchema = z.enum(Object.keys(SUPPORTED_PROVIDERS) as [string, ...string[]]);
-
 export const BedrockIamRoleSchema = z.object({
   authMode: z.literal("iam-role"),
   bedrockRoleArn: z.string().trim().min(1),
@@ -57,23 +45,64 @@ export const AzureSchema = z.object({
   apiKey: z.string().trim().min(1).meta({ redact: true }),
 });
 
-export const ProviderConfigSchema = z.union([
-  z.union([BedrockIamRoleSchema, BedrockAccessKeySchema]),
-  z.union([VertexIdentityFederationSchema, VertexServiceAccountSchema]),
-  ApiKeySchema,
-  AzureSchema,
+export const ProviderSchema = z.discriminatedUnion("slug", [
+  z.object({
+    slug: z.literal("anthropic"),
+    name: z.literal("Anthropic"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("azure"),
+    name: z.literal("Microsoft Azure"),
+    config: z.discriminatedUnion("authMode", [AzureSchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("bedrock"),
+    name: z.literal("Amazon Bedrock"),
+    config: z
+      .discriminatedUnion("authMode", [BedrockIamRoleSchema, BedrockAccessKeySchema])
+      .optional(),
+  }),
+  z.object({
+    slug: z.literal("groq"),
+    name: z.literal("Groq"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("openai"),
+    name: z.literal("OpenAI"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("vertex"),
+    name: z.literal("Google Vertex"),
+    config: z
+      .discriminatedUnion("authMode", [VertexIdentityFederationSchema, VertexServiceAccountSchema])
+      .optional(),
+  }),
+  z.object({
+    slug: z.literal("voyage"),
+    name: z.literal("Voyage"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
 ]);
+export const ProviderSlugSchema = z.enum(ProviderSchema.options.map((o) => o.shape.slug.value));
 
-export const ProviderSchema = z.object({
-  slug: ProviderSlugSchema,
-  name: z.string(),
-  config: ProviderConfigSchema.optional(),
-});
+export const ProviderConfigSchema = z.discriminatedUnion("authMode", [
+  ...new Set(
+    ProviderSchema.options.flatMap(
+      (o) => o.shape.config.unwrap().options as z.core.$ZodTypeDiscriminable[],
+    ),
+  ),
+] as [z.core.$ZodTypeDiscriminable, ...z.core.$ZodTypeDiscriminable[]]);
 
-export const aliasPattern = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/;
+export const ProvidersSchema = z.array(ProviderSchema);
 
 export const ModelConfigSchema = z.object({
-  alias: z.string().min(1).regex(aliasPattern),
+  alias: z
+    .string()
+    .min(1)
+    .regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/),
   type: z.string().min(1),
   routing: z
     .object({
@@ -98,6 +127,7 @@ export type VertexConfig =
 export type ProviderSlug = z.infer<typeof ProviderSlugSchema>;
 export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
 export type Provider = z.infer<typeof ProviderSchema>;
+export type Providers = z.infer<typeof ProvidersSchema>;
 
 export type ModelConfig = z.infer<typeof ModelConfigSchema>;
 export type ModelsConfig = z.infer<typeof ModelsConfigSchema>;
