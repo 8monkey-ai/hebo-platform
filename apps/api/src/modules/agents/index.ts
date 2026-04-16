@@ -4,22 +4,14 @@ import { z } from "zod";
 import { auth } from "@hebo/shared-api/middlewares/auth";
 import { slugFromString } from "@hebo/shared-api/utils/slug";
 
-import type { Prisma } from "~api/generated/prisma/client";
-import { agentsInputSchema } from "~api/generated/zod/schemas/variants/input/agents.input";
-import { agentsModelSchema } from "~api/generated/zod/schemas/variants/pure/agents.pure";
-import { branchesModelSchema } from "~api/generated/zod/schemas/variants/pure/branches.pure";
 import { prisma } from "~api/middlewares/prisma";
 
-import { ModelsSchema } from "./providers/types";
-
-const branchResponseSchema = branchesModelSchema.extend({
-  models: ModelsSchema,
-});
-
-const agentsWithBranchesSchema = agentsModelSchema.extend({
-  branches: z.array(branchResponseSchema).optional(),
-});
-const agentsIncludeSchema = z.object({ branches: z.coerce.boolean().optional() });
+import {
+  AgentCreateSchema,
+  AgentIncludeSchema,
+  AgentUpdateSchema,
+  AgentPlainSchema,
+} from "./types";
 
 export const agentsModule = new Elysia({
   prefix: "/agents",
@@ -37,8 +29,8 @@ export const agentsModule = new Elysia({
       );
     },
     {
-      query: agentsIncludeSchema,
-      response: { 200: z.array(agentsWithBranchesSchema) },
+      query: AgentIncludeSchema,
+      response: { 200: z.array(AgentPlainSchema) },
     },
   )
   .post(
@@ -77,19 +69,16 @@ export const agentsModule = new Elysia({
                 name: "Main",
                 slug: "main",
                 models: [{ alias: "default", type: body.defaultModel }],
-              } as unknown as Prisma.branchesCreateWithoutAgentInput,
+              },
             },
-          } as unknown as Prisma.agentsCreateInput,
+          },
           include: { branches: true },
         }),
       );
     },
     {
-      body: z.object({
-        name: agentsInputSchema.shape.name,
-        defaultModel: z.string(),
-      }),
-      response: { 201: agentsWithBranchesSchema, 409: z.string() },
+      body: AgentCreateSchema,
+      response: { 201: AgentPlainSchema, 409: z.string() },
     },
   )
   .get(
@@ -104,8 +93,8 @@ export const agentsModule = new Elysia({
       );
     },
     {
-      query: agentsIncludeSchema,
-      response: { 200: agentsWithBranchesSchema, 404: z.string() },
+      query: AgentIncludeSchema,
+      response: { 200: AgentPlainSchema, 404: z.string() },
     },
   )
   .patch(
@@ -121,9 +110,9 @@ export const agentsModule = new Elysia({
       );
     },
     {
-      query: agentsIncludeSchema,
-      body: z.object({ name: z.string().optional() }),
-      response: { 200: agentsWithBranchesSchema, 404: z.string() },
+      query: AgentIncludeSchema,
+      body: AgentUpdateSchema,
+      response: { 200: AgentPlainSchema, 404: z.string() },
     },
   )
   .delete(

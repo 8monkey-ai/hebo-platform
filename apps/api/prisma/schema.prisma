@@ -16,26 +16,22 @@ datasource db {
   provider = "postgresql"
 }
 
-generator zod {
-  provider = "prisma-zod-generator"
-  output   = "../src/generated/zod"
-  config   = "./zod-generator.config.json"
-}
-
 model agents {
   id       String     @id @default(uuid(7)) @db.Uuid
   slug     String     @unique
   name     String
   branches branches[]
 
-  // Common audit fields across entities
-  created_by      String
+  // Common audit fields across entities — injected by the Prisma extension,
+  // @default("") makes them optional in create input types while keeping the
+  // result type non-nullable.
+  created_by      String    @default("")
   created_at      DateTime  @default(now())
-  updated_by      String
+  updated_by      String    @default("")
   updated_at      DateTime  @updatedAt
   deleted_by      String?
   deleted_at      DateTime?
-  organization_id String
+  organization_id String    @default("")
   team_id         String
 }
 
@@ -48,14 +44,16 @@ model branches {
   models     Json[] @default([])
   agent      agents @relation(fields: [agent_slug], references: [slug], onDelete: Cascade)
 
-  // Common audit fields across entities
-  created_by      String
+  // Common audit fields across entities — injected by the Prisma extension,
+  // @default("") makes them optional in create input types while keeping the
+  // result type non-nullable.
+  created_by      String    @default("")
   created_at      DateTime  @default(now())
-  updated_by      String
+  updated_by      String    @default("")
   updated_at      DateTime  @updatedAt
   deleted_by      String?
   deleted_at      DateTime?
-  organization_id String
+  organization_id String    @default("")
 
   @@unique([agent_slug, slug])
 }
@@ -66,12 +64,14 @@ model provider_configs {
   /// [ProviderConfig]
   value         Json
 
-  // Common audit fields across entities
-  created_by      String
+  // Common audit fields across entities — injected by the Prisma extension,
+  // @default("") makes them optional in create input types while keeping the
+  // result type non-nullable.
+  created_by      String    @default("")
   created_at      DateTime  @default(now())
-  updated_by      String
+  updated_by      String    @default("")
   updated_at      DateTime  @updatedAt
   deleted_by      String?
   deleted_at      DateTime?
-  organization_id String
+  organization_id String    @default("")
 }

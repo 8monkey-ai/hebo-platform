@@ -3,15 +3,9 @@ import { z } from "zod";
 
 import { slugFromString } from "@hebo/shared-api/utils/slug";
 
-import type { Prisma } from "~api/generated/prisma/client";
-import { branchesModelSchema } from "~api/generated/zod/schemas/variants/pure/branches.pure";
 import { prisma } from "~api/middlewares/prisma";
 
-import { ModelsSchema } from "./providers/types";
-
-const branchResponseSchema = branchesModelSchema.extend({
-  models: ModelsSchema,
-});
+import { BranchCreateSchema, BranchUpdateSchema, BranchPlainSchema } from "./types";
 
 export const branchesModule = new Elysia({
   prefix: "/agents/:agentSlug/branches",
@@ -28,14 +22,14 @@ export const branchesModule = new Elysia({
       );
     },
     {
-      response: { 200: z.array(branchResponseSchema), 404: z.string() },
+      response: { 200: z.array(BranchPlainSchema), 404: z.string() },
     },
   )
   .post(
     "/",
     async ({ body, prismaClient, params }) => {
       const { models } = await prismaClient.branches.findFirstOrThrow({
-        where: { agent_slug: params.agentSlug, slug: body.sourceBranchSlug },
+        where: { agent_slug: params.agentSlug, slug: body.source_branch_slug },
       });
       return status(
         201,
@@ -45,16 +39,13 @@ export const branchesModule = new Elysia({
             name: body.name,
             slug: slugFromString(body.name),
             models,
-          } as unknown as Prisma.branchesCreateInput,
+          },
         }),
       );
     },
     {
-      body: z.object({
-        name: z.string(),
-        sourceBranchSlug: z.string(),
-      }),
-      response: { 201: branchResponseSchema, 404: z.string(), 409: z.string() },
+      body: BranchCreateSchema,
+      response: { 201: BranchPlainSchema, 404: z.string(), 409: z.string() },
     },
   )
   .get(
@@ -68,7 +59,7 @@ export const branchesModule = new Elysia({
       );
     },
     {
-      response: { 200: branchResponseSchema, 404: z.string() },
+      response: { 200: BranchPlainSchema, 404: z.string() },
     },
   )
   .patch(
@@ -86,11 +77,8 @@ export const branchesModule = new Elysia({
       );
     },
     {
-      body: z.object({
-        name: z.string().optional(),
-        models: ModelsSchema.optional(),
-      }),
-      response: { 200: branchResponseSchema, 404: z.string() },
+      body: BranchUpdateSchema,
+      response: { 200: BranchPlainSchema, 404: z.string() },
     },
   )
   .delete(

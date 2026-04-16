@@ -31,7 +31,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
           })
           .branches.post({
             name: submission.value.branchName,
-            sourceBranchSlug: submission.value.sourceBranchSlug,
+            source_branch_slug: submission.value.sourceBranchSlug,
           });
       } catch (error) {
         return {
