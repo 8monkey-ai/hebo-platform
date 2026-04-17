@@ -1,11 +1,12 @@
 import { parseWithZod } from "@conform-to/zod/v4";
 import { redirect } from "react-router";
 
+import { AgentCreateSchema } from "~api/modules/agents/types";
 import { parseError } from "~console/lib/errors";
 import { api } from "~console/lib/service";
 
 import type { Route } from "./+types/route";
-import { AgentCreateForm, AgentCreateSchema } from "./form";
+import { AgentCreateForm } from "./form";
 
 export async function clientAction({ request }: Route.ClientActionArgs) {
   const formData = await request.formData();
@@ -17,7 +18,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
   let result;
   try {
     result = await api.agents.post({
-      name: submission.value.agentName,
+      name: submission.value.name,
       defaultModel: submission.value.defaultModel,
     });
   } catch (error) {
@@ -26,7 +27,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
 
   if (result.error?.status === 409)
     return submission.reply({
-      fieldErrors: { agentName: [parseError(result.error.value).message] },
+      fieldErrors: { name: [parseError(result.error.value).message] },
     });
 
   return redirect(`/agent/${result.data!.slug}/branch/${result.data!.branches![0].slug}`);

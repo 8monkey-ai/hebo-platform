@@ -1,16 +1,16 @@
-import { Elysia, status, t } from "elysia";
+import { Elysia, status } from "elysia";
+import { z } from "zod";
 
 import { slugFromString } from "@hebo/shared-api/utils/slug";
 
-import type { Prisma } from "~api/generated/prisma/client";
-import {
-  branches,
-  branchesInputCreate,
-  branchesInputUpdate,
-} from "~api/generated/prismabox/branches";
 import { prisma } from "~api/middlewares/prisma";
 
-import { Models } from "./providers/types";
+import {
+  BranchCreateSchema,
+  BranchUpdateSchema,
+  BranchPlainSchema,
+  BranchListSchema,
+} from "./types";
 
 export const branchesModule = new Elysia({
   prefix: "/agents/:agentSlug/branches",
@@ -27,14 +27,14 @@ export const branchesModule = new Elysia({
       );
     },
     {
-      response: { 200: t.Array(branches), 404: t.String() },
+      response: { 200: BranchListSchema, 404: z.string() },
     },
   )
   .post(
     "/",
     async ({ body, prismaClient, params }) => {
       const { models } = await prismaClient.branches.findFirstOrThrow({
-        where: { agent_slug: params.agentSlug, slug: body.sourceBranchSlug },
+        where: { agent_slug: params.agentSlug, slug: body.source_branch_slug },
       });
       return status(
         201,
@@ -44,16 +44,13 @@ export const branchesModule = new Elysia({
             name: body.name,
             slug: slugFromString(body.name),
             models,
-          } as unknown as Prisma.branchesCreateInput,
+          },
         }),
       );
     },
     {
-      body: t.Object({
-        name: branchesInputCreate.properties.name,
-        sourceBranchSlug: t.String(),
-      }),
-      response: { 201: branches, 404: t.String(), 409: t.String() },
+      body: BranchCreateSchema,
+      response: { 201: BranchPlainSchema, 404: z.string(), 409: z.string() },
     },
   )
   .get(
@@ -67,7 +64,7 @@ export const branchesModule = new Elysia({
       );
     },
     {
-      response: { 200: branches, 404: t.String() },
+      response: { 200: BranchPlainSchema, 404: z.string() },
     },
   )
   .patch(
@@ -85,11 +82,8 @@ export const branchesModule = new Elysia({
       );
     },
     {
-      body: t.Object({
-        name: branchesInputUpdate.properties.name,
-        models: t.Optional(Models),
-      }),
-      response: { 200: branches, 404: t.String() },
+      body: BranchUpdateSchema,
+      response: { 200: BranchPlainSchema, 404: z.string() },
     },
   )
   .delete(
@@ -119,6 +113,6 @@ export const branchesModule = new Elysia({
       return status(204);
     },
     {
-      response: { 204: t.Void(), 404: t.String(), 409: t.String() },
+      response: { 204: z.void(), 404: z.string(), 409: z.string() },
     },
   );

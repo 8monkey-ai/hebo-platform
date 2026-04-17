@@ -1,11 +1,12 @@
 import { parseWithZod } from "@conform-to/zod/v4";
 import { unstable_useRoute as useRoute } from "react-router";
 
+import { BranchCreateSchema } from "~api/modules/branches/types";
 import { parseError } from "~console/lib/errors";
 import { api } from "~console/lib/service";
 
 import type { Route } from "./+types/route";
-import CreateBranch, { BranchCreateSchema } from "./create";
+import CreateBranch from "./create";
 import { createBranchDeleteSchema } from "./delete";
 import BranchesTable from "./table";
 
@@ -30,8 +31,8 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
             agentSlug: params.agentSlug,
           })
           .branches.post({
-            name: submission.value.branchName,
-            sourceBranchSlug: submission.value.sourceBranchSlug,
+            name: submission.value.name,
+            source_branch_slug: submission.value.source_branch_slug,
           });
       } catch (error) {
         return {
@@ -44,7 +45,7 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
         return {
           intent,
           submission: submission.reply({
-            fieldErrors: { branchName: [parseError(result.error.value).message] },
+            fieldErrors: { name: [parseError(result.error.value).message] },
           }),
         };
 

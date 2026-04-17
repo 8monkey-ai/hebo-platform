@@ -26,105 +26,46 @@ import { Input } from "@hebo/shared-ui/components/Input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@hebo/shared-ui/components/Tabs";
 import { Textarea } from "@hebo/shared-ui/components/Textarea";
 
+import {
+  ProviderConfigSchema,
+  ProviderSchema,
+  ProviderSlugSchema,
+  type Provider,
+} from "~api/modules/providers/types";
 import { useFormErrorToast } from "~console/lib/errors";
 import { labelize } from "~console/lib/utils";
 
+export const ProviderConfigureSchema = z.object({
+  slug: ProviderSlugSchema,
+  config: ProviderConfigSchema,
+});
+
 import type { clientAction } from "./route";
-
-const requiredString = (msg: string) => z.string(msg).trim().min(1, msg);
-const requiredEmail = (msg: string) => z.email(msg);
-const textareaString = (msg: string) => requiredString(msg).meta({ textarea: true });
-
-const BedrockIamRoleSchema = z.object({
-  authMode: z.literal("iam-role"),
-  bedrockRoleArn: requiredString("Please enter a valid Bedrock ARN role"),
-  region: requiredString("Please enter a valid AWS region"),
-});
-
-const BedrockAccessKeySchema = z.object({
-  authMode: z.literal("access-key"),
-  accessKeyId: requiredString("Please enter a valid access key ID"),
-  secretAccessKey: requiredString("Please enter a valid secret access key"),
-  region: requiredString("Please enter a valid AWS region"),
-});
-
-const VertexIdentityFederationSchema = z.object({
-  authMode: z.literal("identity-federation"),
-  serviceAccountEmail: requiredEmail("Please enter a valid service account email"),
-  audience: requiredString("Please enter a valid audience"),
-  location: requiredString("Please enter a valid location"),
-  project: requiredString("Please enter a valid project"),
-});
-
-const VertexServiceAccountSchema = z.object({
-  authMode: z.literal("service-account"),
-  clientEmail: requiredEmail("Please enter a valid service account email"),
-  privateKey: textareaString("Please enter the private key"),
-  location: requiredString("Please enter a valid location"),
-  project: requiredString("Please enter a valid project"),
-});
-
-const AzureSchema = z.object({
-  authMode: z.literal("resource-api-key"),
-  resourceName: requiredString("Please enter a valid resource name"),
-  apiKey: requiredString("Please enter a valid API key"),
-});
-
-const ApiKeySchema = z.object({
-  authMode: z.literal("api-key"),
-  apiKey: requiredString("Please enter a valid API key"),
-});
-
-export const ProviderConfigureSchema = z.discriminatedUnion("slug", [
-  z.object({
-    slug: z.enum(["bedrock"]),
-    config: z.discriminatedUnion("authMode", [BedrockIamRoleSchema, BedrockAccessKeySchema]),
-  }),
-  z.object({
-    slug: z.enum(["vertex"]),
-    config: z.discriminatedUnion("authMode", [
-      VertexIdentityFederationSchema,
-      VertexServiceAccountSchema,
-    ]),
-  }),
-  z.object({
-    slug: z.enum(["azure"]),
-    config: z.discriminatedUnion("authMode", [AzureSchema]),
-  }),
-  z.object({
-    slug: z.enum(["voyage", "groq", "anthropic", "openai"]),
-    config: z.discriminatedUnion("authMode", [ApiKeySchema]),
-  }),
-]);
-
-type ProviderConfigureFormValues = z.infer<typeof ProviderConfigureSchema>;
 
 type ConfigureProviderDialogProps = {
   provider?: { name: string; slug: string; config?: Record<string, unknown> };
 } & React.ComponentProps<typeof Dialog>;
 
 function getProviderModes(slug: string) {
-  const entry = ProviderConfigureSchema.options.find((o) =>
-    (o.shape.slug.options as string[]).includes(slug),
-  );
-  if (!entry) return [];
+  const variant = ProviderSchema.options.find((o) => o.shape.slug.value === slug);
+  if (!variant) return [];
 
-  return entry.shape.config.options.map((opt) => {
-    const value = opt.shape.authMode.value;
-    return { value, label: labelize(value), schema: opt };
+  return variant.shape.config.unwrap().options.map((schema) => {
+    const value = (schema.shape.authMode as z.ZodLiteral<string>).value;
+    return { value, label: labelize(value), schema };
   });
 }
 
-function getConfigFields(schema: z.ZodObject): string[] {
+function getConfigFields(schema: z.ZodObject<z.ZodRawShape>): string[] {
   return Object.keys(schema.shape).filter((k) => k !== "authMode");
 }
 
-function isTextarea(schema: z.ZodObject, key: string): boolean {
+function isTextarea(schema: z.ZodObject<z.ZodRawShape>, key: string): boolean {
   const field = schema.shape[key] as z.ZodType & {
-    meta?: () => { textarea?: boolean } | undefined;
+    meta?: () => { text?: boolean } | undefined;
   };
 
-  return field.meta?.()?.textarea === true;
+  return field.meta?.()?.text === true;
 }
 
 export function ConfigureProviderDialog({ provider, ...props }: ConfigureProviderDialogProps) {
@@ -141,10 +82,10 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
     setActiveAuthMode(defaultAuthMode);
   }, [defaultAuthMode]);
 
-  const [form, fields] = useForm<ProviderConfigureFormValues>({
+  const [form, fields] = useForm<Provider>({
     id: `${provider?.slug}-${activeAuthMode ?? "default"}`,
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,
-    constraint: getZodConstraint(ProviderConfigureSchema),
+    constraint: getZodConstraint(ProviderSchema),
     defaultValue: {
       ...provider,
     },

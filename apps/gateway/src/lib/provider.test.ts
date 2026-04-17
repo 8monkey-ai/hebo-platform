@@ -188,8 +188,4 @@ describe("createProvider", () => {
       });
     }
   });
-
-  it("throws for unsupported provider", () => {
-    expect(() => createProvider("unknown" as never, {})).toThrow("Unsupported provider: unknown");
-  });
 });

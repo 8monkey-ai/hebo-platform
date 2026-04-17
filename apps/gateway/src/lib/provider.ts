@@ -17,11 +17,11 @@ import { createVoyage } from "voyage-ai-provider";
 import { getSecret } from "@hebo/shared-api/utils/secret";
 
 import type {
-  ApiKeyProviderConfig,
-  AzureProviderConfig,
-  BedrockProviderConfig,
+  ApiKeyConfig,
+  AzureConfig,
+  BedrockConfig,
   ProviderSlug,
-  VertexProviderConfig,
+  VertexConfig,
 } from "~api/modules/providers/types";
 
 import { buildWifOptions } from "../utils/aws";
@@ -87,7 +87,7 @@ export async function loadProviderSecrets() {
 export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 {
   switch (slug) {
     case "bedrock": {
-      const bedrockConfig = config as BedrockProviderConfig;
+      const bedrockConfig = config as BedrockConfig;
 
       switch (bedrockConfig.authMode) {
         case "access-key": {
@@ -122,11 +122,11 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       }
     }
     case "groq": {
-      const { apiKey } = config as ApiKeyProviderConfig;
+      const { apiKey } = config as ApiKeyConfig;
       return withCanonicalIdsForGroq(createGroq({ apiKey }));
     }
     case "vertex": {
-      const vertexConfig = config as VertexProviderConfig;
+      const vertexConfig = config as VertexConfig;
       const { location, project } = vertexConfig;
 
       switch (vertexConfig.authMode) {
@@ -161,23 +161,20 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       }
     }
     case "voyage": {
-      const { apiKey } = config as ApiKeyProviderConfig;
+      const { apiKey } = config as ApiKeyConfig;
       return withCanonicalIdsForVoyage(createVoyage({ apiKey }));
     }
     case "anthropic": {
-      const { apiKey } = config as ApiKeyProviderConfig;
+      const { apiKey } = config as ApiKeyConfig;
       return withCanonicalIdsForAnthropic(createAnthropic({ apiKey }));
     }
     case "openai": {
-      const { apiKey } = config as ApiKeyProviderConfig;
+      const { apiKey } = config as ApiKeyConfig;
       return withCanonicalIdsForOpenAI(createOpenAI({ apiKey }));
     }
     case "azure": {
-      const { apiKey, resourceName } = config as AzureProviderConfig;
+      const { apiKey, resourceName } = config as AzureConfig;
       return createAzure({ apiKey, resourceName });
-    }
-    default: {
-      throw new Error(`Unsupported provider: ${slug}`);
     }
   }
 }

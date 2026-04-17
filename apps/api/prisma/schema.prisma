@@ -7,97 +7,68 @@ generator client {
   engineType = "client"
 }
 
+generator json {
+  provider     = "prisma-json-types-generator"
+  clientOutput = "../src/generated/prisma"
+}
+
 datasource db {
   provider = "postgresql"
 }
 
-generator prismabox {
-  provider                    = "prismabox"
-  typeboxImportDependencyName = "elysia"
-  typeboxImportVariableName   = "t"
-  inputModel                  = true
-  output                      = "../src/generated/prismabox"
-  additionalProperties        = false
-}
-
 model agents {
-  /// @prismabox.hide
   id       String     @id @default(uuid(7)) @db.Uuid
-  /// @prismabox.input.hide
   slug     String     @unique
   name     String
-  /// @prismabox.input.hide
   branches branches[]
 
-  // Common audit fields across entities
-  /// @prismabox.input.hide
-  created_by      String
-  /// @prismabox.input.hide
+  // Common audit fields — injected by Prisma extension.
+  // @default("") keeps create inputs optional, results non-nullable.
+  created_by      String    @default("")
   created_at      DateTime  @default(now())
-  /// @prismabox.input.hide
-  updated_by      String
-  /// @prismabox.input.hide
+  updated_by      String    @default("")
   updated_at      DateTime  @updatedAt
-  /// @prismabox.hide
   deleted_by      String?
-  /// @prismabox.hide
   deleted_at      DateTime?
-  /// @prismabox.hide
-  organization_id String
-  /// @prismabox.input.hide
+  organization_id String    @default("")
   team_id         String
 }
 
 model branches {
-  /// @prismabox.hide
   id         String @id @default(uuid(7)) @db.Uuid
-  /// @prismabox.input.hide
   slug       String
-  /// @prismabox.input.hide
   agent_slug String
   name       String
+  /// [ModelConfig]
   models     Json[] @default([])
-  /// @prismabox.hide
   agent      agents @relation(fields: [agent_slug], references: [slug], onDelete: Cascade)
 
-  // Common audit fields across entities
-  /// @prismabox.input.hide
-  created_by      String
-  /// @prismabox.input.hide
+  // Common audit fields — injected by Prisma extension.
+  // @default("") keeps create inputs optional, results non-nullable.
+  created_by      String    @default("")
   created_at      DateTime  @default(now())
-  /// @prismabox.input.hide
-  updated_by      String
-  /// @prismabox.input.hide
+  updated_by      String    @default("")
   updated_at      DateTime  @updatedAt
-  /// @prismabox.hide
   deleted_by      String?
-  /// @prismabox.hide
   deleted_at      DateTime?
-  /// @prismabox.hide
-  organization_id String
+  organization_id String    @default("")
 
   @@unique([agent_slug, slug])
 }
 
 model provider_configs {
-  /// @prismabox.hide
   id            String @id @default(uuid(7)) @db.Uuid
   provider_slug String
+  /// [ProviderConfig]
   value         Json
 
-  // Common audit fields across entities
-  /// @prismabox.hide
-  created_by      String
-  /// @prismabox.hide
+  // Common audit fields — injected by Prisma extension.
+  // @default("") keeps create inputs optional, results non-nullable.
+  created_by      String    @default("")
   created_at      DateTime  @default(now())
-  /// @prismabox.hide
-  updated_by      String
-  /// @prismabox.hide
+  updated_by      String    @default("")
   updated_at      DateTime  @updatedAt
-  /// @prismabox.hide
   deleted_by      String?
-  /// @prismabox.hide
   deleted_at      DateTime?
-  /// @prismabox.hide
-  organization_id String
+  organization_id String    @default("")
 }

@@ -1,38 +1,42 @@
 import { describe, expect, it } from "bun:test";
 
-import { t } from "elysia";
+import { z } from "zod";
 
 import { redactSensitiveValues } from "./utils";
 
 describe("redactSensitiveValues", () => {
-  it("redacts direct x-redact properties", () => {
-    const schema = t.Object({
-      apiKey: t.String({ "x-redact": true }),
-      region: t.String(),
-    });
+  it("redacts fields with meta({ redact: true })", () => {
+    const schema = z.discriminatedUnion("authMode", [
+      z.object({
+        authMode: z.literal("api-key"),
+        apiKey: z.string().meta({ redact: true }),
+        region: z.string(),
+      }),
+    ]);
 
     expect(
       redactSensitiveValues(schema, {
+        authMode: "api-key",
         apiKey: "secret",
         region: "us-east-1",
       }),
     ).toEqual({
+      authMode: "api-key",
       apiKey: "***",
       region: "us-east-1",
     });
   });
 
-  it("redacts transform-wrapped properties from the inner schema annotation", () => {
-    const schema = t.Union([
-      t.Object({
-        authMode: t.Literal("service-account"),
-        clientEmail: t.String(),
-        privateKey: t
-          .Transform(t.String({ "x-redact": true }))
-          .Decode((v) => v.replaceAll("\\n", "\n"))
-          .Encode((v) => v),
-        location: t.String(),
-        project: t.String(),
+  it("redacts fields across multiple variants", () => {
+    const schema = z.discriminatedUnion("authMode", [
+      z.object({
+        authMode: z.literal("service-account"),
+        clientEmail: z.string(),
+        privateKey: z.string().meta({ redact: true }),
+      }),
+      z.object({
+        authMode: z.literal("api-key"),
+        apiKey: z.string().meta({ redact: true }),
       }),
     ]);
 
@@ -41,15 +45,11 @@ describe("redactSensitiveValues", () => {
         authMode: "service-account",
         clientEmail: "service-account@example.com",
         privateKey: "super-secret",
-        location: "us-central1",
-        project: "vertex-project",
       }),
     ).toEqual({
       authMode: "service-account",
       clientEmail: "service-account@example.com",
       privateKey: "***",
-      location: "us-central1",
-      project: "vertex-project",
     });
   });
 });

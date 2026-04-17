@@ -45,11 +45,8 @@ export const API_KEY_EXPIRATION_OPTIONS = [
 ] as const;
 
 export const ApiKeyCreateSchema = z.object({
-  name: ((msg) => z.string(msg).trim().min(1, msg))("Please enter a name"),
-  expiresIn: z.literal(
-    API_KEY_EXPIRATION_OPTIONS.map((option) => option.value),
-    "Select an expiration window",
-  ),
+  name: z.string().trim().min(1),
+  expiresIn: z.literal(API_KEY_EXPIRATION_OPTIONS.map((option) => option.value)),
 });
 
 type ApiKeyCreateFormValues = z.infer<typeof ApiKeyCreateSchema>;

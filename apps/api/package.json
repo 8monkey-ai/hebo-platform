@@ -27,13 +27,13 @@
     "@hebo/shared-api": "workspace:*",
     "@prisma/client": "catalog:",
     "elysia": "catalog:",
-    "lru-cache": "catalog:"
+    "lru-cache": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
-    "@sinclair/typebox": ">= 0.34.0 < 1",
     "@types/bun": "catalog:",
     "prisma": "catalog:",
-    "prismabox": "^1.1.26"
+    "prisma-json-types-generator": "^4.1.1"
   }
 }

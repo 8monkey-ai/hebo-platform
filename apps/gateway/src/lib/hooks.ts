@@ -13,7 +13,7 @@ import {
 import { LRUCache } from "lru-cache";
 
 import type { createPrismaClient } from "~api/db/prisma";
-import type { Models, ProviderSlug } from "~api/modules/providers/types";
+import type { ModelsConfig, ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "../utils/aws";
 import { createProvider } from "./provider";
@@ -52,7 +52,11 @@ export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
 
   ctx.otel["gen_ai.request.model"] = modelId;
 
-  if ("metadata" in ctx.body && typeof ctx.body.metadata === "object" && ctx.body.metadata !== null) {
+  if (
+    "metadata" in ctx.body &&
+    typeof ctx.body.metadata === "object" &&
+    ctx.body.metadata !== null
+  ) {
     const metadata = ctx.body.metadata as Record<string, unknown>;
     for (const key in metadata) {
       ctx.otel[`gen_ai.request.metadata.${key}`] = String(metadata[key]);
@@ -102,7 +106,7 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
     throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
   }
 
-  const model = (branch.models as Models)?.find(({ alias }) => alias === modelAlias);
+  const model = (branch.models as ModelsConfig)?.find(({ alias }) => alias === modelAlias);
 
   if (!model) {
     throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");

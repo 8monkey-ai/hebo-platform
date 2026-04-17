@@ -1,16 +1,7 @@
 import { http, HttpResponse } from "msw";
 
+import { ProviderSchema } from "~api/modules/providers/types";
 import { db } from "~console/mocks/db";
-
-const SUPPORTED_PROVIDERS: Record<string, { name: string }> = {
-  anthropic: { name: "Anthropic" },
-  azure: { name: "Microsoft Azure" },
-  bedrock: { name: "Amazon Bedrock" },
-  groq: { name: "Groq" },
-  openai: { name: "OpenAI" },
-  vertex: { name: "Google Vertex AI" },
-  voyage: { name: "Voyage AI" },
-};
 
 export const providerHandlers = [
   http.get("/api/v1/providers", ({ request }) => {
@@ -18,21 +9,14 @@ export const providerHandlers = [
 
     const providers = [];
 
-    for (const slug in SUPPORTED_PROVIDERS) {
-      const configuredProvider = db.providers.findFirst((q) => q.where({ slug: slug }));
+    for (const o of ProviderSchema.options) {
+      const slug = o.shape.slug.value;
+      const configuredProvider = db.providers.findFirst((q) => q.where({ slug }));
 
       if (configuredProvider) {
         providers.push(configuredProvider);
       } else if (configured !== "true") {
-        providers.push({
-          slug,
-          name: SUPPORTED_PROVIDERS[slug].name,
-          config: undefined,
-          created_by: "",
-          created_at: undefined,
-          updated_by: "",
-          updated_at: undefined,
-        });
+        providers.push({ slug, name: o.shape.name.value, config: undefined });
       }
     }
 
@@ -41,12 +25,13 @@ export const providerHandlers = [
 
   http.put<{ slug: string }>("/api/v1/providers/:slug/config", async ({ params, request }) => {
     const body = await request.json();
+    const o = ProviderSchema.options.find((option) => option.shape.slug.value === params.slug);
 
     db.providers.delete((q) => q.where({ slug: params.slug }));
 
     const provider = await db.providers.create({
       slug: params.slug,
-      name: SUPPORTED_PROVIDERS[params.slug].name,
+      name: o!.shape.name.value,
       config: body,
     });
 

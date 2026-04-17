@@ -40,16 +40,13 @@ import { Input } from "@hebo/shared-ui/components/Input";
 import { Select } from "@hebo/shared-ui/components/Select";
 import { Separator } from "@hebo/shared-ui/components/Separator";
 
+import type { ModelConfig } from "~api/modules/providers/types";
 import { ModelSelector } from "~console/components/ui/ModelSelector";
 import { useFormErrorToast } from "~console/lib/errors";
 import { shellStore } from "~console/lib/shell";
 
 import type { clientAction } from "./route";
-import {
-  modelsConfigFormSchema,
-  type ModelConfigFormValue,
-  type ModelsConfigFormValues,
-} from "./schema";
+import { modelsConfigFormSchema, type ModelsConfigFormValues } from "./schema";
 
 type ModelsConfigProps = {
   agentSlug: string;
@@ -137,7 +134,7 @@ export default function ModelsConfigForm({
 }
 
 function ModelCard(props: {
-  model: FieldMetadata<ModelConfigFormValue>;
+  model: FieldMetadata<ModelConfig>;
   agentSlug: string;
   branchSlug: string;
   isExpanded: boolean;

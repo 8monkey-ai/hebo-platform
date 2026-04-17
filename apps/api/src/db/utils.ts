@@ -1,18 +1,21 @@
-import type { TObject, TSchema, TUnion } from "@sinclair/typebox";
+import type { z } from "zod";
 
 const MASK = "***" as const;
 
-export function redactSensitiveValues<T>(schema: TSchema, value: T): T {
+export function redactSensitiveValues<T>(
+  schema: { options: readonly z.core.$ZodType[] },
+  value: T,
+): T {
   const obj = value as Record<string, unknown>;
 
-  for (const variant of schema.anyOf ?? [schema]) {
-    for (const candidate of (variant as TUnion).anyOf ?? [variant]) {
-      const props = (candidate as TObject).properties ?? {};
+  for (const variant of schema.options) {
+    if (!("shape" in variant)) continue;
 
-      for (const key in props) {
-        if (props[key]?.["x-redact"] && key in obj) {
-          obj[key] = MASK;
-        }
+    const shape = (variant as z.ZodObject).shape as Record<string, z.ZodType>;
+
+    for (const key in shape) {
+      if (key in obj && shape[key]?.meta?.()?.redact) {
+        obj[key] = MASK;
       }
     }
   }

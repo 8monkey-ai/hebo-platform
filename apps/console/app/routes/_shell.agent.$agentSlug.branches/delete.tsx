@@ -33,7 +33,7 @@ export function createBranchDeleteSchema(branchSlug: string) {
     branchSlug: z.string(),
   });
 }
-export type BranchDeleteFormValues = z.infer<ReturnType<typeof createBranchDeleteSchema>>;
+type BranchDeleteFormValues = z.infer<ReturnType<typeof createBranchDeleteSchema>>;
 
 type DeleteBranchDialogProps = {
   branchSlug: string;

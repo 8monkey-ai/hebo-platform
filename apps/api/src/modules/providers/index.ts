@@ -1,10 +1,16 @@
-import { Elysia, status, t } from "elysia";
+import { Elysia, status } from "elysia";
+import { z } from "zod";
 
-import type { Prisma } from "~api/generated/prisma/client";
 import { prisma } from "~api/middlewares/prisma";
 
-import { type Models } from "./types";
-import { Provider, ProviderConfig, ProviderSlug, supportedProviders } from "./types";
+import {
+  type Provider,
+  ProviderSchema,
+  ProvidersSchema,
+  ProviderSlugSchema,
+  ProviderConfigSchema,
+  ProviderConfiguredSchema,
+} from "./types";
 
 export const providersModule = new Elysia({
   prefix: "/providers",
@@ -15,11 +21,14 @@ export const providersModule = new Elysia({
     async ({ prismaClient, query }) => {
       const providerConfigs = await prismaClient.provider_configs.findMany();
 
-      let providers = Object.entries(supportedProviders).map(([slug, { name }]) => ({
-        slug,
-        name,
-        config: providerConfigs.find((p) => p.provider_slug === slug)?.value,
-      }));
+      let providers = ProviderSchema.options.map(
+        (o) =>
+          ({
+            slug: o.shape.slug.value,
+            name: o.shape.name.value,
+            config: providerConfigs.find((p) => p.provider_slug === o.shape.slug.value)?.value,
+          }) as Provider,
+      );
 
       if (query.configured) {
         providers = providers.filter((p) => p.config !== undefined);
@@ -28,10 +37,8 @@ export const providersModule = new Elysia({
       return status(200, providers);
     },
     {
-      query: t.Object({
-        configured: t.Optional(t.Boolean({ default: false })),
-      }),
-      response: { 200: t.Array(Provider) },
+      query: ProviderConfiguredSchema,
+      response: { 200: ProvidersSchema },
     },
   )
   .put(
@@ -46,7 +53,7 @@ export const providersModule = new Elysia({
         data: {
           provider_slug: params.slug,
           value: body,
-        } as unknown as Prisma.provider_configsCreateInput,
+        },
       });
 
       if (existing) {
@@ -56,9 +63,9 @@ export const providersModule = new Elysia({
       return status(201, providerConfig.value);
     },
     {
-      body: ProviderConfig,
-      params: t.Object({ slug: ProviderSlug }),
-      response: { 201: ProviderConfig },
+      body: ProviderConfigSchema,
+      params: z.object({ slug: ProviderSlugSchema }),
+      response: { 201: ProviderConfigSchema },
     },
   )
   .delete(
@@ -72,14 +79,14 @@ export const providersModule = new Elysia({
       const branches = await prismaClient.branches.findMany();
 
       const affectedBranches = branches.filter((branch) => {
-        const models = branch.models as Models;
+        const models = branch.models;
         return models.some((model) => model.routing?.only?.includes(params.slug));
       });
 
       // Batch update all affected branches + delete provider in a single transaction
       await prismaClient.$transaction([
         ...affectedBranches.map((branch) => {
-          const models = branch.models as Models;
+          const models = branch.models;
           for (const model of models) {
             const only = model.routing?.only;
             if (!only?.includes(params.slug)) continue;
@@ -101,7 +108,7 @@ export const providersModule = new Elysia({
       return status(204);
     },
     {
-      params: t.Object({ slug: ProviderSlug }),
-      response: { 204: t.Void(), 404: t.String() },
+      params: z.object({ slug: ProviderSlugSchema }),
+      response: { 204: z.void(), 404: z.string() },
     },
   );

@@ -1,21 +1,18 @@
-import { Elysia, status, t } from "elysia";
+import { Elysia, status } from "elysia";
+import { z } from "zod";
 
 import { auth } from "@hebo/shared-api/middlewares/auth";
 import { slugFromString } from "@hebo/shared-api/utils/slug";
 
-import type { Prisma } from "~api/generated/prisma/client";
-import {
-  agentsInclude,
-  agentsInputCreate,
-  agentsInputUpdate,
-  agentsPlain,
-  agentsRelations,
-} from "~api/generated/prismabox/agents";
 import { prisma } from "~api/middlewares/prisma";
 
-const agents = t.Composite([agentsPlain, t.Partial(agentsRelations)], {
-  additionalProperties: false,
-});
+import {
+  AgentCreateSchema,
+  AgentIncludeSchema,
+  AgentUpdateSchema,
+  AgentPlainSchema,
+  AgentListSchema,
+} from "./types";
 
 export const agentsModule = new Elysia({
   prefix: "/agents",
@@ -33,8 +30,8 @@ export const agentsModule = new Elysia({
       );
     },
     {
-      query: agentsInclude,
-      response: { 200: t.Array(agents) },
+      query: AgentIncludeSchema,
+      response: { 200: AgentListSchema },
     },
   )
   .post(
@@ -73,19 +70,16 @@ export const agentsModule = new Elysia({
                 name: "Main",
                 slug: "main",
                 models: [{ alias: "default", type: body.defaultModel }],
-              } as unknown as Prisma.branchesCreateWithoutAgentInput,
+              },
             },
-          } as unknown as Prisma.agentsCreateInput,
+          },
           include: { branches: true },
         }),
       );
     },
     {
-      body: t.Object({
-        ...agentsInputCreate.properties,
-        defaultModel: t.String(),
-      }),
-      response: { 201: agents, 409: t.String() },
+      body: AgentCreateSchema,
+      response: { 201: AgentPlainSchema, 409: z.string() },
     },
   )
   .get(
@@ -100,8 +94,8 @@ export const agentsModule = new Elysia({
       );
     },
     {
-      query: agentsInclude,
-      response: { 200: agents, 404: t.String() },
+      query: AgentIncludeSchema,
+      response: { 200: AgentPlainSchema, 404: z.string() },
     },
   )
   .patch(
@@ -117,9 +111,9 @@ export const agentsModule = new Elysia({
       );
     },
     {
-      query: agentsInclude,
-      body: agentsInputUpdate,
-      response: { 200: agents, 404: t.String() },
+      query: AgentIncludeSchema,
+      body: AgentUpdateSchema,
+      response: { 200: AgentPlainSchema, 404: z.string() },
     },
   )
   .delete(
@@ -129,6 +123,6 @@ export const agentsModule = new Elysia({
       return status(204);
     },
     {
-      response: { 204: t.Void(), 404: t.String() },
+      response: { 204: z.void(), 404: z.string() },
     },
   );
