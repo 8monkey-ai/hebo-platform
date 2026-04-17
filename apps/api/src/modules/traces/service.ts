@@ -85,7 +85,7 @@ export async function listTraces(
     metaFilterSql += ` AND "${escapeSqlIdentifier(`${METADATA_PREFIX}${key}`)}" = ${addParam(value)}`;
   }
 
-  const HTTP_STATUS_COL = '"span_attributes.http.response.status_code"';
+  const HTTP_STATUS_COL = '"span_attributes.http.response.status_code_effective"';
   let statusFilterSql = "";
   if (statusFilter === "ok") {
     statusFilterSql = ` AND (${HTTP_STATUS_COL} IS NOT NULL AND ${HTTP_STATUS_COL} < 400)`;
@@ -106,7 +106,7 @@ export async function listTraces(
     SELECT
       "timestamp" AS timestamp,
       "trace_id" AS trace_id,
-      "span_attributes.http.response.status_code" AS http_status_code,
+      "span_attributes.http.response.status_code_effective" AS http_status_code,
       "span_status_message" AS span_status_message,
       "duration_nano" AS duration_nano,
       "span_attributes.gen_ai.operation.name" AS operation_name,
@@ -184,7 +184,7 @@ export async function getSpans(
     SELECT
       "timestamp" AS timestamp,
       "span_id" AS span_id,
-      "span_attributes.http.response.status_code" AS http_status_code,
+      "span_attributes.http.response.status_code_effective" AS http_status_code,
       "span_status_message" AS span_status_message,
       "duration_nano" AS duration_nano,
       "span_attributes.gen_ai.operation.name" AS operation_name,
