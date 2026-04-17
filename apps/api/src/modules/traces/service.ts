@@ -85,11 +85,12 @@ export async function listTraces(
     metaFilterSql += ` AND "${escapeSqlIdentifier(`${METADATA_PREFIX}${key}`)}" = ${addParam(value)}`;
   }
 
+  const HTTP_STATUS_COL = '"span_attributes.http.response.status_code"';
   let statusFilterSql = "";
   if (statusFilter === "ok") {
-    statusFilterSql = ` AND "span_status_code" IN ('STATUS_CODE_OK', 'STATUS_CODE_UNSET')`;
+    statusFilterSql = ` AND (${HTTP_STATUS_COL} IS NOT NULL AND ${HTTP_STATUS_COL} < 400)`;
   } else if (statusFilter === "error") {
-    statusFilterSql = ` AND "span_status_code" = 'STATUS_CODE_ERROR'`;
+    statusFilterSql = ` AND (${HTTP_STATUS_COL} IS NULL OR ${HTTP_STATUS_COL} >= 400)`;
   }
 
   let operationFilterSql = "";
@@ -105,13 +106,13 @@ export async function listTraces(
     SELECT
       "timestamp" AS timestamp,
       "trace_id" AS trace_id,
-      "span_status_code" AS span_status_code,
       "span_status_message" AS span_status_message,
       "duration_nano" AS duration_nano,
       "span_attributes.gen_ai.operation.name" AS operation_name,
       "span_attributes.gen_ai.response.model" AS response_model,
       "span_attributes.gen_ai.provider.name" AS provider_name,
-      "span_attributes.gen_ai.input.messages" AS input_messages
+      "span_attributes.gen_ai.input.messages" AS input_messages,
+      "span_attributes.http.response.status_code" AS http_status_code
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
     WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
@@ -145,7 +146,7 @@ export async function listTraces(
       operationName: parseString(row.operation_name),
       model: parseString(row.response_model),
       provider: parseString(row.provider_name),
-      status: formatStatus(row.span_status_code),
+      status: formatStatus(row.http_status_code),
       statusMessage: parseString(row.span_status_message),
       durationMs: Number(row.duration_nano) / 1e6,
       summary: extractLastUserSummary(row.input_messages),
@@ -183,7 +184,6 @@ export async function getSpans(
     SELECT
       "timestamp" AS timestamp,
       "span_id" AS span_id,
-      "span_status_code" AS span_status_code,
       "span_status_message" AS span_status_message,
       "duration_nano" AS duration_nano,
       "span_attributes.gen_ai.operation.name" AS operation_name,
@@ -197,6 +197,7 @@ export async function getSpans(
       "span_attributes.gen_ai.usage.input_tokens" AS input_tokens,
       "span_attributes.gen_ai.usage.output_tokens" AS output_tokens,
       "span_attributes.gen_ai.usage.total_tokens" AS total_tokens,
+      "span_attributes.http.response.status_code" AS http_status_code,
       ${optionalColumnsSql},
       "span_attributes.hebo.agent.slug",
       "span_attributes.hebo.branch.slug",
@@ -242,7 +243,7 @@ export async function getSpans(
       model: parseString(row.request_model),
       responseModel: parseString(row.response_model),
       provider: parseString(row.provider_name),
-      status: formatStatus(row.span_status_code),
+      status: formatStatus(row.http_status_code),
       statusMessage: parseString(row.span_status_message),
       durationMs: Number(row.duration_nano ?? 0) / 1e6,
       inputTokens: parseNullableNumber(row.input_tokens),

@@ -37,10 +37,11 @@ export function parseJsonArray(value: unknown): unknown[] | null {
   return value.map((item) => parseJson(item));
 }
 
-export function formatStatus(statusCode: unknown): "ok" | "error" | "unknown" {
-  if (statusCode === "STATUS_CODE_OK" || statusCode === "STATUS_CODE_UNSET") return "ok";
-  if (statusCode === "STATUS_CODE_ERROR") return "error";
-  return "unknown";
+export function formatStatus(httpStatusCode: unknown): "ok" | "error" | "unknown" {
+  if (typeof httpStatusCode === "number" || typeof httpStatusCode === "bigint") {
+    return httpStatusCode >= 400 ? "error" : "ok";
+  }
+  return "error";
 }
 
 function truncateSummary(value: string): string {
