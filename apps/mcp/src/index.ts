@@ -2,7 +2,7 @@ import { mcp } from "@8monkey/elysia-mcp";
 import { opentelemetry } from "@elysiajs/opentelemetry";
 import { Elysia } from "elysia";
 
-import { createLogger } from "@hebo/shared-api/lib/logger";
+import { getLogger } from "@hebo/shared-api/lib/logger";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { serve } from "@hebo/shared-api/lib/serve";
 import { logging } from "@hebo/shared-api/middlewares/logging";
@@ -16,7 +16,7 @@ const WORKERS = Number(process.env.WORKERS);
 const createMcp = () =>
   new Elysia()
     .use(opentelemetry(getOtelConfig("hebo-mcp")))
-    .use(logging(createLogger("hebo-mcp")))
+    .use(logging(getLogger("hebo-mcp")))
     .use(mcp({ name: "hebo-mcp", version: "0.0.3", path: "/aikit" }))
     .get("/", () => hello, { detail: { mcp: false } })
     .group("/aikit", (app) => app.use(countLetterRoute));

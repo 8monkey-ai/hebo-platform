@@ -6,6 +6,7 @@ import { emailOTP, organization } from "better-auth/plugins";
 import { createPrismaAdapter } from "@hebo/shared-api/db/postgres";
 import { AUTH_SECRET, AUTH_URL, LOG_LEVEL } from "@hebo/shared-api/env";
 import { COOKIE_CONFIG } from "@hebo/shared-api/lib/better-auth";
+import { getLogger } from "@hebo/shared-api/lib/logger";
 import { getSecret } from "@hebo/shared-api/utils/secret";
 import { getRootDomain } from "@hebo/shared-api/utils/url";
 
@@ -17,8 +18,9 @@ import {
   sendOrganizationInvitationEmail,
   sendVerificationOtpEmail,
 } from "./lib/email";
-import { logger } from "./lib/logger";
 import { createOrganizationHook, syncActiveOrganizationHook } from "./lib/organization";
+
+const logger = getLogger("hebo-auth");
 
 const prisma = new PrismaClient({
   adapter: createPrismaAdapter("auth"),
