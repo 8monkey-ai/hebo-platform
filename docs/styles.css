@@ -1,0 +1,19 @@
+html:not(.dark) span.fixed.inset-0 {
+  /* background-color: #f1f5f9; */
+  background:
+    linear-gradient(0deg, oklch(0.985 0.03 100) 0%, oklch(0.975 0.005 240) 60%) 0 0 / 100% 100vh
+      no-repeat,
+    oklch(0.985 0.03 100);
+}
+
+html:not(.dark) #sidebar {
+  background-color: #f1f5f9;
+}
+
+#sidebar-title {
+  font-weight: bold;
+}
+
+.nav-anchor {
+  font-weight: semibold !important;
+}

@@ -1,0 +1,49 @@
+---
+title: "Structured Outputs"
+description: "Generate typed JSON that follows a schema"
+---
+
+Structured outputs let you force model responses into a predictable JSON shape.
+
+This is useful when you need app-ready data from model output, like extracting fields, choosing the next workflow step, or auto-filling forms without brittle string parsing.
+
+```ts Vercel AI SDK highlight={3,4,12-29}
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { generateText, Output } from "ai";
+import { z } from "zod";
+
+const hebo = createOpenAICompatible({
+  name: "hebo",
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const RecipeSchema = z.object({
+  name: z.string(),
+  servings: z.number().int().positive(),
+  prepMinutes: z.number().int().nonnegative(),
+  cookMinutes: z.number().int().nonnegative(),
+  ingredients: z.array(
+    z.object({
+      item: z.string(),
+      amount: z.string(),
+    }),
+  ),
+  steps: z.array(z.string()).min(1),
+});
+
+const { output } = await generateText({
+  model: hebo("openai/gpt-oss-20b"),
+  prompt: "Create a simple vegetarian pasta recipe for 2 servings.",
+  output: Output.object({
+    schema: RecipeSchema,
+  }),
+});
+
+console.log(output);
+```
+
+<Info>
+  Keep your schemas small and explicit. This improves generation quality and reduces post-processing
+  edge cases.
+</Info>
