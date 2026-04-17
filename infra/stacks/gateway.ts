@@ -6,7 +6,7 @@ import heboCluster from "./cluster";
 import heboDatabase from "./db";
 import { authSecret, isProduction, llmSecrets, greptimeHost } from "./env";
 import heboGreptime from "./greptime";
-import { disableInitProcess, albUrl, hostname } from "./helpers";
+import { disableInitProcess, hostname } from "./helpers";
 
 const gatewayPort = "8522";
 
@@ -46,7 +46,7 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   },
   environment: {
     HEBO_MODE: "gateway",
-    AUTH_URL: albUrl(heboAuth),
+    AUTH_URL: heboAuth.url,
     BASE_URL: `https://${hostname("gateway")}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: gatewayPort,
@@ -73,5 +73,10 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   capacity: isProduction ? undefined : "spot",
   wait: isProduction,
 });
+
+export const gatewayRouter = new sst.aws.Router("HeboGatewayRouter", {
+  domain: hostname("gateway"),
+});
+gatewayRouter.route("/*", heboGateway.url, { readTimeout: "60 seconds" });
 
 export default heboGateway;

@@ -37,4 +37,9 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
   wait: isProduction,
 });
 
+const mcpRouter = new sst.aws.Router("HeboMcpRouter", {
+  routes: { "/*": heboMcp.url },
+  domain: hostname("mcp"),
+});
+
 export default heboMcp;

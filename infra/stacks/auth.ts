@@ -42,4 +42,9 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
 
 createMigrator("auth");
 
+export const authRouter = new sst.aws.Router("HeboAuthRouter", {
+  routes: { "/*": heboAuth.url },
+  domain: hostname("auth"),
+});
+
 export default heboAuth;

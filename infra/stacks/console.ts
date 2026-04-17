@@ -1,9 +1,11 @@
 // oxlint-disable-next-line triple-slash-reference
 /// <reference path="../../.sst/platform/config.d.ts" />
 
+import { apiRouter } from "./api";
+import { authRouter } from "./auth";
 import { smtpHost } from "./env";
+import { gatewayRouter } from "./gateway";
 import { hostname } from "./helpers";
-import { apiRouter, authRouter, gatewayRouter } from "./router";
 
 const heboConsole = new sst.aws.StaticSite("HeboConsole", {
   path: "apps/console",

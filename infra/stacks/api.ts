@@ -6,7 +6,7 @@ import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
 import { authSecret, isProduction, greptimeHost } from "./env";
 import heboGreptime from "./greptime";
-import { disableInitProcess, albUrl, hostname } from "./helpers";
+import { disableInitProcess, hostname } from "./helpers";
 
 const apiPort = "8521";
 
@@ -25,7 +25,7 @@ const heboApi = new sst.aws.Service("HeboApi", {
   environment: {
     HEBO_MODE: "api",
     BASE_URL: `https://${hostname("api")}`,
-    AUTH_URL: albUrl(heboAuth),
+    AUTH_URL: heboAuth.url,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: apiPort,
     ...(heboGreptime ? { GREPTIME_HOST: heboGreptime.service } : {}),
@@ -45,5 +45,10 @@ const heboApi = new sst.aws.Service("HeboApi", {
 });
 
 createMigrator("api");
+
+export const apiRouter = new sst.aws.Router("HeboApiRouter", {
+  routes: { "/*": heboApi.url },
+  domain: hostname("api"),
+});
 
 export default heboApi;

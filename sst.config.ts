@@ -31,7 +31,6 @@ export default $config({
     await import("./infra/stacks/api");
     await import("./infra/stacks/gateway");
     await import("./infra/stacks/mcp");
-    await import("./infra/stacks/router");
     await import("./infra/stacks/console");
   },
 });
