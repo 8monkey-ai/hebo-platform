@@ -4,10 +4,8 @@ import { betterAuth } from "better-auth/minimal";
 import { emailOTP, organization } from "better-auth/plugins";
 
 import { createPrismaAdapter } from "@hebo/shared-api/db/postgres";
-import { AUTH_SECRET, AUTH_URL, LOG_LEVEL, LOG_SEVERITY } from "@hebo/shared-api/env";
+import { AUTH_SECRET, AUTH_URL, LOG_LEVEL } from "@hebo/shared-api/env";
 import { COOKIE_CONFIG } from "@hebo/shared-api/lib/better-auth";
-import { createOtelLogger } from "@hebo/shared-api/lib/otel";
-import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino";
 import { getSecret } from "@hebo/shared-api/utils/secret";
 import { getRootDomain } from "@hebo/shared-api/utils/url";
 
@@ -19,6 +17,7 @@ import {
   sendOrganizationInvitationEmail,
   sendVerificationOtpEmail,
 } from "./lib/email";
+import { logger } from "./lib/logger";
 import { createOrganizationHook, syncActiveOrganizationHook } from "./lib/organization";
 
 const prisma = new PrismaClient({
@@ -26,8 +25,6 @@ const prisma = new PrismaClient({
 });
 
 const ROOT_DOMAIN = getRootDomain(AUTH_URL);
-
-const authLogger = createPinoOtelAdapter(createOtelLogger("hebo-auth", LOG_SEVERITY));
 
 const [
   GOOGLE_CLIENT_ID,
@@ -52,7 +49,7 @@ export const auth = betterAuth({
   logger: {
     level: LOG_LEVEL === "trace" ? "debug" : LOG_LEVEL,
     log: (level, message, ...args) => {
-      authLogger[level]({ args }, message);
+      logger[level]({ args }, message);
     },
   },
   accountLinking: {

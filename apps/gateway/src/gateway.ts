@@ -7,10 +7,6 @@ import { voyage35 } from "@hebo-ai/gateway/models/voyage";
 import { instrumentFetch } from "@hebo-ai/gateway/telemetry";
 import { trace } from "@opentelemetry/api";
 
-import { LOG_SEVERITY } from "@hebo/shared-api/env";
-import { createOtelLogger } from "@hebo/shared-api/lib/otel";
-import { createPinoOtelAdapter } from "@hebo/shared-api/utils/otel-pino";
-
 import {
   bestEffortResolveModelOnError,
   injectDefaultCacheControl,
@@ -18,6 +14,7 @@ import {
   selectProviderWithByokFallback,
   tagSpanWithOrganization,
 } from "./lib/hooks";
+import { logger } from "./lib/logger";
 import { createProvider, loadProviderSecrets } from "./lib/provider";
 
 // Disable Bun's hardcoded 5-minute fetch timeout (https://github.com/oven-sh/bun/issues/16682)
@@ -87,7 +84,7 @@ export const gw = gateway({
     onError: bestEffortResolveModelOnError,
   },
 
-  logger: createPinoOtelAdapter(createOtelLogger("hebo-gateway", LOG_SEVERITY)),
+  logger,
 
   timeouts: {
     flex: 30 * 60_000, // 30 minutes

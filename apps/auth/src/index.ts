@@ -8,6 +8,7 @@ import { serve } from "@hebo/shared-api/lib/serve";
 import { logging } from "@hebo/shared-api/middlewares/logging";
 
 import { auth } from "./better-auth";
+import { logger } from "./lib/logger";
 
 const PORT = Number(process.env.PORT ?? 8523);
 const WORKERS = Number(process.env.WORKERS);
@@ -15,7 +16,7 @@ const WORKERS = Number(process.env.WORKERS);
 const createAuth = () =>
   new Elysia()
     .use(opentelemetry(getOtelConfig("hebo-auth")))
-    .use(logging("hebo-auth"))
+    .use(logging(logger))
     .get("/", () => "🐵 Hebo Auth says hello!")
     .use(cors(CORS_CONFIG))
     .mount(auth.handler);

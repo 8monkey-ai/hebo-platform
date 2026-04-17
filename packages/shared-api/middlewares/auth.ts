@@ -9,7 +9,7 @@ import type { VerifyApiKeyPlugin } from "~auth/lib/api-key";
 import { AUTH_SECRET, AUTH_URL } from "../env";
 import { AuthError, BadRequestError } from "../errors";
 import { COOKIE_CONFIG } from "../lib/better-auth";
-import { logging } from "./logging";
+import type { Logger } from "../lib/logger";
 
 const SESSION_TOKEN = getCookies(COOKIE_CONFIG).sessionToken;
 
@@ -52,7 +52,7 @@ const createAuthClient = (request: Request) => {
 };
 
 export const auth = new Elysia({ name: "auth-service" })
-  .use(logging())
+  .decorate("logger", {} as Logger)
   .resolve(async function resolveAuthContext({ request, cookie, logger }) {
     const cookieHeader = request.headers.get("cookie");
     const authHeader = request.headers.get("authorization");
