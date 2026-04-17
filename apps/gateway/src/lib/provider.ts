@@ -90,12 +90,10 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
   switch (slug) {
     case "bedrock": {
       const bedrockConfig = config as BedrockConfig;
-      const region = bedrockConfig.region;
-      if (!region) return;
 
       switch (bedrockConfig.authMode) {
         case "access-key": {
-          const { accessKeyId, secretAccessKey } = bedrockConfig;
+          const { accessKeyId, secretAccessKey, region } = bedrockConfig;
           return withCanonicalIdsForBedrock(
             createAmazonBedrock({
               region,
@@ -104,7 +102,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
           );
         }
         case "iam-role": {
-          const { bedrockRoleArn } = bedrockConfig;
+          const { bedrockRoleArn, region } = bedrockConfig;
           return withCanonicalIdsForBedrock(
             createAmazonBedrock({
               region,
@@ -127,7 +125,6 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
     }
     case "groq": {
       const { apiKey } = config as ApiKeyConfig;
-      if (!apiKey) return;
       return withCanonicalIdsForGroq(createGroq({ apiKey }));
     }
     case "vertex": {
@@ -167,22 +164,18 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
     }
     case "voyage": {
       const { apiKey } = config as ApiKeyConfig;
-      if (!apiKey) return;
       return withCanonicalIdsForVoyage(createVoyage({ apiKey }));
     }
     case "anthropic": {
       const { apiKey } = config as ApiKeyConfig;
-      if (!apiKey) return;
       return withCanonicalIdsForAnthropic(createAnthropic({ apiKey }));
     }
     case "openai": {
       const { apiKey } = config as ApiKeyConfig;
-      if (!apiKey) return;
       return withCanonicalIdsForOpenAI(createOpenAI({ apiKey }));
     }
     case "azure": {
       const { apiKey, resourceName } = config as AzureConfig;
-      if (!apiKey || !resourceName) return;
       return createAzure({ apiKey, resourceName });
     }
   }
