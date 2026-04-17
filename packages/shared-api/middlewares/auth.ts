@@ -9,7 +9,7 @@ import type { VerifyApiKeyPlugin } from "~auth/lib/api-key";
 import { AUTH_SECRET, AUTH_URL } from "../env";
 import { AuthError, BadRequestError } from "../errors";
 import { COOKIE_CONFIG } from "../lib/better-auth";
-import { logging } from "./logging";
+import type { Logger } from "../lib/logger";
 
 const SESSION_TOKEN = getCookies(COOKIE_CONFIG).sessionToken;
 
@@ -52,7 +52,7 @@ const createAuthClient = (request: Request) => {
 };
 
 export const auth = new Elysia({ name: "auth-service" })
-  .use(logging())
+  .decorate("logger", {} as Logger)
   .resolve(async function resolveAuthContext({ request, cookie, logger }) {
     const cookieHeader = request.headers.get("cookie");
     const authHeader = request.headers.get("authorization");
@@ -77,12 +77,16 @@ export const auth = new Elysia({ name: "auth-service" })
         organizationId = session.session.activeOrganizationId as string;
       }
     } else if (authHeader) {
-      const { data: result } = await authClient.internal.verifyApiKey({
+      const { data: result, error: verifyError } = await authClient.internal.verifyApiKey({
         key: authHeader.slice(7) || "invalid-key",
         fetchOptions: {
           headers: { "x-internal-secret": AUTH_SECRET },
         },
       });
+
+      if (verifyError) {
+        logger.warn({ error: verifyError }, "API key verification request failed");
+      }
 
       if (result?.valid && result.key) {
         if (result.key.metadata?.createdByUserId) {

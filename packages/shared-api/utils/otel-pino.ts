@@ -104,11 +104,11 @@ export const createPinoOtelAdapter = (otelLogger: Logger) => {
   ) as Record<LogLevel, (...args: unknown[]) => void>;
 };
 
-export const parseLogSeverity = (raw: string): SeverityNumber => {
+export const parseLogLevel = (raw: string): { level: LogLevel; severity: SeverityNumber } => {
   if (!(raw in OTEL_SEVERITY_BY_LEVEL)) {
     throw new Error(
       `Unsupported LOG_LEVEL "${raw}". Must be one of: ${Object.keys(OTEL_SEVERITY_BY_LEVEL).join(", ")}`,
     );
   }
-  return OTEL_SEVERITY_BY_LEVEL[raw as LogLevel];
+  return { level: raw as LogLevel, severity: OTEL_SEVERITY_BY_LEVEL[raw as LogLevel] };
 };

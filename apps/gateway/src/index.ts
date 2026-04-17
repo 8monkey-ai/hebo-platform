@@ -15,6 +15,7 @@ import { OpenAIErrorSchema } from "@hebo-ai/gateway/errors/openai";
 import { Elysia } from "elysia";
 
 import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";
+import { getLogger } from "@hebo/shared-api/lib/logger";
 import { createOpenapiConfig } from "@hebo/shared-api/lib/openapi";
 import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { serve } from "@hebo/shared-api/lib/serve";
@@ -33,7 +34,7 @@ const GATEWAY_URL = process.env.GATEWAY_URL ?? `http://localhost:${PORT}`;
 export const createGateway = () =>
   new Elysia()
     .use(opentelemetry(getOtelConfig("hebo-gateway")))
-    .use(logging("hebo-gateway"))
+    .use(logging(getLogger("hebo-gateway")))
     // Root route ("/") is unauthenticated and unprotected for health checks.
     .get("/", () => "🐵 Hebo AI Gateway says hello!")
     .use(cors(CORS_CONFIG))
