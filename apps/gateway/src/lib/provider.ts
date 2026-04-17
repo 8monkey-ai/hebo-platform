@@ -95,7 +95,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
 
       switch (bedrockConfig.authMode) {
         case "access-key": {
-          const { accessKeyId, secretAccessKey, region } = bedrockConfig;
+          const { accessKeyId, secretAccessKey } = bedrockConfig;
           return withCanonicalIdsForBedrock(
             createAmazonBedrock({
               region,
@@ -104,7 +104,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
           );
         }
         case "iam-role": {
-          const { bedrockRoleArn, region } = bedrockConfig;
+          const { bedrockRoleArn } = bedrockConfig;
           return withCanonicalIdsForBedrock(
             createAmazonBedrock({
               region,
