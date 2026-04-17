@@ -4,11 +4,10 @@
 import heboAuth from "./auth";
 import heboCluster from "./cluster";
 import heboDatabase from "./db";
-import { disableInitProcess } from "./ecs";
-import { authSecret, isProduction, llmSecrets, greptimeHost, normalizedStage } from "./env";
+import { authSecret, isProduction, llmSecrets, greptimeHost } from "./env";
 import heboGreptime from "./greptime";
+import { disableInitProcess, hostname } from "./helpers";
 
-const gatewayDomain = isProduction ? "gateway.hebo.ai" : `gateway.${normalizedStage}.hebo.ai`;
 const gatewayPort = "8522";
 
 const heboGatewayAlbAccessLogs = new sst.aws.Bucket("HeboGatewayAlbAccessLogs", {
@@ -42,21 +41,21 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile",
-    tags: [gatewayDomain],
+    tags: [hostname("gateway")],
     args: { NODE_ENV: isProduction ? "production" : "development" },
   },
   environment: {
     HEBO_MODE: "gateway",
     AUTH_URL: heboAuth.url,
-    GATEWAY_URL: `https://${gatewayDomain}`,
+    BASE_URL: `https://${hostname("gateway")}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: gatewayPort,
     ...(heboGreptime ? { GREPTIME_HOST: heboGreptime.service } : {}),
   },
   loadBalancer: {
-    domain: gatewayDomain,
+    domain: hostname("gateway-origin"),
     rules: [
-      { listen: "80/http", redirect: "443/https" },
+      { listen: "80/http", forward: `${gatewayPort}/http` },
       { listen: "443/https", forward: `${gatewayPort}/http` },
     ],
   },
@@ -70,11 +69,6 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
         prefix: "gateway-alb",
       };
     },
-    listener: (args) => {
-      if (args.protocol === "HTTPS") {
-        args.sslPolicy = "ELBSecurityPolicy-TLS13-1-2-2021-06";
-      }
-    },
   },
   scaling: {
     min: isProduction ? 2 : 1,
@@ -83,5 +77,10 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
   capacity: isProduction ? undefined : "spot",
   wait: isProduction,
 });
+
+export const gatewayRouter = new sst.aws.Router("HeboGatewayRouter", {
+  domain: hostname("gateway"),
+});
+gatewayRouter.route("/*", heboGateway.url, { readTimeout: "60 seconds" });
 
 export default heboGateway;

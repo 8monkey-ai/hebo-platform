@@ -3,10 +3,9 @@
 
 import heboCluster from "./cluster";
 import heboDatabase, { createMigrator } from "./db";
-import { disableInitProcess } from "./ecs";
-import { authSecrets, isProduction, greptimeHost, normalizedStage } from "./env";
+import { authSecrets, isProduction, greptimeHost } from "./env";
+import { disableInitProcess, hostname } from "./helpers";
 
-const authDomain = isProduction ? "auth.hebo.ai" : `auth.${normalizedStage}.hebo.ai`;
 const authPort = "8523";
 
 const heboAuth = new sst.aws.Service("HeboAuth", {
@@ -18,29 +17,24 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
   image: {
     context: ".",
     dockerfile: "infra/docker/Dockerfile",
-    tags: [authDomain],
+    tags: [hostname("auth")],
     args: { NODE_ENV: isProduction ? "production" : "development" },
   },
   environment: {
     HEBO_MODE: "auth",
-    AUTH_URL: `https://${authDomain}`,
+    BASE_URL: `https://${hostname("auth")}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
     PORT: authPort,
   },
   loadBalancer: {
-    domain: authDomain,
+    domain: hostname("auth-origin"),
     rules: [
-      { listen: "80/http", redirect: "443/https" },
+      { listen: "80/http", forward: `${authPort}/http` },
       { listen: "443/https", forward: `${authPort}/http` },
     ],
   },
   transform: {
     taskDefinition: disableInitProcess,
-    listener: (args) => {
-      if (args.protocol === "HTTPS") {
-        args.sslPolicy = "ELBSecurityPolicy-TLS13-1-2-2021-06";
-      }
-    },
   },
   scaling: {
     min: isProduction ? 2 : 1,
@@ -51,5 +45,10 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
 });
 
 createMigrator("auth");
+
+export const authRouter = new sst.aws.Router("HeboAuthRouter", {
+  routes: { "/*": heboAuth.url },
+  domain: hostname("auth"),
+});
 
 export default heboAuth;
