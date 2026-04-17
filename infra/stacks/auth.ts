@@ -27,7 +27,11 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
     PORT: authPort,
   },
   loadBalancer: {
-    rules: [{ listen: "80/http", forward: `${authPort}/http` }],
+    domain: hostname("auth-origin"),
+    rules: [
+      { listen: "80/http", forward: `${authPort}/http` },
+      { listen: "443/https", forward: `${authPort}/http` },
+    ],
   },
   transform: {
     taskDefinition: disableInitProcess,

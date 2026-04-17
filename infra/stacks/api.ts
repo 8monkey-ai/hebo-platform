@@ -31,7 +31,11 @@ const heboApi = new sst.aws.Service("HeboApi", {
     ...(heboGreptime ? { GREPTIME_HOST: heboGreptime.service } : {}),
   },
   loadBalancer: {
-    rules: [{ listen: "80/http", forward: `${apiPort}/http` }],
+    domain: hostname("api-origin"),
+    rules: [
+      { listen: "80/http", forward: `${apiPort}/http` },
+      { listen: "443/https", forward: `${apiPort}/http` },
+    ],
   },
   transform: {
     taskDefinition: disableInitProcess,

@@ -24,7 +24,11 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
     PORT: mcpPort,
   },
   loadBalancer: {
-    rules: [{ listen: "80/http", forward: `${mcpPort}/http` }],
+    domain: hostname("mcp-origin"),
+    rules: [
+      { listen: "80/http", forward: `${mcpPort}/http` },
+      { listen: "443/https", forward: `${mcpPort}/http` },
+    ],
   },
   transform: {
     taskDefinition: disableInitProcess,
