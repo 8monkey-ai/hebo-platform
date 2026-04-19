@@ -15,6 +15,7 @@
     "anchor-has-content": "off",
     "max-dependencies": "off",
     "no-inline-comments": "off",
+    "unicorn/no-array-reverse": "off",
     "unicorn/no-array-sort": "off",
     "no-unsafe-type-assertion": "off",
     "consistent-return": "off",
