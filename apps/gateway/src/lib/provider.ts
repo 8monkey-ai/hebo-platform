@@ -84,7 +84,7 @@ export async function loadProviderSecrets() {
   };
 }
 
-export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 {
+export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 | undefined {
   switch (slug) {
     case "bedrock": {
       const bedrockConfig = config as BedrockConfig;

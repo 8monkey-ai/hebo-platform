@@ -69,10 +69,7 @@ function scrollDemoSpanAttributes(
     "gen_ai.usage.output_tokens": outputTokens,
     "gen_ai.usage.total_tokens": totalTokens,
     ...Object.fromEntries(
-      Object.entries(metadata).map(([key, value]) => [
-        `gen_ai.request.metadata.${key}`,
-        value,
-      ]),
+      Object.entries(metadata).map(([key, value]) => [`gen_ai.request.metadata.${key}`, value]),
     ),
     "hebo.agent.slug": "my-agent",
     "hebo.branch.slug": "main",
@@ -517,7 +514,12 @@ const traceDetails = [
       1200,
       0,
       1200,
-      { environment: "production", provider: "openai", scenario: "scroll-demo", session_id: "sess_scroll_1" },
+      {
+        environment: "production",
+        provider: "openai",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_1",
+      },
     ),
   },
   {
@@ -556,7 +558,12 @@ const traceDetails = [
       1240,
       500,
       1740,
-      { environment: "staging", provider: "anthropic", scenario: "scroll-demo", session_id: "sess_scroll_2" },
+      {
+        environment: "staging",
+        provider: "anthropic",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_2",
+      },
     ),
   },
   {
@@ -595,7 +602,12 @@ const traceDetails = [
       1280,
       520,
       1800,
-      { environment: "production", provider: "google", scenario: "scroll-demo", session_id: "sess_scroll_3" },
+      {
+        environment: "production",
+        provider: "google",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_3",
+      },
     ),
   },
   {
@@ -634,7 +646,12 @@ const traceDetails = [
       1320,
       540,
       1860,
-      { environment: "staging", provider: "openai", scenario: "scroll-demo", session_id: "sess_scroll_4" },
+      {
+        environment: "staging",
+        provider: "openai",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_4",
+      },
     ),
   },
   {
@@ -673,7 +690,12 @@ const traceDetails = [
       1360,
       560,
       1920,
-      { environment: "production", provider: "anthropic", scenario: "scroll-demo", session_id: "sess_scroll_5" },
+      {
+        environment: "production",
+        provider: "anthropic",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_5",
+      },
     ),
   },
   {
@@ -712,7 +734,12 @@ const traceDetails = [
       1400,
       0,
       1400,
-      { environment: "staging", provider: "google", scenario: "scroll-demo", session_id: "sess_scroll_6" },
+      {
+        environment: "staging",
+        provider: "google",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_6",
+      },
     ),
   },
   {
@@ -751,7 +778,12 @@ const traceDetails = [
       1440,
       600,
       2040,
-      { environment: "production", provider: "openai", scenario: "scroll-demo", session_id: "sess_scroll_7" },
+      {
+        environment: "production",
+        provider: "openai",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_7",
+      },
     ),
   },
   {
@@ -790,7 +822,12 @@ const traceDetails = [
       1480,
       620,
       2100,
-      { environment: "staging", provider: "anthropic", scenario: "scroll-demo", session_id: "sess_scroll_8" },
+      {
+        environment: "staging",
+        provider: "anthropic",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_8",
+      },
     ),
   },
   {
@@ -829,7 +866,12 @@ const traceDetails = [
       1520,
       640,
       2160,
-      { environment: "production", provider: "google", scenario: "scroll-demo", session_id: "sess_scroll_9" },
+      {
+        environment: "production",
+        provider: "google",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_9",
+      },
     ),
   },
   {
@@ -868,7 +910,12 @@ const traceDetails = [
       1560,
       660,
       2220,
-      { environment: "staging", provider: "openai", scenario: "scroll-demo", session_id: "sess_scroll_10" },
+      {
+        environment: "staging",
+        provider: "openai",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_10",
+      },
     ),
   },
   {
@@ -907,7 +954,12 @@ const traceDetails = [
       1600,
       0,
       1600,
-      { environment: "production", provider: "anthropic", scenario: "scroll-demo", session_id: "sess_scroll_11" },
+      {
+        environment: "production",
+        provider: "anthropic",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_11",
+      },
     ),
   },
   {
@@ -946,7 +998,12 @@ const traceDetails = [
       1640,
       700,
       2340,
-      { environment: "staging", provider: "google", scenario: "scroll-demo", session_id: "sess_scroll_12" },
+      {
+        environment: "staging",
+        provider: "google",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_12",
+      },
     ),
   },
   {
@@ -985,7 +1042,12 @@ const traceDetails = [
       1680,
       720,
       2400,
-      { environment: "production", provider: "openai", scenario: "scroll-demo", session_id: "sess_scroll_13" },
+      {
+        environment: "production",
+        provider: "openai",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_13",
+      },
     ),
   },
   {
@@ -1024,7 +1086,12 @@ const traceDetails = [
       1720,
       740,
       2460,
-      { environment: "staging", provider: "anthropic", scenario: "scroll-demo", session_id: "sess_scroll_14" },
+      {
+        environment: "staging",
+        provider: "anthropic",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_14",
+      },
     ),
   },
   {
@@ -1063,7 +1130,12 @@ const traceDetails = [
       1760,
       760,
       2520,
-      { environment: "production", provider: "google", scenario: "scroll-demo", session_id: "sess_scroll_15" },
+      {
+        environment: "production",
+        provider: "google",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_15",
+      },
     ),
   },
   {
@@ -1102,7 +1174,12 @@ const traceDetails = [
       1800,
       0,
       1800,
-      { environment: "staging", provider: "openai", scenario: "scroll-demo", session_id: "sess_scroll_16" },
+      {
+        environment: "staging",
+        provider: "openai",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_16",
+      },
     ),
   },
   {
@@ -1141,7 +1218,12 @@ const traceDetails = [
       1840,
       800,
       2640,
-      { environment: "production", provider: "anthropic", scenario: "scroll-demo", session_id: "sess_scroll_17" },
+      {
+        environment: "production",
+        provider: "anthropic",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_17",
+      },
     ),
   },
   {
@@ -1180,7 +1262,12 @@ const traceDetails = [
       1880,
       820,
       2700,
-      { environment: "staging", provider: "google", scenario: "scroll-demo", session_id: "sess_scroll_18" },
+      {
+        environment: "staging",
+        provider: "google",
+        scenario: "scroll-demo",
+        session_id: "sess_scroll_18",
+      },
     ),
   },
 ];

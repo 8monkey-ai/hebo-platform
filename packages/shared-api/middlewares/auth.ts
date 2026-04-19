@@ -22,7 +22,9 @@ const createAuthClient = (request: Request) => {
 
   // Inject OTEL trace context (traceparent, tracestate) for distributed tracing
   propagation.inject(context.active(), headers, {
-    set: (carrier, key, value) => (carrier[key] = value),
+    set: (carrier, key, value) => {
+      carrier[key] = value;
+    },
   });
 
   return createBetterAuthClient({

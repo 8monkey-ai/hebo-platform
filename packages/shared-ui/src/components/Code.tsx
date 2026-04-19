@@ -112,7 +112,7 @@ export function CodeGroupMdx({ children }: CodeGroupMdxProps) {
     const title = inner?.props?.title ?? `Code ${index + 1}`;
     return {
       title,
-      value: String(title),
+      value: title,
       content: inner?.props?.children,
     };
   });

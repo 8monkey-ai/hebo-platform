@@ -80,7 +80,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
     },
     model: {
       $allModels: {
-        softDelete<T, W>(this: T, where: W) {
+        softDelete(this: unknown, where: unknown) {
           const context = Prisma.getExtensionContext(this);
           // oxlint-disable-next-line no-unsafe-assignment, no-unsafe-member-access, no-unsafe-call, no-unsafe-return
           return (context as any).update({

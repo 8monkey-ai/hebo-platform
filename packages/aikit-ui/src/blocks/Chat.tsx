@@ -413,7 +413,7 @@ function PromptInputAttachmentsDisplay() {
   const attachments = usePromptInputAttachments();
 
   if (attachments.files.length === 0) {
-    return;
+    return null;
   }
 
   return (
