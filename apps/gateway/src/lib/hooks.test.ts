@@ -50,7 +50,7 @@ function makeCtx(overrides: {
         requiresByok: overrides.requiresByok,
       },
     },
-  } satisfies ResolveProviderHookContext;
+  } as unknown as ResolveProviderHookContext;
 }
 
 describe("selectProviderWithByokFallback", () => {
@@ -67,7 +67,7 @@ describe("selectProviderWithByokFallback", () => {
       } catch (e) {
         expect(e).toBeInstanceOf(GatewayError);
         expect((e as GatewayError).status).toBe(402);
-        expect((e as GatewayError).code).toBe("BYOK_REQUIRED");
+        expect((e as GatewayError).statusText).toBe("BYOK_REQUIRED");
       }
     });
 
@@ -84,7 +84,7 @@ describe("selectProviderWithByokFallback", () => {
       } catch (e) {
         expect(e).toBeInstanceOf(GatewayError);
         expect((e as GatewayError).status).toBe(402);
-        expect((e as GatewayError).code).toBe("BYOK_REQUIRED");
+        expect((e as GatewayError).statusText).toBe("BYOK_REQUIRED");
       }
     });
 

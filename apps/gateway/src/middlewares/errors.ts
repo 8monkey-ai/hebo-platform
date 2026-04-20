@@ -12,6 +12,6 @@ export const gatewayErrors = new Elysia({ name: "error-handler" })
 
     if (error instanceof HttpError) return toErrorResponse(error, { status: error.status });
 
-    return toErrorResponse(error);
+    return toErrorResponse(error, {});
   })
   .as("scoped");
