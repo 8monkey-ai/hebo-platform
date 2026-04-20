@@ -151,12 +151,12 @@ bun run sst secret remove GITHUB_CLIENT_ID --stage <stage>
 
 ## Run modes
 
-| #   | Mode                        | Command                                                | Database              | Notes                             |
-| --- | --------------------------- | ------------------------------------------------------ | --------------------- | --------------------------------- |
-| 1   | **Frontend-only** (offline) | `bun run -F @hebo/console dev`                         | —                     | UI relies on mock services        |
-| 2   | **Local full-stack**        | `bun run dev`                                          | Dockerized PostgreSQL | All apps with hot reload          |
-| 3   | **Self-hosted**             | `docker compose up -d` (from `infra/self-hosted/`)     | Dockerized PostgreSQL | Single container, all services    |
-| 4   | **Cloud (ECS)**             | `bun run sst deploy`                                   | Aurora PostgreSQL     | HTTPS URLs exported by SST        |
+| #   | Mode                        | Command                                            | Database              | Notes                          |
+| --- | --------------------------- | -------------------------------------------------- | --------------------- | ------------------------------ |
+| 1   | **Frontend-only** (offline) | `bun run -F @hebo/console dev`                     | —                     | UI relies on mock services     |
+| 2   | **Local full-stack**        | `bun run dev`                                      | Dockerized PostgreSQL | All apps with hot reload       |
+| 3   | **Self-hosted**             | `docker compose up -d` (from `infra/self-hosted/`) | Dockerized PostgreSQL | Single container, all services |
+| 4   | **Cloud (ECS)**             | `bun run sst deploy`                               | Aurora PostgreSQL     | HTTPS URLs exported by SST     |
 
 ## Self-hosted
 

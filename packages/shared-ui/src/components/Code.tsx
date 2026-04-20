@@ -112,6 +112,7 @@ export function CodeGroupMdx({ children }: CodeGroupMdxProps) {
     const title = inner?.props?.title ?? `Code ${index + 1}`;
     return {
       title,
+      // oxlint-disable-next-line no-unnecessary-type-conversion - title can be a ReactNode
       value: String(title),
       content: inner?.props?.children,
     };

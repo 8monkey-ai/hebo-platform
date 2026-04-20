@@ -54,9 +54,9 @@ Open `http://localhost:8520` to access the console.
 
 Create a `.env` file in `infra/self-hosted/` and set the variables you want to override. At minimum for production:
 
-| Variable | Why |
-| --- | --- |
-| `AUTH_SECRET` | Replace the default with a strong random string |
+| Variable                                 | Why                                                              |
+| ---------------------------------------- | ---------------------------------------------------------------- |
+| `AUTH_SECRET`                            | Replace the default with a strong random string                  |
 | `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, … | Platform-wide LLM provider keys (users can also bring their own) |
 
 Optional: OAuth (`GITHUB_CLIENT_ID`, `GOOGLE_CLIENT_ID`, …) and SMTP (`SMTP_HOST`, `SMTP_PORT`, …) for passwordless login and invitations.
@@ -65,13 +65,13 @@ See [`infra/self-hosted/.env.example`](infra/self-hosted/.env.example) for the f
 
 ## How Hebo compares
 
-|  | Hebo | Langfuse | Helicone | Portkey | LiteLLM | OpenRouter | Vercel AI |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Gateway | Stateful\* | — | Stateless | Stateless | Stateless | Stateless | Stateless |
-| Observability | Conversation view | Request level | Request level | Request level | 3rd party | 3rd party | 3rd party |
-| Evaluations | Simple Markdown | Yes | Via integrations | Yes | — | — | — |
-| User experience | Dev & Business | Dev-focused | Dev-focused | Dev-focused | Dev-focused | API only | API only |
-| Deployment | Cloud & self-host | Cloud & self-host | Cloud & self-host | Cloud only | Self-host | Cloud only | Cloud only |
+|                 | Hebo              | Langfuse          | Helicone          | Portkey       | LiteLLM     | OpenRouter | Vercel AI  |
+| --------------- | ----------------- | ----------------- | ----------------- | ------------- | ----------- | ---------- | ---------- |
+| Gateway         | Stateful\*        | —                 | Stateless         | Stateless     | Stateless   | Stateless  | Stateless  |
+| Observability   | Conversation view | Request level     | Request level     | Request level | 3rd party   | 3rd party  | 3rd party  |
+| Evaluations     | Simple Markdown   | Yes               | Via integrations  | Yes           | —           | —          | —          |
+| User experience | Dev & Business    | Dev-focused       | Dev-focused       | Dev-focused   | Dev-focused | API only   | API only   |
+| Deployment      | Cloud & self-host | Cloud & self-host | Cloud & self-host | Cloud only    | Self-host   | Cloud only | Cloud only |
 
 \* Stateful: Hebo supports `/responses` and `/conversations` endpoints, enabling multi-turn sessions and persistent conversation history without managing state in your application.
 

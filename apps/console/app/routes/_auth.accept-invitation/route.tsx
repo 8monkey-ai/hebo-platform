@@ -50,7 +50,7 @@ export default function AcceptInvitation({ loaderData: data }: Route.ComponentPr
             <AlertCircle />
             <AlertTitle>
               {data.status === "error"
-                ? data.message || "This invitation is expired or invalid."
+                ? (data.message ?? "This invitation is expired or invalid.")
                 : "No invitation ID provided."}
             </AlertTitle>
           </Alert>
