@@ -3,8 +3,10 @@ import { Elysia } from "elysia";
 import { IS_PRODUCTION } from "../env";
 import type { Logger } from "../lib/logger";
 
-export const logging = (logger: Logger) => {
-  const app = new Elysia({ name: "hebo-logging" }).decorate("logger", logger);
+export const logging = (logger?: Logger) => {
+  const app = new Elysia({ name: "hebo-logging" }).decorate("logger", (logger ?? {}) as Logger);
+
+  if (!logger) return app.as("scoped");
 
   if (!IS_PRODUCTION) {
     app.onRequest(({ request }) => {
