@@ -22,6 +22,7 @@ function makeCtx(overrides: {
     resolvedModelId: overrides.resolvedModelId ?? overrides.modelId,
     requestId: "",
     otel: {},
+    trace: undefined,
     operation: "chat",
     request: new Request("https://example.com/v1/chat/completions", {
       method: "POST",
@@ -67,7 +68,7 @@ describe("selectProviderWithByokFallback", () => {
       } catch (e) {
         expect(e).toBeInstanceOf(GatewayError);
         expect((e as GatewayError).status).toBe(402);
-        expect((e as GatewayError).code).toBe("BYOK_REQUIRED");
+        expect((e as GatewayError).statusText).toBe("BYOK_REQUIRED");
       }
     });
 
@@ -84,7 +85,7 @@ describe("selectProviderWithByokFallback", () => {
       } catch (e) {
         expect(e).toBeInstanceOf(GatewayError);
         expect((e as GatewayError).status).toBe(402);
-        expect((e as GatewayError).code).toBe("BYOK_REQUIRED");
+        expect((e as GatewayError).statusText).toBe("BYOK_REQUIRED");
       }
     });
 

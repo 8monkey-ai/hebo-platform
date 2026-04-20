@@ -10,8 +10,9 @@ export const gatewayErrors = new Elysia({ name: "error-handler" })
       ? toAnthropicErrorResponse
       : toOpenAIErrorResponse;
 
-    if (error instanceof HttpError) return toErrorResponse(error, { status: error.status });
+    if (error instanceof HttpError)
+      return toErrorResponse(error, { status: error.status, statusText: error.code });
 
-    return toErrorResponse(error);
+    return toErrorResponse(error, {});
   })
   .as("scoped");
