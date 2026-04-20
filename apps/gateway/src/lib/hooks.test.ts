@@ -22,6 +22,7 @@ function makeCtx(overrides: {
     resolvedModelId: overrides.resolvedModelId ?? overrides.modelId,
     requestId: "",
     otel: {},
+    trace: undefined,
     operation: "chat",
     request: new Request("https://example.com/v1/chat/completions", {
       method: "POST",
@@ -50,7 +51,7 @@ function makeCtx(overrides: {
         requiresByok: overrides.requiresByok,
       },
     },
-  } as unknown as ResolveProviderHookContext;
+  } satisfies ResolveProviderHookContext;
 }
 
 describe("selectProviderWithByokFallback", () => {
