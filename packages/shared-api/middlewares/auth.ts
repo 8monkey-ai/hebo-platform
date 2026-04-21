@@ -87,7 +87,6 @@ export const auth = new Elysia({ name: "auth-service" })
       });
 
       if (verifyError) {
-        logger.warn({ error: verifyError }, "API key verification request failed");
         throw new HttpError(verifyError.message ?? "Auth service error", verifyError.status ?? 500, "upstream_auth_error");
       }
 
