@@ -79,20 +79,8 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
 });
 
 export const gatewayRouter = new sst.aws.Router("HeboGatewayRouter", {
-  routes: { "/*": heboGateway.url },
   domain: hostname("gateway"),
-  transform: {
-    cdn: (args) => {
-      args.origins = $util.output(args.origins).apply((origins) =>
-        origins!.map((o) => ({
-          ...o,
-          customOriginConfig: o.customOriginConfig
-            ? { ...o.customOriginConfig, originReadTimeout: 60 }
-            : o.customOriginConfig,
-        })),
-      );
-    },
-  },
 });
+gatewayRouter.route("/", heboGateway.url, { readTimeout: "60 seconds" });
 
 export default heboGateway;
