@@ -9,13 +9,13 @@ export const branchHandlers = [
     async ({ request, params }) => {
       const body = (await request.json()) as {
         name: string;
-        sourceBranchSlug: string;
+        source_branch_slug: string;
       };
       const branchSlug = slugify(body.name, { lower: true, strict: true });
 
       const agent = db.agents.findFirst((q) => q.where({ slug: params.agentSlug }));
 
-      const sourceBranch = agent!.branches.find((b) => b.slug === body.sourceBranchSlug);
+      const sourceBranch = agent!.branches.find((b) => b.slug === body.source_branch_slug);
 
       const existingBranch = agent!.branches.find((b) => b.slug === branchSlug);
       if (existingBranch)

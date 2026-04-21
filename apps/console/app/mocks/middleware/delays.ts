@@ -1,10 +1,10 @@
 import { delay, http, type HttpHandler } from "msw";
 
 const METHOD_DELAYS: Partial<Record<keyof typeof http, number>> = {
-  get: 1000,
-  post: 2000,
+  get: 500,
+  post: 1000,
   patch: 1500,
-  delete: 500,
+  delete: 750,
 };
 
 export function addDelays(handlers: HttpHandler[]): HttpHandler[] {

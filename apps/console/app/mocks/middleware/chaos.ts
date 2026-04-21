@@ -1,7 +1,7 @@
 import { http, HttpResponse, type HttpHandler, type HttpResponseResolver } from "msw";
 
-const CHAOS_NETWORK_RATE = Number(import.meta.env.VITE_CHAOS_NETWORK ?? 0.1);
-const CHAOS_HTTP_RATE = Number(import.meta.env.VITE_CHAOS_HTTP ?? 0.2);
+const CHAOS_NETWORK_RATE = Number(import.meta.env.VITE_CHAOS_NETWORK ?? 0);
+const CHAOS_HTTP_RATE = Number(import.meta.env.VITE_CHAOS_HTTP ?? 0);
 
 const chaosResolver: HttpResponseResolver = (info) => {
   if (info.request.headers.get("x-no-chaos") === "1") return;
