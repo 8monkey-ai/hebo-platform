@@ -82,6 +82,9 @@ export const auth = betterAuth({
   session: {
     cookieCache: { enabled: true },
   },
+  rateLimit: {
+    enabled: false,
+  },
   trustedOrigins: ROOT_DOMAIN ? [`https://*.${ROOT_DOMAIN}`] : ["*"],
   advanced: {
     ...COOKIE_CONFIG.advanced,
