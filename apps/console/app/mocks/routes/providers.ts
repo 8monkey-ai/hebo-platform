@@ -27,19 +27,13 @@ export const providerHandlers = [
     const body = await request.json();
     const o = ProviderSchema.options.find((option) => option.shape.slug.value === params.slug);
 
-    const existing = db.providers.findFirst((q) => q.where({ slug: params.slug }));
+    db.providers.delete((q) => q.where({ slug: params.slug }));
 
-    const provider = existing
-      ? await db.providers.update(existing, {
-          data(p) {
-            p.config = body;
-          },
-        })
-      : await db.providers.create({
-          slug: params.slug,
-          name: o!.shape.name.value,
-          config: body,
-        });
+    const provider = await db.providers.create({
+      slug: params.slug,
+      name: o!.shape.name.value,
+      config: body,
+    });
 
     return HttpResponse.json(provider, { status: 201 });
   }),
