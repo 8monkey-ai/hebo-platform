@@ -42,8 +42,8 @@ const heboMcp = new sst.aws.Service("HeboMcp", {
 });
 
 const mcpRouter = new sst.aws.Router("HeboMcpRouter", {
-  routes: { "/*": heboMcp.url },
   domain: hostname("mcp"),
 });
+mcpRouter.route("/", heboMcp.url);
 
 export default heboMcp;

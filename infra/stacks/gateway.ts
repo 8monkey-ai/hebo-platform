@@ -81,6 +81,6 @@ const heboGateway = new sst.aws.Service("HeboGateway", {
 export const gatewayRouter = new sst.aws.Router("HeboGatewayRouter", {
   domain: hostname("gateway"),
 });
-gatewayRouter.route("/*", heboGateway.url, { readTimeout: "60 seconds" });
+gatewayRouter.route("/", heboGateway.url, { readTimeout: "60 seconds" });
 
 export default heboGateway;
