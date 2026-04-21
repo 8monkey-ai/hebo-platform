@@ -9,13 +9,13 @@ export const branchHandlers = [
     async ({ request, params }) => {
       const body = (await request.json()) as {
         name: string;
-        sourceBranchSlug: string;
+        source_branch_slug: string;
       };
       const branchSlug = slugify(body.name, { lower: true, strict: true });
 
       const agent = db.agents.findFirst((q) => q.where({ slug: params.agentSlug }));
 
-      const sourceBranch = agent!.branches.find((b) => b.slug === body.sourceBranchSlug);
+      const sourceBranch = agent!.branches.find((b) => b.slug === body.source_branch_slug);
 
       const existingBranch = agent!.branches.find((b) => b.slug === branchSlug);
       if (existingBranch)
@@ -30,13 +30,10 @@ export const branchHandlers = [
         models: structuredClone(sourceBranch!.models),
       });
 
-      // FUTURE: Update doesn't work right now in msw/data v1
-      // https://github.com/mswjs/data/issues/346
-      db.agents.delete((q) => q.where({ slug: params.agentSlug }));
-      await db.agents.create({
-        slug: agent!.slug,
-        name: agent!.name,
-        branches: [...agent!.branches, newBranch],
+      await db.agents.update(agent!, {
+        data(a) {
+          a.branches.push(newBranch);
+        },
       });
 
       return HttpResponse.json(newBranch, { status: 201 });
