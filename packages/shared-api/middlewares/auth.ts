@@ -7,7 +7,7 @@ import { type Cookie, Elysia } from "elysia";
 import type { VerifyApiKeyPlugin } from "~auth/lib/api-key";
 
 import { AUTH_SECRET, AUTH_URL } from "../env";
-import { AuthError, BadRequestError } from "../errors";
+import { AuthError, BadRequestError, HttpError } from "../errors";
 import { COOKIE_CONFIG } from "../lib/better-auth";
 import { logging } from "./logging";
 
@@ -88,6 +88,7 @@ export const auth = new Elysia({ name: "auth-service" })
 
       if (verifyError) {
         logger.warn({ error: verifyError }, "API key verification request failed");
+        throw new HttpError(verifyError.message ?? "Auth service error", verifyError.status ?? 500, "upstream_auth_error");
       }
 
       if (result?.valid && result.key) {
