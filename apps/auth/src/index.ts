@@ -19,7 +19,7 @@ const createAuth = () =>
     .use(logging(getLogger("hebo-auth")))
     .get("/", () => "🐵 Hebo Auth says hello!")
     .use(cors(CORS_CONFIG))
-    .mount(auth.handler);
+    .all("/v1/*", ({ request }) => auth.handler(request));
 
 if (import.meta.main) {
   serve(createAuth, PORT, "Hebo Auth", { workers: WORKERS });
