@@ -51,8 +51,8 @@ const heboApi = new sst.aws.Service("HeboApi", {
 createMigrator("api");
 
 export const apiRouter = new sst.aws.Router("HeboApiRouter", {
-  routes: { "/*": heboApi.url },
   domain: hostname("api"),
 });
+apiRouter.route("/", heboApi.url);
 
 export default heboApi;
