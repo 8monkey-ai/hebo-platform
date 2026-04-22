@@ -67,6 +67,7 @@ function ModelSelector({
       onValueChange={(val) => onValueChange?.(val as string)}
       disabled={disabled ?? !hasModels}
       items={groupedItems}
+      itemToStringLabel={(modelId) => models?.[modelId]?.name ?? modelId}
       itemToStringValue={(modelId) => models?.[modelId]?.name ?? modelId}
       filter={(modelId, query) => {
         if (!query) return true;
@@ -84,30 +85,32 @@ function ModelSelector({
       <ComboboxContent>
         <ComboboxEmpty>No models found.</ComboboxEmpty>
         <ComboboxList>
-          <ComboboxGroup>
-            <ComboboxLabel />
-            <ComboboxCollection>
-              {(modelId: string) => {
-                const m = models?.[modelId];
-                if (!m) return null;
-                return (
-                  <ComboboxItem key={modelId} value={modelId}>
-                    {m.name}
-                    <span className="ml-auto flex gap-1">
-                      {m.free ? (
-                        <Badge className="bg-green-600 text-white!">Free Tier</Badge>
-                      ) : m.requiresByok ? (
-                        <Badge className="bg-amber-600 text-white!">BYOK</Badge>
-                      ) : null}
-                      {m.modality === "embedding" && (
-                        <Badge className="bg-blue-500 text-white!">Embeddings</Badge>
-                      )}
-                    </span>
-                  </ComboboxItem>
-                );
-              }}
-            </ComboboxCollection>
-          </ComboboxGroup>
+          <ComboboxCollection>
+            {(group: { value: string; items: string[] }) => (
+              <ComboboxGroup key={group.value}>
+                <ComboboxLabel>{group.value}</ComboboxLabel>
+                {group.items.map((modelId) => {
+                  const m = models?.[modelId];
+                  if (!m) return null;
+                  return (
+                    <ComboboxItem key={modelId} value={modelId}>
+                      {m.name}
+                      <span className="ml-auto flex gap-1">
+                        {m.free ? (
+                          <Badge className="bg-green-600 text-white!">Free Tier</Badge>
+                        ) : m.requiresByok ? (
+                          <Badge className="bg-amber-600 text-white!">BYOK</Badge>
+                        ) : null}
+                        {m.modality === "embedding" && (
+                          <Badge className="bg-blue-500 text-white!">Embeddings</Badge>
+                        )}
+                      </span>
+                    </ComboboxItem>
+                  );
+                })}
+              </ComboboxGroup>
+            )}
+          </ComboboxCollection>
         </ComboboxList>
       </ComboboxContent>
     </Combobox>
