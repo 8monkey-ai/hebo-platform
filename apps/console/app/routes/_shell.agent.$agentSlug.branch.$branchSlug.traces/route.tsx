@@ -25,7 +25,7 @@ export async function clientLoader({
         page: page,
         from: effectiveFrom,
         to: effectiveTo,
-        metadata: Object.keys(metadata).length > 0 ? JSON.stringify(metadata) : undefined,
+        metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
         status,
         operation,
       },

@@ -6,7 +6,7 @@ const TraceTimeRangeQuerySchema = {
 };
 
 export const TraceListQuerySchema = z.object({
-  metadata: z.string().optional(),
+  metadata: z.record(z.string(), z.string()).optional(),
   status: z.union([z.literal("ok"), z.literal("error")]).optional(),
   operation: z.union([z.literal("chat"), z.literal("embeddings")]).optional(),
   ...TraceTimeRangeQuerySchema,

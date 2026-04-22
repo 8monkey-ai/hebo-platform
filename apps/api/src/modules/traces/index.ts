@@ -1,8 +1,6 @@
 import { Elysia, status } from "elysia";
 import { z } from "zod";
 
-import { BadRequestError } from "@hebo/shared-api/errors";
-
 import { greptime } from "~api/middlewares/greptime";
 
 import { getSpans, listTraces } from "./service";
@@ -18,23 +16,6 @@ export const spansModule = new Elysia({
   .get(
     "/",
     async ({ greptimeDb, organizationId, params, query }) => {
-      let metadata: Record<string, string> = {};
-      if (query.metadata) {
-        try {
-          const parsed: unknown = JSON.parse(query.metadata);
-          if (
-            !parsed ||
-            typeof parsed !== "object" ||
-            Array.isArray(parsed) ||
-            Object.values(parsed).some((value) => typeof value !== "string")
-          )
-            throw new Error("Invalid metadata");
-          metadata = parsed as Record<string, string>;
-        } catch {
-          throw new BadRequestError(`Invalid metadata filter: ${query.metadata}`);
-        }
-      }
-
       return status(
         200,
         await listTraces(
@@ -48,7 +29,7 @@ export const spansModule = new Elysia({
           // https://github.com/elysiajs/elysia/issues/817
           query.page!,
           query.pageSize!,
-          metadata,
+          query.metadata ?? {},
           query.status,
           query.operation,
         ),
