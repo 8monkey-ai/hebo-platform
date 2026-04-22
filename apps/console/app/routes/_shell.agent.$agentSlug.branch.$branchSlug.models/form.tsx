@@ -41,7 +41,7 @@ import { Select } from "@hebo/shared-ui/components/Select";
 import { Separator } from "@hebo/shared-ui/components/Separator";
 
 import type { ModelConfig } from "~api/modules/providers/types";
-import { ModelSelector } from "~console/components/ui/ModelSelector";
+import { ModelCombobox } from "~console/components/ui/model-combobox";
 import { useFormErrorToast } from "~console/lib/errors";
 import { shellStore } from "~console/lib/shell";
 
@@ -223,7 +223,7 @@ function ModelCard(props: {
               <Field name={model.getFieldset().type.name}>
                 <FieldLabel>Type</FieldLabel>
                 <FieldControl>
-                  <ModelSelector models={supportedModels} />
+                  <ModelCombobox models={supportedModels} />
                 </FieldControl>
                 <FieldError />
               </Field>

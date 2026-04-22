@@ -55,6 +55,33 @@ const SUPPORTED_MODELS = [
     modality: "embedding",
     free: false,
   },
+  {
+    type: "google/gemini-2.5-pro",
+    displayName: "Gemini 2.5 Pro",
+    owner: "google",
+    created: 1_767_837_920,
+    providers: [{ vertex: "gemini-2.5-pro" }],
+    modality: "chat",
+    free: false,
+  },
+  {
+    type: "mistral/mistral-large",
+    displayName: "Mistral Large",
+    owner: "mistral",
+    created: 1_767_837_920,
+    providers: [{ bedrock: "mistral.mistral-large-v1:0" }],
+    modality: "chat",
+    free: false,
+  },
+  {
+    type: "openai/gpt-4o-mini",
+    displayName: "GPT-4o Mini",
+    owner: "openai",
+    created: 1_767_837_920,
+    providers: [{ bedrock: "openai.gpt-4o-mini-v1:0" }],
+    modality: "chat",
+    free: true,
+  },
 ] as const;
 
 export const modelHandlers = [
