@@ -41,7 +41,7 @@ function groupByLab(models: Models): Array<[string, ModelEntry[]]> {
     ]);
 }
 
-type ModelComboboxProps = {
+type ModelSelectorProps = {
   models: Models | undefined;
   name?: string;
   defaultValue?: string;
@@ -53,7 +53,7 @@ type ModelComboboxProps = {
   "aria-invalid"?: boolean;
 };
 
-function ModelCombobox({
+function ModelSelector({
   models,
   name,
   defaultValue,
@@ -62,11 +62,16 @@ function ModelCombobox({
   disabled,
   id,
   ...ariaProps
-}: ModelComboboxProps) {
+}: ModelSelectorProps) {
   const [inputValue, setInputValue] = useState("");
   const hasModels = models && Object.keys(models).length > 0;
 
   const groups = groupByLab(models ?? {});
+
+  // Build a lookup from model ID to display name for custom filtering
+  const modelNames = models
+    ? Object.fromEntries(Object.entries(models).map(([mid, m]) => [mid, m.name.toLowerCase()]))
+    : {};
 
   return (
     <Combobox
@@ -79,10 +84,16 @@ function ModelCombobox({
       }}
       onInputValueChange={setInputValue}
       inputValue={inputValue}
-      disabled={disabled || !hasModels}
+      disabled={disabled ?? !hasModels}
+      filter={(itemValue: string, query: string) => {
+        const q = query.toLowerCase();
+        const displayName = modelNames[itemValue];
+        return (displayName?.includes(q) ?? false) || itemValue.toLowerCase().includes(q);
+      }}
     >
       <ComboboxInput
         id={id}
+        className="bg-background"
         placeholder={hasModels ? "Select model..." : "Error: Couldn't load models"}
         {...ariaProps}
       />
@@ -93,7 +104,7 @@ function ModelCombobox({
             <ComboboxGroup key={lab}>
               <ComboboxLabel>{labelize(lab)}</ComboboxLabel>
               {items.map((m) => (
-                <ComboboxItem key={m.id} value={m.id} text={m.name}>
+                <ComboboxItem key={m.id} value={m.id}>
                   {m.name}
                   <span className="ml-auto flex gap-1">
                     {m.free ? (
@@ -115,4 +126,4 @@ function ModelCombobox({
   );
 }
 
-export { ModelCombobox };
+export { ModelSelector };

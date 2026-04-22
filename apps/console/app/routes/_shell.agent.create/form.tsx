@@ -24,7 +24,7 @@ import {
 import { Input } from "@hebo/shared-ui/components/Input";
 
 import { AgentCreateSchema, type AgentCreate } from "~api/modules/agents/types";
-import { ModelCombobox } from "~console/components/ui/model-combobox";
+import { ModelSelector } from "~console/components/ui/ModelSelector";
 import { useFormErrorToast } from "~console/lib/errors";
 import { shellStore } from "~console/lib/shell";
 
@@ -84,7 +84,7 @@ export function AgentCreateForm() {
               <FieldLabel>Default Model</FieldLabel>
               <FieldContent>
                 <FieldControl>
-                  <ModelCombobox models={models} />
+                  <ModelSelector models={models} />
                 </FieldControl>
                 <FieldError />
               </FieldContent>
