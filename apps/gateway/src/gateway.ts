@@ -87,9 +87,11 @@ export const gw = gateway({
 
   logger: getLogger("hebo-gateway"),
 
-  timeouts: {
-    flex: 30 * 60_000, // 30 minutes
-    normal: 5 * 60_000, // 5 minutes
+  advanced: {
+    timeouts: {
+      flex: 30 * 60_000, // 30 minutes
+      normal: 5 * 60_000, // 5 minutes
+    },
   },
 
   telemetry: {
