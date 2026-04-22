@@ -1,13 +1,13 @@
-import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
+import { type ModelCatalog, defineModelCatalog, gateway } from "@hebo-ai/gateway";
 import { qwen } from "@hebo-ai/gateway/models/alibaba";
-import { nova2MultimodalEmbeddings } from "@hebo-ai/gateway/models/amazon";
-import { claudeHaiku45, claudeOpus46, claudeSonnet46 } from "@hebo-ai/gateway/models/anthropic";
+import { nova } from "@hebo-ai/gateway/models/amazon";
+import { claude } from "@hebo-ai/gateway/models/anthropic";
 import { deepseek } from "@hebo-ai/gateway/models/deepseek";
-import { gemini } from "@hebo-ai/gateway/models/google";
+import { gemini, gemma } from "@hebo-ai/gateway/models/google";
 import { minimax } from "@hebo-ai/gateway/models/minimax";
 import { kimi } from "@hebo-ai/gateway/models/moonshot";
-import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
-import { voyage35 } from "@hebo-ai/gateway/models/voyage";
+import { gpt, gptOss, textEmbeddings } from "@hebo-ai/gateway/models/openai";
+import { voyage } from "@hebo-ai/gateway/models/voyage";
 import { grok } from "@hebo-ai/gateway/models/xai";
 import { glm } from "@hebo-ai/gateway/models/zai";
 import { instrumentFetch } from "@hebo-ai/gateway/telemetry";
@@ -41,6 +41,12 @@ const withTier = (modelId: string) => ({
     requiresByok: SECRETS.ENFORCE_BYOK && !SECRETS.FREE_MODEL_IDS.has(modelId),
   },
 });
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const tiered = (preset: (override?: any) => ModelCatalog): ModelCatalog => {
+  const modelId = Object.keys(preset({}))[0];
+  return preset(withTier(modelId));
+};
 
 export const gw = gateway({
   basePath: BASE_PATH,
@@ -86,20 +92,20 @@ export const gw = gateway({
   },
 
   models: defineModelCatalog(
-    gptOss20b(withTier("openai/gpt-oss-20b")),
-    gptOss120b(withTier("openai/gpt-oss-120b")),
-    gemini["v3.x"].map((preset) => preset(withTier("google/gemini-2.5-pro"))),
-    claudeOpus46(withTier("anthropic/claude-opus-4.6")),
-    claudeSonnet46(withTier("anthropic/claude-sonnet-4.6")),
-    claudeHaiku45(withTier("anthropic/claude-haiku-4.5")),
-    nova2MultimodalEmbeddings(withTier("amazon/nova-2-multimodal-embeddings")),
-    voyage35(withTier("voyage/voyage-3.5")),
-    deepseek.all.map((preset) => preset(withTier("deepseek/deepseek-v3.2"))),
-    grok.all.map((preset) => preset(withTier("xai/grok-4.2"))),
-    qwen.all.map((preset) => preset(withTier("qwen/qwen-3.5"))),
-    minimax.all.map((preset) => preset(withTier("minimax/minimax-m2"))),
-    glm.all.map((preset) => preset(withTier("zhipu/glm-5"))),
-    kimi.all.map((preset) => preset(withTier("moonshot/kimi-k2"))),
+    claude.all.map(tiered),
+    gpt.all.map(tiered),
+    gptOss.all.map(tiered),
+    textEmbeddings.all.map(tiered),
+    gemini.all.map(tiered),
+    gemma.all.map(tiered),
+    nova.all.map(tiered),
+    voyage.all.map(tiered),
+    deepseek.all.map(tiered),
+    grok.all.map(tiered),
+    qwen.all.map(tiered),
+    minimax.all.map(tiered),
+    glm.all.map(tiered),
+    kimi.all.map(tiered),
   ),
 
   hooks: {
