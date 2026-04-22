@@ -68,10 +68,16 @@ function ModelSelector({
 
   const groups = groupByLab(models ?? {});
 
-  // Build a lookup from model ID to display name for custom filtering
-  const modelNames = models
-    ? Object.fromEntries(Object.entries(models).map(([mid, m]) => [mid, m.name.toLowerCase()]))
-    : {};
+  // Client-side filtering: base-ui's filter prop only works with the `items` prop,
+  // not with rendered children, so we filter the groups ourselves.
+  const q = inputValue.toLowerCase().trim();
+  const filteredGroups = q
+    ? groups
+        .map(([lab, items]) => [lab, items.filter((m) => m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q))] as [string, ModelEntry[]])
+        .filter(([, items]) => items.length > 0)
+    : groups;
+
+  const hasFilteredResults = filteredGroups.length > 0;
 
   return (
     <Combobox
@@ -85,22 +91,18 @@ function ModelSelector({
       onInputValueChange={setInputValue}
       inputValue={inputValue}
       disabled={disabled ?? !hasModels}
-      filter={(itemValue: string, query: string) => {
-        const q = query.toLowerCase();
-        const displayName = modelNames[itemValue];
-        return (displayName?.includes(q) ?? false) || itemValue.toLowerCase().includes(q);
-      }}
+      filter={null}
+      autoComplete="none"
     >
       <ComboboxInput
         id={id}
-        className="bg-background"
         placeholder={hasModels ? "Select model..." : "Error: Couldn't load models"}
         {...ariaProps}
       />
       <ComboboxContent>
         <ComboboxList>
-          <ComboboxEmpty>No models found.</ComboboxEmpty>
-          {groups.map(([lab, items]) => (
+          {!hasFilteredResults && <ComboboxEmpty>No models found.</ComboboxEmpty>}
+          {filteredGroups.map(([lab, items]) => (
             <ComboboxGroup key={lab}>
               <ComboboxLabel>{labelize(lab)}</ComboboxLabel>
               {items.map((m) => (
