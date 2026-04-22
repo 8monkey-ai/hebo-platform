@@ -16,6 +16,14 @@ A platform that brings development and business teams together. Iterate fast. Re
   <img src="https://hebo.ai/assets/hebo-platform-Cwx3imlO.png" alt="Hebo observability dashboard" width="800" />
 </p>
 
+## Supported providers
+
+Anthropic, OpenAI, Amazon Bedrock, Google Vertex, Microsoft Azure, DeepSeek, xAI, Alibaba (Qwen), MiniMax, Z.ai (Zhipu), Moonshot, Fireworks, DeepInfra, Together AI, Chutes, Groq, and Voyage.
+
+All providers support BYOK (Bring Your Own Key). Platform-level keys are optional — users can configure their own credentials per organization.
+
+Browse the full model catalog: [gateway.hebo.ai/v1/models](https://gateway.hebo.ai/v1/models)
+
 ## Get started
 
 ### Hebo Cloud

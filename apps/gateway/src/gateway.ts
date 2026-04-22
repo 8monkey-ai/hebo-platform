@@ -1,9 +1,15 @@
-import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
-import { nova2MultimodalEmbeddings } from "@hebo-ai/gateway/models/amazon";
-import { claudeHaiku45, claudeOpus46, claudeSonnet46 } from "@hebo-ai/gateway/models/anthropic";
-import { gemini } from "@hebo-ai/gateway/models/google";
-import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
-import { voyage35 } from "@hebo-ai/gateway/models/voyage";
+import { type ModelCatalog, defineModelCatalog, gateway } from "@hebo-ai/gateway";
+import { qwen } from "@hebo-ai/gateway/models/alibaba";
+import { nova } from "@hebo-ai/gateway/models/amazon";
+import { claude } from "@hebo-ai/gateway/models/anthropic";
+import { deepseek } from "@hebo-ai/gateway/models/deepseek";
+import { gemini, gemma } from "@hebo-ai/gateway/models/google";
+import { minimax } from "@hebo-ai/gateway/models/minimax";
+import { kimi } from "@hebo-ai/gateway/models/moonshot";
+import { gpt, gptOss, textEmbeddings } from "@hebo-ai/gateway/models/openai";
+import { voyage } from "@hebo-ai/gateway/models/voyage";
+import { grok } from "@hebo-ai/gateway/models/xai";
+import { glm } from "@hebo-ai/gateway/models/zai";
 import { instrumentFetch } from "@hebo-ai/gateway/telemetry";
 import { trace } from "@opentelemetry/api";
 
@@ -36,6 +42,12 @@ const withTier = (modelId: string) => ({
   },
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const tiered = (preset: (override?: any) => ModelCatalog): ModelCatalog => {
+  const modelId = Object.keys(preset({}))[0];
+  return preset(withTier(modelId));
+};
+
 export const gw = gateway({
   basePath: BASE_PATH,
 
@@ -64,17 +76,36 @@ export const gw = gateway({
       project: SECRETS.VERTEX_PROJECT,
     }),
     voyage: createProvider("voyage", { authMode: "api-key", apiKey: SECRETS.VOYAGE_API_KEY }),
+    deepseek: createProvider("deepseek", { authMode: "api-key", apiKey: SECRETS.DEEPSEEK_API_KEY }),
+    xai: createProvider("xai", { authMode: "api-key", apiKey: SECRETS.XAI_API_KEY }),
+    qwen: createProvider("qwen", { authMode: "api-key", apiKey: SECRETS.QWEN_API_KEY }),
+    minimax: createProvider("minimax", { authMode: "api-key", apiKey: SECRETS.MINIMAX_API_KEY }),
+    zhipu: createProvider("zhipu", { authMode: "api-key", apiKey: SECRETS.ZHIPU_API_KEY }),
+    moonshot: createProvider("moonshot", { authMode: "api-key", apiKey: SECRETS.MOONSHOT_API_KEY }),
+    fireworks: createProvider("fireworks", { authMode: "api-key", apiKey: SECRETS.FIREWORKS_API_KEY }),
+    deepinfra: createProvider("deepinfra", { authMode: "api-key", apiKey: SECRETS.DEEPINFRA_API_KEY }),
+    togetherai: createProvider("togetherai", {
+      authMode: "api-key",
+      apiKey: SECRETS.TOGETHERAI_API_KEY,
+    }),
+    chutes: createProvider("chutes", { authMode: "api-key", apiKey: SECRETS.CHUTES_API_KEY }),
   },
 
   models: defineModelCatalog(
-    gptOss20b(withTier("openai/gpt-oss-20b")),
-    gptOss120b(withTier("openai/gpt-oss-120b")),
-    gemini["v3.x"].map((preset) => preset(withTier("google/gemini-2.5-pro"))),
-    claudeOpus46(withTier("anthropic/claude-opus-4.6")),
-    claudeSonnet46(withTier("anthropic/claude-sonnet-4.6")),
-    claudeHaiku45(withTier("anthropic/claude-haiku-4.5")),
-    nova2MultimodalEmbeddings(withTier("amazon/nova-2-multimodal-embeddings")),
-    voyage35(withTier("voyage/voyage-3.5")),
+    claude.all.map(tiered),
+    gpt.all.map(tiered),
+    gptOss.all.map(tiered),
+    textEmbeddings.all.map(tiered),
+    gemini.all.map(tiered),
+    gemma.all.map(tiered),
+    nova.all.map(tiered),
+    voyage.all.map(tiered),
+    deepseek.all.map(tiered),
+    grok.all.map(tiered),
+    qwen.all.map(tiered),
+    minimax.all.map(tiered),
+    glm.all.map(tiered),
+    kimi.all.map(tiered),
   ),
 
   hooks: {
@@ -87,9 +118,11 @@ export const gw = gateway({
 
   logger: getLogger("hebo-gateway"),
 
-  timeouts: {
-    flex: 30 * 60_000, // 30 minutes
-    normal: 5 * 60_000, // 5 minutes
+  advanced: {
+    timeouts: {
+      flex: 30 * 60_000, // 30 minutes
+      normal: 5 * 60_000, // 5 minutes
+    },
   },
 
   telemetry: {

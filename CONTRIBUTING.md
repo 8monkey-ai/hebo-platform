@@ -121,6 +121,16 @@ Secret names:
   - Vertex: `VERTEX_SERVICE_ACCOUNT_EMAIL`, `VERTEX_AWS_PROVIDER_AUDIENCE`, `VERTEX_PROJECT`, `VERTEX_LOCATION`
   - Anthropic: `ANTHROPIC_API_KEY`
   - OpenAI: `OPENAI_API_KEY`
+  - DeepSeek: `DEEPSEEK_API_KEY`
+  - xAI: `XAI_API_KEY`
+  - Alibaba (Qwen): `QWEN_API_KEY`
+  - MiniMax: `MINIMAX_API_KEY`
+  - Z.ai (Zhipu): `ZHIPU_API_KEY`
+  - Moonshot: `MOONSHOT_API_KEY`
+  - Fireworks: `FIREWORKS_API_KEY`
+  - DeepInfra: `DEEPINFRA_API_KEY`
+  - Together AI: `TOGETHERAI_API_KEY`
+  - Chutes: `CHUTES_API_KEY`
   - Others: `VOYAGE_API_KEY`, `GROQ_API_KEY`
 
 - BYOK (Bring Your Own Key)

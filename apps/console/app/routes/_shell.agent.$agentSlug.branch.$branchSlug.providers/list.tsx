@@ -20,11 +20,21 @@ import {
 import {
   Anthropic,
   Bedrock,
+  Chutes,
+  DeepInfra,
+  DeepSeek,
+  Fireworks,
   Groq,
   Microsoft,
+  MiniMax,
+  Moonshot,
   OpenAI,
+  Qwen,
+  TogetherAI,
   Vertex,
   Voyage,
+  Xai,
+  Zhipu,
 } from "~console/components/ui/Icons";
 import { formatDateTime } from "~console/lib/utils";
 
@@ -35,10 +45,20 @@ const ProviderIcons = {
   anthropic: Anthropic,
   azure: Microsoft,
   bedrock: Bedrock,
+  chutes: Chutes,
+  deepinfra: DeepInfra,
+  deepseek: DeepSeek,
+  fireworks: Fireworks,
   groq: Groq,
+  minimax: MiniMax,
+  moonshot: Moonshot,
   openai: OpenAI,
+  qwen: Qwen,
+  togetherai: TogetherAI,
   vertex: Vertex,
   voyage: Voyage,
+  xai: Xai,
+  zhipu: Zhipu,
 } as const;
 
 type Provider = {
