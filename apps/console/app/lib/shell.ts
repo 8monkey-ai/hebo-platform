@@ -6,6 +6,7 @@ export type Models = Record<
   string,
   {
     name: string;
+    lab: string;
     modality: string;
     providers: readonly string[];
     free: boolean;

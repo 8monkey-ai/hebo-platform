@@ -38,17 +38,6 @@ export function AgentCreateForm() {
   const [form, fields] = useForm<AgentCreate>({
     lastResult: navigation.state === "idle" ? lastResult : undefined,
     constraint: getZodConstraint(AgentCreateSchema),
-    defaultValue: {
-      defaultModel: (function selectDefaultModel() {
-        return Object.entries(models ?? {})
-          .filter(([, m]) => m.modality !== "embedding")
-          .toSorted(
-            ([, a], [, b]) =>
-              Number(b.free) - Number(a.free) ||
-              a.name.localeCompare(b.name, undefined, { numeric: true }),
-          )[0]?.[0];
-      })(),
-    },
   });
   useFormErrorToast(form.allErrors);
 
