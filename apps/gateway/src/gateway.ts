@@ -1,9 +1,15 @@
 import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
+import { qwen } from "@hebo-ai/gateway/models/alibaba";
 import { nova2MultimodalEmbeddings } from "@hebo-ai/gateway/models/amazon";
 import { claudeHaiku45, claudeOpus46, claudeSonnet46 } from "@hebo-ai/gateway/models/anthropic";
+import { deepseek } from "@hebo-ai/gateway/models/deepseek";
 import { gemini } from "@hebo-ai/gateway/models/google";
+import { minimax } from "@hebo-ai/gateway/models/minimax";
+import { kimi } from "@hebo-ai/gateway/models/moonshot";
 import { gptOss20b, gptOss120b } from "@hebo-ai/gateway/models/openai";
 import { voyage35 } from "@hebo-ai/gateway/models/voyage";
+import { grok } from "@hebo-ai/gateway/models/xai";
+import { glm } from "@hebo-ai/gateway/models/zai";
 import { instrumentFetch } from "@hebo-ai/gateway/telemetry";
 import { trace } from "@opentelemetry/api";
 
@@ -64,6 +70,12 @@ export const gw = gateway({
       project: SECRETS.VERTEX_PROJECT,
     }),
     voyage: createProvider("voyage", { authMode: "api-key", apiKey: SECRETS.VOYAGE_API_KEY }),
+    deepseek: createProvider("deepseek", { authMode: "api-key", apiKey: SECRETS.DEEPSEEK_API_KEY }),
+    xai: createProvider("xai", { authMode: "api-key", apiKey: SECRETS.XAI_API_KEY }),
+    qwen: createProvider("qwen", { authMode: "api-key", apiKey: SECRETS.QWEN_API_KEY }),
+    minimax: createProvider("minimax", { authMode: "api-key", apiKey: SECRETS.MINIMAX_API_KEY }),
+    zhipu: createProvider("zhipu", { authMode: "api-key", apiKey: SECRETS.ZHIPU_API_KEY }),
+    moonshot: createProvider("moonshot", { authMode: "api-key", apiKey: SECRETS.MOONSHOT_API_KEY }),
   },
 
   models: defineModelCatalog(
@@ -75,6 +87,12 @@ export const gw = gateway({
     claudeHaiku45(withTier("anthropic/claude-haiku-4.5")),
     nova2MultimodalEmbeddings(withTier("amazon/nova-2-multimodal-embeddings")),
     voyage35(withTier("voyage/voyage-3.5")),
+    deepseek.all.map((preset) => preset(withTier("deepseek/deepseek-v3.2"))),
+    grok.all.map((preset) => preset(withTier("xai/grok-4.2"))),
+    qwen.all.map((preset) => preset(withTier("qwen/qwen-3.5"))),
+    minimax.all.map((preset) => preset(withTier("minimax/minimax-m2"))),
+    glm.all.map((preset) => preset(withTier("zhipu/glm-5"))),
+    kimi.all.map((preset) => preset(withTier("moonshot/kimi-k2"))),
   ),
 
   hooks: {
@@ -87,9 +105,11 @@ export const gw = gateway({
 
   logger: getLogger("hebo-gateway"),
 
-  timeouts: {
-    flex: 30 * 60_000, // 30 minutes
-    normal: 5 * 60_000, // 5 minutes
+  advanced: {
+    timeouts: {
+      flex: 30 * 60_000, // 30 minutes
+      normal: 5 * 60_000, // 5 minutes
+    },
   },
 
   telemetry: {

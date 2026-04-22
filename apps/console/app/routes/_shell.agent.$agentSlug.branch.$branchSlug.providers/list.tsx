@@ -20,11 +20,17 @@ import {
 import {
   Anthropic,
   Bedrock,
+  DeepSeek,
   Groq,
   Microsoft,
+  MiniMax,
+  Moonshot,
   OpenAI,
+  Qwen,
   Vertex,
   Voyage,
+  Xai,
+  Zhipu,
 } from "~console/components/ui/Icons";
 import { formatDateTime } from "~console/lib/utils";
 
@@ -35,10 +41,16 @@ const ProviderIcons = {
   anthropic: Anthropic,
   azure: Microsoft,
   bedrock: Bedrock,
+  deepseek: DeepSeek,
   groq: Groq,
+  minimax: MiniMax,
+  moonshot: Moonshot,
   openai: OpenAI,
+  qwen: Qwen,
   vertex: Vertex,
   voyage: Voyage,
+  xai: Xai,
+  zhipu: Zhipu,
 } as const;
 
 type Provider = {

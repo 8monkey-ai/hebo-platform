@@ -85,6 +85,36 @@ export const ProviderSchema = z.discriminatedUnion("slug", [
     name: z.literal("Voyage"),
     config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
   }),
+  z.object({
+    slug: z.literal("deepseek"),
+    name: z.literal("DeepSeek"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("xai"),
+    name: z.literal("xAI"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("qwen"),
+    name: z.literal("Qwen"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("minimax"),
+    name: z.literal("MiniMax"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("zhipu"),
+    name: z.literal("Zhipu"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("moonshot"),
+    name: z.literal("Moonshot"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
 ]);
 export const ProviderSlugSchema = z.enum(ProviderSchema.options.map((o) => o.shape.slug.value));
 
