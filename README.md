@@ -16,29 +16,13 @@ A platform that brings development and business teams together. Iterate fast. Re
   <img src="https://hebo.ai/assets/hebo-platform-Cwx3imlO.png" alt="Hebo observability dashboard" width="800" />
 </p>
 
-## Supported providers and models
+## Supported providers
 
-| Provider | Slug | Auth | Key models |
-| --- | --- | --- | --- |
-| Anthropic | `anthropic` | API key | Claude Opus 4.6, Claude Sonnet 4.6, Claude Haiku 4.5 |
-| OpenAI | `openai` | API key | GPT-oss-20b, GPT-oss-120b |
-| Amazon Bedrock | `bedrock` | IAM role / access key | Cross-region inference profiles |
-| Google Vertex | `vertex` | Identity federation / service account | Gemini 2.5 Pro |
-| Microsoft Azure | `azure` | Resource API key | Azure OpenAI models |
-| DeepSeek | `deepseek` | API key | DeepSeek v3.2 |
-| xAI | `xai` | API key | Grok 4.2 |
-| Alibaba (Qwen) | `qwen` | API key | Qwen 3.5 |
-| MiniMax | `minimax` | API key | MiniMax M2 |
-| Z.ai (Zhipu) | `zhipu` | API key | GLM-5 |
-| Moonshot | `moonshot` | API key | Kimi K2 |
-| Fireworks | `fireworks` | API key | Inference routing |
-| DeepInfra | `deepinfra` | API key | Inference routing |
-| Together AI | `togetherai` | API key | Inference routing |
-| Chutes | `chutes` | API key | Inference routing |
-| Groq | `groq` | API key | Groq-hosted models |
-| Voyage | `voyage` | API key | Voyage 3.5 (embeddings) |
+Anthropic, OpenAI, Amazon Bedrock, Google Vertex, Microsoft Azure, DeepSeek, xAI, Alibaba (Qwen), MiniMax, Z.ai (Zhipu), Moonshot, Fireworks, DeepInfra, Together AI, Chutes, Groq, and Voyage.
 
 All providers support BYOK (Bring Your Own Key). Platform-level keys are optional — users can configure their own credentials per organization.
+
+Browse the full model catalog: [gateway.hebo.ai/v1/models](https://gateway.hebo.ai/v1/models)
 
 ## Get started
 
