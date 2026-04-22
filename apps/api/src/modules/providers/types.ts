@@ -97,7 +97,7 @@ export const ProviderSchema = z.discriminatedUnion("slug", [
   }),
   z.object({
     slug: z.literal("qwen"),
-    name: z.literal("Qwen"),
+    name: z.literal("Alibaba"),
     config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
   }),
   z.object({
@@ -107,12 +107,32 @@ export const ProviderSchema = z.discriminatedUnion("slug", [
   }),
   z.object({
     slug: z.literal("zhipu"),
-    name: z.literal("Zhipu"),
+    name: z.literal("Z.ai"),
     config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
   }),
   z.object({
     slug: z.literal("moonshot"),
     name: z.literal("Moonshot"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("fireworks"),
+    name: z.literal("Fireworks"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("deepinfra"),
+    name: z.literal("DeepInfra"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("togetherai"),
+    name: z.literal("Together AI"),
+    config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
+  }),
+  z.object({
+    slug: z.literal("chutes"),
+    name: z.literal("Chutes"),
     config: z.discriminatedUnion("authMode", [ApiKeySchema]).optional(),
   }),
 ]);

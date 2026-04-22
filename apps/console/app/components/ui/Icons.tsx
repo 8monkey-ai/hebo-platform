@@ -220,6 +220,50 @@ export function Moonshot({ size = DEFAULT_SIZE }: { size?: number }) {
   );
 }
 
+export function Fireworks({ size = DEFAULT_SIZE }: { size?: number }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24">
+      <path
+        fill="#6C3AED"
+        d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 3.5l2.5 4.33L12 14.16 9.5 9.83 12 5.5zm-5.196 3l2.5 4.33-5 .002L1.804 8.5h5.001zm10.392 0h5l-2.5 4.332h-5l2.5-4.332zM4.304 13.832h5l2.5 4.33H6.804l-2.5-4.33zm10.392 0h5l-2.5 4.33h-5l2.5-4.33z"
+      />
+    </svg>
+  );
+}
+
+export function DeepInfra({ size = DEFAULT_SIZE }: { size?: number }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24">
+      <path
+        fill="#19B48C"
+        d="M12 2L3 7v10l9 5 9-5V7l-9-5zm0 2.18L18.36 7.5 12 10.82 5.64 7.5 12 4.18zM5 9.06l6 3.33v6.55L5 15.6V9.06zm14 0v6.55l-6 3.33v-6.55l6-3.33z"
+      />
+    </svg>
+  );
+}
+
+export function TogetherAI({ size = DEFAULT_SIZE }: { size?: number }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24">
+      <path
+        fill="#0F6FFF"
+        d="M7.5 4a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM16.5 4a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM12 11a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM7.5 15a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM16.5 15a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"
+      />
+    </svg>
+  );
+}
+
+export function Chutes({ size = DEFAULT_SIZE }: { size?: number }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24">
+      <path
+        fill="#FF6B35"
+        d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-4.17l-3.74 2.16-.98-1.7L10 10.82 6.28 8.79l.98-1.7L12 9.42l4.74-2.33.98 1.7L14 10.82l3.72 1.97-.98 1.7L13 12.33v4.17h-2z"
+      />
+    </svg>
+  );
+}
+
 export function Voyage({ size = DEFAULT_SIZE }: { size?: number }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="-12 -12 48 48">
