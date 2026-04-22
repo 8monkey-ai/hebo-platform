@@ -49,9 +49,12 @@ function ModelSelector({
       .map(([lab, ids]) => ({
         value: labelize(lab),
         items: ids.toSorted((a, b) => {
-          const ma = models[a]!;
-          const mb = models[b]!;
-          return Number(mb.free) - Number(ma.free) || ma.name.localeCompare(mb.name, undefined, { numeric: true });
+          const ma = models[a];
+          const mb = models[b];
+          return (
+            Number(mb.free) - Number(ma.free) ||
+            ma.name.localeCompare(mb.name, undefined, { numeric: true })
+          );
         }),
       }));
   })();
@@ -67,10 +70,10 @@ function ModelSelector({
       itemToStringValue={(modelId) => models?.[modelId]?.name ?? modelId}
       filter={(modelId, query) => {
         if (!query) return true;
-        const m = models?.[modelId as string];
+        const m = models?.[modelId];
         if (!m) return false;
         const q = query.toLowerCase();
-        return m.name.toLowerCase().includes(q) || (modelId as string).toLowerCase().includes(q);
+        return m.name.toLowerCase().includes(q) || modelId.toLowerCase().includes(q);
       }}
     >
       <ComboboxInput
