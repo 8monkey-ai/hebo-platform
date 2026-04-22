@@ -1,8 +1,7 @@
-import { useState } from "react";
-
 import { Badge } from "@hebo/shared-ui/components/Badge";
 import {
   Combobox,
+  ComboboxCollection,
   ComboboxContent,
   ComboboxEmpty,
   ComboboxGroup,
@@ -14,32 +13,6 @@ import {
 
 import type { Models } from "~console/lib/shell";
 import { labelize } from "~console/lib/utils";
-
-type ModelEntry = {
-  id: string;
-  name: string;
-  lab: string;
-  modality: string;
-  free: boolean;
-  requiresByok: boolean;
-};
-
-function groupByLab(models: Models): Array<[string, ModelEntry[]]> {
-  const groups: Record<string, ModelEntry[]> = {};
-  for (const [id, m] of Object.entries(models)) {
-    (groups[m.lab] ??= []).push({ id, ...m });
-  }
-  // Sort groups alphabetically by lab name
-  return Object.entries(groups)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([lab, items]) => [
-      lab,
-      // Within each group: free tier first, then alphabetical
-      items.toSorted(
-        (a, b) => Number(b.free) - Number(a.free) || a.name.localeCompare(b.name, undefined, { numeric: true }),
-      ),
-    ]);
-}
 
 type ModelSelectorProps = {
   models: Models | undefined;
@@ -63,36 +36,42 @@ function ModelSelector({
   id,
   ...ariaProps
 }: ModelSelectorProps) {
-  const [inputValue, setInputValue] = useState("");
   const hasModels = models && Object.keys(models).length > 0;
 
-  const groups = groupByLab(models ?? {});
-
-  // Client-side filtering: base-ui's filter prop only works with the `items` prop,
-  // not with rendered children, so we filter the groups ourselves.
-  const q = inputValue.toLowerCase().trim();
-  const filteredGroups = q
-    ? groups
-        .map(([lab, items]) => [lab, items.filter((m) => m.name.toLowerCase().includes(q) || m.id.toLowerCase().includes(q))] as [string, ModelEntry[]])
-        .filter(([, items]) => items.length > 0)
-    : groups;
-
-  const hasFilteredResults = filteredGroups.length > 0;
+  const groupedItems = (() => {
+    if (!models) return [];
+    const groups: Record<string, string[]> = {};
+    for (const [modelId, m] of Object.entries(models)) {
+      (groups[m.lab] ??= []).push(modelId);
+    }
+    return Object.entries(groups)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([lab, ids]) => ({
+        value: labelize(lab),
+        items: ids.toSorted((a, b) => {
+          const ma = models[a]!;
+          const mb = models[b]!;
+          return Number(mb.free) - Number(ma.free) || ma.name.localeCompare(mb.name, undefined, { numeric: true });
+        }),
+      }));
+  })();
 
   return (
     <Combobox
       name={name}
       defaultValue={defaultValue}
       value={controlledValue}
-      onValueChange={(val) => {
-        onValueChange?.(val as string);
-        setInputValue("");
-      }}
-      onInputValueChange={setInputValue}
-      inputValue={inputValue}
+      onValueChange={(val) => onValueChange?.(val as string)}
       disabled={disabled ?? !hasModels}
-      filter={null}
-      autoComplete="none"
+      items={groupedItems}
+      itemToStringValue={(modelId) => models?.[modelId]?.name ?? modelId}
+      filter={(modelId, query) => {
+        if (!query) return true;
+        const m = models?.[modelId as string];
+        if (!m) return false;
+        const q = query.toLowerCase();
+        return m.name.toLowerCase().includes(q) || (modelId as string).toLowerCase().includes(q);
+      }}
     >
       <ComboboxInput
         id={id}
@@ -100,28 +79,32 @@ function ModelSelector({
         {...ariaProps}
       />
       <ComboboxContent>
+        <ComboboxEmpty>No models found.</ComboboxEmpty>
         <ComboboxList>
-          {!hasFilteredResults && <ComboboxEmpty>No models found.</ComboboxEmpty>}
-          {filteredGroups.map(([lab, items]) => (
-            <ComboboxGroup key={lab}>
-              <ComboboxLabel>{labelize(lab)}</ComboboxLabel>
-              {items.map((m) => (
-                <ComboboxItem key={m.id} value={m.id}>
-                  {m.name}
-                  <span className="ml-auto flex gap-1">
-                    {m.free ? (
-                      <Badge className="bg-green-600 text-white!">Free Tier</Badge>
-                    ) : m.requiresByok ? (
-                      <Badge className="bg-amber-600 text-white!">BYOK</Badge>
-                    ) : null}
-                    {m.modality === "embedding" && (
-                      <Badge className="bg-blue-500 text-white!">Embeddings</Badge>
-                    )}
-                  </span>
-                </ComboboxItem>
-              ))}
-            </ComboboxGroup>
-          ))}
+          <ComboboxGroup>
+            <ComboboxLabel />
+            <ComboboxCollection>
+              {(modelId: string) => {
+                const m = models?.[modelId];
+                if (!m) return null;
+                return (
+                  <ComboboxItem key={modelId} value={modelId}>
+                    {m.name}
+                    <span className="ml-auto flex gap-1">
+                      {m.free ? (
+                        <Badge className="bg-green-600 text-white!">Free Tier</Badge>
+                      ) : m.requiresByok ? (
+                        <Badge className="bg-amber-600 text-white!">BYOK</Badge>
+                      ) : null}
+                      {m.modality === "embedding" && (
+                        <Badge className="bg-blue-500 text-white!">Embeddings</Badge>
+                      )}
+                    </span>
+                  </ComboboxItem>
+                );
+              }}
+            </ComboboxCollection>
+          </ComboboxGroup>
         </ComboboxList>
       </ComboboxContent>
     </Combobox>
