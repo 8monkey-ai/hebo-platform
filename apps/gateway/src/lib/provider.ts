@@ -242,8 +242,8 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       return withCanonicalIdsForMinimax(
         createOpenAICompatible({
           name: "minimax",
-          baseURL: "https://api.minimax.chat/v1",
-          headers: { Authorization: `Bearer ${apiKey}` },
+          baseURL: "https://api.minimax.io/v1",
+          apiKey,
         }),
       );
     }
@@ -273,7 +273,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
         createOpenAICompatible({
           name: "chutes",
           baseURL: "https://llm.chutes.ai/v1",
-          headers: { Authorization: `Bearer ${apiKey}` },
+          apiKey,
         }),
       );
     }
