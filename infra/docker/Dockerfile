@@ -28,7 +28,8 @@ COPY --parents package.json bun.lock \
 RUN bun install --frozen-lockfile
 
 COPY . .
-RUN bun run build
+ARG BUILD_SCRIPT=build
+RUN bun run $BUILD_SCRIPT
 
 ########################  tools  ########################
 FROM debian:bookworm-slim AS tools
@@ -70,7 +71,7 @@ COPY --from=builder /repo/apps/gateway/dist          /app/gateway/
 COPY --from=builder /repo/apps/mcp/dist              /app/mcp/
 
 # Console
-COPY --from=builder /repo/apps/console/build/client  /app/console/build/client
+COPY --from=builder /repo/apps/console/build*        /app/console/build/
 COPY --from=builder /repo/apps/console/serve.ts      /app/console/serve.ts
 
 # s6 scripts (classic layout — chmod applied directly, no tools detour)

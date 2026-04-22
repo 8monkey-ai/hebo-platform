@@ -18,7 +18,7 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
     context: ".",
     dockerfile: "infra/docker/Dockerfile",
     tags: [hostname("auth")],
-    args: { NODE_ENV: isProduction ? "production" : "development" },
+    args: { NODE_ENV: isProduction ? "production" : "development", BUILD_SCRIPT: "build:ecs" },
   },
   environment: {
     HEBO_MODE: "auth",

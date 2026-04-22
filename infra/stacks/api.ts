@@ -20,7 +20,7 @@ const heboApi = new sst.aws.Service("HeboApi", {
     context: ".",
     dockerfile: "infra/docker/Dockerfile",
     tags: [hostname("api")],
-    args: { NODE_ENV: isProduction ? "production" : "development" },
+    args: { NODE_ENV: isProduction ? "production" : "development", BUILD_SCRIPT: "build:ecs" },
   },
   environment: {
     HEBO_MODE: "api",

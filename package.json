@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "build": "bun run --workspaces --if-present --sequential build",
+    "build:ecs": "bun run --filter '!@hebo/console' --if-present --sequential build",
     "clean": "git clean -fdx -e '.env*'",
     "db:migrate": "bun run --workspaces --if-present --sequential db:migrate",
     "db:reset": "bun run --workspaces --if-present --sequential db:reset",
