@@ -3,7 +3,9 @@ import { describe, expect, it } from "bun:test";
 import type { ProviderV3 } from "@ai-sdk/provider";
 import { GatewayError, type ResolveProviderHookContext } from "@hebo-ai/gateway";
 
-import { selectProviderWithByokFallback } from "./hooks";
+import type { ModelParameters } from "~api/modules/providers/types";
+
+import { injectModelParameters, selectProviderWithByokFallback } from "./hooks";
 
 // Minimal mock for ResolveProviderHookContext
 function makeCtx(overrides: {
@@ -139,6 +141,160 @@ describe("selectProviderWithByokFallback", () => {
       });
       const result = await selectProviderWithByokFallback(ctx);
       expect(result).toBeUndefined();
+    });
+  });
+});
+
+describe("injectModelParameters", () => {
+  describe("simple parameters", () => {
+    it("injects temperature when missing from body", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { temperature: 0.5 }, "chat");
+      expect(body.temperature).toBe(0.5);
+    });
+
+    it("does not override client-provided temperature", () => {
+      const body: Record<string, unknown> = { temperature: 0.2 };
+      injectModelParameters(body, { temperature: 0.5 }, "chat");
+      expect(body.temperature).toBe(0.2);
+    });
+
+    it("injects top_p when missing from body", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { top_p: 0.9 }, "messages");
+      expect(body.top_p).toBe(0.9);
+    });
+
+    it("injects service_tier when missing from body", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { service_tier: "flex" }, "chat");
+      expect(body.service_tier).toBe("flex");
+    });
+
+    it("does not override client-provided service_tier", () => {
+      const body: Record<string, unknown> = { service_tier: "auto" };
+      injectModelParameters(body, { service_tier: "flex" }, "chat");
+      expect(body.service_tier).toBe("auto");
+    });
+  });
+
+  describe("max_tokens", () => {
+    it("injects max_tokens and max_completion_tokens for chat", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { max_tokens: 4096 }, "chat");
+      expect(body.max_completion_tokens).toBe(4096);
+      expect(body.max_tokens).toBe(4096);
+    });
+
+    it("injects only max_tokens for messages", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { max_tokens: 4096 }, "messages");
+      expect(body.max_tokens).toBe(4096);
+      expect(body.max_completion_tokens).toBeUndefined();
+    });
+
+    it("injects only max_tokens for responses", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { max_tokens: 4096 }, "responses");
+      expect(body.max_tokens).toBe(4096);
+      expect(body.max_completion_tokens).toBeUndefined();
+    });
+
+    it("does not override client-provided max_tokens", () => {
+      const body: Record<string, unknown> = { max_tokens: 8192 };
+      injectModelParameters(body, { max_tokens: 4096 }, "messages");
+      expect(body.max_tokens).toBe(8192);
+    });
+  });
+
+  describe("reasoning — chat/responses", () => {
+    it("injects reasoning and reasoning_effort for chat", () => {
+      const params: ModelParameters = {
+        reasoning: { enabled: true, effort: "high", max_tokens: 10000 },
+      };
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, params, "chat");
+      expect(body.reasoning).toEqual(params.reasoning);
+      expect(body.reasoning_effort).toBe("high");
+    });
+
+    it("does not override client-provided reasoning for responses", () => {
+      const clientReasoning = { enabled: true, effort: "low" as const };
+      const body: Record<string, unknown> = { reasoning: clientReasoning };
+      injectModelParameters(body, { reasoning: { effort: "high" } }, "responses");
+      expect(body.reasoning).toEqual(clientReasoning);
+    });
+  });
+
+  describe("reasoning — messages (thinking translation)", () => {
+    it("translates reasoning to thinking object with enabled type", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { reasoning: { enabled: true, max_tokens: 32000 } }, "messages");
+      expect(body.thinking).toEqual({ type: "enabled", budget_tokens: 32000 });
+    });
+
+    it("translates reasoning to adaptive type when enabled is not set", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { reasoning: { max_tokens: 16000 } }, "messages");
+      expect(body.thinking).toEqual({ type: "adaptive", budget_tokens: 16000 });
+    });
+
+    it("does not inject thinking when reasoning.enabled is false", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { reasoning: { enabled: false } }, "messages");
+      expect(body.thinking).toBeUndefined();
+    });
+
+    it("does not override client-provided thinking", () => {
+      const clientThinking = { type: "enabled", budget_tokens: 64000 };
+      const body: Record<string, unknown> = { thinking: clientThinking };
+      injectModelParameters(body, { reasoning: { enabled: true, max_tokens: 32000 } }, "messages");
+      expect(body.thinking).toEqual(clientThinking);
+    });
+
+    it("does not inject reasoning/reasoning_effort for messages", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { reasoning: { enabled: true, effort: "high" } }, "messages");
+      expect(body.reasoning).toBeUndefined();
+      expect(body.reasoning_effort).toBeUndefined();
+    });
+  });
+
+  describe("multiple parameters", () => {
+    it("injects all provided defaults at once", () => {
+      const body: Record<string, unknown> = {};
+      const params: ModelParameters = {
+        temperature: 0.7,
+        top_p: 0.95,
+        max_tokens: 4096,
+        service_tier: "auto",
+      };
+      injectModelParameters(body, params, "messages");
+      expect(body.temperature).toBe(0.7);
+      expect(body.top_p).toBe(0.95);
+      expect(body.max_tokens).toBe(4096);
+      expect(body.service_tier).toBe("auto");
+    });
+
+    it("only fills missing parameters, preserving client values", () => {
+      const body: Record<string, unknown> = { temperature: 0.2, max_tokens: 8192 };
+      const params: ModelParameters = {
+        temperature: 0.7,
+        top_p: 0.95,
+        max_tokens: 4096,
+      };
+      injectModelParameters(body, params, "messages");
+      expect(body.temperature).toBe(0.2);
+      expect(body.top_p).toBe(0.95);
+      expect(body.max_tokens).toBe(8192);
+    });
+  });
+
+  describe("no-op", () => {
+    it("does not modify body when params are empty", () => {
+      const body: Record<string, unknown> = { temperature: 0.5 };
+      injectModelParameters(body, {}, "chat");
+      expect(body).toEqual({ temperature: 0.5 });
     });
   });
 });

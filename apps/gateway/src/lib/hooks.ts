@@ -13,7 +13,7 @@ import {
 import { LRUCache } from "lru-cache";
 
 import type { createPrismaClient } from "~api/db/prisma";
-import type { ModelsConfig, ProviderSlug } from "~api/modules/providers/types";
+import type { ModelParameters, ModelsConfig, ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "../utils/aws";
 import { createProvider } from "./provider";
@@ -30,6 +30,51 @@ const configCache = new LRUCache<string, string>({
 const providerCache = new LRUCache<string, ProviderV3>({
   max: 100,
 });
+
+/**
+ * Injects default inference parameters into the request body using ??= semantics.
+ * Client-provided values are never overwritten.
+ *
+ * For reasoning, translates per API surface:
+ * - chat / responses: inject as `reasoning` + `reasoning_effort`
+ * - messages: translate to Anthropic `thinking` object
+ */
+export function injectModelParameters(
+  body: Record<string, unknown>,
+  params: ModelParameters,
+  operation: string,
+) {
+  if (params.temperature !== undefined) body.temperature ??= params.temperature;
+  if (params.top_p !== undefined) body.top_p ??= params.top_p;
+
+  if (params.max_tokens !== undefined) {
+    if (operation === "chat") {
+      body.max_completion_tokens ??= params.max_tokens;
+      body.max_tokens ??= params.max_tokens;
+    } else {
+      body.max_tokens ??= params.max_tokens;
+    }
+  }
+
+  if (params.reasoning && (operation === "chat" || operation === "responses")) {
+    body.reasoning ??= params.reasoning;
+    if (params.reasoning.effort) {
+      body.reasoning_effort ??= params.reasoning.effort;
+    }
+  } else if (
+    params.reasoning &&
+    operation === "messages" &&
+    !body.thinking &&
+    params.reasoning.enabled !== false
+  ) {
+    body.thinking = {
+      type: params.reasoning.enabled ? "enabled" : "adaptive",
+      ...(params.reasoning.max_tokens && { budget_tokens: params.reasoning.max_tokens }),
+    };
+  }
+
+  if (params.service_tier !== undefined) body.service_tier ??= params.service_tier;
+}
 
 export function tagSpanWithOrganization(ctx: OnRequestHookContext) {
   const { organizationId } = ctx.state as { organizationId: string };
@@ -89,6 +134,14 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
       free: modelConfig?.additionalProperties?.free as boolean | undefined,
       requiresByok: modelConfig?.additionalProperties?.requiresByok as boolean | undefined,
     };
+
+    const catalogDefaults = modelConfig?.additionalProperties?.defaults as
+      | ModelParameters
+      | undefined;
+    if (catalogDefaults) {
+      injectModelParameters(ctx.body as Record<string, unknown>, catalogDefaults, ctx.operation);
+    }
+
     return aliasPath;
   }
 
@@ -120,6 +173,14 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
     free: catalogModel?.additionalProperties?.free as boolean | undefined,
     requiresByok: catalogModel?.additionalProperties?.requiresByok as boolean | undefined,
   };
+
+  const catalogDefaults = catalogModel?.additionalProperties?.defaults as
+    | ModelParameters
+    | undefined;
+  const merged = { ...catalogDefaults, ...model.parameters };
+  if (Object.keys(merged).length > 0) {
+    injectModelParameters(ctx.body as Record<string, unknown>, merged, ctx.operation);
+  }
 
   return model.type;
 }

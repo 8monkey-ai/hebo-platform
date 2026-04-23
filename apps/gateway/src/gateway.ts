@@ -42,10 +42,38 @@ const withTier = (modelId: string) => ({
   },
 });
 
+const MODEL_DEFAULTS: Record<string, { max_tokens?: number }> = {
+  "anthropic/claude-opus-4.7": { max_tokens: 16384 },
+  "anthropic/claude-opus-4.6": { max_tokens: 16384 },
+  "anthropic/claude-opus-4.5": { max_tokens: 16384 },
+  "anthropic/claude-opus-4.1": { max_tokens: 16384 },
+  "anthropic/claude-opus-4": { max_tokens: 16384 },
+  "anthropic/claude-sonnet-4.6": { max_tokens: 16384 },
+  "anthropic/claude-sonnet-4.5": { max_tokens: 16384 },
+  "anthropic/claude-sonnet-4": { max_tokens: 16384 },
+  "anthropic/claude-sonnet-3.7": { max_tokens: 8192 },
+  "anthropic/claude-sonnet-3.5": { max_tokens: 8192 },
+  "anthropic/claude-haiku-4.5": { max_tokens: 8192 },
+  "anthropic/claude-haiku-3.5": { max_tokens: 8192 },
+  "anthropic/claude-haiku-3": { max_tokens: 4096 },
+  "openai/gpt-5": { max_tokens: 16384 },
+  "openai/gpt-5-mini": { max_tokens: 16384 },
+  "openai/gpt-5-nano": { max_tokens: 16384 },
+  "google/gemini-2.5-flash": { max_tokens: 8192 },
+  "google/gemini-2.5-pro": { max_tokens: 8192 },
+  "deepseek/deepseek-v3.2": { max_tokens: 8192 },
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const tiered = (preset: (override?: any) => ModelCatalog): ModelCatalog => {
   const modelId = Object.keys(preset({}))[0];
-  return preset(withTier(modelId));
+  const defaults = MODEL_DEFAULTS[modelId];
+  return preset({
+    additionalProperties: {
+      ...withTier(modelId).additionalProperties,
+      ...(defaults && { defaults }),
+    },
+  });
 };
 
 export const gw = gateway({
@@ -82,8 +110,14 @@ export const gw = gateway({
     minimax: createProvider("minimax", { authMode: "api-key", apiKey: SECRETS.MINIMAX_API_KEY }),
     zhipu: createProvider("zhipu", { authMode: "api-key", apiKey: SECRETS.ZHIPU_API_KEY }),
     moonshot: createProvider("moonshot", { authMode: "api-key", apiKey: SECRETS.MOONSHOT_API_KEY }),
-    fireworks: createProvider("fireworks", { authMode: "api-key", apiKey: SECRETS.FIREWORKS_API_KEY }),
-    deepinfra: createProvider("deepinfra", { authMode: "api-key", apiKey: SECRETS.DEEPINFRA_API_KEY }),
+    fireworks: createProvider("fireworks", {
+      authMode: "api-key",
+      apiKey: SECRETS.FIREWORKS_API_KEY,
+    }),
+    deepinfra: createProvider("deepinfra", {
+      authMode: "api-key",
+      apiKey: SECRETS.DEEPINFRA_API_KEY,
+    }),
     togetherai: createProvider("togetherai", {
       authMode: "api-key",
       apiKey: SECRETS.TOGETHERAI_API_KEY,
