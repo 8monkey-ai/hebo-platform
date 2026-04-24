@@ -9,14 +9,7 @@ export function isRootPathUrl(url: string): boolean {
   return c === 63 || c === 35;
 }
 
-export function withPort(base: string, port: number) {
-  const url = new URL(base);
-  url.port = String(port);
-  return url.href;
-}
-
-export function getRootDomain(baseUrl: string | undefined) {
-  if (!baseUrl) return;
+export function getRootDomain(baseUrl: string) {
   const { hostname } = new URL(baseUrl);
   if (hostname === "localhost") return;
 

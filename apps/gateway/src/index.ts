@@ -21,7 +21,6 @@ import { getOtelConfig } from "@hebo/shared-api/lib/otel";
 import { serve } from "@hebo/shared-api/lib/serve";
 import { auth } from "@hebo/shared-api/middlewares/auth";
 import { logging } from "@hebo/shared-api/middlewares/logging";
-import { withPort } from "@hebo/shared-api/utils/url";
 
 import { prisma } from "~api/middlewares/prisma";
 
@@ -30,7 +29,7 @@ import { gatewayErrors } from "./middlewares/errors";
 
 const PORT = Number(process.env.PORT ?? 8522);
 const WORKERS = Number(process.env.WORKERS);
-const BASE_URL = process.env.BASE_URL ?? "http://localhost";
+const GATEWAY_URL = process.env.GATEWAY_URL ?? `http://localhost:${PORT}`;
 
 export const createGateway = () =>
   new Elysia()
@@ -41,12 +40,7 @@ export const createGateway = () =>
     .use(cors(CORS_CONFIG))
     .use(
       openapi(
-        createOpenapiConfig(
-          "Hebo Gateway",
-          "OpenAI-compatible AI Gateway",
-          withPort(BASE_URL, PORT),
-          "0.1.0",
-        ),
+        createOpenapiConfig("Hebo Gateway", "OpenAI-compatible AI Gateway", GATEWAY_URL, "0.1.0"),
       ),
     )
     .use(gatewayErrors)

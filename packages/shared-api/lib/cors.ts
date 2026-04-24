@@ -1,4 +1,7 @@
-import { ROOT_DOMAIN } from "../env";
+import { AUTH_URL } from "../env";
+import { getRootDomain } from "../utils/url";
+
+const ROOT_DOMAIN = getRootDomain(AUTH_URL);
 
 export const CORS_CONFIG = {
   origin: (request: Request) => {
