@@ -68,7 +68,7 @@ function ModelSelector({
       disabled={disabled ?? !hasModels}
       items={groupedItems}
       itemToStringLabel={(modelId) => models?.[modelId]?.name ?? modelId}
-      itemToStringValue={(modelId) => models?.[modelId]?.name ?? modelId}
+      itemToStringValue={(modelId) => modelId}
       filter={(modelId, query) => {
         if (!query) return true;
         const m = models?.[modelId];
