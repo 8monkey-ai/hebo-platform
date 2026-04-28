@@ -35,13 +35,6 @@ export const BASE_PATH = "/v1";
 
 const SECRETS = await loadProviderSecrets();
 
-const withTier = (modelId: string) => ({
-  additionalProperties: {
-    free: SECRETS.FREE_MODEL_IDS.has(modelId),
-    requiresByok: SECRETS.ENFORCE_BYOK && !SECRETS.FREE_MODEL_IDS.has(modelId),
-  },
-});
-
 const MODEL_DEFAULTS: Record<string, { max_tokens?: number }> = {
   "anthropic/claude-opus-4.7": { max_tokens: 16384 },
   "anthropic/claude-opus-4.6": { max_tokens: 16384 },
@@ -64,16 +57,18 @@ const MODEL_DEFAULTS: Record<string, { max_tokens?: number }> = {
   "deepseek/deepseek-v3.2": { max_tokens: 8192 },
 };
 
+const additionalProperties = (modelId: string) => ({
+  additionalProperties: {
+    free: SECRETS.FREE_MODEL_IDS.has(modelId),
+    requiresByok: SECRETS.ENFORCE_BYOK && !SECRETS.FREE_MODEL_IDS.has(modelId),
+    ...(modelId in MODEL_DEFAULTS && { defaults: MODEL_DEFAULTS[modelId] }),
+  },
+});
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const tiered = (preset: (override?: any) => ModelCatalog): ModelCatalog => {
+const withAdditionalProperties = (preset: (override?: any) => ModelCatalog): ModelCatalog => {
   const modelId = Object.keys(preset({}))[0];
-  const defaults = MODEL_DEFAULTS[modelId];
-  return preset({
-    additionalProperties: {
-      ...withTier(modelId).additionalProperties,
-      ...(defaults && { defaults }),
-    },
-  });
+  return preset(additionalProperties(modelId));
 };
 
 export const gw = gateway({
@@ -126,20 +121,20 @@ export const gw = gateway({
   },
 
   models: defineModelCatalog(
-    claude.all.map(tiered),
-    gpt.all.map(tiered),
-    gptOss.all.map(tiered),
-    textEmbeddings.all.map(tiered),
-    gemini.all.map(tiered),
-    gemma.all.map(tiered),
-    nova.all.map(tiered),
-    voyage.all.map(tiered),
-    deepseek.all.map(tiered),
-    grok.all.map(tiered),
-    qwen.all.map(tiered),
-    minimax.all.map(tiered),
-    glm.all.map(tiered),
-    kimi.all.map(tiered),
+    claude.all.map(withAdditionalProperties),
+    gpt.all.map(withAdditionalProperties),
+    gptOss.all.map(withAdditionalProperties),
+    textEmbeddings.all.map(withAdditionalProperties),
+    gemini.all.map(withAdditionalProperties),
+    gemma.all.map(withAdditionalProperties),
+    nova.all.map(withAdditionalProperties),
+    voyage.all.map(withAdditionalProperties),
+    deepseek.all.map(withAdditionalProperties),
+    grok.all.map(withAdditionalProperties),
+    qwen.all.map(withAdditionalProperties),
+    minimax.all.map(withAdditionalProperties),
+    glm.all.map(withAdditionalProperties),
+    kimi.all.map(withAdditionalProperties),
   ),
 
   hooks: {

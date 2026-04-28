@@ -23,7 +23,7 @@ type PrismaClient = ReturnType<typeof createPrismaClient>;
 
 const canonicalModelIds = new Set<string>(CANONICAL_MODEL_IDS);
 
-function catalogMeta(model?: CatalogModel) {
+function readAdditionalProperties(model?: CatalogModel) {
   const p = model?.additionalProperties as
     | { free?: boolean; requiresByok?: boolean; defaults?: ModelParameters }
     | undefined;
@@ -136,7 +136,7 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
 
   if (canonicalModelIds.has(aliasPath)) {
     const modelConfig = models[aliasPath];
-    const { free, requiresByok, defaults } = catalogMeta(modelConfig);
+    const { free, requiresByok, defaults } = readAdditionalProperties(modelConfig);
     state.modelConfig = {
       type: aliasPath,
       // Currently, we only support routing to the first provider.
@@ -173,7 +173,7 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
   }
 
   const catalogModel = models[model.type as keyof typeof models];
-  const { free, requiresByok, defaults } = catalogMeta(catalogModel);
+  const { free, requiresByok, defaults } = readAdditionalProperties(catalogModel);
   state.modelConfig = {
     type: model.type,
     // Currently, we only support routing to the first provider.
