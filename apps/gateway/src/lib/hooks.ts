@@ -40,41 +40,42 @@ const providerCache = new LRUCache<string, ProviderV3>({
  * - messages: translate to Anthropic `thinking` object
  */
 export function injectModelParameters(
-  body: Record<string, unknown>,
+  body: ResolveModelHookContext["body"],
   params: ModelParameters,
   operation: string,
 ) {
-  if (params.temperature !== undefined) body.temperature ??= params.temperature;
-  if (params.top_p !== undefined) body.top_p ??= params.top_p;
+  const b = body as Record<string, unknown>;
+  if (params.temperature !== undefined) b.temperature ??= params.temperature;
+  if (params.top_p !== undefined) b.top_p ??= params.top_p;
 
   if (params.max_tokens !== undefined) {
     if (operation === "chat") {
-      body.max_completion_tokens ??= params.max_tokens;
+      b.max_completion_tokens ??= params.max_tokens;
     } else if (operation === "responses") {
-      body.max_output_tokens ??= params.max_tokens;
+      b.max_output_tokens ??= params.max_tokens;
     } else {
-      body.max_tokens ??= params.max_tokens;
+      b.max_tokens ??= params.max_tokens;
     }
   }
 
   if (params.reasoning && (operation === "chat" || operation === "responses")) {
-    body.reasoning ??= params.reasoning;
+    b.reasoning ??= params.reasoning;
     if (params.reasoning.effort) {
-      body.reasoning_effort ??= params.reasoning.effort;
+      b.reasoning_effort ??= params.reasoning.effort;
     }
   } else if (
     params.reasoning &&
     operation === "messages" &&
-    !body.thinking &&
+    !b.thinking &&
     params.reasoning.enabled !== false
   ) {
-    body.thinking = {
+    b.thinking = {
       type: params.reasoning.enabled ? "enabled" : "adaptive",
       ...(params.reasoning.max_tokens && { budget_tokens: params.reasoning.max_tokens }),
     };
   }
 
-  if (params.service_tier !== undefined) body.service_tier ??= params.service_tier;
+  if (params.service_tier !== undefined) b.service_tier ??= params.service_tier;
 }
 
 export function tagSpanWithOrganization(ctx: OnRequestHookContext) {
@@ -140,7 +141,7 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
       | ModelParameters
       | undefined;
     if (catalogDefaults) {
-      injectModelParameters(ctx.body as Record<string, unknown>, catalogDefaults, ctx.operation);
+      injectModelParameters(ctx.body, catalogDefaults, ctx.operation);
     }
 
     return aliasPath;
@@ -180,7 +181,7 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
     | undefined;
   const merged = { ...catalogDefaults, ...model.parameters };
   if (Object.keys(merged).length > 0) {
-    injectModelParameters(ctx.body as Record<string, unknown>, merged, ctx.operation);
+    injectModelParameters(ctx.body, merged, ctx.operation);
   }
 
   return model.type;
