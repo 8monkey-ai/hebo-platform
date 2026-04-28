@@ -40,42 +40,41 @@ const providerCache = new LRUCache<string, ProviderV3>({
  * - messages: translate to Anthropic `thinking` object
  */
 export function injectModelParameters(
-  body: ResolveModelHookContext["body"],
+  body: Record<string, unknown>,
   params: ModelParameters,
   operation: string,
 ) {
-  const b = body as Record<string, unknown>;
-  if (params.temperature !== undefined) b.temperature ??= params.temperature;
-  if (params.top_p !== undefined) b.top_p ??= params.top_p;
+  if (params.temperature !== undefined) body.temperature ??= params.temperature;
+  if (params.top_p !== undefined) body.top_p ??= params.top_p;
 
   if (params.max_tokens !== undefined) {
     if (operation === "chat") {
-      b.max_completion_tokens ??= params.max_tokens;
+      body.max_completion_tokens ??= params.max_tokens;
     } else if (operation === "responses") {
-      b.max_output_tokens ??= params.max_tokens;
+      body.max_output_tokens ??= params.max_tokens;
     } else {
-      b.max_tokens ??= params.max_tokens;
+      body.max_tokens ??= params.max_tokens;
     }
   }
 
   if (params.reasoning && (operation === "chat" || operation === "responses")) {
-    b.reasoning ??= params.reasoning;
+    body.reasoning ??= params.reasoning;
     if (params.reasoning.effort) {
-      b.reasoning_effort ??= params.reasoning.effort;
+      body.reasoning_effort ??= params.reasoning.effort;
     }
   } else if (
     params.reasoning &&
     operation === "messages" &&
-    !b.thinking &&
+    !body.thinking &&
     params.reasoning.enabled !== false
   ) {
-    b.thinking = {
+    body.thinking = {
       type: params.reasoning.enabled ? "enabled" : "adaptive",
       ...(params.reasoning.max_tokens && { budget_tokens: params.reasoning.max_tokens }),
     };
   }
 
-  if (params.service_tier !== undefined) b.service_tier ??= params.service_tier;
+  if (params.service_tier !== undefined) body.service_tier ??= params.service_tier;
 }
 
 export function tagSpanWithOrganization(ctx: OnRequestHookContext) {
