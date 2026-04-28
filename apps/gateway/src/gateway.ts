@@ -15,6 +15,8 @@ import { trace } from "@opentelemetry/api";
 
 import { getLogger } from "@hebo/shared-api/lib/logger";
 
+import type { ModelParameters } from "~api/modules/providers/types";
+
 import {
   bestEffortResolveModelOnError,
   injectDefaultCacheControl,
@@ -35,26 +37,11 @@ export const BASE_PATH = "/v1";
 
 const SECRETS = await loadProviderSecrets();
 
-const MODEL_DEFAULTS: Record<string, { max_tokens?: number }> = {
-  "anthropic/claude-opus-4.7": { max_tokens: 16384 },
-  "anthropic/claude-opus-4.6": { max_tokens: 16384 },
-  "anthropic/claude-opus-4.5": { max_tokens: 16384 },
-  "anthropic/claude-opus-4.1": { max_tokens: 16384 },
-  "anthropic/claude-opus-4": { max_tokens: 16384 },
-  "anthropic/claude-sonnet-4.6": { max_tokens: 16384 },
-  "anthropic/claude-sonnet-4.5": { max_tokens: 16384 },
-  "anthropic/claude-sonnet-4": { max_tokens: 16384 },
-  "anthropic/claude-sonnet-3.7": { max_tokens: 8192 },
-  "anthropic/claude-sonnet-3.5": { max_tokens: 8192 },
-  "anthropic/claude-haiku-4.5": { max_tokens: 8192 },
-  "anthropic/claude-haiku-3.5": { max_tokens: 8192 },
-  "anthropic/claude-haiku-3": { max_tokens: 4096 },
-  "openai/gpt-5": { max_tokens: 16384 },
-  "openai/gpt-5-mini": { max_tokens: 16384 },
-  "openai/gpt-5-nano": { max_tokens: 16384 },
-  "google/gemini-2.5-flash": { max_tokens: 8192 },
-  "google/gemini-2.5-pro": { max_tokens: 8192 },
-  "deepseek/deepseek-v3.2": { max_tokens: 8192 },
+const MODEL_DEFAULTS: Record<string, ModelParameters> = {
+  "anthropic/claude-opus-4.7": { temperature: 1, reasoning: { effort: "high" } },
+  "anthropic/claude-opus-4.6": { temperature: 1, reasoning: { effort: "high" } },
+  "google/gemini-3-flash-preview": { temperature: 0.9, reasoning: { effort: "high" } },
+  "google/gemini-3.1-pro-preview": { temperature: 0.9, reasoning: { effort: "high" } },
 };
 
 const additionalProperties = (modelId: string) => ({
