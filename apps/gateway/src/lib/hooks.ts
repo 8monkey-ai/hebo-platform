@@ -50,7 +50,8 @@ export function injectModelParameters(
   if (params.max_tokens !== undefined) {
     if (operation === "chat") {
       body.max_completion_tokens ??= params.max_tokens;
-      body.max_tokens ??= params.max_tokens;
+    } else if (operation === "responses") {
+      body.max_output_tokens ??= params.max_tokens;
     } else {
       body.max_tokens ??= params.max_tokens;
     }

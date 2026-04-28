@@ -179,11 +179,11 @@ describe("injectModelParameters", () => {
   });
 
   describe("max_tokens", () => {
-    it("injects max_tokens and max_completion_tokens for chat", () => {
+    it("injects only max_completion_tokens for chat", () => {
       const body: Record<string, unknown> = {};
       injectModelParameters(body, { max_tokens: 4096 }, "chat");
       expect(body.max_completion_tokens).toBe(4096);
-      expect(body.max_tokens).toBe(4096);
+      expect(body.max_tokens).toBeUndefined();
     });
 
     it("injects only max_tokens for messages", () => {
@@ -193,10 +193,11 @@ describe("injectModelParameters", () => {
       expect(body.max_completion_tokens).toBeUndefined();
     });
 
-    it("injects only max_tokens for responses", () => {
+    it("injects only max_output_tokens for responses", () => {
       const body: Record<string, unknown> = {};
       injectModelParameters(body, { max_tokens: 4096 }, "responses");
-      expect(body.max_tokens).toBe(4096);
+      expect(body.max_output_tokens).toBe(4096);
+      expect(body.max_tokens).toBeUndefined();
       expect(body.max_completion_tokens).toBeUndefined();
     });
 
