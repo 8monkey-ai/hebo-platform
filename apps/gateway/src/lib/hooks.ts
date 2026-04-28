@@ -5,6 +5,7 @@ import {
   CANONICAL_MODEL_IDS,
   GatewayError,
   type BeforeHookContext,
+  type CatalogModel,
   type OnErrorHookContext,
   type OnRequestHookContext,
   type ResolveModelHookContext,
@@ -21,6 +22,13 @@ import { createProvider } from "./provider";
 type PrismaClient = ReturnType<typeof createPrismaClient>;
 
 const canonicalModelIds = new Set<string>(CANONICAL_MODEL_IDS);
+
+function catalogMeta(model?: CatalogModel) {
+  const p = model?.additionalProperties as
+    | { free?: boolean; requiresByok?: boolean; defaults?: ModelParameters }
+    | undefined;
+  return { free: p?.free, requiresByok: p?.requiresByok, defaults: p?.defaults };
+}
 
 const configCache = new LRUCache<string, string>({
   max: 100,
@@ -128,19 +136,17 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
 
   if (canonicalModelIds.has(aliasPath)) {
     const modelConfig = models[aliasPath];
+    const { free, requiresByok, defaults } = catalogMeta(modelConfig);
     state.modelConfig = {
       type: aliasPath,
       // Currently, we only support routing to the first provider.
       customProviderSlug: modelConfig?.providers[0],
-      free: modelConfig?.additionalProperties?.free as boolean | undefined,
-      requiresByok: modelConfig?.additionalProperties?.requiresByok as boolean | undefined,
+      free,
+      requiresByok,
     };
 
-    const catalogDefaults = modelConfig?.additionalProperties?.defaults as
-      | ModelParameters
-      | undefined;
-    if (catalogDefaults) {
-      injectModelParameters(ctx.body, catalogDefaults, ctx.operation);
+    if (defaults) {
+      injectModelParameters(ctx.body, defaults, ctx.operation);
     }
 
     return aliasPath;
@@ -167,18 +173,16 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
   }
 
   const catalogModel = models[model.type as keyof typeof models];
+  const { free, requiresByok, defaults } = catalogMeta(catalogModel);
   state.modelConfig = {
     type: model.type,
     // Currently, we only support routing to the first provider.
     customProviderSlug: model.routing?.only?.[0],
-    free: catalogModel?.additionalProperties?.free as boolean | undefined,
-    requiresByok: catalogModel?.additionalProperties?.requiresByok as boolean | undefined,
+    free,
+    requiresByok,
   };
 
-  const catalogDefaults = catalogModel?.additionalProperties?.defaults as
-    | ModelParameters
-    | undefined;
-  const merged = { ...catalogDefaults, ...model.parameters };
+  const merged = { ...defaults, ...model.parameters };
   if (Object.keys(merged).length > 0) {
     injectModelParameters(ctx.body, merged, ctx.operation);
   }
