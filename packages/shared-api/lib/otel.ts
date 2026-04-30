@@ -87,7 +87,7 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
     enhancedDatabaseReporting: false,
   });
 
-  // In Bun, pg is already loaded via @prisma/adapter-pg before OTel's module-load
+  // Pg is already loaded via @prisma/adapter-pg before OTel's module-load
   // hooks can patch it. Patch pg.Client directly as a workaround, while still
   // passing the instrumentation to NodeSDK so providers are configured correctly.
   try {
