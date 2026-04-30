@@ -87,9 +87,9 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
     enhancedDatabaseReporting: false,
   });
 
-  // Bun loads all static ESM imports before any module body runs, so RITM hooks
-  // never fire for pg (https://github.com/oven-sh/bun/issues/3775). Patch it
-  // directly so the NodeSDK can produce spans and call setMeterProvider() on it.
+  // In Bun, pg is already loaded via @prisma/adapter-pg before OTel's module-load
+  // hooks can patch it. Patch pg.Client directly as a workaround, while still
+  // passing the instrumentation to NodeSDK so providers are configured correctly.
   try {
     // oxlint-disable no-unsafe-assignment no-unsafe-call no-unsafe-member-access
     const { createRequire } = require("module");
