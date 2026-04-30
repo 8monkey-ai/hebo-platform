@@ -4,7 +4,6 @@ import type { SeverityNumber } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
-import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { PgInstrumentation } from "@opentelemetry/instrumentation-pg";
 import { CompressionAlgorithm } from "@opentelemetry/otlp-exporter-base";
 import { resourceFromAttributes } from "@opentelemetry/resources";
@@ -82,24 +81,35 @@ export const createOtelLogger = (serviceName: string, minimumSeverity: SeverityN
   return loggerProvider.getLogger(serviceName);
 };
 
-registerInstrumentations({
-  instrumentations: [
-    new PgInstrumentation({
-      requireParentSpan: true,
-      enhancedDatabaseReporting: false,
-    }),
-    new BunSqlInstrumentation({
-      requireParentSpan: true,
-      ignoreConnectionSpans: true,
-      // FUTURE: set to true to avoid leaking sensitive information
-      maskStatement: false,
-    }),
-  ],
-});
-
 export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
+  const pgInstrumentation = new PgInstrumentation({
+    requireParentSpan: true,
+    enhancedDatabaseReporting: false,
+  });
+
+  // Bun loads all static ESM imports before any module body runs, so RITM hooks
+  // never fire for pg (https://github.com/oven-sh/bun/issues/3775). Patch it
+  // directly so the NodeSDK can produce spans and call setMeterProvider() on it.
+  try {
+    // oxlint-disable no-unsafe-assignment no-unsafe-call no-unsafe-member-access
+    const { createRequire } = require("module");
+    const pg = createRequire(require.resolve("@prisma/adapter-pg"))("pg");
+    // @ts-expect-error _patchPgClient is a private method on PgInstrumentation
+    pgInstrumentation._patchPgClient(pg.Client);
+    // oxlint-enable no-unsafe-assignment no-unsafe-call no-unsafe-member-access
+  } catch {}
+
   return {
     serviceName,
+    instrumentations: [
+      pgInstrumentation,
+      new BunSqlInstrumentation({
+        requireParentSpan: true,
+        ignoreConnectionSpans: true,
+        // FUTURE: set to true to avoid leaking sensitive information
+        maskStatement: false,
+      }),
+    ],
     headersToSpanAttributes: {
       requestHeaders: ALLOWED_REQUEST_HEADERS,
       responseHeaders: ALLOWED_RESPONSE_HEADERS,
