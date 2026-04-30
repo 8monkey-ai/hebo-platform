@@ -14,6 +14,11 @@ export const createBunSqlClient = (url: string) => {
   });
 };
 
-export const greptimeSqlClient = createBunSqlClient(await getGreptimeConnectionString());
+const greptimeUrl = await getGreptimeConnectionString();
+
+let _client: ReturnType<typeof createBunSqlClient>;
+
+/** Lazily created so BunSqlInstrumentation wraps `bun:sql` before the first `new SQL()` call. */
+export const getGreptimeSqlClient = () => (_client ??= createBunSqlClient(greptimeUrl));
 
 export type BunSqlClient = ReturnType<typeof createBunSqlClient>;
