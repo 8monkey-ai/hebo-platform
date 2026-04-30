@@ -12,5 +12,3 @@ export const getGreptimeSqlClient = () =>
     max: DEFAULT_DB_POOL_MAX,
     idleTimeout: DEFAULT_DB_IDLE_TIMEOUT_MS / 1_000,
   }));
-
-export type BunSqlClient = Bun.SQL;
