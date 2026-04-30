@@ -10,11 +10,12 @@ const createBunSqlClient = (url: string) => {
   });
 };
 
-const greptimeUrl = `postgres://${(await getSecret("GREPTIME_HOST")) ?? "localhost"}:4003/public`;
+export const GREPTIME_HOST = (await getSecret("GREPTIME_HOST")) ?? "localhost";
 
 let _client: ReturnType<typeof createBunSqlClient>;
 
 /** Lazily created so BunSqlInstrumentation wraps `bun:sql` before the first `new SQL()` call. */
-export const getGreptimeSqlClient = () => (_client ??= createBunSqlClient(greptimeUrl));
+export const getGreptimeSqlClient = () =>
+  (_client ??= createBunSqlClient(`postgres://${GREPTIME_HOST}:4003/public`));
 
 export type BunSqlClient = ReturnType<typeof createBunSqlClient>;
