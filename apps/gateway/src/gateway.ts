@@ -44,7 +44,7 @@ const MODEL_DEFAULTS: Record<string, ModelParameters> = {
   "google/gemini-3.1-pro-preview": { temperature: 0.9, reasoning: { effort: "high" } },
 };
 
-const additionalProperties = (modelId: string) => ({
+const withMeta = (modelId: string) => ({
   additionalProperties: {
     free: SECRETS.FREE_MODEL_IDS.has(modelId),
     requiresByok: SECRETS.ENFORCE_BYOK && !SECRETS.FREE_MODEL_IDS.has(modelId),
@@ -53,9 +53,9 @@ const additionalProperties = (modelId: string) => ({
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const withAdditionalProperties = (preset: (override?: any) => ModelCatalog): ModelCatalog => {
+const applyMeta = (preset: (override?: any) => ModelCatalog): ModelCatalog => {
   const modelId = Object.keys(preset({}))[0];
-  return preset(additionalProperties(modelId));
+  return preset(withMeta(modelId));
 };
 
 export const gw = gateway({
@@ -108,20 +108,20 @@ export const gw = gateway({
   },
 
   models: defineModelCatalog(
-    claude.all.map(withAdditionalProperties),
-    gpt.all.map(withAdditionalProperties),
-    gptOss.all.map(withAdditionalProperties),
-    textEmbeddings.all.map(withAdditionalProperties),
-    gemini.all.map(withAdditionalProperties),
-    gemma.all.map(withAdditionalProperties),
-    nova.all.map(withAdditionalProperties),
-    voyage.all.map(withAdditionalProperties),
-    deepseek.all.map(withAdditionalProperties),
-    grok.all.map(withAdditionalProperties),
-    qwen.all.map(withAdditionalProperties),
-    minimax.all.map(withAdditionalProperties),
-    glm.all.map(withAdditionalProperties),
-    kimi.all.map(withAdditionalProperties),
+    claude.all.map(applyMeta),
+    gpt.all.map(applyMeta),
+    gptOss.all.map(applyMeta),
+    textEmbeddings.all.map(applyMeta),
+    gemini.all.map(applyMeta),
+    gemma.all.map(applyMeta),
+    nova.all.map(applyMeta),
+    voyage.all.map(applyMeta),
+    deepseek.all.map(applyMeta),
+    grok.all.map(applyMeta),
+    qwen.all.map(applyMeta),
+    minimax.all.map(applyMeta),
+    glm.all.map(applyMeta),
+    kimi.all.map(applyMeta),
   ),
 
   hooks: {
