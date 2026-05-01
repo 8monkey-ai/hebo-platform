@@ -23,11 +23,11 @@ type PrismaClient = ReturnType<typeof createPrismaClient>;
 
 const canonicalModelIds = new Set<string>(CANONICAL_MODEL_IDS);
 
-function readAdditionalProperties(model?: CatalogModel) {
+function readMeta(model?: CatalogModel) {
   const p = model?.additionalProperties as
     | { free?: boolean; requiresByok?: boolean; defaults?: ModelParameters }
     | undefined;
-  return { free: p?.free, requiresByok: p?.requiresByok, defaults: p?.defaults };
+  return { free: p?.free, requiresByok: p?.requiresByok, defaults: p?.defaults ?? {} };
 }
 
 const configCache = new LRUCache<string, string>({
@@ -39,14 +39,7 @@ const providerCache = new LRUCache<string, ProviderV3>({
   max: 100,
 });
 
-/**
- * Injects default inference parameters into the request body using ??= semantics.
- * Client-provided values are never overwritten.
- *
- * For reasoning, translates per API surface:
- * - chat / responses: inject as `reasoning` + `reasoning_effort`
- * - messages: translate to Anthropic `thinking` object
- */
+/** Injects default inference parameters into the request body. Client values always win (??= semantics). */
 export function injectModelParameters(
   body: Record<string, unknown>,
   params: ModelParameters,
@@ -146,7 +139,7 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
 
   if (canonicalModelIds.has(aliasPath)) {
     const modelConfig = models[aliasPath];
-    const { free, requiresByok, defaults } = readAdditionalProperties(modelConfig);
+    const { free, requiresByok, defaults } = readMeta(modelConfig);
     state.modelConfig = {
       type: aliasPath,
       // Currently, we only support routing to the first provider.
@@ -155,10 +148,7 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
       requiresByok,
     };
 
-    if (defaults) {
-      injectModelParameters(ctx.body, defaults, ctx.operation);
-    }
-
+    injectModelParameters(ctx.body, defaults, ctx.operation);
     return aliasPath;
   }
 
@@ -183,7 +173,7 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
   }
 
   const catalogModel = models[model.type as keyof typeof models];
-  const { free, requiresByok, defaults } = readAdditionalProperties(catalogModel);
+  const { free, requiresByok, defaults } = readMeta(catalogModel);
   state.modelConfig = {
     type: model.type,
     // Currently, we only support routing to the first provider.
@@ -193,10 +183,7 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
   };
 
   const merged = { ...defaults, ...model.parameters };
-  if (Object.keys(merged).length > 0) {
-    injectModelParameters(ctx.body, merged, ctx.operation);
-  }
-
+  injectModelParameters(ctx.body, merged, ctx.operation);
   return model.type;
 }
 
