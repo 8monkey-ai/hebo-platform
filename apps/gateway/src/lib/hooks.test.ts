@@ -259,6 +259,64 @@ describe("injectModelParameters", () => {
       expect(body.reasoning).toBeUndefined();
       expect(body.reasoning_effort).toBeUndefined();
     });
+
+    it("translates summary: 'auto' to display: 'summarized'", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(
+        body,
+        { reasoning: { enabled: true, max_tokens: 32000, summary: "auto" } },
+        "messages",
+      );
+      expect(body.thinking).toEqual({
+        type: "enabled",
+        budget_tokens: 32000,
+        display: "summarized",
+      });
+    });
+
+    it("translates summary: 'concise' to display: 'summarized'", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(
+        body,
+        { reasoning: { enabled: true, max_tokens: 32000, summary: "concise" } },
+        "messages",
+      );
+      expect(body.thinking).toEqual({
+        type: "enabled",
+        budget_tokens: 32000,
+        display: "summarized",
+      });
+    });
+
+    it("translates summary: 'none' to display: 'omitted'", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(
+        body,
+        { reasoning: { enabled: true, max_tokens: 32000, summary: "none" } },
+        "messages",
+      );
+      expect(body.thinking).toEqual({ type: "enabled", budget_tokens: 32000, display: "omitted" });
+    });
+
+    it("translates exclude: true to display: 'omitted'", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(
+        body,
+        { reasoning: { enabled: true, max_tokens: 32000, exclude: true } },
+        "messages",
+      );
+      expect(body.thinking).toEqual({ type: "enabled", budget_tokens: 32000, display: "omitted" });
+    });
+
+    it("exclude takes precedence over summary", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(
+        body,
+        { reasoning: { enabled: true, max_tokens: 32000, exclude: true, summary: "auto" } },
+        "messages",
+      );
+      expect(body.thinking).toEqual({ type: "enabled", budget_tokens: 32000, display: "omitted" });
+    });
   });
 
   describe("multiple parameters", () => {

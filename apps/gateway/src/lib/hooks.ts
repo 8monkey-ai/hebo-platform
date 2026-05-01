@@ -52,39 +52,36 @@ export function injectModelParameters(
   body.seed ??= params.seed;
   body.service_tier ??= params.service_tier;
 
-  if (params.stop !== undefined) {
-    if (operation === "messages") {
-      body.stop_sequences ??= Array.isArray(params.stop) ? params.stop : [params.stop];
-    } else if (operation === "chat") {
-      body.stop ??= params.stop;
-    }
-  }
-
-  if (params.max_tokens !== undefined) {
-    if (operation === "chat") {
-      body.max_completion_tokens ??= params.max_tokens;
-    } else if (operation === "responses") {
-      body.max_output_tokens ??= params.max_tokens;
-    } else {
-      body.max_tokens ??= params.max_tokens;
-    }
-  }
-
-  if (params.reasoning && (operation === "chat" || operation === "responses")) {
-    body.reasoning ??= params.reasoning;
-    if (params.reasoning.effort) {
+  if (operation === "chat") {
+    body.max_completion_tokens ??= params.max_tokens;
+    body.stop ??= params.stop;
+    if (params.reasoning) {
+      body.reasoning ??= params.reasoning;
       body.reasoning_effort ??= params.reasoning.effort;
     }
-  } else if (
-    params.reasoning &&
-    operation === "messages" &&
-    !body.thinking &&
-    params.reasoning.enabled !== false
-  ) {
-    body.thinking = {
-      type: params.reasoning.enabled ? "enabled" : "adaptive",
-      ...(params.reasoning.max_tokens && { budget_tokens: params.reasoning.max_tokens }),
-    };
+  } else if (operation === "messages") {
+    body.max_tokens ??= params.max_tokens;
+    if (params.stop !== undefined) {
+      body.stop_sequences ??= Array.isArray(params.stop) ? params.stop : [params.stop];
+    }
+    if (params.reasoning && !body.thinking && params.reasoning.enabled !== false) {
+      const thinking: Record<string, unknown> = {
+        type: params.reasoning.enabled ? "enabled" : "adaptive",
+      };
+      if (params.reasoning.max_tokens) thinking.budget_tokens = params.reasoning.max_tokens;
+      if (params.reasoning.exclude || params.reasoning.summary === "none") {
+        thinking.display = "omitted";
+      } else if (params.reasoning.summary) {
+        thinking.display = "summarized";
+      }
+      body.thinking = thinking;
+    }
+  } else {
+    body.max_output_tokens ??= params.max_tokens;
+    if (params.reasoning) {
+      body.reasoning ??= params.reasoning;
+      body.reasoning_effort ??= params.reasoning.effort;
+    }
   }
 }
 
@@ -182,8 +179,8 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
     requiresByok,
   };
 
-  const merged = { ...defaults, ...model.parameters };
-  injectModelParameters(ctx.body, merged, ctx.operation);
+  const params = model.parameters ? { ...defaults, ...model.parameters } : defaults;
+  injectModelParameters(ctx.body, params, ctx.operation);
   return model.type;
 }
 
