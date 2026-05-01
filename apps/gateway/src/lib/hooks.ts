@@ -52,8 +52,20 @@ export function injectModelParameters(
   params: ModelParameters,
   operation: string,
 ) {
-  if (params.temperature !== undefined) body.temperature ??= params.temperature;
-  if (params.top_p !== undefined) body.top_p ??= params.top_p;
+  body.temperature ??= params.temperature;
+  body.top_p ??= params.top_p;
+  body.frequency_penalty ??= params.frequency_penalty;
+  body.presence_penalty ??= params.presence_penalty;
+  body.seed ??= params.seed;
+  body.service_tier ??= params.service_tier;
+
+  if (params.stop !== undefined) {
+    if (operation === "messages") {
+      body.stop_sequences ??= Array.isArray(params.stop) ? params.stop : [params.stop];
+    } else if (operation === "chat") {
+      body.stop ??= params.stop;
+    }
+  }
 
   if (params.max_tokens !== undefined) {
     if (operation === "chat") {
@@ -81,8 +93,6 @@ export function injectModelParameters(
       ...(params.reasoning.max_tokens && { budget_tokens: params.reasoning.max_tokens }),
     };
   }
-
-  if (params.service_tier !== undefined) body.service_tier ??= params.service_tier;
 }
 
 export function tagSpanWithOrganization(ctx: OnRequestHookContext) {

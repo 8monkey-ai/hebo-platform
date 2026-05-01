@@ -298,4 +298,116 @@ describe("injectModelParameters", () => {
       expect(body).toEqual({ temperature: 0.5 });
     });
   });
+
+  describe("frequency_penalty", () => {
+    it("injects frequency_penalty when missing from body", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { frequency_penalty: 0.5 }, "chat");
+      expect(body.frequency_penalty).toBe(0.5);
+    });
+
+    it("does not override client-provided frequency_penalty", () => {
+      const body: Record<string, unknown> = { frequency_penalty: 0.8 };
+      injectModelParameters(body, { frequency_penalty: 0.5 }, "chat");
+      expect(body.frequency_penalty).toBe(0.8);
+    });
+
+    it("injects frequency_penalty for messages", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { frequency_penalty: 0.3 }, "messages");
+      expect(body.frequency_penalty).toBe(0.3);
+    });
+
+    it("injects frequency_penalty for responses", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { frequency_penalty: 0.3 }, "responses");
+      expect(body.frequency_penalty).toBe(0.3);
+    });
+  });
+
+  describe("presence_penalty", () => {
+    it("injects presence_penalty when missing from body", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { presence_penalty: 0.6 }, "chat");
+      expect(body.presence_penalty).toBe(0.6);
+    });
+
+    it("does not override client-provided presence_penalty", () => {
+      const body: Record<string, unknown> = { presence_penalty: 1.0 };
+      injectModelParameters(body, { presence_penalty: 0.6 }, "chat");
+      expect(body.presence_penalty).toBe(1.0);
+    });
+
+    it("injects presence_penalty for messages", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { presence_penalty: -0.5 }, "messages");
+      expect(body.presence_penalty).toBe(-0.5);
+    });
+  });
+
+  describe("seed", () => {
+    it("injects seed when missing from body", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { seed: 42 }, "chat");
+      expect(body.seed).toBe(42);
+    });
+
+    it("does not override client-provided seed", () => {
+      const body: Record<string, unknown> = { seed: 99 };
+      injectModelParameters(body, { seed: 42 }, "chat");
+      expect(body.seed).toBe(99);
+    });
+
+    it("injects seed for messages", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { seed: 42 }, "messages");
+      expect(body.seed).toBe(42);
+    });
+  });
+
+  describe("stop", () => {
+    it("injects stop for chat as-is (string)", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { stop: "\n" }, "chat");
+      expect(body.stop).toBe("\n");
+    });
+
+    it("injects stop for chat as-is (array)", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { stop: ["\n", "END"] }, "chat");
+      expect(body.stop).toEqual(["\n", "END"]);
+    });
+
+    it("does not override client-provided stop for chat", () => {
+      const body: Record<string, unknown> = { stop: "STOP" };
+      injectModelParameters(body, { stop: "\n" }, "chat");
+      expect(body.stop).toBe("STOP");
+    });
+
+    it("translates stop to stop_sequences for messages (string)", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { stop: "\n" }, "messages");
+      expect(body.stop_sequences).toEqual(["\n"]);
+      expect(body.stop).toBeUndefined();
+    });
+
+    it("translates stop to stop_sequences for messages (array)", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { stop: ["\n", "END"] }, "messages");
+      expect(body.stop_sequences).toEqual(["\n", "END"]);
+    });
+
+    it("does not override client-provided stop_sequences for messages", () => {
+      const body: Record<string, unknown> = { stop_sequences: ["STOP"] };
+      injectModelParameters(body, { stop: "\n" }, "messages");
+      expect(body.stop_sequences).toEqual(["STOP"]);
+    });
+
+    it("does not inject stop for responses", () => {
+      const body: Record<string, unknown> = {};
+      injectModelParameters(body, { stop: "\n" }, "responses");
+      expect(body.stop).toBeUndefined();
+      expect(body.stop_sequences).toBeUndefined();
+    });
+  });
 });

@@ -156,6 +156,10 @@ export const ModelParametersSchema = z.object({
   temperature: z.number().min(0).max(2).optional(),
   top_p: z.number().min(0).max(1).optional(),
   max_tokens: z.number().int().positive().optional(),
+  frequency_penalty: z.number().min(-2).max(2).optional(),
+  presence_penalty: z.number().min(-2).max(2).optional(),
+  seed: z.number().int().optional(),
+  stop: z.union([z.string(), z.array(z.string())]).optional(),
   reasoning: z
     .object({
       enabled: z.boolean().optional(),
