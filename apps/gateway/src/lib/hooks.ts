@@ -39,7 +39,7 @@ const providerCache = new LRUCache<string, ProviderV3>({
   max: 100,
 });
 
-/** Injects default inference parameters into the request body. Client values always win (??= semantics). */
+/** Injects and translates default inference parameters into the request body per API surface. Client values always win (??= semantics). */
 export function injectModelParameters(
   body: Record<string, unknown>,
   params: ModelParameters,
@@ -52,14 +52,7 @@ export function injectModelParameters(
   body.seed ??= params.seed;
   body.service_tier ??= params.service_tier;
 
-  if (operation === "chat") {
-    body.max_completion_tokens ??= params.max_tokens;
-    body.stop ??= params.stop;
-    if (params.reasoning) {
-      body.reasoning ??= params.reasoning;
-      body.reasoning_effort ??= params.reasoning.effort;
-    }
-  } else if (operation === "messages") {
+  if (operation === "messages") {
     body.max_tokens ??= params.max_tokens;
     if (params.stop !== undefined) {
       body.stop_sequences ??= Array.isArray(params.stop) ? params.stop : [params.stop];
@@ -77,11 +70,14 @@ export function injectModelParameters(
       body.thinking = thinking;
     }
   } else {
-    body.max_output_tokens ??= params.max_tokens;
-    if (params.reasoning) {
-      body.reasoning ??= params.reasoning;
-      body.reasoning_effort ??= params.reasoning.effort;
+    if (operation === "chat") {
+      body.max_completion_tokens ??= params.max_tokens;
+      body.stop ??= params.stop;
+    } else {
+      body.max_output_tokens ??= params.max_tokens;
     }
+    body.reasoning ??= params.reasoning;
+    body.reasoning_effort ??= params.reasoning?.effort;
   }
 }
 
