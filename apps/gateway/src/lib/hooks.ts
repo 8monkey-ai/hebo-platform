@@ -13,7 +13,7 @@ import {
 import { LRUCache } from "lru-cache";
 
 import type { createPrismaClient } from "~api/db/prisma";
-import type { ModelsConfig, ProviderSlug } from "~api/modules/providers/types";
+import type { ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "../utils/aws";
 import { createProvider } from "./provider";
@@ -21,6 +21,19 @@ import { createProvider } from "./provider";
 type PrismaClient = ReturnType<typeof createPrismaClient>;
 
 const canonicalModelIds = new Set<string>(CANONICAL_MODEL_IDS);
+
+type PresetCacheEntry = {
+  canonicalModel: string;
+  presetSlug: string;
+};
+
+// Use a sentinel for "looked up, not found" so TypeScript's LRUCache generic remains {}.
+const PRESET_MISS: PresetCacheEntry = { canonicalModel: "", presetSlug: "" };
+
+const presetCache = new LRUCache<string, PresetCacheEntry>({
+  max: 500,
+  ttl: 60 * 1000, // 60 seconds
+});
 
 const configCache = new LRUCache<string, string>({
   max: 100,
@@ -73,75 +86,91 @@ export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
   }
 }
 
-export async function resolveModelAlias(ctx: ResolveModelHookContext) {
-  const { modelId: aliasPath, models, state } = ctx;
+async function lookupPreset(
+  prismaClient: PrismaClient,
+  workspaceId: string,
+  slug: string,
+): Promise<PresetCacheEntry | null> {
+  const cacheKey = `${workspaceId}:${slug}`;
+  const cached = presetCache.get(cacheKey);
+  if (cached === PRESET_MISS) return null;
+  if (cached) return cached;
 
-  const { prismaClient } = state as {
+  const preset = await prismaClient.presets.findFirst({
+    where: { workspace_id: workspaceId, slug, deleted_at: null },
+    select: { slug: true, model: true },
+  });
+
+  if (!preset) {
+    presetCache.set(cacheKey, PRESET_MISS);
+    return null;
+  }
+
+  const entry: PresetCacheEntry = {
+    canonicalModel: preset.model,
+    presetSlug: preset.slug,
+  };
+  presetCache.set(cacheKey, entry);
+  return entry;
+}
+
+export async function resolveModelAlias(ctx: ResolveModelHookContext) {
+  const { modelId, models, state } = ctx;
+
+  const { prismaClient, workspaceId, workspaceSlug } = state as {
     prismaClient: PrismaClient;
+    workspaceId?: string;
+    workspaceSlug?: string;
   };
 
-  if (canonicalModelIds.has(aliasPath)) {
-    const modelConfig = models[aliasPath];
+  if (workspaceSlug) {
+    ctx.otel["hebo.workspace.slug"] = workspaceSlug;
+  }
+
+  // Presets-first — a preset can shadow a canonical model id.
+  if (workspaceId) {
+    const preset = await lookupPreset(prismaClient, workspaceId, modelId);
+    if (preset) {
+      ctx.otel["hebo.preset.slug"] = preset.presetSlug;
+      const catalogModel = models[preset.canonicalModel as keyof typeof models];
+      state.modelConfig = {
+        type: preset.canonicalModel,
+        free: catalogModel?.additionalProperties?.free as boolean | undefined,
+        requiresByok: catalogModel?.additionalProperties?.requiresByok as boolean | undefined,
+      };
+      return preset.canonicalModel;
+    }
+  }
+
+  if (canonicalModelIds.has(modelId)) {
+    const modelConfig = models[modelId];
     state.modelConfig = {
-      type: aliasPath,
-      // Currently, we only support routing to the first provider.
-      customProviderSlug: modelConfig?.providers[0],
+      type: modelId,
       free: modelConfig?.additionalProperties?.free as boolean | undefined,
       requiresByok: modelConfig?.additionalProperties?.requiresByok as boolean | undefined,
     };
-    return aliasPath;
+    return modelId;
   }
 
-  const [agentSlug, branchSlug, modelAlias] = aliasPath.split("/");
-
-  ctx.otel["hebo.agent.slug"] = agentSlug;
-  ctx.otel["hebo.branch.slug"] = branchSlug;
-
-  const branch = await prismaClient.branches.findFirst({
-    where: { agent_slug: agentSlug, slug: branchSlug },
-    select: { models: true },
-  });
-
-  if (!branch) {
-    throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
-  }
-
-  const model = (branch.models as ModelsConfig)?.find(({ alias }) => alias === modelAlias);
-
-  if (!model) {
-    throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
-  }
-
-  const catalogModel = models[model.type as keyof typeof models];
-  state.modelConfig = {
-    type: model.type,
-    // Currently, we only support routing to the first provider.
-    customProviderSlug: model.routing?.only?.[0],
-    free: catalogModel?.additionalProperties?.free as boolean | undefined,
-    requiresByok: catalogModel?.additionalProperties?.requiresByok as boolean | undefined,
-  };
-
-  return model.type;
+  throw new GatewayError(`Model not found: ${modelId}`, 404, "MODEL_NOT_FOUND");
 }
 
-async function resolveCustomProvider(
+async function resolveByokProvider(
   prismaClient: PrismaClient,
   organizationId: string,
   modelId: string,
-  customProviderSlug: ProviderSlug,
+  providerSlug: ProviderSlug,
 ): Promise<ProviderV3 | undefined> {
-  const configCacheKey = `${organizationId}:${customProviderSlug}:${modelId}`;
+  const configCacheKey = `${organizationId}:${providerSlug}:${modelId}`;
   const cachedConfigHash = configCache.get(configCacheKey);
 
   if (cachedConfigHash) {
-    // No custom config exists, use default providers
     if (cachedConfigHash === "default") return;
-
     const cachedProvider = providerCache.get(`${configCacheKey}:${cachedConfigHash}`);
     if (cachedProvider) return cachedProvider;
   }
 
-  const config = await prismaClient.provider_configs.getUnredacted(customProviderSlug);
+  const config = await prismaClient.provider_configs.getUnredacted(providerSlug);
 
   const configHash = config
     ? createHash("sha256").update(JSON.stringify(config.value)).digest("hex")
@@ -149,14 +178,13 @@ async function resolveCustomProvider(
 
   configCache.set(configCacheKey, configHash);
 
-  // If no config is found, return undefined to use the default providers.
   if (!config) return;
 
   const providerCacheKey = `${configCacheKey}:${configHash}`;
   let provider = providerCache.get(providerCacheKey);
 
   if (!provider) {
-    provider = createProvider(customProviderSlug, config.value);
+    provider = createProvider(providerSlug, config.value);
     providerCache.set(providerCacheKey, provider);
   }
 
@@ -175,23 +203,27 @@ export async function selectProviderWithByokFallback(ctx: ResolveProviderHookCon
     await injectMetadataCredentials();
   }
 
-  const { customProviderSlug, free, requiresByok } = state.modelConfig as {
-    customProviderSlug?: ProviderSlug;
+  const { free, requiresByok } = state.modelConfig as {
     free?: boolean;
     requiresByok?: boolean;
   };
 
-  if (customProviderSlug) {
-    const provider = await resolveCustomProvider(
+  const catalogProviders = (models[modelId]?.providers ?? []) as ProviderSlug[];
+
+  // Pass 1 — BYOK-configured providers, in catalog order (preferred first).
+  // Sequential on purpose: preferred providers are tried first and short-circuited.
+  for (const providerSlug of catalogProviders) {
+    // oxlint-disable-next-line no-await-in-loop
+    const byokProvider = await resolveByokProvider(
       prismaClient,
       organizationId,
       modelId,
-      customProviderSlug,
+      providerSlug,
     );
-
-    if (provider) return provider;
+    if (byokProvider) return byokProvider;
   }
 
+  // BYOK-only models may not fall back to platform default providers.
   if (requiresByok && free === false) {
     throw new GatewayError(
       "This model requires Bring Your Own Key (BYOK). Configure your provider credentials in the console under Settings → Providers.",
@@ -200,8 +232,9 @@ export async function selectProviderWithByokFallback(ctx: ResolveProviderHookCon
     );
   }
 
-  // Default to bedrock if supported & available
-  if (!customProviderSlug && providers.bedrock && models[modelId]?.providers.includes("bedrock")) {
-    return providers.bedrock;
+  // Pass 2 — platform-default providers, in catalog order.
+  for (const providerSlug of catalogProviders) {
+    const builtIn = providers[providerSlug];
+    if (builtIn) return builtIn;
   }
 }

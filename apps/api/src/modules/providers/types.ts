@@ -152,23 +152,6 @@ export const ProviderConfiguredSchema = z.object({
 
 export const ProvidersSchema = z.array(ProviderSchema);
 
-export const ModelConfigSchema = z.object({
-  alias: z
-    .string()
-    .min(1)
-    .regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/),
-  type: z.string().min(1),
-  routing: z
-    .object({
-      only: z
-        .array(z.string().optional())
-        .transform((value) => value.filter((v): v is string => v !== undefined)),
-    })
-    .optional(),
-});
-
-export const ModelsConfigSchema = z.array(ModelConfigSchema);
-
 export type ApiKeyConfig = z.infer<typeof ApiKeySchema>;
 export type AzureConfig = z.infer<typeof AzureSchema>;
 export type BedrockConfig =
@@ -182,6 +165,3 @@ export type ProviderSlug = z.infer<typeof ProviderSlugSchema>;
 export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
 export type Provider = z.infer<typeof ProviderSchema>;
 export type Providers = z.infer<typeof ProvidersSchema>;
-
-export type ModelConfig = z.infer<typeof ModelConfigSchema>;
-export type ModelsConfig = z.infer<typeof ModelsConfigSchema>;

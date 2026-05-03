@@ -2,18 +2,18 @@ import { redirect } from "react-router";
 
 import { api } from "~console/lib/service";
 
-async function defaultAgentMiddleware() {
-  const { data: agents } = await api.agents.get();
+async function defaultWorkspaceMiddleware() {
+  const { data: workspaces } = await api.workspaces.get();
 
-  // FUTURE fade-in the next page
-  // FUTURE remember last agent and branch in session storage
-  if (agents && agents.length > 0) {
-    throw redirect(`/agent/${agents[0].slug}/branch/main`);
+  if (workspaces && workspaces.length > 0) {
+    const preferred =
+      workspaces.find((w) => w.slug === "default") ?? workspaces[0];
+    throw redirect(`/w/${preferred.slug}`);
   }
-  throw redirect("/agent/create");
+  throw redirect("/w/create");
 }
 
-export const clientMiddleware = [defaultAgentMiddleware];
+export const clientMiddleware = [defaultWorkspaceMiddleware];
 
 export default function EmptyRoute() {
   return null;

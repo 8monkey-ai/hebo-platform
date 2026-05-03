@@ -1,4 +1,4 @@
-import { Cloud, KeyRound } from "lucide-react";
+import { Cloud } from "lucide-react";
 import { Link, useLocation } from "react-router";
 
 import {
@@ -9,11 +9,6 @@ import {
 
 const navItems = [
   {
-    label: "API Keys",
-    icon: KeyRound,
-    postfix: "/api-keys",
-  },
-  {
     label: "Providers",
     icon: Cloud,
     postfix: "/providers",
@@ -21,13 +16,12 @@ const navItems = [
 ] as const;
 
 type SidebarPlatformProps = {
-  activeAgent: { slug: string };
-  activeBranch: { slug: string };
+  activeWorkspace: { slug: string };
 };
 
-export const SidebarPlatform = ({ activeAgent, activeBranch }: SidebarPlatformProps) => {
+export const SidebarPlatform = ({ activeWorkspace }: SidebarPlatformProps) => {
   const { pathname } = useLocation();
-  const basePath = `/agent/${activeAgent.slug}/branch/${activeBranch.slug}`;
+  const basePath = `/w/${activeWorkspace.slug}`;
 
   return (
     <SidebarMenu>

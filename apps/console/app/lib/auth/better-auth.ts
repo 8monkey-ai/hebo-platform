@@ -28,7 +28,7 @@ const authClient = createAuthClient({
       schema: {
         team: {
           additionalFields: {
-            agentSlug: {
+            workspaceSlug: {
               type: "string",
             },
           },
@@ -102,14 +102,18 @@ export const authService: AuthService = {
     return true;
   },
 
-  async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
+  async generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS, workspace) {
     // Better Auth expects seconds.
     const expiresIn = Math.max(1, Math.floor(expiresInMs / 1000));
     const { data, error } = await authClient.apiKey.create({
       name,
       expiresIn,
       organizationId: shellStore.user?.organizationId,
-      metadata: { createdByUserId: shellStore.user?.userId },
+      metadata: {
+        createdByUserId: shellStore.user?.userId,
+        ...(workspace?.workspaceSlug && { workspaceSlug: workspace.workspaceSlug }),
+        ...(workspace?.workspaceId && { workspaceId: workspace.workspaceId }),
+      },
     });
     if (error) throw new Error(error.message);
     return data satisfies ApiKey;
@@ -122,14 +126,20 @@ export const authService: AuthService = {
     if (error) throw new Error(error.message);
   },
 
-  async listApiKeys() {
+  async listApiKeys(options) {
     const { data, error } = await authClient.apiKey.list({
       query: {
         organizationId: shellStore.user?.organizationId,
       },
     });
     if (error) throw new Error(error.message);
-    const keys: ApiKey[] = data.apiKeys.map((k) => ({
+    const filtered = options?.workspaceSlug
+      ? data.apiKeys.filter((k) => {
+          const metadata = k.metadata as { workspaceSlug?: string } | null | undefined;
+          return metadata?.workspaceSlug === options.workspaceSlug;
+        })
+      : data.apiKeys;
+    const keys: ApiKey[] = filtered.map((k) => ({
       id: k.id,
       name: k.name ?? "",
       createdAt: k.createdAt,

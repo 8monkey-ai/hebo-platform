@@ -11,7 +11,11 @@ import { getSecret } from "@hebo/shared-api/utils/secret";
 
 import { PrismaClient } from "~auth/generated/prisma/client";
 
-import { verifyApiKeyPlugin, type AuthWithApiKeyPlugin } from "./lib/api-key";
+import {
+  apiKeyAuthzPlugin,
+  verifyApiKeyPlugin,
+  type AuthWithApiKeyPlugin,
+} from "./lib/api-key";
 import {
   HAS_SMTP_CONFIG,
   sendOrganizationInvitationEmail,
@@ -134,7 +138,7 @@ export const auth = betterAuth({
       schema: {
         team: {
           additionalFields: {
-            agentSlug: {
+            workspaceSlug: {
               type: "string",
               input: true,
               required: true,
@@ -161,5 +165,6 @@ export const auth = betterAuth({
       },
     }),
     verifyApiKeyPlugin((): AuthWithApiKeyPlugin => auth as unknown as AuthWithApiKeyPlugin),
+    apiKeyAuthzPlugin(),
   ],
 });

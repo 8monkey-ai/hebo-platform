@@ -1,0 +1,100 @@
+import { UserName } from "~console/components/ui/UserName";
+import { Logo } from "~console/components/ui/Logo";
+import { GenerateApiKey } from "./api-key";
+import { kbs } from "~console/lib/utils";
+
+<Logo className="hidden md:flex" />
+
+<div className="text-base font-semibold">
+
+Hi <UserName />!
+
+</div>
+
+Start using our interactive playground ({kbs("mod+P")}) or code your first agent with our gateway.
+
+## Step 1: Create your first API key
+
+<GenerateApiKey />
+Copy your key once generated; for security reasons, you won’t be able to see it again.
+
+## Step 2: (Optional) Create a preset
+
+Open the [Presets](./presets) page to give a friendly slug to a canonical model. Presets are per-workspace and can shadow canonical model ids when calling the gateway.
+
+## Step 3: Connect using your favorite framework
+
+First, install the required package:
+
+<CodeGroup>
+```bash Vercel AI SDK
+npm install ai @ai-sdk/openai-compatible
+```
+
+```bash OpenAI SDK
+npm install openai
+```
+
+```bash Langchain
+pip install -U langchain-openai
+```
+</CodeGroup>
+
+Then, use them in your code:
+
+<CodeGroup>
+```ts Vercel AI SDK
+import { generateText } from "ai";
+import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+
+const hebo = createOpenAICompatible({
+  name: "hebo",
+  baseURL: "https://gateway.hebo.ai/v1",
+  apiKey: "<HEBO_API_KEY>", // Replace with your generated key
+});
+
+const { text } = await generateText({
+  model: hebo("<CANONICAL_MODEL_OR_PRESET_SLUG>"),
+  prompt: "Tell me a joke about monkeys."
+});
+
+console.log(text);
+```
+
+```ts OpenAI SDK
+import OpenAI from "openai";
+
+const hebo = new OpenAI({
+  baseURL: "https://gateway.hebo.ai/v1",
+  apiKey: "<HEBO_API_KEY>", // Replace with your generated key
+});
+
+const completion = await hebo.chat.completions.create({
+  model: '<CANONICAL_MODEL_OR_PRESET_SLUG>',
+  messages: [{
+    role: 'user',
+    content: 'Tell me a joke about monkeys.',
+  }],
+});
+
+console.log(completion.choices[0].message);
+```
+
+```python Langchain
+from langchain_openai import ChatOpenAI
+
+hebo = ChatOpenAI(
+  base_url="https://gateway.hebo.ai/v1",
+  api_key="<HEBO_API_KEY>", # Replace with your generated key
+  model="<CANONICAL_MODEL_OR_PRESET_SLUG>",
+)
+
+response = hebo.invoke("Tell me a joke about monkeys.")
+
+print(response.content)
+```
+</CodeGroup>
+
+## Next: Use your observability tools & evals as usual
+
+Continue to read our full documentation to [learn more](https://hebo.ai/docs/introduction)

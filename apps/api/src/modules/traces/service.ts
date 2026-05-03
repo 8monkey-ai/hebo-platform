@@ -60,8 +60,7 @@ async function getTraceColumnNames(greptimeDb: GreptimeDb) {
 export async function listTraces(
   greptimeDb: GreptimeDb,
   organizationId: string,
-  agentSlug: string,
-  branchSlug: string,
+  workspaceSlug: string | undefined,
   from: Date,
   to: Date,
   page: number,
@@ -73,10 +72,15 @@ export async function listTraces(
   const { metadataColumns } = await getTraceColumnNames(greptimeDb);
   const metadataKeys = metadataColumns.map((col) => col.slice(METADATA_PREFIX.length));
 
-  const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
+  const params: unknown[] = [organizationId, from, to];
   function addParam(value: unknown) {
     params.push(value);
     return `$${params.length}`;
+  }
+
+  let workspaceFilterSql = "";
+  if (workspaceSlug) {
+    workspaceFilterSql = ` AND "span_attributes.hebo.workspace.slug" = ${addParam(workspaceSlug)}`;
   }
 
   let metaFilterSql = "";
@@ -115,11 +119,10 @@ export async function listTraces(
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
     WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
-      AND "span_attributes.hebo.agent.slug" = $1
-      AND "span_attributes.hebo.branch.slug" = $2
-      AND "span_attributes.hebo.organization.id" = $3
-      AND "timestamp" >= $4
-      AND "timestamp" <= $5
+      AND "span_attributes.hebo.organization.id" = $1
+      AND "timestamp" >= $2
+      AND "timestamp" <= $3
+      ${workspaceFilterSql}
       ${metaFilterSql}
       ${statusFilterSql}
       ${operationFilterSql}
@@ -163,8 +166,7 @@ export async function listTraces(
 export async function getSpans(
   greptimeDb: GreptimeDb,
   organizationId: string,
-  agentSlug: string,
-  branchSlug: string,
+  workspaceSlug: string | undefined,
   traceId: string,
 ) {
   const { metadataColumns, optionalColumns } = await getTraceColumnNames(greptimeDb);
@@ -178,6 +180,17 @@ export async function getSpans(
       ? `"${escapeSqlIdentifier(column)}" AS "${escapeSqlIdentifier(alias)}"`
       : `NULL AS "${escapeSqlIdentifier(alias)}"`,
   ).join(",\n      ");
+
+  const params: unknown[] = [traceId, organizationId];
+  function addParam(value: unknown) {
+    params.push(value);
+    return `$${params.length}`;
+  }
+
+  let workspaceFilterSql = "";
+  if (workspaceSlug) {
+    workspaceFilterSql = ` AND "span_attributes.hebo.workspace.slug" = ${addParam(workspaceSlug)}`;
+  }
 
   const queryText = `
     SELECT
@@ -198,25 +211,19 @@ export async function getSpans(
       "span_attributes.gen_ai.usage.output_tokens" AS output_tokens,
       "span_attributes.gen_ai.usage.total_tokens" AS total_tokens,
       ${optionalColumnsSql},
-      "span_attributes.hebo.agent.slug",
-      "span_attributes.hebo.branch.slug",
+      "span_attributes.hebo.workspace.slug",
+      "span_attributes.hebo.preset.slug",
       "span_attributes.hebo.organization.id"
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
     WHERE "trace_id" = $1
       AND "span_attributes.hebo.organization.id" = $2
-      AND "span_attributes.hebo.agent.slug" = $3
-      AND "span_attributes.hebo.branch.slug" = $4
+      ${workspaceFilterSql}
       AND "span_attributes.gen_ai.operation.name" IS NOT NULL
     ORDER BY "timestamp" ASC
   `;
 
-  const rows = await greptimeDb.unsafe<Record<string, unknown>[]>(queryText, [
-    traceId,
-    organizationId,
-    agentSlug,
-    branchSlug,
-  ]);
+  const rows = await greptimeDb.unsafe<Record<string, unknown>[]>(queryText, params);
 
   const result = [];
   for (const row of rows) {

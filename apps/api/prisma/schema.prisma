@@ -16,11 +16,12 @@ datasource db {
   provider = "postgresql"
 }
 
-model agents {
-  id       String     @id @default(uuid(7)) @db.Uuid
-  slug     String     @unique
-  name     String
-  branches branches[]
+model workspaces {
+  id      String    @id @default(uuid(7)) @db.Uuid
+  slug    String
+  name    String
+  team_id String
+  presets presets[]
 
   // Common audit fields — injected by Prisma extension.
   // @default("") keeps create inputs optional, results non-nullable.
@@ -31,17 +32,17 @@ model agents {
   deleted_by      String?
   deleted_at      DateTime?
   organization_id String    @default("")
-  team_id         String
+
+  @@unique([organization_id, slug])
 }
 
-model branches {
-  id         String @id @default(uuid(7)) @db.Uuid
-  slug       String
-  agent_slug String
-  name       String
-  /// [ModelConfig]
-  models     Json[] @default([])
-  agent      agents @relation(fields: [agent_slug], references: [slug], onDelete: Cascade)
+model presets {
+  id           String     @id @default(uuid(7)) @db.Uuid
+  workspace_id String     @db.Uuid
+  name         String
+  slug         String
+  model        String
+  workspace    workspaces @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
 
   // Common audit fields — injected by Prisma extension.
   // @default("") keeps create inputs optional, results non-nullable.
@@ -53,7 +54,8 @@ model branches {
   deleted_at      DateTime?
   organization_id String    @default("")
 
-  @@unique([agent_slug, slug])
+  @@unique([workspace_id, slug])
+  @@index([organization_id, slug])
 }
 
 model provider_configs {

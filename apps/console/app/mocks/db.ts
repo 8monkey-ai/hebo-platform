@@ -1,14 +1,15 @@
 import { Collection } from "@msw/data";
 import { z } from "zod";
 
-const agentSchema = z.object({
+const workspaceSchema = z.object({
   // Core fields
   slug: z.string(),
   name: z.string(),
+  team_id: z.string().default("team-dummy"),
 
   // Relations
-  get branches() {
-    return z.array(branchSchema);
+  get presets() {
+    return z.array(presetSchema);
   },
 
   // Audit fields
@@ -18,14 +19,15 @@ const agentSchema = z.object({
   updated_at: z.date().default(() => new Date()),
 });
 
-const branchSchema = z.object({
+const presetSchema = z.object({
   // Core fields
+  id: z.string().default(() => crypto.randomUUID()),
   slug: z.string(),
   name: z.string(),
-  models: z.array(z.unknown()),
+  model: z.string(),
 
   // Relations
-  agent_slug: z.string(),
+  workspace_id: z.string(),
 
   // Audit fields
   created_by: z.string().default("Dummy User"),
@@ -47,17 +49,17 @@ const providerSchema = z.object({
 });
 
 export const createDb = () => {
-  const agents = new Collection({ schema: agentSchema });
-  const branches = new Collection({ schema: branchSchema });
+  const workspaces = new Collection({ schema: workspaceSchema });
+  const presets = new Collection({ schema: presetSchema });
   const providers = new Collection({ schema: providerSchema });
 
-  agents.defineRelations(({ many }) => ({
-    branches: many(branches, { onDelete: "cascade" }),
+  workspaces.defineRelations(({ many }) => ({
+    presets: many(presets, { onDelete: "cascade" }),
   }));
 
   return {
-    agents,
-    branches,
+    workspaces,
+    presets,
     providers,
   } as const;
 };

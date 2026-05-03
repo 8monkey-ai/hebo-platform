@@ -51,9 +51,9 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
             organization_id: organizationId,
           };
 
-          if (model === "agents" && args.data.branches?.create) {
-            const existing = args.data.branches.create;
-            args.data.branches.create = Array.isArray(existing)
+          if (model === "workspaces" && args.data.presets?.create) {
+            const existing = args.data.presets.create;
+            args.data.presets.create = Array.isArray(existing)
               ? existing.map((item) => ({
                   ...item,
                   created_by: userId,

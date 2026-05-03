@@ -1,8 +1,14 @@
+export type ApiKeyWorkspaceRef = { workspaceSlug: string; workspaceId?: string };
+
 export interface AuthService {
   ensureSignedIn(): Promise<boolean>;
-  generateApiKey(name: string, expiresInMs?: number): Promise<ApiKey>;
+  generateApiKey(
+    name: string,
+    expiresInMs?: number,
+    workspace?: ApiKeyWorkspaceRef,
+  ): Promise<ApiKey>;
   revokeApiKey(apiKeyId: string): Promise<void>;
-  listApiKeys(): Promise<Array<ApiKey>>;
+  listApiKeys(options?: { workspaceSlug?: string }): Promise<Array<ApiKey>>;
   signInWithOAuth(provider: string): Promise<void>;
   sendMagicLinkEmail(email: string): Promise<string>;
   signInWithMagicLink(code: string, email: string): Promise<void>;

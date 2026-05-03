@@ -12,6 +12,7 @@ const apiKeys = new Collection({
     key: z.string(),
     createdAt: z.date(),
     expiresAt: z.date(),
+    workspaceSlug: z.string().optional(),
   }),
 });
 
@@ -84,13 +85,14 @@ export const authService = {
     return Promise.resolve(true);
   },
 
-  generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS) {
+  generateApiKey(name, expiresInMs = DEFAULT_EXPIRATION_MS, workspace) {
     const now = new Date();
     return apiKeys.create({
       name,
       key: crypto.randomUUID(),
       createdAt: now,
       expiresAt: new Date(now.getTime() + expiresInMs),
+      workspaceSlug: workspace?.workspaceSlug,
     });
   },
 
@@ -99,8 +101,12 @@ export const authService = {
     return Promise.resolve();
   },
 
-  listApiKeys() {
-    return Promise.resolve(apiKeys.findMany());
+  listApiKeys(options) {
+    const all = apiKeys.findMany();
+    const filtered = options?.workspaceSlug
+      ? all.filter((k) => k.workspaceSlug === options.workspaceSlug)
+      : all;
+    return Promise.resolve(filtered);
   },
 
   signInWithOAuth() {
