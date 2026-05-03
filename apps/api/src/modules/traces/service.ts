@@ -23,6 +23,7 @@ const OPTIONAL_SPAN_COLUMNS = [
   { column: "span_attributes.gen_ai.request.reasoning.effort", alias: "reasoning_effort" },
   { column: "span_attributes.gen_ai.request.reasoning.enabled", alias: "reasoning_enabled" },
   { column: "span_attributes.gen_ai.request.reasoning.max_tokens", alias: "reasoning_max_tokens" },
+  { column: "span_attributes.hebo.preset.slug", alias: "span_attributes.hebo.preset.slug" },
 ] as const;
 
 const traceColumnsCache = new LRUCache<
@@ -212,7 +213,6 @@ export async function getSpans(
       "span_attributes.gen_ai.usage.total_tokens" AS total_tokens,
       ${optionalColumnsSql},
       "span_attributes.hebo.workspace.slug",
-      "span_attributes.hebo.preset.slug",
       "span_attributes.hebo.organization.id"
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
