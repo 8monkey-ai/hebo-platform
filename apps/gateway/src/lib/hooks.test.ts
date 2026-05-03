@@ -423,49 +423,23 @@ describe("injectModelParameters", () => {
     });
   });
 
-  describe("stop", () => {
-    it("injects stop for chat as-is (string)", () => {
+  describe("cache_control", () => {
+    it("injects cache_control when missing from body", () => {
       const body: Record<string, unknown> = {};
-      injectModelParameters(body, { stop: "\n" }, "chat");
-      expect(body.stop).toBe("\n");
+      injectModelParameters(body, { cache_control: { type: "ephemeral" } }, "chat");
+      expect(body.cache_control).toEqual({ type: "ephemeral" });
     });
 
-    it("injects stop for chat as-is (array)", () => {
+    it("injects cache_control with ttl", () => {
       const body: Record<string, unknown> = {};
-      injectModelParameters(body, { stop: ["\n", "END"] }, "chat");
-      expect(body.stop).toEqual(["\n", "END"]);
+      injectModelParameters(body, { cache_control: { type: "ephemeral", ttl: "1h" } }, "messages");
+      expect(body.cache_control).toEqual({ type: "ephemeral", ttl: "1h" });
     });
 
-    it("does not override client-provided stop for chat", () => {
-      const body: Record<string, unknown> = { stop: "STOP" };
-      injectModelParameters(body, { stop: "\n" }, "chat");
-      expect(body.stop).toBe("STOP");
-    });
-
-    it("translates stop to stop_sequences for messages (string)", () => {
-      const body: Record<string, unknown> = {};
-      injectModelParameters(body, { stop: "\n" }, "messages");
-      expect(body.stop_sequences).toEqual(["\n"]);
-      expect(body.stop).toBeUndefined();
-    });
-
-    it("translates stop to stop_sequences for messages (array)", () => {
-      const body: Record<string, unknown> = {};
-      injectModelParameters(body, { stop: ["\n", "END"] }, "messages");
-      expect(body.stop_sequences).toEqual(["\n", "END"]);
-    });
-
-    it("does not override client-provided stop_sequences for messages", () => {
-      const body: Record<string, unknown> = { stop_sequences: ["STOP"] };
-      injectModelParameters(body, { stop: "\n" }, "messages");
-      expect(body.stop_sequences).toEqual(["STOP"]);
-    });
-
-    it("does not inject stop for responses", () => {
-      const body: Record<string, unknown> = {};
-      injectModelParameters(body, { stop: "\n" }, "responses");
-      expect(body.stop).toBeUndefined();
-      expect(body.stop_sequences).toBeUndefined();
+    it("does not override client-provided cache_control", () => {
+      const body: Record<string, unknown> = { cache_control: { type: "ephemeral", ttl: "24h" } };
+      injectModelParameters(body, { cache_control: { type: "ephemeral", ttl: "5m" } }, "chat");
+      expect(body.cache_control).toEqual({ type: "ephemeral", ttl: "24h" });
     });
   });
 });

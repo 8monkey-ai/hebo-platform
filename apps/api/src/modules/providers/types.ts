@@ -159,7 +159,6 @@ export const ModelParametersSchema = z.object({
   frequency_penalty: z.number().min(-2).max(2).optional(),
   presence_penalty: z.number().min(-2).max(2).optional(),
   seed: z.number().int().optional(),
-  stop: z.union([z.string(), z.array(z.string())]).optional(),
   reasoning: z
     .object({
       enabled: z.boolean().optional(),
@@ -170,6 +169,12 @@ export const ModelParametersSchema = z.object({
     })
     .optional(),
   service_tier: z.enum(["default", "auto", "flex", "scale", "priority"]).optional(),
+  cache_control: z
+    .object({
+      type: z.literal("ephemeral"),
+      ttl: z.enum(["5m", "1h", "24h"]).optional(),
+    })
+    .optional(),
 });
 
 export const ModelConfigSchema = z.object({

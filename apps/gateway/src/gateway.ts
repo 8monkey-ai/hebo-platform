@@ -15,8 +15,6 @@ import { trace } from "@opentelemetry/api";
 
 import { getLogger } from "@hebo/shared-api/lib/logger";
 
-import type { ModelParameters } from "~api/modules/providers/types";
-
 import {
   bestEffortResolveModelOnError,
   injectDefaultCacheControl,
@@ -37,25 +35,17 @@ export const BASE_PATH = "/v1";
 
 const SECRETS = await loadProviderSecrets();
 
-const MODEL_DEFAULTS: Record<string, ModelParameters> = {
-  "anthropic/claude-opus-4.7": { temperature: 1, reasoning: { effort: "high" } },
-  "anthropic/claude-opus-4.6": { temperature: 1, reasoning: { effort: "high" } },
-  "google/gemini-3-flash-preview": { temperature: 0.9, reasoning: { effort: "high" } },
-  "google/gemini-3.1-pro-preview": { temperature: 0.9, reasoning: { effort: "high" } },
-};
-
-const withMeta = (modelId: string) => ({
+const withTier = (modelId: string) => ({
   additionalProperties: {
     free: SECRETS.FREE_MODEL_IDS.has(modelId),
     requiresByok: SECRETS.ENFORCE_BYOK && !SECRETS.FREE_MODEL_IDS.has(modelId),
-    ...(modelId in MODEL_DEFAULTS && { defaults: MODEL_DEFAULTS[modelId] }),
   },
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const applyMeta = (preset: (override?: any) => ModelCatalog): ModelCatalog => {
+const tiered = (preset: (override?: any) => ModelCatalog): ModelCatalog => {
   const modelId = Object.keys(preset({}))[0];
-  return preset(withMeta(modelId));
+  return preset(withTier(modelId));
 };
 
 export const gw = gateway({
@@ -108,20 +98,20 @@ export const gw = gateway({
   },
 
   models: defineModelCatalog(
-    claude.all.map(applyMeta),
-    gpt.all.map(applyMeta),
-    gptOss.all.map(applyMeta),
-    textEmbeddings.all.map(applyMeta),
-    gemini.all.map(applyMeta),
-    gemma.all.map(applyMeta),
-    nova.all.map(applyMeta),
-    voyage.all.map(applyMeta),
-    deepseek.all.map(applyMeta),
-    grok.all.map(applyMeta),
-    qwen.all.map(applyMeta),
-    minimax.all.map(applyMeta),
-    glm.all.map(applyMeta),
-    kimi.all.map(applyMeta),
+    claude.all.map(tiered),
+    gpt.all.map(tiered),
+    gptOss.all.map(tiered),
+    textEmbeddings.all.map(tiered),
+    gemini.all.map(tiered),
+    gemma.all.map(tiered),
+    nova.all.map(tiered),
+    voyage.all.map(tiered),
+    deepseek.all.map(tiered),
+    grok.all.map(tiered),
+    qwen.all.map(tiered),
+    minimax.all.map(tiered),
+    glm.all.map(tiered),
+    kimi.all.map(tiered),
   ),
 
   hooks: {

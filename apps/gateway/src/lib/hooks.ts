@@ -5,7 +5,6 @@ import {
   CANONICAL_MODEL_IDS,
   GatewayError,
   type BeforeHookContext,
-  type CatalogModel,
   type OnErrorHookContext,
   type OnRequestHookContext,
   type ResolveModelHookContext,
@@ -22,13 +21,6 @@ import { createProvider } from "./provider";
 type PrismaClient = ReturnType<typeof createPrismaClient>;
 
 const canonicalModelIds = new Set<string>(CANONICAL_MODEL_IDS);
-
-function readMeta(model?: CatalogModel) {
-  const p = model?.additionalProperties as
-    | { free?: boolean; requiresByok?: boolean; defaults?: ModelParameters }
-    | undefined;
-  return { free: p?.free, requiresByok: p?.requiresByok, defaults: p?.defaults ?? {} };
-}
 
 const configCache = new LRUCache<string, string>({
   max: 100,
@@ -51,12 +43,10 @@ export function injectModelParameters(
   body.presence_penalty ??= params.presence_penalty;
   body.seed ??= params.seed;
   body.service_tier ??= params.service_tier;
+  body.cache_control ??= params.cache_control;
 
   if (operation === "messages") {
     body.max_tokens ??= params.max_tokens;
-    if (params.stop !== undefined) {
-      body.stop_sequences ??= Array.isArray(params.stop) ? params.stop : [params.stop];
-    }
     if (params.reasoning && !body.thinking && params.reasoning.enabled !== false) {
       const thinking: Record<string, unknown> = {
         type: params.reasoning.enabled ? "enabled" : "adaptive",
@@ -72,7 +62,6 @@ export function injectModelParameters(
   } else {
     if (operation === "chat") {
       body.max_completion_tokens ??= params.max_tokens;
-      body.stop ??= params.stop;
     } else {
       body.max_output_tokens ??= params.max_tokens;
     }
@@ -132,16 +121,13 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
 
   if (canonicalModelIds.has(aliasPath)) {
     const modelConfig = models[aliasPath];
-    const { free, requiresByok, defaults } = readMeta(modelConfig);
     state.modelConfig = {
       type: aliasPath,
       // Currently, we only support routing to the first provider.
       customProviderSlug: modelConfig?.providers[0],
-      free,
-      requiresByok,
+      free: modelConfig?.additionalProperties?.free as boolean | undefined,
+      requiresByok: modelConfig?.additionalProperties?.requiresByok as boolean | undefined,
     };
-
-    injectModelParameters(ctx.body, defaults, ctx.operation);
     return aliasPath;
   }
 
@@ -166,17 +152,18 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
   }
 
   const catalogModel = models[model.type as keyof typeof models];
-  const { free, requiresByok, defaults } = readMeta(catalogModel);
   state.modelConfig = {
     type: model.type,
     // Currently, we only support routing to the first provider.
     customProviderSlug: model.routing?.only?.[0],
-    free,
-    requiresByok,
+    free: catalogModel?.additionalProperties?.free as boolean | undefined,
+    requiresByok: catalogModel?.additionalProperties?.requiresByok as boolean | undefined,
   };
 
-  const params = model.parameters ? { ...defaults, ...model.parameters } : defaults;
-  injectModelParameters(ctx.body, params, ctx.operation);
+  if (model.parameters) {
+    injectModelParameters(ctx.body, model.parameters, ctx.operation);
+  }
+
   return model.type;
 }
 
