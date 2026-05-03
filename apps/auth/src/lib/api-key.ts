@@ -1,6 +1,6 @@
 import type { apiKey } from "@better-auth/api-key";
 import type { Auth, BetterAuthPlugin } from "better-auth";
-import { APIError, createAuthEndpoint, createAuthMiddleware } from "better-auth/api";
+import { APIError, createAuthEndpoint } from "better-auth/api";
 import { z } from "zod";
 
 export type AuthWithApiKeyPlugin = Auth<{
@@ -34,69 +34,3 @@ export const verifyApiKeyPlugin = (getAuth: () => AuthWithApiKeyPlugin) => {
 };
 
 export type VerifyApiKeyPlugin = typeof verifyApiKeyPlugin;
-
-/**
- * Enforces that only organization `owner` or `admin` members may create API keys.
- * The check applies to the caller (the signed-in user), not the key itself.
- */
-export const apiKeyAuthzPlugin = () => {
-  return {
-    id: "api-key-authz",
-    hooks: {
-      before: [
-        {
-          matcher: (ctx) => ctx.path === "/api-key/create",
-          handler: createAuthMiddleware(async (ctx) => {
-            const session = (ctx as unknown as {
-              context: {
-                session?: {
-                  user: { id: string };
-                  session: { activeOrganizationId?: string };
-                };
-                adapter: {
-                  findOne: <T>(args: {
-                    model: string;
-                    where: Array<{ field: string; value: string }>;
-                  }) => Promise<T | null>;
-                };
-              };
-              body?: { organizationId?: string };
-            }).context.session;
-            if (!session) throw new APIError("UNAUTHORIZED");
-
-            const body = (ctx as unknown as { body?: { organizationId?: string } }).body;
-            const organizationId =
-              body?.organizationId ?? session.session.activeOrganizationId;
-            if (!organizationId) {
-              throw new APIError("FORBIDDEN", { message: "No active organization" });
-            }
-
-            const adapter = (ctx as unknown as {
-              context: {
-                adapter: {
-                  findOne: <T>(args: {
-                    model: string;
-                    where: Array<{ field: string; value: string }>;
-                  }) => Promise<T | null>;
-                };
-              };
-            }).context.adapter;
-
-            const member = await adapter.findOne<{ role: string }>({
-              model: "member",
-              where: [
-                { field: "userId", value: session.user.id },
-                { field: "organizationId", value: organizationId },
-              ],
-            });
-            if (!member || !["owner", "admin"].includes(member.role)) {
-              throw new APIError("FORBIDDEN", {
-                message: "Only organization owners or admins can create API keys",
-              });
-            }
-          }),
-        },
-      ],
-    },
-  } satisfies BetterAuthPlugin;
-};

@@ -1,8 +1,9 @@
 import { useForm } from "@conform-to/react";
 import { getZodConstraint } from "@conform-to/zod/v4";
 import { Brain, Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
+import slugify from "slugify";
 import { useSnapshot } from "valtio";
 
 import {
@@ -121,15 +122,29 @@ function CreatePresetCard() {
   const fetcher = useFetcher<typeof clientAction>();
   const { models } = useSnapshot(shellStore);
   const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [slug, setSlug] = useState("");
+  const [slugEdited, setSlugEdited] = useState(false);
+
+  const submission =
+    fetcher.state === "idle" && fetcher.data && "submission" in fetcher.data
+      ? fetcher.data.submission
+      : undefined;
 
   const [form, fields] = useForm<PresetCreateFormValues>({
-    lastResult:
-      fetcher.state === "idle" && fetcher.data && "submission" in fetcher.data
-        ? fetcher.data.submission
-        : undefined,
+    lastResult: submission,
     constraint: getZodConstraint(presetCreateFormSchema),
   });
   useFormErrorToast(form.allErrors);
+
+  useEffect(() => {
+    if (submission?.status === "success") {
+      setOpen(false);
+      setName("");
+      setSlug("");
+      setSlugEdited(false);
+    }
+  }, [submission]);
 
   if (!open) {
     return (
@@ -159,14 +174,33 @@ function CreatePresetCard() {
             <Field name={fields.name.name}>
               <FieldLabel>Name</FieldLabel>
               <FieldControl>
-                <Input placeholder="My fast preset" autoComplete="off" />
+                <Input
+                  placeholder="My fast preset"
+                  autoComplete="off"
+                  value={name}
+                  onChange={(e) => {
+                    const next = e.target.value;
+                    setName(next);
+                    if (!slugEdited) {
+                      setSlug(slugify(next, { lower: true, strict: true }));
+                    }
+                  }}
+                />
               </FieldControl>
               <FieldError />
             </Field>
             <Field name={fields.slug.name}>
               <FieldLabel>Slug</FieldLabel>
               <FieldControl>
-                <Input placeholder="my-fast-preset" autoComplete="off" />
+                <Input
+                  placeholder="my-fast-preset"
+                  autoComplete="off"
+                  value={slug}
+                  onChange={(e) => {
+                    setSlug(e.target.value);
+                    setSlugEdited(true);
+                  }}
+                />
               </FieldControl>
               <FieldError />
             </Field>

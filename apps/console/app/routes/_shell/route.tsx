@@ -1,6 +1,11 @@
 import { XCircle, SquareChevronRight } from "lucide-react";
 import { useRef, useEffect } from "react";
-import { Outlet, unstable_useRoute as useRoute, useLocation } from "react-router";
+import {
+  Outlet,
+  unstable_useRoute as useRoute,
+  useLocation,
+  type ShouldRevalidateFunctionArgs,
+} from "react-router";
 import { Toaster } from "sonner";
 import { useSnapshot } from "valtio";
 
@@ -70,7 +75,14 @@ export async function clientLoader() {
   return { workspaces: workspaces?.data ?? [] };
 }
 
-export { revalidateOnSuccessfulAction as shouldRevalidate };
+export function shouldRevalidate(args: ShouldRevalidateFunctionArgs) {
+  // Revalidate workspace list when navigating to a different workspace (covers
+  // the post-create redirect into /w/:newSlug).
+  const currentSlug = (args.currentParams as { workspaceSlug?: string }).workspaceSlug;
+  const nextSlug = (args.nextParams as { workspaceSlug?: string }).workspaceSlug;
+  if (currentSlug !== nextSlug) return true;
+  return revalidateOnSuccessfulAction(args);
+}
 
 export default function ShellLayout({ loaderData: { workspaces } }: Route.ComponentProps) {
   const { user, organizations } = useSnapshot(shellStore);

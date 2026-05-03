@@ -32,6 +32,14 @@ export async function clientAction({ request, params }: Route.ClientActionArgs) 
           model: submission.value.model,
         });
       if (result.error) {
+        if (result.error.status === 409) {
+          return {
+            intent,
+            submission: submission.reply({
+              fieldErrors: { slug: [parseError(result.error.value).message] },
+            }),
+          };
+        }
         return {
           intent,
           submission: submission.reply({ formErrors: [parseError(result.error.value).message] }),

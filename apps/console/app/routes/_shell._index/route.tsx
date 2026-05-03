@@ -10,7 +10,12 @@ async function defaultWorkspaceMiddleware() {
       workspaces.find((w) => w.slug === "default") ?? workspaces[0];
     throw redirect(`/w/${preferred.slug}`);
   }
-  throw redirect("/w/create");
+
+  const { data: created } = await api.workspaces.post({
+    name: "Default Workspace",
+    slug: "default",
+  });
+  throw redirect(`/w/${created?.slug ?? "default"}`);
 }
 
 export const clientMiddleware = [defaultWorkspaceMiddleware];

@@ -12,7 +12,6 @@ import { getSecret } from "@hebo/shared-api/utils/secret";
 import { PrismaClient } from "~auth/generated/prisma/client";
 
 import {
-  apiKeyAuthzPlugin,
   verifyApiKeyPlugin,
   type AuthWithApiKeyPlugin,
 } from "./lib/api-key";
@@ -165,6 +164,5 @@ export const auth = betterAuth({
       },
     }),
     verifyApiKeyPlugin((): AuthWithApiKeyPlugin => auth as unknown as AuthWithApiKeyPlugin),
-    apiKeyAuthzPlugin(),
   ],
 });

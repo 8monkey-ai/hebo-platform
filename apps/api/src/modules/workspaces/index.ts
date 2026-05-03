@@ -30,7 +30,7 @@ export const workspacesModule = new Elysia({
   .post(
     "/",
     async ({ body, prismaClient, organizationId, userId, authClient }) => {
-      const workspaceSlug = body.slug ?? slugFromString(body.name, 3);
+      const workspaceSlug = body.slug ?? slugFromString(body.name);
 
       const { data: team, error: createTeamError } = await authClient!.organization.createTeam({
         name: `${body.name}'s Team`,
