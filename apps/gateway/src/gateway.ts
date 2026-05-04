@@ -10,7 +10,6 @@ import { gpt, gptOss, textEmbeddings } from "@hebo-ai/gateway/models/openai";
 import { voyage } from "@hebo-ai/gateway/models/voyage";
 import { grok } from "@hebo-ai/gateway/models/xai";
 import { glm } from "@hebo-ai/gateway/models/zai";
-import { instrumentFetch } from "@hebo-ai/gateway/telemetry";
 import { trace } from "@opentelemetry/api";
 
 import { getLogger } from "@hebo/shared-api/lib/logger";
@@ -28,8 +27,6 @@ import { createProvider, loadProviderSecrets } from "./lib/provider";
 const _fetch = globalThis.fetch;
 // @ts-expect-error -- Bun-specific `timeout` option not in standard RequestInit
 globalThis.fetch = ((input, init) => _fetch(input, { ...init, timeout: false })) as typeof fetch;
-
-instrumentFetch("full");
 
 export const BASE_PATH = "/v1";
 
