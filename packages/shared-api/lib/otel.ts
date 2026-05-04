@@ -99,8 +99,8 @@ registerInstrumentations({
 
 export const getOtelConfig = (
   serviceName: string,
-  additionalRequestHeaders?: string[],
-  additionalResponseHeaders?: string[],
+  additionalRequestHeaders?: readonly string[],
+  additionalResponseHeaders?: readonly string[],
 ): ElysiaOpenTelemetryOptions => {
   return {
     serviceName,
