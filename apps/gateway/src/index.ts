@@ -12,6 +12,7 @@ import { ModelListSchema, ModelSchema } from "@hebo-ai/gateway/endpoints/models"
 import { ResponsesBodySchema, ResponsesSchema } from "@hebo-ai/gateway/endpoints/responses";
 import { AnthropicErrorSchema } from "@hebo-ai/gateway/errors/anthropic";
 import { OpenAIErrorSchema } from "@hebo-ai/gateway/errors/openai";
+import { FORWARD_HEADER_ALLOWLIST, RESPONSE_HEADER_ALLOWLIST } from "@hebo-ai/gateway/utils";
 import { Elysia } from "elysia";
 
 import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";
@@ -34,7 +35,11 @@ const BASE_URL = process.env.BASE_URL ?? "http://localhost";
 
 export const createGateway = () =>
   new Elysia()
-    .use(opentelemetry(getOtelConfig("hebo-gateway")))
+    .use(
+      opentelemetry(
+        getOtelConfig("hebo-gateway", FORWARD_HEADER_ALLOWLIST, RESPONSE_HEADER_ALLOWLIST),
+      ),
+    )
     .use(logging(getLogger("hebo-gateway")))
     // Root route ("/") is unauthenticated and unprotected for health checks.
     .get("/", () => "🐵 Hebo AI Gateway says hello!")

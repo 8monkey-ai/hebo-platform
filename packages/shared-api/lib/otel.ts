@@ -97,12 +97,16 @@ registerInstrumentations({
   ],
 });
 
-export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
+export const getOtelConfig = (
+  serviceName: string,
+  additionalRequestHeaders?: readonly string[],
+  additionalResponseHeaders?: readonly string[],
+): ElysiaOpenTelemetryOptions => {
   return {
     serviceName,
     headersToSpanAttributes: {
-      requestHeaders: ALLOWED_REQUEST_HEADERS,
-      responseHeaders: ALLOWED_RESPONSE_HEADERS,
+      requestHeaders: [...ALLOWED_REQUEST_HEADERS, ...(additionalRequestHeaders ?? [])],
+      responseHeaders: [...ALLOWED_RESPONSE_HEADERS, ...(additionalResponseHeaders ?? [])],
     },
     metricReader: new PeriodicExportingMetricReader({
       exporter: new OTLPMetricExporter({
