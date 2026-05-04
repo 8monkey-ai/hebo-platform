@@ -11,11 +11,10 @@ function makeCtx(overrides: {
   resolvedModelId?: string;
   free?: boolean;
   requiresByok?: boolean;
-  customProviderSlug?: string;
   organizationId?: string;
   modelProviders?: string[];
   providerConfigsResult?: unknown;
-  bedrockProvider?: ProviderV3 | undefined;
+  providers?: Partial<Record<string, ProviderV3 | undefined>>;
 }) {
   return {
     modelId: overrides.modelId,
@@ -34,9 +33,7 @@ function makeCtx(overrides: {
         providers: overrides.modelProviders ?? ["anthropic", "bedrock", "vertex"],
       },
     },
-    providers: {
-      bedrock: overrides.bedrockProvider,
-    },
+    providers: overrides.providers ?? { bedrock: {} as ProviderV3 },
     state: {
       prismaClient: {
         provider_configs: {
@@ -46,7 +43,6 @@ function makeCtx(overrides: {
       organizationId: overrides.organizationId ?? "org-1",
       modelConfig: {
         type: overrides.resolvedModelId ?? overrides.modelId,
-        customProviderSlug: overrides.customProviderSlug,
         free: overrides.free,
         requiresByok: overrides.requiresByok,
       },
@@ -56,7 +52,7 @@ function makeCtx(overrides: {
 
 describe("selectProviderWithByokFallback", () => {
   describe("requiresByok: true", () => {
-    it("throws 402 BYOK_REQUIRED for non-free model without custom provider", async () => {
+    it("throws 402 BYOK_REQUIRED for non-free model without any BYOK provider configured", async () => {
       const ctx = makeCtx({
         modelId: "anthropic/claude-opus-4.6",
         free: false,
@@ -72,34 +68,24 @@ describe("selectProviderWithByokFallback", () => {
       }
     });
 
-    it("throws 402 BYOK_REQUIRED for non-free model with custom provider slug but no credentials", async () => {
+    it("does not throw for free model — falls back to platform provider", async () => {
       const ctx = makeCtx({
-        modelId: "anthropic/claude-opus-4.6",
-        free: false,
+        modelId: "openai/gpt-oss-20b",
+        // org-${new Date().getTime()} avoids cache collision with the previous test
+        organizationId: `org-${Date.now()}-free`,
+        free: true,
         requiresByok: true,
-        customProviderSlug: "bedrock",
       });
-      try {
-        await selectProviderWithByokFallback(ctx);
-        expect.unreachable("should have thrown");
-      } catch (e) {
-        expect(e).toBeInstanceOf(GatewayError);
-        expect((e as GatewayError).status).toBe(402);
-        expect((e as GatewayError).statusText).toBe("BYOK_REQUIRED");
-      }
-    });
-
-    it("does not throw for free model without custom provider", async () => {
-      const ctx = makeCtx({ modelId: "openai/gpt-oss-20b", free: true, requiresByok: true });
       const result = await selectProviderWithByokFallback(ctx);
       expect(result).toBe(ctx.providers.bedrock);
     });
   });
 
   describe("requiresByok: false", () => {
-    it("does not throw for non-free model without custom provider", async () => {
+    it("falls back to the first platform-default provider in catalog order", async () => {
       const ctx = makeCtx({
         modelId: "anthropic/claude-opus-4.6",
+        organizationId: `org-${Date.now()}-ok`,
         free: false,
         requiresByok: false,
       });
@@ -107,35 +93,14 @@ describe("selectProviderWithByokFallback", () => {
       expect(result).toBe(ctx.providers.bedrock);
     });
 
-    it("returns undefined when bedrock is not supported by the model", async () => {
+    it("returns undefined when no catalog provider has platform credentials", async () => {
       const ctx = makeCtx({
         modelId: "google/gemini-3.1-pro-preview",
+        organizationId: `org-${Date.now()}-none`,
         free: false,
         requiresByok: false,
         modelProviders: ["vertex"],
-      });
-      const result = await selectProviderWithByokFallback(ctx);
-      expect(result).toBeUndefined();
-    });
-
-    it("returns undefined when bedrock is not configured", async () => {
-      const ctx = makeCtx({
-        modelId: "anthropic/claude-opus-4.6",
-        free: false,
-        requiresByok: false,
-        bedrockProvider: undefined,
-      });
-      const result = await selectProviderWithByokFallback(ctx);
-      expect(result).toBeUndefined();
-    });
-
-    it("returns undefined when a custom provider slug is set but unresolved", async () => {
-      const ctx = makeCtx({
-        modelId: "agent/main/copilot",
-        resolvedModelId: "anthropic/claude-opus-4.6",
-        free: false,
-        requiresByok: false,
-        customProviderSlug: "anthropic",
+        providers: {},
       });
       const result = await selectProviderWithByokFallback(ctx);
       expect(result).toBeUndefined();

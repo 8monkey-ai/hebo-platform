@@ -71,8 +71,7 @@ function scrollDemoSpanAttributes(
     ...Object.fromEntries(
       Object.entries(metadata).map(([key, value]) => [`gen_ai.request.metadata.${key}`, value]),
     ),
-    "hebo.agent.slug": "my-agent",
-    "hebo.branch.slug": "main",
+    "hebo.workspace.slug": "default",
   };
 }
 
@@ -275,8 +274,7 @@ const traceDetails = [
       "gen_ai.request.metadata.session_id": "sess_abc123",
       "gen_ai.request.metadata.environment": "production",
       "gen_ai.request.metadata.user_id": "usr_456",
-      "hebo.agent.slug": "my-agent",
-      "hebo.branch.slug": "main",
+      "hebo.workspace.slug": "default",
     },
   },
   {
@@ -343,8 +341,7 @@ const traceDetails = [
       "gen_ai.response.finish_reasons": ["stop"],
       "gen_ai.request.metadata.session_id": "sess_def456",
       "gen_ai.request.metadata.environment": "staging",
-      "hebo.agent.slug": "my-agent",
-      "hebo.branch.slug": "main",
+      "hebo.workspace.slug": "default",
     },
   },
   {
@@ -393,8 +390,7 @@ const traceDetails = [
       "gen_ai.usage.total_tokens": 4096,
       "error.type": "RateLimitError",
       "error.stack": "RateLimitError: Rate limit exceeded\n    at ...",
-      "hebo.agent.slug": "my-agent",
-      "hebo.branch.slug": "main",
+      "hebo.workspace.slug": "default",
     },
   },
   {
@@ -438,8 +434,7 @@ const traceDetails = [
       "gen_ai.usage.output_tokens": 64,
       "gen_ai.usage.total_tokens": 192,
       "gen_ai.request.metadata.environment": "staging",
-      "hebo.agent.slug": "my-agent",
-      "hebo.branch.slug": "main",
+      "hebo.workspace.slug": "default",
     },
   },
   {
@@ -474,8 +469,7 @@ const traceDetails = [
       "gen_ai.usage.input_tokens": 256,
       "gen_ai.usage.total_tokens": 256,
       "gen_ai.request.metadata.environment": "production",
-      "hebo.agent.slug": "my-agent",
-      "hebo.branch.slug": "main",
+      "hebo.workspace.slug": "default",
     },
   },
   {
@@ -1292,57 +1286,51 @@ const mockMetadataKeys = [...new Set(traceDetails.flatMap((t) => Object.keys(t.m
 
 export const traceHandlers = [
   // List traces
-  http.get<{ agentSlug: string; branchSlug: string }>(
-    "/api/v1/agents/:agentSlug/branches/:branchSlug/traces",
-    ({ request }) => {
-      const url = new URL(request.url);
+  http.get("/api/v1/traces", ({ request }) => {
+    const url = new URL(request.url);
 
-      const pageParam = Number(url.searchParams.get("page"));
-      const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
-      const pageSizeParam = Number(url.searchParams.get("pageSize"));
-      const pageSize = Number.isInteger(pageSizeParam) && pageSizeParam > 0 ? pageSizeParam : 10;
+    const pageParam = Number(url.searchParams.get("page"));
+    const page = Number.isInteger(pageParam) && pageParam > 0 ? pageParam : 1;
+    const pageSizeParam = Number(url.searchParams.get("pageSize"));
+    const pageSize = Number.isInteger(pageSizeParam) && pageSizeParam > 0 ? pageSizeParam : 10;
 
-      const metadataParam = url.searchParams.get("metadata");
-      let metadataFilters: Record<string, string> | null = null;
-      try {
-        metadataFilters =
-          metadataParam === null
-            ? {}
-            : z.record(z.string(), z.string()).parse(JSON.parse(metadataParam));
-      } catch {
-        return new HttpResponse(`Invalid metadata filter: ${metadataParam}`, { status: 400 });
-      }
+    const metadataParam = url.searchParams.get("metadata");
+    let metadataFilters: Record<string, string> | null = null;
+    try {
+      metadataFilters =
+        metadataParam === null
+          ? {}
+          : z.record(z.string(), z.string()).parse(JSON.parse(metadataParam));
+    } catch {
+      return new HttpResponse(`Invalid metadata filter: ${metadataParam}`, { status: 400 });
+    }
 
-      // Apply metadata filters
-      const filterEntries = Object.entries(metadataFilters);
-      const filtered =
-        filterEntries.length > 0
-          ? mockTraces.filter((t) => {
-              return filterEntries.every(
-                ([metaKey, value]) => t.metadata?.[metaKey as keyof typeof t.metadata] === value,
-              );
-            })
-          : [...mockTraces];
+    // Apply metadata filters
+    const filterEntries = Object.entries(metadataFilters);
+    const filtered =
+      filterEntries.length > 0
+        ? mockTraces.filter((t) => {
+            return filterEntries.every(
+              ([metaKey, value]) => t.metadata?.[metaKey as keyof typeof t.metadata] === value,
+            );
+          })
+        : [...mockTraces];
 
-      const start = (page - 1) * pageSize;
-      const paged = filtered.slice(start, start + pageSize);
-      const hasNextPage = start + pageSize < filtered.length;
+    const start = (page - 1) * pageSize;
+    const paged = filtered.slice(start, start + pageSize);
+    const hasNextPage = start + pageSize < filtered.length;
 
-      return HttpResponse.json({
-        data: paged,
-        hasNextPage,
-        metadataKeys: mockMetadataKeys,
-      });
-    },
-  ),
+    return HttpResponse.json({
+      data: paged,
+      hasNextPage,
+      metadataKeys: mockMetadataKeys,
+    });
+  }),
 
   // Get trace detail
-  http.get<{ agentSlug: string; branchSlug: string; traceId: string }>(
-    "/api/v1/agents/:agentSlug/branches/:branchSlug/traces/:traceId",
-    ({ params }) => {
-      const detail = mockSpanDetails[params.traceId];
-      if (!detail) return new HttpResponse(null, { status: 404 });
-      return HttpResponse.json([detail]);
-    },
-  ),
+  http.get<{ traceId: string }>("/api/v1/traces/:traceId", ({ params }) => {
+    const detail = mockSpanDetails[params.traceId];
+    if (!detail) return new HttpResponse(null, { status: 404 });
+    return HttpResponse.json([detail]);
+  }),
 ];

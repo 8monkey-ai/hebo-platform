@@ -35,7 +35,7 @@ const createAuthClient = (request: Request) => {
         schema: {
           team: {
             additionalFields: {
-              agentSlug: {
+              workspaceSlug: {
                 type: "string",
               },
             },
@@ -67,6 +67,8 @@ export const auth = new Elysia({ name: "auth-service" })
 
     let userId: string | undefined;
     let organizationId: string | undefined;
+    let workspaceId: string | undefined;
+    let workspaceSlug: string | undefined;
 
     if (cookieHeader) {
       const session = await getCookieCache(request, {
@@ -91,11 +93,19 @@ export const auth = new Elysia({ name: "auth-service" })
       }
 
       if (result?.valid && result.key) {
-        if (result.key.metadata?.createdByUserId) {
-          userId = result.key.metadata.createdByUserId as string;
+        const metadata = result.key.metadata as
+          | { createdByUserId?: string; workspaceId?: string; workspaceSlug?: string }
+          | null
+          | undefined;
+
+        if (metadata?.createdByUserId) {
+          userId = metadata.createdByUserId;
         } else {
           logger.warn("API key missing createdByUserId in metadata");
         }
+
+        workspaceId = metadata?.workspaceId;
+        workspaceSlug = metadata?.workspaceSlug;
 
         // For org-owned keys, referenceId is the organization ID
         organizationId = result.key.referenceId;
@@ -117,6 +127,8 @@ export const auth = new Elysia({ name: "auth-service" })
     return {
       userId,
       organizationId,
+      workspaceId,
+      workspaceSlug,
       authClient: userId ? authClient : undefined,
     } as const;
   })

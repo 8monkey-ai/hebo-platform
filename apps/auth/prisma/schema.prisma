@@ -131,7 +131,7 @@ model Teams {
   organizations  Organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   createdAt      DateTime
   updatedAt      DateTime?     @updatedAt
-  agentSlug      String
+  workspaceSlug  String
   teammembers    TeamMembers[]
 
   @@index([organizationId])

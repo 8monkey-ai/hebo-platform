@@ -80,8 +80,8 @@ export const createGateway = () =>
         .use(prisma)
         .post(
           "/chat/completions",
-          ({ request, prismaClient, organizationId }) =>
-            gw.handler(request, { prismaClient, organizationId }),
+          ({ request, prismaClient, organizationId, workspaceId, workspaceSlug }) =>
+            gw.handler(request, { prismaClient, organizationId, workspaceId, workspaceSlug }),
           {
             parse: "none",
             body: ChatCompletionsBodySchema,
@@ -95,8 +95,8 @@ export const createGateway = () =>
         )
         .post(
           "/embeddings",
-          ({ request, prismaClient, organizationId }) =>
-            gw.handler(request, { prismaClient, organizationId }),
+          ({ request, prismaClient, organizationId, workspaceId, workspaceSlug }) =>
+            gw.handler(request, { prismaClient, organizationId, workspaceId, workspaceSlug }),
           {
             parse: "none",
             body: EmbeddingsBodySchema,
@@ -110,8 +110,8 @@ export const createGateway = () =>
         )
         .post(
           "/responses",
-          ({ request, prismaClient, organizationId }) =>
-            gw.handler(request, { prismaClient, organizationId }),
+          ({ request, prismaClient, organizationId, workspaceId, workspaceSlug }) =>
+            gw.handler(request, { prismaClient, organizationId, workspaceId, workspaceSlug }),
           {
             parse: "none",
             body: ResponsesBodySchema,
@@ -125,8 +125,8 @@ export const createGateway = () =>
         )
         .post(
           "/messages",
-          ({ request, prismaClient, organizationId }) =>
-            gw.handler(request, { prismaClient, organizationId }),
+          ({ request, prismaClient, organizationId, workspaceId, workspaceSlug }) =>
+            gw.handler(request, { prismaClient, organizationId, workspaceId, workspaceSlug }),
           {
             parse: "none",
             body: MessagesBodySchema,

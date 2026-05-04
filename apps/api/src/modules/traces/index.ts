@@ -4,25 +4,29 @@ import { z } from "zod";
 import { greptime } from "~api/middlewares/greptime";
 
 import { getSpans, listTraces } from "./service";
-import { SpanListSchema, TraceListQuerySchema, TraceListResponseSchema } from "./types";
+import {
+  SpanListSchema,
+  TraceDetailQuerySchema,
+  TraceListQuerySchema,
+  TraceListResponseSchema,
+} from "./types";
 
 const DEFAULT_FROM = () => new Date(Date.now() - 60 * 60 * 1000);
 const DEFAULT_TO = () => new Date();
 
-export const spansModule = new Elysia({
-  prefix: "/agents/:agentSlug/branches/:branchSlug/traces",
+export const tracesModule = new Elysia({
+  prefix: "/traces",
 })
   .use(greptime)
   .get(
     "/",
-    async ({ greptimeDb, organizationId, params, query }) => {
+    async ({ greptimeDb, organizationId, query }) => {
       return status(
         200,
         await listTraces(
           greptimeDb,
           organizationId!,
-          params.agentSlug,
-          params.branchSlug,
+          query.workspace,
           query.from ?? DEFAULT_FROM(),
           query.to ?? DEFAULT_TO(),
           // FUTURE: remove '!' on page & pageSize
@@ -42,18 +46,13 @@ export const spansModule = new Elysia({
   )
   .get(
     "/:traceId",
-    async ({ greptimeDb, organizationId, params }) => {
-      const spans = await getSpans(
-        greptimeDb,
-        organizationId!,
-        params.agentSlug,
-        params.branchSlug,
-        params.traceId,
-      );
+    async ({ greptimeDb, organizationId, params, query }) => {
+      const spans = await getSpans(greptimeDb, organizationId!, query.workspace, params.traceId);
       if (spans.length === 0) return status(404, null);
       return status(200, spans);
     },
     {
+      query: TraceDetailQuerySchema,
       response: { 200: SpanListSchema, 404: z.null() },
     },
   );

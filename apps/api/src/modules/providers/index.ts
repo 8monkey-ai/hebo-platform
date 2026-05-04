@@ -76,34 +76,7 @@ export const providersModule = new Elysia({
         select: { id: true },
       });
 
-      const branches = await prismaClient.branches.findMany();
-
-      const affectedBranches = branches.filter((branch) => {
-        const models = branch.models;
-        return models.some((model) => model.routing?.only?.includes(params.slug));
-      });
-
-      // Batch update all affected branches + delete provider in a single transaction
-      await prismaClient.$transaction([
-        ...affectedBranches.map((branch) => {
-          const models = branch.models;
-          for (const model of models) {
-            const only = model.routing?.only;
-            if (!only?.includes(params.slug)) continue;
-
-            const nextOnly = only.filter((slug) => slug !== params.slug);
-            model.routing = nextOnly.length > 0 ? { ...model.routing, only: nextOnly } : undefined;
-          }
-          return prismaClient.branches.update({
-            where: { id: branch.id },
-            data: { models },
-          });
-        }),
-        prismaClient.provider_configs.update({
-          where: { id },
-          data: { deleted_at: new Date() },
-        }),
-      ]);
+      await prismaClient.provider_configs.softDelete({ id });
 
       return status(204);
     },

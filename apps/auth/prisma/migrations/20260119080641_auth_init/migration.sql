@@ -104,7 +104,7 @@ CREATE TABLE "teams" (
     "organizationId" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL,
     "updatedAt" TIMESTAMP(3),
-    "agentSlug" TEXT NOT NULL,
+    "workspaceSlug" TEXT NOT NULL,
 
     CONSTRAINT "teams_pkey" PRIMARY KEY ("id")
 );

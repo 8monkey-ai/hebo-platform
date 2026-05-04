@@ -1,6 +1,11 @@
 import { XCircle, SquareChevronRight } from "lucide-react";
 import { useRef, useEffect } from "react";
-import { Outlet, unstable_useRoute as useRoute, useLocation } from "react-router";
+import {
+  Outlet,
+  unstable_useRoute as useRoute,
+  useLocation,
+  type ShouldRevalidateFunctionArgs,
+} from "react-router";
 import { Toaster } from "sonner";
 import { useSnapshot } from "valtio";
 
@@ -26,8 +31,8 @@ import { shellStore } from "~console/lib/shell";
 import { getCookie, kbs } from "~console/lib/utils";
 
 import type { Route } from "./+types/route";
-import { AgentSelect } from "./sidebar-agent";
-import { BranchSelect } from "./sidebar-branch";
+import { HeboWordmark } from "./sidebar-agent";
+import { WorkspaceSelect } from "./sidebar-branch";
 import { SidebarNav } from "./sidebar-nav";
 import { SidebarPlatform } from "./sidebar-platform";
 import { PlaygroundSidebar } from "./sidebar-playground";
@@ -40,8 +45,8 @@ async function authMiddleware() {
 export const clientMiddleware = [authMiddleware];
 
 export async function clientLoader() {
-  const [agents] = await Promise.all([
-    api.agents.get(),
+  const [workspaces] = await Promise.all([
+    api.workspaces.get(),
     shellStore.models
       ? Promise.resolve()
       : gateway.models
@@ -67,16 +72,22 @@ export async function clientLoader() {
           }),
   ]);
 
-  return { agents: agents?.data ?? [] };
+  return { workspaces: workspaces?.data ?? [] };
 }
 
-export { revalidateOnSuccessfulAction as shouldRevalidate };
+export function shouldRevalidate(args: ShouldRevalidateFunctionArgs) {
+  // Revalidate workspace list when navigating to a different workspace (covers
+  // the post-create redirect into /w/:newSlug).
+  const currentSlug = (args.currentParams as { workspaceSlug?: string }).workspaceSlug;
+  const nextSlug = (args.nextParams as { workspaceSlug?: string }).workspaceSlug;
+  if (currentSlug !== nextSlug) return true;
+  return revalidateOnSuccessfulAction(args);
+}
 
-export default function ShellLayout({ loaderData: { agents } }: Route.ComponentProps) {
+export default function ShellLayout({ loaderData: { workspaces } }: Route.ComponentProps) {
   const { user, organizations } = useSnapshot(shellStore);
 
-  const { agent: activeAgent, branch: activeBranch } =
-    useRoute("routes/_shell.agent.$agentSlug")?.loaderData ?? {};
+  const activeWorkspace = useRoute("routes/_shell.w.$workspaceSlug")?.loaderData?.workspace;
 
   // Focus main element on route change for keyboard nav
   const location = useLocation();
@@ -104,21 +115,24 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
       <Sidebar collapsible="icon">
         <div className="flex h-full flex-col transition-[padding] group-data-[state=collapsed]:px-2">
           <SidebarHeader>
-            <AgentSelect agents={agents} activeAgent={activeAgent} />
-            {activeAgent && <BranchSelect activeAgent={activeAgent} activeBranch={activeBranch} />}
+            <HeboWordmark />
+            <WorkspaceSelect
+              workspaces={workspaces}
+              activeWorkspace={activeWorkspace}
+            />
           </SidebarHeader>
           <SidebarContent>
-            {activeAgent && activeBranch && (
+            {activeWorkspace && (
               <SidebarGroup>
-                <SidebarNav activeAgent={activeAgent} activeBranch={activeBranch} />
+                <SidebarNav activeWorkspace={activeWorkspace} />
               </SidebarGroup>
             )}
           </SidebarContent>
           <SidebarFooter>
-            {activeAgent && activeBranch && (
+            {activeWorkspace && (
               <>
                 <SidebarSeparator className="mx-0" />
-                <SidebarPlatform activeAgent={activeAgent} activeBranch={activeBranch} />
+                <SidebarPlatform activeWorkspace={activeWorkspace} />
               </>
             )}
             <SidebarSeparator className="mx-0" />
@@ -172,7 +186,7 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
         />
         <Sidebar side="right" collapsible="offcanvas">
           <SidebarContent>
-            <PlaygroundSidebar activeAgent={activeAgent} activeBranch={activeBranch} />
+            <PlaygroundSidebar activeWorkspace={activeWorkspace} />
           </SidebarContent>
         </Sidebar>
       </SidebarProvider>

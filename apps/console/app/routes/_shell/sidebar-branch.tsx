@@ -1,10 +1,11 @@
-import { Check, ChevronDown, GitBranch } from "lucide-react";
+import { Check, ChevronsUpDown, Plus } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router";
 
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
@@ -15,25 +16,18 @@ import {
   SidebarMenuItem,
 } from "@hebo/shared-ui/components/Sidebar";
 
-type Branch = {
-  slug: string;
+type Workspace = {
   name: string;
-};
-
-type Agent = {
   slug: string;
-  branches?: Branch[];
 };
 
-export function BranchSelect({
-  activeAgent,
-  activeBranch,
+export function WorkspaceSelect({
+  activeWorkspace,
+  workspaces,
 }: {
-  activeAgent: Agent;
-  activeBranch?: Branch;
+  activeWorkspace: Workspace | undefined;
+  workspaces: Workspace[];
 }) {
-  const branches = activeAgent.branches ?? [];
-
   const [selectorOpen, setSelectorOpen] = useState(false);
 
   return (
@@ -44,45 +38,50 @@ export function BranchSelect({
             render={
               <SidebarMenuButton
                 className="border border-input bg-background"
-                aria-label="Select branch"
+                aria-label="Select workspace"
               >
-                <GitBranch aria-hidden="true" />
                 <span className="truncate">
-                  {activeBranch?.name ?? <span className="text-muted-foreground">Select …</span>}
+                  {activeWorkspace?.name ?? (
+                    <span className="text-muted-foreground">Select workspace …</span>
+                  )}
                 </span>
-                <ChevronDown className="ml-auto" aria-hidden="true" />
+                <ChevronsUpDown className="ml-auto" aria-hidden="true" />
               </SidebarMenuButton>
             }
           />
-          <DropdownMenuContent className="min-w-42" align="start" side="bottom" sideOffset={4}>
-            {branches.length > 0 ? (
-              branches.map((branch) => (
-                <DropdownMenuItem
-                  key={branch.slug}
-                  render={
-                    <Link to={`/agent/${activeAgent.slug}/branch/${branch.slug}`} viewTransition>
-                      <span className="truncate">{branch.name}</span>
-                      {branch.slug === activeBranch?.slug && (
-                        <Check size={12} className="ml-auto" aria-hidden="true" />
-                      )}
-                    </Link>
-                  }
-                />
-              ))
-            ) : (
-              <DropdownMenuItem disabled className="text-muted-foreground">
-                No branches
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-muted-foreground"
-              render={
-                <Link to={`/agent/${activeAgent.slug}/branches`} viewTransition>
-                  Manage branches
-                </Link>
-              }
-            />
+          <DropdownMenuContent className="min-w-52" align="start" side="bottom" sideOffset={4}>
+            <DropdownMenuGroup>
+              {workspaces.length > 0 ? (
+                workspaces.map((workspace) => (
+                  <DropdownMenuItem
+                    key={workspace.slug}
+                    className="gap-2 p-2"
+                    render={
+                      <Link to={`/w/${workspace.slug}`} viewTransition>
+                        <span className="truncate">{workspace.name}</span>
+                        {workspace.slug === activeWorkspace?.slug && (
+                          <Check size={12} className="ml-auto" aria-hidden="true" />
+                        )}
+                      </Link>
+                    }
+                  />
+                ))
+              ) : (
+                <DropdownMenuItem disabled className="gap-2 p-2 text-muted-foreground">
+                  No workspaces
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="gap-2 p-2"
+                render={
+                  <Link to="/w/create" aria-label="Create workspace" viewTransition>
+                    <Plus className="size-4 text-muted-foreground" aria-hidden="true" />
+                    <span className="font-medium text-muted-foreground">New Workspace</span>
+                  </Link>
+                }
+              />
+            </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
