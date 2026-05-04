@@ -39,46 +39,6 @@ const ALLOWED_REQUEST_HEADERS = [
   "user-agent",
   "x-forwarded-proto",
   "x-request-id",
-  // Headers forwarded by hebo-gateway to upstream providers
-  "anthropic-beta",
-  "anthropic-version",
-  "openai-beta",
-  "openai-organization",
-  "openai-project",
-  "x-stainless-arch",
-  "x-stainless-lang",
-  "x-stainless-os",
-  "x-stainless-package-version",
-  "x-stainless-runtime",
-  "x-stainless-runtime-version",
-  "x-client",
-  "x-client-name",
-  "x-client-type",
-  "x-client-version",
-  "x-platform",
-  "x-platform-version",
-  "x-task-id",
-  "agent-session-id",
-  "x-claude-code-session-id",
-  "x-kilo-session",
-  "x-kilocode-taskid",
-  "x-kilocode-editorname",
-  "x-kilocode-feature",
-  "x-kilocode-organizationid",
-  "x-kilocode-projectid",
-  "x-kilocode-tester",
-  "or_app_name",
-  "x-openrouter-categories",
-  "x-openrouter-title",
-  "x-title",
-  "x-amzn-bedrock-guardrailidentifier",
-  "x-amzn-bedrock-guardrailversion",
-  "x-amzn-bedrock-performanceconfig-latency",
-  "x-amzn-bedrock-trace",
-  "x-goog-api-client",
-  "x-vertex-ai-endpoint-id",
-  "x-vertex-ai-llm-request-type",
-  "x-vertex-ai-llm-shared-request-type",
 ];
 
 const ALLOWED_RESPONSE_HEADERS = [
@@ -86,10 +46,6 @@ const ALLOWED_RESPONSE_HEADERS = [
   "content-type",
   "cache-control",
   "x-request-id",
-  // Headers forwarded by hebo-gateway from upstream providers
-  "retry-after",
-  "retry-after-ms",
-  "x-should-retry",
 ];
 
 export const GREPTIME_OTLP_ENDPOINT = `http://${(await getSecret("GREPTIME_HOST")) ?? "localhost"}:4000/v1/otlp`;
@@ -141,12 +97,16 @@ registerInstrumentations({
   ],
 });
 
-export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
+export const getOtelConfig = (
+  serviceName: string,
+  additionalRequestHeaders?: string[],
+  additionalResponseHeaders?: string[],
+): ElysiaOpenTelemetryOptions => {
   return {
     serviceName,
     headersToSpanAttributes: {
-      requestHeaders: ALLOWED_REQUEST_HEADERS,
-      responseHeaders: ALLOWED_RESPONSE_HEADERS,
+      requestHeaders: [...ALLOWED_REQUEST_HEADERS, ...(additionalRequestHeaders ?? [])],
+      responseHeaders: [...ALLOWED_RESPONSE_HEADERS, ...(additionalResponseHeaders ?? [])],
     },
     metricReader: new PeriodicExportingMetricReader({
       exporter: new OTLPMetricExporter({

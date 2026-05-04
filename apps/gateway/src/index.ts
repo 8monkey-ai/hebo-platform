@@ -12,6 +12,12 @@ import { ModelListSchema, ModelSchema } from "@hebo-ai/gateway/endpoints/models"
 import { ResponsesBodySchema, ResponsesSchema } from "@hebo-ai/gateway/endpoints/responses";
 import { AnthropicErrorSchema } from "@hebo-ai/gateway/errors/anthropic";
 import { OpenAIErrorSchema } from "@hebo-ai/gateway/errors/openai";
+import {
+  FORWARD_HEADER_ALLOWLIST,
+  RETRY_AFTER_HEADER,
+  RETRY_AFTER_MS_HEADER,
+  X_SHOULD_RETRY_HEADER,
+} from "@hebo-ai/gateway/utils";
 import { Elysia } from "elysia";
 
 import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";
@@ -32,9 +38,23 @@ const PORT = Number(process.env.PORT ?? 8522);
 const WORKERS = Number(process.env.WORKERS);
 const BASE_URL = process.env.BASE_URL ?? "http://localhost";
 
+/** Headers excluded from OTEL span recording for privacy reasons. */
+const EXCLUDED_FORWARD_HEADERS = new Set([
+  "or_site_url", // Full client-supplied URL, no header-level redaction
+  "x-kilocode-machineid", // Hardware/device fingerprint
+]);
+
 export const createGateway = () =>
   new Elysia()
-    .use(opentelemetry(getOtelConfig("hebo-gateway")))
+    .use(
+      opentelemetry(
+        getOtelConfig(
+          "hebo-gateway",
+          FORWARD_HEADER_ALLOWLIST.filter((h) => !EXCLUDED_FORWARD_HEADERS.has(h)),
+          [RETRY_AFTER_HEADER, RETRY_AFTER_MS_HEADER, X_SHOULD_RETRY_HEADER],
+        ),
+      ),
+    )
     .use(logging(getLogger("hebo-gateway")))
     // Root route ("/") is unauthenticated and unprotected for health checks.
     .get("/", () => "🐵 Hebo AI Gateway says hello!")
