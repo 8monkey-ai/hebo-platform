@@ -82,27 +82,13 @@ export const createOtelLogger = (serviceName: string, minimumSeverity: SeverityN
 };
 
 export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
-  const pgInstrumentation = new PgInstrumentation({
-    requireParentSpan: true,
-    enhancedDatabaseReporting: false,
-  });
-
-  // Pg is already loaded via @prisma/adapter-pg before OTel's module-load
-  // hooks can patch it. Patch pg.Client directly as a workaround, while still
-  // passing the instrumentation to NodeSDK so providers are configured correctly.
-  try {
-    // oxlint-disable no-unsafe-assignment no-unsafe-call no-unsafe-member-access
-    const { createRequire } = require("module");
-    const pg = createRequire(require.resolve("@prisma/adapter-pg"))("pg");
-    // @ts-expect-error _patchPgClient is a private method on PgInstrumentation
-    pgInstrumentation._patchPgClient(pg.Client);
-    // oxlint-enable no-unsafe-assignment no-unsafe-call no-unsafe-member-access
-  } catch {}
-
   return {
     serviceName,
     instrumentations: [
-      pgInstrumentation,
+      new PgInstrumentation({
+        requireParentSpan: true,
+        enhancedDatabaseReporting: false,
+      }),
       new BunSqlInstrumentation({
         requireParentSpan: true,
         ignoreConnectionSpans: true,
