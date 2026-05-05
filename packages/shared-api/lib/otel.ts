@@ -1,5 +1,5 @@
 import { BunSqlInstrumentation } from "@8monkey/opentelemetry-instrumentation-bun-sql";
-import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
+import type { ElysiaOpenTelemetryOptions } from "@elysia/opentelemetry";
 import type { SeverityNumber } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
@@ -105,8 +105,8 @@ export const getOtelConfig = (
   return {
     serviceName,
     headersToSpanAttributes: {
-      requestHeaders: [...ALLOWED_REQUEST_HEADERS, ...(additionalRequestHeaders ?? [])],
-      responseHeaders: [...ALLOWED_RESPONSE_HEADERS, ...(additionalResponseHeaders ?? [])],
+      request: [...ALLOWED_REQUEST_HEADERS, ...(additionalRequestHeaders ?? [])],
+      response: [...ALLOWED_RESPONSE_HEADERS, ...(additionalResponseHeaders ?? [])],
     },
     metricReader: new PeriodicExportingMetricReader({
       exporter: new OTLPMetricExporter({

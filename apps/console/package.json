@@ -20,7 +20,7 @@
     "@better-auth/api-key": "catalog:",
     "@conform-to/react": "catalog:",
     "@conform-to/zod": "catalog:",
-    "@elysiajs/eden": "catalog:",
+    "@elysia/eden": "catalog:",
     "@fontsource/recursive": "^5.2.8",
     "@hebo/aikit-ui": "workspace:*",
     "@hebo/shared-ui": "workspace:*",

@@ -21,9 +21,9 @@
     "start": "bun dist/index.js"
   },
   "dependencies": {
-    "@elysiajs/cors": "catalog:",
-    "@elysiajs/openapi": "catalog:",
-    "@elysiajs/opentelemetry": "catalog:",
+    "@elysia/cors": "catalog:",
+    "@elysia/openapi": "catalog:",
+    "@elysia/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",
     "@prisma/client": "catalog:",
     "elysia": "catalog:",
