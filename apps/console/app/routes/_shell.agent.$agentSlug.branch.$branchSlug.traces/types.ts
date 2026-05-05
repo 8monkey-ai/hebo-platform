@@ -1,4 +1,4 @@
-import type { Treaty } from "@elysiajs/eden";
+import type { Treaty } from "@elysia/eden";
 import type { Api } from "~api";
 
 type TracesRoute = ReturnType<ReturnType<Treaty.Create<Api>["v1"]["agents"]>["branches"]>["traces"];
