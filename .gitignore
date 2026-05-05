@@ -57,6 +57,9 @@ sst-env.d.ts
 # Cursor
 .cursor
 
+# Claude Code Worktrees
+.claude/worktrees/
+
 # db
 .local-storage
 

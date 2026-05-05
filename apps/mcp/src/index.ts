@@ -1,5 +1,5 @@
 import { mcp } from "@8monkey/elysia-mcp";
-import { opentelemetry } from "@elysiajs/opentelemetry";
+import { opentelemetry } from "@elysia/opentelemetry";
 import { Elysia } from "elysia";
 
 import { getLogger } from "@hebo/shared-api/lib/logger";

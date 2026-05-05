@@ -42,7 +42,7 @@
     "@types/bun": "catalog:"
   },
   "peerDependencies": {
-    "@elysiajs/opentelemetry": "catalog:",
+    "@elysia/opentelemetry": "catalog:",
     "elysia": "catalog:",
     "sst": "catalog:"
   }

@@ -1,6 +1,6 @@
-import { cors } from "@elysiajs/cors";
-import { openapi } from "@elysiajs/openapi";
-import { opentelemetry } from "@elysiajs/opentelemetry";
+import { cors } from "@elysia/cors";
+import { openapi } from "@elysia/openapi";
+import { opentelemetry } from "@elysia/opentelemetry";
 import { Elysia } from "elysia";
 
 import { CORS_CONFIG } from "@hebo/shared-api/lib/cors";

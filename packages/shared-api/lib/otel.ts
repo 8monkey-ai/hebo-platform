@@ -1,5 +1,5 @@
 import { BunSqlInstrumentation } from "@8monkey/opentelemetry-instrumentation-bun-sql";
-import type { ElysiaOpenTelemetryOptions } from "@elysiajs/opentelemetry";
+import type { ElysiaOpenTelemetryOptions } from "@elysia/opentelemetry";
 import type { SeverityNumber } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
@@ -81,7 +81,11 @@ export const createOtelLogger = (serviceName: string, minimumSeverity: SeverityN
   return loggerProvider.getLogger(serviceName);
 };
 
-export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions => {
+export const getOtelConfig = (
+  serviceName: string,
+  additionalRequestHeaders?: readonly string[],
+  additionalResponseHeaders?: readonly string[],
+): ElysiaOpenTelemetryOptions => {
   return {
     serviceName,
     instrumentations: [
@@ -97,8 +101,8 @@ export const getOtelConfig = (serviceName: string): ElysiaOpenTelemetryOptions =
       }),
     ],
     headersToSpanAttributes: {
-      requestHeaders: ALLOWED_REQUEST_HEADERS,
-      responseHeaders: ALLOWED_RESPONSE_HEADERS,
+      request: [...ALLOWED_REQUEST_HEADERS, ...(additionalRequestHeaders ?? [])],
+      response: [...ALLOWED_RESPONSE_HEADERS, ...(additionalResponseHeaders ?? [])],
     },
     metricReader: new PeriodicExportingMetricReader({
       exporter: new OTLPMetricExporter({

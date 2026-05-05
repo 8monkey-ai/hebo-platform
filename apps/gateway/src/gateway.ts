@@ -10,7 +10,6 @@ import { gpt, gptOss, textEmbeddings } from "@hebo-ai/gateway/models/openai";
 import { voyage } from "@hebo-ai/gateway/models/voyage";
 import { grok } from "@hebo-ai/gateway/models/xai";
 import { glm } from "@hebo-ai/gateway/models/zai";
-import { instrumentFetch } from "@hebo-ai/gateway/telemetry";
 import { trace } from "@opentelemetry/api";
 
 import { getLogger } from "@hebo/shared-api/lib/logger";
@@ -28,8 +27,6 @@ import { createProvider, loadProviderSecrets } from "./lib/provider";
 const _fetch = globalThis.fetch;
 // @ts-expect-error -- Bun-specific `timeout` option not in standard RequestInit
 globalThis.fetch = ((input, init) => _fetch(input, { ...init, timeout: false })) as typeof fetch;
-
-instrumentFetch("full");
 
 export const BASE_PATH = "/v1";
 
@@ -82,8 +79,14 @@ export const gw = gateway({
     minimax: createProvider("minimax", { authMode: "api-key", apiKey: SECRETS.MINIMAX_API_KEY }),
     zhipu: createProvider("zhipu", { authMode: "api-key", apiKey: SECRETS.ZHIPU_API_KEY }),
     moonshot: createProvider("moonshot", { authMode: "api-key", apiKey: SECRETS.MOONSHOT_API_KEY }),
-    fireworks: createProvider("fireworks", { authMode: "api-key", apiKey: SECRETS.FIREWORKS_API_KEY }),
-    deepinfra: createProvider("deepinfra", { authMode: "api-key", apiKey: SECRETS.DEEPINFRA_API_KEY }),
+    fireworks: createProvider("fireworks", {
+      authMode: "api-key",
+      apiKey: SECRETS.FIREWORKS_API_KEY,
+    }),
+    deepinfra: createProvider("deepinfra", {
+      authMode: "api-key",
+      apiKey: SECRETS.DEEPINFRA_API_KEY,
+    }),
     togetherai: createProvider("togetherai", {
       authMode: "api-key",
       apiKey: SECRETS.TOGETHERAI_API_KEY,

@@ -1,4 +1,4 @@
-import { treaty } from "@elysiajs/eden";
+import { treaty } from "@elysia/eden";
 import ky, { HTTPError } from "ky";
 import type { Api } from "~api";
 import type { Gateway } from "~gateway";

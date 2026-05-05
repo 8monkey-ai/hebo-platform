@@ -1,6 +1,6 @@
 {
   "name": "hebo",
-  "version": "0.7.2",
+  "version": "0.7.4",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -50,10 +50,10 @@
     "@better-auth/api-key": "^1.6.5",
     "@conform-to/react": "^1.15.1",
     "@conform-to/zod": "^1.15.1",
-    "@elysiajs/cors": "^1.4.1",
-    "@elysiajs/eden": "^1.4.8",
-    "@elysiajs/openapi": "^1.4.14",
-    "@elysiajs/opentelemetry": "github:turisanapo/opentelemetry#fork/main",
+    "@elysia/cors": "^1.4.2",
+    "@elysia/eden": "^1.4.10",
+    "@elysia/openapi": "^1.4.15",
+    "@elysia/opentelemetry": "^1.4.12",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
     "@opentelemetry/instrumentation": "^0.214.0",

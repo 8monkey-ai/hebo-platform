@@ -52,13 +52,18 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Install Playwright CLI
+        run: |
+          npm install -g @playwright/cli@latest
+          playwright-cli install-browser webkit --with-deps
+
       - name: Run Claude
-        uses: anthropics/claude-code-action@v1.0.89 # pinned: v1.0.90 broke Bedrock OIDC auth (anthropics/claude-code-action#1196)
+        uses: anthropics/claude-code-action@v1
         with:
           github_token: ${{ steps.app-token.outputs.token }}
           use_bedrock: "true"
           branch_prefix: "claude-"
           claude_args: |
-            --model us.anthropic.claude-opus-4-6-v1
+            --model us.anthropic.claude-opus-4-7
             --allowedTools Bash,Edit,Read,Write,Glob,Grep,LS,WebFetch,WebSearch
-            --max-turns 100
+            --max-turns 1000
