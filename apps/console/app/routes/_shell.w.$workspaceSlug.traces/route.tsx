@@ -9,17 +9,13 @@ import type { Route } from "./+types/route";
 import { TraceList } from "./list";
 import { parseTraceSearchParams } from "./search-params";
 
-export async function clientLoader({
-  params: { workspaceSlug },
-  request,
-}: Route.ClientLoaderArgs) {
+export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   const { effectiveFrom, effectiveTo, metadata, status, operation, page } = parseTraceSearchParams(
     new URL(request.url).searchParams,
   );
 
   const listResult = await api.traces.get({
     query: {
-      workspace: workspaceSlug,
       page: page,
       from: effectiveFrom,
       to: effectiveTo,

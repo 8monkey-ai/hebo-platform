@@ -6,17 +6,12 @@ const TraceTimeRangeQuerySchema = {
 };
 
 export const TraceListQuerySchema = z.object({
-  workspace: z.string().optional(),
   metadata: z.record(z.string(), z.string()).optional(),
   status: z.union([z.literal("ok"), z.literal("error")]).optional(),
   operation: z.union([z.literal("chat"), z.literal("embeddings")]).optional(),
   ...TraceTimeRangeQuerySchema,
   page: z.coerce.number().int().min(1).default(1).optional(),
   pageSize: z.coerce.number().int().min(1).max(200).default(50).optional(),
-});
-
-export const TraceDetailQuerySchema = z.object({
-  workspace: z.string().optional(),
 });
 
 const SpanStatusSchema = z.union([z.literal("ok"), z.literal("error"), z.literal("unknown")]);

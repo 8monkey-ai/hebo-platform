@@ -9,13 +9,9 @@ import { api } from "~console/lib/service";
 import type { Route } from "./+types/route";
 import { TraceDetail } from "./details";
 
-export async function clientLoader({
-  params: { workspaceSlug, traceId },
-}: Route.ClientLoaderArgs) {
+export async function clientLoader({ params: { traceId } }: Route.ClientLoaderArgs) {
   if (!traceId) return null;
-  const { data } = await api
-    .traces({ traceId })
-    .get({ query: { workspace: workspaceSlug } });
+  const { data } = await api.traces({ traceId }).get();
   return data?.[0] ?? null;
 }
 

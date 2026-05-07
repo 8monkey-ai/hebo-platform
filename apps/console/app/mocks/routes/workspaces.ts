@@ -39,7 +39,7 @@ export const workspaceHandlers = [
     "/api/v1/workspaces/:workspaceSlug",
     ({ params }) => {
       db.workspaces.delete((q) => q.where({ slug: params.workspaceSlug }));
-      return new HttpResponse(undefined, { status: 200 });
+      return new HttpResponse(null, { status: 204 });
     },
   ),
 
@@ -110,7 +110,7 @@ export const workspaceHandlers = [
       db.presets.delete((q) =>
         q.where({ slug: params.presetSlug, workspace_id: params.workspaceSlug }),
       );
-      return new HttpResponse(undefined, { status: 200 });
+      return new HttpResponse(null, { status: 204 });
     },
   ),
 ];
