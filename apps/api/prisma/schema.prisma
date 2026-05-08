@@ -31,16 +31,16 @@ model workspaces {
   deleted_by      String?
   deleted_at      DateTime?
   organization_id String    @default("")
-  team_id String
+  team_id         String
 
   @@unique([organization_id, slug])
 }
 
 model presets {
   id           String     @id @default(uuid(7)) @db.Uuid
+  slug         String
   workspace_id String     @db.Uuid
   name         String
-  slug         String
   model        String
   workspace    workspaces @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
 
@@ -55,7 +55,6 @@ model presets {
   organization_id String    @default("")
 
   @@unique([workspace_id, slug])
-  @@index([organization_id, slug])
 }
 
 model provider_configs {

@@ -3,7 +3,6 @@ CREATE TABLE "workspaces" (
     "id" UUID NOT NULL,
     "slug" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "team_id" TEXT NOT NULL,
     "created_by" TEXT NOT NULL DEFAULT '',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_by" TEXT NOT NULL DEFAULT '',
@@ -11,6 +10,7 @@ CREATE TABLE "workspaces" (
     "deleted_by" TEXT,
     "deleted_at" TIMESTAMP(3),
     "organization_id" TEXT NOT NULL DEFAULT '',
+    "team_id" TEXT NOT NULL,
 
     CONSTRAINT "workspaces_pkey" PRIMARY KEY ("id")
 );
@@ -18,9 +18,9 @@ CREATE TABLE "workspaces" (
 -- CreateTable
 CREATE TABLE "presets" (
     "id" UUID NOT NULL,
+    "slug" TEXT NOT NULL,
     "workspace_id" UUID NOT NULL,
     "name" TEXT NOT NULL,
-    "slug" TEXT NOT NULL,
     "model" TEXT NOT NULL,
     "created_by" TEXT NOT NULL DEFAULT '',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -54,9 +54,6 @@ CREATE UNIQUE INDEX "workspaces_organization_id_slug_key" ON "workspaces"("organ
 
 -- CreateIndex
 CREATE UNIQUE INDEX "presets_workspace_id_slug_key" ON "presets"("workspace_id", "slug");
-
--- CreateIndex
-CREATE INDEX "presets_organization_id_slug_idx" ON "presets"("organization_id", "slug");
 
 -- AddForeignKey
 ALTER TABLE "presets" ADD CONSTRAINT "presets_workspace_id_fkey" FOREIGN KEY ("workspace_id") REFERENCES "workspaces"("id") ON DELETE CASCADE ON UPDATE CASCADE;
