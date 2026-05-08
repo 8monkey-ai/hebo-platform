@@ -54,7 +54,7 @@
     "@elysia/eden": "^1.4.10",
     "@elysia/openapi": "^1.4.15",
     "@elysia/opentelemetry": "^1.4.12",
-    "@opentelemetry/api": "^1.9.1",
+    "@opentelemetry/api": "1.9.0",
     "@opentelemetry/api-logs": "^0.217.0",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.217.0",
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.217.0",
