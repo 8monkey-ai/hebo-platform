@@ -22,7 +22,7 @@
     "@8monkey/opentelemetry-instrumentation-bun-sql": "catalog:",
     "@opentelemetry/api": "catalog:",
     "@opentelemetry/api-logs": "catalog:",
-    "@opentelemetry/exporter-logs-otlp-proto": "^catalog:",
+    "@opentelemetry/exporter-logs-otlp-proto": "catalog:",
     "@opentelemetry/exporter-metrics-otlp-proto": "catalog:",
     "@opentelemetry/exporter-trace-otlp-proto": "catalog:",
     "@opentelemetry/instrumentation": "catalog:",
