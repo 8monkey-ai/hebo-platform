@@ -51,7 +51,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
             organization_id: organizationId,
           };
 
-          if (model === "workspaces" && args.data.presets?.create) {
+          if (model === "Workspace" && args.data.presets?.create) {
             const existing = args.data.presets.create;
             args.data.presets.create = Array.isArray(existing)
               ? existing.map((item) => ({
@@ -92,11 +92,11 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
           });
         },
       },
-      provider_configs: {
+      provider: {
         getUnredacted(slug: string) {
-          return prisma.provider_configs.findFirst({
+          return prisma.provider.findFirst({
             where: {
-              provider_slug: slug,
+              slug: slug,
               created_by: userId,
               deleted_at: DB_NULL,
               organization_id: organizationId,
@@ -106,11 +106,11 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
       },
     },
     result: {
-      provider_configs: {
-        value: {
-          needs: { value: true },
-          compute({ value }: { value: ProviderConfig }) {
-            return redactSensitiveValues(ProviderConfigSchema, value);
+      provider: {
+        config: {
+          needs: { config: true },
+          compute({ config }: { config: ProviderConfig }) {
+            return redactSensitiveValues(ProviderConfigSchema, config);
           },
         },
       },

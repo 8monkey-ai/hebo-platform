@@ -96,7 +96,7 @@ async function lookupPreset(
   if (cached === PRESET_MISS) return null;
   if (cached) return cached;
 
-  const preset = await prismaClient.presets.findFirst({
+  const preset = await prismaClient.preset.findFirst({
     where: { workspace_id: workspaceId, slug, deleted_at: null },
     select: { slug: true, model: true },
   });
@@ -170,21 +170,21 @@ async function resolveByokProvider(
     if (cachedProvider) return cachedProvider;
   }
 
-  const config = await prismaClient.provider_configs.getUnredacted(providerSlug);
+  const p = await prismaClient.provider.getUnredacted(providerSlug);
 
-  const configHash = config
-    ? createHash("sha256").update(JSON.stringify(config.value)).digest("hex")
+  const configHash = p
+    ? createHash("sha256").update(JSON.stringify(p.config)).digest("hex")
     : "default";
 
   configCache.set(configCacheKey, configHash);
 
-  if (!config) return;
+  if (!p) return;
 
   const providerCacheKey = `${configCacheKey}:${configHash}`;
   let provider = providerCache.get(providerCacheKey);
 
   if (!provider) {
-    provider = createProvider(providerSlug, config.value);
+    provider = createProvider(providerSlug, p.config);
     providerCache.set(providerCacheKey, provider);
   }
 

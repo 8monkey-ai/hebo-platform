@@ -19,14 +19,14 @@ export const providersModule = new Elysia({
   .get(
     "/",
     async ({ prismaClient, query }) => {
-      const providerConfigs = await prismaClient.provider_configs.findMany();
+      const providerConfigs = await prismaClient.provider.findMany();
 
       let providers = ProviderSchema.options.map(
         (o) =>
           ({
             slug: o.shape.slug.value,
             name: o.shape.name.value,
-            config: providerConfigs.find((p) => p.provider_slug === o.shape.slug.value)?.value,
+            config: providerConfigs.find((p) => p.slug === o.shape.slug.value)?.config,
           }) as Provider,
       );
 
@@ -44,23 +44,23 @@ export const providersModule = new Elysia({
   .put(
     "/:slug/config",
     async ({ body, prismaClient, params }) => {
-      const existing = await prismaClient.provider_configs.findFirst({
-        where: { provider_slug: params.slug },
+      const existing = await prismaClient.provider.findFirst({
+        where: { slug: params.slug },
         select: { id: true },
       });
 
-      const providerConfig = await prismaClient.provider_configs.create({
+      const providerConfig = await prismaClient.provider.create({
         data: {
-          provider_slug: params.slug,
-          value: body,
+          slug: params.slug,
+          config: body,
         },
       });
 
       if (existing) {
-        await prismaClient.provider_configs.softDelete({ id: existing.id });
+        await prismaClient.provider.softDelete({ id: existing.id });
       }
 
-      return status(201, providerConfig.value);
+      return status(201, providerConfig.config);
     },
     {
       body: ProviderConfigSchema,
@@ -71,12 +71,12 @@ export const providersModule = new Elysia({
   .delete(
     "/:slug/config",
     async ({ prismaClient, params }) => {
-      const { id } = await prismaClient.provider_configs.findFirstOrThrow({
-        where: { provider_slug: params.slug },
+      const { id } = await prismaClient.provider.findFirstOrThrow({
+        where: { slug: params.slug },
         select: { id: true },
       });
 
-      await prismaClient.provider_configs.softDelete({ id });
+      await prismaClient.provider.softDelete({ id });
 
       return status(204);
     },

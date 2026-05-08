@@ -21,7 +21,7 @@ export const workspacesModule = new Elysia({
   .get(
     "/",
     async ({ prismaClient }) => {
-      return status(200, await prismaClient.workspaces.findMany());
+      return status(200, await prismaClient.workspace.findMany());
     },
     {
       response: { 200: WorkspaceListSchema },
@@ -53,7 +53,7 @@ export const workspacesModule = new Elysia({
 
       return status(
         201,
-        await prismaClient.workspaces.create({
+        await prismaClient.workspace.create({
           data: {
             name: body.name,
             slug: workspaceSlug,
@@ -72,7 +72,7 @@ export const workspacesModule = new Elysia({
     async ({ prismaClient, params }) => {
       return status(
         200,
-        await prismaClient.workspaces.findFirstOrThrow({
+        await prismaClient.workspace.findFirstOrThrow({
           where: { slug: params.workspaceSlug },
         }),
       );
@@ -84,13 +84,13 @@ export const workspacesModule = new Elysia({
   .patch(
     "/:workspaceSlug",
     async ({ body, prismaClient, params }) => {
-      const { id } = await prismaClient.workspaces.findFirstOrThrow({
+      const { id } = await prismaClient.workspace.findFirstOrThrow({
         where: { slug: params.workspaceSlug },
         select: { id: true },
       });
       return status(
         200,
-        await prismaClient.workspaces.update({
+        await prismaClient.workspace.update({
           where: { id },
           data: { name: body.name },
         }),
@@ -104,11 +104,11 @@ export const workspacesModule = new Elysia({
   .delete(
     "/:workspaceSlug",
     async ({ prismaClient, params }) => {
-      const { id } = await prismaClient.workspaces.findFirstOrThrow({
+      const { id } = await prismaClient.workspace.findFirstOrThrow({
         where: { slug: params.workspaceSlug },
         select: { id: true },
       });
-      await prismaClient.workspaces.softDelete({ id });
+      await prismaClient.workspace.softDelete({ id });
       return status(204);
     },
     {

@@ -19,7 +19,6 @@ CREATE TABLE "workspaces" (
 CREATE TABLE "presets" (
     "id" UUID NOT NULL,
     "slug" TEXT NOT NULL,
-    "workspace_id" UUID NOT NULL,
     "name" TEXT NOT NULL,
     "model" TEXT NOT NULL,
     "created_by" TEXT NOT NULL DEFAULT '',
@@ -29,15 +28,16 @@ CREATE TABLE "presets" (
     "deleted_by" TEXT,
     "deleted_at" TIMESTAMP(3),
     "organization_id" TEXT NOT NULL DEFAULT '',
+    "workspace_id" UUID NOT NULL,
 
     CONSTRAINT "presets_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "provider_configs" (
+CREATE TABLE "providers" (
     "id" UUID NOT NULL,
-    "provider_slug" TEXT NOT NULL,
-    "value" JSONB NOT NULL,
+    "slug" TEXT NOT NULL,
+    "config" JSONB NOT NULL,
     "created_by" TEXT NOT NULL DEFAULT '',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_by" TEXT NOT NULL DEFAULT '',
@@ -46,7 +46,7 @@ CREATE TABLE "provider_configs" (
     "deleted_at" TIMESTAMP(3),
     "organization_id" TEXT NOT NULL DEFAULT '',
 
-    CONSTRAINT "provider_configs_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "providers_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -54,6 +54,9 @@ CREATE UNIQUE INDEX "workspaces_organization_id_slug_key" ON "workspaces"("organ
 
 -- CreateIndex
 CREATE UNIQUE INDEX "presets_workspace_id_slug_key" ON "presets"("workspace_id", "slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "providers_organization_id_slug_key" ON "providers"("organization_id", "slug");
 
 -- AddForeignKey
 ALTER TABLE "presets" ADD CONSTRAINT "presets_workspace_id_fkey" FOREIGN KEY ("workspace_id") REFERENCES "workspaces"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -16,11 +16,11 @@ datasource db {
   provider = "postgresql"
 }
 
-model workspaces {
+model Workspace {
   id      String    @id @default(uuid(7)) @db.Uuid
   slug    String
   name    String
-  presets presets[]
+  presets Preset[]
 
   // Common audit fields — injected by Prisma extension.
   // @default("") keeps create inputs optional, results non-nullable.
@@ -30,19 +30,21 @@ model workspaces {
   updated_at      DateTime  @updatedAt
   deleted_by      String?
   deleted_at      DateTime?
+
+  // Relations
   organization_id String    @default("")
   team_id         String
 
   @@unique([organization_id, slug])
+
+  @@map("workspaces")
 }
 
-model presets {
+model Preset {
   id           String     @id @default(uuid(7)) @db.Uuid
   slug         String
-  workspace_id String     @db.Uuid
   name         String
   model        String
-  workspace    workspaces @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
 
   // Common audit fields — injected by Prisma extension.
   // @default("") keeps create inputs optional, results non-nullable.
@@ -52,16 +54,22 @@ model presets {
   updated_at      DateTime  @updatedAt
   deleted_by      String?
   deleted_at      DateTime?
-  organization_id String    @default("")
+
+  // Relations
+  organization_id String      @default("")
+  workspace_id    String      @db.Uuid
+  workspace       Workspace  @relation(fields: [workspace_id], references: [id], onDelete: Cascade)
 
   @@unique([workspace_id, slug])
+
+  @@map("presets")
 }
 
-model provider_configs {
-  id            String @id @default(uuid(7)) @db.Uuid
-  provider_slug String
+model Provider {
+  id      String  @id @default(uuid(7)) @db.Uuid
+  slug    String
   /// [ProviderConfig]
-  value         Json
+  config  Json
 
   // Common audit fields — injected by Prisma extension.
   // @default("") keeps create inputs optional, results non-nullable.
@@ -71,5 +79,11 @@ model provider_configs {
   updated_at      DateTime  @updatedAt
   deleted_by      String?
   deleted_at      DateTime?
+
+  // Relations
   organization_id String    @default("")
+
+  @@unique([organization_id, slug])
+
+  @@map("providers")
 }

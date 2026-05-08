@@ -19,7 +19,7 @@ export const presetsModule = new Elysia({
     async ({ prismaClient, params }) => {
       return status(
         200,
-        await prismaClient.presets.findMany({
+        await prismaClient.preset.findMany({
           where: { workspace: { slug: params.workspaceSlug } },
         }),
       );
@@ -31,13 +31,13 @@ export const presetsModule = new Elysia({
   .post(
     "/",
     async ({ body, prismaClient, params }) => {
-      const workspace = await prismaClient.workspaces.findFirstOrThrow({
+      const workspace = await prismaClient.workspace.findFirstOrThrow({
         where: { slug: params.workspaceSlug },
         select: { id: true },
       });
       return status(
         201,
-        await prismaClient.presets.create({
+        await prismaClient.preset.create({
           data: {
             workspace_id: workspace.id,
             name: body.name,
@@ -57,7 +57,7 @@ export const presetsModule = new Elysia({
     async ({ prismaClient, params }) => {
       return status(
         200,
-        await prismaClient.presets.findFirstOrThrow({
+        await prismaClient.preset.findFirstOrThrow({
           where: {
             slug: params.presetSlug,
             workspace: { slug: params.workspaceSlug },
@@ -72,7 +72,7 @@ export const presetsModule = new Elysia({
   .patch(
     "/:presetSlug",
     async ({ body, prismaClient, params }) => {
-      const { id } = await prismaClient.presets.findFirstOrThrow({
+      const { id } = await prismaClient.preset.findFirstOrThrow({
         where: {
           slug: params.presetSlug,
           workspace: { slug: params.workspaceSlug },
@@ -81,7 +81,7 @@ export const presetsModule = new Elysia({
       });
       return status(
         200,
-        await prismaClient.presets.update({
+        await prismaClient.preset.update({
           where: { id },
           data: { name: body.name, model: body.model },
         }),
@@ -95,14 +95,14 @@ export const presetsModule = new Elysia({
   .delete(
     "/:presetSlug",
     async ({ prismaClient, params }) => {
-      const { id } = await prismaClient.presets.findFirstOrThrow({
+      const { id } = await prismaClient.preset.findFirstOrThrow({
         where: {
           slug: params.presetSlug,
           workspace: { slug: params.workspaceSlug },
         },
         select: { id: true },
       });
-      await prismaClient.presets.softDelete({ id });
+      await prismaClient.preset.softDelete({ id });
       return status(204);
     },
     {
