@@ -54,7 +54,7 @@
     "@elysia/eden": "^1.4.10",
     "@elysia/openapi": "^1.4.15",
     "@elysia/opentelemetry": "^1.4.12",
-    "@opentelemetry/api": "1.9.0",
+    "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/api-logs": "^0.217.0",
     "@opentelemetry/exporter-logs-otlp-proto": "^0.217.0",
     "@opentelemetry/exporter-metrics-otlp-proto": "^0.217.0",
@@ -92,5 +92,8 @@
     "typescript": "^6.0.0",
     "lru-cache": "^11.3.6",
     "zod": "^4.3.5"
+  },
+  "overrides": {
+    "@opentelemetry/api": "1.9.1"
   }
 }
