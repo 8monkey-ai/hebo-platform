@@ -31,16 +31,13 @@ import {
 } from "@hebo/shared-ui/components/Field";
 import { Input } from "@hebo/shared-ui/components/Input";
 
-import type { PresetPlain } from "~api/modules/presets/types";
+import type { PresetPlain } from "~api/modules/workspaces/presets/types";
 import { ModelSelector } from "~console/components/ui/ModelSelector";
 import { useFormErrorToast } from "~console/lib/errors";
 import { shellStore } from "~console/lib/shell";
 
 import type { clientAction } from "./route";
-import {
-  presetCreateFormSchema,
-  type PresetCreateFormValues,
-} from "./schema";
+import { presetCreateFormSchema, type PresetCreateFormValues } from "./schema";
 
 export default function PresetsList({ presets }: { presets: PresetPlain[] }) {
   return (

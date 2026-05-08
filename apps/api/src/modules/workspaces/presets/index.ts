@@ -11,7 +11,7 @@ import {
 } from "./types";
 
 export const presetsModule = new Elysia({
-  prefix: "/workspaces/:workspaceSlug/presets",
+  prefix: "/:workspaceSlug/presets",
 })
   .use(prisma)
   .get(

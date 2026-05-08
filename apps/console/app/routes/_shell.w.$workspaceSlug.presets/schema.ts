@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PresetCreateSchema, PresetUpdateSchema } from "~api/modules/presets/types";
+import { PresetCreateSchema, PresetUpdateSchema } from "~api/modules/workspaces/presets/types";
 
 export const presetCreateFormSchema = PresetCreateSchema;
 

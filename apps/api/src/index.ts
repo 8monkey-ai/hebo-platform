@@ -13,10 +13,10 @@ import { logging } from "@hebo/shared-api/middlewares/logging";
 import { withPort } from "@hebo/shared-api/utils/url";
 
 import { errors } from "./middlewares/errors";
-import { presetsModule } from "./modules/presets";
 import { providersModule } from "./modules/providers";
 import { tracesModule } from "./modules/traces";
 import { workspacesModule } from "./modules/workspaces";
+import { presetsModule } from "./modules/workspaces/presets";
 
 const PORT = Number(process.env.PORT ?? 8521);
 const WORKERS = Number(process.env.WORKERS);
@@ -41,14 +41,12 @@ const createApi = () =>
       },
       (app) =>
         app
-          // /workspaces/[:workspaceSlug]
-          .use(workspacesModule)
-          // /workspaces/:workspaceSlug/presets/[:presetSlug]
-          .use(presetsModule)
-          // /traces/[:traceId] (optional ?workspace=slug)
-          .use(tracesModule)
           // /providers
-          .use(providersModule),
+          .use(providersModule)
+          // /workspaces/:workspaceSlug/presets/[:presetSlug]
+          .use(workspacesModule.use(presetsModule))
+          // /traces/[:traceId] (optional ?workspace=slug)
+          .use(tracesModule),
     );
 
 if (import.meta.main) {
