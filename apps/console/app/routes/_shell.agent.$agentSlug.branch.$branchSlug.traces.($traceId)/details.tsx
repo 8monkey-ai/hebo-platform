@@ -341,7 +341,7 @@ function MessageBlock({ message }: { message: TraceMessage }) {
             )}
           </div>
 
-          <CopyButton sourceRef={contentRef} />
+          <CopyButton value={contentRef} />
         </div>
 
         {!reasoning && texts.length === 0 && toolCalls.length === 0 && otherParts.length === 0 ? (

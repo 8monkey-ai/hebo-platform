@@ -6,7 +6,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
 
 /**
  * Elements carrying this attribute (including their descendants) are excluded
- * when `sourceRef` is used to derive the clipboard text from the DOM.
+ * when a DOM `RefObject` is passed as `value` to derive the clipboard text.
  */
 const COPY_IGNORE_ATTR = "data-copy-ignore";
 
@@ -48,39 +48,35 @@ function collectCopyText(root: HTMLElement): string {
 
   walk(root);
 
-  return chunks.join("").replaceAll(/\n{3,}/g, "\n\n").trim();
+  return chunks
+    .join("")
+    .replaceAll(/\n{3,}/g, "\n\n")
+    .trim();
 }
 
-type CopyButtonOwnProps = {
-  className?: string;
-  disabled?: boolean;
-  tooltip?: string;
-  icon?: React.ReactNode;
-  /**
-   * The text to copy. Can be a string or a function returning a string
-   * (evaluated on click, so large strings aren't held in memory between renders).
-   */
-  value?: string | (() => string);
-  /**
-   * Ref to a DOM subtree whose text content should be copied. The subtree is
-   * walked on click, skipping elements annotated with `data-copy-ignore`.
-   * Text inside hidden / collapsed descendants is still captured — visibility
-   * is not respected on purpose, so collapsed content is copied in full.
-   *
-   * When both `sourceRef` and `value` are provided, `sourceRef` takes precedence.
-   */
-  sourceRef?: React.RefObject<HTMLElement | null>;
-};
+/**
+ * Source of the text to copy. One of:
+ * - `string` — copied verbatim.
+ * - `() => string` — evaluated on click, so large strings aren't built on every render.
+ * - `RefObject<HTMLElement>` — the subtree is walked on click, skipping
+ *   `[data-copy-ignore]` descendants. Hidden / collapsed text is captured in full.
+ */
+type CopyValue = string | (() => string) | React.RefObject<HTMLElement | null>;
 
 export function CopyButton({
   value,
-  sourceRef,
   className,
   disabled = false,
   tooltip = "Copy to Clipboard",
   icon = <Copy />,
   ...props
-}: CopyButtonOwnProps & Omit<React.ComponentProps<"button">, "value">) {
+}: {
+  value: CopyValue;
+  className?: string;
+  disabled?: boolean;
+  tooltip?: string;
+  icon?: React.ReactNode;
+} & Omit<React.ComponentProps<"button">, "value">) {
   const [hasCopied, setHasCopied] = React.useState(false);
 
   React.useEffect(() => {
@@ -94,9 +90,9 @@ export function CopyButton({
   }, [hasCopied]);
 
   const resolveText = (): string => {
-    if (sourceRef?.current) return collectCopyText(sourceRef.current);
+    if (typeof value === "string") return value;
     if (typeof value === "function") return value();
-    return value ?? "";
+    return value.current ? collectCopyText(value.current) : "";
   };
 
   const copy = async () => {
