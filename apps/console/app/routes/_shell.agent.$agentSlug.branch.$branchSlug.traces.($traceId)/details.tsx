@@ -310,6 +310,20 @@ function extractMessageParts(message: TraceMessage) {
   };
 }
 
+function buildMessageCopyText({
+  texts,
+  reasoning,
+  toolCalls,
+  otherParts,
+}: ReturnType<typeof extractMessageParts>): string {
+  const sections: string[] = [];
+  if (reasoning) sections.push(reasoning);
+  sections.push(...texts);
+  for (const tc of toolCalls) sections.push(`${tc.name}\n${tc.arguments}`);
+  for (const part of otherParts) sections.push(`${part.type}\n${part.value}`);
+  return sections.join("\n\n");
+}
+
 const ROLE_ACCENTS: Record<string, string> = {
   system: "border-l-amber-500",
   user: "border-l-blue-500",
@@ -319,8 +333,6 @@ const ROLE_ACCENTS: Record<string, string> = {
 
 function MessageBlock({ message }: { message: TraceMessage }) {
   const { texts, reasoning, toolCalls, otherParts } = extractMessageParts(message);
-
-  const contentRef = useRef<HTMLDivElement>(null);
 
   return (
     <section className="py-4 first:pt-0 last:pb-0">
@@ -341,13 +353,15 @@ function MessageBlock({ message }: { message: TraceMessage }) {
             )}
           </div>
 
-          <CopyButton value={() => contentRef.current?.innerText ?? ""} />
+          <CopyButton
+            value={() => buildMessageCopyText({ texts, reasoning, toolCalls, otherParts })}
+          />
         </div>
 
         {!reasoning && texts.length === 0 && toolCalls.length === 0 && otherParts.length === 0 ? (
           <p className="text-xs text-muted-foreground opacity-50">(no message)</p>
         ) : (
-          <div ref={contentRef} className="space-y-3">
+          <div className="space-y-3">
             {reasoning && (
               <ExpandableContent label="Reasoning">
                 <p className="text-xs whitespace-pre-wrap text-muted-foreground italic">
