@@ -79,14 +79,8 @@ export const gw = gateway({
     minimax: createProvider("minimax", { authMode: "api-key", apiKey: SECRETS.MINIMAX_API_KEY }),
     zhipu: createProvider("zhipu", { authMode: "api-key", apiKey: SECRETS.ZHIPU_API_KEY }),
     moonshot: createProvider("moonshot", { authMode: "api-key", apiKey: SECRETS.MOONSHOT_API_KEY }),
-    fireworks: createProvider("fireworks", {
-      authMode: "api-key",
-      apiKey: SECRETS.FIREWORKS_API_KEY,
-    }),
-    deepinfra: createProvider("deepinfra", {
-      authMode: "api-key",
-      apiKey: SECRETS.DEEPINFRA_API_KEY,
-    }),
+    fireworks: createProvider("fireworks", { authMode: "api-key", apiKey: SECRETS.FIREWORKS_API_KEY }),
+    deepinfra: createProvider("deepinfra", { authMode: "api-key", apiKey: SECRETS.DEEPINFRA_API_KEY }),
     togetherai: createProvider("togetherai", {
       authMode: "api-key",
       apiKey: SECRETS.TOGETHERAI_API_KEY,
