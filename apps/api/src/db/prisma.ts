@@ -6,7 +6,7 @@ import { ProviderConfigSchema, type ProviderConfig } from "~api/modules/provider
 
 const DB_NULL = null;
 
-/** Lazily created so OTel RITM hooks intercept pg before the first connection. */
+/** Deferred to first request so OTel instrumentation is registered before the driver loads. */
 let _prisma: PrismaClient;
 const getPrisma = () => (_prisma ??= new PrismaClient({ adapter: createPrismaAdapter("api") }));
 

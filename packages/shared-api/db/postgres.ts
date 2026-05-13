@@ -22,11 +22,8 @@ export const createPrismaAdapter = (
   schema: string,
   max: number = DEFAULT_DB_POOL_MAX,
 ): PrismaPg => {
-  // Opaque require so the Bun bundler leaves it as a runtime call, letting
-  // OTel's RITM hooks intercept pg when the module loads.
   // oxlint-disable no-unsafe-assignment no-unsafe-call no-unsafe-return
-  const pkg = ["@prisma", "adapter-pg"].join("/");
-  const { PrismaPg: Adapter } = require(pkg);
+  const { PrismaPg: Adapter } = require("@prisma/adapter-pg");
   return new Adapter(
     {
       connectionString: getConnectionString(schema),
