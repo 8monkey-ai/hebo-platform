@@ -6,9 +6,9 @@ import { ProviderConfigSchema, type ProviderConfig } from "~api/modules/provider
 
 const DB_NULL = null;
 
-const prisma = new PrismaClient({
-  adapter: createPrismaAdapter("api"),
-});
+/** Lazily created so OTel RITM hooks intercept pg before the first connection. */
+let _prisma: PrismaClient;
+const getPrisma = () => (_prisma ??= new PrismaClient({ adapter: createPrismaAdapter("api") }));
 
 export const createPrismaClient = (organizationId: string, userId: string) => {
   if (!organizationId || !userId) {
@@ -17,7 +17,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
 
   const tenantFilters = { deleted_at: DB_NULL, organization_id: organizationId };
 
-  return prisma.$extends({
+  return getPrisma().$extends({
     query: {
       $allModels: {
         $allOperations({ args, query, operation }) {
@@ -94,7 +94,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
       },
       provider_configs: {
         getUnredacted(slug: string) {
-          return prisma.provider_configs.findFirst({
+          return getPrisma().provider_configs.findFirst({
             where: {
               provider_slug: slug,
               created_by: userId,
