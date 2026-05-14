@@ -10,48 +10,24 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
  */
 const COPY_IGNORE_ATTR = "data-copy-ignore";
 
-const BLOCK_TAG_PATTERN =
-  /^(ADDRESS|ARTICLE|ASIDE|BLOCKQUOTE|DD|DETAILS|DIALOG|DIV|DL|DT|FIELDSET|FIGCAPTION|FIGURE|FOOTER|FORM|H[1-6]|HEADER|HR|LI|MAIN|NAV|OL|P|PRE|SECTION|SUMMARY|TABLE|TR|UL)$/;
+const BLOCK_TAGS = new Set(["DIV", "P", "PRE"]);
 
 function collectCopyText(root: HTMLElement): string {
-  const chunks: string[] = [];
+  if (root.tagName === "PRE") return root.textContent ?? "";
 
-  const pushBlockBreak = () => {
-    const last = chunks.at(-1);
-    if (last !== undefined && !last.endsWith("\n")) {
-      chunks.push("\n");
-    }
-  };
-
-  const walk = (node: Node) => {
-    if (node.nodeType === Node.TEXT_NODE) {
-      chunks.push(node.nodeValue ?? "");
-      return;
-    }
-    if (node.nodeType !== Node.ELEMENT_NODE) return;
-
+  const walk = (node: Node): string => {
+    if (node.nodeType === Node.TEXT_NODE) return node.nodeValue ?? "";
+    if (node.nodeType !== Node.ELEMENT_NODE) return "";
     const el = node as HTMLElement;
-    if (el.hasAttribute(COPY_IGNORE_ATTR)) return;
-
-    if (el.tagName === "BR") {
-      chunks.push("\n");
-      return;
-    }
-
-    const isBlock = BLOCK_TAG_PATTERN.test(el.tagName);
-    if (isBlock) pushBlockBreak();
-
-    for (const child of Array.from(el.childNodes)) walk(child);
-
-    if (isBlock) pushBlockBreak();
+    if (el.hasAttribute(COPY_IGNORE_ATTR)) return "";
+    if (el.tagName === "BR") return "\n";
+    const inner = Array.from(el.childNodes)
+      .map((child) => walk(child))
+      .join("");
+    return BLOCK_TAGS.has(el.tagName) ? `\n${inner}\n` : inner;
   };
 
-  walk(root);
-
-  return chunks
-    .join("")
-    .replaceAll(/\n{3,}/g, "\n\n")
-    .trim();
+  return walk(root).replaceAll(/\n+/g, "\n").trim();
 }
 
 /**
