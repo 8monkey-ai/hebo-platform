@@ -1,3 +1,4 @@
+import type { PrismaPg } from "@prisma/adapter-pg";
 import { Resource } from "sst";
 
 import { DEFAULT_DB_IDLE_TIMEOUT_MS, DEFAULT_DB_POOL_MAX } from "./config";
@@ -17,8 +18,12 @@ export const getConnectionString = (schema: string) => {
   return `${base}${base.includes("?") ? "&" : "?"}schema=${schema.toLowerCase()}`;
 };
 
-export const createPrismaAdapter = (schema: string, max: number = DEFAULT_DB_POOL_MAX) =>
-  new (require("@prisma/adapter-pg") as typeof import("@prisma/adapter-pg")).PrismaPg(
+export const createPrismaAdapter = (
+  schema: string,
+  max: number = DEFAULT_DB_POOL_MAX,
+): PrismaPg => {
+  const { PrismaPg } = require("@prisma/adapter-pg") as typeof import("@prisma/adapter-pg");
+  return new PrismaPg(
     {
       connectionString: getConnectionString(schema),
       max,
@@ -26,3 +31,4 @@ export const createPrismaAdapter = (schema: string, max: number = DEFAULT_DB_POO
     },
     { schema: schema.toLowerCase() },
   );
+};
