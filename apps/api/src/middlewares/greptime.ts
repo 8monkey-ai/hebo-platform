@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 
-import { getGreptimeSqlClient, type BunSqlClient } from "@hebo/shared-api/db/greptime";
+import { greptimeSqlClient, type BunSqlClient } from "@hebo/shared-api/db/greptime";
 import { auth } from "@hebo/shared-api/middlewares/auth";
 
 export const greptime = new Elysia({
@@ -9,7 +9,7 @@ export const greptime = new Elysia({
   .use(auth)
   .resolve(function resolveGreptimeDb() {
     return {
-      greptimeDb: getGreptimeSqlClient(),
+      greptimeDb: greptimeSqlClient,
     };
   })
   .as("scoped");
