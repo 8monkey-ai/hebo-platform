@@ -341,7 +341,7 @@ function MessageBlock({ message }: { message: TraceMessage }) {
             )}
           </div>
 
-          <CopyButton value={() => contentRef.current?.innerText ?? ""} />
+          <CopyButton value={contentRef} />
         </div>
 
         {!reasoning && texts.length === 0 && toolCalls.length === 0 && otherParts.length === 0 ? (
@@ -369,7 +369,7 @@ function MessageBlock({ message }: { message: TraceMessage }) {
 
             {toolCalls.map((tc, index) => (
               <div key={`tool-call:${index}`} className="space-y-2">
-                <Badge variant="outline">
+                <Badge variant="outline" data-copy-ignore>
                   <Wrench className="size-3" />
                   {tc.name}
                 </Badge>
@@ -379,7 +379,10 @@ function MessageBlock({ message }: { message: TraceMessage }) {
 
             {otherParts.map((part, index) => (
               <div key={`${part.type}:${index}`} className="space-y-2">
-                <div className="text-xs font-medium text-muted-foreground uppercase">
+                <div
+                  data-copy-ignore
+                  className="text-xs font-medium text-muted-foreground uppercase"
+                >
                   {part.type}
                 </div>
                 <CollapsibleCode code={part.value} maxLength={300} />
@@ -409,6 +412,7 @@ function CollapsibleText({ text, maxLength }: { text: string; maxLength: number 
       </p>
       {needsTruncation && (
         <CollapsibleTrigger
+          data-copy-ignore
           render={
             <Button variant="ghost" size="sm" className={COLLAPSE_TOGGLE_CLASS_NAME}>
               {expanded ? <ChevronUp className="size-3" /> : <ChevronRight className="size-3" />}
@@ -437,6 +441,7 @@ function CollapsibleCode({ code, maxLength }: { code: string; maxLength: number 
       </pre>
       {needsTruncation && (
         <CollapsibleTrigger
+          data-copy-ignore
           render={
             <Button variant="ghost" size="sm" className={COLLAPSE_TOGGLE_CLASS_NAME}>
               {expanded ? <ChevronUp className="size-3" /> : <ChevronRight className="size-3" />}
@@ -453,6 +458,7 @@ function ExpandableContent({ label, children }: { label: string; children: React
   return (
     <Collapsible>
       <CollapsibleTrigger
+        data-copy-ignore
         render={
           <Button variant="ghost" size="sm" className={cn("group", INLINE_DISCLOSURE_CLASS_NAME)}>
             <ChevronRight className="size-3 transition-transform group-data-panel-open:rotate-90" />
@@ -460,7 +466,9 @@ function ExpandableContent({ label, children }: { label: string; children: React
           </Button>
         }
       />
-      <CollapsibleContent className="pt-1">{children}</CollapsibleContent>
+      <CollapsibleContent keepMounted className="pt-1">
+        {children}
+      </CollapsibleContent>
     </Collapsible>
   );
 }
