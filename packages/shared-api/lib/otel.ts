@@ -17,8 +17,8 @@ import {
 import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 
-import { GREPTIME_HOST } from "../db/greptime";
 import { IS_PRODUCTION } from "../env";
+import { getSecret } from "../utils/secret";
 import { isRootPathUrl } from "../utils/url";
 
 /**
@@ -47,7 +47,7 @@ const ALLOWED_RESPONSE_HEADERS = [
   "x-request-id",
 ];
 
-export const GREPTIME_OTLP_ENDPOINT = `http://${GREPTIME_HOST}:4000/v1/otlp`;
+export const GREPTIME_OTLP_ENDPOINT = `http://${(await getSecret("GREPTIME_HOST")) ?? "localhost"}:4000/v1/otlp`;
 
 export const createOtelLogger = (serviceName: string, minimumSeverity: SeverityNumber) => {
   const loggerProvider = new LoggerProvider({
