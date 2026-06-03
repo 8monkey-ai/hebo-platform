@@ -15,7 +15,7 @@ export function addDelays(handlers: HttpHandler[]): HttpHandler[] {
         : "all";
     const duration = method ? METHOD_DELAYS[method] : undefined;
     if (!method || !duration) return [h];
-    const path = h.info?.path ?? /.*/;
+    const path = h.info?.path ?? /.*/u;
 
     return [http[method](path, () => delay(duration)), h];
   });

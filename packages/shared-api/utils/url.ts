@@ -25,7 +25,7 @@ export function getRootDomain(baseUrl: string | undefined) {
   const sld = parts.at(-2);
 
   // ccTLDs with a registry second level (e.g. co.uk, com.au, org.nz)
-  const take3 = tld?.length === 2 && /^(co|com|net|org|edu|gov|ac|me|ne)$/.test(sld ?? "");
+  const take3 = tld?.length === 2 && /^(co|com|net|org|edu|gov|ac|me|ne)$/u.test(sld ?? "");
 
   return parts.slice(take3 ? -3 : -2).join(".");
 }

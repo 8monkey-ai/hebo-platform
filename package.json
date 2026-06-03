@@ -31,8 +31,8 @@
     "check-dependency-version-consistency": "^6.0.0",
     "lefthook": "^2.0.15",
     "oxfmt": "^0.45.0",
-    "oxlint": "^1.60.0",
-    "oxlint-tsgolint": "^0.21.1",
+    "oxlint": "^1.68.0",
+    "oxlint-tsgolint": "^0.22.1",
     "sst": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:"
