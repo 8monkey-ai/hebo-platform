@@ -65,9 +65,7 @@ export const createDb = () => {
 type DB = ReturnType<typeof createDb>;
 
 declare global {
-  // oxlint-disable-next-line no-underscore-dangle -- HMR global singleton pattern
-  var __heboDb: DB | undefined;
+  var heboDb: DB | undefined;
 }
 
-// oxlint-disable-next-line no-underscore-dangle -- HMR global singleton pattern
-export const db: DB = (globalThis.__heboDb ??= createDb());
+export const db: DB = (globalThis.heboDb ??= createDb());
