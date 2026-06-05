@@ -13,7 +13,7 @@ import {
 import { LRUCache } from "lru-cache";
 
 import type { createPrismaClient } from "~api/db/prisma";
-import type { ModelsConfig, ProviderSlug } from "~api/modules/providers/types";
+import type { ModelParameters, ModelsConfig, ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "../utils/aws";
 import { createProvider } from "./provider";
@@ -30,6 +30,45 @@ const configCache = new LRUCache<string, string>({
 const providerCache = new LRUCache<string, ProviderV3>({
   max: 100,
 });
+
+/** Injects and translates default inference parameters into the request body per API surface. Client values always win (??= semantics). */
+export function injectModelParameters(
+  body: Record<string, unknown>,
+  params: ModelParameters,
+  operation: string,
+) {
+  body.temperature ??= params.temperature;
+  body.top_p ??= params.top_p;
+  body.frequency_penalty ??= params.frequency_penalty;
+  body.presence_penalty ??= params.presence_penalty;
+  body.seed ??= params.seed;
+  body.service_tier ??= params.service_tier;
+  body.cache_control ??= params.cache_control;
+
+  if (operation === "messages") {
+    body.max_tokens ??= params.max_tokens;
+    if (params.reasoning && !body.thinking && params.reasoning.enabled !== false) {
+      const thinking: Record<string, unknown> = {
+        type: params.reasoning.enabled ? "enabled" : "adaptive",
+      };
+      if (params.reasoning.max_tokens) thinking.budget_tokens = params.reasoning.max_tokens;
+      if (params.reasoning.exclude || params.reasoning.summary === "none") {
+        thinking.display = "omitted";
+      } else if (params.reasoning.summary) {
+        thinking.display = "summarized";
+      }
+      body.thinking = thinking;
+    }
+  } else {
+    if (operation === "chat") {
+      body.max_completion_tokens ??= params.max_tokens;
+    } else {
+      body.max_output_tokens ??= params.max_tokens;
+    }
+    body.reasoning ??= params.reasoning;
+    body.reasoning_effort ??= params.reasoning?.effort;
+  }
+}
 
 export function tagSpanWithOrganization(ctx: OnRequestHookContext) {
   const { organizationId } = ctx.state as { organizationId: string };
@@ -120,6 +159,10 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
     free: catalogModel?.additionalProperties?.free as boolean | undefined,
     requiresByok: catalogModel?.additionalProperties?.requiresByok as boolean | undefined,
   };
+
+  if (model.parameters) {
+    injectModelParameters(ctx.body, model.parameters, ctx.operation);
+  }
 
   return model.type;
 }
