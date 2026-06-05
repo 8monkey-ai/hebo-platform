@@ -4,6 +4,8 @@ import { Button } from "../_shadcn/ui/button";
 import { useSidebar, Sidebar as ShadCnSidebar } from "../_shadcn/ui/sidebar";
 import { cn } from "../lib/utils";
 
+const DEFAULT_SIDEBAR_TRIGGER_ICON = <PanelLeftIcon />;
+
 export function Sidebar({
   side = "left",
   variant = "sidebar",
@@ -35,7 +37,7 @@ export function Sidebar({
 export function SidebarTrigger({
   className,
   onClick,
-  icon = <PanelLeftIcon />,
+  icon = DEFAULT_SIDEBAR_TRIGGER_ICON,
   ...props
 }: React.ComponentProps<typeof Button> & {
   icon?: React.ReactNode;

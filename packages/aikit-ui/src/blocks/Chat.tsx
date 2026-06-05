@@ -229,6 +229,7 @@ export function Chat({
                           from={message.role}
                           key={`${message.id}-${i}`}
                           tabIndex={-1}
+                          // oxlint-disable-next-line prefer-tag-over-role -- role is forwarded to the internal DOM element
                           role="article"
                           aria-label={`Message from ${message.role}`}
                         >
@@ -302,6 +303,7 @@ export function Chat({
                 {/* oxlint-enable no-array-index-key */}
               </div>
             ))}
+            {/* oxlint-disable-next-line prefer-tag-over-role -- role is forwarded to the internal DOM element */}
             {status === "submitted" && <Spinner role="status" />}
             {error && (
               <Alert variant="destructive" className="overflow-x-auto">
@@ -320,6 +322,7 @@ export function Chat({
       {/* Input area */}
       <PromptInput
         onSubmit={handleSubmit}
+        // oxlint-disable-next-line prefer-tag-over-role -- role is forwarded to the internal DOM element
         role="form"
         className="mt-4 rounded-md bg-background"
         globalDrop

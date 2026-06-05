@@ -156,7 +156,7 @@ export const ModelConfigSchema = z.object({
   alias: z
     .string()
     .min(1)
-    .regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/),
+    .regex(/^[a-zA-Z0-9][a-zA-Z0-9_-]*$/u),
   type: z.string().min(1),
   routing: z
     .object({

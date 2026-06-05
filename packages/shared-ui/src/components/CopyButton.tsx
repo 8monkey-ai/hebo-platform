@@ -4,12 +4,14 @@ import * as React from "react";
 import { cn } from "../lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
 
+const DEFAULT_ICON = <Copy />;
+
 export function CopyButton({
   value,
   className,
   disabled = false,
   tooltip = "Copy to Clipboard",
-  icon = <Copy />,
+  icon = DEFAULT_ICON,
   ...props
 }: {
   value: string | (() => string);

@@ -65,7 +65,7 @@ export const createDb = () => {
 type DB = ReturnType<typeof createDb>;
 
 declare global {
-  var __heboDb: DB | undefined;
+  var heboDb: DB | undefined;
 }
 
-export const db: DB = (globalThis.__heboDb ??= createDb());
+export const db: DB = (globalThis.heboDb ??= createDb());

@@ -25,7 +25,7 @@ export function addChaos(handlers: HttpHandler[]): HttpHandler[] {
       typeof h.info?.method === "string"
         ? (h.info.method.toLowerCase() as keyof typeof http)
         : "all";
-    const path = h.info?.path ?? /.*/;
+    const path = h.info?.path ?? /.*/u;
 
     return [http[method](path, chaosResolver), h];
   });
