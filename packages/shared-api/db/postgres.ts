@@ -1,4 +1,4 @@
-import { PrismaPg } from "@prisma/adapter-pg";
+import type { PrismaPg } from "@prisma/adapter-pg";
 import { Resource } from "sst";
 
 import { DEFAULT_DB_IDLE_TIMEOUT_MS, DEFAULT_DB_POOL_MAX } from "./config";
@@ -22,6 +22,7 @@ export const createPrismaAdapter = (
   schema: string,
   max: number = DEFAULT_DB_POOL_MAX,
 ): PrismaPg => {
+  const { PrismaPg } = require("@prisma/adapter-pg") as typeof import("@prisma/adapter-pg");
   return new PrismaPg(
     {
       connectionString: getConnectionString(schema),
