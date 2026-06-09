@@ -1,0 +1,9 @@
+{
+  "extends": "@hebo/typescript-config/base.json",
+  "compilerOptions": {
+    "paths": {
+      "~agent-runner/*": ["./src/*"]
+    },
+    "types": ["@types/bun"]
+  }
+}
