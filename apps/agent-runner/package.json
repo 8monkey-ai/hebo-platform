@@ -1,0 +1,29 @@
+{
+  "name": "@hebo/agent-runner",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "scripts": {
+    "build": "bun build src/index.ts --minify-whitespace --minify-syntax --keep-names --target=bun --outdir dist $([ \"$NODE_ENV\" = production ] && echo '--production')",
+    "clean": "git clean -fdx -e '.env*' .",
+    "dev": "bun --hot src/index.ts",
+    "format": "oxfmt .",
+    "lint": "oxlint",
+    "test": "bun test",
+    "typecheck": "oxlint --type-aware --type-check",
+    "prestart": "bun run build",
+    "start": "bun dist/index.js"
+  },
+  "dependencies": {
+    "@agentclientprotocol/sdk": "^0.25.0",
+    "@elysia/cors": "catalog:",
+    "@elysia/opentelemetry": "catalog:",
+    "@hebo/shared-api": "workspace:*",
+    "elysia": "catalog:"
+  },
+  "devDependencies": {
+    "@hebo/typescript-config": "workspace:*",
+    "@types/bun": "catalog:"
+  }
+}

@@ -16,6 +16,21 @@
         "typescript": "catalog:",
       },
     },
+    "apps/agent-runner": {
+      "name": "@hebo/agent-runner",
+      "version": "0.1.0",
+      "dependencies": {
+        "@agentclientprotocol/sdk": "^0.25.0",
+        "@elysia/cors": "catalog:",
+        "@elysia/opentelemetry": "catalog:",
+        "@hebo/shared-api": "workspace:*",
+        "elysia": "catalog:",
+      },
+      "devDependencies": {
+        "@hebo/typescript-config": "workspace:*",
+        "@types/bun": "catalog:",
+      },
+    },
     "apps/api": {
       "name": "@hebo/api",
       "version": "0.1.1",
@@ -316,6 +331,8 @@
     "@8monkey/elysia-mcp": ["@8monkey/elysia-mcp@0.1.0-rc0", "", { "dependencies": { "@modelcontextprotocol/sdk": "^1.29.0" }, "peerDependencies": { "elysia": "^1.4.0" } }, "sha512-Ei4o/ak56Nld4/qTr8whDVS0QNFanq7xMcxRdB1OnQFhGfRX2UUFKTbinap4kUQX9OFUnBvqI66rrvogmgY4QQ=="],
 
     "@8monkey/opentelemetry-instrumentation-bun-sql": ["@8monkey/opentelemetry-instrumentation-bun-sql@0.2.0", "", { "dependencies": { "@opentelemetry/core": "^2.6.1", "@opentelemetry/instrumentation": "^0.214.0", "@opentelemetry/semantic-conventions": "^1.40.0", "@opentelemetry/sql-common": "^0.41.2" }, "peerDependencies": { "@opentelemetry/api": "^1.3.0" } }, "sha512-boua4k0Ji8y66Dtglcnxc+oODxtb5yyT+BcUaCjdZPckJhfxOFvnojRbXLpVjyyZIx3j8wPlydkr16wF6Lhkuw=="],
+
+    "@agentclientprotocol/sdk": ["@agentclientprotocol/sdk@0.25.0", "", { "peerDependencies": { "zod": "^3.25.0 || ^4.0.0" } }, "sha512-wU1VgXNtMvdVotX49txc3WJUDV+/QbLpsgjMvFhlRmp37osdLbI7L7y+iwAlQATwfjLxcv1r1p3ZxZBcXlGhcQ=="],
 
     "@ai-sdk/alibaba": ["@ai-sdk/alibaba@1.0.23", "", { "dependencies": { "@ai-sdk/openai-compatible": "2.0.47", "@ai-sdk/provider": "3.0.10", "@ai-sdk/provider-utils": "4.0.27" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-IH1vuFCJZacj8UPMrOPCdesFNv86hf6/c/0h19OfeoW4zHeBpW9ssCKUbQ+V68EBZto5aEDr/SnRn1pIuGvgfA=="],
 
@@ -626,6 +643,8 @@
     "@grpc/proto-loader": ["@grpc/proto-loader@0.8.0", "", { "dependencies": { "lodash.camelcase": "^4.3.0", "long": "^5.0.0", "protobufjs": "^7.5.3", "yargs": "^17.7.2" }, "bin": { "proto-loader-gen-types": "build/bin/proto-loader-gen-types.js" } }, "sha512-rc1hOQtjIWGxcxpb9aHAfLpIctjEnsDehj0DAiVfBlmT84uvR0uUtN2hEi/ecvWVjXUGf5qPF4qEgiLOx1YIMQ=="],
 
     "@hebo-ai/gateway": ["@hebo-ai/gateway@0.11.5", "", { "dependencies": { "@ai-sdk/provider": "^3.0.10", "ai": "^6.0.176", "lru-cache": "^11.3.6", "uuid": "^14.0.0", "zod": "^4.3.6" }, "peerDependencies": { "@ai-sdk/alibaba": "^1.0.23", "@ai-sdk/amazon-bedrock": "^4.0.103", "@ai-sdk/anthropic": "^3.0.76", "@ai-sdk/cohere": "^3.0.35", "@ai-sdk/deepinfra": "^2.0.51", "@ai-sdk/deepseek": "^2.0.34", "@ai-sdk/fireworks": "^2.0.52", "@ai-sdk/google-vertex": "^4.0.124", "@ai-sdk/groq": "^3.0.39", "@ai-sdk/moonshotai": "^2.0.22", "@ai-sdk/openai": "^3.0.63", "@ai-sdk/togetherai": "^2.0.51", "@ai-sdk/xai": "^3.0.89", "@libsql/client": "^0.17.3", "@opentelemetry/api": "^1.9.1", "better-sqlite3": "^12.9.0", "mysql2": "^3.22.3", "pg": "^8.20.0", "postgres": "^3.4.9", "typescript": ">=5.9.3", "voyage-ai-provider": "^3.0.0", "zhipu-ai-provider": "^0.3.1" }, "optionalPeers": ["@ai-sdk/alibaba", "@ai-sdk/amazon-bedrock", "@ai-sdk/anthropic", "@ai-sdk/cohere", "@ai-sdk/deepinfra", "@ai-sdk/deepseek", "@ai-sdk/fireworks", "@ai-sdk/google-vertex", "@ai-sdk/groq", "@ai-sdk/moonshotai", "@ai-sdk/openai", "@ai-sdk/togetherai", "@ai-sdk/xai", "@libsql/client", "better-sqlite3", "mysql2", "pg", "postgres", "voyage-ai-provider", "zhipu-ai-provider"] }, "sha512-vSI9PJK8mfeWpHjApl1UGjBU7cupPZ59L1Elb5PHXfOOQJVVXM+YVP890Ru8dCqcMxXuQerYHEZrDPjL9WdDfw=="],
+
+    "@hebo/agent-runner": ["@hebo/agent-runner@workspace:apps/agent-runner"],
 
     "@hebo/aikit-ui": ["@hebo/aikit-ui@workspace:packages/aikit-ui"],
 
