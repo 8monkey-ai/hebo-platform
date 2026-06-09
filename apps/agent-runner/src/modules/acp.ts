@@ -9,15 +9,9 @@ function createAcpStream(ws: { readyState: number; send(data: string): unknown }
   let controller: ReadableStreamDefaultController | null = null;
 
   const stream: Stream = {
-    readable: new ReadableStream({
-      start: (c) => {
-        controller = c;
-      },
-    }),
+    readable: new ReadableStream({ start: (c) => (controller = c) }),
     writable: new WritableStream({
-      write: (msg) => {
-        if (ws.readyState === 1) ws.send(JSON.stringify(msg));
-      },
+      write: (msg) => void (ws.readyState === 1 && ws.send(JSON.stringify(msg))),
     }),
   };
 
