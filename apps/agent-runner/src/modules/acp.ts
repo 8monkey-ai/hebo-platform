@@ -53,15 +53,11 @@ export const acpModule = new Elysia().use(auth).ws("/acp", {
   },
 
   open(ws) {
-    const {
-      query: { agent },
-    } = ws.data;
-
     const acpStream = createAcpStream(ws.raw);
     connections.set(ws.raw, acpStream);
 
     const connection = new AgentSideConnection(
-      (conn) => createAgentHandler(conn, { agentId: agent }),
+      (conn) => createAgentHandler(conn, { agentId: ws.data.query.agent }),
       acpStream.stream,
     );
 
