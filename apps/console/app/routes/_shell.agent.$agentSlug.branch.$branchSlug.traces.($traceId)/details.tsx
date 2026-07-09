@@ -480,11 +480,44 @@ function RawJsonView({ trace }: { trace: TraceDetailData }) {
 
 // --- Metadata View ---
 
+const REQUEST_PARAM_ATTRIBUTES = [
+  { key: "gen_ai.request.stream", label: "Stream" },
+  { key: "gen_ai.request.temperature", label: "Temperature" },
+  { key: "gen_ai.request.max_tokens", label: "Max Tokens" },
+  { key: "gen_ai.request.top_p", label: "Top P" },
+  { key: "gen_ai.request.frequency_penalty", label: "Frequency Penalty" },
+  { key: "gen_ai.request.presence_penalty", label: "Presence Penalty" },
+  { key: "gen_ai.request.stop_sequences", label: "Stop Sequences" },
+  { key: "gen_ai.request.seed", label: "Seed" },
+  { key: "gen_ai.request.service_tier", label: "Service Tier" },
+] as const;
+
 function MetadataView({ trace }: { trace: TraceDetailData }) {
   const metadataEntries = Object.entries(trace.metadata).sort(([a], [b]) => a.localeCompare(b));
 
+  const requestParams = REQUEST_PARAM_ATTRIBUTES.flatMap(({ key, label }) => {
+    const value = trace.spanAttributes[key];
+    if (value == null) return [];
+    return [{ label, value: String(value) }];
+  });
+
   return (
     <div className="flex flex-col gap-5">
+      {requestParams.length > 0 && (
+        <div>
+          <h3 className="mb-3">Request Parameters</h3>
+          <div className="overflow-hidden rounded-md border">
+            <table className="w-full text-xs">
+              <tbody>
+                {requestParams.map(({ label, value }) => (
+                  <IdentifierRow key={label} label={label} value={value} />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
       {metadataEntries.length > 0 && (
         <div>
           <h3 className="mb-3">Request Metadata</h3>
