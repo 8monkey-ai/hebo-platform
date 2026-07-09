@@ -136,7 +136,7 @@
         "@elysia/cors": "catalog:",
         "@elysia/openapi": "catalog:",
         "@elysia/opentelemetry": "catalog:",
-        "@hebo-ai/gateway": "0.11.5",
+        "@hebo-ai/gateway": "0.11.6",
         "@hebo/api": "workspace:*",
         "@hebo/shared-api": "workspace:*",
         "@opentelemetry/api": "catalog:",
@@ -625,7 +625,7 @@
 
     "@grpc/proto-loader": ["@grpc/proto-loader@0.8.0", "", { "dependencies": { "lodash.camelcase": "^4.3.0", "long": "^5.0.0", "protobufjs": "^7.5.3", "yargs": "^17.7.2" }, "bin": { "proto-loader-gen-types": "build/bin/proto-loader-gen-types.js" } }, "sha512-rc1hOQtjIWGxcxpb9aHAfLpIctjEnsDehj0DAiVfBlmT84uvR0uUtN2hEi/ecvWVjXUGf5qPF4qEgiLOx1YIMQ=="],
 
-    "@hebo-ai/gateway": ["@hebo-ai/gateway@0.11.5", "", { "dependencies": { "@ai-sdk/provider": "^3.0.10", "ai": "^6.0.176", "lru-cache": "^11.3.6", "uuid": "^14.0.0", "zod": "^4.3.6" }, "peerDependencies": { "@ai-sdk/alibaba": "^1.0.23", "@ai-sdk/amazon-bedrock": "^4.0.103", "@ai-sdk/anthropic": "^3.0.76", "@ai-sdk/cohere": "^3.0.35", "@ai-sdk/deepinfra": "^2.0.51", "@ai-sdk/deepseek": "^2.0.34", "@ai-sdk/fireworks": "^2.0.52", "@ai-sdk/google-vertex": "^4.0.124", "@ai-sdk/groq": "^3.0.39", "@ai-sdk/moonshotai": "^2.0.22", "@ai-sdk/openai": "^3.0.63", "@ai-sdk/togetherai": "^2.0.51", "@ai-sdk/xai": "^3.0.89", "@libsql/client": "^0.17.3", "@opentelemetry/api": "^1.9.1", "better-sqlite3": "^12.9.0", "mysql2": "^3.22.3", "pg": "^8.20.0", "postgres": "^3.4.9", "typescript": ">=5.9.3", "voyage-ai-provider": "^3.0.0", "zhipu-ai-provider": "^0.3.1" }, "optionalPeers": ["@ai-sdk/alibaba", "@ai-sdk/amazon-bedrock", "@ai-sdk/anthropic", "@ai-sdk/cohere", "@ai-sdk/deepinfra", "@ai-sdk/deepseek", "@ai-sdk/fireworks", "@ai-sdk/google-vertex", "@ai-sdk/groq", "@ai-sdk/moonshotai", "@ai-sdk/openai", "@ai-sdk/togetherai", "@ai-sdk/xai", "@libsql/client", "better-sqlite3", "mysql2", "pg", "postgres", "voyage-ai-provider", "zhipu-ai-provider"] }, "sha512-vSI9PJK8mfeWpHjApl1UGjBU7cupPZ59L1Elb5PHXfOOQJVVXM+YVP890Ru8dCqcMxXuQerYHEZrDPjL9WdDfw=="],
+    "@hebo-ai/gateway": ["@hebo-ai/gateway@0.11.6", "", { "dependencies": { "@ai-sdk/provider": "^3.0.13", "ai": "^6.0.221", "lru-cache": "^11.5.2", "uuid": "^14.0.1", "zod": "^4.3.6" }, "peerDependencies": { "@ai-sdk/alibaba": "^1.0.23", "@ai-sdk/amazon-bedrock": "^4.0.103", "@ai-sdk/anthropic": "^3.0.76", "@ai-sdk/cohere": "^3.0.35", "@ai-sdk/deepinfra": "^2.0.51", "@ai-sdk/deepseek": "^2.0.34", "@ai-sdk/fireworks": "^2.0.52", "@ai-sdk/google-vertex": "^4.0.124", "@ai-sdk/groq": "^3.0.39", "@ai-sdk/moonshotai": "^2.0.22", "@ai-sdk/openai": "^3.0.63", "@ai-sdk/togetherai": "^2.0.51", "@ai-sdk/xai": "^3.0.89", "@libsql/client": "^0.17.3", "@opentelemetry/api": "^1.9.1", "better-sqlite3": "^12.9.0", "mysql2": "^3.22.3", "pg": "^8.20.0", "postgres": "^3.4.9", "typescript": ">=5.9.3", "voyage-ai-provider": "^3.0.0", "zhipu-ai-provider": "^0.3.1" }, "optionalPeers": ["@ai-sdk/alibaba", "@ai-sdk/amazon-bedrock", "@ai-sdk/anthropic", "@ai-sdk/cohere", "@ai-sdk/deepinfra", "@ai-sdk/deepseek", "@ai-sdk/fireworks", "@ai-sdk/google-vertex", "@ai-sdk/groq", "@ai-sdk/moonshotai", "@ai-sdk/openai", "@ai-sdk/togetherai", "@ai-sdk/xai", "@libsql/client", "better-sqlite3", "mysql2", "pg", "postgres", "voyage-ai-provider", "zhipu-ai-provider"] }, "sha512-ZCtJJKtq08EO28DpnMMuguA07Kc/g724TcyvGx7OrBP76pbXopPYUv3owX64UQsSAlUReXsWQlPR2Ig3ZpHWJQ=="],
 
     "@hebo/aikit-ui": ["@hebo/aikit-ui@workspace:packages/aikit-ui"],
 
@@ -2833,7 +2833,7 @@
 
     "utils-merge": ["utils-merge@1.0.1", "", {}, "sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA=="],
 
-    "uuid": ["uuid@14.0.0", "", { "bin": { "uuid": "dist-node/bin/uuid" } }, "sha512-Qo+uWgilfSmAhXCMav1uYFynlQO7fMFiMVZsQqZRMIXp0O7rR7qjkj+cPvBHLgBqi960QCoo/PH2/6ZtVqKvrg=="],
+    "uuid": ["uuid@14.0.1", "", { "bin": { "uuid": "dist-node/bin/uuid" } }, "sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew=="],
 
     "valibot": ["valibot@1.2.0", "", { "peerDependencies": { "typescript": ">=5" }, "optionalPeers": ["typescript"] }, "sha512-mm1rxUsmOxzrwnX5arGS+U4T25RdvpPjPN4yR0u9pUBov9+zGVtO84tif1eY4r6zWxVxu3KzIyknJy3rxfRZZg=="],
 
@@ -3002,6 +3002,12 @@
     "@elysia/opentelemetry/@opentelemetry/instrumentation": ["@opentelemetry/instrumentation@0.200.0", "", { "dependencies": { "@opentelemetry/api-logs": "0.200.0", "@types/shimmer": "^1.2.0", "import-in-the-middle": "^1.8.1", "require-in-the-middle": "^7.1.1", "shimmer": "^1.2.1" }, "peerDependencies": { "@opentelemetry/api": "^1.3.0" } }, "sha512-pmPlzfJd+vvgaZd/reMsC8RWgTXn2WY1OWT5RT42m3aOn5532TozwXNDhg1vzqJ+jnvmkREcdLr27ebJEQt0Jg=="],
 
     "@grpc/proto-loader/protobufjs": ["protobufjs@7.5.4", "", { "dependencies": { "@protobufjs/aspromise": "^1.1.2", "@protobufjs/base64": "^1.1.2", "@protobufjs/codegen": "^2.0.4", "@protobufjs/eventemitter": "^1.1.0", "@protobufjs/fetch": "^1.1.0", "@protobufjs/float": "^1.0.2", "@protobufjs/inquire": "^1.1.0", "@protobufjs/path": "^1.1.2", "@protobufjs/pool": "^1.1.0", "@protobufjs/utf8": "^1.1.0", "@types/node": ">=13.7.0", "long": "^5.0.0" } }, "sha512-CvexbZtbov6jW2eXAvLukXjXUW1TzFaivC46BpWc/3BpcCysb5Vffu+B3XHMm8lVEuy2Mm4XGex8hBSg1yapPg=="],
+
+    "@hebo-ai/gateway/@ai-sdk/provider": ["@ai-sdk/provider@3.0.13", "", { "dependencies": { "json-schema": "^0.4.0" } }, "sha512-ZPtVYt5QIJzOta1kdUiDuCx4HhFkvNPv/rvmZ2b1iXwybYjJsCnNYR4PAw4kW7rgVfDARvHXcU64efWuqNp6bw=="],
+
+    "@hebo-ai/gateway/ai": ["ai@6.0.221", "", { "dependencies": { "@ai-sdk/gateway": "3.0.145", "@ai-sdk/provider": "3.0.13", "@ai-sdk/provider-utils": "4.0.37", "@opentelemetry/api": "^1.9.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-cB7qJbNTMuD5spdJEo+guejX0rkjhSQpc4PHITNB+iBFBnGYHLUZOM+uSeIkY4mS4sVVKBKm3kSQQoI5cUwU3g=="],
+
+    "@hebo-ai/gateway/lru-cache": ["lru-cache@11.5.2", "", {}, "sha512-4pfM1Ff0x50o0tQwb5ucw/RzNyD0/YJME6IVcStalZuMWxdt3sR3huStTtxz4PUmvZfRguvDejasvQ2kifR11g=="],
 
     "@isaacs/cliui/string-width": ["string-width@5.1.2", "", { "dependencies": { "eastasianwidth": "^0.2.0", "emoji-regex": "^9.2.2", "strip-ansi": "^7.0.1" } }, "sha512-HnLOCR3vjcY8beoNLtcjZ5/nxn2afmME6lhrDrebokqMap+XbeW8n9TXpPDOqdGK5qcI3oT0GKTW6wC7EMiVqA=="],
 
@@ -3380,6 +3386,10 @@
     "@elysia/opentelemetry/@opentelemetry/instrumentation/import-in-the-middle": ["import-in-the-middle@1.15.0", "", { "dependencies": { "acorn": "^8.14.0", "acorn-import-attributes": "^1.9.5", "cjs-module-lexer": "^1.2.2", "module-details-from-path": "^1.0.3" } }, "sha512-bpQy+CrsRmYmoPMAE/0G33iwRqwW4ouqdRg8jgbH3aKuCtOc8lxgmYXg2dMM92CRiGP660EtBcymH/eVUpCSaA=="],
 
     "@elysia/opentelemetry/@opentelemetry/instrumentation/require-in-the-middle": ["require-in-the-middle@7.5.2", "", { "dependencies": { "debug": "^4.3.5", "module-details-from-path": "^1.0.3", "resolve": "^1.22.8" } }, "sha512-gAZ+kLqBdHarXB64XpAe2VCjB7rIRv+mU8tfRWziHRJ5umKsIHN2tLLv6EtMw7WCdP19S0ERVMldNvxYCHnhSQ=="],
+
+    "@hebo-ai/gateway/ai/@ai-sdk/gateway": ["@ai-sdk/gateway@3.0.145", "", { "dependencies": { "@ai-sdk/provider": "3.0.13", "@ai-sdk/provider-utils": "4.0.37", "@vercel/oidc": "3.2.0" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-cqSQ+I0Bjj2W9g1oFyE1O1mSowsWXb+U1wK9vtg5kRQqB95iWVIKbtdr14gGf46cueJSiBlKfPTT24gDDVuFmw=="],
+
+    "@hebo-ai/gateway/ai/@ai-sdk/provider-utils": ["@ai-sdk/provider-utils@4.0.37", "", { "dependencies": { "@ai-sdk/provider": "3.0.13", "@standard-schema/spec": "^1.1.0", "eventsource-parser": "^3.0.8" }, "peerDependencies": { "zod": "^3.25.76 || ^4.1.8" } }, "sha512-VG4tpVXCuzm21U9xjg05BCMZnjZOazC72+MxBkLAa7hCKsnqNt542GYWUUqwmHSczJwgbSXN8UvaNgSerUaKdw=="],
 
     "@isaacs/cliui/string-width/emoji-regex": ["emoji-regex@9.2.2", "", {}, "sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg=="],
 
