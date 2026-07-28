@@ -1,14 +1,20 @@
 #!/bin/bash
 # Hebo self-hosted — provision a Compute Engine VM in GCP running the
 # docker-compose stack (hebo + postgres + greptimedb + caddy), fronted by
-# HTTPS. The image is pushed to a public Docker Hub repo (no secrets are
-# baked into it — see build-image.sh); the VM needs no pull credentials.
+# HTTPS. The image is pushed to GHCR (no secrets are baked into it — see
+# build-image.sh); once the package is set public, the VM needs no pull
+# credentials.
 #
 # Usage: ./deploy.sh <environment>
 #   e.g. ./deploy.sh qa           (auto sslip.io hostnames, no domain needed)
 #        ./deploy.sh production   (your own domain — edit environments/production.env first)
 #
-# Requires `docker login` locally with push access to 8monkey/hebo-platform-selfhosted.
+# Requires `docker login ghcr.io` locally with push access first, e.g.:
+#   gh auth refresh -h github.com -s write:packages,read:packages
+#   echo $(gh auth token) | docker login ghcr.io -u buibaoanh --password-stdin
+#
+# After the first push, set the package to public (one-time):
+#   https://github.com/users/buibaoanh/packages/container/3cat-selfhosted/settings
 #
 # Config lives in environments/<environment>.env. Review every command
 # before running — this is meant to be read and executed deliberately,
@@ -35,8 +41,8 @@ fi
 VM_NAME="hebo-${ENV_NAME}"
 STATIC_IP_NAME="hebo-ip-${ENV_NAME}"
 DATA_DISK_NAME="hebo-data-${ENV_NAME}"
-DOCKERHUB_REPO="8monkey/hebo-platform-selfhosted"
-IMAGE_TAG="${DOCKERHUB_REPO}:${ENV_NAME}"
+GHCR_REPO="ghcr.io/buibaoanh/3cat-selfhosted"
+IMAGE_TAG="${GHCR_REPO}:${ENV_NAME}"
 IMAGE_FAMILY="debian-12"
 IMAGE_PROJECT="debian-cloud"
 LABELS="app=hebo,env=${ENV_NAME}"
@@ -125,8 +131,8 @@ sed \
   -e "s|__MCP_DOMAIN__|${MCP_DOMAIN}|g" \
   "$SCRIPT_DIR/startup-script.sh.tmpl" > "$RENDERED_SCRIPT"
 
-# ── The VM itself. Public image on Docker Hub means no pull credentials
-#    are needed on the VM at all — default scopes are fine. Re-running
+# ── The VM itself. Public GHCR package means no pull credentials are
+#    needed on the VM at all — default scopes are fine. Re-running
 #    against an existing VM just refreshes its startup-script metadata
 #    (new image tag/domains) instead of failing. ──
 if gcloud compute instances describe "$VM_NAME" --zone="$ZONE" >/dev/null 2>&1; then

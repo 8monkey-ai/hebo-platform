@@ -3,15 +3,16 @@
 # bundle at build time (the published 8monkey/hebo-platform image bakes in
 # localhost:8521/8522/8523, which only works for browsers on the same
 # machine as the container — see apps/console/app/lib/env.ts), and pushes
-# it to Docker Hub.
+# it to GHCR.
 #
 # Only public domain names go into the image (VITE_API_URL etc.) — no
 # secrets. Real secrets (AUTH_SECRET, DB credentials, provider keys) are
 # set directly on the VM in /opt/hebo/.env, never baked into the image —
-# so the image can stay public same as the upstream one.
+# so the image can stay public same as the upstream one (set the GHCR
+# package visibility to public after the first push).
 #
-# Requires `docker login` to have been run locally with push access to
-# IMAGE_TAG's namespace before calling this.
+# Requires `docker login ghcr.io` to have been run locally with push
+# access to IMAGE_TAG's namespace before calling this.
 #
 # Not meant to be run standalone — deploy.sh exports the required
 # environment variables and calls this after computing the domains for

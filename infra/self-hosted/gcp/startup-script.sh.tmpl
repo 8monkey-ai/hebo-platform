@@ -13,8 +13,8 @@
 #   Caddy             -> terminates TLS on 80/443, reverse-proxies by hostname
 #                        to the hebo container over the compose network
 #
-# Image is public on Docker Hub (no secrets baked in — see build-image.sh),
-# so no registry credentials are needed here at all.
+# Image is public on GHCR (no secrets baked in — see build-image.sh), so
+# no registry credentials are needed here at all.
 set -euo pipefail
 
 DATA_DEVICE="/dev/disk/by-id/google-hebo-data"
