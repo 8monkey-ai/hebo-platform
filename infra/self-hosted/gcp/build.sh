@@ -14,10 +14,12 @@
 #        ./build.sh qa v2-manual-test
 #
 # Only public domain names go into the image — no secrets. Real secrets
-# live in /opt/hebo/.env on the VM, set over SSH. Published to a private
-# Artifact Registry repo — the VM pulls via its own service account, no
-# token/PAT to manage (tried making a public GHCR package instead, but
-# org policy disables visibility changes there).
+# live in /opt/hebo/.env on the VM, set over SSH, so the image can stay a
+# public GHCR package (see deploy.sh for the one-time visibility step).
+#
+# Requires `docker login ghcr.io` locally with push access first, e.g.:
+#   gh auth refresh -h github.com -s write:packages,read:packages
+#   echo $(gh auth token) | docker login ghcr.io -u buibaoanh --password-stdin
 set -euo pipefail
 
 ENV_NAME="${1:?Usage: $0 <environment> [version]   (see environments/*.env)}"
@@ -34,15 +36,8 @@ gcloud config set project "$PROJECT_ID" >/dev/null
 # shellcheck disable=SC1091
 source "$SCRIPT_DIR/lib-domains.sh"
 
-AR_REPO_NAME="hebo"
-gcloud services enable artifactregistry.googleapis.com
-gcloud artifacts repositories create "$AR_REPO_NAME" \
-  --repository-format=docker --location="$REGION" \
-  --description="Hebo self-hosted images" \
-  || echo "Artifact Registry repo already exists, skipping."
-gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
-
-IMAGE_TAG="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO_NAME}/hebo-platform-selfhosted:${ENV_NAME}-${VERSION}"
+GHCR_REPO="ghcr.io/3cat-sdn-bhd/hebo-platform-selfhosted"
+IMAGE_TAG="${GHCR_REPO}:${ENV_NAME}-${VERSION}"
 
 docker build \
   -f "$REPO_ROOT/infra/docker/Dockerfile" \

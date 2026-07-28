@@ -13,10 +13,8 @@
 #   Caddy             -> terminates TLS on 80/443, reverse-proxies by hostname
 #                        to the hebo container over the compose network
 #
-# No secrets are baked into the image (see build.sh) — it's just pushed
-# to a private Artifact Registry repo instead of a public GHCR package
-# (org policy disables GHCR visibility changes), so this VM pulls using
-# its own service account via the credential helper below.
+# Image is public on GHCR (no secrets baked in — see build-image.sh), so
+# no registry credentials are needed here at all.
 set -euo pipefail
 
 DATA_DEVICE="/dev/disk/by-id/google-hebo-data"
@@ -43,16 +41,6 @@ if ! command -v docker >/dev/null 2>&1; then
   apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
 fi
 systemctl enable docker
-
-# ── Artifact Registry credential helper (uses the VM's attached service
-#    account via the metadata server — no key files, no full gcloud SDK) ──
-if ! command -v docker-credential-gcr >/dev/null 2>&1; then
-  GCR_HELPER_VERSION="2.1.22"
-  curl -fsSL "https://github.com/GoogleCloudPlatform/docker-credential-gcr/releases/download/v${GCR_HELPER_VERSION}/docker-credential-gcr_linux_amd64-${GCR_HELPER_VERSION}.tar.gz" \
-    | tar xz --to-stdout ./docker-credential-gcr > /usr/local/bin/docker-credential-gcr
-  chmod +x /usr/local/bin/docker-credential-gcr
-fi
-docker-credential-gcr configure-docker --registries="$(echo "$HEBO_IMAGE" | cut -d/ -f1)"
 
 # ── Format the data disk once, then mount it every boot. Postgres/
 #    GreptimeDB/Caddy data are bind-mounted from here directly (rather
