@@ -86,16 +86,10 @@ services:
   hebo:
     image: ${HEBO_IMAGE}
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:8520:8520"
-      - "127.0.0.1:8521:8521"
-      - "127.0.0.1:8522:8522"
-      - "127.0.0.1:8523:8523"
-      - "127.0.0.1:8524:8524"
     environment:
-      AUTH_SECRET: \${AUTH_SECRET:-change-me-in-production}
-      POSTGRES_URL: \${POSTGRES_URL:-postgresql://postgres:password@postgres:5432/hebo}
-      GREPTIME_HOST: \${GREPTIME_HOST:-greptimedb}
+      AUTH_SECRET: \${AUTH_SECRET}
+      POSTGRES_URL: postgresql://postgres:password@postgres:5432/hebo
+      GREPTIME_HOST: greptimedb
     env_file:
       - path: .env
         required: false
@@ -108,8 +102,6 @@ services:
   postgres:
     image: postgres:17.6
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
@@ -125,11 +117,6 @@ services:
   greptimedb:
     image: greptime/greptimedb:v1.0.0
     restart: unless-stopped
-    ports:
-      - "127.0.0.1:4000:4000"
-      - "127.0.0.1:4001:4001"
-      - "127.0.0.1:4002:4002"
-      - "127.0.0.1:4003:4003"
     volumes:
       - ${DATA_MOUNT}/greptimedb:/greptimedb_data
     command: >-

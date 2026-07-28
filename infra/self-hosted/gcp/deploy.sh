@@ -35,7 +35,6 @@ fi
 VM_NAME="hebo-${ENV_NAME}"
 STATIC_IP_NAME="hebo-ip-${ENV_NAME}"
 DATA_DISK_NAME="hebo-data-${ENV_NAME}"
-NETWORK_TAG="hebo-${ENV_NAME}"
 DOCKERHUB_REPO="8monkey/hebo-platform-selfhosted"
 IMAGE_TAG="${DOCKERHUB_REPO}:${ENV_NAME}"
 IMAGE_FAMILY="debian-12"
@@ -85,33 +84,29 @@ case "$DOMAIN_MODE" in
     ;;
 esac
 
-# ── Build + push the custom image (bakes the domains above into the
-#    console bundle at build time — see build-image.sh for why). Requires
-#    `docker login` with push access to $DOCKERHUB_REPO first — the image
-#    is public, same as upstream 8monkey/hebo-platform, since it contains
-#    no secrets (those live in /opt/hebo/.env on the VM, set over SSH). ──
+# ── Build + push the custom image (see build-image.sh for what/why) ──
 IMAGE_TAG="$IMAGE_TAG" \
   API_DOMAIN="$API_DOMAIN" AUTH_DOMAIN="$AUTH_DOMAIN" GATEWAY_DOMAIN="$GATEWAY_DOMAIN" \
   "$SCRIPT_DIR/build-image.sh"
 
 # ── Firewall: SSH only via Identity-Aware Proxy (no public port 22);
 #    80/443 public — required for Let's Encrypt's HTTP-01 challenge and
-#    for anyone to reach the site over HTTPS. Ports 8520-8524 stay bound
-#    to 127.0.0.1 only; Caddy reaches them over the compose network, not
-#    via host-published ports. Rules are per-environment so qa/production
-#    can coexist in the same project without colliding. ──
+#    for anyone to reach the site over HTTPS. Hebo's app ports (8520-8524)
+#    and Postgres/GreptimeDB aren't published to the host at all — Caddy
+#    reaches them over the compose network by service name. Rules are
+#    per-environment so qa/production can coexist without colliding. ──
 gcloud compute firewall-rules create "hebo-allow-iap-ssh-${ENV_NAME}" \
   --direction=INGRESS --action=ALLOW --rules=tcp:22 \
   --source-ranges=35.235.240.0/20 \
   --network=default \
-  --target-tags="$NETWORK_TAG" \
+  --target-tags="$VM_NAME" \
   || echo "Firewall rule hebo-allow-iap-ssh-${ENV_NAME} already exists, skipping."
 
 gcloud compute firewall-rules create "hebo-allow-web-${ENV_NAME}" \
   --direction=INGRESS --action=ALLOW --rules=tcp:80,tcp:443 \
   --source-ranges=0.0.0.0/0 \
   --network=default \
-  --target-tags="$NETWORK_TAG" \
+  --target-tags="$VM_NAME" \
   || echo "Firewall rule hebo-allow-web-${ENV_NAME} already exists, skipping."
 
 # ── Persistent disk for Postgres + GreptimeDB data ──
@@ -147,7 +142,7 @@ else
     --boot-disk-size="$BOOT_DISK_SIZE" \
     --disk="name=$DATA_DISK_NAME,device-name=hebo-data,mode=rw,boot=no" \
     --address="$STATIC_IP" \
-    --tags="$NETWORK_TAG" \
+    --tags="$VM_NAME" \
     --labels="$LABELS" \
     --metadata-from-file=startup-script="$RENDERED_SCRIPT"
   UPDATED_EXISTING_VM=0
@@ -184,9 +179,5 @@ containers won't pick it up until you apply the refreshed startup script:
 EOF
 fi
 
-# ── Optional: snapshot schedule for the data disk (daily, 7-day retention) ──
-# gcloud compute resource-policies create snapshot-schedule "hebo-${ENV_NAME}-daily-snapshot" \
-#   --region="$REGION" --daily-schedule --start-time=07:00 \
-#   --max-retention-days=7
-# gcloud compute disks add-resource-policies "$DATA_DISK_NAME" --zone="$ZONE" \
-#   --resource-policies="hebo-${ENV_NAME}-daily-snapshot"
+# Want automated backups of $DATA_DISK_NAME? See `gcloud compute resource-policies
+# create snapshot-schedule` / `gcloud compute disks add-resource-policies`.
