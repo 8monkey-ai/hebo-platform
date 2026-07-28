@@ -1,11 +1,14 @@
 #!/bin/bash
 # Hebo self-hosted — provision a Compute Engine VM in GCP running the
 # docker-compose stack (hebo + postgres + greptimedb + caddy), fronted by
-# HTTPS.
+# HTTPS. The image is pushed to a public Docker Hub repo (no secrets are
+# baked into it — see build-image.sh); the VM needs no pull credentials.
 #
 # Usage: ./deploy.sh <environment>
 #   e.g. ./deploy.sh qa           (auto sslip.io hostnames, no domain needed)
 #        ./deploy.sh production   (your own domain — edit environments/production.env first)
+#
+# Requires `docker login` locally with push access to 8monkey/hebo-platform-selfhosted.
 #
 # Config lives in environments/<environment>.env. Review every command
 # before running — this is meant to be read and executed deliberately,
@@ -33,14 +36,14 @@ VM_NAME="hebo-${ENV_NAME}"
 STATIC_IP_NAME="hebo-ip-${ENV_NAME}"
 DATA_DISK_NAME="hebo-data-${ENV_NAME}"
 NETWORK_TAG="hebo-${ENV_NAME}"
-AR_REPO="hebo"
-IMAGE_TAG="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/hebo-platform:${ENV_NAME}"
+DOCKERHUB_REPO="8monkey/hebo-platform-selfhosted"
+IMAGE_TAG="${DOCKERHUB_REPO}:${ENV_NAME}"
 IMAGE_FAMILY="debian-12"
 IMAGE_PROJECT="debian-cloud"
 LABELS="app=hebo,env=${ENV_NAME}"
 
 gcloud config set project "$PROJECT_ID"
-gcloud services enable compute.googleapis.com artifactregistry.googleapis.com
+gcloud services enable compute.googleapis.com
 
 # ── Reserve a static external IP first — it's the anchor for sslip.io
 #    mode and for DNS stability across VM recreation either way ──
@@ -83,19 +86,13 @@ case "$DOMAIN_MODE" in
 esac
 
 # ── Build + push the custom image (bakes the domains above into the
-#    console bundle at build time — see build-image.sh for why) ──
-PROJECT_ID="$PROJECT_ID" REGION="$REGION" AR_REPO="$AR_REPO" IMAGE_TAG="$IMAGE_TAG" \
+#    console bundle at build time — see build-image.sh for why). Requires
+#    `docker login` with push access to $DOCKERHUB_REPO first — the image
+#    is public, same as upstream 8monkey/hebo-platform, since it contains
+#    no secrets (those live in /opt/hebo/.env on the VM, set over SSH). ──
+IMAGE_TAG="$IMAGE_TAG" \
   API_DOMAIN="$API_DOMAIN" AUTH_DOMAIN="$AUTH_DOMAIN" GATEWAY_DOMAIN="$GATEWAY_DOMAIN" \
   "$SCRIPT_DIR/build-image.sh"
-
-# ── Let the VM's default service account pull from Artifact Registry ──
-PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
-COMPUTE_SA="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
-gcloud artifacts repositories add-iam-policy-binding "$AR_REPO" \
-  --location="$REGION" \
-  --member="serviceAccount:${COMPUTE_SA}" \
-  --role="roles/artifactregistry.reader" \
-  || echo "IAM binding already present, skipping."
 
 # ── Firewall: SSH only via Identity-Aware Proxy (no public port 22);
 #    80/443 public — required for Let's Encrypt's HTTP-01 challenge and
@@ -133,10 +130,10 @@ sed \
   -e "s|__MCP_DOMAIN__|${MCP_DOMAIN}|g" \
   "$SCRIPT_DIR/startup-script.sh.tmpl" > "$RENDERED_SCRIPT"
 
-# ── The VM itself — cloud-platform scope needed for the Artifact
-#    Registry credential helper (auths via the metadata server, no keys).
-#    Re-running against an existing VM just refreshes its startup-script
-#    metadata (new image tag/domains) instead of failing. ──
+# ── The VM itself. Public image on Docker Hub means no pull credentials
+#    are needed on the VM at all — default scopes are fine. Re-running
+#    against an existing VM just refreshes its startup-script metadata
+#    (new image tag/domains) instead of failing. ──
 if gcloud compute instances describe "$VM_NAME" --zone="$ZONE" >/dev/null 2>&1; then
   echo "VM $VM_NAME already exists — updating startup-script metadata."
   gcloud compute instances add-metadata "$VM_NAME" --zone="$ZONE" \
@@ -151,7 +148,6 @@ else
     --disk="name=$DATA_DISK_NAME,device-name=hebo-data,mode=rw,boot=no" \
     --address="$STATIC_IP" \
     --tags="$NETWORK_TAG" \
-    --scopes=cloud-platform \
     --labels="$LABELS" \
     --metadata-from-file=startup-script="$RENDERED_SCRIPT"
   UPDATED_EXISTING_VM=0
@@ -169,6 +165,11 @@ Once boot + Let's Encrypt provisioning finish (a minute or two), the app is at:
   Gateway:  https://${GATEWAY_DOMAIN}
   Auth:     https://${AUTH_DOMAIN}
   MCP:      https://${MCP_DOMAIN}   (no auth layer — demo tool only, see earlier audit)
+
+Real secrets (OAuth/SMTP/LLM provider keys, a stronger AUTH_SECRET, etc.)
+aren't set by this script — edit them directly on the VM and restart:
+  gcloud compute ssh $VM_NAME --zone $ZONE --tunnel-through-iap
+  sudo nano /opt/hebo/.env && cd /opt/hebo && sudo docker compose up -d
 
 Tail boot/setup logs with:
   gcloud compute ssh $VM_NAME --zone $ZONE --tunnel-through-iap -- 'sudo journalctl -u google-startup-scripts -f'
