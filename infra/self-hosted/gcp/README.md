@@ -12,7 +12,7 @@ pick which one a given server runs, without rebuilding on every deploy.
 
 | File | Role |
 |---|---|
-| `build.sh` | Builds an image tagged with the environment + a version, pushes it to GHCR. Doesn't touch any VM. |
+| `build.sh` | Builds an image tagged with the environment + a version, pushes it to Artifact Registry. Doesn't touch any VM. |
 | `deploy.sh` | Points a VM at a specific already-built version. First run for an environment also provisions the static IP, firewall, disk, and VM. |
 | `lib-domains.sh` | Shared by both — sourced, not run directly. Reserves the static IP and computes the 5 service hostnames. |
 | `startup-script.sh.tmpl` | Template rendered onto the VM at boot. Installs Docker, mounts the data disk, writes the compose file + Caddyfile, brings the stack up. |
@@ -27,20 +27,19 @@ only works for browsers running on the same machine as the container. This
 setup rebuilds the image per environment with the real public domains baked
 in instead (see `apps/console/app/lib/env.ts` and `infra/docker/Dockerfile`).
 
-The image only ever contains public domain names — never secrets — so it's
-safe to publish as a public package, same trust model as the upstream image.
+The image only ever contains public domain names — never secrets — so it
+would be safe to publish as a public package, same trust model as the
+upstream image. It's published to a private Artifact Registry repo instead
+of a public GHCR package because org policy disables changing GHCR package
+visibility — Artifact Registry sidesteps that anyway, since the VM pulls
+using its own service account rather than needing a public package or a
+manually managed token.
 
 ## One-time setup
 
-**GHCR push access** — images publish to `ghcr.io/3cat-sdn-bhd/hebo-platform-selfhosted`:
-
-```bash
-gh auth refresh -h github.com -s write:packages,read:packages
-echo $(gh auth token) | docker login ghcr.io -u buibaoanh --password-stdin
-```
-
-**GCP** — `gcloud` should already be authenticated with billing enabled on
-the target project:
+`gcloud` should already be authenticated with billing enabled on the target
+project — `build.sh`/`deploy.sh` handle enabling the Artifact Registry API,
+creating the repo, and granting the VM's service account pull access:
 
 ```bash
 gcloud config get-value project
@@ -56,15 +55,6 @@ cd infra/self-hosted/gcp
 ```
 
 Prints the pushed tag and the exact `deploy.sh` command to run next.
-
-**After the first push to a new environment**, set the GHCR package to
-public (one-time per package, no clean API for this — use the UI):
-
-`https://github.com/orgs/3cat-Sdn-Bhd/packages/container/hebo-platform-selfhosted/settings`
-→ Danger Zone → Change visibility → Public
-
-Without this, the VM has no pull credentials and `docker compose pull` will
-fail on first boot.
 
 ## Deploy
 

@@ -31,14 +31,23 @@ fi
 
 VM_NAME="hebo-${ENV_NAME}"
 DATA_DISK_NAME="hebo-data-${ENV_NAME}"
-GHCR_REPO="ghcr.io/3cat-sdn-bhd/hebo-platform-selfhosted"
-IMAGE_TAG="${GHCR_REPO}:${ENV_NAME}-${VERSION}"
+AR_REPO_NAME="hebo"
+IMAGE_TAG="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO_NAME}/hebo-platform-selfhosted:${ENV_NAME}-${VERSION}"
 IMAGE_FAMILY="debian-12"
 IMAGE_PROJECT="debian-cloud"
 LABELS="app=hebo,env=${ENV_NAME}"
 
 gcloud config set project "$PROJECT_ID"
-gcloud services enable compute.googleapis.com
+gcloud services enable compute.googleapis.com artifactregistry.googleapis.com
+
+# ── Let the VM's default service account pull from Artifact Registry ──
+PROJECT_NUMBER="$(gcloud projects describe "$PROJECT_ID" --format='value(projectNumber)')"
+COMPUTE_SA="${PROJECT_NUMBER}-compute@developer.gserviceaccount.com"
+gcloud artifacts repositories add-iam-policy-binding "$AR_REPO_NAME" \
+  --location="$REGION" \
+  --member="serviceAccount:${COMPUTE_SA}" \
+  --role="roles/artifactregistry.reader" \
+  || echo "IAM binding already present, skipping."
 
 # ── Reserve/look up the static IP and compute the 5 service hostnames ──
 # shellcheck disable=SC1091
@@ -94,10 +103,10 @@ sed \
   -e "s|__MCP_DOMAIN__|${MCP_DOMAIN}|g" \
   "$SCRIPT_DIR/startup-script.sh.tmpl" > "$RENDERED_SCRIPT"
 
-# ── The VM itself. Public GHCR package means no pull credentials are
-#    needed on the VM at all — default scopes are fine. Re-running
-#    against an existing VM just refreshes its startup-script metadata
-#    (new version/domains) instead of failing. ──
+# ── The VM itself — cloud-platform scope needed for the Artifact
+#    Registry credential helper (auths via the metadata server, no keys).
+#    Re-running against an existing VM just refreshes its startup-script
+#    metadata (new version/domains) instead of failing. ──
 if gcloud compute instances describe "$VM_NAME" --zone="$ZONE" >/dev/null 2>&1; then
   echo "VM $VM_NAME already exists — updating startup-script metadata."
   gcloud compute instances add-metadata "$VM_NAME" --zone="$ZONE" \
@@ -113,6 +122,7 @@ else
     --address="$STATIC_IP" \
     --tags="$VM_NAME" \
     --labels="$LABELS" \
+    --scopes=cloud-platform \
     --metadata-from-file=startup-script="$RENDERED_SCRIPT"
   UPDATED_EXISTING_VM=0
 fi
