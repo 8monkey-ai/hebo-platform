@@ -37,13 +37,14 @@ AR_REPO="hebo"
 IMAGE_TAG="${REGION}-docker.pkg.dev/${PROJECT_ID}/${AR_REPO}/hebo-platform:${ENV_NAME}"
 IMAGE_FAMILY="debian-12"
 IMAGE_PROJECT="debian-cloud"
+LABELS="app=hebo,env=${ENV_NAME}"
 
 gcloud config set project "$PROJECT_ID"
 gcloud services enable compute.googleapis.com artifactregistry.googleapis.com
 
 # ── Reserve a static external IP first — it's the anchor for sslip.io
 #    mode and for DNS stability across VM recreation either way ──
-gcloud compute addresses create "$STATIC_IP_NAME" --region="$REGION" \
+gcloud compute addresses create "$STATIC_IP_NAME" --region="$REGION" --labels="$LABELS" \
   || echo "Static IP already exists, skipping."
 
 STATIC_IP="$(gcloud compute addresses describe "$STATIC_IP_NAME" --region="$REGION" --format='value(address)')"
@@ -118,6 +119,7 @@ gcloud compute firewall-rules create "hebo-allow-web-${ENV_NAME}" \
 
 # ── Persistent disk for Postgres + GreptimeDB data ──
 gcloud compute disks create "$DATA_DISK_NAME" --zone="$ZONE" --size="$DATA_DISK_SIZE" --type=pd-balanced \
+  --labels="$LABELS" \
   || echo "Data disk already exists, skipping."
 
 # ── Render the startup script template with the real image + domains ──
@@ -150,6 +152,7 @@ else
     --address="$STATIC_IP" \
     --tags="$NETWORK_TAG" \
     --scopes=cloud-platform \
+    --labels="$LABELS" \
     --metadata-from-file=startup-script="$RENDERED_SCRIPT"
   UPDATED_EXISTING_VM=0
 fi

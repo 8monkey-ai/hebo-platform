@@ -26,6 +26,7 @@ gcloud services enable artifactregistry.googleapis.com
 gcloud artifacts repositories create "$AR_REPO" \
   --repository-format=docker --location="$REGION" \
   --description="Hebo self-hosted images" \
+  --labels="app=hebo" \
   || echo "Artifact Registry repo already exists, skipping."
 
 gcloud auth configure-docker "${REGION}-docker.pkg.dev" --quiet
