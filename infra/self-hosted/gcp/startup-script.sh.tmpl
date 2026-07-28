@@ -1,0 +1,184 @@
+#!/bin/bash
+# Hebo self-hosted — GCE startup script (runs on every boot, idempotent).
+# Rendered from startup-script.sh.tmpl by deploy.sh — do not edit the
+# placeholders (__FOO__) directly, edit the template instead.
+#
+# Layout:
+#   secondary disk    -> /mnt/hebo-data          (formatted once, mounted every boot)
+#   docker data-root  -> /mnt/hebo-data/docker   (containers/volumes survive VM recreation)
+#   compose project   -> /opt/hebo
+#   Caddy             -> terminates TLS on 80/443, reverse-proxies by hostname
+#                        to the hebo container over the compose network
+set -euo pipefail
+
+DATA_DEVICE="/dev/disk/by-id/google-hebo-data"
+DATA_MOUNT="/mnt/hebo-data"
+COMPOSE_DIR="/opt/hebo"
+HEBO_IMAGE="__HEBO_IMAGE__"
+CONSOLE_DOMAIN="__CONSOLE_DOMAIN__"
+API_DOMAIN="__API_DOMAIN__"
+GATEWAY_DOMAIN="__GATEWAY_DOMAIN__"
+AUTH_DOMAIN="__AUTH_DOMAIN__"
+MCP_DOMAIN="__MCP_DOMAIN__"
+
+# ── Install Docker (idempotent) ──
+if ! command -v docker >/dev/null 2>&1; then
+  apt-get update
+  apt-get install -y ca-certificates curl gnupg
+  install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/debian/gpg -o /etc/apt/keyrings/docker.asc
+  chmod a+r /etc/apt/keyrings/docker.asc
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+    > /etc/apt/sources.list.d/docker.list
+  apt-get update
+  apt-get install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+fi
+
+# ── Artifact Registry credential helper (uses the VM's attached service
+#    account via the metadata server — no key files, no full gcloud SDK) ──
+if ! command -v docker-credential-gcr >/dev/null 2>&1; then
+  GCR_HELPER_VERSION="2.1.22"
+  curl -fsSL "https://github.com/GoogleCloudPlatform/docker-credential-gcr/releases/download/v${GCR_HELPER_VERSION}/docker-credential-gcr_linux_amd64-${GCR_HELPER_VERSION}.tar.gz" \
+    | tar xz --to-stdout ./docker-credential-gcr > /usr/local/bin/docker-credential-gcr
+  chmod +x /usr/local/bin/docker-credential-gcr
+fi
+docker-credential-gcr configure-docker --registries="$(echo "$HEBO_IMAGE" | cut -d/ -f1)"
+
+# ── Format the data disk once, then mount it every boot ──
+if ! blkid "$DATA_DEVICE" >/dev/null 2>&1; then
+  mkfs.ext4 -m 0 -F "$DATA_DEVICE"
+fi
+mkdir -p "$DATA_MOUNT"
+mountpoint -q "$DATA_MOUNT" || mount "$DATA_DEVICE" "$DATA_MOUNT"
+grep -q "$DATA_DEVICE" /etc/fstab || echo "$DATA_DEVICE $DATA_MOUNT ext4 discard,defaults,nofail 0 2" >> /etc/fstab
+mkdir -p "$DATA_MOUNT/docker"
+
+# ── Point Docker's data-root at the persistent disk (one-time, needs restart) ──
+if [ ! -f /etc/docker/daemon.json ] || ! grep -q "$DATA_MOUNT/docker" /etc/docker/daemon.json 2>/dev/null; then
+  mkdir -p /etc/docker
+  cat > /etc/docker/daemon.json <<EOF
+{ "data-root": "$DATA_MOUNT/docker" }
+EOF
+  systemctl restart docker
+fi
+systemctl enable docker
+
+# ── Compose project ──
+mkdir -p "$COMPOSE_DIR"
+
+cat > "$COMPOSE_DIR/Caddyfile" <<EOF
+${CONSOLE_DOMAIN} {
+  reverse_proxy hebo:8520
+}
+
+${API_DOMAIN} {
+  reverse_proxy hebo:8521
+}
+
+${GATEWAY_DOMAIN} {
+  reverse_proxy hebo:8522
+}
+
+${AUTH_DOMAIN} {
+  reverse_proxy hebo:8523
+}
+
+# mcp has no auth layer of its own (see apps/mcp) — fine while it only
+# serves the built-in demo tool, revisit before adding real tools/data.
+${MCP_DOMAIN} {
+  reverse_proxy hebo:8524
+}
+EOF
+
+cat > "$COMPOSE_DIR/docker-compose.yaml" <<COMPOSE_EOF
+services:
+  hebo:
+    image: ${HEBO_IMAGE}
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8520:8520"
+      - "127.0.0.1:8521:8521"
+      - "127.0.0.1:8522:8522"
+      - "127.0.0.1:8523:8523"
+      - "127.0.0.1:8524:8524"
+    environment:
+      AUTH_SECRET: \${AUTH_SECRET:-change-me-in-production}
+      POSTGRES_URL: \${POSTGRES_URL:-postgresql://postgres:password@postgres:5432/hebo}
+      GREPTIME_HOST: \${GREPTIME_HOST:-greptimedb}
+    env_file:
+      - path: .env
+        required: false
+    depends_on:
+      postgres:
+        condition: service_healthy
+      greptimedb:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:17.6
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: hebo
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  greptimedb:
+    image: greptime/greptimedb:v1.0.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:4000:4000"
+      - "127.0.0.1:4001:4001"
+      - "127.0.0.1:4002:4002"
+      - "127.0.0.1:4003:4003"
+    volumes:
+      - greptimedb-data:/greptimedb_data
+    command: >-
+      standalone start
+      --http-addr 0.0.0.0:4000
+      --rpc-bind-addr 0.0.0.0:4001
+      --mysql-addr 0.0.0.0:4002
+      --postgres-addr 0.0.0.0:4003
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:4000/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - hebo
+
+volumes:
+  postgres-data:
+  greptimedb-data:
+  caddy-data:
+  caddy-config:
+COMPOSE_EOF
+
+# ── Generate a real AUTH_SECRET once, on first boot only ──
+if [ ! -f "$COMPOSE_DIR/.env" ]; then
+  echo "AUTH_SECRET=$(openssl rand -hex 32)" > "$COMPOSE_DIR/.env"
+fi
+
+cd "$COMPOSE_DIR"
+docker compose pull
+docker compose up -d
