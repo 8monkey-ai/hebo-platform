@@ -1,27 +1,22 @@
 #!/bin/bash
-# Hebo self-hosted — provision a Compute Engine VM in GCP running the
-# docker-compose stack (hebo + postgres + greptimedb + caddy), fronted by
-# HTTPS. The image is pushed to GHCR (no secrets are baked into it — see
-# build-image.sh); once the package is set public, the VM needs no pull
-# credentials.
+# Hebo self-hosted — point a Compute Engine VM at a specific, already-built
+# image version. Build one first with ./build.sh.
 #
-# Usage: ./deploy.sh <environment>
-#   e.g. ./deploy.sh qa           (auto sslip.io hostnames, no domain needed)
-#        ./deploy.sh production   (your own domain — edit environments/production.env first)
+# First run for an environment also provisions the static IP, firewall,
+# data disk, and VM; later runs just update which version is running.
+# Safe to re-run — everything is create-if-missing.
 #
-# Requires `docker login ghcr.io` locally with push access first, e.g.:
-#   gh auth refresh -h github.com -s write:packages,read:packages
-#   echo $(gh auth token) | docker login ghcr.io -u buibaoanh --password-stdin
-#
-# After the first push, set the package to public (one-time):
-#   https://github.com/orgs/3cat-Sdn-Bhd/packages/container/hebo-platform-selfhosted/settings
+# Usage: ./deploy.sh <environment> <version>
+#   e.g. ./deploy.sh qa a1b2c3d
+#        ./deploy.sh production v1.4.0
 #
 # Config lives in environments/<environment>.env. Review every command
 # before running — this is meant to be read and executed deliberately,
 # not blindly trusted.
 set -euo pipefail
 
-ENV_NAME="${1:?Usage: $0 <environment>   (see infra/self-hosted/gcp/environments/*.env)}"
+ENV_NAME="${1:?Usage: $0 <environment> <version>   (build it first with ./build.sh)}"
+VERSION="${2:?Usage: $0 <environment> <version>   (build it first with ./build.sh)}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ENV_FILE="$SCRIPT_DIR/environments/${ENV_NAME}.env"
 
@@ -35,10 +30,9 @@ if [ "$DOMAIN_MODE" = "custom" ] && [ "$BASE_DOMAIN" = "hebo.yourdomain.com" ]; 
 fi
 
 VM_NAME="hebo-${ENV_NAME}"
-STATIC_IP_NAME="hebo-ip-${ENV_NAME}"
 DATA_DISK_NAME="hebo-data-${ENV_NAME}"
 GHCR_REPO="ghcr.io/3cat-sdn-bhd/hebo-platform-selfhosted"
-IMAGE_TAG="${GHCR_REPO}:${ENV_NAME}"
+IMAGE_TAG="${GHCR_REPO}:${ENV_NAME}-${VERSION}"
 IMAGE_FAMILY="debian-12"
 IMAGE_PROJECT="debian-cloud"
 LABELS="app=hebo,env=${ENV_NAME}"
@@ -46,50 +40,23 @@ LABELS="app=hebo,env=${ENV_NAME}"
 gcloud config set project "$PROJECT_ID"
 gcloud services enable compute.googleapis.com
 
-# ── Reserve a static external IP first — it's the anchor for sslip.io
-#    mode and for DNS stability across VM recreation either way ──
-gcloud compute addresses create "$STATIC_IP_NAME" --region="$REGION" --labels="$LABELS" \
-  || echo "Static IP already exists, skipping."
+# ── Reserve/look up the static IP and compute the 5 service hostnames ──
+# shellcheck disable=SC1091
+source "$SCRIPT_DIR/lib-domains.sh"
+echo "Static IP: $STATIC_IP"
 
-STATIC_IP="$(gcloud compute addresses describe "$STATIC_IP_NAME" --region="$REGION" --format='value(address)')"
-echo "Reserved static IP: $STATIC_IP"
-
-# ── Compute the 5 service hostnames for this environment ──
-case "$DOMAIN_MODE" in
-  sslip)
-    CONSOLE_DOMAIN="console.${STATIC_IP}.sslip.io"
-    API_DOMAIN="api.${STATIC_IP}.sslip.io"
-    GATEWAY_DOMAIN="gateway.${STATIC_IP}.sslip.io"
-    AUTH_DOMAIN="auth.${STATIC_IP}.sslip.io"
-    MCP_DOMAIN="mcp.${STATIC_IP}.sslip.io"
-    ;;
-  custom)
-    CONSOLE_DOMAIN="console.${BASE_DOMAIN}"
-    API_DOMAIN="api.${BASE_DOMAIN}"
-    GATEWAY_DOMAIN="gateway.${BASE_DOMAIN}"
-    AUTH_DOMAIN="auth.${BASE_DOMAIN}"
-    MCP_DOMAIN="mcp.${BASE_DOMAIN}"
-
-    echo
-    echo "Point these A records at ${STATIC_IP} before continuing:"
-    echo "  ${CONSOLE_DOMAIN}"
-    echo "  ${API_DOMAIN}"
-    echo "  ${GATEWAY_DOMAIN}"
-    echo "  ${AUTH_DOMAIN}"
-    echo "  ${MCP_DOMAIN}"
-    echo
-    read -r -p "Press enter once DNS is in place (Let's Encrypt needs it resolving)... "
-    ;;
-  *)
-    echo "Unknown DOMAIN_MODE '$DOMAIN_MODE' in $ENV_FILE (expected sslip or custom)" >&2
-    exit 1
-    ;;
-esac
-
-# ── Build + push the custom image (see build-image.sh for what/why) ──
-IMAGE_TAG="$IMAGE_TAG" \
-  API_DOMAIN="$API_DOMAIN" AUTH_DOMAIN="$AUTH_DOMAIN" GATEWAY_DOMAIN="$GATEWAY_DOMAIN" \
-  "$SCRIPT_DIR/build-image.sh"
+if [ "$DOMAIN_MODE" = "custom" ]; then
+  echo
+  echo "Make sure these A records point at ${STATIC_IP} before continuing"
+  echo "(Let's Encrypt needs them resolving to issue certs):"
+  echo "  ${CONSOLE_DOMAIN}"
+  echo "  ${API_DOMAIN}"
+  echo "  ${GATEWAY_DOMAIN}"
+  echo "  ${AUTH_DOMAIN}"
+  echo "  ${MCP_DOMAIN}"
+  echo
+  read -r -p "Press enter once DNS is in place... "
+fi
 
 # ── Firewall: SSH only via Identity-Aware Proxy (no public port 22);
 #    80/443 public — required for Let's Encrypt's HTTP-01 challenge and
@@ -116,7 +83,7 @@ gcloud compute disks create "$DATA_DISK_NAME" --zone="$ZONE" --size="$DATA_DISK_
   --labels="$LABELS" \
   || echo "Data disk already exists, skipping."
 
-# ── Render the startup script template with the real image + domains ──
+# ── Render the startup script template with the image version + domains ──
 RENDERED_SCRIPT="$(mktemp)"
 sed \
   -e "s|__HEBO_IMAGE__|${IMAGE_TAG}|g" \
@@ -130,7 +97,7 @@ sed \
 # ── The VM itself. Public GHCR package means no pull credentials are
 #    needed on the VM at all — default scopes are fine. Re-running
 #    against an existing VM just refreshes its startup-script metadata
-#    (new image tag/domains) instead of failing. ──
+#    (new version/domains) instead of failing. ──
 if gcloud compute instances describe "$VM_NAME" --zone="$ZONE" >/dev/null 2>&1; then
   echo "VM $VM_NAME already exists — updating startup-script metadata."
   gcloud compute instances add-metadata "$VM_NAME" --zone="$ZONE" \
@@ -154,7 +121,7 @@ rm -f "$RENDERED_SCRIPT"
 
 cat <<EOF
 
-Done. [$ENV_NAME] VM external IP: $STATIC_IP
+Done. [$ENV_NAME] now pointed at version $VERSION. VM external IP: $STATIC_IP
 
 Once boot + Let's Encrypt provisioning finish (a minute or two), the app is at:
   Console:  https://${CONSOLE_DOMAIN}
@@ -174,8 +141,8 @@ EOF
 
 if [ "$UPDATED_EXISTING_VM" = "1" ]; then
   cat <<EOF
-This reused an existing VM — the new image was pushed but the running
-containers won't pick it up until you apply the refreshed startup script:
+This reused an existing VM — the new version's metadata was written but
+the running containers won't pick it up until you apply it:
   gcloud compute ssh $VM_NAME --zone $ZONE --tunnel-through-iap -- \\
     'sudo google_metadata_script_runner startup'
 EOF

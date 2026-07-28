@@ -3,12 +3,18 @@
 Provisions a single Compute Engine VM running Hebo (all-in-one container),
 Postgres, GreptimeDB, and Caddy via `docker compose`, fronted by HTTPS.
 
+Build and deploy are separate steps: `build.sh` produces a versioned image
+and pushes it; `deploy.sh` points a (possibly already-running) VM at
+whichever version you choose. This means you can build several versions and
+pick which one a given server runs, without rebuilding on every deploy.
+
 ## Files
 
 | File | Role |
 |---|---|
-| `deploy.sh` | Entry point — `./deploy.sh <environment>`. Reserves a static IP, builds/pushes the image, sets up firewall/disk/VM. Safe to re-run (updates in place instead of failing). |
-| `build-image.sh` | Builds the Hebo image with the environment's real domains baked into the console bundle, pushes it to GHCR. Not run directly — called by `deploy.sh`. |
+| `build.sh` | Builds an image tagged with the environment + a version, pushes it to GHCR. Doesn't touch any VM. |
+| `deploy.sh` | Points a VM at a specific already-built version. First run for an environment also provisions the static IP, firewall, disk, and VM. |
+| `lib-domains.sh` | Shared by both — sourced, not run directly. Reserves the static IP and computes the 5 service hostnames. |
 | `startup-script.sh.tmpl` | Template rendered onto the VM at boot. Installs Docker, mounts the data disk, writes the compose file + Caddyfile, brings the stack up. |
 | `environments/qa.env` | QA config — sslip.io hostnames, no domain needed. |
 | `environments/production.env` | Production config — edit `BASE_DOMAIN` before first use. |
@@ -41,17 +47,15 @@ gcloud config get-value project
 gcloud auth list
 ```
 
-## Deploy
+## Build
 
 ```bash
 cd infra/self-hosted/gcp
-./deploy.sh qa           # sslip.io hostnames, zero domain setup
-./deploy.sh production   # edit environments/production.env's BASE_DOMAIN first
+./build.sh qa                  # version defaults to the current git short SHA
+./build.sh qa v2-manual-test    # or name it explicitly
 ```
 
-For `production` (`DOMAIN_MODE=custom`), the script prints the A records to
-create and pauses until you confirm DNS is live — Let's Encrypt needs the
-hostnames resolving before it can issue certs.
+Prints the pushed tag and the exact `deploy.sh` command to run next.
 
 **After the first push to a new environment**, set the GHCR package to
 public (one-time per package, no clean API for this — use the UI):
@@ -61,6 +65,21 @@ public (one-time per package, no clean API for this — use the UI):
 
 Without this, the VM has no pull credentials and `docker compose pull` will
 fail on first boot.
+
+## Deploy
+
+```bash
+./deploy.sh qa a1b2c3d          # deploy that exact version to qa
+./deploy.sh production v1.4.0
+```
+
+For `production` (`DOMAIN_MODE=custom`), the script prints the A records to
+create and pauses until you confirm DNS is live — Let's Encrypt needs the
+hostnames resolving before it can issue certs.
+
+Re-running `deploy.sh` with a different version against an existing VM
+updates its startup-script metadata but doesn't restart anything by itself
+— apply it with the command the script prints at the end.
 
 ## After deploying
 
@@ -75,8 +94,8 @@ Visit the Console URL printed at the end of `deploy.sh`'s output.
 
 ## Setting real secrets
 
-`deploy.sh` never sets real secrets — only a random `AUTH_SECRET` is
-generated on first boot. For OAuth/SMTP/LLM provider keys, SSH in and edit
+Neither script sets real secrets — only a random `AUTH_SECRET` is generated
+on first boot. For OAuth/SMTP/LLM provider keys, SSH in and edit
 `/opt/hebo/.env` directly, then restart:
 
 ```bash
@@ -92,6 +111,8 @@ cd /opt/hebo && sudo docker compose up -d
 - **No Terraform-style state/plan** — `deploy.sh` is imperative gcloud
   commands with `create || echo "already exists"` idempotency, not a real
   state-tracked apply.
+- **No CI wiring** — `build.sh`/`deploy.sh` are run locally by hand. Worth
+  revisiting if this grows beyond one person deploying.
 - **No ingress sharing story with other projects on the same VM yet** —
   Caddy currently owns 80/443 on the box. If another project needs to
   coexist on the same VM, that needs to be resolved before deploying both
