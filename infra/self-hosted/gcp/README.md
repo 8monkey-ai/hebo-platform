@@ -26,7 +26,7 @@ safe to publish as a public package, same trust model as the upstream image.
 
 ## One-time setup
 
-**GHCR push access** — images publish to `ghcr.io/3cat-sdn-bhd/3cat-selfhosted`:
+**GHCR push access** — images publish to `ghcr.io/3cat-sdn-bhd/hebo-platform-selfhosted`:
 
 ```bash
 gh auth refresh -h github.com -s write:packages,read:packages
@@ -56,7 +56,7 @@ hostnames resolving before it can issue certs.
 **After the first push to a new environment**, set the GHCR package to
 public (one-time per package, no clean API for this — use the UI):
 
-`https://github.com/orgs/3cat-Sdn-Bhd/packages/container/3cat-selfhosted/settings`
+`https://github.com/orgs/3cat-Sdn-Bhd/packages/container/hebo-platform-selfhosted/settings`
 → Danger Zone → Change visibility → Public
 
 Without this, the VM has no pull credentials and `docker compose pull` will

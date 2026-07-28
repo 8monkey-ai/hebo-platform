@@ -14,7 +14,7 @@
 #   echo $(gh auth token) | docker login ghcr.io -u buibaoanh --password-stdin
 #
 # After the first push, set the package to public (one-time):
-#   https://github.com/orgs/3cat-Sdn-Bhd/packages/container/3cat-selfhosted/settings
+#   https://github.com/orgs/3cat-Sdn-Bhd/packages/container/hebo-platform-selfhosted/settings
 #
 # Config lives in environments/<environment>.env. Review every command
 # before running — this is meant to be read and executed deliberately,
@@ -29,10 +29,6 @@ ENV_FILE="$SCRIPT_DIR/environments/${ENV_NAME}.env"
 # shellcheck disable=SC1090
 source "$ENV_FILE"
 
-if [ "$PROJECT_ID" = "CHANGE_ME" ]; then
-  echo "Edit $ENV_FILE and set a real PROJECT_ID first." >&2
-  exit 1
-fi
 if [ "$DOMAIN_MODE" = "custom" ] && [ "$BASE_DOMAIN" = "hebo.yourdomain.com" ]; then
   echo "Edit $ENV_FILE and set a real BASE_DOMAIN first." >&2
   exit 1
@@ -41,7 +37,7 @@ fi
 VM_NAME="hebo-${ENV_NAME}"
 STATIC_IP_NAME="hebo-ip-${ENV_NAME}"
 DATA_DISK_NAME="hebo-data-${ENV_NAME}"
-GHCR_REPO="ghcr.io/3cat-sdn-bhd/3cat-selfhosted"
+GHCR_REPO="ghcr.io/3cat-sdn-bhd/hebo-platform-selfhosted"
 IMAGE_TAG="${GHCR_REPO}:${ENV_NAME}"
 IMAGE_FAMILY="debian-12"
 IMAGE_PROJECT="debian-cloud"
