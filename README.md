@@ -71,6 +71,30 @@ Optional: OAuth (`GITHUB_CLIENT_ID`, `GOOGLE_CLIENT_ID`, …) and SMTP (`SMTP_HO
 
 See [`infra/self-hosted/.env.example`](infra/self-hosted/.env.example) for the full variable reference.
 
+#### Custom domains
+
+The console is a static SPA, so the API, Auth and Gateway URLs are compiled into its bundle at build time. The published image is built without them and falls back to `localhost`, which means **serving the console from your own domain requires building your own image** from a checkout of this repository.
+
+Set the URLs in `infra/self-hosted/.env`:
+
+```bash
+VITE_API_URL=https://api.example.com
+VITE_AUTH_URL=https://auth.example.com
+VITE_GATEWAY_URL=https://gateway.example.com
+
+BASE_URL=https://api.example.com
+NODE_ENV=production
+```
+
+Then build and start:
+
+```bash
+cd infra/self-hosted
+docker compose -f docker-compose.yaml -f docker-compose.build.yaml up -d --build
+```
+
+`BASE_URL` configures the server side — CORS, the auth base URL, trusted origins and the session cookie domain. The console and the services must share a registrable domain (`example.com` above), the console must be on a subdomain rather than the apex, and every origin must be `https://`. Using OAuth additionally requires registering `${BASE_URL}/v1/callback/<provider>` with each provider.
+
 ## How Hebo compares
 
 |                 | Hebo              | Langfuse          | Helicone          | Portkey       | LiteLLM     | OpenRouter | Vercel AI  |

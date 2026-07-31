@@ -6,10 +6,13 @@
 #
 # Usage:
 #   docker compose up -d
+#
+# Serving the console from a custom domain requires building your own image —
+# see docker-compose.build.yaml.
 
 services:
   hebo:
-    image: 8monkey/hebo-platform:latest
+    image: ${HEBO_IMAGE:-8monkey/hebo-platform:latest}
     restart: unless-stopped
     ports:
       - "127.0.0.1:8520:8520"

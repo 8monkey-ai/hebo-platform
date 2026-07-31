@@ -1,0 +1,28 @@
+# Hebo self-hosted — build the image locally instead of pulling it.
+#
+# Needed when the console is served from a custom domain. The console is a
+# static SPA whose API/Auth/Gateway URLs are compiled into the bundle by Vite
+# at build time, so the published image cannot know them — it always falls back
+# to localhost. Set the VITE_* variables in .env and build your own image.
+#
+# Requires a full checkout of the repository: the build context is the repo
+# root, not this directory.
+#
+# Usage:
+#   docker compose -f docker-compose.yaml -f docker-compose.build.yaml up -d --build
+#
+# The result is tagged with HEBO_IMAGE (default 8monkey/hebo-platform:latest),
+# which replaces any published image of that name in your local Docker store.
+# Set HEBO_IMAGE in .env to tag it separately or to push to your own registry.
+
+services:
+  hebo:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile
+      args:
+        NODE_ENV: production
+        VITE_API_URL: ${VITE_API_URL:-}
+        VITE_AUTH_URL: ${VITE_AUTH_URL:-}
+        VITE_GATEWAY_URL: ${VITE_GATEWAY_URL:-}
+        VITE_MAGICLINK_AUTH: ${VITE_MAGICLINK_AUTH:-}
