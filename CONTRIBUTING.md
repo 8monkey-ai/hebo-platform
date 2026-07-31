@@ -201,7 +201,7 @@ The Docker image is built from `infra/docker/Dockerfile` and published to Docker
 - **Release** — pushing a `v*` tag builds with `NODE_ENV=production` and tags the image as `v<semver>`
 - **Manual** — trigger the workflow manually for development builds
 
-The console's `VITE_API_URL`, `VITE_AUTH_URL`, `VITE_GATEWAY_URL` and `VITE_MAGICLINK_AUTH` are Vite constants baked into the static bundle, so the Dockerfile takes them as build args. The published image is built without them and falls back to `localhost`; self-hosters on a custom domain build their own image via `infra/self-hosted/docker-compose.build.yaml`.
+The console's `VITE_*` values are Vite constants baked into the bundle, so the Dockerfile takes them as build args. The published image is built without them and falls back to `localhost`; custom-domain deployments build their own image via `infra/self-hosted/docker-compose.build.yaml`.
 
 ### Cloud (AWS ECS)
 

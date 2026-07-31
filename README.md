@@ -93,9 +93,9 @@ cd infra/self-hosted
 docker compose -f docker-compose.yaml -f docker-compose.build.yaml up -d --build
 ```
 
-`BASE_URL` configures the server side — CORS, the auth base URL, trusted origins and the session cookie domain. The console and the services must share a registrable domain (`example.com` above), the console must be on a subdomain rather than the apex, and every origin must be `https://`. Using OAuth additionally requires registering `${BASE_URL}/v1/callback/<provider>` with each provider.
+`BASE_URL` configures the server side: CORS, the auth base URL, trusted origins and the session cookie domain. Point it at your **auth** host — all services share one `BASE_URL` in standalone mode, and auth is the only one that uses it literally, deriving OAuth callbacks as `${BASE_URL}/v1/callback/<provider>` (register that with each provider). The console and the services must share a registrable domain (`example.com` above), the console must be on a subdomain rather than the apex, and every origin must be `https://`.
 
-Point `BASE_URL` at your **auth** host. All five services share one `BASE_URL` in standalone mode, but only the auth service uses it literally — for the OAuth callback URL above — while CORS and cookies only need the registrable domain, which any subdomain resolves to. The one casualty is the `servers` URL advertised in the API and Gateway OpenAPI documents; it is cosmetic and affects generated client defaults rather than live traffic.
+One side effect: the API and Gateway build the `servers` URL in their OpenAPI documents from `BASE_URL`, so it will name the auth host. That affects generated client defaults, not live traffic.
 
 ## How Hebo compares
 

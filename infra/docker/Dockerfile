@@ -27,13 +27,10 @@ COPY --parents package.json bun.lock \
      ./
 RUN bun install --frozen-lockfile
 
-# Console service URLs are compiled into the static bundle by Vite, so they
-# have to be known here rather than at container start. Unset args stay empty
-# and the console falls back to its localhost defaults — fine for a local
-# `docker compose up`, but a custom-domain deployment must pass its own values
-# and therefore build its own image.
-#
-# Declared after `bun install` so changing a domain reuses the dependency layer.
+# Console URLs are Vite constants baked into the bundle, so they must be known
+# here rather than at container start. Unset args keep the localhost fallback in
+# apps/console/app/lib/env.ts. Placed after `bun install` so that changing a
+# domain reuses the dependency layer.
 ARG VITE_API_URL
 ARG VITE_AUTH_URL
 ARG VITE_GATEWAY_URL

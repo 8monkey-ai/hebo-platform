@@ -7,8 +7,7 @@
 # Usage:
 #   docker compose up -d
 #
-# Serving the console from a custom domain requires building your own image —
-# see docker-compose.build.yaml.
+# Custom domains require building your own image — see docker-compose.build.yaml.
 
 services:
   hebo:
