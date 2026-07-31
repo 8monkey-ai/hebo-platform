@@ -82,7 +82,7 @@ VITE_API_URL=https://api.example.com
 VITE_AUTH_URL=https://auth.example.com
 VITE_GATEWAY_URL=https://gateway.example.com
 
-BASE_URL=https://api.example.com
+BASE_URL=https://auth.example.com
 NODE_ENV=production
 ```
 
@@ -94,6 +94,8 @@ docker compose -f docker-compose.yaml -f docker-compose.build.yaml up -d --build
 ```
 
 `BASE_URL` configures the server side — CORS, the auth base URL, trusted origins and the session cookie domain. The console and the services must share a registrable domain (`example.com` above), the console must be on a subdomain rather than the apex, and every origin must be `https://`. Using OAuth additionally requires registering `${BASE_URL}/v1/callback/<provider>` with each provider.
+
+Point `BASE_URL` at your **auth** host. All five services share one `BASE_URL` in standalone mode, but only the auth service uses it literally — for the OAuth callback URL above — while CORS and cookies only need the registrable domain, which any subdomain resolves to. The one casualty is the `servers` URL advertised in the API and Gateway OpenAPI documents; it is cosmetic and affects generated client defaults rather than live traffic.
 
 ## How Hebo compares
 
