@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import type { ProviderV3 } from "@ai-sdk/provider";
+import type { ProviderV4 } from "@ai-sdk/provider";
 import {
   CANONICAL_MODEL_IDS,
   GatewayError,
@@ -27,7 +27,7 @@ const configCache = new LRUCache<string, string>({
   ttl: 5 * 60 * 1000, // 5 minutes
 });
 
-const providerCache = new LRUCache<string, ProviderV3>({
+const providerCache = new LRUCache<string, ProviderV4>({
   max: 100,
 });
 
@@ -129,7 +129,7 @@ async function resolveCustomProvider(
   organizationId: string,
   modelId: string,
   customProviderSlug: ProviderSlug,
-): Promise<ProviderV3 | undefined> {
+): Promise<ProviderV4 | undefined> {
   const configCacheKey = `${organizationId}:${customProviderSlug}:${modelId}`;
   const cachedConfigHash = configCache.get(configCacheKey);
 

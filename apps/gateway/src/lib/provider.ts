@@ -10,7 +10,7 @@ import { createGroq } from "@ai-sdk/groq";
 import { createMoonshotAI } from "@ai-sdk/moonshotai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import type { ProviderV3 } from "@ai-sdk/provider";
+import type { ProviderV4 } from "@ai-sdk/provider";
 import { createTogetherAI } from "@ai-sdk/togetherai";
 import { createXai } from "@ai-sdk/xai";
 import { fromContainerMetadata, fromTemporaryCredentials } from "@aws-sdk/credential-providers";
@@ -133,7 +133,7 @@ export async function loadProviderSecrets() {
   };
 }
 
-export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 {
+export function createProvider(slug: ProviderSlug, config: unknown): ProviderV4 {
   switch (slug) {
     case "bedrock": {
       const bedrockConfig = config as BedrockConfig;
