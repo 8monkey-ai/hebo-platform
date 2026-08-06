@@ -13,6 +13,21 @@ jobs:
     name: Run Quality Checks
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:17.6
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: hebo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d hebo"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -30,6 +45,11 @@ jobs:
 
       - name: Run typecheck
         run: bun run typecheck
+
+      - name: Generate Prisma client and apply migrations
+        run: |
+          bun run -F @hebo/api db generate
+          bun run -F @hebo/api db:deploy
 
       - name: Run tests
         run: bun run test
