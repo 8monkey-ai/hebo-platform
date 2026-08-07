@@ -9,7 +9,6 @@
     "build": "bun build src/index.ts --minify-whitespace --minify-syntax --keep-names --target=bun --outdir dist $([ \"$NODE_ENV\" = production ] && echo '--production')",
     "clean": "git clean -fdx -e '.env*' .",
     "db": "prisma",
-    "db:deploy": "bun run db migrate deploy",
     "db:migrate": "bun run db migrate dev",
     "db:reset": "bun run db migrate reset --force",
     "predev": "test -d src/generated || bun run db generate",

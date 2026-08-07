@@ -49,7 +49,7 @@ jobs:
       - name: Generate Prisma client and apply migrations
         run: |
           bun run -F @hebo/api db generate
-          bun run -F @hebo/api db:deploy
+          bun run -F @hebo/api db migrate deploy
 
       - name: Run tests
         run: bun run test
