@@ -97,7 +97,6 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
           return prisma.provider_configs.findFirst({
             where: {
               provider_slug: slug,
-              created_by: userId,
               deleted_at: DB_NULL,
               organization_id: organizationId,
             },
