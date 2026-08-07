@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import type { ProviderV3 } from "@ai-sdk/provider";
+import type { ProviderV4 } from "@ai-sdk/provider";
 import { GatewayError, type ResolveProviderHookContext } from "@hebo-ai/gateway";
 
 import { selectProviderWithByokFallback } from "./hooks";
@@ -15,7 +15,7 @@ function makeCtx(overrides: {
   organizationId?: string;
   modelProviders?: string[];
   providerConfigsResult?: unknown;
-  bedrockProvider?: ProviderV3 | undefined;
+  bedrockProvider?: ProviderV4 | undefined;
 }) {
   return {
     modelId: overrides.modelId,

@@ -289,7 +289,9 @@ export function Chat({
                         </Item>
                       );
                     }
+                    case "custom":
                     case "dynamic-tool":
+                    case "reasoning-file":
                     case "source-document":
                     case "source-url":
                     case "step-start": {

@@ -107,7 +107,9 @@ async function toOpenAIMessage(message: UIMessage): Promise<OpenAIMessage> {
         if (filePart) contentParts.push(filePart);
         break;
       }
+      case "custom":
       case "dynamic-tool":
+      case "reasoning-file":
       case "source-document":
       case "source-url":
       case "step-start":
