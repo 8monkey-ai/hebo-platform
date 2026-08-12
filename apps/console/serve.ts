@@ -14,9 +14,7 @@ const RUNTIME_ENV_KEYS = [
  * runs before the deferred module bundle, so the app sees the config on first read.
  */
 export const injectRuntimeEnv = (html: string, env: Record<string, string | undefined>) => {
-  if (!html.includes("<head>")) {
-    throw new Error("serve.ts: no <head> in index.html — cannot inject runtime config");
-  }
+  if (!html.includes("<head>")) throw new Error("serve.ts: no <head> in index.html");
 
   const values = Object.fromEntries(
     RUNTIME_ENV_KEYS.filter((key) => env[key]).map((key) => [key, env[key]]),

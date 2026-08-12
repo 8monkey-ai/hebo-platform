@@ -22,13 +22,7 @@ declare global {
 // Runtime config, injected into index.html by serve.ts, wins over the values Vite
 // baked in — that's what lets the published image be pointed at any domain without
 // a rebuild. Unset keys are omitted, so the build-time value stays in play.
-const env: ConsoleEnv = {
-  VITE_API_URL: import.meta.env.VITE_API_URL,
-  VITE_AUTH_URL: import.meta.env.VITE_AUTH_URL,
-  VITE_GATEWAY_URL: import.meta.env.VITE_GATEWAY_URL,
-  VITE_MAGICLINK_AUTH: import.meta.env.VITE_MAGICLINK_AUTH,
-  ...globalThis.heboEnv,
-};
+const env: ConsoleEnv = { ...import.meta.env, ...globalThis.heboEnv };
 
 // oxlint-disable prefer-nullish-coalescing -- empty string should use the fallback URL
 export const apiUrl = useMocks
