@@ -8,16 +8,38 @@ const isReachable = (url: string) =>
 
 export const useMocks = shouldAutoDetect && !(await isReachable("http://localhost:8521"));
 
+type ConsoleEnv = {
+  VITE_API_URL?: string;
+  VITE_AUTH_URL?: string;
+  VITE_GATEWAY_URL?: string;
+  VITE_MAGICLINK_AUTH?: string;
+};
+
+declare global {
+  var heboEnv: ConsoleEnv | undefined;
+}
+
+// Runtime config, injected into index.html by serve.ts, wins over the values Vite
+// baked in — that's what lets the published image be pointed at any domain without
+// a rebuild. Unset keys are omitted, so the build-time value stays in play.
+const env: ConsoleEnv = {
+  VITE_API_URL: import.meta.env.VITE_API_URL,
+  VITE_AUTH_URL: import.meta.env.VITE_AUTH_URL,
+  VITE_GATEWAY_URL: import.meta.env.VITE_GATEWAY_URL,
+  VITE_MAGICLINK_AUTH: import.meta.env.VITE_MAGICLINK_AUTH,
+  ...globalThis.heboEnv,
+};
+
 // oxlint-disable prefer-nullish-coalescing -- empty string should use the fallback URL
 export const apiUrl = useMocks
   ? "http://localhost:8520/api"
-  : import.meta.env.VITE_API_URL || "http://localhost:8521";
+  : env.VITE_API_URL || "http://localhost:8521";
 
-export const authUrl = import.meta.env.VITE_AUTH_URL || "http://localhost:8523";
+export const authUrl = env.VITE_AUTH_URL || "http://localhost:8523";
 
 export const gatewayUrl = useMocks
   ? "http://localhost:8520/gateway"
-  : import.meta.env.VITE_GATEWAY_URL || "http://localhost:8522";
+  : env.VITE_GATEWAY_URL || "http://localhost:8522";
 // oxlint-enable prefer-nullish-coalescing
 
-export const magicLinkAuth = import.meta.env.VITE_MAGICLINK_AUTH === "true";
+export const magicLinkAuth = env.VITE_MAGICLINK_AUTH === "true";
