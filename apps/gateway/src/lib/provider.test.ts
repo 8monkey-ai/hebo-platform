@@ -59,6 +59,28 @@ describe("createProvider", () => {
       expect(provider).toBeDefined();
     });
 
+    it("serves GPT-5.x from mantle and everything else from converse with an IAM role", () => {
+      const provider = createProvider("bedrock", {
+        authMode: "iam-role",
+        bedrockRoleArn: "arn:aws:iam::123456789012:role/test-role",
+        region: "us-east-1",
+      });
+      expect(provider.languageModel("openai/gpt-5.6-sol").provider).toBe(
+        "bedrock-mantle.responses",
+      );
+      expect(provider.languageModel("anthropic/claude-opus-5").provider).toBe("amazon-bedrock");
+    });
+
+    it("serves GPT-5.x from mantle with access-key credentials", () => {
+      const provider = createProvider("bedrock", {
+        authMode: "access-key",
+        accessKeyId: "AKIA1234567890ABCDEF",
+        secretAccessKey: "secretkey123",
+        region: "us-east-1",
+      });
+      expect(provider.languageModel("openai/gpt-5.5").provider).toBe("bedrock-mantle.responses");
+    });
+
     it("returns a provider when authMode is invalid (fallback)", () => {
       const provider = createProvider("bedrock", {
         authMode: "api-key",
