@@ -1,18 +1,13 @@
 import { resolve } from "node:path";
 
-// Public config the console resolves at runtime, so one prebuilt image can be pointed at
-// any domain. Allowlisted, not VITE_-prefix-filtered: these land in publicly served HTML.
-const RUNTIME_ENV_KEYS = [
-  "VITE_API_URL",
-  "VITE_AUTH_URL",
-  "VITE_GATEWAY_URL",
-  "VITE_MAGICLINK_AUTH",
-] as const;
-
-/** Inlines `window.heboEnv` into `<head>`, where it runs before the deferred module bundle. */
+/**
+ * Inlines every set `VITE_` var as `window.heboEnv` into `<head>`, where it runs before the
+ * deferred module bundle. Same prefix Vite exposes at build time, so one prebuilt image can
+ * be pointed at any domain. Consumed by app/lib/env.ts.
+ */
 export const injectRuntimeEnv = (html: string, env: Record<string, string | undefined>) => {
   const values = Object.fromEntries(
-    RUNTIME_ENV_KEYS.filter((key) => env[key]).map((key) => [key, env[key]]),
+    Object.entries(env).filter(([key, value]) => key.startsWith("VITE_") && value),
   );
   // Escape `<` so a stray "</script>" in a value can't close the tag early.
   const json = JSON.stringify(values).replaceAll("<", "\\u003c");
@@ -30,7 +25,8 @@ if (import.meta.main) {
     async fetch(req) {
       const path = new URL(req.url).pathname;
 
-      if (path !== "/") {
+      // /index.html must fall through, or it serves the build artifact without the config.
+      if (path !== "/" && path !== "/index.html") {
         const file = Bun.file(`${dir}${path}`);
         if (await file.exists()) return new Response(file);
 
