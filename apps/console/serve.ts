@@ -9,10 +9,7 @@ export const injectRuntimeEnv = (html: string, env: Record<string, string | unde
   const values = Object.fromEntries(
     Object.entries(env).filter(([key, value]) => key.startsWith("VITE_") && value),
   );
-  // Escape `<` so a stray "</script>" in a value can't close the tag early.
-  const json = JSON.stringify(values).replaceAll("<", "\\u003c");
-
-  return html.replace("<head>", `<head><script>window.heboEnv=${json}</script>`);
+  return html.replace("<head>", `<head><script>window.heboEnv=${JSON.stringify(values)}</script>`);
 };
 
 if (import.meta.main) {

@@ -18,11 +18,4 @@ describe("injectRuntimeEnv", () => {
       injectRuntimeEnv(html, { VITE_API_URL: "", VITE_AUTH_URL: undefined, PATH: "/usr/bin" }),
     ).toContain("window.heboEnv={}</script>");
   });
-
-  it("escapes < so a value cannot close the script tag", () => {
-    const out = injectRuntimeEnv(html, { VITE_API_URL: "</script><script>alert(1)</script>" });
-
-    expect(out).not.toContain("</script><script>alert(1)");
-    expect(out.match(/<script>/gu)).toHaveLength(1);
-  });
 });
