@@ -1,7 +1,7 @@
 import { resolve } from "node:path";
 
-// Public config the console resolves at runtime rather than at build time, so one
-// prebuilt image can be pointed at any domain. Consumed by app/lib/env.ts.
+// Public config the console resolves at runtime, so one prebuilt image can be pointed at
+// any domain. Allowlisted, not VITE_-prefix-filtered: these land in publicly served HTML.
 const RUNTIME_ENV_KEYS = [
   "VITE_API_URL",
   "VITE_AUTH_URL",
@@ -9,13 +9,8 @@ const RUNTIME_ENV_KEYS = [
   "VITE_MAGICLINK_AUTH",
 ] as const;
 
-/**
- * Inlines `window.heboEnv` at the top of `<head>`. A classic inline script
- * runs before the deferred module bundle, so the app sees the config on first read.
- */
+/** Inlines `window.heboEnv` into `<head>`, where it runs before the deferred module bundle. */
 export const injectRuntimeEnv = (html: string, env: Record<string, string | undefined>) => {
-  if (!html.includes("<head>")) throw new Error("serve.ts: no <head> in index.html");
-
   const values = Object.fromEntries(
     RUNTIME_ENV_KEYS.filter((key) => env[key]).map((key) => [key, env[key]]),
   );

@@ -23,8 +23,4 @@ describe("injectRuntimeEnv", () => {
     expect(out).not.toContain("</script><script>alert(1)");
     expect(out.match(/<script>/gu)).toHaveLength(1);
   });
-
-  it("fails loudly rather than silently dropping config", () => {
-    expect(() => injectRuntimeEnv("<html><body></body></html>", {})).toThrow(/no <head>/u);
-  });
 });

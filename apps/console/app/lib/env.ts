@@ -8,21 +8,12 @@ const isReachable = (url: string) =>
 
 export const useMocks = shouldAutoDetect && !(await isReachable("http://localhost:8521"));
 
-type ConsoleEnv = {
-  VITE_API_URL?: string;
-  VITE_AUTH_URL?: string;
-  VITE_GATEWAY_URL?: string;
-  VITE_MAGICLINK_AUTH?: string;
-};
-
 declare global {
-  var heboEnv: ConsoleEnv | undefined;
+  var heboEnv: Record<string, string | undefined> | undefined;
 }
 
-// Runtime config, injected into index.html by serve.ts, wins over the values Vite
-// baked in — that's what lets the published image be pointed at any domain without
-// a rebuild. Unset keys are omitted, so the build-time value stays in play.
-const env: ConsoleEnv = { ...import.meta.env, ...globalThis.heboEnv };
+// Runtime config from serve.ts wins; unset keys fall through to the build-time values.
+const env = { ...import.meta.env, ...globalThis.heboEnv };
 
 // oxlint-disable prefer-nullish-coalescing -- empty string should use the fallback URL
 export const apiUrl = useMocks
