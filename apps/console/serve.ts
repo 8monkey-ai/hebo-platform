@@ -1,23 +1,41 @@
 import { resolve } from "node:path";
 
-const port = Number(process.env.PORT ?? 8520);
-const dir = resolve(import.meta.dirname, "build/client");
-const indexFile = Bun.file(`${dir}/index.html`);
+/**
+ * Inlines every set `VITE_` var as `window.heboEnv` into `<head>`, where it runs before the
+ * deferred module bundle. Same prefix Vite exposes at build time, so one prebuilt image can
+ * be pointed at any domain. Consumed by app/lib/env.ts.
+ */
+export const injectRuntimeEnv = (html: string, env: Record<string, string | undefined>) => {
+  const values = Object.fromEntries(
+    Object.entries(env).filter(([key, value]) => key.startsWith("VITE_") && value),
+  );
+  return html.replace("<head>", `<head><script>window.heboEnv=${JSON.stringify(values)}</script>`);
+};
 
-Bun.serve({
-  port,
-  async fetch(req) {
-    const path = new URL(req.url).pathname;
+if (import.meta.main) {
+  const port = Number(process.env.PORT ?? 8520);
+  const dir = resolve(import.meta.dirname, "build/client");
+  const indexHtml = injectRuntimeEnv(await Bun.file(`${dir}/index.html`).text(), process.env);
 
-    if (path !== "/") {
-      const file = Bun.file(`${dir}${path}`);
-      if (await file.exists()) return new Response(file);
+  Bun.serve({
+    port,
+    async fetch(req) {
+      const path = new URL(req.url).pathname;
 
-      // Static asset miss (has extension) => 404
-      if (path.includes(".")) return new Response("Not Found", { status: 404 });
-    }
+      // /index.html must fall through, or it serves the build artifact without the config.
+      if (path !== "/" && path !== "/index.html") {
+        const file = Bun.file(`${dir}${path}`);
+        if (await file.exists()) return new Response(file);
 
-    // SPA fallback for client-side routes
-    return new Response(indexFile);
-  },
-});
+        // Static asset miss (has extension) => 404
+        if (path.includes(".")) return new Response("Not Found", { status: 404 });
+      }
+
+      // SPA fallback for client-side routes. Revalidate always — the document
+      // carries the runtime config, so a stale copy points at the wrong domain.
+      return new Response(indexHtml, {
+        headers: { "content-type": "text/html;charset=utf-8", "cache-control": "no-cache" },
+      });
+    },
+  });
+}
