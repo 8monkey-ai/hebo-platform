@@ -71,6 +71,19 @@ Optional: OAuth (`GITHUB_CLIENT_ID`, `GOOGLE_CLIENT_ID`, …) and SMTP (`SMTP_HO
 
 See [`infra/self-hosted/.env.example`](infra/self-hosted/.env.example) for the full variable reference.
 
+#### Custom domain
+
+The console is configured at container start, not at image build time, so pointing it at your own domain needs no rebuild — set these in `.env` and restart:
+
+| Variable                                            | Why                                                                    |
+| --------------------------------------------------- | ---------------------------------------------------------------------- |
+| `VITE_API_URL`, `VITE_AUTH_URL`, `VITE_GATEWAY_URL` | Where the browser calls each service — must be reachable from the user |
+| `BASE_URL`                                          | Your root domain, e.g. `https://example.com`                           |
+
+`BASE_URL` is what restricts CORS and auth to your domain and scopes the session cookie. Leave it unset and every origin is accepted — set it for any deployment reachable from the internet.
+
+Serve each service on a subdomain of that root domain (`api.`, `auth.`, `gateway.`) so the shared session cookie applies.
+
 ## How Hebo compares
 
 |                 | Hebo              | Langfuse          | Helicone          | Portkey       | LiteLLM     | OpenRouter | Vercel AI  |

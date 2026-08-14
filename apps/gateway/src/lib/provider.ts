@@ -141,30 +141,26 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV4 
       switch (bedrockConfig.authMode) {
         case "access-key": {
           const { accessKeyId, secretAccessKey, region } = bedrockConfig;
-          return withCanonicalIdsForBedrock(
-            createAmazonBedrock({
-              region,
-              credentialProvider: () => Promise.resolve({ accessKeyId, secretAccessKey }),
-            }),
-          );
+          const credentialProvider = () => Promise.resolve({ accessKeyId, secretAccessKey });
+          // Mantle serves the GPT-5.x models and signs for `bedrock-mantle` instead of
+          // `bedrock`, so it needs its own copy of the credentials.
+          return withCanonicalIdsForBedrock(createAmazonBedrock({ region, credentialProvider }), {
+            mantle: { credentialProvider },
+          });
         }
         case "iam-role": {
           const { bedrockRoleArn, region } = bedrockConfig;
-          return withCanonicalIdsForBedrock(
-            createAmazonBedrock({
-              region,
-              credentialProvider: fromTemporaryCredentials({
-                params: { RoleArn: bedrockRoleArn },
-                masterCredentials: fromContainerMetadata(),
-                clientConfig: { region },
-              }),
-            }),
-            {
-              inferenceProfile: {
-                arn: { accountId: bedrockRoleArn?.split(":")[4], region },
-              },
+          const credentialProvider = fromTemporaryCredentials({
+            params: { RoleArn: bedrockRoleArn },
+            masterCredentials: fromContainerMetadata(),
+            clientConfig: { region },
+          });
+          return withCanonicalIdsForBedrock(createAmazonBedrock({ region, credentialProvider }), {
+            inferenceProfile: {
+              arn: { accountId: bedrockRoleArn?.split(":")[4], region },
             },
-          );
+            mantle: { credentialProvider },
+          });
         }
         default:
           return withCanonicalIdsForBedrock(createAmazonBedrock());
