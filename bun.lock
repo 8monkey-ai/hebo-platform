@@ -136,7 +136,7 @@
         "@elysia/cors": "catalog:",
         "@elysia/openapi": "catalog:",
         "@elysia/opentelemetry": "catalog:",
-        "@hebo-ai/gateway": "0.12.1",
+        "@hebo-ai/gateway": "0.12.2",
         "@hebo/api": "workspace:*",
         "@hebo/shared-api": "workspace:*",
         "@opentelemetry/api": "catalog:",
@@ -629,7 +629,7 @@
 
     "@grpc/proto-loader": ["@grpc/proto-loader@0.8.0", "", { "dependencies": { "lodash.camelcase": "^4.3.0", "long": "^5.0.0", "protobufjs": "^7.5.3", "yargs": "^17.7.2" }, "bin": { "proto-loader-gen-types": "build/bin/proto-loader-gen-types.js" } }, "sha512-rc1hOQtjIWGxcxpb9aHAfLpIctjEnsDehj0DAiVfBlmT84uvR0uUtN2hEi/ecvWVjXUGf5qPF4qEgiLOx1YIMQ=="],
 
-    "@hebo-ai/gateway": ["@hebo-ai/gateway@0.12.1", "", { "dependencies": { "@ai-sdk/provider": "^4.0.5", "ai": "^7.0.52", "lru-cache": "^11.5.2", "uuid": "^14.0.1", "zod": "^4.3.6" }, "peerDependencies": { "@ai-sdk/alibaba": "^2.0.25", "@ai-sdk/amazon-bedrock": "^5.0.43", "@ai-sdk/anthropic": "^4.0.30", "@ai-sdk/cohere": "^4.0.21", "@ai-sdk/deepinfra": "^3.0.23", "@ai-sdk/deepseek": "^3.0.22", "@ai-sdk/fireworks": "^3.0.25", "@ai-sdk/google-vertex": "^5.0.41", "@ai-sdk/groq": "^4.0.22", "@ai-sdk/moonshotai": "^3.0.26", "@ai-sdk/openai": "^4.0.30", "@ai-sdk/togetherai": "^3.0.24", "@ai-sdk/xai": "^4.0.28", "@libsql/client": "^0.17.3", "@opentelemetry/api": "^1.9.1", "better-sqlite3": "^12.9.0", "mysql2": "^3.22.3", "pg": "^8.20.0", "postgres": "^3.4.9", "typescript": ">=5.9.3", "voyage-ai-provider": "^4.0.0", "zhipu-ai-provider": "^0.4.0" }, "optionalPeers": ["@ai-sdk/alibaba", "@ai-sdk/amazon-bedrock", "@ai-sdk/anthropic", "@ai-sdk/cohere", "@ai-sdk/deepinfra", "@ai-sdk/deepseek", "@ai-sdk/fireworks", "@ai-sdk/google-vertex", "@ai-sdk/groq", "@ai-sdk/moonshotai", "@ai-sdk/openai", "@ai-sdk/togetherai", "@ai-sdk/xai", "@libsql/client", "better-sqlite3", "mysql2", "pg", "postgres", "voyage-ai-provider", "zhipu-ai-provider"] }, "sha512-7dN7mYc+p5AITROZrkIxKr2GyUF4SLcCETE7OYtfykTZqQjb2KOr4ZNYvLDgUycEuTp7SRHK8C+NbHYKDjlVBA=="],
+    "@hebo-ai/gateway": ["@hebo-ai/gateway@0.12.2", "", { "dependencies": { "@ai-sdk/provider": "^4.0.5", "ai": "^7.0.52", "lru-cache": "^11.5.2", "uuid": "^14.0.1", "zod": "^4.3.6" }, "peerDependencies": { "@ai-sdk/alibaba": "^2.0.25", "@ai-sdk/amazon-bedrock": "^5.0.43", "@ai-sdk/anthropic": "^4.0.30", "@ai-sdk/cohere": "^4.0.21", "@ai-sdk/deepinfra": "^3.0.23", "@ai-sdk/deepseek": "^3.0.22", "@ai-sdk/fireworks": "^3.0.25", "@ai-sdk/google-vertex": "^5.0.41", "@ai-sdk/groq": "^4.0.22", "@ai-sdk/moonshotai": "^3.0.26", "@ai-sdk/openai": "^4.0.30", "@ai-sdk/togetherai": "^3.0.24", "@ai-sdk/xai": "^4.0.28", "@libsql/client": "^0.17.3", "@opentelemetry/api": "^1.9.1", "better-sqlite3": "^12.9.0", "mysql2": "^3.22.3", "pg": "^8.20.0", "postgres": "^3.4.9", "typescript": ">=5.9.3", "voyage-ai-provider": "^4.0.0", "zhipu-ai-provider": "^0.4.0" }, "optionalPeers": ["@ai-sdk/alibaba", "@ai-sdk/amazon-bedrock", "@ai-sdk/anthropic", "@ai-sdk/cohere", "@ai-sdk/deepinfra", "@ai-sdk/deepseek", "@ai-sdk/fireworks", "@ai-sdk/google-vertex", "@ai-sdk/groq", "@ai-sdk/moonshotai", "@ai-sdk/openai", "@ai-sdk/togetherai", "@ai-sdk/xai", "@libsql/client", "better-sqlite3", "mysql2", "pg", "postgres", "voyage-ai-provider", "zhipu-ai-provider"] }, "sha512-StekTsNmGuGBubfJvUs4b4Vd9rWtS39WY7eAHs3xbfY2qL1jR5GXYQC6z4yxA4N1ViceLAjnjB+CoEwnd+AzxQ=="],
 
     "@hebo/aikit-ui": ["@hebo/aikit-ui@workspace:packages/aikit-ui"],
 
