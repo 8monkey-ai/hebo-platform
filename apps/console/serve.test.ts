@@ -18,6 +18,9 @@ describe("injectRuntimeEnv", () => {
       'window.heboEnv={"VITE_MAGICLINK_AUTH":"true"}</script>',
     );
     expect(
+      injectRuntimeEnv(html, { SMTP_HOST: "smtp.example.com", VITE_MAGICLINK_AUTH: "" }),
+    ).toContain('window.heboEnv={"VITE_MAGICLINK_AUTH":"true"}</script>');
+    expect(
       injectRuntimeEnv(html, {
         SMTP_HOST: "smtp.example.com",
         VITE_MAGICLINK_AUTH: "false",

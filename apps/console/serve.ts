@@ -8,7 +8,7 @@ export const injectRuntimeEnv = (html: string, env: Record<string, string | unde
   const values = Object.fromEntries(
     Object.entries(env).filter(([key, value]) => key.startsWith("VITE_") && value),
   );
-  if (env.SMTP_HOST && env.VITE_MAGICLINK_AUTH === undefined) values.VITE_MAGICLINK_AUTH = "true";
+  if (env.SMTP_HOST && !env.VITE_MAGICLINK_AUTH) values.VITE_MAGICLINK_AUTH = "true";
   return html.replace("<head>", `<head><script>window.heboEnv=${JSON.stringify(values)}</script>`);
 };
 
