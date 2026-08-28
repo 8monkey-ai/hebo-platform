@@ -1,14 +1,14 @@
 import { resolve } from "node:path";
 
 /**
- * Inlines every set `VITE_` var as `window.heboEnv` into `<head>`, where it runs before the
- * deferred module bundle. Same prefix Vite exposes at build time, so one prebuilt image can
- * be pointed at any domain. Consumed by app/lib/env.ts.
+ * Inlines runtime console settings before the deferred module bundle runs. Standalone mode
+ * derives the magic-link setting from SMTP_HOST to match the distributed deployment.
  */
 export const injectRuntimeEnv = (html: string, env: Record<string, string | undefined>) => {
   const values = Object.fromEntries(
     Object.entries(env).filter(([key, value]) => key.startsWith("VITE_") && value),
   );
+  if (env.SMTP_HOST && env.VITE_MAGICLINK_AUTH === undefined) values.VITE_MAGICLINK_AUTH = "true";
   return html.replace("<head>", `<head><script>window.heboEnv=${JSON.stringify(values)}</script>`);
 };
 
