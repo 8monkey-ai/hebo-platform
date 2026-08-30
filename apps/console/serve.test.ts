@@ -13,6 +13,21 @@ describe("injectRuntimeEnv", () => {
     );
   });
 
+  it("derives magic-link auth from SMTP_HOST unless explicitly set", () => {
+    expect(injectRuntimeEnv(html, { SMTP_HOST: "smtp.example.com" })).toContain(
+      'window.heboEnv={"VITE_MAGICLINK_AUTH":"true"}</script>',
+    );
+    expect(
+      injectRuntimeEnv(html, { SMTP_HOST: "smtp.example.com", VITE_MAGICLINK_AUTH: "" }),
+    ).toContain('window.heboEnv={"VITE_MAGICLINK_AUTH":"true"}</script>');
+    expect(
+      injectRuntimeEnv(html, {
+        SMTP_HOST: "smtp.example.com",
+        VITE_MAGICLINK_AUTH: "false",
+      }),
+    ).toContain('window.heboEnv={"VITE_MAGICLINK_AUTH":"false"}</script>');
+  });
+
   it("omits non-VITE, unset, and empty values so build-time defaults still apply", () => {
     expect(
       injectRuntimeEnv(html, { VITE_API_URL: "", VITE_AUTH_URL: undefined, PATH: "/usr/bin" }),
