@@ -14,6 +14,7 @@ import type { ProviderV4 } from "@ai-sdk/provider";
 import { createTogetherAI } from "@ai-sdk/togetherai";
 import { createXai } from "@ai-sdk/xai";
 import { fromContainerMetadata, fromTemporaryCredentials } from "@aws-sdk/credential-providers";
+import { withCanonicalIds } from "@hebo-ai/gateway";
 import { withCanonicalIdsForAlibaba } from "@hebo-ai/gateway/providers/alibaba";
 import { withCanonicalIdsForAnthropic } from "@hebo-ai/gateway/providers/anthropic";
 import { withCanonicalIdsForBedrock } from "@hebo-ai/gateway/providers/bedrock";
@@ -219,7 +220,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV4 
     }
     case "azure": {
       const { apiKey, resourceName } = config as AzureConfig;
-      return createAzure({ apiKey, resourceName });
+      return withCanonicalIds(createAzure({ apiKey, resourceName }));
     }
     case "deepseek": {
       const { apiKey } = config as ApiKeyConfig;
