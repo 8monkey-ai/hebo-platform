@@ -196,6 +196,15 @@ describe("createProvider", () => {
       });
       expect(provider).toBeDefined();
     });
+
+    it("removes the canonical namespace from Azure deployment IDs", () => {
+      const provider = createProvider("azure", {
+        authMode: "resource-api-key",
+        apiKey: "key123",
+        resourceName: "my-resource",
+      });
+      expect(provider.languageModel("openai/gpt-5.6-luna").modelId).toBe("gpt-5.6-luna");
+    });
   });
 
   describe("api key providers", () => {

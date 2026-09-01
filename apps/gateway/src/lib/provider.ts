@@ -16,6 +16,7 @@ import { createXai } from "@ai-sdk/xai";
 import { fromContainerMetadata, fromTemporaryCredentials } from "@aws-sdk/credential-providers";
 import { withCanonicalIdsForAlibaba } from "@hebo-ai/gateway/providers/alibaba";
 import { withCanonicalIdsForAnthropic } from "@hebo-ai/gateway/providers/anthropic";
+import { withCanonicalIdsForAzure } from "@hebo-ai/gateway/providers/azure";
 import { withCanonicalIdsForBedrock } from "@hebo-ai/gateway/providers/bedrock";
 import { withCanonicalIdsForChutes } from "@hebo-ai/gateway/providers/chutes";
 import { withCanonicalIdsForDeepInfra } from "@hebo-ai/gateway/providers/deepinfra";
@@ -219,7 +220,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV4 
     }
     case "azure": {
       const { apiKey, resourceName } = config as AzureConfig;
-      return createAzure({ apiKey, resourceName });
+      return withCanonicalIdsForAzure(createAzure({ apiKey, resourceName }));
     }
     case "deepseek": {
       const { apiKey } = config as ApiKeyConfig;
