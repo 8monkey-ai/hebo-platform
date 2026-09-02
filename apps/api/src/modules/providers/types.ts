@@ -152,6 +152,31 @@ export const ProviderConfiguredSchema = z.object({
 
 export const ProvidersSchema = z.array(ProviderSchema);
 
+export const ModelParametersSchema = z.object({
+  temperature: z.number().min(0).max(2).optional(),
+  top_p: z.number().min(0).max(1).optional(),
+  max_tokens: z.number().int().positive().optional(),
+  frequency_penalty: z.number().min(-2).max(2).optional(),
+  presence_penalty: z.number().min(-2).max(2).optional(),
+  seed: z.number().int().optional(),
+  reasoning: z
+    .object({
+      enabled: z.boolean().optional(),
+      effort: z.enum(["none", "minimal", "low", "medium", "high", "xhigh", "max"]).optional(),
+      max_tokens: z.number().int().positive().optional(),
+      exclude: z.boolean().optional(),
+      summary: z.enum(["none", "auto", "concise", "detailed"]).optional(),
+    })
+    .optional(),
+  service_tier: z.enum(["default", "auto", "flex", "scale", "priority"]).optional(),
+  cache_control: z
+    .object({
+      type: z.literal("ephemeral"),
+      ttl: z.enum(["5m", "1h", "24h"]).optional(),
+    })
+    .optional(),
+});
+
 export const ModelConfigSchema = z.object({
   alias: z
     .string()
@@ -165,6 +190,7 @@ export const ModelConfigSchema = z.object({
         .transform((value) => value.filter((v): v is string => v !== undefined)),
     })
     .optional(),
+  parameters: ModelParametersSchema.optional(),
 });
 
 export const ModelsConfigSchema = z.array(ModelConfigSchema);
@@ -183,5 +209,6 @@ export type ProviderConfig = z.infer<typeof ProviderConfigSchema>;
 export type Provider = z.infer<typeof ProviderSchema>;
 export type Providers = z.infer<typeof ProvidersSchema>;
 
+export type ModelParameters = z.infer<typeof ModelParametersSchema>;
 export type ModelConfig = z.infer<typeof ModelConfigSchema>;
 export type ModelsConfig = z.infer<typeof ModelsConfigSchema>;
