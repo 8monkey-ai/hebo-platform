@@ -25,9 +25,22 @@ const OPTIONAL_SPAN_COLUMNS = [
   { column: "span_attributes.gen_ai.request.reasoning.max_tokens", alias: "reasoning_max_tokens" },
 ] as const;
 
+/** Request-parameter columns surfaced unaliased so they flow into spanAttributes. */
+const REQUEST_PARAM_COLUMNS = [
+  "span_attributes.gen_ai.request.stream",
+  "span_attributes.gen_ai.request.temperature",
+  "span_attributes.gen_ai.request.max_tokens",
+  "span_attributes.gen_ai.request.top_p",
+  "span_attributes.gen_ai.request.frequency_penalty",
+  "span_attributes.gen_ai.request.presence_penalty",
+  "span_attributes.gen_ai.request.stop_sequences",
+  "span_attributes.gen_ai.request.seed",
+  "span_attributes.gen_ai.request.service_tier",
+] as const;
+
 const traceColumnsCache = new LRUCache<
   string,
-  { metadataColumns: string[]; optionalColumns: Set<string> }
+  { metadataColumns: string[]; optionalColumns: Set<string>; requestParamColumns: string[] }
 >({
   max: 1,
   ttl: 2_000,
@@ -36,23 +49,31 @@ const traceColumnsCache = new LRUCache<
 async function getTraceColumnNames(greptimeDb: GreptimeDb) {
   const cached = traceColumnsCache.get("trace_columns");
   if (cached) return cached;
+
+  const allOptional = [
+    ...OPTIONAL_SPAN_COLUMNS.map(({ column }) => column),
+    ...REQUEST_PARAM_COLUMNS,
+  ];
   const rows = await greptimeDb.unsafe<Array<{ column_name: string }>>(
     `SELECT column_name
      FROM information_schema.columns
      WHERE table_name = 'opentelemetry_traces'
        AND (column_name LIKE $1
-         OR column_name IN (${OPTIONAL_SPAN_COLUMNS.map((_, i) => `$${i + 2}`).join(", ")}))`,
-    [`${METADATA_PREFIX}%`, ...OPTIONAL_SPAN_COLUMNS.map(({ column }) => column)],
+         OR column_name IN (${allOptional.map((_, i) => `$${i + 2}`).join(", ")}))`,
+    [`${METADATA_PREFIX}%`, ...allOptional],
   );
 
   const metadataColumns: string[] = [];
   const optionalColumns = new Set<string>();
+  const requestParamColumns: string[] = [];
+  const requestParamSet = new Set<string>(REQUEST_PARAM_COLUMNS);
   for (const { column_name } of rows) {
     const name = column_name;
     if (name.startsWith(METADATA_PREFIX)) metadataColumns.push(name);
+    else if (requestParamSet.has(name)) requestParamColumns.push(name);
     else optionalColumns.add(name);
   }
-  const result = { metadataColumns, optionalColumns };
+  const result = { metadataColumns, optionalColumns, requestParamColumns };
   traceColumnsCache.set("trace_columns", result);
   return result;
 }
@@ -167,7 +188,8 @@ export async function getSpans(
   branchSlug: string,
   traceId: string,
 ) {
-  const { metadataColumns, optionalColumns } = await getTraceColumnNames(greptimeDb);
+  const { metadataColumns, optionalColumns, requestParamColumns } =
+    await getTraceColumnNames(greptimeDb);
 
   const metadataSelectSql = metadataColumns
     .map((col) => `"${escapeSqlIdentifier(col)}"`)
@@ -178,6 +200,10 @@ export async function getSpans(
       ? `"${escapeSqlIdentifier(column)}" AS "${escapeSqlIdentifier(alias)}"`
       : `NULL AS "${escapeSqlIdentifier(alias)}"`,
   ).join(",\n      ");
+
+  const requestParamSql = requestParamColumns
+    .map((col) => `"${escapeSqlIdentifier(col)}"`)
+    .join(",\n      ");
 
   const queryText = `
     SELECT
@@ -201,6 +227,7 @@ export async function getSpans(
       "span_attributes.hebo.agent.slug",
       "span_attributes.hebo.branch.slug",
       "span_attributes.hebo.organization.id"
+      ${requestParamSql ? `,\n      ${requestParamSql}` : ""}
       ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
     FROM opentelemetry_traces
     WHERE "trace_id" = $1
