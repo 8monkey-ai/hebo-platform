@@ -31,6 +31,8 @@ ElysiaJS powers `apps/api` and `apps/gateway`; call helpers from `packages/share
 
 Since we are using React Compiler, don't use useMemo, useCallback, and React.memo.
 
+Bun.sql returns `bigint` columns as strings, not numbers. Always parse these string values to numbers before performing arithmetic or numeric comparisons (e.g., HTTP status codes stored as bigint).
+
 ## Console Frontend Patterns
 
 ### Search Params as State
