@@ -59,7 +59,7 @@ describe("createProvider", () => {
       expect(provider).toBeDefined();
     });
 
-    it("serves GPT-5.x from mantle and everything else from converse with an IAM role", () => {
+    it("serves GPT-5.x from mantle, Claude from invoke and everything else from converse with an IAM role", () => {
       const provider = createProvider("bedrock", {
         authMode: "iam-role",
         bedrockRoleArn: "arn:aws:iam::123456789012:role/test-role",
@@ -68,7 +68,10 @@ describe("createProvider", () => {
       expect(provider.languageModel("openai/gpt-5.6-sol").provider).toBe(
         "bedrock-mantle.responses",
       );
-      expect(provider.languageModel("anthropic/claude-opus-5").provider).toBe("amazon-bedrock");
+      expect(provider.languageModel("anthropic/claude-opus-5").provider).toBe(
+        "bedrock.anthropic.messages",
+      );
+      expect(provider.languageModel("google/gemma-3-27b").provider).toBe("amazon-bedrock");
     });
 
     it("serves GPT-5.x from mantle with access-key credentials", () => {
