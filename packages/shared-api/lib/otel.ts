@@ -4,7 +4,6 @@ import type { SeverityNumber } from "@opentelemetry/api-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-proto";
 import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-proto";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-proto";
-import { registerInstrumentations } from "@opentelemetry/instrumentation";
 import { PgInstrumentation } from "@opentelemetry/instrumentation-pg";
 import { CompressionAlgorithm } from "@opentelemetry/otlp-exporter-base";
 import { resourceFromAttributes } from "@opentelemetry/resources";
@@ -82,21 +81,6 @@ export const createOtelLogger = (serviceName: string, minimumSeverity: SeverityN
   return loggerProvider.getLogger(serviceName);
 };
 
-registerInstrumentations({
-  instrumentations: [
-    new PgInstrumentation({
-      requireParentSpan: true,
-      enhancedDatabaseReporting: false,
-    }),
-    new BunSqlInstrumentation({
-      requireParentSpan: true,
-      ignoreConnectionSpans: true,
-      // FUTURE: set to true to avoid leaking sensitive information
-      maskStatement: false,
-    }),
-  ],
-});
-
 export const getOtelConfig = (
   serviceName: string,
   additionalRequestHeaders?: readonly string[],
@@ -104,6 +88,18 @@ export const getOtelConfig = (
 ): ElysiaOpenTelemetryOptions => {
   return {
     serviceName,
+    instrumentations: [
+      new PgInstrumentation({
+        requireParentSpan: true,
+        enhancedDatabaseReporting: false,
+      }),
+      new BunSqlInstrumentation({
+        requireParentSpan: true,
+        ignoreConnectionSpans: true,
+        // FUTURE: set to true to avoid leaking sensitive information
+        maskStatement: false,
+      }),
+    ],
     headersToSpanAttributes: {
       request: [...ALLOWED_REQUEST_HEADERS, ...(additionalRequestHeaders ?? [])],
       response: [...ALLOWED_RESPONSE_HEADERS, ...(additionalResponseHeaders ?? [])],
