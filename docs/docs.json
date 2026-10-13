@@ -83,6 +83,15 @@
         "pages": ["evals/getting-started"]
       },
       {
+        "group": "Integrations",
+        "icon": "plug",
+        "pages": [
+          "integrations/overview",
+          "integrations/claude-desktop",
+          "integrations/codex-desktop"
+        ]
+      },
+      {
         "group": "Changelog",
         "icon": "calendar-days",
         "pages": ["changelog/updates"]

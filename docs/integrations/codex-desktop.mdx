@@ -1,0 +1,47 @@
+---
+title: "Codex Desktop"
+description: "Use the Codex app with Hebo Gateway"
+---
+
+The Codex app reads its settings from `~/.codex/config.toml`. Add Hebo Gateway as a model provider there.
+
+You need the [Codex app](https://developers.openai.com/codex/app), a Hebo API key, and an alias path. See [Overview](/integrations/overview).
+
+## Configure Codex
+
+1. Open `~/.codex/config.toml` (`%USERPROFILE%\.codex\config.toml` on Windows) and add these lines. Replace the `model` value with your alias path:
+
+   ```toml config.toml
+   model_provider = "hebo"
+   model = "my-first-agent/main/default"
+
+   [model_providers.hebo]
+   name = "Hebo"
+   base_url = "https://gateway.hebo.ai/v1"
+   env_key = "HEBO_API_KEY"
+   wire_api = "responses"
+   supports_websockets = false
+   ```
+
+2. Make your API key available to the app. An `export` in your shell profile is not sufficient, because apps that you open from the Dock or the Start menu do not read it.
+
+   <CodeGroup>
+
+   ```bash macOS
+   launchctl setenv HEBO_API_KEY "your_api_key_here"
+   ```
+
+   ```powershell Windows
+   setx HEBO_API_KEY "your_api_key_here"
+   ```
+
+   </CodeGroup>
+
+3. Quit the app fully and open it again.
+
+<Info>On macOS, `launchctl setenv` stops when you log out. Run it again after each login.</Info>
+
+## Troubleshooting
+
+- **Authentication errors:** The app cannot read `HEBO_API_KEY`. Do step 2 again, then restart the app.
+- **The app ignores your changes:** Make sure that you edited `~/.codex/config.toml` in your home directory, not `.codex/config.toml` in a project. Background processes of the app can also keep the old settings. Stop all processes with `codex` or `gpt` in their name, or log out and log in again.

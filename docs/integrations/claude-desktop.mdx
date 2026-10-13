@@ -1,0 +1,30 @@
+---
+title: "Claude Desktop"
+description: "Use the Claude app with Hebo Gateway"
+---
+
+Claude Desktop can send its requests to Hebo Gateway instead of Anthropic. You do not need an Anthropic account.
+
+You need the latest version of [Claude Desktop](https://claude.ai/download), a Hebo API key, and an alias path. See [Overview](/integrations/overview).
+
+## Configure Claude Desktop
+
+1. Open Claude Desktop and click **Help > Troubleshooting > Enable Developer Mode**.
+2. Click **Developer > Configure Third-Party Inference…**.
+3. In the **Connection** section, set **Inference provider** to **Gateway** and enter these values:
+
+   | Field               | Value                     |
+   | ------------------- | ------------------------- |
+   | Gateway base URL    | `https://gateway.hebo.ai` |
+   | Gateway API key     | Your Hebo API key         |
+   | Credential kind     | Static API key            |
+   | Gateway auth scheme | Bearer                    |
+
+4. Add your alias path to the model list.
+5. Click **Apply Changes**. Claude Desktop restarts. On the start screen, choose **Continue with Gateway**, then select your alias in the model picker.
+
+<Tip>Do not add `/v1` to the base URL. Claude Desktop adds it itself.</Tip>
+
+## Troubleshooting
+
+- **Connection errors:** Make sure that the base URL is exactly `https://gateway.hebo.ai` and that the auth scheme is **Bearer**.
