@@ -10,7 +10,7 @@
 #  Used for both self-hosted (standalone) and ECS (single-role) deployments.
 # ---------------------------------------------------------------------------
 
-ARG BUN_VERSION=1.3.12
+ARG BUN_VERSION=1.4.3
 
 ########################  builder  ########################
 FROM oven/bun:${BUN_VERSION} AS builder
