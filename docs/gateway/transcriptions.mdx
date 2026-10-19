@@ -51,15 +51,18 @@ curl https://gateway.hebo.ai/v1/audio/transcriptions \
   }'
 ```
 
+The `format` value can be `flac`, `m4a`, `mp3`, `mp4`, `mpeg`, `mpga`, `ogg`, `pcm`, `wav`, `webm`, or `x-aac`. Audio format support varies by model.
+
 ## Options
 
-- `language` — the language of the audio (e.g. `en`).
-- `prompt` — text that guides the style or the vocabulary of the transcript.
-- `temperature` — a value from `0` to `1`.
-- `response_format` — `json` (default) returns `text` and `usage`. `verbose_json` also returns `language` and `duration` when the model reports them. The timings depend on the model:
-  - `openai/gpt-transcribe` returns no timings. The Gateway always requests `json` from this model.
-  - `google/gemini-3.5-transcribe` and `xai/grok-voice-transcribe-2.0` return word timings in `words`. `segments` is always empty.
-- `timestamp_granularities` — set to `["word"]` to get word timings from `google/gemini-3.5-transcribe`. `xai/grok-voice-transcribe-2.0` always returns word timings. In multipart forms, send this field as `timestamp_granularities[]`.
+- `language`: the language of the audio (for example, `en`).
+- `prompt`: text that guides the transcript's style or vocabulary. Applies only to `openai/gpt-transcribe`.
+- `temperature`: a value from `0` to `1`. Applies only to `openai/gpt-transcribe`.
+- `response_format`: `json` (default) returns `text` and `usage`. `verbose_json` also returns `language`, `duration`, and word timestamps when available. Word timestamps appear in `words`, and `segments` is empty.
+- `timestamp_granularities`: word timestamps require `response_format: "verbose_json"`. In multipart forms, send this field as `timestamp_granularities[]`. Support depends on the model:
+  - `openai/gpt-transcribe`: does not support timestamps.
+  - `google/gemini-3.5-transcribe`: requires `timestamp_granularities: ["word"]`.
+  - `xai/grok-voice-transcribe-2.0`: does not require this option.
 
 ## Supported Models
 
@@ -67,7 +70,8 @@ curl https://gateway.hebo.ai/v1/audio/transcriptions \
 - `google/gemini-3.5-transcribe`
 - `xai/grok-voice-transcribe-2.0`
 
-<Info>
-  Request bodies can be up to 35 MB. Base64 adds about 33% to the size of the audio. Streaming is
-  not supported: `stream: true` returns a `400` error.
-</Info>
+## Limits
+
+Request bodies can be up to 35 MB. Larger requests return a `413` error. Base64 adds about 33% to the size of the audio, so a JSON request can hold about 25 MB of audio.
+
+Streaming is not supported: `stream: true` returns a `400` error.
