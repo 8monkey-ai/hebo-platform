@@ -104,6 +104,9 @@ function ModelSelector({
                         {m.modality === "embedding" && (
                           <Badge className="bg-blue-500 text-white!">Embeddings</Badge>
                         )}
+                        {m.modality === "transcription" && (
+                          <Badge className="bg-violet-500 text-white!">Transcription</Badge>
+                        )}
                       </span>
                     </ComboboxItem>
                   );

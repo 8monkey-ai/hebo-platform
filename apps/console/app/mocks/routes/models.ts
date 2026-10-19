@@ -12,7 +12,7 @@ const SUPPORTED_MODELS = [
         groq: "openai/gpt-oss-120b",
       },
     ],
-    modality: "chat",
+    modality: "text->text",
     free: true,
   },
   {
@@ -21,7 +21,7 @@ const SUPPORTED_MODELS = [
     owner: "anthropic",
     created: 1_764_888_221,
     providers: [{ bedrock: "anthropic.claude-sonnet-4-6-v1:0" }],
-    modality: "chat",
+    modality: "text->text",
     free: false,
   },
   {
@@ -30,7 +30,7 @@ const SUPPORTED_MODELS = [
     owner: "anthropic",
     created: 1_764_888_221,
     providers: [{ bedrock: "anthropic.claude-haiku-4-5-20251001-v1:0" }],
-    modality: "chat",
+    modality: "text->text",
     free: false,
   },
   {
@@ -39,7 +39,7 @@ const SUPPORTED_MODELS = [
     owner: "amazon",
     created: 1_764_888_221,
     providers: [{ bedrock: "amazon.nova-2-multimodal-embeddings-v1:0" }],
-    modality: "embedding",
+    modality: "text->embedding",
     free: true,
   },
   {
@@ -52,7 +52,7 @@ const SUPPORTED_MODELS = [
         voyage: "voyage-3.5",
       },
     ],
-    modality: "embedding",
+    modality: "text->embedding",
     free: false,
   },
   {
@@ -61,7 +61,7 @@ const SUPPORTED_MODELS = [
     owner: "google",
     created: 1_767_837_920,
     providers: [{ vertex: "gemini-2.5-pro" }],
-    modality: "chat",
+    modality: "text->text",
     free: false,
   },
   {
@@ -70,7 +70,7 @@ const SUPPORTED_MODELS = [
     owner: "mistral",
     created: 1_767_837_920,
     providers: [{ bedrock: "mistral.mistral-large-v1:0" }],
-    modality: "chat",
+    modality: "text->text",
     free: false,
   },
   {
@@ -79,8 +79,17 @@ const SUPPORTED_MODELS = [
     owner: "openai",
     created: 1_767_837_920,
     providers: [{ bedrock: "openai.gpt-4o-mini-v1:0" }],
-    modality: "chat",
+    modality: "text->text",
     free: true,
+  },
+  {
+    type: "openai/gpt-transcribe",
+    displayName: "GPT Transcribe",
+    owner: "openai",
+    created: 1_785_283_200,
+    providers: [{ openai: "gpt-transcribe" }],
+    modality: "audio->text",
+    free: false,
   },
 ] as const;
 
@@ -98,7 +107,10 @@ export const modelHandlers = [
             name: model.displayName,
             created: model.created,
             owned_by: model.owner,
-            architecture: { output_modalities: [model.modality] },
+            architecture: {
+              modality: model.modality,
+              output_modalities: [model.modality.split("->")[1]],
+            },
             free: model.free,
           },
           includeEndpoints && {
