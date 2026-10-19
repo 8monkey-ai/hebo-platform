@@ -64,14 +64,8 @@ The `format` value can be `flac`, `m4a`, `mp3`, `mp4`, `mpeg`, `mpga`, `ogg`, `p
   - `google/gemini-3.5-transcribe`: requires `timestamp_granularities: ["word"]`.
   - `xai/grok-voice-transcribe-2.0`: does not require this option.
 
-## Supported Models
-
-- `openai/gpt-transcribe`
-- `google/gemini-3.5-transcribe`
-- `xai/grok-voice-transcribe-2.0`
-
 ## Limits
 
-Request bodies can be up to 35 MB. Larger requests return a `413` error. Base64 adds about 33% to the size of the audio, so a JSON request can hold about 25 MB of audio.
+Request bodies can be up to 35 MB. Larger requests return a `413` error.
 
 Streaming is not supported: `stream: true` returns a `400` error.
