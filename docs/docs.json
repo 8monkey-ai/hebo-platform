@@ -69,6 +69,7 @@
           "gateway/reasoning",
           "gateway/attachments",
           "gateway/embeddings",
+          "gateway/transcriptions",
           "gateway/supported-models"
         ]
       },
