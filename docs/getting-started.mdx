@@ -1,0 +1,39 @@
+---
+title: "Getting Started"
+description: "Create an account and an agent, and get a Hebo API key"
+---
+
+Set up your first Hebo Cloud agent and get a Hebo API key. This guide uses **GPT-OSS 120B**, a **Free Tier** model that does not require provider credentials.
+
+## Create an account
+
+Sign in at [console.hebo.ai](https://console.hebo.ai) with GitHub, Google, Microsoft, or an email code.
+
+On your first sign-in, Hebo creates an organization for your account.
+
+## Create an agent
+
+After your first sign-in, the console shows **Create a new agent**. To create another agent later, open the agent picker in the sidebar and select **Create Agent**.
+
+Enter an **Agent Name**, for example `My First Agent`, select **GPT-OSS 120B** as the **Default Model**, and select **Create**.
+
+Hebo creates the agent with a branch named `main` and a model alias named `default` that uses **GPT-OSS 120B**. A model alias is a name for a model configuration. In the app guides, you use the alias path as the model name.
+
+## Copy the alias path
+
+In **Models**, copy the **Alias path** from the `default` card.
+
+An alias path looks like `my-first-agent-x7k/main/default`. Use the path from your console, not the example.
+
+## Create a Hebo API key
+
+1. In **API Keys**, select **Create API Key**. Enter a **Name**, choose an expiration period under **Expires in**, and select **Create**.
+2. Copy the key and store it in a safe place. The console shows the key only once.
+
+The key belongs to your organization and works with all of its agents. When the key expires, create a new key and update it in your apps.
+
+## Next steps
+
+- Connect an app: [Claude Desktop](/integrations/claude-desktop) or [Codex Desktop](/integrations/codex-desktop).
+- Call the gateway from your code: [Quick Start](/gateway/quick-start).
+- Switch models, add aliases, or use your own provider credentials: [Models](/models).
