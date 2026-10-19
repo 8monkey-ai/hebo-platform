@@ -2,7 +2,7 @@ import { useSearchParams } from "react-router";
 
 export const traceTimePresets = ["15m", "1h", "24h", "custom"] as const;
 export const traceStatuses = ["ok", "error"] as const;
-export const traceOperations = ["chat", "embeddings"] as const;
+export const traceOperations = ["chat", "embeddings", "transcription"] as const;
 
 export function timeRangeToParams(
   range: string,
