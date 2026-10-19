@@ -1,6 +1,7 @@
 import { cors } from "@elysia/cors";
 import { openapi } from "@elysia/openapi";
 import { opentelemetry } from "@elysia/opentelemetry";
+import { TranscriptionsSchema } from "@hebo-ai/gateway/endpoints/audio-transcriptions";
 import {
   ChatCompletionsBodySchema,
   ChatCompletionsChunkSchema,
@@ -107,6 +108,21 @@ export const createGateway = () =>
             body: EmbeddingsBodySchema,
             response: {
               200: EmbeddingsSchema,
+              400: OpenAIErrorSchema,
+              402: OpenAIErrorSchema,
+              500: OpenAIErrorSchema,
+            },
+          },
+        )
+        .post(
+          "/audio/transcriptions",
+          ({ request, prismaClient, organizationId }) =>
+            gw.handler(request, { prismaClient, organizationId }),
+          {
+            // No `body`: OpenAPI cannot show the `Uint8Array` audio type and logs a warning.
+            parse: "none",
+            response: {
+              200: TranscriptionsSchema,
               400: OpenAIErrorSchema,
               402: OpenAIErrorSchema,
               500: OpenAIErrorSchema,

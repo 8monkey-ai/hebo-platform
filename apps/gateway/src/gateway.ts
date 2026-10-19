@@ -122,6 +122,7 @@ export const gw = gateway({
   logger: getLogger("hebo-gateway"),
 
   advanced: {
+    maxBodySize: 35 * 1024 * 1024, // 35 MB
     timeouts: {
       flex: 30 * 60_000, // 30 minutes
       normal: 5 * 60_000, // 5 minutes
