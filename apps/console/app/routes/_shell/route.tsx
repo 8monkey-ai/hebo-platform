@@ -53,10 +53,7 @@ export async function clientLoader() {
                 {
                   name: m.name ?? "n/a",
                   lab: m.owned_by ?? m.id.split("/")[0] ?? "unknown",
-                  modality:
-                    m.architecture?.modality === "audio->text"
-                      ? "transcription"
-                      : (m.architecture?.output_modalities?.[0] ?? "n/a"),
+                  modality: m.architecture?.modality ?? "n/a",
                   providers: m.endpoints?.map((e) => e.tag) ?? [],
                   free: m.free === true,
                   requiresByok: m.requiresByok === true,
