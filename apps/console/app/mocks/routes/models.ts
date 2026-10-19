@@ -12,7 +12,8 @@ const SUPPORTED_MODELS = [
         groq: "openai/gpt-oss-120b",
       },
     ],
-    modality: "text->text",
+    input: ["text", "file"],
+    output: ["text"],
     free: true,
   },
   {
@@ -21,7 +22,8 @@ const SUPPORTED_MODELS = [
     owner: "anthropic",
     created: 1_764_888_221,
     providers: [{ bedrock: "anthropic.claude-sonnet-4-6-v1:0" }],
-    modality: "text->text",
+    input: ["text", "image", "pdf", "file"],
+    output: ["text"],
     free: false,
   },
   {
@@ -30,7 +32,8 @@ const SUPPORTED_MODELS = [
     owner: "anthropic",
     created: 1_764_888_221,
     providers: [{ bedrock: "anthropic.claude-haiku-4-5-20251001-v1:0" }],
-    modality: "text->text",
+    input: ["text", "image", "pdf", "file"],
+    output: ["text"],
     free: false,
   },
   {
@@ -39,7 +42,8 @@ const SUPPORTED_MODELS = [
     owner: "amazon",
     created: 1_764_888_221,
     providers: [{ bedrock: "amazon.nova-2-multimodal-embeddings-v1:0" }],
-    modality: "text->embedding",
+    input: ["text", "image", "audio", "video", "pdf"],
+    output: ["embedding"],
     free: true,
   },
   {
@@ -52,7 +56,8 @@ const SUPPORTED_MODELS = [
         voyage: "voyage-3.5",
       },
     ],
-    modality: "text->embedding",
+    input: ["text"],
+    output: ["embedding"],
     free: false,
   },
   {
@@ -61,7 +66,8 @@ const SUPPORTED_MODELS = [
     owner: "google",
     created: 1_767_837_920,
     providers: [{ vertex: "gemini-2.5-pro" }],
-    modality: "text->text",
+    input: ["text"],
+    output: ["text"],
     free: false,
   },
   {
@@ -70,7 +76,8 @@ const SUPPORTED_MODELS = [
     owner: "mistral",
     created: 1_767_837_920,
     providers: [{ bedrock: "mistral.mistral-large-v1:0" }],
-    modality: "text->text",
+    input: ["text"],
+    output: ["text"],
     free: false,
   },
   {
@@ -79,7 +86,8 @@ const SUPPORTED_MODELS = [
     owner: "openai",
     created: 1_767_837_920,
     providers: [{ bedrock: "openai.gpt-4o-mini-v1:0" }],
-    modality: "text->text",
+    input: ["text"],
+    output: ["text"],
     free: true,
   },
   {
@@ -88,7 +96,8 @@ const SUPPORTED_MODELS = [
     owner: "openai",
     created: 1_785_283_200,
     providers: [{ openai: "gpt-transcribe" }],
-    modality: "audio->text",
+    input: ["audio"],
+    output: ["text"],
     free: false,
   },
 ] as const;
@@ -108,8 +117,9 @@ export const modelHandlers = [
             created: model.created,
             owned_by: model.owner,
             architecture: {
-              modality: model.modality,
-              output_modalities: [model.modality.split("->")[1]],
+              input_modalities: model.input,
+              modality: `${model.input[0]}->${model.output[0]}`,
+              output_modalities: model.output,
             },
             free: model.free,
           },
