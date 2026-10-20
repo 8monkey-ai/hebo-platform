@@ -39,7 +39,7 @@ const SUPPORTED_MODELS = [
     owner: "amazon",
     created: 1_764_888_221,
     providers: [{ bedrock: "amazon.nova-2-multimodal-embeddings-v1:0" }],
-    modality: "embedding",
+    modality: "embeddings",
     free: true,
   },
   {
@@ -52,7 +52,7 @@ const SUPPORTED_MODELS = [
         voyage: "voyage-3.5",
       },
     ],
-    modality: "embedding",
+    modality: "embeddings",
     free: false,
   },
   {
@@ -81,6 +81,15 @@ const SUPPORTED_MODELS = [
     providers: [{ bedrock: "openai.gpt-4o-mini-v1:0" }],
     modality: "chat",
     free: true,
+  },
+  {
+    type: "openai/gpt-transcribe",
+    displayName: "GPT Transcribe",
+    owner: "openai",
+    created: 1_785_283_200,
+    providers: [{ openai: "gpt-transcribe" }],
+    modality: "transcription",
+    free: false,
   },
 ] as const;
 
