@@ -5,6 +5,10 @@ image:
 
 frontend:
   replicas: 3
+  configData: |
+    # Write retries can duplicate rows in append-only tables (traces, logs).
+    [write_retry]
+    max_retries = 0
   service:
     type: LoadBalancer
     annotations:
@@ -31,6 +35,10 @@ datanode:
   configData: |
     [[region_engine]]
     [region_engine.mito]
+    # Cap memory explicitly: the defaults derive from node memory, not the pod limit.
+    global_write_buffer_size = "512MB"
+    global_write_buffer_reject_size = "1GB"
+    page_cache_size = "512MB"
     experimental_compaction_memory_limit = "500MB"
     experimental_compaction_on_exhausted = "fail"
   podTemplate:
