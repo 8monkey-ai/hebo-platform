@@ -12,7 +12,7 @@ const SUPPORTED_MODELS = [
         groq: "openai/gpt-oss-120b",
       },
     ],
-    modality: "chat",
+    modality: "text",
     free: true,
   },
   {
@@ -21,7 +21,7 @@ const SUPPORTED_MODELS = [
     owner: "anthropic",
     created: 1_764_888_221,
     providers: [{ bedrock: "anthropic.claude-sonnet-4-6-v1:0" }],
-    modality: "chat",
+    modality: "text",
     free: false,
   },
   {
@@ -30,7 +30,7 @@ const SUPPORTED_MODELS = [
     owner: "anthropic",
     created: 1_764_888_221,
     providers: [{ bedrock: "anthropic.claude-haiku-4-5-20251001-v1:0" }],
-    modality: "chat",
+    modality: "text",
     free: false,
   },
   {
@@ -61,7 +61,7 @@ const SUPPORTED_MODELS = [
     owner: "google",
     created: 1_767_837_920,
     providers: [{ vertex: "gemini-2.5-pro" }],
-    modality: "chat",
+    modality: "text",
     free: false,
   },
   {
@@ -70,7 +70,7 @@ const SUPPORTED_MODELS = [
     owner: "mistral",
     created: 1_767_837_920,
     providers: [{ bedrock: "mistral.mistral-large-v1:0" }],
-    modality: "chat",
+    modality: "text",
     free: false,
   },
   {
@@ -79,7 +79,7 @@ const SUPPORTED_MODELS = [
     owner: "openai",
     created: 1_767_837_920,
     providers: [{ bedrock: "openai.gpt-4o-mini-v1:0" }],
-    modality: "chat",
+    modality: "text",
     free: true,
   },
   {
