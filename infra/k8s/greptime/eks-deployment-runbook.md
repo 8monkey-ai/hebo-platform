@@ -13,8 +13,6 @@ Environment-specific values (VPC, subnets, Aurora host, S3 bucket, IAM role, etc
 ```bash
 export GREPTIME_NS="greptime"
 export HELM_RELEASE_CLUSTER="greptime-cluster"
-export OPERATOR_CHART_VERSION="0.6.3"
-export CLUSTER_CHART_VERSION="0.8.39"
 ```
 
 ## 1) Create cluster
@@ -40,8 +38,7 @@ aws s3api create-bucket \
 helm repo add greptime https://greptimeteam.github.io/helm-charts/
 helm repo update
 
-helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n greptimedb-admin --create-namespace \
-  --version "$OPERATOR_CHART_VERSION"
+helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n greptimedb-admin --create-namespace
 ```
 
 ## 4) Deploy Greptime cluster (Helm)
@@ -51,7 +48,6 @@ Replace the `<PLACEHOLDER>` values in `greptime-values.yaml` with your Aurora ho
 ```bash
 helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
   -n "$GREPTIME_NS" --create-namespace \
-  --version "$CLUSTER_CHART_VERSION" \
   -f infra/k8s/greptime/greptime-values.yaml
 ```
 
@@ -79,7 +75,6 @@ aws iam get-role --role-name "GreptimeS3Role-<CLUSTER_NAME>" --query 'Role.Arn' 
 ```bash
 helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
   -n "$GREPTIME_NS" \
-  --version "$CLUSTER_CHART_VERSION" \
   -f infra/k8s/greptime/greptime-values.yaml
 ```
 
@@ -116,14 +111,13 @@ kubectl -n "$GREPTIME_NS" logs statefulset/${HELM_RELEASE_CLUSTER}-datanode --si
 
 ## Upgrading GreptimeDB
 
-The operator handles rolling updates. Set the new versions in the shell setup and `image.tag` in `greptime-values.yaml`, then run the steps below.
+The operator handles rolling updates. Change the `image.tag` in `greptime-values.yaml`, then run the steps below.
 
 ### 1) Update the operator
 
 ```bash
 helm repo update
-helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n greptimedb-admin \
-  --version "$OPERATOR_CHART_VERSION"
+helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n greptimedb-admin
 ```
 
 ### 2) Apply the Helm upgrade
@@ -131,7 +125,6 @@ helm upgrade --install greptimedb-operator greptime/greptimedb-operator -n grept
 ```bash
 helm upgrade --install "$HELM_RELEASE_CLUSTER" greptime/greptimedb-cluster \
   -n "$GREPTIME_NS" \
-  --version "$CLUSTER_CHART_VERSION" \
   -f infra/k8s/greptime/greptime-values.yaml
 ```
 
