@@ -13,7 +13,9 @@
 ARG BUN_VERSION=1.4.3
 
 ########################  builder  ########################
-FROM oven/bun:${BUN_VERSION} AS builder
+# Runs on the platform of the build machine, not the target platform: its output
+# is JavaScript and static files only. Under QEMU emulation, Bun 1.4 can hang.
+FROM --platform=$BUILDPLATFORM oven/bun:${BUN_VERSION} AS builder
 
 ARG NODE_ENV
 ENV CI=1 NODE_ENV=$NODE_ENV
