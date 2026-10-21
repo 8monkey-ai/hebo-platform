@@ -6,8 +6,8 @@ describe("parseTraceSearchParams", () => {
   it.each([
     ["chat", "chat"],
     ["embeddings", "embeddings"],
-    ["transcription", "transcription"],
-    ["transcriptions", undefined],
+    ["transcriptions", "transcriptions"],
+    ["transcription", undefined],
   ])("parses operation=%s", (raw, expected) => {
     const { operation } = parseTraceSearchParams(new URLSearchParams({ operation: raw }));
 

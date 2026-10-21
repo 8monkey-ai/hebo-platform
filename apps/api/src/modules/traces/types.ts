@@ -9,7 +9,7 @@ export const TraceListQuerySchema = z.object({
   metadata: z.record(z.string(), z.string()).optional(),
   status: z.union([z.literal("ok"), z.literal("error")]).optional(),
   operation: z
-    .union([z.literal("chat"), z.literal("embeddings"), z.literal("transcription")])
+    .union([z.literal("chat"), z.literal("embeddings"), z.literal("transcriptions")])
     .optional(),
   ...TraceTimeRangeQuerySchema,
   page: z.coerce.number().int().min(1).default(1).optional(),

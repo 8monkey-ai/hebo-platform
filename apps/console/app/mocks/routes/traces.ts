@@ -351,7 +351,7 @@ const traceDetails = [
     timestamp: new Date(now - 9 * min),
     traceId: "a0000024-0000-4000-9000-000000000024",
     spanId: "6f708192-0123-4def-8123-678901234567",
-    operationName: "transcription",
+    operationName: "transcriptions",
     model: "openai/gpt-transcribe",
     responseModel: "openai/gpt-transcribe",
     provider: "openai",
@@ -395,7 +395,7 @@ const traceDetails = [
     responseId: "",
     metadata: {},
     spanAttributes: {
-      "gen_ai.operation.name": "transcription",
+      "gen_ai.operation.name": "transcriptions",
       "gen_ai.request.model": "openai/gpt-transcribe",
       "gen_ai.response.model": "openai/gpt-transcribe",
       "gen_ai.provider.name": "openai",
@@ -1376,7 +1376,7 @@ export const traceHandlers = [
 
       const operationParam = url.searchParams.get("operation");
       const operation = z
-        .enum(["chat", "embeddings", "transcription"])
+        .enum(["chat", "embeddings", "transcriptions"])
         .nullable()
         .safeParse(operationParam);
       if (!operation.success) {
