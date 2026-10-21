@@ -13,8 +13,7 @@
 ARG BUN_VERSION=1.4.3
 
 ########################  builder  ########################
-# Runs on the platform of the build machine, not the target platform: its output
-# is JavaScript and static files only. Under QEMU emulation, Bun 1.4 can hang.
+# Builds natively: the output does not depend on the platform, and Bun 1.4 can hang under QEMU.
 FROM --platform=$BUILDPLATFORM oven/bun:${BUN_VERSION} AS builder
 
 ARG NODE_ENV
