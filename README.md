@@ -8,7 +8,7 @@ A platform that brings development and business teams together. Iterate fast. Re
 
 ## Key features
 
-- **Gateway** — Unified access to state-of-the-art LLMs with native support for `/chat/completions` (OpenAI), `/responses` (OpenResponses), and `/messages` (Anthropic). Embeddings and multi-turn conversations out of the box.
+- **Gateway** — Unified access to state-of-the-art LLMs with native support for `/chat/completions` (OpenAI), `/responses` (OpenResponses), and `/messages` (Anthropic). Embeddings, audio transcriptions, and multi-turn conversations out of the box.
 - **Observability** — Conversation-level traces with token and latency tracking, tool call inspection, and full conversation replay — not just individual request logs.
 - **Evaluations** — Define evals as simple Markdown files. Test agent behavior against guidelines, tool usage, and hand-off triggers.
 
