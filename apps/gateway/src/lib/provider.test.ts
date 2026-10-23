@@ -95,6 +95,10 @@ describe("createProvider", () => {
   });
 
   describe("vertex", () => {
+    it("initializes before platform federation credentials are configured", () => {
+      expect(createProvider("vertex", { authMode: "identity-federation" })).toBeDefined();
+    });
+
     it("returns a provider when authMode is invalid (fallback)", () => {
       const provider = createProvider("vertex", {
         authMode: "api-key",

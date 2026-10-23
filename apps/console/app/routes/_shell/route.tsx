@@ -83,6 +83,7 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
   const mainRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     mainRef.current?.focus();
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Navigation intentionally triggers focus even when the ref is unchanged.
   }, [location.pathname]);
 
   // FUTURE replace with session storage

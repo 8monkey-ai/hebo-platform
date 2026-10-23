@@ -92,8 +92,8 @@ model Apikeys {
   lastRefillAt        DateTime?
   enabled             Boolean?  @default(true)
   rateLimitEnabled    Boolean?  @default(true)
-  rateLimitTimeWindow Int?      @default(3600000)
-  rateLimitMax        Int?      @default(3600)
+  rateLimitTimeWindow Int?      @default(86400000)
+  rateLimitMax        Int?      @default(10)
   requestCount        Int?      @default(0)
   remaining           Int?
   lastRequest         DateTime?
@@ -127,6 +127,7 @@ model Organizations {
 model Teams {
   id             String        @id
   name           String
+  memberCount    Int           @default(0)
   organizationId String
   organizations  Organizations @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   createdAt      DateTime
@@ -139,13 +140,15 @@ model Teams {
 }
 
 model TeamMembers {
-  id        String    @id
-  teamId    String
-  teams     Teams     @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  userId    String
-  users     Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  createdAt DateTime?
+  id            String    @id
+  teamId        String
+  teams         Teams     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId        String
+  users         Users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime?
+  membershipKey String?
 
+  @@unique([membershipKey])
   @@index([teamId])
   @@index([userId])
   @@map("teamMembers")

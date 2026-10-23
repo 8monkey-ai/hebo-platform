@@ -139,12 +139,13 @@ export const ProviderSchema = z.discriminatedUnion("slug", [
 export const ProviderSlugSchema = z.enum(ProviderSchema.options.map((o) => o.shape.slug.value));
 
 export const ProviderConfigSchema = z.discriminatedUnion("authMode", [
-  ...new Set(
-    ProviderSchema.options.flatMap(
-      (o) => o.shape.config.unwrap().options as z.core.$ZodTypeDiscriminable[],
-    ),
-  ),
-] as [z.core.$ZodTypeDiscriminable, ...z.core.$ZodTypeDiscriminable[]]);
+  ApiKeySchema,
+  AzureSchema,
+  BedrockIamRoleSchema,
+  BedrockAccessKeySchema,
+  VertexIdentityFederationSchema,
+  VertexServiceAccountSchema,
+]);
 
 export const ProviderConfiguredSchema = z.object({
   configured: z.coerce.boolean().default(false).optional(),

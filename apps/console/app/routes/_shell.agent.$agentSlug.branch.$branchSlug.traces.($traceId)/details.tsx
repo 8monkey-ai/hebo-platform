@@ -180,6 +180,7 @@ function FormattedViewPanel({ trace }: { trace: TraceDetailData }) {
   };
 
   useEffect(() => {
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Recalculate scroll buttons when trace content changes.
     updateButtons();
   }, [trace]);
 

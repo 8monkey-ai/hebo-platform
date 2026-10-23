@@ -31,6 +31,7 @@ import { withCanonicalIdsForVertex } from "@hebo-ai/gateway/providers/vertex";
 import { withCanonicalIdsForVoyage } from "@hebo-ai/gateway/providers/voyage";
 import { withCanonicalIdsForXai } from "@hebo-ai/gateway/providers/xai";
 import { withCanonicalIdsForZai } from "@hebo-ai/gateway/providers/zai";
+import { AwsClient, JWT } from "google-auth-library";
 import { createVoyage } from "voyage-ai-provider";
 import { createZhipu } from "zhipu-ai-provider";
 
@@ -181,8 +182,11 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV4 
           return withCanonicalIdsForVertex(
             createVertex({
               googleAuthOptions: {
-                credentials: { client_email: clientEmail, private_key: privateKey },
-                scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+                authClient: new JWT({
+                  email: clientEmail,
+                  key: privateKey,
+                  scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+                }),
               },
               location,
               project,
@@ -194,8 +198,8 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV4 
           return withCanonicalIdsForVertex(
             createVertex({
               googleAuthOptions: {
-                credentials: buildWifOptions(audience, serviceAccountEmail),
-                scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+                // Unconfigured platform credentials must not prevent gateway startup.
+                authClient: new AwsClient(buildWifOptions(audience ?? "", serviceAccountEmail)),
               },
               location,
               project,
