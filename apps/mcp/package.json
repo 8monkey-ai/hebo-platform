@@ -14,7 +14,7 @@
     "start": "bun dist/index.js"
   },
   "dependencies": {
-    "@8monkey/elysia-mcp": "^0.1.0",
+    "@8monkey/elysia-mcp": "^0.2.0",
     "@elysia/opentelemetry": "catalog:",
     "@hebo/shared-api": "workspace:*",
     "elysia": "catalog:"
