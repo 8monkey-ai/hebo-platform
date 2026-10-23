@@ -36,7 +36,7 @@
 
 ## Prerequisites
 
-- Bun >= 1.4.3
+- Bun >= 1.4.4
 - Docker >= 28
 - AWS CLI (only required for deployment)
 

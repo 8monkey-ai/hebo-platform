@@ -10,7 +10,7 @@
 #  Used for both self-hosted (standalone) and ECS (single-role) deployments.
 # ---------------------------------------------------------------------------
 
-ARG BUN_VERSION=1.4.3
+ARG BUN_VERSION=1.4.4
 
 ########################  builder  ########################
 # Builds natively: the output does not depend on the platform, and Bun 1.4 can hang under QEMU.
