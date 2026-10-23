@@ -14,6 +14,7 @@ ARG BUN_VERSION=1.4.4
 
 ########################  builder  ########################
 # Builds natively: the output does not depend on the platform, and Bun 1.4 can hang under QEMU.
+# FUTURE: Remove --platform=$BUILDPLATFORM once https://github.com/oven-sh/bun/issues/46555 is fixed.
 FROM --platform=$BUILDPLATFORM oven/bun:${BUN_VERSION} AS builder
 
 ARG NODE_ENV
