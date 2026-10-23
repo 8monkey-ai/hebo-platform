@@ -12,7 +12,7 @@ import {
   ArrowUp,
   Square,
 } from "lucide-react";
-import { useEffect, useEffectEvent, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "../_shadcn/ui/alert";
 import {
@@ -139,11 +139,19 @@ export function Chat({
       document.removeEventListener("drop", onDrop);
     };
   }, []);
-  const transport = new OpenAIHttpChatTransport({
-    api: currentModel?.endpoint.baseUrl + "/chat/completions",
-    fetch: currentModel?.endpoint.fetch ?? fetch,
-    credentials: currentModel?.endpoint.credentials,
-  });
+  const transport = useMemo(
+    () =>
+      new OpenAIHttpChatTransport({
+        api: currentModel?.endpoint.baseUrl + "/chat/completions",
+        fetch: currentModel?.endpoint.fetch ?? fetch,
+        credentials: currentModel?.endpoint.credentials,
+      }),
+    [
+      currentModel?.endpoint.baseUrl,
+      currentModel?.endpoint.credentials,
+      currentModel?.endpoint.fetch,
+    ],
+  );
   const { messages, sendMessage, setMessages, status, error, stop } = useChat({
     transport,
   });
