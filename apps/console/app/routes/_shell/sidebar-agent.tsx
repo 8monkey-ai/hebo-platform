@@ -65,7 +65,7 @@ export function AgentSelect({
                     render={
                       <Link
                         to={`/agent/${activeAgent.slug}/settings`}
-                        viewTransition
+
                         aria-label="Agent Settings"
                       >
                         <Settings size={16} className="ml-auto" aria-hidden="true" />
@@ -81,7 +81,7 @@ export function AgentSelect({
                     key={agent.slug}
                     className="gap-2 p-2"
                     render={
-                      <Link to={`/agent/${agent.slug}/branch/main`} viewTransition>
+                      <Link to={`/agent/${agent.slug}/branch/main`}>
                         <span className="truncate">{agent.name}</span>
                         {agent.slug === activeAgent?.slug && (
                           <Check size={12} className="ml-auto" aria-hidden="true" />
@@ -99,7 +99,7 @@ export function AgentSelect({
               <DropdownMenuItem
                 className="gap-2 p-2"
                 render={
-                  <Link to="/agent/create" aria-label="Create agent" viewTransition>
+                  <Link to="/agent/create" aria-label="Create agent">
                     <Plus className="size-4 text-muted-foreground" aria-hidden="true" />
                     <span className="font-medium text-muted-foreground">Create Agent</span>
                   </Link>

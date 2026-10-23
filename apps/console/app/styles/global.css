@@ -19,14 +19,14 @@
 }
 
 /* Global cross-fade duration */
-::view-transition-old(root),
-::view-transition-new(root) {
+::view-transition-old(*),
+::view-transition-new(*) {
   animation-duration: 300ms;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
     animation-duration: 0ms;
   }
 }

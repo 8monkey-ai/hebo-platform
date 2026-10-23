@@ -8,7 +8,7 @@ describe("parseTraceSearchParams", () => {
     ["embeddings", "embeddings"],
     ["transcriptions", "transcriptions"],
     ["transcription", undefined],
-  ])("parses operation=%s", (raw, expected) => {
+  ] as const)("parses operation=%s", (raw, expected) => {
     const { operation } = parseTraceSearchParams(new URLSearchParams({ operation: raw }));
 
     expect(operation).toBe(expected);

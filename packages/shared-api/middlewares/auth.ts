@@ -87,7 +87,11 @@ export const auth = new Elysia({ name: "auth-service" })
       });
 
       if (verifyError) {
-        throw new HttpError(verifyError.message ?? "Auth service error", verifyError.status ?? 500, "upstream_auth_error");
+        throw new HttpError(
+          verifyError.message ?? "Auth service error",
+          verifyError.status ?? 500,
+          "upstream_auth_error",
+        );
       }
 
       if (result?.valid && result.key) {

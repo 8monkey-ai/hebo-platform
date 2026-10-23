@@ -25,6 +25,9 @@ import { formatDateTime } from "~console/lib/utils";
 import { RevokeApiKeyDialog } from "./revoke";
 
 export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
+  // oxlint-disable-next-line react/purity -- Expiry labels use the time of the current render.
+  const now = Date.now();
+
   const [revokeDialog, setRevokeDialog] = useState({
     open: false,
     apiKey: undefined as ApiKey | undefined,
@@ -51,11 +54,11 @@ export function ApiKeysTable({ apiKeys }: { apiKeys: ApiKey[] }) {
             </TableRow>
           ) : (
             apiKeys.map((key) => {
-              const isExpired = key.expiresAt != null && key.expiresAt.getTime() <= Date.now();
+              const isExpired = key.expiresAt != null && key.expiresAt.getTime() <= now;
               const isExpiringSoon =
                 !isExpired &&
                 key.expiresAt != null &&
-                key.expiresAt.getTime() - Date.now() <= 7 * 24 * 60 * 60 * 1000; // 7 Days
+                key.expiresAt.getTime() - now <= 7 * 24 * 60 * 60 * 1000; // 7 Days
 
               return (
                 <TableRow key={key.id}>

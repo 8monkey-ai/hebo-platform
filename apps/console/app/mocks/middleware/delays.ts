@@ -1,4 +1,5 @@
-import { delay, http, type HttpHandler } from "msw";
+import { http, type HttpHandler } from "msw/http";
+import { delay } from "msw/utils/delay";
 
 const METHOD_DELAYS: Partial<Record<keyof typeof http, number>> = {
   get: 500,

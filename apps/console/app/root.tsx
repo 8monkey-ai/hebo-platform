@@ -1,9 +1,11 @@
+import { ViewTransition } from "react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 
 import type { Route } from "./+types/root";
 import { ErrorView } from "./components/ui/ErrorView";
 // oxlint-disable no-unassigned-import
 import "./init";
+
 import "./styles/fonts.css";
 import "./styles/tailwind.css";
 import "./styles/global.css";
@@ -32,7 +34,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <ViewTransition>
+      <Outlet />
+    </ViewTransition>
+  );
 }
 
 export function ErrorBoundary() {

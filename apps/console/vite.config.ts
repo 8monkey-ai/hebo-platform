@@ -48,7 +48,8 @@ export default defineConfig(({ command }) => {
       tailwindcss(),
       reactRouter(),
       babel({
-        filter: (id) => /\.[jt]sx?$/u.test(id) && !id.includes("node_modules"),
+        include: /\.[jt]sx?$/u,
+        exclude: /node_modules/u,
         babelConfig: {
           presets: ["@babel/preset-typescript"],
           plugins: [["babel-plugin-react-compiler"]],

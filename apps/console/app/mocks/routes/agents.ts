@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw/http";
 import slugify from "slugify";
 
 import { db } from "~console/mocks/db";

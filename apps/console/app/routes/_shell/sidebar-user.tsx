@@ -138,7 +138,7 @@ export function UserMenu({
             <DropdownMenuGroup>
               <DropdownMenuItem
                 render={
-                  <Link to="/signout" viewTransition>
+                  <Link to="/signout">
                     <LogOut aria-hidden="true" />
                     <span>Log out</span>
                   </Link>

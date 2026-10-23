@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw/http";
 
 import { ProviderSchema } from "~api/modules/providers/types";
 import { db } from "~console/mocks/db";
