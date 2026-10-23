@@ -1,4 +1,4 @@
-import { http, HttpResponse, type HttpHandler, type HttpResponseResolver } from "msw";
+import { http, HttpResponse, type HttpHandler, type HttpResponseResolver } from "msw/http";
 
 const CHAOS_NETWORK_RATE = Number(import.meta.env.VITE_CHAOS_NETWORK ?? 0);
 const CHAOS_HTTP_RATE = Number(import.meta.env.VITE_CHAOS_HTTP ?? 0);

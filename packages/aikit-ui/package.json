@@ -14,7 +14,7 @@
     "typecheck": "oxlint --type-aware --type-check"
   },
   "dependencies": {
-    "nanoid": "^5.1.16"
+    "nanoid": "^6.0.2"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
@@ -27,7 +27,7 @@
     "@base-ui/react": "catalog:",
     "@base-ui/utils": "catalog:",
     "@streamdown/cjk": "^1.0.4",
-    "@streamdown/code": "^1.1.1",
+    "@streamdown/code": "^2.0.0",
     "@streamdown/math": "^1.0.3",
     "@streamdown/mermaid": "^1.0.3",
     "ai": "catalog:",
@@ -35,7 +35,7 @@
     "clsx": "catalog:",
     "cmdk-base": "^1.0.0",
     "lucide-react": "catalog:",
-    "motion": "^12.43.0",
+    "motion": "^14.6.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "streamdown": "^2.7.1",

@@ -9,7 +9,7 @@ import { apiUrl, gatewayUrl } from "~console/lib/env";
 export const kyFetch = ky.extend({
   credentials: "include",
   timeout: 60_000, // 60 seconds
-  throwHttpErrors: false,
+  throwHttpErrors: (status) => ![400, 404, 409, 422].includes(status),
   hooks: {
     beforeRequest: [
       async () => {
@@ -19,19 +19,10 @@ export const kyFetch = ky.extend({
         }
       },
     ],
-    afterResponse: [
-      async (_req, _opts, res) => {
-        // Successful response, all good
-        if (res.ok) return res;
-
-        // Don't throw on application-level errors
-        if ([400, 404, 409, 422].includes(res.status)) return res;
-
-        // Else, unpack error to surface in the UI
-        const body = (res.headers.get("content-type") ?? "").includes("json")
-          ? await res.json()
-          : await res.text();
-        const err = new HTTPError(res, _req, _opts);
+    beforeError: [
+      ({ error: err }) => {
+        if (!(err instanceof HTTPError)) return err;
+        const body: unknown = err.data;
 
         if (typeof body === "string") err.message = body;
 
@@ -56,7 +47,7 @@ export const kyFetch = ky.extend({
           }
         }
 
-        throw err;
+        return err;
       },
     ],
   },

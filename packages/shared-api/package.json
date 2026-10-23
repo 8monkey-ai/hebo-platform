@@ -35,7 +35,7 @@
     "@prisma/adapter-pg": "catalog:",
     "@sindresorhus/slugify": "^3.0.1",
     "better-auth": "catalog:",
-    "crypto-random-string": "^5.0.0"
+    "crypto-random-string": "^6.0.0"
   },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
