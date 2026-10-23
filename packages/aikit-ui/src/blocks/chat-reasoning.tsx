@@ -1,7 +1,7 @@
 "use client";
 
 import { Brain } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import {
   Trace,
@@ -12,7 +12,6 @@ import {
   TraceLine,
   TraceTitle,
 } from "../_shadcn/ui/trace";
-import { ChatMarkdown } from "./chat-markdown";
 
 export function ChatReasoning({
   children,
@@ -22,26 +21,13 @@ export function ChatReasoning({
   isStreaming: boolean;
 }) {
   const [open, setOpen] = useState<boolean>();
-  const [duration, setDuration] = useState<number>();
-  const startedAt = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (isStreaming) {
-      startedAt.current ??= Date.now();
-    } else if (startedAt.current !== null) {
-      setDuration(Math.ceil((Date.now() - startedAt.current) / 1000));
-      startedAt.current = null;
-    }
-  }, [isStreaming]);
 
   const line = (
     <TraceLine status={isStreaming ? "running" : undefined}>
       <TraceIcon>
         <Brain />
       </TraceIcon>
-      <TraceTitle>
-        {isStreaming ? "Thinking" : duration === undefined ? "Thought" : `Thought for ${duration}s`}
-      </TraceTitle>
+      <TraceTitle>{isStreaming ? "Thinking" : "Thought"}</TraceTitle>
     </TraceLine>
   );
 
@@ -52,8 +38,8 @@ export function ChatReasoning({
       ) : (
         <TraceCollapsible open={open ?? isStreaming} onOpenChange={setOpen}>
           <TraceCollapsibleTrigger>{line}</TraceCollapsibleTrigger>
-          <TraceCollapsibleContent className="text-sm">
-            <ChatMarkdown>{children}</ChatMarkdown>
+          <TraceCollapsibleContent className="text-sm whitespace-pre-wrap">
+            {children}
           </TraceCollapsibleContent>
         </TraceCollapsible>
       )}

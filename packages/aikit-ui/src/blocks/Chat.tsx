@@ -12,7 +12,7 @@ import {
   ArrowUp,
   Square,
 } from "lucide-react";
-import { useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Alert, AlertDescription, AlertTitle } from "../_shadcn/ui/alert";
 import {
@@ -94,51 +94,10 @@ export function Chat({
   const currentModel = modelsConfig.find((m) => m.alias === currentModelAlias);
 
   const [input, setInput] = useState("");
-  const [attachments, setAttachments] = useState<Array<{ file: File; url: string }>>([]);
-  const attachmentUrls = useRef(new Set<string>());
+  const [attachments, setAttachments] = useState<Array<{ id: string; file: File }>>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isSending, setIsSending] = useState(false);
 
-  function addFiles(files: FileList | File[]) {
-    const incoming = Array.from(files, (file) => {
-      const url = URL.createObjectURL(file);
-      attachmentUrls.current.add(url);
-      return { file, url };
-    });
-    setAttachments((current) => [...current, ...incoming]);
-  }
-
-  function removeAttachment(url: string) {
-    URL.revokeObjectURL(url);
-    attachmentUrls.current.delete(url);
-    setAttachments((current) => current.filter((attachment) => attachment.url !== url));
-  }
-
-  useEffect(() => {
-    const urls = attachmentUrls.current;
-    return () => {
-      for (const url of urls) URL.revokeObjectURL(url);
-    };
-  }, []);
-
-  const addDroppedFiles = useEffectEvent(addFiles);
-  useEffect(() => {
-    function onDragOver(event: DragEvent) {
-      if (event.dataTransfer?.types.includes("Files")) event.preventDefault();
-    }
-    function onDrop(event: DragEvent) {
-      if (event.dataTransfer?.types.includes("Files")) {
-        event.preventDefault();
-        addDroppedFiles(event.dataTransfer.files);
-      }
-    }
-    document.addEventListener("dragover", onDragOver);
-    document.addEventListener("drop", onDrop);
-    return () => {
-      document.removeEventListener("dragover", onDragOver);
-      document.removeEventListener("drop", onDrop);
-    };
-  }, []);
   const transport = useMemo(
     () =>
       new OpenAIHttpChatTransport({
@@ -226,10 +185,6 @@ export function Chat({
         { body: { model: currentModelAlias } },
       );
       setInput("");
-      for (const attachment of attachments) {
-        URL.revokeObjectURL(attachment.url);
-        attachmentUrls.current.delete(attachment.url);
-      }
       setAttachments([]);
       await sending;
     } finally {
@@ -308,8 +263,8 @@ export function Chat({
                               <MessageContent>
                                 {message.role === "user" ? (
                                   <Bubble align="end" variant="muted">
-                                    <BubbleContent>
-                                      <ChatMarkdown>{part.text}</ChatMarkdown>
+                                    <BubbleContent className="whitespace-pre-wrap">
+                                      {part.text}
                                     </BubbleContent>
                                   </Bubble>
                                 ) : (
@@ -422,21 +377,21 @@ export function Chat({
           hidden
           aria-label="Upload files"
           onChange={(event) => {
-            if (event.currentTarget.files) addFiles(event.currentTarget.files);
+            const selected = Array.from(event.currentTarget.files ?? [], (file) => ({
+              id: crypto.randomUUID(),
+              file,
+            }));
+            setAttachments((current) => [...current, ...selected]);
             event.currentTarget.value = "";
           }}
         />
         <InputGroup className="overflow-hidden bg-background">
           {attachments.length > 0 && (
             <InputGroupAddon align="block-start" className="flex-wrap">
-              {attachments.map(({ file, url }) => (
-                <Attachment key={url} size="sm">
-                  <AttachmentMedia variant={file.type.startsWith("image/") ? "image" : "icon"}>
-                    {file.type.startsWith("image/") ? (
-                      <img src={url} alt={file.name} />
-                    ) : (
-                      <FileUp />
-                    )}
+              {attachments.map(({ id, file }) => (
+                <Attachment key={id} size="sm">
+                  <AttachmentMedia>
+                    <FileUp />
                   </AttachmentMedia>
                   <AttachmentContent>
                     <AttachmentTitle>{file.name}</AttachmentTitle>
@@ -444,7 +399,9 @@ export function Chat({
                   <AttachmentAction
                     aria-label={`Remove ${file.name}`}
                     onClick={() => {
-                      removeAttachment(url);
+                      setAttachments((current) =>
+                        current.filter((attachment) => attachment.id !== id),
+                      );
                     }}
                   >
                     <XIcon />
@@ -465,15 +422,6 @@ export function Chat({
               if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
                 event.currentTarget.form?.requestSubmit();
-              } else if (event.key === "Backspace" && !input && attachments.length > 0) {
-                event.preventDefault();
-                removeAttachment(attachments.at(-1)!.url);
-              }
-            }}
-            onPaste={(event) => {
-              if (event.clipboardData.files.length > 0) {
-                event.preventDefault();
-                addFiles(event.clipboardData.files);
               }
             }}
             placeholder="Ask anything …"
