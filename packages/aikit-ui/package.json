@@ -13,9 +13,6 @@
     "lint": "oxlint",
     "typecheck": "oxlint --type-aware --type-check"
   },
-  "dependencies": {
-    "nanoid": "^6.0.2"
-  },
   "devDependencies": {
     "@hebo/typescript-config": "workspace:*",
     "@types/react": "catalog:",
@@ -25,7 +22,7 @@
     "@ai-sdk/provider-utils": "catalog:",
     "@ai-sdk/react": "^4.0.154",
     "@base-ui/react": "catalog:",
-    "@base-ui/utils": "catalog:",
+    "@shadcn/react": "^0.3.1",
     "@streamdown/cjk": "^1.0.4",
     "@streamdown/code": "^2.0.0",
     "@streamdown/math": "^1.0.3",
@@ -33,14 +30,12 @@
     "ai": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
-    "cmdk-base": "^1.0.0",
+    "cmdk": "^1.1.1",
     "lucide-react": "catalog:",
-    "motion": "^14.6.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "streamdown": "^2.7.1",
     "tailwind-merge": "catalog:",
-    "tailwindcss": "catalog:",
-    "use-stick-to-bottom": "^1.1.6"
+    "tailwindcss": "catalog:"
   }
 }

@@ -2,8 +2,8 @@
 
 import * as React from "react"
 import { Combobox as ComboboxPrimitive } from "@base-ui/react"
-
 import { cn } from "../../lib/utils"
+
 import { Button } from "./button"
 import {
   InputGroup,
@@ -61,7 +61,7 @@ function ComboboxInput({
   showClear?: boolean
 }) {
   return (
-    <InputGroup className={cn("w-auto bg-background", className)}>
+    <InputGroup className={cn("w-auto", className)}>
       <ComboboxPrimitive.Input
         render={<InputGroupInput disabled={disabled} />}
         {...props}

@@ -1,45 +1,37 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { Brain, Download, Edit, FileUp, Paperclip, TriangleAlert } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  Brain,
+  Download,
+  Edit,
+  FileUp,
+  Paperclip,
+  TriangleAlert,
+  XIcon,
+  ArrowUp,
+  Square,
+} from "lucide-react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
+import { Alert, AlertDescription, AlertTitle } from "../_shadcn/ui/alert";
 import {
   Attachment,
-  AttachmentInfo,
-  AttachmentPreview,
-  AttachmentRemove,
-  Attachments,
-} from "../_ai-elements/attachments";
-import {
-  Conversation,
-  ConversationContent,
-  ConversationScrollButton,
-} from "../_ai-elements/conversation";
-import { Message, MessageContent, MessageResponse } from "../_ai-elements/message";
-import {
-  PromptInput,
-  // FUTURE: PromptInputActionAddAttachments
-  PromptInputBody,
-  PromptInputButton,
-  PromptInputHeader,
-  type PromptInputMessage,
-  PromptInputSelect,
-  PromptInputSelectContent,
-  PromptInputSelectItem,
-  PromptInputSelectTrigger,
-  PromptInputSelectValue,
-  PromptInputSubmit,
-  PromptInputTextarea,
-  PromptInputFooter,
-  PromptInputTools,
-  usePromptInputAttachments,
-} from "../_ai-elements/prompt-input";
-import { Reasoning, ReasoningContent, ReasoningTrigger } from "../_ai-elements/reasoning";
-import { Alert, AlertDescription, AlertTitle } from "../_shadcn/ui/alert";
+  AttachmentMedia,
+  AttachmentContent,
+  AttachmentTitle,
+  AttachmentAction,
+} from "../_shadcn/ui/attachment";
 import { Avatar, AvatarFallback } from "../_shadcn/ui/avatar";
+import { Bubble, BubbleContent } from "../_shadcn/ui/bubble";
 import { Button } from "../_shadcn/ui/button";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "../_shadcn/ui/empty"; // FUTURE: replace with ConversationEmptyState
+import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "../_shadcn/ui/empty";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from "../_shadcn/ui/input-group";
 import {
   Item,
   ItemActions,
@@ -48,10 +40,29 @@ import {
   ItemMedia,
   ItemTitle,
 } from "../_shadcn/ui/item";
+import { Message, MessageContent } from "../_shadcn/ui/message";
+import {
+  MessageScrollerProvider,
+  MessageScroller,
+  MessageScrollerViewport,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerButton,
+} from "../_shadcn/ui/message-scroller";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../_shadcn/ui/select";
 import { Spinner } from "../_shadcn/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../_shadcn/ui/tooltip";
 import { OpenAIHttpChatTransport } from "../lib/openai-transport";
 import { cn } from "../lib/utils";
+import { ChatMarkdown } from "./chat-markdown";
+import { ChatReasoning } from "./chat-reasoning";
 
 // Types based on models.schema.json
 export type ModelsConfig = Array<{
@@ -83,19 +94,56 @@ export function Chat({
   const currentModel = modelsConfig.find((m) => m.alias === currentModelAlias);
 
   const [input, setInput] = useState("");
-  const transport = useMemo(
-    () =>
-      new OpenAIHttpChatTransport({
-        api: currentModel?.endpoint.baseUrl + "/chat/completions",
-        fetch: currentModel?.endpoint.fetch ?? fetch,
-        credentials: currentModel?.endpoint.credentials,
-      }),
-    [
-      currentModel?.endpoint.baseUrl,
-      currentModel?.endpoint.credentials,
-      currentModel?.endpoint.fetch,
-    ],
-  );
+  const [attachments, setAttachments] = useState<Array<{ file: File; url: string }>>([]);
+  const attachmentUrls = useRef(new Set<string>());
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isSending, setIsSending] = useState(false);
+
+  function addFiles(files: FileList | File[]) {
+    const incoming = Array.from(files, (file) => {
+      const url = URL.createObjectURL(file);
+      attachmentUrls.current.add(url);
+      return { file, url };
+    });
+    setAttachments((current) => [...current, ...incoming]);
+  }
+
+  function removeAttachment(url: string) {
+    URL.revokeObjectURL(url);
+    attachmentUrls.current.delete(url);
+    setAttachments((current) => current.filter((attachment) => attachment.url !== url));
+  }
+
+  useEffect(() => {
+    const urls = attachmentUrls.current;
+    return () => {
+      for (const url of urls) URL.revokeObjectURL(url);
+    };
+  }, []);
+
+  const addDroppedFiles = useEffectEvent(addFiles);
+  useEffect(() => {
+    function onDragOver(event: DragEvent) {
+      if (event.dataTransfer?.types.includes("Files")) event.preventDefault();
+    }
+    function onDrop(event: DragEvent) {
+      if (event.dataTransfer?.types.includes("Files")) {
+        event.preventDefault();
+        addDroppedFiles(event.dataTransfer.files);
+      }
+    }
+    document.addEventListener("dragover", onDragOver);
+    document.addEventListener("drop", onDrop);
+    return () => {
+      document.removeEventListener("dragover", onDragOver);
+      document.removeEventListener("drop", onDrop);
+    };
+  }, []);
+  const transport = new OpenAIHttpChatTransport({
+    api: currentModel?.endpoint.baseUrl + "/chat/completions",
+    fetch: currentModel?.endpoint.fetch ?? fetch,
+    credentials: currentModel?.endpoint.credentials,
+  });
   const { messages, sendMessage, setMessages, status, error, stop } = useChat({
     transport,
   });
@@ -156,25 +204,30 @@ export function Chat({
     };
   }, []);
 
-  const handleSubmit = (message: PromptInputMessage) => {
-    if (status === "streaming") void stop();
-    if (!message.text && !message.files) return;
+  async function handleSubmit() {
+    if (!currentModelAlias || isSending || status === "submitted" || status === "streaming") return;
+    if (!input.trim() && attachments.length === 0) return;
 
-    void sendMessage(
-      {
-        text: message.text,
-        files: message.files,
-      },
-      {
-        body: {
-          model: currentModel?.alias,
-          // reasoningEffort: "medium"
-        },
-      },
-    );
-
-    setInput("");
-  };
+    // Let the AI SDK convert browser files to serializable message parts.
+    const files = new DataTransfer();
+    for (const attachment of attachments) files.items.add(attachment.file);
+    setIsSending(true);
+    try {
+      const sending = sendMessage(
+        { text: input, files: files.files },
+        { body: { model: currentModelAlias } },
+      );
+      setInput("");
+      for (const attachment of attachments) {
+        URL.revokeObjectURL(attachment.url);
+        attachmentUrls.current.delete(attachment.url);
+      }
+      setAttachments([]);
+      await sending;
+    } finally {
+      setIsSending(false);
+    }
+  }
 
   return (
     <div className="relative flex h-full flex-col p-2 pt-12">
@@ -216,230 +269,283 @@ export function Chat({
         </Empty>
       ) : (
         // Conversation area
-        <Conversation className="h-full">
-          <ConversationContent className="gap-5 px-2" aria-label="Chat conversation" tabIndex={-1}>
-            {messages.map((message) => (
-              <div key={message.id} className="flex flex-col gap-1">
-                {/* oxlint-disable no-array-index-key -- safe as append-only */}
-                {message.parts.map((part, i) => {
-                  switch (part.type) {
-                    case "text": {
-                      return (
-                        <Message
-                          from={message.role}
-                          key={`${message.id}-${i}`}
-                          tabIndex={-1}
-                          // oxlint-disable-next-line prefer-tag-over-role -- role is forwarded to the internal DOM element
-                          role="article"
-                          aria-label={`Message from ${message.role}`}
-                        >
-                          <MessageContent className="group-[.is-user]:px-3 group-[.is-user]:py-2">
-                            <MessageResponse>{part.text}</MessageResponse>
-                          </MessageContent>
-                        </Message>
-                      );
-                    }
-                    case "reasoning": {
-                      return (
-                        mode === "full" && (
-                          <Reasoning
-                            key={`${message.id}-${i}`}
-                            className="w-full"
-                            isStreaming={
-                              status === "streaming" &&
-                              i === message.parts.length - 1 &&
-                              message.id === messages.at(-1)?.id
-                            }
-                          >
-                            <ReasoningTrigger />
-                            <ReasoningContent>{part.text}</ReasoningContent>
-                          </Reasoning>
-                        )
-                      );
-                    }
-                    case "file": {
-                      const IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/gif"];
-                      return IMAGE_TYPES.includes(part.mediaType) ? (
-                        <img
-                          key={`${message.id}-${i}`}
-                          className="ml-auto h-auto w-24 rounded-lg"
-                          src={part.url}
-                          alt={part.filename}
-                        />
-                      ) : (
-                        // FUTURE: currently non image file types break in the gateway
-                        <Item
-                          key={`${message.id}-${i}`}
-                          variant="outline"
-                          size="xs"
-                          className="ml-auto w-3xs bg-card"
-                        >
-                          <a href={part.url} download={part.filename} className="contents">
-                            <ItemMedia className="translate-y-0! self-center!">
-                              <FileUp size={24} className="text-foreground" />
-                            </ItemMedia>
-                            <ItemContent className="gap-0 truncate">
-                              <ItemTitle>{part.filename}</ItemTitle>
-                              <ItemDescription>{part.mediaType}</ItemDescription>
-                            </ItemContent>
-                            <ItemActions>
-                              <Download className="size-4" />
-                            </ItemActions>
-                          </a>
-                        </Item>
-                      );
-                    }
-                    case "custom":
-                    case "dynamic-tool":
-                    case "reasoning-file":
-                    case "source-document":
-                    case "source-url":
-                    case "step-start": {
-                      return null;
-                    }
-                    default: {
-                      throw new Error(`Unhandled part type: ${(part as { type: string }).type}`);
-                    }
-                  }
-                })}
-                {/* oxlint-enable no-array-index-key */}
-              </div>
-            ))}
-            {/* oxlint-disable-next-line prefer-tag-over-role -- role is forwarded to the internal DOM element */}
-            {status === "submitted" && <Spinner role="status" />}
-            {error && (
-              <Alert variant="destructive" className="overflow-x-auto">
-                <TriangleAlert />
-                <AlertTitle>Something went wrong 🙉</AlertTitle>
-                <AlertDescription>
-                  <p>{error.message}</p>
-                </AlertDescription>
-              </Alert>
-            )}
-          </ConversationContent>
-          <ConversationScrollButton />
-        </Conversation>
+        <MessageScrollerProvider autoScroll>
+          <MessageScroller className="flex-1">
+            <MessageScrollerViewport>
+              <MessageScrollerContent
+                className="gap-5 px-2 py-4"
+                aria-label="Chat conversation"
+                tabIndex={-1}
+              >
+                {messages.map((message) => (
+                  <MessageScrollerItem
+                    key={message.id}
+                    messageId={message.id}
+                    scrollAnchor={message.role === "user"}
+                    className="flex flex-col gap-1"
+                  >
+                    {/* oxlint-disable no-array-index-key -- safe as append-only */}
+                    {message.parts.map((part, i) => {
+                      switch (part.type) {
+                        case "text": {
+                          return (
+                            <Message
+                              align={message.role === "user" ? "end" : "start"}
+                              key={`${message.id}-${i}`}
+                              tabIndex={-1}
+                              // oxlint-disable-next-line prefer-tag-over-role -- role is forwarded to the internal DOM element
+                              role="article"
+                              aria-label={`Message from ${message.role}`}
+                            >
+                              <MessageContent>
+                                {message.role === "user" ? (
+                                  <Bubble align="end" variant="muted">
+                                    <BubbleContent>
+                                      <ChatMarkdown>{part.text}</ChatMarkdown>
+                                    </BubbleContent>
+                                  </Bubble>
+                                ) : (
+                                  <ChatMarkdown>{part.text}</ChatMarkdown>
+                                )}
+                              </MessageContent>
+                            </Message>
+                          );
+                        }
+                        case "reasoning": {
+                          return (
+                            mode === "full" && (
+                              <ChatReasoning
+                                key={`${message.id}-${i}`}
+                                isStreaming={
+                                  status === "streaming" &&
+                                  i === message.parts.length - 1 &&
+                                  message.id === messages.at(-1)?.id
+                                }
+                              >
+                                {part.text}
+                              </ChatReasoning>
+                            )
+                          );
+                        }
+                        case "file": {
+                          const IMAGE_TYPES = [
+                            "image/jpeg",
+                            "image/png",
+                            "image/webp",
+                            "image/gif",
+                          ];
+                          return IMAGE_TYPES.includes(part.mediaType) ? (
+                            <img
+                              key={`${message.id}-${i}`}
+                              className="ml-auto h-auto w-24 rounded-lg"
+                              src={part.url}
+                              alt={part.filename}
+                            />
+                          ) : (
+                            // FUTURE: currently non image file types break in the gateway
+                            <Item
+                              key={`${message.id}-${i}`}
+                              variant="outline"
+                              size="xs"
+                              className="ml-auto w-3xs bg-card"
+                            >
+                              <a href={part.url} download={part.filename} className="contents">
+                                <ItemMedia className="translate-y-0! self-center!">
+                                  <FileUp size={24} className="text-foreground" />
+                                </ItemMedia>
+                                <ItemContent className="gap-0 truncate">
+                                  <ItemTitle>{part.filename}</ItemTitle>
+                                  <ItemDescription>{part.mediaType}</ItemDescription>
+                                </ItemContent>
+                                <ItemActions>
+                                  <Download className="size-4" />
+                                </ItemActions>
+                              </a>
+                            </Item>
+                          );
+                        }
+                        case "custom":
+                        case "dynamic-tool":
+                        case "reasoning-file":
+                        case "source-document":
+                        case "source-url":
+                        case "step-start": {
+                          return null;
+                        }
+                        default: {
+                          throw new Error(
+                            `Unhandled part type: ${(part as { type: string }).type}`,
+                          );
+                        }
+                      }
+                    })}
+                    {/* oxlint-enable no-array-index-key */}
+                  </MessageScrollerItem>
+                ))}
+                {/* oxlint-disable-next-line prefer-tag-over-role -- role is forwarded to the internal DOM element */}
+                {status === "submitted" && <Spinner role="status" />}
+                {error && (
+                  <Alert variant="destructive" className="overflow-x-auto">
+                    <TriangleAlert />
+                    <AlertTitle>Something went wrong 🙉</AlertTitle>
+                    <AlertDescription>
+                      <p>{error.message}</p>
+                    </AlertDescription>
+                  </Alert>
+                )}
+              </MessageScrollerContent>
+            </MessageScrollerViewport>
+            <MessageScrollerButton />
+          </MessageScroller>
+        </MessageScrollerProvider>
       )}
 
-      {/* Input area */}
-      <PromptInput
-        onSubmit={handleSubmit}
-        // oxlint-disable-next-line prefer-tag-over-role -- role is forwarded to the internal DOM element
-        role="form"
-        className="mt-4 rounded-md bg-background"
-        globalDrop
-        multiple
+      <form
+        className="mt-4"
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleSubmit();
+        }}
       >
-        <PromptInputHeader className="p-0">
-          <PromptInputAttachmentsDisplay />
-        </PromptInputHeader>
-        <PromptInputBody>
-          <PromptInputTextarea
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          hidden
+          aria-label="Upload files"
+          onChange={(event) => {
+            if (event.currentTarget.files) addFiles(event.currentTarget.files);
+            event.currentTarget.value = "";
+          }}
+        />
+        <InputGroup className="overflow-hidden bg-background">
+          {attachments.length > 0 && (
+            <InputGroupAddon align="block-start" className="flex-wrap">
+              {attachments.map(({ file, url }) => (
+                <Attachment key={url} size="sm">
+                  <AttachmentMedia variant={file.type.startsWith("image/") ? "image" : "icon"}>
+                    {file.type.startsWith("image/") ? (
+                      <img src={url} alt={file.name} />
+                    ) : (
+                      <FileUp />
+                    )}
+                  </AttachmentMedia>
+                  <AttachmentContent>
+                    <AttachmentTitle>{file.name}</AttachmentTitle>
+                  </AttachmentContent>
+                  <AttachmentAction
+                    aria-label={`Remove ${file.name}`}
+                    onClick={() => {
+                      removeAttachment(url);
+                    }}
+                  >
+                    <XIcon />
+                  </AttachmentAction>
+                </Attachment>
+              ))}
+            </InputGroupAddon>
+          )}
+          <InputGroupTextarea
             ref={chatInputRef}
             disabled={!currentModelAlias}
-            onChange={(e) => {
-              setInput(e.target.value);
-            }}
             value={input}
+            onChange={(event) => {
+              setInput(event.target.value);
+            }}
+            onKeyDown={(event) => {
+              if (event.nativeEvent.isComposing) return;
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                event.currentTarget.form?.requestSubmit();
+              } else if (event.key === "Backspace" && !input && attachments.length > 0) {
+                event.preventDefault();
+                removeAttachment(attachments.at(-1)!.url);
+              }
+            }}
+            onPaste={(event) => {
+              if (event.clipboardData.files.length > 0) {
+                event.preventDefault();
+                addFiles(event.clipboardData.files);
+              }
+            }}
             placeholder="Ask anything …"
             aria-label="Chat message input"
             aria-describedby="input-help"
-            className="min-h-0 pb-0"
+            className="max-h-48 min-h-0 p-3 pb-0"
           />
-
-          {/* Hidden help text */}
-          <div id="input-help" className="sr-only">
+          <span id="input-help" className="sr-only">
             Press Enter to send message, Shift+Enter for new line
-          </div>
-        </PromptInputBody>
-
-        <PromptInputFooter className="pb-2">
-          <PromptInputTools className="h-6 w-full">
-            {/* File upload */}
-            <PromptInputActionAddAttachment ref={attachBtnRef} />
-
-            {/* Model selector */}
+          </span>
+          <InputGroupAddon align="block-end" className="pb-2">
+            <InputGroupButton
+              ref={attachBtnRef}
+              type="button"
+              variant="outline"
+              size="icon-sm"
+              className="rounded-full"
+              onClick={() => {
+                fileInputRef.current?.click();
+              }}
+              aria-label="Add attachment"
+            >
+              <Paperclip />
+            </InputGroupButton>
             {modelsConfig.length > 1 && (
-              <PromptInputSelect
-                id="chat-model-select"
-                onValueChange={(alias: unknown) => {
-                  setSelectedModelAlias(alias as string);
-                }}
+              <Select
                 value={currentModelAlias}
-                disabled={status === "submitted" || modelsConfig.length === 0}
-                aria-label="Select model"
+                onValueChange={(alias) => {
+                  if (alias) setSelectedModelAlias(alias);
+                }}
+                disabled={status === "submitted" || isSending}
               >
-                <PromptInputSelectTrigger className="ml-auto max-w-3xs">
-                  <>
-                    <Brain />
-                    <PromptInputSelectValue className="truncate" />
-                  </>
-                </PromptInputSelectTrigger>
-                <PromptInputSelectContent>
-                  {modelsConfig.map((model) => (
-                    <PromptInputSelectItem key={model.alias} value={model.alias}>
-                      {model.alias.split("/").pop()}
-                    </PromptInputSelectItem>
-                  ))}
-                </PromptInputSelectContent>
-              </PromptInputSelect>
+                <SelectTrigger
+                  className="ml-auto max-w-3xs border-none bg-transparent shadow-none"
+                  aria-label="Select model"
+                >
+                  <Brain />
+                  <SelectValue className="truncate" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {modelsConfig.map((model) => (
+                      <SelectItem key={model.alias} value={model.alias}>
+                        {model.alias.split("/").pop()}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             )}
-          </PromptInputTools>
-
-          {/* Submit button - disable when no model is selected */}
-          <PromptInputSubmit
-            disabled={!currentModelAlias || (!input && status !== "streaming")}
-            status={status === "error" ? "ready" : status}
-          />
-        </PromptInputFooter>
-      </PromptInput>
+            <InputGroupButton
+              type={status === "streaming" ? "button" : "submit"}
+              variant="default"
+              size="icon-sm"
+              className={cn("rounded-full", modelsConfig.length <= 1 && "ml-auto")}
+              aria-label={status === "streaming" ? "Stop" : "Submit"}
+              disabled={
+                !currentModelAlias ||
+                status === "submitted" ||
+                (status !== "streaming" &&
+                  (isSending || (!input.trim() && attachments.length === 0)))
+              }
+              onClick={(event) => {
+                if (status === "streaming") {
+                  event.preventDefault();
+                  void stop();
+                }
+              }}
+            >
+              {status === "streaming" ? (
+                <Square />
+              ) : status === "submitted" || isSending ? (
+                <Spinner />
+              ) : (
+                <ArrowUp />
+              )}
+            </InputGroupButton>
+          </InputGroupAddon>
+        </InputGroup>
+      </form>
     </div>
-  );
-}
-
-function PromptInputActionAddAttachment(props: React.ComponentProps<typeof PromptInputButton>) {
-  const attachments = usePromptInputAttachments();
-
-  return (
-    <PromptInputButton
-      {...props}
-      className="-ml-1.5"
-      onClick={() => {
-        attachments.openFileDialog();
-      }}
-      aria-label="Add attachment"
-    >
-      <Paperclip className="size-4" />
-    </PromptInputButton>
-  );
-}
-
-function PromptInputAttachmentsDisplay() {
-  const attachments = usePromptInputAttachments();
-
-  if (attachments.files.length === 0) {
-    return null;
-  }
-
-  return (
-    <Attachments variant="inline" className="p-2 pb-0">
-      {attachments.files.map((attachment) => (
-        <Attachment
-          key={attachment.id}
-          data={attachment}
-          onRemove={() => {
-            attachments.remove(attachment.id);
-          }}
-        >
-          <div className="relative size-5 shrink-0">
-            <div className="absolute inset-0 transition-opacity group-hover:opacity-0">
-              <AttachmentPreview />
-            </div>
-            <AttachmentRemove className="absolute inset-0" />
-          </div>
-          <AttachmentInfo />
-        </Attachment>
-      ))}
-    </Attachments>
   );
 }
