@@ -1,6 +1,10 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import { cjk } from "@streamdown/cjk";
+import { code } from "@streamdown/code";
+import { math } from "@streamdown/math";
+import { mermaid } from "@streamdown/mermaid";
 import {
   Brain,
   Download,
@@ -12,7 +16,8 @@ import {
   ArrowUp,
   Square,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ComponentProps } from "react";
+import { Streamdown } from "streamdown";
 
 import { Alert, AlertDescription, AlertTitle } from "../_shadcn/ui/alert";
 import {
@@ -59,10 +64,17 @@ import {
 } from "../_shadcn/ui/select";
 import { Spinner } from "../_shadcn/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../_shadcn/ui/tooltip";
+import {
+  Trace,
+  TraceCollapsible,
+  TraceCollapsibleContent,
+  TraceCollapsibleTrigger,
+  TraceIcon,
+  TraceLine,
+  TraceTitle,
+} from "../_shadcn/ui/trace";
 import { OpenAIHttpChatTransport } from "../lib/openai-transport";
 import { cn } from "../lib/utils";
-import { ChatMarkdown } from "./chat-markdown";
-import { ChatReasoning } from "./chat-reasoning";
 
 // Types based on models.schema.json
 export type ModelsConfig = Array<{
@@ -503,5 +515,45 @@ export function Chat({
         </InputGroup>
       </form>
     </div>
+  );
+}
+
+type ChatMarkdownProps = ComponentProps<typeof Streamdown>;
+
+const streamdownPlugins = { cjk, code, math, mermaid };
+
+const ChatMarkdown = ({ className, ...props }: ChatMarkdownProps) => (
+  <Streamdown
+    className={cn("size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0", className)}
+    plugins={streamdownPlugins}
+    {...props}
+  />
+);
+
+function ChatReasoning({ children, isStreaming }: { children: string; isStreaming: boolean }) {
+  const [open, setOpen] = useState<boolean>();
+
+  const line = (
+    <TraceLine status={isStreaming ? "running" : undefined}>
+      <TraceIcon>
+        <Brain />
+      </TraceIcon>
+      <TraceTitle>{isStreaming ? "Thinking" : "Thought"}</TraceTitle>
+    </TraceLine>
+  );
+
+  return (
+    <Trace className="mb-4">
+      {children.length === 0 ? (
+        line
+      ) : (
+        <TraceCollapsible open={open ?? isStreaming} onOpenChange={setOpen}>
+          <TraceCollapsibleTrigger>{line}</TraceCollapsibleTrigger>
+          <TraceCollapsibleContent className="text-sm whitespace-pre-wrap">
+            {children}
+          </TraceCollapsibleContent>
+        </TraceCollapsible>
+      )}
+    </Trace>
   );
 }
