@@ -1,4 +1,3 @@
-import { ViewTransition } from "react";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 
 import type { Route } from "./+types/root";
@@ -34,11 +33,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return (
-    <ViewTransition>
-      <Outlet />
-    </ViewTransition>
-  );
+  return <Outlet />;
 }
 
 export function ErrorBoundary() {
