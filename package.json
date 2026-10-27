@@ -18,7 +18,7 @@
     "format": "oxfmt .",
     "format:staged": "oxfmt --no-error-on-unmatched-pattern",
     "lint": "oxlint",
-    "lint:staged": "oxlint --fix",
+    "lint:staged": "oxlint --fix --no-error-on-unmatched-pattern",
     "lint:deps": "check-dependency-version-consistency .",
     "prepare": "test -n \"$CI\" || lefthook install",
     "secret": "bun run scripts/secrets.ts",

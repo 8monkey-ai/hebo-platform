@@ -42,7 +42,7 @@ RUN apt-get update && \
 # s6-overlay
 ARG TARGETARCH
 RUN S6_ARCH=$([ "$TARGETARCH" = "arm64" ] && echo "aarch64" || echo "x86_64") && \
-    S6_BASE="https://github.com/just-containers/s6-overlay/releases/download/v3.2.0.2" && \
+    S6_BASE="https://github.com/just-containers/s6-overlay/releases/download/v3.2.3.2" && \
     curl -sSfL "${S6_BASE}/s6-overlay-noarch.tar.xz" | tar -C / -Jxpf - && \
     curl -sSfL "${S6_BASE}/s6-overlay-${S6_ARCH}.tar.xz" | tar -C / -Jxpf -
 
