@@ -136,7 +136,6 @@ export function CreateApiKeyDialog() {
       </Dialog>
 
       <ApiKeyRevealDialog
-        key={fetcher.data?.apiKey?.id}
         open={revealOpen}
         onOpenChange={setRevealOpen}
         apiKey={fetcher.data?.apiKey?.key ?? ""}
@@ -151,6 +150,11 @@ type ApiKeyRevealDialogProps = {
 
 function ApiKeyRevealDialog({ apiKey, ...props }: ApiKeyRevealDialogProps) {
   const [acknowledged, setAcknowledged] = useState(false);
+
+  useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- Reset acknowledgement for each key.
+    if (props.open) setAcknowledged(false);
+  }, [props.open]);
 
   return (
     <Dialog {...props}>
