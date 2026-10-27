@@ -56,8 +56,9 @@ export function useFormErrorToast(formErrors: Record<string, string[]>) {
 export const revalidateOnSuccessfulAction: ShouldRevalidateFunction = ({
   actionResult,
   defaultShouldRevalidate,
+  formMethod,
 }) => {
-  if (!actionResult) return false;
+  if (!actionResult) return formMethod ? defaultShouldRevalidate : false;
   if (
     typeof actionResult === "object" &&
     "status" in actionResult &&

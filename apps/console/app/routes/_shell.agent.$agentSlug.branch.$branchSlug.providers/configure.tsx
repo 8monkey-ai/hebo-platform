@@ -78,6 +78,11 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
 
   const [activeAuthMode, setActiveAuthMode] = useState(defaultAuthMode);
 
+  useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect, react/no-deriving-state-in-effects -- Reset the mode when the provider changes.
+    setActiveAuthMode(defaultAuthMode);
+  }, [defaultAuthMode]);
+
   const [form, fields] = useForm<Provider>({
     id: `${provider?.slug}-${activeAuthMode ?? "default"}`,
     lastResult: fetcher.state === "idle" ? fetcher.data?.submission : undefined,

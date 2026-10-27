@@ -73,12 +73,14 @@ export default function ModelsConfigForm({
 
   // Close the active card on successful submit
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
+  // oxlint-disable react-hooks/exhaustive-deps, react/exhaustive-effect-dependencies
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error" && !form.dirty) {
       // oxlint-disable-next-line react/set-state-in-effect -- Collapse the card after a successful save.
       setExpandedCardId(null);
     }
-  }, [fetcher.state, form.status, form.dirty]);
+  }, [fetcher.state, form.status]);
+  // oxlint-enable react-hooks/exhaustive-deps, react/exhaustive-effect-dependencies
 
   const formRef = useRef<HTMLFormElement>(null);
 
