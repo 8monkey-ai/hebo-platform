@@ -13,7 +13,7 @@ import {
 import { LRUCache } from "lru-cache";
 
 import type { createPrismaClient } from "~api/db/prisma";
-import type { ModelsConfig, ProviderSlug } from "~api/modules/providers/types";
+import type { ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "../utils/aws";
 import { createProvider } from "./provider";
@@ -67,7 +67,7 @@ export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
     await resolveModelAlias({
       ...(ctx as unknown as Omit<ResolveModelHookContext, "modelId">),
       modelId,
-    } as ResolveModelHookContext);
+    });
   } catch {
     // Best-effort: body may be partially valid, swallow resolution failures
   }
@@ -106,13 +106,13 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
     throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
   }
 
-  const model = (branch.models as ModelsConfig)?.find(({ alias }) => alias === modelAlias);
+  const model = branch.models.find(({ alias }) => alias === modelAlias);
 
   if (!model) {
     throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
   }
 
-  const catalogModel = models[model.type as keyof typeof models];
+  const catalogModel = models[model.type];
   state.modelConfig = {
     type: model.type,
     // Currently, we only support routing to the first provider.

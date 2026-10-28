@@ -4,7 +4,8 @@
     "paths": {
       "~gateway/*": ["./src/*"],
       "~api": ["../api/src/index.ts"],
-      "~api/*": ["../api/src/*"]
+      "~api/*": ["../api/src/*"],
+      "~auth/*": ["../auth/src/*"]
     },
     "types": ["@types/bun"]
   }

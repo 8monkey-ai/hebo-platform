@@ -4,6 +4,8 @@ import { redactSensitiveValues } from "~api/db/utils";
 import { Prisma, PrismaClient } from "~api/generated/prisma/client";
 import { ProviderConfigSchema, type ProviderConfig } from "~api/modules/providers/types";
 
+export type * from "./json-types";
+
 const DB_NULL = null;
 
 const prisma = new PrismaClient({

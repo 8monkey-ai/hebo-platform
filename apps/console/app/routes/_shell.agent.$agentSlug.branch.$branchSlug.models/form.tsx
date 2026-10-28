@@ -73,12 +73,14 @@ export default function ModelsConfigForm({
 
   // Close the active card on successful submit
   const [expandedCardId, setExpandedCardId] = useState<number | null>(null);
+  // oxlint-disable react-hooks/exhaustive-deps, react/exhaustive-effect-dependencies
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error" && !form.dirty) {
+      // oxlint-disable-next-line react/set-state-in-effect -- Collapse the card after a successful save.
       setExpandedCardId(null);
     }
-    // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
+  // oxlint-enable react-hooks/exhaustive-deps, react/exhaustive-effect-dependencies
 
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -99,6 +101,7 @@ export default function ModelsConfigForm({
             if (open) setExpandedCardId(index);
           }}
           onRemove={() => {
+            // oxlint-disable-next-line react/set-state-in-effect -- Collapse the card after a successful save.
             setExpandedCardId(null);
             form.remove({ name: fields.models.name, index });
             // FUTURE: this is a quirk to work around a current Conform limitation.
@@ -107,6 +110,7 @@ export default function ModelsConfigForm({
           }}
           onCancel={() => {
             if (form.dirty) form.reset({ name: fields.models.name });
+            // oxlint-disable-next-line react/set-state-in-effect -- Collapse the card after a successful save.
             setExpandedCardId(null);
           }}
           isSubmitting={fetcher.state === "submitting"}

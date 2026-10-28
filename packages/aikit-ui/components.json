@@ -17,11 +17,7 @@
     "utils": "#/lib/utils",
     "ui": "#/_shadcn/ui",
     "lib": "#/lib",
-    "hooks": "#/hooks",
-    "components/ai-elements": "#/_ai-elements"
+    "hooks": "#/hooks"
   },
-  "iconLibrary": "lucide",
-  "registries": {
-    "@ai-elements": "https://registry.ai-sdk.dev/{name}.json"
-  }
+  "iconLibrary": "lucide"
 }

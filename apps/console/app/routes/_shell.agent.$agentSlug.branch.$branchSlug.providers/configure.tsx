@@ -79,6 +79,7 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
   const [activeAuthMode, setActiveAuthMode] = useState(defaultAuthMode);
 
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect, react/no-deriving-state-in-effects -- Reset the mode when the provider changes.
     setActiveAuthMode(defaultAuthMode);
   }, [defaultAuthMode]);
 
@@ -92,12 +93,13 @@ export function ConfigureProviderDialog({ provider, ...props }: ConfigureProvide
   });
   useFormErrorToast(form.allErrors);
 
+  // oxlint-disable exhaustive-deps, react/exhaustive-effect-dependencies -- Run on submission status changes, not callback identity changes.
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
       props.onOpenChange?.(false, {} as never);
     }
-    // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
+  // oxlint-enable exhaustive-deps, react/exhaustive-effect-dependencies
 
   const configFieldset = fields.config.getFieldset();
   const activeMode = modes.find((m) => m.value === activeAuthMode) ?? modes[0];

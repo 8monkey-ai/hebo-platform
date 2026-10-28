@@ -4,6 +4,7 @@ import type { Route } from "./+types/root";
 import { ErrorView } from "./components/ui/ErrorView";
 // oxlint-disable no-unassigned-import
 import "./init";
+
 import "./styles/fonts.css";
 import "./styles/tailwind.css";
 import "./styles/global.css";

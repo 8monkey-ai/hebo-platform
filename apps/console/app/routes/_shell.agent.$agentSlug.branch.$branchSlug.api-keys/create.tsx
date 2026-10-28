@@ -67,6 +67,7 @@ export function CreateApiKeyDialog() {
   const [revealOpen, setRevealOpen] = useState(false);
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
+      // oxlint-disable-next-line react/set-state-in-effect -- Close the dialog after submission completes.
       createSetOpen(false);
       if (fetcher.data?.apiKey) {
         setRevealOpen(true);
@@ -151,6 +152,7 @@ function ApiKeyRevealDialog({ apiKey, ...props }: ApiKeyRevealDialogProps) {
   const [acknowledged, setAcknowledged] = useState(false);
 
   useEffect(() => {
+    // oxlint-disable-next-line react/set-state-in-effect -- Reset acknowledgement for each key.
     if (props.open) setAcknowledged(false);
   }, [props.open]);
 
