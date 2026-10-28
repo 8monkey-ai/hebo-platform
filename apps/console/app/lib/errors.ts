@@ -3,6 +3,23 @@ import { useEffect } from "react";
 import { isRouteErrorResponse, type ShouldRevalidateFunction } from "react-router";
 import { toast } from "sonner";
 
+const networkErrorMessages = new Set([
+  "network error",
+  "NetworkError when attempting to fetch resource.",
+  "The Internet connection appears to be offline.",
+  "Load failed",
+]);
+
+function isNetworkError(error: unknown): error is NetworkError | TypeError {
+  return (
+    error instanceof NetworkError ||
+    (error instanceof TypeError &&
+      (networkErrorMessages.has(error.message) ||
+        error.message === "Failed to fetch" ||
+        error.message.startsWith("Failed to fetch (")))
+  );
+}
+
 export function parseError(error: unknown) {
   let message: string | undefined;
   let status: number | undefined;
@@ -19,7 +36,7 @@ export function parseError(error: unknown) {
     message = e.summary || e.message || "Unknown Error";
   } else if (error instanceof TimeoutError) {
     message = error.message;
-  } else if (error instanceof NetworkError) {
+  } else if (isNetworkError(error)) {
     message = `Network error: ${error.message}`;
   } else if (error instanceof HTTPError) {
     message = `${error.response.statusText}: ${error.message}`;
@@ -36,7 +53,7 @@ export function parseError(error: unknown) {
 
   let retryable = !!status && (status >= 500 || [408, 409, 425, 429].includes(status));
   if (!retryable && error instanceof TimeoutError) retryable = true;
-  if (!retryable && error instanceof NetworkError) retryable = true;
+  if (!retryable && isNetworkError(error)) retryable = true;
 
   return { message, status, stack, retryable };
 }

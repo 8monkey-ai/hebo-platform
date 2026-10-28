@@ -2,7 +2,20 @@ import { describe, expect, test } from "bun:test";
 
 import { createMemoryRouter, redirect } from "react-router";
 
-import { revalidateOnSuccessfulAction } from "./errors";
+import { parseError, revalidateOnSuccessfulAction } from "./errors";
+
+describe("parseError", () => {
+  test("recognizes native fetch network errors without treating other TypeErrors as network failures", () => {
+    expect(parseError(new TypeError("Failed to fetch"))).toMatchObject({
+      message: "Network error: Failed to fetch",
+      retryable: true,
+    });
+    expect(parseError(new TypeError("Cannot read properties of undefined"))).toMatchObject({
+      message: "Cannot read properties of undefined",
+      retryable: false,
+    });
+  });
+});
 
 describe("revalidateOnSuccessfulAction", () => {
   test("reloads the parent after an action redirects", async () => {
