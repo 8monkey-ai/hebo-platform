@@ -21,6 +21,14 @@ import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { IS_PRODUCTION } from "../env";
 import { getSecret } from "../utils/secret";
 import { isRootPathUrl } from "../utils/url";
+import {
+  AttributeKeySanitizer,
+  GREPTIME_LOG_PIPELINE_NAME,
+  GREPTIME_LOG_TABLE_NAME,
+  GREPTIME_TRACE_PIPELINE_NAME,
+  GREPTIME_TRACE_TABLE_NAME,
+  ensureGreptimeLogPipeline,
+} from "./greptime-otlp";
 
 /**
  * Headers that are safe and useful to record as span attributes.
@@ -48,9 +56,13 @@ const ALLOWED_RESPONSE_HEADERS = [
   "x-request-id",
 ];
 
-export const GREPTIME_OTLP_ENDPOINT = `http://${(await getSecret("GREPTIME_HOST")) ?? "localhost"}:4000/v1/otlp`;
+const GREPTIME_HTTP_URL = `http://${(await getSecret("GREPTIME_HOST")) ?? "localhost"}:4000`;
+export const GREPTIME_OTLP_ENDPOINT = `${GREPTIME_HTTP_URL}/v1/otlp`;
 
 export const createOtelLogger = (serviceName: string, minimumSeverity: SeverityNumber) => {
+  // Fire-and-forget: the first batch is exported only after `scheduledDelayMillis`.
+  void ensureGreptimeLogPipeline(GREPTIME_HTTP_URL);
+
   const loggerProvider = new LoggerProvider({
     resource: resourceFromAttributes({
       "service.name": serviceName,
@@ -68,6 +80,10 @@ export const createOtelLogger = (serviceName: string, minimumSeverity: SeverityN
       new BatchLogRecordProcessor(
         new OTLPLogExporter({
           url: `${GREPTIME_OTLP_ENDPOINT}/v1/logs`,
+          headers: {
+            "x-greptime-pipeline-name": GREPTIME_LOG_PIPELINE_NAME,
+            "x-greptime-log-table-name": GREPTIME_LOG_TABLE_NAME,
+          },
           compression: CompressionAlgorithm.GZIP,
         }),
         {
@@ -119,10 +135,14 @@ export const getOtelConfig = (
       return !isRootPathUrl(request.url);
     },
     spanProcessors: [
+      new AttributeKeySanitizer(),
       new BatchSpanProcessor(
         new OTLPTraceExporter({
           url: `${GREPTIME_OTLP_ENDPOINT}/v1/traces`,
-          headers: { "x-greptime-pipeline-name": "greptime_trace_v1" },
+          headers: {
+            "x-greptime-pipeline-name": GREPTIME_TRACE_PIPELINE_NAME,
+            "x-greptime-trace-table-name": GREPTIME_TRACE_TABLE_NAME,
+          },
           compression: CompressionAlgorithm.GZIP,
         }),
         {

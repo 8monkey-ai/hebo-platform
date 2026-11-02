@@ -1,4 +1,4 @@
-import { LRUCache } from "lru-cache";
+import { GREPTIME_TRACE_TABLE_NAME } from "@hebo/shared-api/lib/greptime-otlp";
 
 import type { GreptimeDb } from "~api/middlewares/greptime";
 
@@ -12,49 +12,33 @@ import {
   parseString,
 } from "./utils";
 
-const METADATA_PREFIX = "span_attributes.gen_ai.request.metadata.";
+const METADATA_PREFIX = "gen_ai.request.metadata.";
 
-const OPTIONAL_SPAN_COLUMNS = [
-  {
-    column: "span_attributes.gen_ai.usage.cache_read.input_tokens",
-    alias: "cache_read_input_tokens",
-  },
-  { column: "span_attributes.gen_ai.usage.reasoning.output_tokens", alias: "reasoning_tokens" },
-  { column: "span_attributes.gen_ai.request.reasoning.effort", alias: "reasoning_effort" },
-  { column: "span_attributes.gen_ai.request.reasoning.enabled", alias: "reasoning_enabled" },
-  { column: "span_attributes.gen_ai.request.reasoning.max_tokens", alias: "reasoning_max_tokens" },
-] as const;
+type SpanAttributes = Record<string, unknown>;
 
-const traceColumnsCache = new LRUCache<
-  string,
-  { metadataColumns: string[]; optionalColumns: Set<string> }
->({
-  max: 1,
-  ttl: 2_000,
-});
+/** Reads a top-level string key of the `span_attributes` JSON2 column (keys contain dots). */
+const spanAttribute = (key: string) => `span_attributes."${escapeSqlIdentifier(key)}"::STRING`;
 
-async function getTraceColumnNames(greptimeDb: GreptimeDb) {
-  const cached = traceColumnsCache.get("trace_columns");
-  if (cached) return cached;
-  const rows = await greptimeDb.unsafe<Array<{ column_name: string }>>(
-    `SELECT column_name
-     FROM information_schema.columns
-     WHERE table_name = 'opentelemetry_traces'
-       AND (column_name LIKE $1
-         OR column_name IN (${OPTIONAL_SPAN_COLUMNS.map((_, i) => `$${i + 2}`).join(", ")}))`,
-    [`${METADATA_PREFIX}%`, ...OPTIONAL_SPAN_COLUMNS.map(({ column }) => column)],
-  );
-
-  const metadataColumns: string[] = [];
-  const optionalColumns = new Set<string>();
-  for (const { column_name } of rows) {
-    const name = column_name;
-    if (name.startsWith(METADATA_PREFIX)) metadataColumns.push(name);
-    else optionalColumns.add(name);
+function extractMetadata(attributes: SpanAttributes) {
+  const metadata: Record<string, string> = {};
+  for (const key in attributes) {
+    const value = attributes[key];
+    if (key.startsWith(METADATA_PREFIX) && typeof value === "string") {
+      metadata[key.slice(METADATA_PREFIX.length)] = value;
+    }
   }
-  const result = { metadataColumns, optionalColumns };
-  traceColumnsCache.set("trace_columns", result);
-  return result;
+  return metadata;
+}
+
+function extractScalarAttributes(attributes: SpanAttributes) {
+  const scalars: Record<string, string | number | boolean> = {};
+  for (const key in attributes) {
+    const value = attributes[key];
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      scalars[key] = value;
+    }
+  }
+  return scalars;
 }
 
 export async function listTraces(
@@ -70,9 +54,6 @@ export async function listTraces(
   statusFilter?: "ok" | "error",
   operationFilter?: "chat" | "embeddings" | "transcriptions",
 ) {
-  const { metadataColumns } = await getTraceColumnNames(greptimeDb);
-  const metadataKeys = metadataColumns.map((col) => col.slice(METADATA_PREFIX.length));
-
   const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
   function addParam(value: unknown) {
     params.push(value);
@@ -81,8 +62,7 @@ export async function listTraces(
 
   let metaFilterSql = "";
   for (const [key, value] of Object.entries(metadataFilters)) {
-    if (!metadataKeys.includes(key)) continue;
-    metaFilterSql += ` AND "${escapeSqlIdentifier(`${METADATA_PREFIX}${key}`)}" = ${addParam(value)}`;
+    metaFilterSql += ` AND ${spanAttribute(`${METADATA_PREFIX}${key}`)} = ${addParam(value)}`;
   }
 
   let statusFilterSql = "";
@@ -94,12 +74,8 @@ export async function listTraces(
 
   let operationFilterSql = "";
   if (operationFilter) {
-    operationFilterSql = ` AND "span_attributes.gen_ai.operation.name" = ${addParam(operationFilter)}`;
+    operationFilterSql = ` AND ${spanAttribute("gen_ai.operation.name")} = ${addParam(operationFilter)}`;
   }
-
-  const metadataSelectSql = metadataColumns
-    .map((col) => `"${escapeSqlIdentifier(col)}"`)
-    .join(",\n      ");
 
   const queryText = `
     SELECT
@@ -108,16 +84,12 @@ export async function listTraces(
       "span_status_code" AS span_status_code,
       "span_status_message" AS span_status_message,
       "duration_nano" AS duration_nano,
-      "span_attributes.gen_ai.operation.name" AS operation_name,
-      "span_attributes.gen_ai.response.model" AS response_model,
-      "span_attributes.gen_ai.provider.name" AS provider_name,
-      "span_attributes.gen_ai.input.messages" AS input_messages
-      ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
-    FROM opentelemetry_traces
-    WHERE "span_attributes.gen_ai.operation.name" IS NOT NULL
-      AND "span_attributes.hebo.agent.slug" = $1
-      AND "span_attributes.hebo.branch.slug" = $2
-      AND "span_attributes.hebo.organization.id" = $3
+      "span_attributes" AS span_attributes
+    FROM ${GREPTIME_TRACE_TABLE_NAME}
+    WHERE ${spanAttribute("gen_ai.operation.name")} IS NOT NULL
+      AND ${spanAttribute("hebo.agent.slug")} = $1
+      AND ${spanAttribute("hebo.branch.slug")} = $2
+      AND ${spanAttribute("hebo.organization.id")} = $3
       AND "timestamp" >= $4
       AND "timestamp" <= $5
       ${metaFilterSql}
@@ -131,24 +103,22 @@ export async function listTraces(
   const hasNextPage = rows.length > pageSize;
   const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
 
+  const metadataKeys = new Set<string>();
   const data = [];
   for (const row of pageRows) {
-    const metadata: Record<string, string> = {};
-    for (const col of metadataColumns) {
-      if (row[col] !== null && row[col] !== undefined) {
-        metadata[col.slice(METADATA_PREFIX.length)] = parseString(row[col]);
-      }
-    }
+    const attributes = (row.span_attributes ?? {}) as SpanAttributes;
+    const metadata = extractMetadata(attributes);
+    for (const key in metadata) metadataKeys.add(key);
     data.push({
       timestamp: row.timestamp as Date,
       traceId: parseString(row.trace_id),
-      operationName: parseString(row.operation_name),
-      model: parseString(row.response_model),
-      provider: parseString(row.provider_name),
+      operationName: parseString(attributes["gen_ai.operation.name"]),
+      model: parseString(attributes["gen_ai.response.model"]),
+      provider: parseString(attributes["gen_ai.provider.name"]),
       status: formatStatus(row.span_status_code),
       statusMessage: parseString(row.span_status_message),
       durationMs: Number(row.duration_nano) / 1e6,
-      summary: extractLastUserSummary(row.input_messages),
+      summary: extractLastUserSummary(attributes["gen_ai.input.messages"]),
       metadata,
     });
   }
@@ -156,7 +126,7 @@ export async function listTraces(
   return {
     data,
     hasNextPage,
-    metadataKeys,
+    metadataKeys: [...metadataKeys],
   };
 }
 
@@ -167,18 +137,6 @@ export async function getSpans(
   branchSlug: string,
   traceId: string,
 ) {
-  const { metadataColumns, optionalColumns } = await getTraceColumnNames(greptimeDb);
-
-  const metadataSelectSql = metadataColumns
-    .map((col) => `"${escapeSqlIdentifier(col)}"`)
-    .join(",\n      ");
-
-  const optionalColumnsSql = OPTIONAL_SPAN_COLUMNS.map(({ column, alias }) =>
-    optionalColumns.has(column)
-      ? `"${escapeSqlIdentifier(column)}" AS "${escapeSqlIdentifier(alias)}"`
-      : `NULL AS "${escapeSqlIdentifier(alias)}"`,
-  ).join(",\n      ");
-
   const queryText = `
     SELECT
       "timestamp" AS timestamp,
@@ -186,28 +144,13 @@ export async function getSpans(
       "span_status_code" AS span_status_code,
       "span_status_message" AS span_status_message,
       "duration_nano" AS duration_nano,
-      "span_attributes.gen_ai.operation.name" AS operation_name,
-      "span_attributes.gen_ai.request.model" AS request_model,
-      "span_attributes.gen_ai.response.model" AS response_model,
-      "span_attributes.gen_ai.provider.name" AS provider_name,
-      "span_attributes.gen_ai.input.messages" AS input_messages,
-      "span_attributes.gen_ai.output.messages" AS output_messages,
-      "span_attributes.gen_ai.response.finish_reasons" AS finish_reasons,
-      "span_attributes.gen_ai.response.id" AS response_id,
-      "span_attributes.gen_ai.usage.input_tokens" AS input_tokens,
-      "span_attributes.gen_ai.usage.output_tokens" AS output_tokens,
-      "span_attributes.gen_ai.usage.total_tokens" AS total_tokens,
-      ${optionalColumnsSql},
-      "span_attributes.hebo.agent.slug",
-      "span_attributes.hebo.branch.slug",
-      "span_attributes.hebo.organization.id"
-      ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
-    FROM opentelemetry_traces
+      "span_attributes" AS span_attributes
+    FROM ${GREPTIME_TRACE_TABLE_NAME}
     WHERE "trace_id" = $1
-      AND "span_attributes.hebo.organization.id" = $2
-      AND "span_attributes.hebo.agent.slug" = $3
-      AND "span_attributes.hebo.branch.slug" = $4
-      AND "span_attributes.gen_ai.operation.name" IS NOT NULL
+      AND ${spanAttribute("hebo.organization.id")} = $2
+      AND ${spanAttribute("hebo.agent.slug")} = $3
+      AND ${spanAttribute("hebo.branch.slug")} = $4
+      AND ${spanAttribute("gen_ai.operation.name")} IS NOT NULL
     ORDER BY "timestamp" ASC
   `;
 
@@ -220,45 +163,35 @@ export async function getSpans(
 
   const result = [];
   for (const row of rows) {
-    const spanAttributes: Record<string, string | number | boolean | null> = {};
-    const metadata: Record<string, string> = {};
-
-    for (const [key, value] of Object.entries(row)) {
-      if (value === null || value === undefined) continue;
-      if (key.startsWith("span_attributes.")) {
-        if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-          spanAttributes[key.replace("span_attributes.", "")] = value;
-        }
-        if (key.startsWith(METADATA_PREFIX) && typeof value === "string") {
-          metadata[key.replace(METADATA_PREFIX, "")] = value;
-        }
-      }
-    }
+    const attributes = (row.span_attributes ?? {}) as SpanAttributes;
+    const reasoningEnabled = attributes["gen_ai.request.reasoning.enabled"];
 
     result.push({
       timestamp: row.timestamp as Date,
       spanId: parseString(row.span_id),
-      operationName: parseString(row.operation_name),
-      model: parseString(row.request_model),
-      responseModel: parseString(row.response_model),
-      provider: parseString(row.provider_name),
+      operationName: parseString(attributes["gen_ai.operation.name"]),
+      model: parseString(attributes["gen_ai.request.model"]),
+      responseModel: parseString(attributes["gen_ai.response.model"]),
+      provider: parseString(attributes["gen_ai.provider.name"]),
       status: formatStatus(row.span_status_code),
       statusMessage: parseString(row.span_status_message),
       durationMs: Number(row.duration_nano ?? 0) / 1e6,
-      inputTokens: parseNullableNumber(row.input_tokens),
-      outputTokens: parseNullableNumber(row.output_tokens),
-      totalTokens: parseNullableNumber(row.total_tokens),
-      cacheReadInputTokens: parseNullableNumber(row.cache_read_input_tokens),
-      reasoningTokens: parseNullableNumber(row.reasoning_tokens),
-      reasoningEffort: parseString(row.reasoning_effort),
-      reasoningEnabled: row.reasoning_enabled == null ? null : Boolean(row.reasoning_enabled),
-      reasoningMaxTokens: parseNullableNumber(row.reasoning_max_tokens),
-      inputMessages: parseJsonArray(row.input_messages) as GenAIInputMessages,
-      outputMessages: parseJsonArray(row.output_messages) as GenAIOutputMessages,
-      finishReasons: parseJsonArray(row.finish_reasons) as GenAIFinishReasons,
-      responseId: parseString(row.response_id),
-      metadata,
-      spanAttributes,
+      inputTokens: parseNullableNumber(attributes["gen_ai.usage.input_tokens"]),
+      outputTokens: parseNullableNumber(attributes["gen_ai.usage.output_tokens"]),
+      totalTokens: parseNullableNumber(attributes["gen_ai.usage.total_tokens"]),
+      cacheReadInputTokens: parseNullableNumber(attributes["gen_ai.usage.cache_read.input_tokens"]),
+      reasoningTokens: parseNullableNumber(attributes["gen_ai.usage.reasoning.output_tokens"]),
+      reasoningEffort: parseString(attributes["gen_ai.request.reasoning.effort"]),
+      reasoningEnabled: reasoningEnabled == null ? null : Boolean(reasoningEnabled),
+      reasoningMaxTokens: parseNullableNumber(attributes["gen_ai.request.reasoning.max_tokens"]),
+      inputMessages: parseJsonArray(attributes["gen_ai.input.messages"]) as GenAIInputMessages,
+      outputMessages: parseJsonArray(attributes["gen_ai.output.messages"]) as GenAIOutputMessages,
+      finishReasons: parseJsonArray(
+        attributes["gen_ai.response.finish_reasons"],
+      ) as GenAIFinishReasons,
+      responseId: parseString(attributes["gen_ai.response.id"]),
+      metadata: extractMetadata(attributes),
+      spanAttributes: extractScalarAttributes(attributes),
     });
   }
   return result;
