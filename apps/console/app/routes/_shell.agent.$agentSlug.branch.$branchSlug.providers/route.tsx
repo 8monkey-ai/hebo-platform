@@ -29,7 +29,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
       try {
         provider = await api
           .providers({ slug: submission.value.slug })
-          .config.put(submission.value.config as Record<string, unknown>);
+          .config.put(submission.value.config);
       } catch (error) {
         return {
           intent,

@@ -5,11 +5,18 @@
       "~console/*": ["./app/*"],
       "~api": ["../api/src/index.ts"],
       "~api/*": ["../api/src/*"],
+      "~auth/*": ["../auth/src/*"],
       "~gateway": ["../gateway/src/index.ts"],
       "~gateway/*": ["../gateway/src/*"]
     },
     "rootDirs": [".", "./.react-router/types"],
     "types": ["vite/client", "mdx"]
   },
-  "include": ["**/*", "**/.server/**/*", "**/.client/**/*", ".react-router/types/**/*"]
+  "include": [
+    "**/*",
+    "app/**/*.mdx",
+    "**/.server/**/*",
+    "**/.client/**/*",
+    ".react-router/types/**/*"
+  ]
 }

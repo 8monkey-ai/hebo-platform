@@ -1,4 +1,5 @@
-import { delay, http, type HttpHandler } from "msw";
+import { http, type HttpHandler } from "msw/http";
+import { delay } from "msw/utils/delay";
 
 const METHOD_DELAYS: Partial<Record<keyof typeof http, number>> = {
   get: 500,
@@ -15,7 +16,7 @@ export function addDelays(handlers: HttpHandler[]): HttpHandler[] {
         : "all";
     const duration = method ? METHOD_DELAYS[method] : undefined;
     if (!method || !duration) return [h];
-    const path = h.info?.path ?? /.*/;
+    const path = h.info?.path ?? /.*/u;
 
     return [http[method](path, () => delay(duration)), h];
   });

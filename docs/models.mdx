@@ -1,0 +1,49 @@
+---
+title: "Models"
+description: "Choose the model for an alias and use your own provider keys"
+---
+
+Use a model alias to switch models without changing your app configuration. An alias belongs to a branch of your agent, and its **Type** selects the model that Hebo calls. With an alias, your app sends its path as the model name.
+
+| Setting      | Example                           |
+| ------------ | --------------------------------- |
+| Alias path   | `my-first-agent-x7k/main/default` |
+| Model (Type) | **GPT-OSS 120B**                  |
+
+An alias path has the form `<agent-slug>/<branch-slug>/<alias>`. Copy it from the alias card in **Models**.
+
+## Model badges
+
+When you select a **Type**, some models in the list show one of these badges:
+
+- **Free Tier**: The model works without provider credentials.
+- **BYOK** (bring your own key): The model works only with your own provider credentials. See [Bring your own key](#bring-your-own-key).
+
+## Switch models
+
+In the [Hebo Console](https://console.hebo.ai), open **Models**. On the alias card, select **Edit**, select the new model in **Type**, and select **Save**.
+
+The alias path stays the same. The next request to the alias uses the new model.
+
+## Add an alias
+
+Add one alias for each model that you want to select in your app.
+
+In **Models**, select **Add Model**. Enter an **Alias**, for example `fast`, select the model in **Type**, and select **Save**.
+
+Copy the **Alias path** of the new alias, for example `my-first-agent-x7k/main/fast`, and add it to your app. For the steps, see [Claude Desktop](/integrations/claude-desktop) or [Codex Desktop](/integrations/codex-desktop).
+
+## Bring your own key
+
+Models marked **BYOK** require your own provider credentials. For **Free Tier** models, BYOK is optional. Use it to send requests through your own provider account.
+
+You save provider credentials in the Hebo Console, and Hebo uses them to call the provider. Your app still authenticates with your Hebo API key. To use BYOK, configure the provider and select it on the alias:
+
+1. In **Providers**, select **Configure** on the row of your provider. Enter the credentials, then select **Set**.
+2. In **Models**, select **Edit** on the alias card. Open **Advanced options**, select **Bring Your Own Provider**, select your provider, and select **Save**.
+
+The provider list shows only the providers that you configured and that support the selected model.
+
+Provider credentials belong to your organization, so you can select them on aliases in all of its agents.
+
+If a request returns the error `BYOK_REQUIRED`, check that the provider has credentials in **Providers** and that the alias has the provider selected in **Advanced options**.

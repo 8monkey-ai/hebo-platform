@@ -1,8 +1,24 @@
-import isNetworkError from "is-network-error";
-import { HTTPError, TimeoutError } from "ky";
+import { HTTPError, NetworkError, TimeoutError } from "ky";
 import { useEffect } from "react";
 import { isRouteErrorResponse, type ShouldRevalidateFunction } from "react-router";
 import { toast } from "sonner";
+
+const networkErrorMessages = new Set([
+  "network error",
+  "NetworkError when attempting to fetch resource.",
+  "The Internet connection appears to be offline.",
+  "Load failed",
+]);
+
+function isNetworkError(error: unknown): error is NetworkError | TypeError {
+  return (
+    error instanceof NetworkError ||
+    (error instanceof TypeError &&
+      (networkErrorMessages.has(error.message) ||
+        error.message === "Failed to fetch" ||
+        error.message.startsWith("Failed to fetch (")))
+  );
+}
 
 export function parseError(error: unknown) {
   let message: string | undefined;
@@ -57,8 +73,9 @@ export function useFormErrorToast(formErrors: Record<string, string[]>) {
 export const revalidateOnSuccessfulAction: ShouldRevalidateFunction = ({
   actionResult,
   defaultShouldRevalidate,
+  formMethod,
 }) => {
-  if (!actionResult) return false;
+  if (!actionResult) return formMethod ? defaultShouldRevalidate : false;
   if (
     typeof actionResult === "object" &&
     "status" in actionResult &&

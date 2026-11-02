@@ -49,12 +49,13 @@ export default function DeleteBranchDialog({ branchSlug, ...props }: DeleteBranc
   });
   useFormErrorToast(form.allErrors);
 
+  // oxlint-disable exhaustive-deps, react/exhaustive-effect-dependencies -- Run on submission status changes, not callback identity changes.
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
       props.onOpenChange?.(false, {} as never);
     }
-    // oxlint-disable-next-line exhaustive-deps
   }, [fetcher.state, form.status]);
+  // oxlint-enable exhaustive-deps, react/exhaustive-effect-dependencies
 
   return (
     <Dialog {...props}>

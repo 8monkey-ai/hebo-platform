@@ -1,0 +1,70 @@
+---
+title: "Codex Desktop"
+description: "Use the Codex app with Hebo Gateway"
+---
+
+The Codex app reads its settings from `~/.codex/config.toml`. To send its requests to Hebo Gateway, add Hebo as a model provider in that file.
+
+<Info>
+  This setup uses your Hebo API key, not your ChatGPT subscription. Requests through Hebo do not use
+  your subscription allowance or change your plan.
+</Info>
+
+## Before you start
+
+- Install the [Codex app](https://developers.openai.com/codex/app).
+- Copy your alias path and create a Hebo API key. See [Getting Started](/getting-started).
+
+## Configure Codex
+
+1. Open or create `~/.codex/config.toml` (`%USERPROFILE%\.codex\config.toml` on Windows) and add these settings. Set `model` to your alias path:
+
+   ```toml config.toml
+   model_provider = "hebo"
+   model = "my-first-agent-x7k/main/default"
+
+   [model_providers.hebo]
+   name = "Hebo"
+   base_url = "https://gateway.hebo.ai/v1"
+   env_key = "HEBO_API_KEY"
+   wire_api = "responses"
+   supports_websockets = false
+   ```
+
+   Put `model_provider` and `model` before the first table header, such as `[model_providers.hebo]`. If the file already sets these keys or has a `[model_providers.hebo]` section, update them instead of adding duplicates.
+
+2. Set `HEBO_API_KEY` for desktop apps. Apps launched from the Dock or Start menu do not read your shell profile.
+
+   <CodeGroup>
+
+   ```bash macOS
+   launchctl setenv HEBO_API_KEY "your_api_key_here"
+   ```
+
+   ```powershell Windows
+   setx HEBO_API_KEY "your_api_key_here"
+   ```
+
+   </CodeGroup>
+
+   <Info>
+     On macOS, the `launchctl setenv` value lasts until you log out. Run the command again after
+     each login.
+   </Info>
+
+3. Quit and reopen Codex Desktop.
+
+## Verify the connection
+
+Send a test message in Codex and confirm that you receive a response. In the [Hebo Console](https://console.hebo.ai), open the agent and branch used by your alias and check **Traces** for the request.
+
+## Switch models
+
+- To use a different model with the same alias, change the **Type** of the alias in the Hebo Console. Your `config.toml` stays the same. See [Models](/models).
+- To use a different alias, set `model` in `config.toml` to its alias path. Then quit and reopen Codex Desktop.
+
+## Troubleshooting
+
+- **Authentication errors:** Check that `HEBO_API_KEY` holds a valid Hebo API key. Do step 2 again, then quit and reopen Codex Desktop.
+- **The app ignores your changes:** Check that you edited `~/.codex/config.toml` in your home directory, not a `.codex/config.toml` file in a project folder. If the app still uses old settings, log out of your computer, log in, and do step 2 again.
+- **`BYOK_REQUIRED` error:** The model needs your own provider credentials. See [Bring your own key](/models#bring-your-own-key).

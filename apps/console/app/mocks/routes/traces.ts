@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw/http";
 import { z } from "zod";
 
 const now = Date.now();
@@ -343,6 +343,67 @@ const traceDetails = [
       "gen_ai.response.finish_reasons": ["stop"],
       "gen_ai.request.metadata.session_id": "sess_def456",
       "gen_ai.request.metadata.environment": "staging",
+      "hebo.agent.slug": "my-agent",
+      "hebo.branch.slug": "main",
+    },
+  },
+  {
+    timestamp: new Date(now - 9 * min),
+    traceId: "a0000024-0000-4000-9000-000000000024",
+    spanId: "6f708192-0123-4def-8123-678901234567",
+    operationName: "transcriptions",
+    model: "openai/gpt-transcribe",
+    responseModel: "openai/gpt-transcribe",
+    provider: "openai",
+    status: "ok",
+    durationMs: 3120,
+    inputTokens: 412,
+    outputTokens: 96,
+    totalTokens: 508,
+    cacheReadInputTokens: null,
+    reasoningTokens: null,
+    reasoningEffort: "",
+    reasoningEnabled: null,
+    reasoningMaxTokens: null,
+    inputMessages: [
+      {
+        role: "user",
+        parts: [
+          {
+            type: "blob",
+            modality: "audio",
+            mime_type: "audio/mpeg",
+            content: "[REDACTED_BINARY_DATA]",
+          },
+          { type: "text", content: "Customer support call about a delayed flight refund." },
+        ],
+      },
+    ],
+    outputMessages: [
+      {
+        role: "assistant",
+        parts: [
+          {
+            type: "text",
+            content:
+              "Hi, I booked flight MH 88 to Tokyo last week and it was cancelled. I was told the refund would arrive in five days, but I have not received it yet. Can you check the status for me?",
+          },
+        ],
+      },
+    ],
+    finishReasons: [],
+    responseId: "",
+    metadata: {},
+    spanAttributes: {
+      "gen_ai.operation.name": "transcriptions",
+      "gen_ai.request.model": "openai/gpt-transcribe",
+      "gen_ai.response.model": "openai/gpt-transcribe",
+      "gen_ai.provider.name": "openai",
+      "gen_ai.request.service_tier": "auto",
+      "gen_ai.usage.input_tokens": 412,
+      "gen_ai.usage.output_tokens": 96,
+      "gen_ai.usage.total_tokens": 508,
+      "gen_ai.usage.audio_seconds": 42.5,
       "hebo.agent.slug": "my-agent",
       "hebo.branch.slug": "main",
     },
@@ -1313,16 +1374,23 @@ export const traceHandlers = [
         return new HttpResponse(`Invalid metadata filter: ${metadataParam}`, { status: 400 });
       }
 
-      // Apply metadata filters
+      const operationParam = url.searchParams.get("operation");
+      const operation = z
+        .enum(["chat", "embeddings", "transcriptions"])
+        .nullable()
+        .safeParse(operationParam);
+      if (!operation.success) {
+        return new HttpResponse(`Invalid operation filter: ${operationParam}`, { status: 422 });
+      }
+
       const filterEntries = Object.entries(metadataFilters);
-      const filtered =
-        filterEntries.length > 0
-          ? mockTraces.filter((t) => {
-              return filterEntries.every(
-                ([metaKey, value]) => t.metadata?.[metaKey as keyof typeof t.metadata] === value,
-              );
-            })
-          : [...mockTraces];
+      const filtered = mockTraces.filter(
+        (t) =>
+          (!operation.data || t.operationName === operation.data) &&
+          filterEntries.every(
+            ([metaKey, value]) => t.metadata?.[metaKey as keyof typeof t.metadata] === value,
+          ),
+      );
 
       const start = (page - 1) * pageSize;
       const paged = filtered.slice(start, start + pageSize);

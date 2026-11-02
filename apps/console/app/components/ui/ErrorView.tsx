@@ -34,7 +34,6 @@ export function ErrorView() {
           onClick={() => {
             void navigate(`${pathname}${search}${hash}`, {
               replace: true,
-              viewTransition: true,
             });
           }}
           isLoading={navigation.state !== "idle"}

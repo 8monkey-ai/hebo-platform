@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-import type { ProviderV3 } from "@ai-sdk/provider";
+import type { ProviderV4 } from "@ai-sdk/provider";
 import {
   CANONICAL_MODEL_IDS,
   GatewayError,
@@ -13,7 +13,7 @@ import {
 import { LRUCache } from "lru-cache";
 
 import type { createPrismaClient } from "~api/db/prisma";
-import type { ModelsConfig, ProviderSlug } from "~api/modules/providers/types";
+import type { ProviderSlug } from "~api/modules/providers/types";
 
 import { injectMetadataCredentials } from "../utils/aws";
 import { createProvider } from "./provider";
@@ -27,7 +27,7 @@ const configCache = new LRUCache<string, string>({
   ttl: 5 * 60 * 1000, // 5 minutes
 });
 
-const providerCache = new LRUCache<string, ProviderV3>({
+const providerCache = new LRUCache<string, ProviderV4>({
   max: 100,
 });
 
@@ -67,7 +67,7 @@ export async function bestEffortResolveModelOnError(ctx: OnErrorHookContext) {
     await resolveModelAlias({
       ...(ctx as unknown as Omit<ResolveModelHookContext, "modelId">),
       modelId,
-    } as ResolveModelHookContext);
+    });
   } catch {
     // Best-effort: body may be partially valid, swallow resolution failures
   }
@@ -106,13 +106,13 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
     throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
   }
 
-  const model = (branch.models as ModelsConfig)?.find(({ alias }) => alias === modelAlias);
+  const model = branch.models.find(({ alias }) => alias === modelAlias);
 
   if (!model) {
     throw new GatewayError(`Model alias not found: ${aliasPath}`, 404, "MODEL_NOT_FOUND");
   }
 
-  const catalogModel = models[model.type as keyof typeof models];
+  const catalogModel = models[model.type];
   state.modelConfig = {
     type: model.type,
     // Currently, we only support routing to the first provider.
@@ -129,7 +129,7 @@ async function resolveCustomProvider(
   organizationId: string,
   modelId: string,
   customProviderSlug: ProviderSlug,
-): Promise<ProviderV3 | undefined> {
+): Promise<ProviderV4 | undefined> {
   const configCacheKey = `${organizationId}:${customProviderSlug}:${modelId}`;
   const cachedConfigHash = configCache.get(configCacheKey);
 

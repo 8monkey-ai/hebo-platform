@@ -68,7 +68,7 @@ export async function listTraces(
   pageSize: number,
   metadataFilters: Record<string, string>,
   statusFilter?: "ok" | "error",
-  operationFilter?: "chat" | "embeddings",
+  operationFilter?: "chat" | "embeddings" | "transcriptions",
 ) {
   const { metadataColumns } = await getTraceColumnNames(greptimeDb);
   const metadataKeys = metadataColumns.map((col) => col.slice(METADATA_PREFIX.length));

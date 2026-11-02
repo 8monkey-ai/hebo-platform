@@ -14,7 +14,7 @@ export function parseString(value: unknown): string {
 }
 
 function normalizeJsonUnicodeEscapes(value: string): string {
-  return value.replaceAll(/\\u\{([0-9a-fA-F]+)\}/g, (match, hex: string) => {
+  return value.replaceAll(/\\u\{([0-9a-fA-F]+)\}/gu, (match, hex: string) => {
     const codePoint = Number.parseInt(hex, 16);
     return Number.isFinite(codePoint) ? String.fromCodePoint(codePoint) : match;
   });

@@ -7,13 +7,13 @@ import heboVpc from "./network";
 const globalCluster = new aws.rds.GlobalCluster("HeboDbGlobal", {
   globalClusterIdentifier: `${normalizedStage}-hebo-db-global`,
   engine: "aurora-postgresql",
-  engineVersion: "17.6",
+  engineVersion: "18.6",
   storageEncrypted: true,
 });
 
 const heboDatabase = new sst.aws.Aurora("HeboDatabase", {
   engine: "postgres",
-  version: "17.6",
+  version: "18.6",
   vpc: heboVpc,
   replicas: isProduction ? 1 : 0,
   scaling: isProduction
@@ -21,8 +21,10 @@ const heboDatabase = new sst.aws.Aurora("HeboDatabase", {
     : { min: "0 ACU", max: "4 ACU", pauseAfter: "20 minutes" },
   database: "hebo",
   transform: {
-    cluster: (a) => {
+    cluster: (a, opts) => {
       a.globalClusterIdentifier = globalCluster.id;
+      // The global cluster controls engine upgrades for all member clusters.
+      opts.ignoreChanges = [...(opts.ignoreChanges ?? []), "engineVersion"];
       if (isProduction) {
         a.performanceInsightsEnabled = true;
         a.performanceInsightsRetentionPeriod = 465;

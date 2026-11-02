@@ -51,9 +51,11 @@ export const auth = betterAuth({
       logger[level]({ args }, message);
     },
   },
-  accountLinking: {
-    enabled: true,
-    trustedProviders: ["google", "github", "microsoft", "email-password"],
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google", "github", "microsoft", "email-password"],
+    },
   },
   emailAndPassword: {
     enabled: !HAS_SMTP_CONFIG,
@@ -90,6 +92,7 @@ export const auth = betterAuth({
     ...COOKIE_CONFIG.advanced,
     database: {
       generateId: () => Bun.randomUUIDv7(),
+      joins: true,
     },
   },
   database: prismaAdapter(prisma, {
@@ -105,7 +108,6 @@ export const auth = betterAuth({
       update: { after: syncActiveOrganizationHook(prisma) },
     },
   },
-  experimental: { joins: true },
   plugins: [
     apiKey({
       references: "organization",

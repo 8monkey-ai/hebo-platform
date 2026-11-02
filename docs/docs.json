@@ -56,7 +56,7 @@
     "groups": [
       {
         "group": "Overview",
-        "pages": ["introduction"]
+        "pages": ["introduction", "getting-started", "models"]
       },
       {
         "group": "Gateway",
@@ -69,6 +69,7 @@
           "gateway/reasoning",
           "gateway/attachments",
           "gateway/embeddings",
+          "gateway/transcriptions",
           "gateway/supported-models"
         ]
       },
@@ -81,6 +82,11 @@
         "group": "Evals",
         "icon": "gauge",
         "pages": ["evals/getting-started"]
+      },
+      {
+        "group": "Integrations",
+        "icon": "plug",
+        "pages": ["integrations/claude-desktop", "integrations/codex-desktop"]
       },
       {
         "group": "Changelog",

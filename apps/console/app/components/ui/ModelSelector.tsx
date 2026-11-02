@@ -101,8 +101,11 @@ function ModelSelector({
                         ) : m.requiresByok ? (
                           <Badge className="bg-amber-600 text-white!">BYOK</Badge>
                         ) : null}
-                        {m.modality === "embedding" && (
+                        {m.modality === "embeddings" && (
                           <Badge className="bg-blue-500 text-white!">Embeddings</Badge>
+                        )}
+                        {m.modality === "transcription" && (
+                          <Badge className="bg-violet-500 text-white!">Transcription</Badge>
                         )}
                       </span>
                     </ComboboxItem>

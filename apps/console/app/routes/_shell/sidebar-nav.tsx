@@ -49,7 +49,7 @@ export const SidebarNav = ({ activeAgent, activeBranch }: SidebarNavProps) => {
               isActive={active}
               tooltip={label}
               render={
-                <Link to={path} viewTransition>
+                <Link to={path}>
                   <Icon aria-hidden="true" />
                   <span>{label}</span>
                 </Link>

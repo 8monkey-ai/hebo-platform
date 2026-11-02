@@ -3,7 +3,7 @@ import type { z } from "zod";
 const MASK = "***" as const;
 
 export function redactSensitiveValues<T>(
-  schema: { options: readonly z.core.$ZodType[] },
+  schema: { options: readonly z.core.$ZodTypeDiscriminable[] },
   value: T,
 ): T {
   const obj = value as Record<string, unknown>;

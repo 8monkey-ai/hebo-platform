@@ -1,0 +1,53 @@
+---
+title: "Claude Desktop"
+description: "Use the Claude app with Hebo Gateway"
+---
+
+Claude Desktop can send its requests to Hebo Gateway instead of Anthropic. In gateway mode, the app authenticates with your Hebo API key.
+
+<Info>
+  This setup uses your Hebo API key, not your Claude subscription. Requests through Hebo do not use
+  your subscription allowance or change your plan.
+</Info>
+
+## Before you start
+
+- Install the latest version of [Claude Desktop](https://claude.ai/download).
+- Copy your alias path and create a Hebo API key. See [Getting Started](/getting-started).
+
+## Configure Claude Desktop
+
+1. Open Claude Desktop and select **Help > Troubleshooting > Enable Developer Mode**.
+2. Select **Developer > Configure Third-Party Inference…**.
+3. In the **Connection** section, set **Inference provider** to **Gateway**, then enter these values:
+
+   | Field               | Value                     |
+   | ------------------- | ------------------------- |
+   | Gateway base URL    | `https://gateway.hebo.ai` |
+   | Gateway API key     | Your Hebo API key         |
+   | Credential kind     | Static API key            |
+   | Gateway auth scheme | Bearer                    |
+
+   <Tip>Use this base URL without `/v1`.</Tip>
+
+4. In **Model list**, add an item and set **Model ID** to your alias path, for example `my-first-agent-x7k/main/default`.
+5. Select **Apply Changes**. Claude Desktop restarts. On the start screen, select **Continue with Gateway**.
+
+## Verify the connection
+
+Send a test message in a new chat and confirm that you receive a response. In the [Hebo Console](https://console.hebo.ai), open the agent and branch used by your alias and check **Traces** for the request.
+
+## Switch models
+
+To use a different model with the same alias, change the **Type** of the alias in the Hebo Console. Your Claude Desktop settings stay the same. See [Models](/models).
+
+To select from more than one model in Claude Desktop:
+
+1. In the Hebo Console, add one alias for each model. See [Add an alias](/models#add-an-alias).
+2. In **Model list**, add each alias path as an item, then select **Apply Changes**.
+3. Select the model in the model picker.
+
+## Troubleshooting
+
+- **Connection errors:** Check that **Gateway base URL** is exactly `https://gateway.hebo.ai` and that **Gateway auth scheme** is **Bearer**.
+- **`BYOK_REQUIRED` error:** The model needs your own provider credentials. See [Bring your own key](/models#bring-your-own-key).

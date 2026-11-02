@@ -26,7 +26,7 @@
     "@conform-to/react": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
-    "input-otp": "^1.4.2",
+    "input-otp": "^1.5.0",
     "lucide-react": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

@@ -60,7 +60,7 @@ export function BranchSelect({
                 <DropdownMenuItem
                   key={branch.slug}
                   render={
-                    <Link to={`/agent/${activeAgent.slug}/branch/${branch.slug}`} viewTransition>
+                    <Link to={`/agent/${activeAgent.slug}/branch/${branch.slug}`}>
                       <span className="truncate">{branch.name}</span>
                       {branch.slug === activeBranch?.slug && (
                         <Check size={12} className="ml-auto" aria-hidden="true" />
@@ -77,11 +77,7 @@ export function BranchSelect({
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-muted-foreground"
-              render={
-                <Link to={`/agent/${activeAgent.slug}/branches`} viewTransition>
-                  Manage branches
-                </Link>
-              }
+              render={<Link to={`/agent/${activeAgent.slug}/branches`}>Manage branches</Link>}
             />
           </DropdownMenuContent>
         </DropdownMenu>

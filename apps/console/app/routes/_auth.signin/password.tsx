@@ -56,14 +56,14 @@ export function PasswordSignIn() {
         <div role="alert" className="py-2 text-center text-sm text-destructive">
           {error}
           {"! "}
-          <Link to="/signup" viewTransition className="font-medium text-foreground underline">
+          <Link to="/signup" className="font-medium text-foreground underline">
             Sign up instead?
           </Link>
         </div>
       ) : (
         <p className="py-2 text-center text-sm">
           Don&apos;t have an account?{" "}
-          <Link to="/signup" viewTransition className="font-medium underline">
+          <Link to="/signup" className="font-medium underline">
             Sign up
           </Link>
         </p>

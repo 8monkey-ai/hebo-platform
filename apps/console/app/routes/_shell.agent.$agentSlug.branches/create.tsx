@@ -52,6 +52,7 @@ export default function CreateBranch({ branches }: CreateBranchProps) {
   const [open, setOpen] = useState(false);
   useEffect(() => {
     if (fetcher.state === "idle" && form.status !== "error") {
+      // oxlint-disable-next-line react/set-state-in-effect -- Close the dialog after submission completes.
       setOpen(false);
     }
   }, [fetcher.state, form.status]);

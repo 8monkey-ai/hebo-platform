@@ -1,5 +1,5 @@
 import { XCircle, SquareChevronRight } from "lucide-react";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, ViewTransition } from "react";
 import { Outlet, unstable_useRoute as useRoute, useLocation } from "react-router";
 import { Toaster } from "sonner";
 import { useSnapshot } from "valtio";
@@ -83,6 +83,7 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
   const mainRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     mainRef.current?.focus();
+    // oxlint-disable-next-line react/exhaustive-effect-dependencies -- Navigation intentionally triggers focus even when the ref is unchanged.
   }, [location.pathname]);
 
   // FUTURE replace with session storage
@@ -143,7 +144,9 @@ export default function ShellLayout({ loaderData: { agents } }: Route.ComponentP
         >
           <div className="@container mx-auto flex h-full min-h-0 w-full min-w-0 flex-1 flex-col">
             <PageLoader />
-            <Outlet />
+            <ViewTransition>
+              <Outlet />
+            </ViewTransition>
           </div>
         </div>
       </SidebarInset>

@@ -4,6 +4,8 @@ import * as React from "react";
 import { cn } from "../lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
 
+const DEFAULT_ICON = <Copy />;
+
 /**
  * Elements carrying this attribute (including their descendants) are excluded
  * when a DOM `RefObject` is passed as `value` to derive the clipboard text.
@@ -27,7 +29,7 @@ function collectCopyText(root: HTMLElement): string {
     return BLOCK_TAGS.has(el.tagName) ? `\n${inner}\n` : inner;
   };
 
-  return walk(root).replaceAll(/\n+/g, "\n").trim();
+  return walk(root).replaceAll(/\n+/gu, "\n").trim();
 }
 
 /**
@@ -44,7 +46,7 @@ export function CopyButton({
   className,
   disabled = false,
   tooltip = "Copy to Clipboard",
-  icon = <Copy />,
+  icon = DEFAULT_ICON,
   ...props
 }: {
   value: CopyValue;

@@ -1,4 +1,5 @@
 import { BookOpen } from "lucide-react";
+import { ViewTransition } from "react";
 import { Outlet } from "react-router";
 
 import { Badge } from "@hebo/shared-ui/components/Badge";
@@ -43,7 +44,9 @@ export default function AuthLayout() {
       </aside>
 
       <main className="flex min-h-dvh flex-1 items-center justify-center transition-all duration-300 lg:ml-128">
-        <Outlet />
+        <ViewTransition>
+          <Outlet />
+        </ViewTransition>
       </main>
     </div>
   );

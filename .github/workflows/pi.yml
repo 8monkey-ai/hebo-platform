@@ -1,0 +1,19 @@
+name: Pi AI Agent
+
+on:
+  issue_comment:
+    types: [created]
+
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  pi:
+    uses: 8monkey-ai/.github/.github/workflows/pi-agent.yml@main
+    secrets: inherit

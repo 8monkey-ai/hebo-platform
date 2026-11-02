@@ -10,12 +10,13 @@ import { createGroq } from "@ai-sdk/groq";
 import { createMoonshotAI } from "@ai-sdk/moonshotai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
-import type { ProviderV3 } from "@ai-sdk/provider";
+import type { ProviderV4 } from "@ai-sdk/provider";
 import { createTogetherAI } from "@ai-sdk/togetherai";
 import { createXai } from "@ai-sdk/xai";
 import { fromContainerMetadata, fromTemporaryCredentials } from "@aws-sdk/credential-providers";
 import { withCanonicalIdsForAlibaba } from "@hebo-ai/gateway/providers/alibaba";
 import { withCanonicalIdsForAnthropic } from "@hebo-ai/gateway/providers/anthropic";
+import { withCanonicalIdsForAzure } from "@hebo-ai/gateway/providers/azure";
 import { withCanonicalIdsForBedrock } from "@hebo-ai/gateway/providers/bedrock";
 import { withCanonicalIdsForChutes } from "@hebo-ai/gateway/providers/chutes";
 import { withCanonicalIdsForDeepInfra } from "@hebo-ai/gateway/providers/deepinfra";
@@ -30,6 +31,7 @@ import { withCanonicalIdsForVertex } from "@hebo-ai/gateway/providers/vertex";
 import { withCanonicalIdsForVoyage } from "@hebo-ai/gateway/providers/voyage";
 import { withCanonicalIdsForXai } from "@hebo-ai/gateway/providers/xai";
 import { withCanonicalIdsForZai } from "@hebo-ai/gateway/providers/zai";
+import { AwsClient, JWT } from "google-auth-library";
 import { createVoyage } from "voyage-ai-provider";
 import { createZhipu } from "zhipu-ai-provider";
 
@@ -133,7 +135,7 @@ export async function loadProviderSecrets() {
   };
 }
 
-export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 {
+export function createProvider(slug: ProviderSlug, config: unknown): ProviderV4 {
   switch (slug) {
     case "bedrock": {
       const bedrockConfig = config as BedrockConfig;
@@ -141,30 +143,26 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
       switch (bedrockConfig.authMode) {
         case "access-key": {
           const { accessKeyId, secretAccessKey, region } = bedrockConfig;
-          return withCanonicalIdsForBedrock(
-            createAmazonBedrock({
-              region,
-              credentialProvider: () => Promise.resolve({ accessKeyId, secretAccessKey }),
-            }),
-          );
+          const credentialProvider = () => Promise.resolve({ accessKeyId, secretAccessKey });
+          // Mantle serves the GPT-5.x models and signs for `bedrock-mantle` instead of
+          // `bedrock`, so it needs its own copy of the credentials.
+          return withCanonicalIdsForBedrock(createAmazonBedrock({ region, credentialProvider }), {
+            mantle: { credentialProvider },
+          });
         }
         case "iam-role": {
           const { bedrockRoleArn, region } = bedrockConfig;
-          return withCanonicalIdsForBedrock(
-            createAmazonBedrock({
-              region,
-              credentialProvider: fromTemporaryCredentials({
-                params: { RoleArn: bedrockRoleArn },
-                masterCredentials: fromContainerMetadata(),
-                clientConfig: { region },
-              }),
-            }),
-            {
-              inferenceProfile: {
-                arn: { accountId: bedrockRoleArn?.split(":")[4], region },
-              },
+          const credentialProvider = fromTemporaryCredentials({
+            params: { RoleArn: bedrockRoleArn },
+            masterCredentials: fromContainerMetadata(),
+            clientConfig: { region },
+          });
+          return withCanonicalIdsForBedrock(createAmazonBedrock({ region, credentialProvider }), {
+            inferenceProfile: {
+              arn: { accountId: bedrockRoleArn?.split(":")[4], region },
             },
-          );
+            mantle: { credentialProvider },
+          });
         }
         default:
           return withCanonicalIdsForBedrock(createAmazonBedrock());
@@ -184,8 +182,11 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
           return withCanonicalIdsForVertex(
             createVertex({
               googleAuthOptions: {
-                credentials: { client_email: clientEmail, private_key: privateKey },
-                scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+                authClient: new JWT({
+                  email: clientEmail,
+                  key: privateKey,
+                  scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+                }),
               },
               location,
               project,
@@ -197,8 +198,8 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
           return withCanonicalIdsForVertex(
             createVertex({
               googleAuthOptions: {
-                credentials: buildWifOptions(audience, serviceAccountEmail),
-                scopes: ["https://www.googleapis.com/auth/cloud-platform"],
+                // Unconfigured platform credentials must not prevent gateway startup.
+                authClient: new AwsClient(buildWifOptions(audience ?? "", serviceAccountEmail)),
               },
               location,
               project,
@@ -223,7 +224,7 @@ export function createProvider(slug: ProviderSlug, config: unknown): ProviderV3 
     }
     case "azure": {
       const { apiKey, resourceName } = config as AzureConfig;
-      return createAzure({ apiKey, resourceName });
+      return withCanonicalIdsForAzure(createAzure({ apiKey, resourceName }));
     }
     case "deepseek": {
       const { apiKey } = config as ApiKeyConfig;

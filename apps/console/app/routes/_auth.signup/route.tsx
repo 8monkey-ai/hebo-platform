@@ -90,7 +90,7 @@ export default function SignUp() {
 
         <p className="text-center text-sm">
           Already have an account?{" "}
-          <Link to="/signin" viewTransition className="font-medium underline">
+          <Link to="/signin" className="font-medium underline">
             Sign in
           </Link>
         </p>

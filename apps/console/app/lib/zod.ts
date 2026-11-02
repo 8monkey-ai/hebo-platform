@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { labelize } from "./utils";
 
-export const identifierPattern = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/.toString();
+export const identifierPattern = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/u.toString();
 
 function required(path: PropertyKey[] | undefined): { message: string } {
   const key = path?.at(-1);

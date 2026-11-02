@@ -11,13 +11,13 @@ export function getCookie(name: string): string | undefined {
  * @returns The formatted shortcut string (e.g., '⌘P' on Mac, 'Ctrl P' on other platforms)
  */
 export const kbs = (shortcut: string): string => {
-  const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+  const isMac = /Mac|iPhone|iPad|iPod/u.test(navigator.userAgent);
 
   const map: Record<string, string> = isMac
     ? { mod: "⌘", option: "⌥", ctrl: "⌃", shift: "⇧" }
     : { mod: "Ctrl", option: "Alt", ctrl: "Ctrl", shift: "Shift" };
 
-  return shortcut.replaceAll("+", "").replaceAll(/(mod|option|ctrl|shift)/gi, (match) => {
+  return shortcut.replaceAll("+", "").replaceAll(/(mod|option|ctrl|shift)/giu, (match) => {
     const lower = match.toLowerCase();
     return map[lower] ?? match.toUpperCase();
   });
@@ -33,7 +33,7 @@ export const formatDateTime = (date: Date) => {
 // Create human readable labels, e.g. "serviceAccount" => "Service Account", "iam-role" => "Iam Role"
 export function labelize(value: string) {
   return value
-    .replaceAll(/([a-z\d])([A-Z])/g, "$1 $2")
+    .replaceAll(/([a-z\d])([A-Z])/gu, "$1 $2")
     .replaceAll("-", " ")
-    .replaceAll(/\b\w/g, (c) => c.toUpperCase());
+    .replaceAll(/\b\w/gu, (c) => c.toUpperCase());
 }

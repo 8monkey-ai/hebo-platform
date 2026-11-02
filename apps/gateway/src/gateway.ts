@@ -24,9 +24,9 @@ import {
 import { createProvider, loadProviderSecrets } from "./lib/provider";
 
 // Disable Bun's hardcoded 5-minute fetch timeout (https://github.com/oven-sh/bun/issues/16682)
-const _fetch = globalThis.fetch;
-// @ts-expect-error -- Bun-specific `timeout` option not in standard RequestInit
-globalThis.fetch = ((input, init) => _fetch(input, { ...init, timeout: false })) as typeof fetch;
+const originalFetch = globalThis.fetch;
+globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) =>
+  originalFetch(input, { ...init, timeout: false } as RequestInit)) as typeof fetch;
 
 export const BASE_PATH = "/v1";
 
@@ -79,8 +79,14 @@ export const gw = gateway({
     minimax: createProvider("minimax", { authMode: "api-key", apiKey: SECRETS.MINIMAX_API_KEY }),
     zhipu: createProvider("zhipu", { authMode: "api-key", apiKey: SECRETS.ZHIPU_API_KEY }),
     moonshot: createProvider("moonshot", { authMode: "api-key", apiKey: SECRETS.MOONSHOT_API_KEY }),
-    fireworks: createProvider("fireworks", { authMode: "api-key", apiKey: SECRETS.FIREWORKS_API_KEY }),
-    deepinfra: createProvider("deepinfra", { authMode: "api-key", apiKey: SECRETS.DEEPINFRA_API_KEY }),
+    fireworks: createProvider("fireworks", {
+      authMode: "api-key",
+      apiKey: SECRETS.FIREWORKS_API_KEY,
+    }),
+    deepinfra: createProvider("deepinfra", {
+      authMode: "api-key",
+      apiKey: SECRETS.DEEPINFRA_API_KEY,
+    }),
     togetherai: createProvider("togetherai", {
       authMode: "api-key",
       apiKey: SECRETS.TOGETHERAI_API_KEY,

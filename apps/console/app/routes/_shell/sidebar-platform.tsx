@@ -44,7 +44,7 @@ export const SidebarPlatform = ({ activeAgent, activeBranch }: SidebarPlatformPr
               isActive={active}
               tooltip={label}
               render={
-                <Link to={path} viewTransition>
+                <Link to={path}>
                   <Icon aria-hidden="true" />
                   <span>{label}</span>
                 </Link>

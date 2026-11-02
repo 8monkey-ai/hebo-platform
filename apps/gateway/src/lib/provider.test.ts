@@ -59,6 +59,31 @@ describe("createProvider", () => {
       expect(provider).toBeDefined();
     });
 
+    it("serves GPT-5.x from mantle, Claude from invoke and everything else from converse with an IAM role", () => {
+      const provider = createProvider("bedrock", {
+        authMode: "iam-role",
+        bedrockRoleArn: "arn:aws:iam::123456789012:role/test-role",
+        region: "us-east-1",
+      });
+      expect(provider.languageModel("openai/gpt-5.6-sol").provider).toBe(
+        "bedrock-mantle.responses",
+      );
+      expect(provider.languageModel("anthropic/claude-opus-5").provider).toBe(
+        "bedrock.anthropic.messages",
+      );
+      expect(provider.languageModel("google/gemma-3-27b").provider).toBe("amazon-bedrock");
+    });
+
+    it("serves GPT-5.x from mantle with access-key credentials", () => {
+      const provider = createProvider("bedrock", {
+        authMode: "access-key",
+        accessKeyId: "AKIA1234567890ABCDEF",
+        secretAccessKey: "secretkey123",
+        region: "us-east-1",
+      });
+      expect(provider.languageModel("openai/gpt-5.5").provider).toBe("bedrock-mantle.responses");
+    });
+
     it("returns a provider when authMode is invalid (fallback)", () => {
       const provider = createProvider("bedrock", {
         authMode: "api-key",
@@ -70,6 +95,10 @@ describe("createProvider", () => {
   });
 
   describe("vertex", () => {
+    it("initializes before platform federation credentials are configured", () => {
+      expect(createProvider("vertex", { authMode: "identity-federation" })).toBeDefined();
+    });
+
     it("returns a provider when authMode is invalid (fallback)", () => {
       const provider = createProvider("vertex", {
         authMode: "api-key",
@@ -173,6 +202,15 @@ describe("createProvider", () => {
         resourceName: "my-resource",
       });
       expect(provider).toBeDefined();
+    });
+
+    it("removes the canonical namespace from Azure deployment IDs", () => {
+      const provider = createProvider("azure", {
+        authMode: "resource-api-key",
+        apiKey: "key123",
+        resourceName: "my-resource",
+      });
+      expect(provider.languageModel("openai/gpt-5.6-luna").modelId).toBe("gpt-5.6-luna");
     });
   });
 

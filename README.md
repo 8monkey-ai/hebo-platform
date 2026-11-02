@@ -8,7 +8,7 @@ A platform that brings development and business teams together. Iterate fast. Re
 
 ## Key features
 
-- **Gateway** — Unified access to state-of-the-art LLMs with native support for `/chat/completions` (OpenAI), `/responses` (OpenResponses), and `/messages` (Anthropic). Embeddings and multi-turn conversations out of the box.
+- **Gateway** — Unified access to state-of-the-art LLMs with native support for `/chat/completions` (OpenAI), `/responses` (OpenResponses), and `/messages` (Anthropic). Embeddings, audio transcriptions, and multi-turn conversations out of the box.
 - **Observability** — Conversation-level traces with token and latency tracking, tool call inspection, and full conversation replay — not just individual request logs.
 - **Evaluations** — Define evals as simple Markdown files. Test agent behavior against guidelines, tool usage, and hand-off triggers.
 
@@ -70,6 +70,19 @@ Create a `.env` file in `infra/self-hosted/` and set the variables you want to o
 Optional: OAuth (`GITHUB_CLIENT_ID`, `GOOGLE_CLIENT_ID`, …) and SMTP (`SMTP_HOST`, `SMTP_PORT`, …) for passwordless login and invitations.
 
 See [`infra/self-hosted/.env.example`](infra/self-hosted/.env.example) for the full variable reference.
+
+#### Custom domain
+
+The console is configured at container start, not at image build time, so pointing it at your own domain needs no rebuild — set these in `.env` and restart:
+
+| Variable                                            | Why                                                                    |
+| --------------------------------------------------- | ---------------------------------------------------------------------- |
+| `VITE_API_URL`, `VITE_AUTH_URL`, `VITE_GATEWAY_URL` | Where the browser calls each service — must be reachable from the user |
+| `BASE_URL`                                          | Your root domain, e.g. `https://example.com`                           |
+
+`BASE_URL` is what restricts CORS and auth to your domain and scopes the session cookie. Leave it unset and every origin is accepted — set it for any deployment reachable from the internet.
+
+Serve each service on a subdomain of that root domain (`api.`, `auth.`, `gateway.`) so the shared session cookie applies.
 
 ## How Hebo compares
 

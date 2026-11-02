@@ -1,0 +1,70 @@
+---
+title: "Transcriptions"
+description: "Transcribe audio into text"
+---
+
+You can transcribe audio with the same OpenAI-compatible `/audio/transcriptions` API across providers.
+
+Common use cases include meeting notes, voice input, subtitles, and call analysis.
+
+<CodeGroup>
+
+```ts OpenAI SDK highlight={9-12}
+import fs from "node:fs";
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const { text } = await client.audio.transcriptions.create({
+  model: "openai/gpt-transcribe",
+  file: fs.createReadStream("meeting.mp3"),
+});
+
+console.log(text);
+```
+
+```bash Bash
+curl https://gateway.hebo.ai/v1/audio/transcriptions \
+  -H "Authorization: Bearer $HEBO_API_KEY" \
+  -F model="openai/gpt-transcribe" \
+  -F file="@meeting.mp3"
+```
+
+</CodeGroup>
+
+The Gateway detects the audio format from the file extension or the MIME type.
+
+## Base64 Input
+
+You can also send the audio as base64 in a JSON body:
+
+```bash Bash
+curl https://gateway.hebo.ai/v1/audio/transcriptions \
+  -H "Authorization: Bearer $HEBO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "openai/gpt-transcribe",
+    "input_audio": { "data": "<base64>", "format": "mp3" }
+  }'
+```
+
+The `format` value can be `flac`, `m4a`, `mp3`, `mp4`, `mpeg`, `mpga`, `ogg`, `pcm`, `wav`, `webm`, or `x-aac`. Audio format support varies by model.
+
+## Options
+
+- `language`: the language of the audio (for example, `en`).
+- `prompt`: text that guides the transcript's style or vocabulary.
+- `temperature`: a value from `0` to `1`.
+- `response_format`: `json` (default) returns `text` and `usage`. `verbose_json` also returns `language`, `duration`, and word timestamps when available. Word timestamps appear in `words`, and `segments` is empty.
+- `timestamp_granularities`: set to `["word"]` to request word timestamps. Requires `response_format: "verbose_json"`. In multipart forms, send this field as `timestamp_granularities[]`.
+
+Support for `prompt`, `temperature`, and timestamps varies by model.
+
+## Limits
+
+Request bodies can be up to 10 MB. Larger requests return a `413` error.
+
+Streaming is not supported: `stream: true` returns a `400` error.
