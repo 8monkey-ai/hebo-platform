@@ -5,6 +5,7 @@ import { cjk } from "@streamdown/cjk";
 import { code } from "@streamdown/code";
 import { math } from "@streamdown/math";
 import { mermaid } from "@streamdown/mermaid";
+import type { UIMessage } from "ai";
 import {
   Brain,
   Check,
@@ -47,7 +48,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "../_shadcn/ui/item";
-import { Message, MessageContent } from "../_shadcn/ui/message";
+import { Message, MessageContent, MessageFooter } from "../_shadcn/ui/message";
 import {
   MessageScrollerProvider,
   MessageScroller,
@@ -358,12 +359,15 @@ export function Chat({
                     })}
                     {/* oxlint-enable no-array-index-key */}
                     {message.role === "assistant" &&
-                      !(status === "streaming" && message.id === messages.at(-1)?.id) && (
-                        <ChatCopyButton
-                          value={message.parts
-                            .flatMap((part) => (part.type === "text" ? [part.text] : []))
-                            .join("\n\n")}
-                        />
+                      !(status === "streaming" && message.id === messages.at(-1)?.id) &&
+                      getMessageText(message) && (
+                        <Message>
+                          <MessageContent>
+                            <MessageFooter className="px-0">
+                              <ChatCopyAction value={getMessageText(message)} />
+                            </MessageFooter>
+                          </MessageContent>
+                        </Message>
                       )}
                   </MessageScrollerItem>
                 ))}
@@ -528,49 +532,61 @@ export function Chat({
   );
 }
 
-function ChatCopyButton({ value }: { value: string }) {
-  const [hasCopied, setHasCopied] = useState(false);
+function getMessageText(message: UIMessage) {
+  return message.parts
+    .flatMap((part) => (part.type === "text" ? [part.text] : []))
+    .join("\n\n")
+    .trim();
+}
+
+function MessageAction({
+  label,
+  children,
+  ...props
+}: ComponentProps<typeof Button> & { label: string }) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={<Button variant="ghost" size="icon-sm" aria-label={label} {...props} />}
+      >
+        {children}
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+function ChatCopyAction({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    if (!hasCopied) return;
+    if (!copied) return;
     const timeout = setTimeout(() => {
-      setHasCopied(false);
+      setCopied(false);
     }, 2000);
     return () => {
       clearTimeout(timeout);
     };
-  }, [hasCopied]);
-
-  if (!value.trim()) return null;
+  }, [copied]);
 
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(value);
-      setHasCopied(true);
+      setCopied(true);
     } catch (error) {
       console.error("Failed to copy to clipboard:", error);
     }
   };
 
   return (
-    <Tooltip>
-      <TooltipTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            className="text-muted-foreground"
-            aria-label={hasCopied ? "Copied" : "Copy message"}
-            onClick={() => {
-              void copy();
-            }}
-          >
-            {hasCopied ? <Check className="text-green-800" /> : <Copy />}
-          </Button>
-        }
-      />
-      <TooltipContent>{hasCopied ? "Copied" : "Copy to Clipboard"}</TooltipContent>
-    </Tooltip>
+    <MessageAction
+      label={copied ? "Copied" : "Copy"}
+      onClick={() => {
+        void copy();
+      }}
+    >
+      {copied ? <Check /> : <Copy />}
+    </MessageAction>
   );
 }
 
