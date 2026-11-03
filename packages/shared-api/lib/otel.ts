@@ -21,11 +21,7 @@ import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { IS_PRODUCTION } from "../env";
 import { getSecret } from "../utils/secret";
 import { isRootPathUrl } from "../utils/url";
-import {
-  AttributeKeySanitizer,
-  GREPTIME_TRACE_PIPELINE_NAME,
-  GREPTIME_TRACE_TABLE_NAME,
-} from "./greptime-otlp";
+import { GREPTIME_TRACE_PIPELINE_NAME, GREPTIME_TRACE_TABLE_NAME } from "./greptime-otlp";
 
 /**
  * Headers that are safe and useful to record as span attributes.
@@ -124,7 +120,6 @@ export const getOtelConfig = (
       return !isRootPathUrl(request.url);
     },
     spanProcessors: [
-      new AttributeKeySanitizer(),
       new BatchSpanProcessor(
         new OTLPTraceExporter({
           url: `${GREPTIME_OTLP_ENDPOINT}/v1/traces`,
