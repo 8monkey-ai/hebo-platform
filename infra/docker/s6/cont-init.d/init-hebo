@@ -14,12 +14,22 @@ if [ "$HEBO_MODE" != "standalone" ]; then
 fi
 
 # ── Run Prisma migrations ──
-echo "[init] Running API schema migrations"
-POSTGRES_URL="${POSTGRES_URL}?schema=api" \
+# Schema names can be overridden (e.g. POSTGRES_AUTH_SCHEMA=hebo_auth on Supabase,
+# which reserves the `auth` schema).
+API_SCHEMA=$(printf '%s' "${POSTGRES_API_SCHEMA:-api}" | tr '[:upper:]' '[:lower:]')
+AUTH_SCHEMA=$(printf '%s' "${POSTGRES_AUTH_SCHEMA:-auth}" | tr '[:upper:]' '[:lower:]')
+
+case "$POSTGRES_URL" in
+  *\?*) SEP="&" ;;
+  *) SEP="?" ;;
+esac
+
+echo "[init] Running API schema migrations (schema=${API_SCHEMA})"
+POSTGRES_URL="${POSTGRES_URL}${SEP}schema=${API_SCHEMA}" \
   bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
 
-echo "[init] Running Auth schema migrations"
-POSTGRES_URL="${POSTGRES_URL}?schema=auth" \
+echo "[init] Running Auth schema migrations (schema=${AUTH_SCHEMA})"
+POSTGRES_URL="${POSTGRES_URL}${SEP}schema=${AUTH_SCHEMA}" \
   bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
 
 echo "[init] Bootstrap complete"
