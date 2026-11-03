@@ -71,6 +71,8 @@ Optional: OAuth (`GITHUB_CLIENT_ID`, `GOOGLE_CLIENT_ID`, …) and SMTP (`SMTP_HO
 
 Using an external Postgres such as Supabase? Just set `POSTGRES_URL`. Auth data lives in the `hebo_auth` schema, so it doesn't clash with Supabase's `auth` schema.
 
+> **Upgrading an install created before the `hebo_auth` default?** Set `POSTGRES_AUTH_SCHEMA=auth` in your `.env` to keep using your existing auth data.
+
 See [`infra/self-hosted/.env.example`](infra/self-hosted/.env.example) for the full variable reference.
 
 #### Custom domain

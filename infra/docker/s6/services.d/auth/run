@@ -1,5 +1,4 @@
 #!/command/with-contenv sh
-[ -f /run/hebo/env ] && . /run/hebo/env
 case "${HEBO_MODE:-standalone}" in
   standalone|auth) exec bun /app/auth/index.js ;;
 esac

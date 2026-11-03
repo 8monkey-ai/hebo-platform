@@ -13,24 +13,16 @@ if [ "$HEBO_MODE" != "standalone" ]; then
   exit 0
 fi
 
-# ── Resolve auth schema ──
-# New installs use `hebo_auth` (Supabase reserves `auth`); installs that already
-# have Hebo tables in `auth` keep it. Saved to a file because S6_KEEP_ENV=1.
-if [ -z "$POSTGRES_AUTH_SCHEMA" ]; then
-  POSTGRES_AUTH_SCHEMA=$(bun -e 'const [r] = await Bun.sql`SELECT to_regclass(${"auth.organizations"}) IS NOT NULL AS legacy`; console.log(r.legacy ? "auth" : "hebo_auth"); process.exit()')
-fi
-mkdir -p /run/hebo
-echo "export POSTGRES_AUTH_SCHEMA=$POSTGRES_AUTH_SCHEMA" > /run/hebo/env
-
 # ── Run Prisma migrations ──
 case "$POSTGRES_URL" in *\?*) SEP="&" ;; *) SEP="?" ;; esac
+AUTH_SCHEMA="${POSTGRES_AUTH_SCHEMA:-hebo_auth}"
 
 echo "[init] Running API schema migrations"
 POSTGRES_URL="${POSTGRES_URL}${SEP}schema=api" \
   bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
 
-echo "[init] Running Auth schema migrations (schema=${POSTGRES_AUTH_SCHEMA})"
-POSTGRES_URL="${POSTGRES_URL}${SEP}schema=${POSTGRES_AUTH_SCHEMA}" \
+echo "[init] Running Auth schema migrations (schema=${AUTH_SCHEMA})"
+POSTGRES_URL="${POSTGRES_URL}${SEP}schema=${AUTH_SCHEMA}" \
   bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
 
 echo "[init] Bootstrap complete"
