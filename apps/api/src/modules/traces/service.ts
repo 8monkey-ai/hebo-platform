@@ -1,4 +1,4 @@
-import { GREPTIME_TRACE_TABLE_NAME } from "@hebo/shared-api/lib/greptime-otlp";
+import { GREPTIME_TRACE_TABLE_NAME } from "@hebo/shared-api/lib/otel";
 
 import type { GreptimeDb } from "~api/middlewares/greptime";
 

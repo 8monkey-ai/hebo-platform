@@ -21,7 +21,6 @@ import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base";
 import { IS_PRODUCTION } from "../env";
 import { getSecret } from "../utils/secret";
 import { isRootPathUrl } from "../utils/url";
-import { GREPTIME_TRACE_PIPELINE_NAME, GREPTIME_TRACE_TABLE_NAME } from "./greptime-otlp";
 
 /**
  * Headers that are safe and useful to record as span attributes.
@@ -48,6 +47,18 @@ const ALLOWED_RESPONSE_HEADERS = [
   "cache-control",
   "x-request-id",
 ];
+
+/**
+ * Traces use the built-in `greptime_trace_v2` pipeline (JSON2 attribute columns, GreptimeDB
+ * v1.3.0+). It writes to a new `_v2` table, since GreptimeDB rejects V2 writes into a table
+ * created by the V1 pipeline. The table is auto-created on the first write.
+ *
+ * Known issue (v1.3.0): GreptimeDB doesn't escape JSON2 object keys over the Postgres wire
+ * protocol, so a span attribute key containing `"` or `\` makes any query returning that
+ * span's `span_attributes` fail to parse. Accepted as an edge case (user metadata keys only).
+ */
+const GREPTIME_TRACE_PIPELINE_NAME = "greptime_trace_v2";
+export const GREPTIME_TRACE_TABLE_NAME = "opentelemetry_traces_v2";
 
 export const GREPTIME_OTLP_ENDPOINT = `http://${(await getSecret("GREPTIME_HOST")) ?? "localhost"}:4000/v1/otlp`;
 
