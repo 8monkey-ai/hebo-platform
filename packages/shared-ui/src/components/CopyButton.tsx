@@ -6,6 +6,41 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./Tooltip";
 
 const DEFAULT_ICON = <Copy />;
 
+/**
+ * Elements carrying this attribute (including their descendants) are excluded
+ * when a DOM `RefObject` is passed as `value` to derive the clipboard text.
+ */
+const COPY_IGNORE_ATTR = "data-copy-ignore";
+
+const BLOCK_TAGS = new Set(["DIV", "P", "PRE"]);
+
+function collectCopyText(root: HTMLElement): string {
+  if (root.tagName === "PRE") return root.textContent ?? "";
+
+  const walk = (node: Node): string => {
+    if (node.nodeType === Node.TEXT_NODE) return node.nodeValue ?? "";
+    if (node.nodeType !== Node.ELEMENT_NODE) return "";
+    const el = node as HTMLElement;
+    if (el.hasAttribute(COPY_IGNORE_ATTR)) return "";
+    if (el.tagName === "BR") return "\n";
+    const inner = Array.from(el.childNodes)
+      .map((child) => walk(child))
+      .join("");
+    return BLOCK_TAGS.has(el.tagName) ? `\n${inner}\n` : inner;
+  };
+
+  return walk(root).replaceAll(/\n+/gu, "\n").trim();
+}
+
+/**
+ * Source of the text to copy. One of:
+ * - `string` — copied verbatim.
+ * - `() => string` — evaluated on click, so large strings aren't built on every render.
+ * - `RefObject<HTMLElement>` — the subtree is walked on click, skipping
+ *   `[data-copy-ignore]` descendants. Hidden / collapsed text is captured in full.
+ */
+type CopyValue = string | (() => string) | React.RefObject<HTMLElement | null>;
+
 export function CopyButton({
   value,
   className,
@@ -14,7 +49,7 @@ export function CopyButton({
   icon = DEFAULT_ICON,
   ...props
 }: {
-  value: string | (() => string);
+  value: CopyValue;
   className?: string;
   disabled?: boolean;
   tooltip?: string;
@@ -32,9 +67,15 @@ export function CopyButton({
     };
   }, [hasCopied]);
 
+  const resolveText = (): string => {
+    if (typeof value === "string") return value;
+    if (typeof value === "function") return value();
+    return value.current ? collectCopyText(value.current) : "";
+  };
+
   const copy = async () => {
     try {
-      await navigator.clipboard.writeText(typeof value === "function" ? value() : value);
+      await navigator.clipboard.writeText(resolveText());
       setHasCopied(true);
     } catch (error) {
       console.error("Failed to copy to clipboard:", error);
