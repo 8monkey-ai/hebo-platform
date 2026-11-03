@@ -3,42 +3,36 @@ import { Resource } from "sst";
 
 import { DEFAULT_DB_IDLE_TIMEOUT_MS, DEFAULT_DB_POOL_MAX } from "./config";
 
-// Auth defaults to `hebo_auth` because Supabase reserves the `auth` schema.
-// Deployments created before this default pin the legacy `auth` schema via
-// `POSTGRES_AUTH_SCHEMA` (SST stacks, and init-hebo detects it for Docker).
-const DEFAULT_SCHEMAS: Record<string, string> = { auth: "hebo_auth" };
+// Supabase reserves `auth`, so Hebo defaults to `hebo_auth`.
+// Deployments created before that pin `POSTGRES_AUTH_SCHEMA=auth`.
+const resolveSchema = (schema: string) =>
+  schema === "auth" ? (process.env.POSTGRES_AUTH_SCHEMA ?? "hebo_auth") : schema.toLowerCase();
 
-// Resolves the Postgres schema for a service. Override via `POSTGRES_<NAME>_SCHEMA`.
-export const getSchemaName = (name: string) => {
-  // oxlint-disable-next-line prefer-nullish-coalescing -- treat empty values as unset
-  const override = process.env[`POSTGRES_${name.toUpperCase()}_SCHEMA`] || undefined;
-  return (override ?? DEFAULT_SCHEMAS[name] ?? name).toLowerCase();
-};
-
-export const getConnectionString = (name: string) => {
-  const schema = getSchemaName(name);
-
+export const getConnectionString = (schema: string) => {
   // SST Resource for ECS deployments
   try {
     // oxlint-disable no-unsafe-assignment no-unsafe-member-access
     // @ts-expect-error: HeboDatabase may not be defined
     const db = Resource.HeboDatabase;
-    return `postgresql://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}?sslmode=verify-full&schema=${schema}`;
+    return `postgresql://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}?sslmode=verify-full&schema=${resolveSchema(schema)}`;
     // oxlint-enable no-unsafe-assignment no-unsafe-member-access
   } catch {}
 
   // POSTGRES_URL env var for standalone / self-hosted
   const base = process.env.POSTGRES_URL ?? "postgresql://postgres:password@localhost:5432/hebo";
-  return `${base}${base.includes("?") ? "&" : "?"}schema=${schema}`;
+  return `${base}${base.includes("?") ? "&" : "?"}schema=${resolveSchema(schema)}`;
 };
 
-export const createPrismaAdapter = (name: string, max: number = DEFAULT_DB_POOL_MAX): PrismaPg => {
+export const createPrismaAdapter = (
+  schema: string,
+  max: number = DEFAULT_DB_POOL_MAX,
+): PrismaPg => {
   return new PrismaPg(
     {
-      connectionString: getConnectionString(name),
+      connectionString: getConnectionString(schema),
       max,
       idleTimeoutMillis: DEFAULT_DB_IDLE_TIMEOUT_MS,
     },
-    { schema: getSchemaName(name) },
+    { schema: resolveSchema(schema) },
   );
 };

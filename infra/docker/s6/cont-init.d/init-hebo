@@ -13,40 +13,24 @@ if [ "$HEBO_MODE" != "standalone" ]; then
   exit 0
 fi
 
-# ── Resolve schema names ──
-# Auth defaults to `hebo_auth` (Supabase reserves `auth`). Installs that already
-# applied migrations to the legacy `auth` schema keep using it. Connection errors
-# abort the bootstrap rather than silently picking a fresh schema.
+# ── Resolve auth schema ──
+# New installs use `hebo_auth` (Supabase reserves `auth`); installs that already
+# have Hebo tables in `auth` keep it. Saved to a file because S6_KEEP_ENV=1.
 if [ -z "$POSTGRES_AUTH_SCHEMA" ]; then
-  POSTGRES_AUTH_SCHEMA=$(bun -e '
-    const sql = new Bun.SQL(process.env.POSTGRES_URL);
-    const [{ found }] = await sql`SELECT to_regclass(${"auth._prisma_migrations"}) IS NOT NULL AS found`;
-    const legacy = found && (await sql`SELECT 1 FROM auth._prisma_migrations WHERE finished_at IS NOT NULL LIMIT 1`).length > 0;
-    console.log(legacy ? "auth" : "hebo_auth");
-    await sql.close();
-  ')
+  POSTGRES_AUTH_SCHEMA=$(bun -e 'const [r] = await Bun.sql`SELECT to_regclass(${"auth.organizations"}) IS NOT NULL AS legacy`; console.log(r.legacy ? "auth" : "hebo_auth"); process.exit()')
 fi
-
-API_SCHEMA=$(printf '%s' "${POSTGRES_API_SCHEMA:-api}" | tr '[:upper:]' '[:lower:]')
-AUTH_SCHEMA=$(printf '%s' "$POSTGRES_AUTH_SCHEMA" | tr '[:upper:]' '[:lower:]')
-
-# S6_KEEP_ENV=1 makes the container environment read-only, so hand the resolved
-# schema to the auth service through a file it sources on start.
 mkdir -p /run/hebo
-printf 'export POSTGRES_AUTH_SCHEMA=%s\n' "$AUTH_SCHEMA" > /run/hebo/env
+echo "export POSTGRES_AUTH_SCHEMA=$POSTGRES_AUTH_SCHEMA" > /run/hebo/env
 
 # ── Run Prisma migrations ──
-case "$POSTGRES_URL" in
-  *\?*) SEP="&" ;;
-  *) SEP="?" ;;
-esac
+case "$POSTGRES_URL" in *\?*) SEP="&" ;; *) SEP="?" ;; esac
 
-echo "[init] Running API schema migrations (schema=${API_SCHEMA})"
-POSTGRES_URL="${POSTGRES_URL}${SEP}schema=${API_SCHEMA}" \
+echo "[init] Running API schema migrations"
+POSTGRES_URL="${POSTGRES_URL}${SEP}schema=api" \
   bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
 
-echo "[init] Running Auth schema migrations (schema=${AUTH_SCHEMA})"
-POSTGRES_URL="${POSTGRES_URL}${SEP}schema=${AUTH_SCHEMA}" \
+echo "[init] Running Auth schema migrations (schema=${POSTGRES_AUTH_SCHEMA})"
+POSTGRES_URL="${POSTGRES_URL}${SEP}schema=${POSTGRES_AUTH_SCHEMA}" \
   bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
 
 echo "[init] Bootstrap complete"

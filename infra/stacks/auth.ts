@@ -2,7 +2,7 @@
 /// <reference path="../../.sst/platform/config.d.ts" />
 
 import heboCluster from "./cluster";
-import heboDatabase, { createMigrator, schemaEnvironment } from "./db";
+import heboDatabase, { createMigrator } from "./db";
 import { disableInitProcess } from "./ecs";
 import { authSecrets, isProduction, greptimeHost, normalizedStage } from "./env";
 
@@ -22,7 +22,7 @@ const heboAuth = new sst.aws.Service("HeboAuth", {
     args: { NODE_ENV: isProduction ? "production" : "development" },
   },
   environment: {
-    ...schemaEnvironment,
+    POSTGRES_AUTH_SCHEMA: "auth", // Hebo Cloud predates the `hebo_auth` default
     HEBO_MODE: "auth",
     BASE_URL: `https://${authDomain}`,
     NODE_EXTRA_CA_CERTS: "/etc/ssl/certs/rds-bundle.pem",
