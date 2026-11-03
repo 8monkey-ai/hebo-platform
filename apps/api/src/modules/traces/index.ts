@@ -50,10 +50,10 @@ export const spansModule = new Elysia({
         params.branchSlug,
         params.traceId,
       );
-      if (spans.length === 0) return status(404, null);
+      if (spans.length === 0) return status(404, "Trace not found");
       return status(200, spans);
     },
     {
-      response: { 200: SpanListSchema, 404: z.null() },
+      response: { 200: SpanListSchema, 404: z.string() },
     },
   );
