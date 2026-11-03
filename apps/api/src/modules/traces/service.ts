@@ -13,11 +13,20 @@ import {
 } from "./utils";
 
 const METADATA_PREFIX = "gen_ai.request.metadata.";
+const METADATA_KEYS_SAMPLE_SIZE = 500;
 
 type SpanAttributes = Record<string, unknown>;
 
 /** Reads a top-level string key of the `span_attributes` JSON2 column (keys contain dots). */
 const spanAttribute = (key: string) => `span_attributes."${escapeSqlIdentifier(key)}"::STRING`;
+
+/** Spans of one agent branch in a time window. Params: agentSlug, branchSlug, orgId, from, to. */
+const BRANCH_SPANS_WHERE_SQL = `${spanAttribute("gen_ai.operation.name")} IS NOT NULL
+  AND ${spanAttribute("hebo.agent.slug")} = $1
+  AND ${spanAttribute("hebo.branch.slug")} = $2
+  AND ${spanAttribute("hebo.organization.id")} = $3
+  AND "timestamp" >= $4
+  AND "timestamp" <= $5`;
 
 function extractMetadata(attributes: SpanAttributes) {
   const metadata: Record<string, string> = {};
@@ -39,6 +48,45 @@ function extractScalarAttributes(attributes: SpanAttributes) {
     }
   }
   return scalars;
+}
+
+/**
+ * Distinct metadata keys of the latest spans in the time window (JSON2 has no key catalog).
+ * Reading the whole JSON2 object scans it for every row in the window before filtering, so
+ * first pick the latest spans via cheap path filters, then narrow the read by `trace_id`
+ * (bloom index) and timestamp.
+ */
+async function listMetadataKeys(
+  greptimeDb: GreptimeDb,
+  organizationId: string,
+  agentSlug: string,
+  branchSlug: string,
+  from: Date,
+  to: Date,
+) {
+  const latest = await greptimeDb.unsafe<Array<{ trace_id: string; timestamp: Date }>>(
+    `SELECT "trace_id" AS trace_id, "timestamp" AS timestamp
+     FROM ${GREPTIME_TRACE_TABLE_NAME}
+     WHERE ${BRANCH_SPANS_WHERE_SQL}
+     ORDER BY "timestamp" DESC
+     LIMIT ${METADATA_KEYS_SAMPLE_SIZE}`,
+    [agentSlug, branchSlug, organizationId, from, to],
+  );
+  if (latest.length === 0) return [];
+
+  const traceIds = [...new Set(latest.map((row) => row.trace_id))];
+  const rows = await greptimeDb.unsafe<Array<{ key: string }>>(
+    `SELECT key FROM (
+       SELECT unnest(json_object_keys(parse_json(json_get(span_attributes, '$')))) AS key
+       FROM ${GREPTIME_TRACE_TABLE_NAME}
+       WHERE ${BRANCH_SPANS_WHERE_SQL}
+         AND "trace_id" IN (${traceIds.map((_, i) => `$${i + 6}`).join(", ")})
+     )
+     WHERE starts_with(key, '${METADATA_PREFIX}')
+     GROUP BY key`,
+    [agentSlug, branchSlug, organizationId, latest.at(-1)!.timestamp, to, ...traceIds],
+  );
+  return rows.map(({ key }) => key.slice(METADATA_PREFIX.length));
 }
 
 export async function listTraces(
@@ -86,12 +134,7 @@ export async function listTraces(
       "duration_nano" AS duration_nano,
       "span_attributes" AS span_attributes
     FROM ${GREPTIME_TRACE_TABLE_NAME}
-    WHERE ${spanAttribute("gen_ai.operation.name")} IS NOT NULL
-      AND ${spanAttribute("hebo.agent.slug")} = $1
-      AND ${spanAttribute("hebo.branch.slug")} = $2
-      AND ${spanAttribute("hebo.organization.id")} = $3
-      AND "timestamp" >= $4
-      AND "timestamp" <= $5
+    WHERE ${BRANCH_SPANS_WHERE_SQL}
       ${metaFilterSql}
       ${statusFilterSql}
       ${operationFilterSql}
@@ -99,16 +142,17 @@ export async function listTraces(
     LIMIT ${addParam(pageSize + 1)} OFFSET ${addParam((page - 1) * pageSize)}
   `;
 
-  const rows = await greptimeDb.unsafe<Record<string, unknown>[]>(queryText, params);
+  const [rows, metadataKeys] = await Promise.all([
+    greptimeDb.unsafe<Record<string, unknown>[]>(queryText, params),
+    listMetadataKeys(greptimeDb, organizationId, agentSlug, branchSlug, from, to),
+  ]);
   const hasNextPage = rows.length > pageSize;
   const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
 
-  const metadataKeys = new Set<string>();
   const data = [];
   for (const row of pageRows) {
     const attributes = (row.span_attributes ?? {}) as SpanAttributes;
     const metadata = extractMetadata(attributes);
-    for (const key in metadata) metadataKeys.add(key);
     data.push({
       timestamp: row.timestamp as Date,
       traceId: parseString(row.trace_id),
@@ -126,7 +170,7 @@ export async function listTraces(
   return {
     data,
     hasNextPage,
-    metadataKeys: [...metadataKeys],
+    metadataKeys,
   };
 }
 

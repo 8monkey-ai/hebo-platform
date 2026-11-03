@@ -148,6 +148,8 @@ FROM opentelemetry_traces_v2
 WHERE span_attributes."hebo.organization.id"::STRING = $1
 ```
 
+Selecting the whole JSON2 column (or `json_get(span_attributes, '$')`) reads the full object for every row in the time range before `WHERE` filters apply, while path reads (`span_attributes."key"::STRING`) stay cheap. When you need whole objects for many rows, pick the rows with path filters first, then read them by `trace_id IN (...)`, which uses the bloom index. JSON2 has no key catalog: list keys with `unnest(json_object_keys(parse_json(json_get(span_attributes, '$'))))` (see `listMetadataKeys`).
+
 ## Hot Path Rules
 
 - Minimize per-request allocations and repeated transformations in middleware/converter/handler paths.
