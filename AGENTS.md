@@ -138,6 +138,16 @@ If priorities conflict, apply this order:
 3. Readability and style consistency
 4. Hot-path performance
 
+## GreptimeDB Traces (JSON2)
+
+Traces use the built-in `greptime_trace_v2` pipeline and are written to `opentelemetry_traces_v2` (auto-created on first write; names live in `packages/shared-api/lib/greptime-otlp.ts`). Span attributes are stored in the `span_attributes` JSON2 column with flat dotted keys, so quote the whole key and cast when filtering. Select the whole column to get typed values (numbers, booleans, arrays) without schema discovery:
+
+```sql
+SELECT "trace_id", "span_attributes"
+FROM opentelemetry_traces_v2
+WHERE span_attributes."hebo.organization.id"::STRING = $1
+```
+
 ## Hot Path Rules
 
 - Minimize per-request allocations and repeated transformations in middleware/converter/handler paths.

@@ -27,7 +27,6 @@
     "@hebo/shared-api": "workspace:*",
     "@prisma/client": "catalog:",
     "elysia": "catalog:",
-    "lru-cache": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
