@@ -50,6 +50,8 @@ export const spansModule = new Elysia({
         params.branchSlug,
         params.traceId,
       );
+      // FUTURE: switch back to status(404, null) with z.null() once Elysia stops replacing null bodies
+      // https://github.com/elysiajs/elysia/issues/1738
       if (spans.length === 0) return status(404, "Trace not found");
       return status(200, spans);
     },
