@@ -1,0 +1,159 @@
+---
+title: "Messages API"
+description: "Call any model with the Anthropic Messages API"
+---
+
+Hebo Gateway provides a `/messages` endpoint compatible with the [Anthropic Messages API](https://docs.anthropic.com/en/api/messages). It works with all models on the gateway, not only Claude models, and supports streaming, tool use, extended thinking, and multimodal inputs.
+
+Use it with clients that speak the Messages API, such as the Anthropic SDK or [Claude Desktop](/integrations/claude-desktop).
+
+## Your First Call
+
+<CodeGroup>
+
+```ts Anthropic SDK
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({
+  apiKey: null,
+  authToken: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai",
+});
+
+const message = await client.messages.create({
+  model: "openai/gpt-oss-20b",
+  max_tokens: 1024,
+  system: "You are a funny assistant.",
+  messages: [{ role: "user", content: "Tell me a joke about monkeys" }],
+});
+
+for (const block of message.content) {
+  if (block.type === "text") console.log(block.text);
+}
+```
+
+```bash Bash
+curl https://gateway.hebo.ai/v1/messages \
+  -H "Authorization: Bearer $HEBO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "openai/gpt-oss-20b",
+    "max_tokens": 1024,
+    "system": "You are a funny assistant.",
+    "messages": [
+      { "role": "user", "content": "Tell me a joke about monkeys" }
+    ]
+  }'
+```
+
+</CodeGroup>
+
+<Info>
+  Hebo authenticates with the `Authorization: Bearer` header, not `x-api-key`. In the Anthropic SDK,
+  pass your Hebo API key as `authToken`. Use the base URL `https://gateway.hebo.ai` without `/v1`,
+  because the SDK adds `/v1/messages`.
+</Info>
+
+`max_tokens` is required. Message content can be a string or a list of content blocks: `text`, `image`, `document`, and `tool_result` in user messages, and `text`, `tool_use`, `thinking`, and `redacted_thinking` in assistant messages.
+
+## Streaming
+
+Set `stream: true` to receive server-sent events (`message_start`, `content_block_start`, `content_block_delta`, `content_block_stop`, `message_delta`, `message_stop`).
+
+```ts Anthropic SDK highlight={13,16-20}
+import Anthropic from "@anthropic-ai/sdk";
+
+const client = new Anthropic({
+  apiKey: null,
+  authToken: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai",
+});
+
+const stream = await client.messages.create({
+  model: "openai/gpt-oss-20b",
+  max_tokens: 1024,
+  messages: [{ role: "user", content: "Tell me a very long story about monkeys" }],
+  stream: true,
+});
+
+for await (const event of stream) {
+  if (event.type === "content_block_delta" && event.delta.type === "text_delta") {
+    process.stdout.write(event.delta.text);
+  }
+}
+```
+
+## Extended Thinking
+
+Use `thinking` to control reasoning:
+
+| Value                                          | Meaning                                                                                            |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `{ "type": "enabled", "budget_tokens": 2048 }` | Enable reasoning with a token budget.                                                              |
+| `{ "type": "adaptive" }`                       | Enable reasoning without a fixed budget. Uses `high` effort unless you set `output_config.effort`. |
+| `{ "type": "disabled" }`                       | Disable reasoning.                                                                                 |
+
+`budget_tokens` must be at least `1024`. Instead of a budget, you can set `output_config.effort` to `low`, `medium`, `high`, or `max`. Hebo maps both settings to the provider-specific controls, so they also work with non-Claude models.
+
+```json
+{
+  "model": "openai/gpt-oss-20b",
+  "max_tokens": 4096,
+  "thinking": { "type": "enabled", "budget_tokens": 2048 },
+  "messages": [{ "role": "user", "content": "Why did the monkey bring a ladder to the bar?" }]
+}
+```
+
+The response contains `thinking` blocks with a `signature`. In follow-up calls, send the assistant `content` back unchanged so the model keeps its reasoning state.
+
+## Tool Use
+
+Define tools with a name and an `input_schema`. When the model calls a tool, the response contains a `tool_use` block and `stop_reason` is `tool_use`. Run the tool in your code and send the result back in a `tool_result` block with the same `tool_use_id`.
+
+```json
+{
+  "model": "openai/gpt-oss-20b",
+  "max_tokens": 1024,
+  "messages": [{ "role": "user", "content": "How many r's are in Strawberry?" }],
+  "tools": [
+    {
+      "name": "count_letters",
+      "description": "Count letter occurrences in a word",
+      "input_schema": {
+        "type": "object",
+        "properties": { "word": { "type": "string" }, "letter": { "type": "string" } },
+        "required": ["word", "letter"]
+      }
+    }
+  ]
+}
+```
+
+The gateway accepts server tools such as `web_search_20250305`, so clients can send their default payload, but it does not run them.
+
+## Structured Outputs
+
+Set `output_config.format` to a JSON schema to get typed JSON output:
+
+```json
+{
+  "model": "openai/gpt-oss-20b",
+  "max_tokens": 1024,
+  "messages": [{ "role": "user", "content": "Create a simple vegetarian pasta recipe." }],
+  "output_config": {
+    "format": {
+      "type": "json_schema",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "steps": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["name", "steps"]
+      }
+    }
+  }
+}
+```
+
+For all request and response fields, see the [API Reference](/api-reference/introduction).

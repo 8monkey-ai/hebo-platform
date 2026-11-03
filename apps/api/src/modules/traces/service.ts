@@ -2,7 +2,12 @@ import { LRUCache } from "lru-cache";
 
 import type { GreptimeDb } from "~api/middlewares/greptime";
 
-import type { GenAIFinishReasons, GenAIInputMessages, GenAIOutputMessages } from "./types";
+import type {
+  GenAIFinishReasons,
+  GenAIInputMessages,
+  GenAIOutputMessages,
+  TraceOperation,
+} from "./types";
 import {
   escapeSqlIdentifier,
   extractLastUserSummary,
@@ -68,7 +73,7 @@ export async function listTraces(
   pageSize: number,
   metadataFilters: Record<string, string>,
   statusFilter?: "ok" | "error",
-  operationFilter?: "chat" | "embeddings" | "transcriptions",
+  operationFilter?: TraceOperation,
 ) {
   const { metadataColumns } = await getTraceColumnNames(greptimeDb);
   const metadataKeys = metadataColumns.map((col) => col.slice(METADATA_PREFIX.length));

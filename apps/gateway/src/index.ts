@@ -31,6 +31,7 @@ import { withPort } from "@hebo/shared-api/utils/url";
 import { prisma } from "~api/middlewares/prisma";
 
 import { BASE_PATH, gw } from "./gateway";
+import { jsonRequestBody, transcriptionsRequestBody } from "./lib/openapi";
 import { gatewayErrors } from "./middlewares/errors";
 
 const PORT = Number(process.env.PORT ?? 8522);
@@ -46,13 +47,13 @@ export const createGateway = () =>
     )
     .use(logging(getLogger("hebo-gateway")))
     // Root route ("/") is unauthenticated and unprotected for health checks.
-    .get("/", () => "🐵 Hebo AI Gateway says hello!")
+    .get("/", () => "🐵 Hebo AI Gateway says hello!", { detail: { hide: true } })
     .use(cors(CORS_CONFIG))
     .use(
       openapi(
         createOpenapiConfig(
           "Hebo Gateway",
-          "OpenAI-compatible AI Gateway",
+          "OpenAI- and Anthropic-compatible AI Gateway",
           withPort(BASE_URL, PORT),
           "0.1.0",
         ),
@@ -64,9 +65,35 @@ export const createGateway = () =>
       "/v1/models",
       ({ request }: { request: Request }) => gw.routes["/models"].handler(request),
       {
+        detail: {
+          tags: ["Models"],
+          summary: "List models",
+          description: "Lists all models available on Hebo Gateway. No authentication required.",
+          security: [],
+        },
         response: {
           200: ModelListSchema,
           400: OpenAIErrorSchema,
+          500: OpenAIErrorSchema,
+        },
+      },
+    )
+    // Documented variant: model IDs contain a slash, so clients URL-encode it (`openai%2Fgpt-oss-20b`).
+    .get(
+      "/v1/models/:model",
+      ({ request }: { request: Request }) => gw.routes["/models"].handler(request),
+      {
+        detail: {
+          tags: ["Models"],
+          summary: "Retrieve a model",
+          description:
+            "Returns a single model by ID, for example `openai/gpt-oss-20b`. No authentication required.",
+          security: [],
+        },
+        response: {
+          200: ModelSchema,
+          400: OpenAIErrorSchema,
+          404: OpenAIErrorSchema,
           500: OpenAIErrorSchema,
         },
       },
@@ -75,6 +102,7 @@ export const createGateway = () =>
       "/v1/models/*",
       ({ request }: { request: Request }) => gw.routes["/models"].handler(request),
       {
+        detail: { hide: true },
         response: {
           200: ModelSchema,
           400: OpenAIErrorSchema,
@@ -93,7 +121,13 @@ export const createGateway = () =>
             gw.handler(request, { prismaClient, organizationId }),
           {
             parse: "none",
-            body: ChatCompletionsBodySchema,
+            detail: {
+              tags: ["Chat"],
+              summary: "Create a chat completion",
+              description:
+                "Creates a model response for a chat conversation. OpenAI Chat Completions compatible. Set `stream: true` to receive server-sent events.",
+              requestBody: jsonRequestBody(ChatCompletionsBodySchema),
+            },
             response: {
               200: ChatCompletionsSchema.or(ChatCompletionsChunkSchema),
               400: OpenAIErrorSchema,
@@ -108,7 +142,13 @@ export const createGateway = () =>
             gw.handler(request, { prismaClient, organizationId }),
           {
             parse: "none",
-            body: EmbeddingsBodySchema,
+            detail: {
+              tags: ["Embeddings"],
+              summary: "Create embeddings",
+              description:
+                "Creates vector embeddings for the input text. OpenAI Embeddings compatible.",
+              requestBody: jsonRequestBody(EmbeddingsBodySchema),
+            },
             response: {
               200: EmbeddingsSchema,
               400: OpenAIErrorSchema,
@@ -123,7 +163,13 @@ export const createGateway = () =>
             gw.handler(request, { prismaClient, organizationId }),
           {
             parse: "none",
-            body: TranscriptionsBodySchema,
+            detail: {
+              tags: ["Audio"],
+              summary: "Create a transcription",
+              description:
+                "Transcribes audio into text. Send a multipart `file` upload or base64 `input_audio` in a JSON body. OpenAI Audio Transcriptions compatible.",
+              requestBody: transcriptionsRequestBody(TranscriptionsBodySchema),
+            },
             response: {
               200: TranscriptionsSchema,
               400: OpenAIErrorSchema,
@@ -138,7 +184,13 @@ export const createGateway = () =>
             gw.handler(request, { prismaClient, organizationId }),
           {
             parse: "none",
-            body: ResponsesBodySchema,
+            detail: {
+              tags: ["Responses"],
+              summary: "Create a response",
+              description:
+                "Creates a model response. OpenAI Responses API compatible. Responses are not stored, so send the full conversation on each request. Set `stream: true` to receive server-sent events.",
+              requestBody: jsonRequestBody(ResponsesBodySchema),
+            },
             response: {
               200: ResponsesSchema,
               400: OpenAIErrorSchema,
@@ -153,7 +205,13 @@ export const createGateway = () =>
             gw.handler(request, { prismaClient, organizationId }),
           {
             parse: "none",
-            body: MessagesBodySchema,
+            detail: {
+              tags: ["Messages"],
+              summary: "Create a message",
+              description:
+                "Creates a model response for a conversation. Anthropic Messages API compatible. Set `stream: true` to receive server-sent events.",
+              requestBody: jsonRequestBody(MessagesBodySchema),
+            },
             response: {
               200: MessagesSchema,
               400: AnthropicErrorSchema,

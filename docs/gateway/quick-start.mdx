@@ -3,12 +3,13 @@ title: "Quick Start"
 description: "Your first ```/chat/completions``` call"
 ---
 
-Hebo Gateway provides a unified API for completions, embeddings, audio transcriptions, and model discovery.
+Hebo Gateway provides a unified API for chat completions, responses, messages, embeddings, audio transcriptions, and model discovery.
 It normalizes provider differences so you can switch models without rewriting your client.
 
 ## Why Gateway
 
-- OpenAI-compatible endpoints and normalized model IDs across providers
+- OpenAI-compatible endpoints (`/chat/completions`, `/responses`, `/embeddings`, `/audio/transcriptions`, `/models`) and an Anthropic-compatible `/messages` endpoint
+- Normalized model IDs across providers
 - One way to configure reasoning across all models
 - Support for streaming and non-streaming responses, as well as reasoning and tool calls
 - Compatible with common AI SDKs (Vercel AI SDK, TanStack AI, Langchain, OpenAI SDK, ...)
@@ -119,4 +120,7 @@ curl https://gateway.hebo.ai/v1/chat/completions \
 
 ## What's Next?
 
+- Use the [Responses API](/gateway/responses) or the [Messages API](/gateway/messages) with any model.
+- Inspect your requests in [Traces](/observability/traces).
+- See all endpoints and fields in the [API Reference](/api-reference/introduction).
 - Dig deeper into advanced features like [Tool Calling](/gateway/tool-calling), [Structured Outputs](/gateway/structured-outputs), [Reasoning](/gateway/reasoning), [Embeddings](/gateway/embeddings), and [Transcriptions](/gateway/transcriptions).

@@ -1,0 +1,173 @@
+---
+title: "Responses API"
+description: "Call any model with the OpenAI Responses API"
+---
+
+Hebo Gateway provides a `/responses` endpoint compatible with the [OpenAI Responses API](https://platform.openai.com/docs/api-reference/responses). It works with all models on the gateway, not only OpenAI models, and supports the same reasoning, tool calling, and structured output features as `/chat/completions`.
+
+Use it with clients that speak the Responses API, such as the OpenAI SDK or [Codex Desktop](/integrations/codex-desktop).
+
+## Your First Call
+
+<CodeGroup>
+
+```ts OpenAI SDK
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const response = await client.responses.create({
+  model: "openai/gpt-oss-20b",
+  instructions: "You are a funny assistant.",
+  input: "Tell me a joke about monkeys",
+});
+
+console.log(response.output_text);
+```
+
+```bash Bash
+curl https://gateway.hebo.ai/v1/responses \
+  -H "Authorization: Bearer $HEBO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "openai/gpt-oss-20b",
+    "instructions": "You are a funny assistant.",
+    "input": "Tell me a joke about monkeys"
+  }'
+```
+
+</CodeGroup>
+
+`input` can be a string or a list of input items: messages (`user`, `assistant`, `system`, `developer`), function calls, function call outputs, and reasoning items. Messages can contain text, images, files, and audio.
+
+<Info>
+  Every input item needs a `type`. For messages, set `type: "message"`, for example `{ "type":
+  "message", "role": "user", "content": "Hello" }`. Items without a `type` return a `400` error.
+</Info>
+
+For the Vercel AI SDK, LangChain, and other OpenAI-compatible clients, use [`/chat/completions`](/gateway/quick-start) instead.
+
+## Streaming
+
+Set `stream: true` to receive server-sent events. Text arrives in `response.output_text.delta` events, and the final response in `response.completed`.
+
+```ts OpenAI SDK highlight={11,14-16}
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const stream = await client.responses.create({
+  model: "openai/gpt-oss-20b",
+  input: "Tell me a very long story about monkeys",
+  stream: true,
+});
+
+for await (const event of stream) {
+  if (event.type === "response.output_text.delta") process.stdout.write(event.delta);
+}
+```
+
+## Follow-up Calls
+
+The gateway does not store responses. To continue a conversation, send the previous output items back in `input`, followed by the next user message. This keeps tool calls and reasoning state across turns.
+
+```ts OpenAI SDK highlight={14-18}
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const input: OpenAI.Responses.ResponseInput = [
+  { type: "message", role: "user", content: "Tell me a joke about monkeys" },
+];
+
+const first = await client.responses.create({ model: "openai/gpt-oss-20b", input });
+
+input.push(...(first.output as OpenAI.Responses.ResponseInputItem[]), {
+  type: "message",
+  role: "user",
+  content: "Explain the joke.",
+});
+
+const second = await client.responses.create({ model: "openai/gpt-oss-20b", input });
+
+console.log(second.output_text);
+```
+
+## Reasoning
+
+Set `reasoning.effort` to `none`, `minimal`, `low`, `medium`, `high`, `xhigh`, or `max`. Hebo maps the value to the provider-specific controls. Set `reasoning.summary` to `auto`, `concise`, or `detailed` to request a reasoning summary. For more details, see [Reasoning](/gateway/reasoning).
+
+```json
+{
+  "model": "openai/gpt-oss-20b",
+  "input": "Why did the monkey bring a ladder to the bar?",
+  "reasoning": { "effort": "medium", "summary": "auto" }
+}
+```
+
+Reasoning is returned as `reasoning` items in `output`. Send them back unchanged in follow-up calls.
+
+## Tool Calling
+
+Define function tools with `type: "function"`. When the model calls a tool, the output contains a `function_call` item. Run the function in your code and send the result back as a `function_call_output` item with the same `call_id`.
+
+```json
+{
+  "model": "openai/gpt-oss-20b",
+  "input": "How many r's are in Strawberry?",
+  "tools": [
+    {
+      "type": "function",
+      "name": "count_letters",
+      "description": "Count letter occurrences in a word",
+      "parameters": {
+        "type": "object",
+        "properties": { "word": { "type": "string" }, "letter": { "type": "string" } },
+        "required": ["word", "letter"]
+      }
+    }
+  ]
+}
+```
+
+The gateway accepts hosted tools such as `web_search`, so clients can send their default payload, but it does not run them.
+
+## Structured Outputs
+
+Set `text.format` to a JSON schema to get typed JSON output:
+
+```json
+{
+  "model": "openai/gpt-oss-20b",
+  "input": "Create a simple vegetarian pasta recipe for 2 servings.",
+  "text": {
+    "format": {
+      "type": "json_schema",
+      "name": "recipe",
+      "schema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "steps": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["name", "steps"]
+      }
+    }
+  }
+}
+```
+
+## Limitations
+
+The gateway does not store responses and does not support server-side state. These Responses API fields are not supported and are ignored: `store`, `background`, `previous_response_id`, `conversation`, `prompt`, `include`, `truncation`, `text.verbosity`, and `top_logprobs`.
+
+For all request and response fields, see the [API Reference](/api-reference/introduction).

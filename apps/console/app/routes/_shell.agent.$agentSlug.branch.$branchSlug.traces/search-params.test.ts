@@ -5,6 +5,8 @@ import { parseTraceSearchParams } from "./search-params";
 describe("parseTraceSearchParams", () => {
   it.each([
     ["chat", "chat"],
+    ["responses", "responses"],
+    ["messages", "messages"],
     ["embeddings", "embeddings"],
     ["transcriptions", "transcriptions"],
     ["transcription", undefined],

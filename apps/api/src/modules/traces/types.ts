@@ -8,9 +8,7 @@ const TraceTimeRangeQuerySchema = {
 export const TraceListQuerySchema = z.object({
   metadata: z.record(z.string(), z.string()).optional(),
   status: z.union([z.literal("ok"), z.literal("error")]).optional(),
-  operation: z
-    .union([z.literal("chat"), z.literal("embeddings"), z.literal("transcriptions")])
-    .optional(),
+  operation: z.enum(["chat", "responses", "messages", "embeddings", "transcriptions"]).optional(),
   ...TraceTimeRangeQuerySchema,
   page: z.coerce.number().int().min(1).default(1).optional(),
   pageSize: z.coerce.number().int().min(1).max(200).default(50).optional(),
@@ -123,6 +121,7 @@ export const SpanDetailSchema = z.object({
 
 export const SpanListSchema = z.array(SpanDetailSchema);
 
+export type TraceOperation = NonNullable<z.infer<typeof TraceListQuerySchema>["operation"]>;
 export type GenAIInputMessages = z.infer<typeof GenAIInputMessagesSchema>;
 export type GenAIOutputMessages = z.infer<typeof GenAIOutputMessagesSchema>;
 export type GenAIFinishReasons = z.infer<typeof GenAIFinishReasonsSchema>;

@@ -9,4 +9,10 @@ Simply call the `/models` endpoint:
 curl https://gateway.hebo.ai/v1/models
 ```
 
-<Info>This endpoint does not require authentication</Info>
+To get a single model, add its ID to the path:
+
+```bash Bash
+curl https://gateway.hebo.ai/v1/models/openai/gpt-oss-20b
+```
+
+<Info>These endpoints do not require authentication</Info>

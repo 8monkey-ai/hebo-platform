@@ -1,0 +1,71 @@
+---
+title: "Introduction"
+description: "Endpoints, authentication, and errors of the Hebo Gateway API"
+---
+
+The Hebo Gateway API gives you one API for all models. It is compatible with the OpenAI API and the Anthropic Messages API, so you can use existing SDKs and change only the base URL and the API key.
+
+## Base URL
+
+```text
+https://gateway.hebo.ai/v1
+```
+
+| Endpoint                        | Compatible with             | Guide                                     |
+| ------------------------------- | --------------------------- | ----------------------------------------- |
+| `POST /v1/chat/completions`     | OpenAI Chat Completions     | [Quick Start](/gateway/quick-start)       |
+| `POST /v1/responses`            | OpenAI Responses            | [Responses API](/gateway/responses)       |
+| `POST /v1/messages`             | Anthropic Messages          | [Messages API](/gateway/messages)         |
+| `POST /v1/embeddings`           | OpenAI Embeddings           | [Embeddings](/gateway/embeddings)         |
+| `POST /v1/audio/transcriptions` | OpenAI Audio Transcriptions | [Transcriptions](/gateway/transcriptions) |
+| `GET /v1/models`                | OpenAI Models               | [Models](/gateway/supported-models)       |
+| `GET /v1/models/{model}`        | OpenAI Models               | [Models](/gateway/supported-models)       |
+
+The machine-readable OpenAPI spec is available at [`https://gateway.hebo.ai/openapi/json`](https://gateway.hebo.ai/openapi/json).
+
+## Authentication
+
+Send your Hebo API key as a Bearer token in the `Authorization` header:
+
+```bash
+curl https://gateway.hebo.ai/v1/chat/completions \
+  -H "Authorization: Bearer $HEBO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{ "model": "openai/gpt-oss-20b", "messages": [{ "role": "user", "content": "Hello" }] }'
+```
+
+All endpoints except `/v1/models` require authentication. To create an API key, see [Getting Started](/getting-started#create-a-hebo-api-key).
+
+<Info>
+  The `x-api-key` header is not supported, including on `/v1/messages`. With the Anthropic SDK, pass
+  your key as `authToken`.
+</Info>
+
+## Model names
+
+Set `model` to one of these values:
+
+- **An alias path**, for example `my-first-agent-x7k/main/default`. Hebo uses the model and provider configured on the alias, and the request appears in [Traces](/observability/traces). See [Models](/models).
+- **A model ID**, for example `openai/gpt-oss-20b`. To list all model IDs, call [`GET /v1/models`](/gateway/supported-models).
+
+## Hebo extensions
+
+All endpoints accept these fields in addition to the standard request fields:
+
+- `trace`: controls what Hebo records for the request. See [Control what is recorded](/observability/traces#control-what-is-recorded).
+- `metadata`: string key-value pairs that you can filter by in [Traces](/observability/traces#add-metadata). Not supported on `/v1/audio/transcriptions`.
+
+`/v1/chat/completions` and `/v1/responses` also accept a normalized `reasoning` object. See [Reasoning](/gateway/reasoning).
+
+## Errors
+
+Errors use the OpenAI error format, `{ "error": { "message", "type", "code", "param" } }`. On `/v1/messages`, errors use the Anthropic error format, `{ "type": "error", "error": { "type", "message" } }`.
+
+| Status | Meaning                                                                                                                |
+| ------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `400`  | The request body is invalid. The message names the invalid field.                                                      |
+| `401`  | The API key is missing, invalid, or expired.                                                                           |
+| `402`  | The model needs your own provider credentials (`BYOK_REQUIRED`). See [Bring your own key](/models#bring-your-own-key). |
+| `404`  | The model or alias does not exist (`MODEL_NOT_FOUND`).                                                                 |
+| `413`  | The request body is larger than 10 MB.                                                                                 |
+| `500`  | An error occurred on the gateway or at the provider.                                                                   |

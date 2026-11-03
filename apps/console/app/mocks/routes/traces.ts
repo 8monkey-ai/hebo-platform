@@ -543,7 +543,7 @@ const traceDetails = [
     timestamp: new Date(now - 30 * min),
     traceId: "a0000006-0000-4000-9000-000000000006",
     spanId: "90000000-0000-4000-8000-000000000001",
-    operationName: "response.create",
+    operationName: "responses",
     model: "gpt-oss-120b",
     responseModel: "gpt-oss-120b-2026-03-01",
     provider: "openai",
@@ -568,7 +568,7 @@ const traceDetails = [
       session_id: "sess_scroll_1",
     },
     spanAttributes: scrollDemoSpanAttributes(
-      "response.create",
+      "responses",
       "gpt-oss-120b",
       "gpt-oss-120b-2026-03-01",
       "openai",
@@ -719,7 +719,7 @@ const traceDetails = [
     timestamp: new Date(now - 46 * min),
     traceId: "a0000010-0000-4000-9000-000000000010",
     spanId: "90000000-0000-4000-8000-000000000005",
-    operationName: "response.create",
+    operationName: "responses",
     model: "claude-sonnet-4-20250514",
     responseModel: "claude-sonnet-4-20250514-2026-03-01",
     provider: "anthropic",
@@ -744,7 +744,7 @@ const traceDetails = [
       session_id: "sess_scroll_5",
     },
     spanAttributes: scrollDemoSpanAttributes(
-      "response.create",
+      "responses",
       "claude-sonnet-4-20250514",
       "claude-sonnet-4-20250514-2026-03-01",
       "anthropic",
@@ -895,7 +895,7 @@ const traceDetails = [
     timestamp: new Date(now - 62 * min),
     traceId: "a0000014-0000-4000-9000-000000000014",
     spanId: "90000000-0000-4000-8000-000000000009",
-    operationName: "response.create",
+    operationName: "responses",
     model: "gemini-2.5-pro",
     responseModel: "gemini-2.5-pro-2026-03-01",
     provider: "google",
@@ -920,7 +920,7 @@ const traceDetails = [
       session_id: "sess_scroll_9",
     },
     spanAttributes: scrollDemoSpanAttributes(
-      "response.create",
+      "responses",
       "gemini-2.5-pro",
       "gemini-2.5-pro-2026-03-01",
       "google",
@@ -1071,7 +1071,7 @@ const traceDetails = [
     timestamp: new Date(now - 78 * min),
     traceId: "a0000018-0000-4000-9000-000000000018",
     spanId: "90000000-0000-4000-8000-000000000013",
-    operationName: "response.create",
+    operationName: "responses",
     model: "gpt-oss-120b",
     responseModel: "gpt-oss-120b-2026-03-01",
     provider: "openai",
@@ -1096,7 +1096,7 @@ const traceDetails = [
       session_id: "sess_scroll_13",
     },
     spanAttributes: scrollDemoSpanAttributes(
-      "response.create",
+      "responses",
       "gpt-oss-120b",
       "gpt-oss-120b-2026-03-01",
       "openai",
@@ -1247,7 +1247,7 @@ const traceDetails = [
     timestamp: new Date(now - 94 * min),
     traceId: "a0000022-0000-4000-9000-000000000022",
     spanId: "90000000-0000-4000-8000-000000000017",
-    operationName: "response.create",
+    operationName: "responses",
     model: "claude-sonnet-4-20250514",
     responseModel: "claude-sonnet-4-20250514-2026-03-01",
     provider: "anthropic",
@@ -1272,7 +1272,7 @@ const traceDetails = [
       session_id: "sess_scroll_17",
     },
     spanAttributes: scrollDemoSpanAttributes(
-      "response.create",
+      "responses",
       "claude-sonnet-4-20250514",
       "claude-sonnet-4-20250514-2026-03-01",
       "anthropic",
@@ -1376,7 +1376,7 @@ export const traceHandlers = [
 
       const operationParam = url.searchParams.get("operation");
       const operation = z
-        .enum(["chat", "embeddings", "transcriptions"])
+        .enum(["chat", "responses", "messages", "embeddings", "transcriptions"])
         .nullable()
         .safeParse(operationParam);
       if (!operation.success) {

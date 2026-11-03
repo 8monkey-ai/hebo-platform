@@ -63,6 +63,8 @@
         "icon": "brain-circuit",
         "pages": [
           "gateway/quick-start",
+          "gateway/responses",
+          "gateway/messages",
           "gateway/streaming",
           "gateway/tool-calling",
           "gateway/structured-outputs",
@@ -72,6 +74,11 @@
           "gateway/transcriptions",
           "gateway/supported-models"
         ]
+      },
+      {
+        "group": "Observability",
+        "icon": "activity",
+        "pages": ["observability/traces"]
       },
       {
         "group": "MCP",
@@ -87,6 +94,17 @@
         "group": "Integrations",
         "icon": "plug",
         "pages": ["integrations/claude-desktop", "integrations/codex-desktop"]
+      },
+      {
+        "group": "API Reference",
+        "icon": "square-terminal",
+        "pages": [
+          "api-reference/introduction",
+          {
+            "group": "Gateway API",
+            "openapi": "https://gateway.hebo.ai/openapi/json"
+          }
+        ]
       },
       {
         "group": "Changelog",
