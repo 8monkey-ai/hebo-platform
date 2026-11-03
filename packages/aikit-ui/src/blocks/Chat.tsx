@@ -7,6 +7,8 @@ import { math } from "@streamdown/math";
 import { mermaid } from "@streamdown/mermaid";
 import {
   Brain,
+  Check,
+  Copy,
   Download,
   Edit,
   FileUp,
@@ -355,6 +357,14 @@ export function Chat({
                       }
                     })}
                     {/* oxlint-enable no-array-index-key */}
+                    {message.role === "assistant" &&
+                      !(status === "streaming" && message.id === messages.at(-1)?.id) && (
+                        <ChatCopyButton
+                          value={message.parts
+                            .flatMap((part) => (part.type === "text" ? [part.text] : []))
+                            .join("\n\n")}
+                        />
+                      )}
                   </MessageScrollerItem>
                 ))}
                 {/* oxlint-disable-next-line prefer-tag-over-role -- role is forwarded to the internal DOM element */}
@@ -515,6 +525,52 @@ export function Chat({
         </InputGroup>
       </form>
     </div>
+  );
+}
+
+function ChatCopyButton({ value }: { value: string }) {
+  const [hasCopied, setHasCopied] = useState(false);
+
+  useEffect(() => {
+    if (!hasCopied) return;
+    const timeout = setTimeout(() => {
+      setHasCopied(false);
+    }, 2000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [hasCopied]);
+
+  if (!value.trim()) return null;
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setHasCopied(true);
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+    }
+  };
+
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            className="text-muted-foreground"
+            aria-label={hasCopied ? "Copied" : "Copy message"}
+            onClick={() => {
+              void copy();
+            }}
+          >
+            {hasCopied ? <Check className="text-green-800" /> : <Copy />}
+          </Button>
+        }
+      />
+      <TooltipContent>{hasCopied ? "Copied" : "Copy to Clipboard"}</TooltipContent>
+    </Tooltip>
   );
 }
 
