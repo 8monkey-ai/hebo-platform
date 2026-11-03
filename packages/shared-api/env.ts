@@ -3,7 +3,10 @@ import { getSecret } from "./utils/secret";
 import { getRootDomain } from "./utils/url";
 
 export const AUTH_URL = process.env.AUTH_URL ?? "http://localhost:8523";
-export const ROOT_DOMAIN = getRootDomain(process.env.BASE_URL);
+// Explicit ROOT_DOMAIN wins; otherwise derive it from BASE_URL.
+export const ROOT_DOMAIN = process.env.ROOT_DOMAIN
+  ? process.env.ROOT_DOMAIN.trim().toLowerCase().replace(/^\./u, "")
+  : getRootDomain(process.env.BASE_URL);
 export const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
 export const { level: LOG_LEVEL, severity: LOG_SEVERITY } = parseLogLevel(

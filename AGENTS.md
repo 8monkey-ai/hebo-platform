@@ -165,3 +165,5 @@ Commit messages stay short and imperative (`update console mock`, `improve namin
 ## Environment & Secrets
 
 Run `bun run dev` once to provision the Dockerized Postgres container, and stop it with `bun run postdev`. Clone `.env` templates from each workspace and fill only the required keys. Manage secrets via SST (`bun run sst secret set <Key> <value> --stage <stage>`) and never commit credentials.
+
+`ROOT_DOMAIN` (from `@hebo/shared-api/env`) scopes CORS, better-auth trusted origins and the shared session cookie. It comes from the `ROOT_DOMAIN` env var when set, otherwise `getRootDomain(BASE_URL)` (handles ccTLDs, IP literals and wildcard DNS like `<ip>.sslip.io`). Extend `getRootDomain` and its tests in `packages/shared-api/utils/url.test.ts` rather than parsing hostnames elsewhere.

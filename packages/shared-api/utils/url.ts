@@ -15,10 +15,27 @@ export function withPort(base: string, port: number) {
   return url.href;
 }
 
+// Wildcard DNS services that map `<ip>.<service>` to the IP, so the IP part
+// (not the service) identifies the deployment. Supported IP notations:
+// dotted (`1.2.3.4`), dashed (`1-2-3-4`) and hex (`01020304`).
+const WILDCARD_DNS_SERVICES = ["sslip.io", "nip.io", "traefik.me"];
+const IPV4 = /^\d{1,3}(?:\.\d{1,3}){3}$/u;
+
 export function getRootDomain(baseUrl: string | undefined) {
   if (!baseUrl) return;
   const { hostname } = new URL(baseUrl);
   if (hostname === "localhost") return;
+
+  // IP literals have no parent domain
+  if (IPV4.test(hostname)) return hostname;
+
+  const service = WILDCARD_DNS_SERVICES.find((s) => hostname.endsWith(`.${s}`));
+  if (service) {
+    const labels = hostname.slice(0, -service.length - 1).split(".");
+    const dotted = labels.slice(-4);
+    const ip = IPV4.test(dotted.join(".")) ? dotted : labels.slice(-1);
+    return `${ip.join(".")}.${service}`;
+  }
 
   const parts = hostname.split(".");
   const tld = parts.at(-1);

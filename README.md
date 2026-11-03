@@ -75,12 +75,15 @@ See [`infra/self-hosted/.env.example`](infra/self-hosted/.env.example) for the f
 
 The console is configured at container start, not at image build time, so pointing it at your own domain needs no rebuild — set these in `.env` and restart:
 
-| Variable                                            | Why                                                                    |
-| --------------------------------------------------- | ---------------------------------------------------------------------- |
-| `VITE_API_URL`, `VITE_AUTH_URL`, `VITE_GATEWAY_URL` | Where the browser calls each service — must be reachable from the user |
-| `BASE_URL`                                          | Your root domain, e.g. `https://example.com`                           |
+| Variable                                            | Why                                                                                  |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `VITE_API_URL`, `VITE_AUTH_URL`, `VITE_GATEWAY_URL` | Where the browser calls each service — must be reachable from the user               |
+| `BASE_URL`                                          | Your root domain, e.g. `https://example.com`                                         |
+| `ROOT_DOMAIN` (optional)                            | Explicit root domain, e.g. `example.com` — overrides the one derived from `BASE_URL` |
 
 `BASE_URL` is what restricts CORS and auth to your domain and scopes the session cookie. Leave it unset and every origin is accepted — set it for any deployment reachable from the internet.
+
+The root domain is derived from `BASE_URL` (`https://api.example.com` → `example.com`). Wildcard DNS hosts are handled too (`https://api.203.0.113.7.sslip.io` → `203.0.113.7.sslip.io`, also `nip.io` and `traefik.me`). If your domain uses a multi-level public suffix that isn't detected, set `ROOT_DOMAIN` explicitly.
 
 Serve each service on a subdomain of that root domain (`api.`, `auth.`, `gateway.`) so the shared session cookie applies.
 
