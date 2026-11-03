@@ -1,4 +1,6 @@
 #!/command/with-contenv sh
+# Schema resolved by init-hebo (standalone only)
+[ -f /run/hebo/env ] && . /run/hebo/env
 case "${HEBO_MODE:-standalone}" in
   standalone|auth) exec bun /app/auth/index.js ;;
 esac

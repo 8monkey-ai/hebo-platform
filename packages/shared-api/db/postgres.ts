@@ -3,12 +3,17 @@ import { Resource } from "sst";
 
 import { DEFAULT_DB_IDLE_TIMEOUT_MS, DEFAULT_DB_POOL_MAX } from "./config";
 
-// Resolves the Postgres schema for a service. Override via `POSTGRES_<NAME>_SCHEMA`
-// (e.g. `POSTGRES_AUTH_SCHEMA=hebo_auth`) to avoid collisions with reserved schemas
-// such as Supabase's built-in `auth` schema.
-export const getSchemaName = (name: string) =>
+// Auth defaults to `hebo_auth` because Supabase reserves the `auth` schema.
+// Deployments created before this default pin the legacy `auth` schema via
+// `POSTGRES_AUTH_SCHEMA` (SST stacks, and init-hebo detects it for Docker).
+const DEFAULT_SCHEMAS: Record<string, string> = { auth: "hebo_auth" };
+
+// Resolves the Postgres schema for a service. Override via `POSTGRES_<NAME>_SCHEMA`.
+export const getSchemaName = (name: string) => {
   // oxlint-disable-next-line prefer-nullish-coalescing -- treat empty values as unset
-  (process.env[`POSTGRES_${name.toUpperCase()}_SCHEMA`] || name).toLowerCase();
+  const override = process.env[`POSTGRES_${name.toUpperCase()}_SCHEMA`] || undefined;
+  return (override ?? DEFAULT_SCHEMAS[name] ?? name).toLowerCase();
+};
 
 export const getConnectionString = (name: string) => {
   const schema = getSchemaName(name);

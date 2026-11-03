@@ -13,12 +13,29 @@ if [ "$HEBO_MODE" != "standalone" ]; then
   exit 0
 fi
 
-# ── Run Prisma migrations ──
-# Schema names can be overridden (e.g. POSTGRES_AUTH_SCHEMA=hebo_auth on Supabase,
-# which reserves the `auth` schema).
-API_SCHEMA=$(printf '%s' "${POSTGRES_API_SCHEMA:-api}" | tr '[:upper:]' '[:lower:]')
-AUTH_SCHEMA=$(printf '%s' "${POSTGRES_AUTH_SCHEMA:-auth}" | tr '[:upper:]' '[:lower:]')
+# ── Resolve schema names ──
+# Auth defaults to `hebo_auth` (Supabase reserves `auth`). Installs that already
+# applied migrations to the legacy `auth` schema keep using it. Connection errors
+# abort the bootstrap rather than silently picking a fresh schema.
+if [ -z "$POSTGRES_AUTH_SCHEMA" ]; then
+  POSTGRES_AUTH_SCHEMA=$(bun -e '
+    const sql = new Bun.SQL(process.env.POSTGRES_URL);
+    const [{ found }] = await sql`SELECT to_regclass(${"auth._prisma_migrations"}) IS NOT NULL AS found`;
+    const legacy = found && (await sql`SELECT 1 FROM auth._prisma_migrations WHERE finished_at IS NOT NULL LIMIT 1`).length > 0;
+    console.log(legacy ? "auth" : "hebo_auth");
+    await sql.close();
+  ')
+fi
 
+API_SCHEMA=$(printf '%s' "${POSTGRES_API_SCHEMA:-api}" | tr '[:upper:]' '[:lower:]')
+AUTH_SCHEMA=$(printf '%s' "$POSTGRES_AUTH_SCHEMA" | tr '[:upper:]' '[:lower:]')
+
+# S6_KEEP_ENV=1 makes the container environment read-only, so hand the resolved
+# schema to the auth service through a file it sources on start.
+mkdir -p /run/hebo
+printf 'export POSTGRES_AUTH_SCHEMA=%s\n' "$AUTH_SCHEMA" > /run/hebo/env
+
+# ── Run Prisma migrations ──
 case "$POSTGRES_URL" in
   *\?*) SEP="&" ;;
   *) SEP="?" ;;

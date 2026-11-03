@@ -35,6 +35,10 @@ const heboDatabase = new sst.aws.Aurora("HeboDatabase", {
   },
 });
 
+// Hebo Cloud predates the `hebo_auth` default, so it keeps the legacy `auth` schema.
+// Shared by the auth service and the migrators so both always resolve the same schema.
+export const schemaEnvironment = { POSTGRES_AUTH_SCHEMA: "auth" };
+
 export function createMigrator(schema: string) {
   const migrator = new sst.aws.Function(`${schema}DatabaseMigrator`, {
     handler: "packages/shared-api/db/lambda/migrator.handler",
@@ -45,6 +49,7 @@ export function createMigrator(schema: string) {
       { from: `apps/${schema}/prisma.config.ts`, to: "./prisma.config.ts" },
     ],
     environment: {
+      ...schemaEnvironment,
       NODE_EXTRA_CA_CERTS: "/var/runtime/ca-cert.pem",
       NPM_CONFIG_CACHE: "/tmp/.npm",
     },
