@@ -39,15 +39,44 @@ function extractMetadata(attributes: SpanAttributes) {
   return metadata;
 }
 
-function extractScalarAttributes(attributes: SpanAttributes) {
-  const scalars: Record<string, string | number | boolean> = {};
+/** Besides metadata, the only attributes V1 returned under their own names; keep that shape. */
+const SPAN_ATTRIBUTE_KEYS = new Set([
+  "hebo.agent.slug",
+  "hebo.branch.slug",
+  "hebo.organization.id",
+]);
+
+function extractSpanAttributes(attributes: SpanAttributes) {
+  const spanAttributes: Record<string, string | number | boolean> = {};
   for (const key in attributes) {
     const value = attributes[key];
+    if (!SPAN_ATTRIBUTE_KEYS.has(key) && !key.startsWith(METADATA_PREFIX)) continue;
     if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
-      scalars[key] = value;
+      spanAttributes[key] = value;
     }
   }
-  return scalars;
+  return spanAttributes;
+}
+
+/**
+ * Metadata filters whose key some span in the table has (any org, any time). On V1 a filter
+ * on a key without a column was ignored; JSON2 has no key catalog, so check the data.
+ */
+async function filterKnownMetadataKeys(
+  greptimeDb: GreptimeDb,
+  metadataFilters: Record<string, string>,
+) {
+  const known = await Promise.all(
+    Object.entries(metadataFilters).map(async (entry) => {
+      const rows = await greptimeDb.unsafe<unknown[]>(
+        `SELECT 1 FROM ${GREPTIME_TRACE_TABLE_NAME}
+         WHERE ${spanAttribute(`${METADATA_PREFIX}${entry[0]}`)} IS NOT NULL
+         LIMIT 1`,
+      );
+      return rows.length > 0 ? [entry] : [];
+    }),
+  );
+  return Object.fromEntries(known.flat());
 }
 
 /**
@@ -83,7 +112,8 @@ async function listMetadataKeys(
          AND "trace_id" IN (${traceIds.map((_, i) => `$${i + 6}`).join(", ")})
      )
      WHERE starts_with(key, '${METADATA_PREFIX}')
-     GROUP BY key`,
+     GROUP BY key
+     ORDER BY key`,
     [agentSlug, branchSlug, organizationId, latest.at(-1)!.timestamp, to, ...traceIds],
   );
   return rows.map(({ key }) => key.slice(METADATA_PREFIX.length));
@@ -141,17 +171,6 @@ export async function listTraces(
   statusFilter?: "ok" | "error",
   operationFilter?: "chat" | "embeddings" | "transcriptions",
 ) {
-  const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
-  function addParam(value: unknown) {
-    params.push(value);
-    return `$${params.length}`;
-  }
-
-  let metaFilterSql = "";
-  for (const [key, value] of Object.entries(metadataFilters)) {
-    metaFilterSql += ` AND ${spanAttribute(`${METADATA_PREFIX}${key}`)} = ${addParam(value)}`;
-  }
-
   let statusFilterSql = "";
   if (statusFilter === "ok") {
     statusFilterSql = ` AND "span_status_code" IN ('STATUS_CODE_OK', 'STATUS_CODE_UNSET')`;
@@ -159,32 +178,54 @@ export async function listTraces(
     statusFilterSql = ` AND "span_status_code" = 'STATUS_CODE_ERROR'`;
   }
 
-  let operationFilterSql = "";
-  if (operationFilter) {
-    operationFilterSql = ` AND ${spanAttribute("gen_ai.operation.name")} = ${addParam(operationFilter)}`;
-  }
-
   // Page selection uses path filters only; the whole `span_attributes` objects are read
   // afterwards for just the page rows (see `readSpanAttributes`).
-  const queryText = `
-    SELECT
-      "timestamp" AS timestamp,
-      "trace_id" AS trace_id,
-      "span_id" AS span_id,
-      "span_status_code" AS span_status_code,
-      "span_status_message" AS span_status_message,
-      "duration_nano" AS duration_nano
-    FROM ${GREPTIME_TRACE_TABLE_NAME}
-    WHERE ${BRANCH_SPANS_WHERE_SQL}
-      ${metaFilterSql}
-      ${statusFilterSql}
-      ${operationFilterSql}
-    ORDER BY "timestamp" DESC
-    LIMIT ${addParam(pageSize + 1)} OFFSET ${addParam((page - 1) * pageSize)}
-  `;
+  const selectPage = (filters: Record<string, string>) => {
+    const params: unknown[] = [agentSlug, branchSlug, organizationId, from, to];
+    function addParam(value: unknown) {
+      params.push(value);
+      return `$${params.length}`;
+    }
+
+    let metaFilterSql = "";
+    for (const [key, value] of Object.entries(filters)) {
+      metaFilterSql += ` AND ${spanAttribute(`${METADATA_PREFIX}${key}`)} = ${addParam(value)}`;
+    }
+
+    let operationFilterSql = "";
+    if (operationFilter) {
+      operationFilterSql = ` AND ${spanAttribute("gen_ai.operation.name")} = ${addParam(operationFilter)}`;
+    }
+
+    const queryText = `
+      SELECT
+        "timestamp" AS timestamp,
+        "trace_id" AS trace_id,
+        "span_id" AS span_id,
+        "span_status_code" AS span_status_code,
+        "span_status_message" AS span_status_message,
+        "duration_nano" AS duration_nano
+      FROM ${GREPTIME_TRACE_TABLE_NAME}
+      WHERE ${BRANCH_SPANS_WHERE_SQL}
+        ${metaFilterSql}
+        ${statusFilterSql}
+        ${operationFilterSql}
+      ORDER BY "timestamp" DESC
+      LIMIT ${addParam(pageSize + 1)} OFFSET ${addParam((page - 1) * pageSize)}
+    `;
+    return greptimeDb.unsafe<PageRow[]>(queryText, params);
+  };
 
   const listPage = async () => {
-    const rows = await greptimeDb.unsafe<PageRow[]>(queryText, params);
+    let rows = await selectPage(metadataFilters);
+    // Filters on keys no span has are ignored (as on V1). Any returned row proves its filter
+    // keys exist, so only check the keys when the page is empty.
+    if (rows.length === 0 && Object.keys(metadataFilters).length > 0) {
+      const knownFilters = await filterKnownMetadataKeys(greptimeDb, metadataFilters);
+      if (Object.keys(knownFilters).length < Object.keys(metadataFilters).length) {
+        rows = await selectPage(knownFilters);
+      }
+    }
     const hasNextPage = rows.length > pageSize;
     const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
     const attributesBySpan = await readSpanAttributes(
@@ -288,7 +329,7 @@ export async function getSpans(
       ) as GenAIFinishReasons,
       responseId: parseString(attributes["gen_ai.response.id"]),
       metadata: extractMetadata(attributes),
-      spanAttributes: extractScalarAttributes(attributes),
+      spanAttributes: extractSpanAttributes(attributes),
     });
   }
   return result;
