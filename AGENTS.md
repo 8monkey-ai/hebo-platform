@@ -31,6 +31,21 @@ ElysiaJS powers `apps/api` and `apps/gateway`; call helpers from `packages/share
 
 Since we are using React Compiler, don't use useMemo, useCallback, and React.memo.
 
+### Gateway OpenAPI Spec
+
+The public API Reference at `hebo.ai/docs` is generated from the gateway's `/openapi/json`. Gateway routes use `parse: "none"` so `@hebo-ai/gateway` can read the raw request, which leaves the body empty in the spec (and `body:` is not validated at runtime). Document the body with `detail.requestBody` built from the gateway's Zod schema, and give every route `tags` and a `summary` (used as the docs page title).
+
+```ts
+.post("/responses", handler, {
+  parse: "none",
+  detail: {
+    tags: ["Responses"],
+    summary: "Create a response",
+    requestBody: jsonRequestBody(ResponsesBodySchema),
+  },
+})
+```
+
 ## Console Frontend Patterns
 
 ### Search Params as State

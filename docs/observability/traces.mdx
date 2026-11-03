@@ -1,0 +1,110 @@
+---
+title: "Traces"
+description: "Inspect every model call your agent makes"
+---
+
+Hebo records each gateway request as a trace: the input and output messages, the model and provider, token usage, duration, and status. Use traces to debug conversations, check which model answered, and follow up on errors.
+
+Traces work for all endpoints: `/chat/completions`, `/responses`, `/messages`, `/embeddings`, and `/audio/transcriptions`.
+
+## Before you start
+
+Traces belong to an agent branch. A request appears in **Traces** only when it uses an alias path as the model name, for example `my-first-agent-x7k/main/default`. Requests that use a model ID like `openai/gpt-oss-20b` directly are not linked to an agent and do not appear.
+
+To get an alias path, see [Getting Started](/getting-started#copy-the-alias-path).
+
+## View traces
+
+1. In the [Hebo Console](https://console.hebo.ai), select the agent and branch used by your alias.
+2. In the sidebar, select **Traces**.
+3. Select a trace in the list to open its details.
+
+The list shows the most recent requests first, with the model, duration, time, and the last user message. A green time means the request succeeded, and a red time means it failed. Select the refresh button to load new traces.
+
+### Time range
+
+By default, the list shows the last 15 minutes. Select `15m`, `1h`, or `24h`, or select the calendar button to enter a custom range.
+
+### Filters
+
+Select **Filters** to narrow the list:
+
+- **Status**: **OK** or **Error**.
+- **Operation**: `chat`, `responses`, `messages`, `embeddings`, or `transcriptions`. The operation matches the endpoint that received the request.
+- **Metadata**: select a key, enter a value, and select **Add**. You can also select a metadata tag on a trace to filter by it, and select it again to remove the filter.
+
+## Trace details
+
+The detail view shows the model, operation, time, duration, status, and token usage, including cached input tokens and the number of tool calls. It has three tabs:
+
+- **Formatted**: the conversation as messages, including system instructions, tool calls and results, and reasoning. If the request failed, the error message appears at the top.
+- **Raw JSON**: the full trace data.
+- **Metadata**: your request metadata and identifiers such as the response ID, the requested and resolved model, the provider, finish reasons, and reasoning settings.
+
+## Add metadata
+
+Attach metadata to a request to filter traces later, for example by user, session, or feature. Metadata is a set of string key-value pairs. Keys can have up to 64 characters, and values up to 512 characters.
+
+<CodeGroup>
+
+```ts OpenAI SDK highlight={11-14}
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.HEBO_API_KEY,
+  baseURL: "https://gateway.hebo.ai/v1",
+});
+
+const response = await client.chat.completions.create({
+  model: "my-first-agent-x7k/main/default",
+  messages: [{ role: "user", content: "Tell me a joke about monkeys" }],
+  metadata: {
+    user_id: "user_123",
+    session_id: "session_456",
+  },
+});
+```
+
+```bash Bash highlight={7-10}
+curl https://gateway.hebo.ai/v1/chat/completions \
+  -H "Authorization: Bearer $HEBO_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "my-first-agent-x7k/main/default",
+    "messages": [{ "role": "user", "content": "Tell me a joke about monkeys" }],
+    "metadata": {
+      "user_id": "user_123",
+      "session_id": "session_456"
+    }
+  }'
+```
+
+</CodeGroup>
+
+`/responses` and `/embeddings` accept the same `metadata` object. `/messages` follows the Anthropic API and accepts only `metadata.user_id`.
+
+## Control what is recorded
+
+By default, Hebo records the full request and response, including message content. To record less for a request, set `trace` in the request body:
+
+| Value              | What is recorded                                                                                    |
+| ------------------ | --------------------------------------------------------------------------------------------------- |
+| `"full"` (default) | Everything, including input and output messages.                                                    |
+| `"recommended"`    | Model, provider, status, duration, token usage, request settings, and metadata. No message content. |
+| `"required"`       | Model, provider, status, and duration only.                                                         |
+| `"off"` or `false` | No request details. Successful requests do not appear in **Traces**.                                |
+
+```json
+{
+  "model": "my-first-agent-x7k/main/default",
+  "messages": [{ "role": "user", "content": "Sensitive question" }],
+  "trace": "recommended"
+}
+```
+
+The `trace` field works on all endpoints.
+
+<Info>
+  `trace` is a Hebo extension, so OpenAI and Anthropic SDK types do not include it. In TypeScript,
+  add a `// @ts-expect-error` comment above the field.
+</Info>

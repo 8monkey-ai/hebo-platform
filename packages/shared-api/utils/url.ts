@@ -9,9 +9,11 @@ export function isRootPathUrl(url: string): boolean {
   return c === 63 || c === 35;
 }
 
+// Adds the listening port to plain-HTTP URLs without an explicit port (local development).
+// HTTPS URLs are public endpoints behind a load balancer, so they keep their default port.
 export function withPort(base: string, port: number) {
   const url = new URL(base);
-  url.port = String(port);
+  if (url.protocol === "http:" && !url.port) url.port = String(port);
   return url.href;
 }
 
