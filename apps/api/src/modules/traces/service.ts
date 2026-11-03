@@ -89,6 +89,45 @@ async function listMetadataKeys(
   return rows.map(({ key }) => key.slice(METADATA_PREFIX.length));
 }
 
+type PageRow = Record<string, unknown> & { timestamp: Date; trace_id: string; span_id: string };
+
+const spanKey = (row: { trace_id: string; span_id: string }) => `${row.trace_id}:${row.span_id}`;
+
+/**
+ * Whole `span_attributes` objects of the given page spans (ordered by timestamp DESC), keyed
+ * by `spanKey`. Reading the JSON2 object scans it for every row in the time range before
+ * filtering, so narrow the read by `trace_id` (bloom index) and the page's timestamp range.
+ */
+async function readSpanAttributes(
+  greptimeDb: GreptimeDb,
+  organizationId: string,
+  agentSlug: string,
+  branchSlug: string,
+  spans: PageRow[],
+) {
+  const attributesBySpan = new Map<string, SpanAttributes>();
+  if (spans.length === 0) return attributesBySpan;
+
+  const from = spans.at(-1)!.timestamp;
+  const to = spans[0].timestamp;
+  const traceIds = [...new Set(spans.map((span) => span.trace_id))];
+  const rows = await greptimeDb.unsafe<
+    Array<{ trace_id: string; span_id: string; span_attributes: SpanAttributes | null }>
+  >(
+    `SELECT
+       "trace_id" AS trace_id,
+       "span_id" AS span_id,
+       "span_attributes" AS span_attributes
+     FROM ${GREPTIME_TRACE_TABLE_NAME}
+     WHERE ${BRANCH_SPANS_WHERE_SQL}
+       AND "trace_id" IN (${traceIds.map((_, i) => `$${i + 6}`).join(", ")})`,
+    // Timestamps come back with millisecond precision, so widen the upper bound by 1 ms.
+    [agentSlug, branchSlug, organizationId, from, new Date(to.getTime() + 1), ...traceIds],
+  );
+  for (const row of rows) attributesBySpan.set(spanKey(row), row.span_attributes ?? {});
+  return attributesBySpan;
+}
+
 export async function listTraces(
   greptimeDb: GreptimeDb,
   organizationId: string,
@@ -125,14 +164,16 @@ export async function listTraces(
     operationFilterSql = ` AND ${spanAttribute("gen_ai.operation.name")} = ${addParam(operationFilter)}`;
   }
 
+  // Page selection uses path filters only; the whole `span_attributes` objects are read
+  // afterwards for just the page rows (see `readSpanAttributes`).
   const queryText = `
     SELECT
       "timestamp" AS timestamp,
       "trace_id" AS trace_id,
+      "span_id" AS span_id,
       "span_status_code" AS span_status_code,
       "span_status_message" AS span_status_message,
-      "duration_nano" AS duration_nano,
-      "span_attributes" AS span_attributes
+      "duration_nano" AS duration_nano
     FROM ${GREPTIME_TRACE_TABLE_NAME}
     WHERE ${BRANCH_SPANS_WHERE_SQL}
       ${metaFilterSql}
@@ -142,20 +183,32 @@ export async function listTraces(
     LIMIT ${addParam(pageSize + 1)} OFFSET ${addParam((page - 1) * pageSize)}
   `;
 
-  const [rows, metadataKeys] = await Promise.all([
-    greptimeDb.unsafe<Record<string, unknown>[]>(queryText, params),
+  const listPage = async () => {
+    const rows = await greptimeDb.unsafe<PageRow[]>(queryText, params);
+    const hasNextPage = rows.length > pageSize;
+    const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
+    const attributesBySpan = await readSpanAttributes(
+      greptimeDb,
+      organizationId,
+      agentSlug,
+      branchSlug,
+      pageRows,
+    );
+    return { pageRows, hasNextPage, attributesBySpan };
+  };
+
+  const [{ pageRows, hasNextPage, attributesBySpan }, metadataKeys] = await Promise.all([
+    listPage(),
     listMetadataKeys(greptimeDb, organizationId, agentSlug, branchSlug, from, to),
   ]);
-  const hasNextPage = rows.length > pageSize;
-  const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
 
   const data = [];
   for (const row of pageRows) {
-    const attributes = (row.span_attributes ?? {}) as SpanAttributes;
+    const attributes = attributesBySpan.get(spanKey(row)) ?? {};
     const metadata = extractMetadata(attributes);
     data.push({
-      timestamp: row.timestamp as Date,
-      traceId: parseString(row.trace_id),
+      timestamp: row.timestamp,
+      traceId: row.trace_id,
       operationName: parseString(attributes["gen_ai.operation.name"]),
       model: parseString(attributes["gen_ai.response.model"]),
       provider: parseString(attributes["gen_ai.provider.name"]),
