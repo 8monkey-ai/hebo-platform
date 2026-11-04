@@ -54,6 +54,53 @@ async function hasMetadataKey(greptimeDb: GreptimeDb, key: string) {
   return rows.length > 0;
 }
 
+const spanKey = (row: Record<string, unknown>) =>
+  `${parseString(row.trace_id)}:${parseString(row.span_id)}`;
+
+/**
+ * Reads the attributes shown in the list for just the page's spans. Greptime decodes
+ * non-scalar and overflow JSON2 paths (e.g. `gen_ai.input.messages`) for every row it
+ * scans, so the page query only reads plain columns and this narrows by `trace_id`.
+ */
+async function getPageSpanAttributes(
+  greptimeDb: GreptimeDb,
+  organizationId: string,
+  agentSlug: string,
+  branchSlug: string,
+  from: Date,
+  to: Date,
+  pageRows: Record<string, unknown>[],
+  metadataColumns: string[],
+) {
+  const attributesBySpan = new Map<string, Record<string, unknown>>();
+  if (pageRows.length === 0) return attributesBySpan;
+
+  const traceIds = [...new Set(pageRows.map((row) => row.trace_id))];
+  const metadataSelectSql = metadataColumns
+    .map((col) => `,\n      ${spanAttribute(col)} AS "${escapeSqlIdentifier(col)}"`)
+    .join("");
+
+  const rows = await greptimeDb.unsafe<Record<string, unknown>[]>(
+    `SELECT
+      "trace_id" AS trace_id,
+      "span_id" AS span_id,
+      ${spanAttribute("gen_ai.operation.name")} AS operation_name,
+      ${spanAttribute("gen_ai.response.model")} AS response_model,
+      ${spanAttribute("gen_ai.provider.name")} AS provider_name,
+      ${spanAttribute("gen_ai.input.messages")} AS input_messages${metadataSelectSql}
+    FROM ${GREPTIME_TRACE_TABLE_NAME}
+    WHERE "trace_id" IN (${traceIds.map((_, i) => `$${i + 6}`).join(", ")})
+      AND ${spanAttribute("hebo.agent.slug")} = $1
+      AND ${spanAttribute("hebo.branch.slug")} = $2
+      AND ${spanAttribute("hebo.organization.id")} = $3
+      AND "timestamp" >= $4
+      AND "timestamp" <= $5`,
+    [agentSlug, branchSlug, organizationId, from, to, ...traceIds],
+  );
+  for (const row of rows) attributesBySpan.set(spanKey(row), row);
+  return attributesBySpan;
+}
+
 export async function listTraces(
   greptimeDb: GreptimeDb,
   organizationId: string,
@@ -108,22 +155,14 @@ export async function listTraces(
     operationFilterSql = ` AND ${spanAttribute("gen_ai.operation.name")} = ${addParam(operationFilter)}`;
   }
 
-  const metadataSelectSql = metadataColumns
-    .map((col) => `${spanAttribute(col)} AS "${escapeSqlIdentifier(col)}"`)
-    .join(",\n      ");
-
   const queryText = `
     SELECT
       "timestamp" AS timestamp,
       "trace_id" AS trace_id,
+      "span_id" AS span_id,
       "span_status_code" AS span_status_code,
       "span_status_message" AS span_status_message,
-      "duration_nano" AS duration_nano,
-      ${spanAttribute("gen_ai.operation.name")} AS operation_name,
-      ${spanAttribute("gen_ai.response.model")} AS response_model,
-      ${spanAttribute("gen_ai.provider.name")} AS provider_name,
-      ${spanAttribute("gen_ai.input.messages")} AS input_messages
-      ${metadataSelectSql ? `,\n      ${metadataSelectSql}` : ""}
+      "duration_nano" AS duration_nano
     FROM ${GREPTIME_TRACE_TABLE_NAME}
     WHERE ${spanAttribute("gen_ai.operation.name")} IS NOT NULL
       AND ${spanAttribute("hebo.agent.slug")} = $1
@@ -141,27 +180,38 @@ export async function listTraces(
   const rows = await greptimeDb.unsafe<Record<string, unknown>[]>(queryText, params);
   const hasNextPage = rows.length > pageSize;
   const pageRows = hasNextPage ? rows.slice(0, pageSize) : rows;
+  const attributesBySpan = await getPageSpanAttributes(
+    greptimeDb,
+    organizationId,
+    agentSlug,
+    branchSlug,
+    from,
+    to,
+    pageRows,
+    metadataColumns,
+  );
 
   const data = [];
   for (const row of pageRows) {
+    const attributes = attributesBySpan.get(spanKey(row)) ?? {};
     const metadata: Record<string, string> = {};
     for (const col of metadataColumns) {
-      if (row[col] !== null && row[col] !== undefined) {
-        metadata[col.slice(METADATA_PREFIX.length)] = parseString(row[col]);
+      if (attributes[col] !== null && attributes[col] !== undefined) {
+        metadata[col.slice(METADATA_PREFIX.length)] = parseString(attributes[col]);
       }
     }
     data.push({
       timestamp: row.timestamp as Date,
       traceId: parseString(row.trace_id),
-      operationName: parseString(row.operation_name),
-      model: parseString(row.response_model),
-      provider: parseString(row.provider_name),
+      operationName: parseString(attributes.operation_name),
+      model: parseString(attributes.response_model),
+      provider: parseString(attributes.provider_name),
       status: formatStatus(row.span_status_code),
       statusMessage: parseString(row.span_status_message),
       durationMs: Number(row.duration_nano) / 1e6,
       // A JSON2 path read returns arrays as JSON text.
       summary: extractLastUserSummary(
-        row.input_messages == null ? null : JSON.parse(row.input_messages as string),
+        attributes.input_messages == null ? null : JSON.parse(attributes.input_messages as string),
       ),
       metadata,
     });
