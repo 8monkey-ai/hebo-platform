@@ -82,6 +82,8 @@ The console is configured at container start, not at image build time, so pointi
 
 `BASE_URL` is what restricts CORS and auth to your domain and scopes the session cookie. Leave it unset and every origin is accepted — set it for any deployment reachable from the internet.
 
+The root domain is auto-detected from `BASE_URL` — e.g. `https://api.example.com` → `example.com`, `https://api.example.co.uk` → `example.co.uk`, `https://api.1.2.3.4.sslip.io` → `1.2.3.4.sslip.io` (also `nip.io` and `traefik.me`). A bare IP address is used as-is. If the detected value is wrong for your setup, set `ROOT_DOMAIN` (e.g. `ROOT_DOMAIN=hebo.example.com`) to override it.
+
 Serve each service on a subdomain of that root domain (`api.`, `auth.`, `gateway.`) so the shared session cookie applies.
 
 ## How Hebo compares
