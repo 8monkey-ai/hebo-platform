@@ -69,6 +69,8 @@ Create a `.env` file in `infra/self-hosted/` and set the variables you want to o
 
 Optional: OAuth (`GITHUB_CLIENT_ID`, `GOOGLE_CLIENT_ID`, …) and SMTP (`SMTP_HOST`, `SMTP_PORT`, …) for passwordless login and invitations.
 
+Using an external Postgres such as Supabase? Just set `POSTGRES_URL`. Auth data lives in the `hebo_auth` schema, so it doesn't clash with Supabase's `auth` schema.
+
 See [`infra/self-hosted/.env.example`](infra/self-hosted/.env.example) for the full variable reference.
 
 #### Custom domain

@@ -14,12 +14,15 @@ if [ "$HEBO_MODE" != "standalone" ]; then
 fi
 
 # ── Run Prisma migrations ──
+case "$POSTGRES_URL" in *\?*) SEP="&" ;; *) SEP="?" ;; esac
+AUTH_SCHEMA="${POSTGRES_AUTH_SCHEMA:-hebo_auth}"
+
 echo "[init] Running API schema migrations"
-POSTGRES_URL="${POSTGRES_URL}?schema=api" \
+POSTGRES_URL="${POSTGRES_URL}${SEP}schema=api" \
   bunx --bun prisma migrate deploy --config /app/prisma/api/prisma.config.ts
 
-echo "[init] Running Auth schema migrations"
-POSTGRES_URL="${POSTGRES_URL}?schema=auth" \
+echo "[init] Running Auth schema migrations (schema=${AUTH_SCHEMA})"
+POSTGRES_URL="${POSTGRES_URL}${SEP}schema=${AUTH_SCHEMA}" \
   bunx --bun prisma migrate deploy --config /app/prisma/auth/prisma.config.ts
 
 echo "[init] Bootstrap complete"

@@ -45,6 +45,7 @@ export function createMigrator(schema: string) {
       { from: `apps/${schema}/prisma.config.ts`, to: "./prisma.config.ts" },
     ],
     environment: {
+      POSTGRES_AUTH_SCHEMA: "auth", // Hebo Cloud predates the `hebo_auth` default
       NODE_EXTRA_CA_CERTS: "/var/runtime/ca-cert.pem",
       NPM_CONFIG_CACHE: "/tmp/.npm",
     },
