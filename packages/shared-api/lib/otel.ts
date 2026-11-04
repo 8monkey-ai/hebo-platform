@@ -48,16 +48,7 @@ const ALLOWED_RESPONSE_HEADERS = [
   "x-request-id",
 ];
 
-/**
- * Traces use the built-in `greptime_trace_v2` pipeline (JSON2 attribute columns, GreptimeDB
- * v1.3.0+). It writes to a new `_v2` table, since GreptimeDB rejects V2 writes into a table
- * created by the V1 pipeline. The table is auto-created on the first write.
- *
- * Known issue (v1.3.0): GreptimeDB doesn't escape JSON2 object keys over the Postgres wire
- * protocol, so a span attribute key containing `"` or `\` makes any query returning that
- * span's `span_attributes` fail to parse. Accepted as an edge case (user metadata keys only).
- */
-const GREPTIME_TRACE_PIPELINE_NAME = "greptime_trace_v2";
+/** GreptimeDB rejects `greptime_trace_v2` (JSON2) writes into a V1 table, hence a new table. */
 export const GREPTIME_TRACE_TABLE_NAME = "opentelemetry_traces_v2";
 
 export const GREPTIME_OTLP_ENDPOINT = `http://${(await getSecret("GREPTIME_HOST")) ?? "localhost"}:4000/v1/otlp`;
@@ -135,7 +126,7 @@ export const getOtelConfig = (
         new OTLPTraceExporter({
           url: `${GREPTIME_OTLP_ENDPOINT}/v1/traces`,
           headers: {
-            "x-greptime-pipeline-name": GREPTIME_TRACE_PIPELINE_NAME,
+            "x-greptime-pipeline-name": "greptime_trace_v2",
             "x-greptime-trace-table-name": GREPTIME_TRACE_TABLE_NAME,
           },
           compression: CompressionAlgorithm.GZIP,
