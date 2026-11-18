@@ -112,6 +112,7 @@ async function toOpenAIMessage(message: UIMessage): Promise<OpenAIMessage> {
       case "reasoning-file":
       case "source-document":
       case "source-url":
+      case "steering-message":
       case "step-start":
     }
   }
