@@ -45,9 +45,9 @@
   },
   "packageManager": "bun@1.4.4",
   "catalog": {
-    "ai": "^7.0.150",
+    "ai": "^7.0.176",
     "@8monkey/opentelemetry-instrumentation-bun-sql": "^0.2.0",
-    "@ai-sdk/provider-utils": "^5.0.67",
+    "@ai-sdk/provider-utils": "^5.0.82",
     "@base-ui/react": "^1.9.0",
     "@better-auth/api-key": "^1.7.16",
     "auth": "^1.7.16",
