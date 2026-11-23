@@ -8,9 +8,9 @@ export type * from "./json-types";
 
 const DB_NULL = null;
 
-const prisma = new PrismaClient({
-  adapter: createPrismaAdapter("api"),
-});
+/** Deferred to first request so OTel instrumentation is registered before the driver loads. */
+let _prisma: PrismaClient;
+const getPrisma = () => (_prisma ??= new PrismaClient({ adapter: createPrismaAdapter("api") }));
 
 export const createPrismaClient = (organizationId: string, userId: string) => {
   if (!organizationId || !userId) {
@@ -19,7 +19,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
 
   const tenantFilters = { deleted_at: DB_NULL, organization_id: organizationId };
 
-  return prisma.$extends({
+  return getPrisma().$extends({
     query: {
       $allModels: {
         $allOperations({ args, query, operation }) {
@@ -96,7 +96,7 @@ export const createPrismaClient = (organizationId: string, userId: string) => {
       },
       provider_configs: {
         getUnredacted(slug: string) {
-          return prisma.provider_configs.findFirst({
+          return getPrisma().provider_configs.findFirst({
             where: {
               provider_slug: slug,
               deleted_at: DB_NULL,
