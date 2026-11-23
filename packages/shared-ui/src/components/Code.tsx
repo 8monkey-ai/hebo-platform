@@ -4,27 +4,13 @@ import { cn } from "../lib/utils";
 import { CopyButton } from "./CopyButton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./Tabs";
 
-const getNodeText = (node: React.ReactNode): string => {
-  if (typeof node === "string" || typeof node === "number") {
-    return String(node);
-  }
-  if (Array.isArray(node)) {
-    return React.Children.toArray(node)
-      .map((child) => getNodeText(child))
-      .join("");
-  }
-  if (React.isValidElement(node)) {
-    return getNodeText((node as React.ReactElement<{ children?: React.ReactNode }>).props.children);
-  }
-  return "";
-};
-
 type CodeBlockProps = React.HTMLAttributes<HTMLDivElement> & {
   children: React.ReactNode;
   title?: React.ReactNode;
 };
 
 export function CodeBlock({ children, className, title, ...props }: CodeBlockProps) {
+  const preRef = React.useRef<HTMLPreElement>(null);
   return (
     <div
       data-slot="code-block"
@@ -37,15 +23,15 @@ export function CodeBlock({ children, className, title, ...props }: CodeBlockPro
       {title ? (
         <div className="flex items-center justify-between gap-1 bg-accent py-0.5 pr-1 pl-2">
           <span className="text-sm font-medium text-foreground">{title}</span>
-          <CopyButton value={getNodeText(children)} className="" />
+          <CopyButton value={preRef} className="" />
         </div>
       ) : (
-        <CopyButton
-          value={getNodeText(children)}
-          className="absolute top-0 right-0 z-10 bg-background p-2.5"
-        />
+        <CopyButton value={preRef} className="absolute top-0 right-0 z-10 bg-background p-2.5" />
       )}
-      <pre className="h-full w-full overflow-auto p-2 font-mono text-sm whitespace-pre">
+      <pre
+        ref={preRef}
+        className="h-full w-full overflow-auto p-2 font-mono text-sm whitespace-pre"
+      >
         <code>{children}</code>
       </pre>
     </div>
