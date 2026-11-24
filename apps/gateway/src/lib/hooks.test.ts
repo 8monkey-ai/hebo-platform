@@ -58,7 +58,7 @@ describe("selectProviderWithByokFallback", () => {
   describe("requiresByok: true", () => {
     it("throws 402 BYOK_REQUIRED for non-free model without custom provider", async () => {
       const ctx = makeCtx({
-        modelId: "anthropic/claude-opus-4.6",
+        modelId: "anthropic/claude-opus-4-6",
         free: false,
         requiresByok: true,
       });
@@ -74,7 +74,7 @@ describe("selectProviderWithByokFallback", () => {
 
     it("throws 402 BYOK_REQUIRED for non-free model with custom provider slug but no credentials", async () => {
       const ctx = makeCtx({
-        modelId: "anthropic/claude-opus-4.6",
+        modelId: "anthropic/claude-opus-4-6",
         free: false,
         requiresByok: true,
         customProviderSlug: "bedrock",
@@ -99,7 +99,7 @@ describe("selectProviderWithByokFallback", () => {
   describe("requiresByok: false", () => {
     it("does not throw for non-free model without custom provider", async () => {
       const ctx = makeCtx({
-        modelId: "anthropic/claude-opus-4.6",
+        modelId: "anthropic/claude-opus-4-6",
         free: false,
         requiresByok: false,
       });
@@ -120,7 +120,7 @@ describe("selectProviderWithByokFallback", () => {
 
     it("returns undefined when bedrock is not configured", async () => {
       const ctx = makeCtx({
-        modelId: "anthropic/claude-opus-4.6",
+        modelId: "anthropic/claude-opus-4-6",
         free: false,
         requiresByok: false,
         bedrockProvider: undefined,
@@ -132,7 +132,7 @@ describe("selectProviderWithByokFallback", () => {
     it("returns undefined when a custom provider slug is set but unresolved", async () => {
       const ctx = makeCtx({
         modelId: "agent/main/copilot",
-        resolvedModelId: "anthropic/claude-opus-4.6",
+        resolvedModelId: "anthropic/claude-opus-4-6",
         free: false,
         requiresByok: false,
         customProviderSlug: "anthropic",

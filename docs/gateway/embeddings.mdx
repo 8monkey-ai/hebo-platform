@@ -18,7 +18,7 @@ const hebo = createOpenAICompatible({
 });
 
 const { embedding } = await embed({
-  model: hebo.embeddingModel("voyage/voyage-3.5"),
+  model: hebo.embeddingModel("voyageai/voyage-3.5"),
   value: "Tell me a joke about monkeys",
 });
 

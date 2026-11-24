@@ -16,7 +16,7 @@ const SUPPORTED_MODELS = [
     free: true,
   },
   {
-    type: "anthropic/claude-sonnet-4.6",
+    type: "anthropic/claude-sonnet-4-6",
     displayName: "Claude Sonnet 4.6",
     owner: "anthropic",
     created: 1_764_888_221,
@@ -25,11 +25,11 @@ const SUPPORTED_MODELS = [
     free: false,
   },
   {
-    type: "anthropic/claude-haiku-4.5",
-    displayName: "Claude Haiku 4.5",
+    type: "anthropic/claude-haiku-5-5",
+    displayName: "Claude Haiku 5.5",
     owner: "anthropic",
     created: 1_764_888_221,
-    providers: [{ bedrock: "anthropic.claude-haiku-4-5-20251001-v1:0" }],
+    providers: [{ bedrock: "anthropic.claude-haiku-5-5" }],
     modality: "text",
     free: false,
   },
@@ -43,9 +43,9 @@ const SUPPORTED_MODELS = [
     free: true,
   },
   {
-    type: "voyage/voyage-3.5",
+    type: "voyageai/voyage-3.5",
     displayName: "Voyage 3.5",
-    owner: "voyage",
+    owner: "voyageai",
     created: 1_767_837_920,
     providers: [
       {
