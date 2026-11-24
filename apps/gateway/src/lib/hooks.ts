@@ -77,7 +77,7 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
     prismaClient: PrismaClient;
   };
 
-  const modelConfig = models[aliasPath];
+  const modelConfig = Object.hasOwn(models, aliasPath) ? models[aliasPath] : undefined;
   if (modelConfig) {
     state.modelConfig = {
       type: aliasPath,

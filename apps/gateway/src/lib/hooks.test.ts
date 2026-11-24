@@ -1,9 +1,13 @@
 import { describe, expect, it } from "bun:test";
 
 import type { ProviderV4 } from "@ai-sdk/provider";
-import { GatewayError, type ResolveProviderHookContext } from "@hebo-ai/gateway";
+import {
+  GatewayError,
+  type ResolveModelHookContext,
+  type ResolveProviderHookContext,
+} from "@hebo-ai/gateway";
 
-import { selectProviderWithByokFallback } from "./hooks";
+import { resolveModelAlias, selectProviderWithByokFallback } from "./hooks";
 
 // Minimal mock for ResolveProviderHookContext
 function makeCtx(overrides: {
@@ -140,5 +144,21 @@ describe("selectProviderWithByokFallback", () => {
       const result = await selectProviderWithByokFallback(ctx);
       expect(result).toBeUndefined();
     });
+  });
+});
+
+describe("resolveModelAlias", () => {
+  it("rejects an inherited object property name as an unknown alias", async () => {
+    const ctx = {
+      modelId: "constructor",
+      models: {},
+      otel: {},
+      state: { prismaClient: { branches: { findFirst: () => Promise.resolve(null) } } },
+    } as unknown as ResolveModelHookContext;
+
+    const error = await resolveModelAlias(ctx).catch((e: unknown) => e);
+
+    expect(error).toBeInstanceOf(GatewayError);
+    expect((error as GatewayError).status).toBe(404);
   });
 });
