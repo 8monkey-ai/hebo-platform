@@ -2,7 +2,6 @@ import { createHash } from "node:crypto";
 
 import type { ProviderV4 } from "@ai-sdk/provider";
 import {
-  CANONICAL_MODEL_IDS,
   GatewayError,
   type BeforeHookContext,
   type OnErrorHookContext,
@@ -19,8 +18,6 @@ import { injectMetadataCredentials } from "../utils/aws";
 import { createProvider } from "./provider";
 
 type PrismaClient = ReturnType<typeof createPrismaClient>;
-
-const canonicalModelIds = new Set<string>(CANONICAL_MODEL_IDS);
 
 const configCache = new LRUCache<string, string>({
   max: 100,
@@ -80,14 +77,14 @@ export async function resolveModelAlias(ctx: ResolveModelHookContext) {
     prismaClient: PrismaClient;
   };
 
-  if (canonicalModelIds.has(aliasPath)) {
-    const modelConfig = models[aliasPath];
+  const modelConfig = Object.hasOwn(models, aliasPath) ? models[aliasPath] : undefined;
+  if (modelConfig) {
     state.modelConfig = {
       type: aliasPath,
       // Currently, we only support routing to the first provider.
-      customProviderSlug: modelConfig?.providers[0],
-      free: modelConfig?.additionalProperties?.free as boolean | undefined,
-      requiresByok: modelConfig?.additionalProperties?.requiresByok as boolean | undefined,
+      customProviderSlug: modelConfig.providers[0],
+      free: modelConfig.additionalProperties?.free as boolean | undefined,
+      requiresByok: modelConfig.additionalProperties?.requiresByok as boolean | undefined,
     };
     return aliasPath;
   }

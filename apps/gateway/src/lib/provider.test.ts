@@ -1,5 +1,8 @@
 import { describe, expect, it } from "bun:test";
 
+// oxlint-disable-next-line no-unassigned-import -- loads the model specs that define the Bedrock Mantle route
+import "@hebo-ai/gateway/models/openai";
+
 import { createProvider } from "./provider";
 
 describe("createProvider", () => {
@@ -71,7 +74,7 @@ describe("createProvider", () => {
       expect(provider.languageModel("anthropic/claude-opus-5").provider).toBe(
         "bedrock.anthropic.messages",
       );
-      expect(provider.languageModel("google/gemma-3-27b").provider).toBe("amazon-bedrock");
+      expect(provider.languageModel("google/gemma-3-27b-it").provider).toBe("amazon-bedrock");
     });
 
     it("serves GPT-5.x from mantle with access-key credentials", () => {

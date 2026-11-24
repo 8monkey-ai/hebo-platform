@@ -1,4 +1,4 @@
-import { type ModelCatalog, defineModelCatalog, gateway } from "@hebo-ai/gateway";
+import { defineModelCatalog, gateway } from "@hebo-ai/gateway";
 import { qwen } from "@hebo-ai/gateway/models/alibaba";
 import { nova } from "@hebo-ai/gateway/models/amazon";
 import { claude } from "@hebo-ai/gateway/models/anthropic";
@@ -38,12 +38,6 @@ const withTier = (modelId: string) => ({
     requiresByok: SECRETS.ENFORCE_BYOK && !SECRETS.FREE_MODEL_IDS.has(modelId),
   },
 });
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const tiered = (preset: (override?: any) => ModelCatalog): ModelCatalog => {
-  const modelId = Object.keys(preset({}))[0];
-  return preset(withTier(modelId));
-};
 
 export const gw = gateway({
   basePath: BASE_PATH,
@@ -95,20 +89,20 @@ export const gw = gateway({
   },
 
   models: defineModelCatalog(
-    claude.all.map(tiered),
-    gpt.all.map(tiered),
-    gptOss.all.map(tiered),
-    textEmbeddings.all.map(tiered),
-    gemini.all.map(tiered),
-    gemma.all.map(tiered),
-    nova.all.map(tiered),
-    voyage.all.map(tiered),
-    deepseek.all.map(tiered),
-    grok.all.map(tiered),
-    qwen.all.map(tiered),
-    minimax.all.map(tiered),
-    glm.all.map(tiered),
-    kimi.all.map(tiered),
+    claude.all(withTier),
+    gpt.all(withTier),
+    gptOss.all(withTier),
+    textEmbeddings.all(withTier),
+    gemini.all(withTier),
+    gemma.all(withTier),
+    nova.all(withTier),
+    voyage.all(withTier),
+    deepseek.all(withTier),
+    grok.all(withTier),
+    qwen.all(withTier),
+    minimax.all(withTier),
+    glm.all(withTier),
+    kimi.all(withTier),
   ),
 
   hooks: {
